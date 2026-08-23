@@ -12,6 +12,7 @@ var game: Game
 var map_view: MapView
 var region_panel: RegionPanel
 var family_panel: FamilyPanel
+var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
@@ -54,6 +55,8 @@ func _ready() -> void:
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
 	region_panel.army_selected.connect(_on_army_selected)
+	region_panel.attack_requested.connect(attack_army_order)
+	region_panel.siege_requested.connect(besiege_order)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -66,9 +69,15 @@ func _ready() -> void:
 	family_panel.family_changed.connect(refresh)
 	add_child(family_panel)
 
+	diplomacy_panel = DiplomacyPanel.new()
+	diplomacy_panel.stance_changed.connect(refresh)
+	add_child(diplomacy_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
+	# Centering must wait for the first layout, or it centers on the map's
+	# minimum size rather than the window it actually gets.
 	var capital: String = game.state["factions"][game.state["player_faction"]]["capital"]
-	map_view.center_on(capital)
+	map_view.center_on.call_deferred(capital)
 	refresh()
 
 
@@ -91,6 +100,7 @@ func _build_top_bar() -> HBoxContainer:
 
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
+	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -123,9 +133,10 @@ func refresh() -> void:
 
 func _on_region_clicked(region_id: String) -> void:
 	# With one of our armies selected, a click on another region is an order.
+	# Shift makes it a forced march: double range, weary men.
 	if selected_army != "" and game.state["armies"].has(selected_army) \
 			and region_id != game.state["armies"][selected_army]["region"]:
-		_army_order(region_id)
+		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
 		return
 	map_view.selected_region = region_id
 	selected_army = ""
@@ -138,47 +149,105 @@ func _on_army_selected(army_id: String) -> void:
 	region_panel.show_region(game, map_view.selected_region, selected_army)
 
 
-func _army_order(target_region: String) -> void:
+func _army_order(target_region: String, forced_march: bool = false) -> void:
 	var army: Dictionary = game.state["armies"][selected_army]
 	var player: String = game.state["player_faction"]
 
-	# A hostile army in the target region means battle.
-	var defender := ""
-	var army_ids: Array = game.state["armies"].keys()
-	army_ids.sort()
-	for army_id in army_ids:
-		var other: Dictionary = game.state["armies"][army_id]
-		if other["region"] == target_region and other["owner"] != player:
-			defender = army_id
-			break
+	# Only an army we are ALREADY at war with is a target — marching past a
+	# neutral must never start a war by accident. Deliberate first strikes go
+	# through the explicit Attack button in the region panel.
+	var defender := _enemy_army_in(target_region)
 	if defender != "":
-		var result := game.attack_army(selected_army, defender)
-		if result.is_empty():
-			_log("The army cannot come to grips with the enemy from here.")
-		else:
-			_log("[b]Battle![/b] The %s prevail." % ("attackers" if result["winner"] == "attacker" else "defenders"))
-		_after_order()
+		attack_army_order(defender)
 		return
 
-	# A hostile settlement means a siege.
+	# A settlement of a faction we are at war with can be invested.
 	var settlement: Dictionary = game.state["settlements"].get(target_region, {})
 	if not settlement.is_empty() and settlement["owner"] != player \
+			and DiplomacyRules.at_war(game.state, player, settlement["owner"]) \
 			and MapRules.are_adjacent(game.data, army["region"], target_region):
-		if game.besiege(selected_army, target_region):
-			_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
-		else:
-			_log("No siege can be laid there.")
-		_after_order()
+		besiege_order(target_region)
 		return
 
 	# Otherwise: march (or sail).
-	if game.move_army(selected_army, target_region):
-		_log("The army marches to %s." % game.data.regions[target_region]["name"])
+	if game.move_army(selected_army, target_region, forced_march):
+		var suffix := " by forced march — the men will be weary." if forced_march else "."
+		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
 	elif game.sea_move_army(selected_army, target_region):
 		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
 	else:
 		_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
 	_after_order()
+
+
+func _enemy_army_in(region_id: String) -> String:
+	## An at-war army we can actually see. Invisible armies must not influence
+	## orders at all, or the log itself leaks their presence.
+	var player: String = game.state["player_faction"]
+	if not game.visible_regions().has(region_id):
+		return ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var other: Dictionary = game.state["armies"][army_id]
+		if other["region"] == region_id and DiplomacyRules.at_war(game.state, player, other["owner"]):
+			return army_id
+	return ""
+
+
+func attack_army_order(defender_id: String) -> void:
+	## Attacking a faction we are not yet at war with is a decision, not a
+	## mis-click, so it is confirmed first.
+	var defender: Dictionary = game.state["armies"].get(defender_id, {})
+	if defender.is_empty():
+		return
+	var player: String = game.state["player_faction"]
+	if not DiplomacyRules.at_war(game.state, player, defender["owner"]):
+		var faction_name: String = game.data.factions.get(defender["owner"], {}).get("name", defender["owner"])
+		_confirm("This will declare war on %s. Attack?" % faction_name,
+			func(): _resolve_attack(defender_id))
+		return
+	_resolve_attack(defender_id)
+
+
+func _resolve_attack(defender_id: String) -> void:
+	var result := game.attack_army(selected_army, defender_id)
+	if result.is_empty():
+		_log("The army cannot come to grips with the enemy from here.")
+	else:
+		_log("[b]Battle![/b] The %s prevail." % ("attackers" if result["winner"] == "attacker" else "defenders"))
+	_after_order()
+
+
+func besiege_order(target_region: String) -> void:
+	var settlement: Dictionary = game.state["settlements"].get(target_region, {})
+	if settlement.is_empty():
+		return
+	var player: String = game.state["player_faction"]
+	if not DiplomacyRules.at_war(game.state, player, settlement["owner"]):
+		var faction_name: String = game.data.factions.get(settlement["owner"], {}).get("name", settlement["owner"])
+		_confirm("This will declare war on %s. Lay siege?" % faction_name,
+			func(): _resolve_siege(target_region))
+		return
+	_resolve_siege(target_region)
+
+
+func _resolve_siege(target_region: String) -> void:
+	if game.besiege(selected_army, target_region):
+		_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
+	else:
+		_log("No siege can be laid there.")
+	_after_order()
+
+
+func _confirm(text: String, on_accept: Callable) -> void:
+	var dialog := ConfirmationDialog.new()
+	dialog.dialog_text = text
+	dialog.confirmed.connect(on_accept)
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
 
 
 func _after_order() -> void:
@@ -226,14 +295,25 @@ func _log_report(report: Dictionary) -> void:
 					event_def = candidate
 			_log("[color=#c0b060][b]%s[/b][/color] %s" % [event_def.get("name", event["id"]), event_def.get("text", "")])
 		else:
-			_log("[color=#e06050]Disaster strikes %s![/color]" % event.get("region", ""))
+			var struck: String = event.get("region", "")
+			_log("[color=#e06050]Disaster strikes %s![/color]"
+				% game.data.regions.get(struck, {}).get("settlement_name", struck))
 	for notice in report["senate"]:
 		if notice["faction"] == player:
-			_log("[color=#9090d0]Senate: %s (%s)[/color]" % [notice["kind"].replace("_", " "), str(notice.get("mission", ""))])
+			var mission_id: String = str(notice.get("mission", ""))
+			var mission_name: String = game.data.missions.get(mission_id, {}).get("name", mission_id)
+			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
+				"" if mission_name == "" else " — " + mission_name])
 	for notice in report["characters"]:
-		if notice.get("faction", "") == player or _is_player_character(notice.get("character", "")):
-			_log("[color=#80b080]%s: %s[/color]" % [String(notice["kind"]).replace("_", " "),
-				game.state["characters"].get(notice.get("character", ""), {}).get("name", "")])
+		if notice.get("faction", "") != player and not _is_player_character(notice.get("character", "")):
+			continue
+		var who: String = game.state["characters"].get(notice.get("character", ""), {}).get("name", "")
+		var detail := ""
+		if notice.has("name"):
+			detail = " — " + String(notice["name"])
+		elif notice.has("ancillary"):
+			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
+		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
 

@@ -35,12 +35,24 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 		screen._on_region_clicked(army["region"])
 		screen._on_army_selected(army_id)
 		t.check_eq(screen.selected_army, army_id, "army selected")
+
+		# Marching onto a neighbour must MOVE the army — never start a war,
+		# whoever happens to be standing there.
+		var stances_before: Dictionary = game.state["factions"]["julii"]["diplomacy"].duplicate()
 		var from_region: String = army["region"]
+		var target := ""
 		for neighbor in game.data.regions[from_region].get("adjacent", []):
 			var holder: String = game.state["settlements"].get(neighbor, {}).get("owner", "")
-			if holder == "julii":
-				screen._on_region_clicked(neighbor)
+			if holder == "julii" or holder == "":
+				target = neighbor
 				break
+		if target != "":
+			screen._on_region_clicked(target)
+			t.check_eq(game.state["armies"][army_id]["region"], target, "the army actually marched")
+		for other_faction in stances_before:
+			if stances_before[other_faction] != "war":
+				t.check(game.state["factions"]["julii"]["diplomacy"][other_faction] != "war",
+					"marching did not declare war on " + String(other_faction))
 		t.check(screen.report_log.get_parsed_text().length() > 0, "orders are logged")
 
 	# A turn resolves through the button path.
@@ -75,7 +87,45 @@ func test_map_picking(t) -> void:
 	t.check_eq(view._region_at(screen_pos), capital, "clicking a token picks its region")
 	t.check_eq(view._region_at(screen_pos + Vector2(4000, 4000)), "", "empty sea picks nothing")
 
+	# Picking must survive zoom and pan: to_screen and _region_at share one transform.
+	view._zoom_at(Vector2(100, 100), 1.5)
+	view._camera_offset += Vector2(37, -19)
+	var zoomed_pos := view.to_screen(view.world_pos(game.data.regions[capital]))
+	t.check_eq(view._region_at(zoomed_pos), capital, "picking holds after zoom and pan")
+
 	view.free()
+
+
+func test_many_turns_through_the_ui(t) -> void:
+	## Drives the real report-log formatting against live riots, revolts,
+	## events, senate notices and character news — the branches a single
+	## turn-1 report never reaches.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	for i in range(25):
+		screen._end_turn()
+	t.check_eq(int(game.state["turn"]), 25, "twenty-five turns survive the UI path")
+	t.check(screen.report_log.get_parsed_text().length() > 200, "the log filled with news")
+
+	# Every panel still opens on a world that has moved on.
+	screen.family_panel.open_for(game)
+	t.check(screen.family_panel._content.get_child_count() > 0, "family scroll survives the years")
+	screen.family_panel.hide()
+	screen.diplomacy_panel.open_for(game)
+	t.check(screen.diplomacy_panel._content.get_child_count() > 0, "diplomacy scroll lists the powers")
+	screen.diplomacy_panel.hide()
+
+	# And a settlement panel renders for every owned region.
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "julii":
+			screen._on_region_clicked(region_id)
+			t.check(screen.region_panel.get_child_count() > 3, "panel renders for " + region_id)
+			break
+
+	screen.free()
 
 
 func test_start_menu_scene_loads(t) -> void:
@@ -86,10 +136,14 @@ func test_start_menu_scene_loads(t) -> void:
 	tree.root.add_child(menu)
 	var factions: OptionButton = menu.get_node("Center/Menu/FactionRow/Factions")
 	t.check(factions.item_count >= 11, "all playable and unlockable houses offered (got %d)" % factions.item_count)
+	factions.selected = 1
 	menu._on_start_pressed()
-	var has_campaign := false
+	var campaign: CampaignScreen = null
 	for child in menu.get_children():
 		if child is CampaignScreen:
-			has_campaign = true
-	t.check(has_campaign, "starting spawns the campaign screen")
+			campaign = child
+	t.check(campaign != null, "starting spawns the campaign screen")
+	if campaign != null:
+		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
+			"the house that was picked is the house that is played")
 	menu.free()

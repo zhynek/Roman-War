@@ -93,7 +93,97 @@ func test_general_movement_bonus(t) -> void:
 	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
 	state["armies"][army_id]["general"] = "gaius"
 	MovementRules.reset_movement(data, state)
-	t.check_near(float(state["armies"][army_id]["movement_left"]), 3.0, 0.001, "pathfinder +50% movement")
+	# The movement effect is flat movement points, matching how the real
+	# tables author it (a Quartermaster's +0.25 is a quarter-step).
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 2.5, 0.001, "pathfinder adds half a step")
+
+
+func test_real_movement_traits_bite(t) -> void:
+	## Guards the scale of the SHIPPED tables, not just the fixture's.
+	var data := GameData.load_from("res://data")
+	var logistician: Dictionary = data.traits.get("logistician", {})
+	t.check(not logistician.is_empty(), "the shipped tables define a logistician")
+	if logistician.is_empty():
+		return
+	var base := float(data.balance["movement"]["base_movement_points"])
+	var top_bonus := float(logistician["levels"][-1].get("effects", {}).get("movement", 0.0))
+	t.check(top_bonus >= base * 0.1,
+		"a top-level logistician is worth at least a tenth of a march (got %f on base %f)"
+			% [top_bonus, base])
+
+
+func test_governor_follows_presence(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.add_character(state, "red", "gaius", {"location": "beta"})
+	SettlementRules.refresh_governors(data, state)
+	t.check_eq(state["settlements"]["beta"]["governor"], "gaius", "presence makes a governor")
+
+	# March him away and the seat falls vacant — no governing by post.
+	state["characters"]["gaius"]["location"] = "gamma"
+	SettlementRules.refresh_governors(data, state)
+	t.check(state["settlements"]["beta"]["governor"] == null, "an absent man governs nothing")
+
+	# And no one holds two cities at once: the stronger claim wins each seat.
+	state["characters"]["gaius"]["location"] = "epsilon"
+	Fixtures.add_character(state, "red", "marcus", {"location": "epsilon", "influence": 9})
+	SettlementRules.refresh_governors(data, state)
+	t.check_eq(state["settlements"]["epsilon"]["governor"], "marcus", "the most influential claimant governs")
+
+
+func test_characters_flee_a_fallen_city(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rng := CampaignRng.seeded(5)
+	Fixtures.add_character(state, "red", "gaius", {"location": "beta"})
+	Fixtures.add_character(state, "red", "quintus", {"location": "epsilon"})
+
+	CombatRules.capture_settlement(data, state, rng, "beta", "blue", "occupy")
+	t.check(state["characters"]["gaius"]["alive"], "the governor escapes while a city remains")
+	t.check_eq(state["characters"]["gaius"]["location"], "epsilon", "he flees to the nearest holding")
+
+	# With nowhere left to run, the family falls with the last city.
+	CombatRules.capture_settlement(data, state, rng, "epsilon", "blue", "occupy")
+	t.check(not state["characters"]["gaius"]["alive"], "no refuge, no survival")
+	t.check(not state["characters"]["quintus"]["alive"], "the whole house is lost with the last city")
+
+
+func test_mercy_is_not_for_butchers(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rng := CampaignRng.seeded(5)
+	data.traits["test_merciful"] = {
+		"id": "test_merciful", "name": "Merciful",
+		"levels": [{"name": "Merciful", "threshold": 1, "effects": {"influence": 1}}],
+		"triggers": [{"when": "settlement_captured", "condition": {"occupation": "occupy"},
+			"chance": 1.0, "points": 1}],
+	}
+	Fixtures.add_character(state, "red", "gaius", {"location": "beta"})
+	var notices: Array = []
+
+	CombatRules.fire_occupation_triggers(data, state, rng, "gaius", "exterminate", notices)
+	t.check(not state["characters"]["gaius"]["trait_points"].has("test_merciful"),
+		"putting a city to the sword earns no reputation for mercy")
+
+	CombatRules.fire_occupation_triggers(data, state, rng, "gaius", "occupy", notices)
+	t.check(state["characters"]["gaius"]["trait_points"].has("test_merciful"),
+		"a city spared does")
+
+
+func test_death_frees_the_retinue_and_settles_succession(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	data.ancillaries["test_scribe"]["unique"] = true
+	Fixtures.add_character(state, "red", "the_leader", {"role": "leader", "age": 50,
+		"ancillaries": ["test_scribe"]})
+	Fixtures.add_character(state, "red", "the_heir", {"role": "heir", "age": 30})
+
+	var notices: Array = []
+	CharacterRules.kill(state, "the_leader", data, notices)
+	t.check_eq(state["characters"]["the_leader"]["ancillaries"], [], "the dead keep no retinue")
+	t.check(not CharacterRules._ancillary_held_anywhere(state, "test_scribe"),
+		"a unique retinue member returns to circulation")
+	t.check_eq(state["characters"]["the_heir"]["role"], "leader", "succession settles at once, not next year")
 
 
 func test_aging_death_and_succession(t) -> void:

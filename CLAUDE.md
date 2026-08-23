@@ -13,7 +13,9 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   numbers through rules modules.
 - **`src/core/` must stay scene-free and deterministic.** No `Node`, no UI, no
   wall-clock time, no unseeded randomness. Every random draw goes through the
-  RNG stored in the game state (`state.rng_seed`/`Rng` helper). GameState is a
+  RNG stored in the game state (`state.rng_state` / `CampaignRng` helper) —
+  and any loop whose iteration order can steer an RNG draw must sort its keys
+  first, so a loaded save replays exactly like the live game. GameState is a
   plain Dictionary so save/load is JSON round-tripping.
 - **Growth and public order are summed factor lists** returning named
   breakdowns, not opaque numbers — the UI will render the breakdowns.

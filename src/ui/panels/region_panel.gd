@@ -6,6 +6,8 @@ extends VBoxContainer
 
 signal action_taken
 signal army_selected(army_id: String)
+signal attack_requested(defender_army_id: String)
+signal siege_requested(region_id: String)
 
 var game: Game
 var region_id := ""
@@ -22,28 +24,35 @@ func show_region(current_game: Game, new_region_id: String, army_id: String = ""
 func clear_panel() -> void:
 	region_id = ""
 	selected_army = ""
+	_clear_children()
+
+
+func _clear_children() -> void:
+	## remove_child before queue_free: freed rows linger until end of frame
+	## otherwise, doubling the panel for anything reading it the same frame.
 	for child in get_children():
+		remove_child(child)
 		child.queue_free()
 
 
 func _rebuild() -> void:
-	for child in get_children():
-		child.queue_free()
+	_clear_children()
 	if game == null or region_id == "":
 		return
 	var region: Dictionary = game.data.regions[region_id]
 	var visible_set := game.visible_regions()
 	var is_visible := visible_set.has(region_id)
 
+	if not is_visible:
+		_header(region["name"], 16)
+		_label("Beyond our maps: no reports come from this land.")
+		return
+
 	_header("%s — %s" % [region["name"], region["settlement_name"]], 16)
 	_label("Terrain: %s   Fertility: %.1f" % [region["terrain"], float(region["fertility"])])
 	var resources: Array = region.get("resources", [])
 	if not resources.is_empty():
 		_label("Goods: " + ", ".join(resources))
-
-	if not is_visible:
-		_label("Beyond our maps: no reports from this land.")
-		return
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty():
@@ -86,6 +95,12 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		action_taken.emit())
 	tax_row.add_child(tax_options)
 
+	var capital: String = game.state["factions"][player]["capital"]
+	if capital != region_id:
+		_action_button("Make this the capital", func():
+			game.move_capital(region_id)
+			action_taken.emit())
+
 	_breakdown("Public order: %d%%" % int(PublicOrderRules.total(game.data, game.state, region_id)),
 		game.order_breakdown(region_id))
 	_breakdown("Growth: %+.1f%%" % GrowthRules.total_pct(game.data, game.state, region_id),
@@ -111,6 +126,20 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Build %s (%d, %dt)" % [project["name"], int(project["cost"]), int(project["build_turns"])],
 			func():
 				game.queue_building(region_id, project["chain"])
+				action_taken.emit())
+
+	# Demolition — the way a conqueror works off a foreign culture penalty.
+	var demolishable: Array = []
+	for chain_id in settlement["buildings"]:
+		var chain: Dictionary = game.data.chains.get(chain_id, {})
+		if chain.is_empty() or chain.get("indestructible", false) or chain["kind"] == "government":
+			continue
+		demolishable.append(chain_id)
+	demolishable.sort()
+	for chain_id in demolishable:
+		_action_button("Demolish %s" % _chain_name(chain_id),
+			func():
+				game.demolish_building(region_id, chain_id)
 				action_taken.emit())
 
 	# Recruitment
@@ -153,6 +182,12 @@ func _build_armies_section() -> void:
 				_build_selected_army_detail(army_id, army)
 		else:
 			_label(title, Color.html(faction.get("color", "#808080")))
+			# A beaten enemy can be stacked in our own region; the map click
+			# cannot reach him there, so the order lives here.
+			if selected_army != "" and game.state["armies"].has(selected_army) \
+					and game.state["armies"][selected_army]["region"] == region_id:
+				_action_button("Attack the %s" % faction.get("name", army["owner"]),
+					func(): attack_requested.emit(army_id))
 
 
 func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
@@ -166,6 +201,10 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 		_action_button("Garrison the army in the city", func():
 			game.garrison_army(army_id)
 			action_taken.emit())
+	elif not settlement.is_empty() and settlement.get("siege") == null:
+		# Standing in a hostile settlement's region: the siege starts from here.
+		_action_button("Lay siege to %s" % settlement_display_name(),
+			func(): siege_requested.emit(region_id))
 
 	if not settlement.is_empty() and settlement.get("siege") != null \
 			and settlement["siege"]["besieger"] == army_id:
@@ -227,6 +266,10 @@ func _action_button(text: String, handler: Callable) -> void:
 
 func _separator() -> void:
 	add_child(HSeparator.new())
+
+
+func settlement_display_name() -> String:
+	return game.data.regions.get(region_id, {}).get("settlement_name", region_id)
 
 
 func _unit_name(unit: Dictionary) -> String:

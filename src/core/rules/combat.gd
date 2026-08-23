@@ -18,6 +18,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
 	var defender_soldiers := soldiers_in(data, defender["units"])
+	var attacker_had_general: bool = attacker["general"] != null
+	var defender_had_general: bool = defender["general"] != null
 
 	var result := resolver.resolve(data, rng, attacker["units"], defender["units"], {
 		"terrain": region["terrain"],
@@ -28,9 +30,10 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 		"sally": false,
 	})
 
-	_process_general_deaths(state, attacker, defender, result)
+	_process_general_deaths(data, state, attacker, defender, result)
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
+		MovementRules.sync_general_location(state, attacker)
 		attacker["movement_left"] = 0.0
 
 	# Battle records shape the victors and the beaten (surviving generals only),
@@ -49,13 +52,16 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	var winner_army := attacker if attacker_won else defender
 	var winner_soldiers := attacker_soldiers if attacker_won else defender_soldiers
 	var loser_soldiers := defender_soldiers if attacker_won else attacker_soldiers
-	if not winner_army["units"].is_empty():
+	# Only a captain earns the hour — never a stand-in for a general who fell
+	# in this same battle.
+	var winner_had_general: bool = attacker_had_general if attacker_won else defender_had_general
+	if not winner_army["units"].is_empty() and not winner_had_general:
 		FamilyRules.maybe_man_of_the_hour(data, state, rng, winner_army,
 			winner_soldiers, loser_soldiers, notices)
 	result["character_notices"] = notices
 
-	_cleanup_destroyed_army(state, attacker_id)
-	_cleanup_destroyed_army(state, defender_id)
+	_cleanup_destroyed_army(data, state, attacker_id)
+	_cleanup_destroyed_army(data, state, defender_id)
 	return result
 
 
@@ -100,6 +106,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	var order_penalty := int(occupation_rules["%s_order_penalty" % occupation])
 	var decay := int(data.balance["public_order"]["recently_conquered_decay_per_turn"])
 
+	var previous_owner: String = settlement["owner"]
 	settlement["owner"] = new_owner
 	settlement["population"] = maxi(population, 400)
 	settlement["garrison"] = []
@@ -113,9 +120,70 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 
+	var taken := displace_characters(data, state, region_id, previous_owner)
+
 	# Losing your last settlement destroys the faction.
 	_check_faction_destroyed(state)
-	return {"loot": loot, "slaves": slaves, "occupation": occupation}
+	SettlementRules.refresh_governors(data, state)
+	return {"loot": loot, "slaves": slaves, "occupation": occupation, "characters_taken": taken}
+
+
+static func fire_occupation_triggers(data: GameData, state: Dictionary, rng: CampaignRng, general_id, occupation: String, notices: Array) -> void:
+	## The conquering general remembers how the city was treated. Every capture
+	## path (assault or starve-out, player or AI) must come through here.
+	if general_id == null or not state["characters"].has(general_id):
+		return
+	var context := {"occupation": occupation}
+	CharacterRules.fire_trigger(data, state, general_id, "settlement_captured", context, rng, notices)
+	if occupation == "enslave":
+		CharacterRules.fire_trigger(data, state, general_id, "settlement_enslaved", context, rng, notices)
+	elif occupation == "exterminate":
+		CharacterRules.fire_trigger(data, state, general_id, "settlement_exterminated", context, rng, notices)
+
+
+static func displace_characters(data: GameData, state: Dictionary, region_id: String, losing_faction: String) -> Array:
+	## Family caught in a fallen city flee to the nearest settlement their house
+	## still holds. Those with nowhere to run are lost with the city.
+	var taken: Array = []
+	var refuge := _nearest_owned_settlement(data, state, region_id, losing_faction)
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character["alive"] or character["faction"] != losing_faction:
+			continue
+		if character.get("location", "") != region_id:
+			continue
+		# A general still at the head of an army in the field marches on with it.
+		var with_army := false
+		for army in state["armies"].values():
+			if army["general"] == char_id:
+				with_army = true
+				break
+		if with_army:
+			continue
+		if refuge == "":
+			CharacterRules.kill(state, char_id, data)
+			taken.append(char_id)
+		else:
+			character["location"] = refuge
+	return taken
+
+
+static func _nearest_owned_settlement(data: GameData, state: Dictionary, from_region: String, faction_id: String) -> String:
+	var hops := MapRules.hops_from(data, from_region)
+	var best := ""
+	var best_hops := 1 << 30
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		if region_id == from_region or state["settlements"][region_id]["owner"] != faction_id:
+			continue
+		var distance := int(hops.get(region_id, 1 << 29))
+		if distance < best_hops:
+			best_hops = distance
+			best = region_id
+	return best
 
 
 static func garrison_army(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
@@ -128,9 +196,10 @@ static func garrison_army(data: GameData, state: Dictionary, army_id: String, re
 		return false
 	for unit in army["units"]:
 		settlement["garrison"].append(unit)
-	if army["general"] != null and settlement["governor"] == null:
-		settlement["governor"] = army["general"]
+	if army["general"] != null and state["characters"].has(army["general"]):
+		state["characters"][army["general"]]["location"] = region_id
 	state["armies"].erase(army_id)
+	SettlementRules.refresh_governors(data, state)
 	return true
 
 
@@ -141,20 +210,20 @@ static func _distribute_slaves(data: GameData, state: Dictionary, faction_id: St
 			other["slave_bonus_turns"] = turns
 
 
-static func _process_general_deaths(state: Dictionary, attacker: Dictionary, defender: Dictionary, result: Dictionary) -> void:
+static func _process_general_deaths(data: GameData, state: Dictionary, attacker: Dictionary, defender: Dictionary, result: Dictionary) -> void:
 	if result.get("attacker_general_died", false) and attacker["general"] != null:
-		CharacterRules.kill(state, attacker["general"])
+		CharacterRules.kill(state, attacker["general"], data)
 	if result.get("defender_general_died", false) and defender["general"] != null:
-		CharacterRules.kill(state, defender["general"])
+		CharacterRules.kill(state, defender["general"], data)
 
 
-static func _cleanup_destroyed_army(state: Dictionary, army_id: String) -> void:
+static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: String) -> void:
 	if not state["armies"].has(army_id):
 		return
 	var army: Dictionary = state["armies"][army_id]
 	if army["units"].is_empty():
 		if army["general"] != null:
-			CharacterRules.kill(state, army["general"])
+			CharacterRules.kill(state, army["general"], data)
 		state["armies"].erase(army_id)
 
 

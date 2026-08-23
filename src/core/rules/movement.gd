@@ -10,10 +10,11 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 	for army in state["armies"].values():
 		var points := base
 		if army["general"] != null and state["characters"].has(army["general"]):
-			# Logistics-minded generals stretch the column's daily march.
-			var bonus := CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
-			points *= 1.0 + bonus / 100.0
-		army["movement_left"] = points
+			# Logistics-minded generals stretch the column's daily march. The
+			# "movement" effect is a flat bonus in movement points (base 2.0),
+			# so a Quartermaster's +0.25 is a real quarter-step, not a rounding.
+			points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
+		army["movement_left"] = maxf(points, 0.5)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base
@@ -62,7 +63,7 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 	else:
 		army["movement_left"] = budget - cost
 	army["region"] = to_region
-	_move_general_with_army(state, army)
+	sync_general_location(state, army)
 	return true
 
 
@@ -98,7 +99,7 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 			return false
 	army["movement_left"] = 0.0
 	army["region"] = to_region
-	_move_general_with_army(state, army)
+	sync_general_location(state, army)
 	return true
 
 
@@ -129,6 +130,9 @@ static func _at_war(state: Dictionary, a: String, b: String) -> bool:
 	return state["factions"][a]["diplomacy"].get(b, "neutral") == "war"
 
 
-static func _move_general_with_army(state: Dictionary, army: Dictionary) -> void:
+static func sync_general_location(state: Dictionary, army: Dictionary) -> void:
+	## Call this wherever an army's region changes — a general's location must
+	## never drift from the army he leads (co-location gates retinue transfers,
+	## births, and the family panel).
 	if army["general"] != null and state["characters"].has(army["general"]):
 		state["characters"][army["general"]]["location"] = army["region"]

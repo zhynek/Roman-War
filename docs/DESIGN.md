@@ -1,9 +1,10 @@
 # Roman War — Game Design Document
 
 **Status:** living document. Describes both the design intent and what the engine in
-`src/core/` actually implements today (Phases 0–2 of the roadmap plus the Phase-3
-battle interface). Where a system is planned but not built, this document says so
-explicitly. Design rationale and genre research:
+`src/core/` actually implements today — Phases 0–4 of the roadmap, the Phase-7
+senate foundation loop, and the Phase-8 campaign UI. Section 10's status table is
+the single source of truth; where a system is planned but not built, this document
+says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
 
 ---
@@ -69,11 +70,15 @@ the world in a **fixed order** so campaigns are reproducible:
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
 | 7 | Events | Scripted/date/condition events, disasters, then senate politics |
-| 8 | Date & bookkeeping | Turn/season/year advance, characters age yearly, movement points reset, victory checked |
+| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 9 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
+
+Governorship is re-derived from character presence (`SettlementRules.refresh_governors`)
+at the top of the resolution, before anything reads it.
 
 `end_turn` returns a report dictionary (`sieges`, `completed_buildings`,
-`completed_units`, `rioted`, `revolted`, `events`, `senate`, `winner`) that the
-future UI presents as start-of-turn event scrolls.
+`completed_units`, `rioted`, `revolted`, `events`, `senate`, `characters`,
+`winner`) that the UI presents as the start-of-turn event log.
 
 ### 2.4 The map
 
@@ -81,8 +86,11 @@ The campaign map is a **region graph**, not a tile grid. Each region has exactly
 settlement, a terrain type (`plains, forest, hills, mountains, desert, steppe,
 marsh`), a fertility rating (0–3), resources, land adjacencies, and the sea zones it
 touches (non-empty = coastal). Sea zones form their own adjacency graph for fleets.
-`MapRules` provides BFS hop counts (used for distance-to-capital and corruption),
-adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
+Every region also carries a **`position`** (`x` 0–100 west→east, `y` 0–100
+north→south) placing it at its real geographic location, which is what the campaign
+map draws; sea zones carry optional anchor positions reserved for zone labelling.
+`MapRules` provides BFS hop counts (cached per map, used for distance-to-capital and
+corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
 faction sees its own regions and armies plus one hop out, and every coastal region
 of any sea zone one of its fleets occupies.
 
@@ -352,35 +360,63 @@ replaced.
 
 ## 6. Characters, Agents & Diplomacy
 
-### 6.1 Built now
+### 6.1 Built now (Phase 4)
 
 - **Characters** live in the game state with faction, name, age, role
-  (leader/heir/family/spouse/child), father link, command/management/influence,
-  traits, ancillaries, location, and alive flag. They age one year per year.
-- **Governors:** a family character in an owned settlement governs it — influence
-  feeds public order (+5/point); ungoverned settlements take −5. Enslavement
-  bonuses flow only to governed cities.
-- **Generals:** armies may be led by a family general (command boosts battle
-  strength) and move with their army; generals can die in lost battles or when
-  their army is wiped out.
-- **Diplomatic stances** are data now: every faction pair holds one of
+  (leader/heir/family/spouse/child), gender, father link,
+  command/management/influence, `trait_points`, ancillaries, location, and an
+  alive flag.
+- **Traits are points, not flags.** `CharacterRules.award_points` adds points for
+  a trait; a trait is active at the highest level whose `threshold` those points
+  reach, and only that level's effects apply (they do not stack up the ladder).
+  Positive points **erode the anti-trait first** — a brave deed spends itself
+  burning off cowardice before it builds courage.
+- **Triggers** follow the data tables' `when` / `condition` / `chance` / `points`
+  shape. Fired kinds: `turn_end_governing`, `turn_end_campaigning`,
+  `turn_end_idle`, `battle_won`, `battle_lost` (with an `odds_against` condition),
+  `siege_won`, `settlement_captured` (carrying an `occupation` condition so mercy
+  is only credited for a city spared), `settlement_enslaved`,
+  `settlement_exterminated`, and `came_of_age`. `office_gained` is authored ahead
+  of the Phase 7 senate offices; the validator warns about any *other* unfired
+  kind so dead content cannot ship silently.
+- **Ancillaries (retinue)** are acquired through the same trigger system, capped at
+  8 per character, with `unique` members held by only one living character at a
+  time. The player may **transfer** a retinue member between two living,
+  co-located characters of their own faction; death releases them back into
+  circulation.
+- **Effective attributes** are base + trait + retinue modifiers, and they reach
+  every system: influence and law/happiness traits into public order, management
+  and `trade_pct` into settlement income, `growth` into population growth,
+  `movement` (a flat bonus in movement points) into an army's march range, and
+  `command` / `troop_morale` into the `BattleResolver` through a general profile.
+- **Governorship follows presence.** An adult family member standing in a
+  settlement his faction owns governs it; march him away and the seat falls
+  vacant (−5 order). No one governs two cities, and the most influential claimant
+  present holds the seat.
+- **The family year** (`FamilyRules.process_year`): aging, natural death (rising
+  after 50, certain at 85), succession (the heir takes the throne; the next heir is
+  chosen by nearness to the leader's line, then influence, then age), coming of
+  age at 16, births, marriage suitors who marry into the house, adoption when a
+  house runs short of adult men, and **man of the hour** — a captain who wins
+  badly outnumbered may be adopted and given the army he saved. The player can
+  name any adult male heir; the man passed over takes the *Disinherited* trait.
+- **Family caught in a fallen city** flee to the nearest settlement their house
+  still holds; with nowhere to run they are lost with the city.
+- **Diplomatic stances:** every faction pair holds one of
   `war / neutral / trade / alliance / protectorate`, kept symmetric, seeded from
-  `campaign.json`, and everyone is at war with the rebels. Stances already gate
-  movement (war), trade routes, and grain imports.
+  `campaign.json`. Stances gate movement, trade routes and grain imports; attacking
+  or besieging declares war, and `DiplomacyRules.set_stance` changes them directly.
 
-### 6.2 Planned (Phases 4–5) — data ships now, engines later
+### 6.2 Planned (Phase 5)
 
-- **Traits & ancillaries:** `traits.json` / `ancillaries.json` define a full
-  trigger system (`when` / `condition` / `chance` / `points`, leveled traits with
-  anti-traits) already loaded by `GameData` — the engine that fires triggers and
-  applies effects is Phase 4, alongside succession, marriage, adoption,
-  come-of-age, and "hero of the field" recruitment from victorious captains.
 - **Agents:** envoys, spies, and assassins (infiltration, gate-opening,
-  counter-espionage, sabotage, assassination as skill-vs-security probability)
-  are Phase 5.
+  counter-espionage, sabotage, assassination as skill-vs-security probability).
+  The `personal_security` and `agent_skill` ancillary effects are authored for
+  them and lie dormant until then.
 - **Diplomacy engine:** offer/counter-offer negotiation, tribute, region deals,
-  bribery, and an AI attitude model are Phase 5; because stances are already the
-  single source of truth, the negotiation layer bolts on without retrofits.
+  bribery, and an AI attitude model. Because stances are already the single source
+  of truth, the negotiation layer bolts on without retrofits — today's UI simply
+  sets a stance directly.
 
 ## 7. Factions & Cultures
 
@@ -485,7 +521,10 @@ take the maximum across chains.
 ### 9.2 The validator
 
 `tools/validate_data.py` runs every schema, then the cross-file checks JSON Schema
-cannot express: id references across tables; exactly one rebel and one senate
+cannot express — including map-position sanity (no two region tokens closer than
+1.2 world units; a warning when land-adjacent regions sit more than 35 apart) and
+trigger liveness (any trait/ancillary trigger kind no engine call site fires is
+reported as dead content, except the deliberately forward-authored `office_gained`): id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
 culture's cap; monotonic `min_settlement_level` within chains; temple chains carry
 god + archetype; every unit's requirement satisfiable by some chain of its

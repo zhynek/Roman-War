@@ -135,7 +135,7 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	if order < float(order_rules["revolt_threshold"]):
 		settlement["low_order_streak"] = int(settlement["low_order_streak"]) + 1
 		if settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
-			_revolt(state, region_id)
+			_revolt(data, state, region_id)
 			result["revolted"] = true
 	else:
 		settlement["low_order_streak"] = 0
@@ -155,10 +155,12 @@ static func _damage_random_building(settlement: Dictionary, rng: CampaignRng) ->
 		settlement["buildings"][chain_id] = tier
 
 
-static func _revolt(state: Dictionary, region_id: String) -> void:
+static func _revolt(data: GameData, state: Dictionary, region_id: String) -> void:
 	## The settlement secedes to the rebel faction; the garrison is expelled...
-	## by which we mean destroyed, as is traditional.
+	## by which we mean destroyed, as is traditional. Any family caught inside
+	## flees to the nearest city the house still holds.
 	var settlement: Dictionary = state["settlements"][region_id]
+	var previous_owner: String = settlement["owner"]
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
 	settlement["construction_queue"] = []
@@ -168,3 +170,5 @@ static func _revolt(state: Dictionary, region_id: String) -> void:
 	settlement["recently_conquered"] = 0
 	settlement["siege"] = null
 	settlement["tax_level"] = "normal"
+	CombatRules.displace_characters(data, state, region_id, previous_owner)
+	SettlementRules.refresh_governors(data, state)

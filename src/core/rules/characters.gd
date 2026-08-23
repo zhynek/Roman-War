@@ -99,10 +99,17 @@ static func fire_trigger(data: GameData, state: Dictionary, char_id: String, whe
 				continue
 			if not rng.chance(float(trigger["chance"])):
 				continue
-			var before := active_trait_levels(data, character).size()
+			# Compare per-trait levels, not the count: a rise WITHIN a trait, or
+			# an anti-trait fading as its opposite takes hold, are both news.
+			var before := _level_map(data, character)
 			award_points(data, character, trait_id, int(trigger["points"]))
-			if active_trait_levels(data, character).size() != before:
-				notices.append({"kind": "trait", "character": char_id, "trait": trait_id})
+			var after := _level_map(data, character)
+			for changed_id in _changed_levels(before, after):
+				notices.append({
+					"kind": "trait", "character": char_id, "trait": changed_id,
+					"level": int(after.get(changed_id, 0)),
+					"name": _level_name(data, character, changed_id),
+				})
 
 	var ancillary_ids: Array = data.ancillaries.keys()
 	ancillary_ids.sort()
@@ -150,15 +157,24 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 
 ## --- Lifecycle helpers (shared with combat and family) --------------------
 
-static func kill(state: Dictionary, char_id: String) -> void:
+static func kill(state: Dictionary, char_id: String, data: GameData = null, notices: Array = []) -> void:
+	## Death releases every post and every retinue member (so unique ancillaries
+	## return to circulation). Pass `data` to have the succession settled at once
+	## rather than waiting for the year to turn.
+	var faction_id := ""
 	if state["characters"].has(char_id):
-		state["characters"][char_id]["alive"] = false
+		var character: Dictionary = state["characters"][char_id]
+		character["alive"] = false
+		character["ancillaries"] = []
+		faction_id = character["faction"]
 	for settlement in state["settlements"].values():
 		if settlement["governor"] == char_id:
 			settlement["governor"] = null
 	for army in state["armies"].values():
 		if army["general"] == char_id:
 			army["general"] = null
+	if data != null and faction_id != "":
+		FamilyRules.ensure_succession(data, state, faction_id, notices)
 
 
 static func transfer_ancillary(data: GameData, state: Dictionary, from_id: String, to_id: String, ancillary_id: String) -> bool:
@@ -185,8 +201,36 @@ static func transfer_ancillary(data: GameData, state: Dictionary, from_id: Strin
 
 ## --- Internals ------------------------------------------------------------
 
+static func _level_map(data: GameData, character: Dictionary) -> Dictionary:
+	var levels := {}
+	for entry in active_trait_levels(data, character):
+		levels[entry["trait"]["id"]] = int(entry["level_number"])
+	return levels
+
+
+static func _changed_levels(before: Dictionary, after: Dictionary) -> Array:
+	var changed: Array = []
+	for trait_id in after:
+		if int(before.get(trait_id, 0)) != int(after[trait_id]):
+			changed.append(trait_id)
+	for trait_id in before:
+		if not after.has(trait_id):
+			changed.append(trait_id)
+	changed.sort()
+	return changed
+
+
+static func _level_name(data: GameData, character: Dictionary, trait_id: String) -> String:
+	for entry in active_trait_levels(data, character):
+		if entry["trait"]["id"] == trait_id:
+			return String(entry["level"]["name"])
+	return "lost " + String(data.traits.get(trait_id, {}).get("name", trait_id))
+
+
 static func _governed_settlement(state: Dictionary, char_id: String) -> String:
-	for region_id in state["settlements"]:
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()  # canonical order — the result gates rng-consuming triggers
+	for region_id in region_ids:
 		if state["settlements"][region_id]["governor"] == char_id:
 			return region_id
 	return ""
@@ -201,7 +245,7 @@ static func _leads_army(state: Dictionary, char_id: String) -> bool:
 
 static func _ancillary_held_anywhere(state: Dictionary, ancillary_id: String) -> bool:
 	for character in state["characters"].values():
-		if character.get("ancillaries", []).has(ancillary_id):
+		if character["alive"] and character.get("ancillaries", []).has(ancillary_id):
 			return true
 	return false
 
@@ -211,6 +255,9 @@ static func _condition_met(data: GameData, state: Dictionary, character: Diction
 		return true
 
 	if condition.has("odds_against") and bool(condition["odds_against"]) != bool(context.get("odds_against", false)):
+		return false
+
+	if condition.has("occupation") and String(condition["occupation"]) != String(context.get("occupation", "")):
 		return false
 
 	# Settlement-scoped conditions only bind while actually governing.
@@ -227,11 +274,15 @@ static func _condition_met(data: GameData, state: Dictionary, character: Diction
 				return false
 		if condition.has("building_kind"):
 			var min_level := int(condition.get("min_building_level", 1))
+			var required_god: String = condition.get("temple_god", "")
 			var found := false
 			for chain_id in settlement["buildings"]:
 				var chain: Dictionary = data.chains.get(chain_id, {})
-				if chain.get("kind", "") == String(condition["building_kind"]) \
-						and int(settlement["buildings"][chain_id]) >= min_level:
+				if chain.get("kind", "") != String(condition["building_kind"]):
+					continue
+				if required_god != "" and String(chain.get("god", "")) != required_god:
+					continue
+				if int(settlement["buildings"][chain_id]) >= min_level:
 					found = true
 					break
 			if not found:

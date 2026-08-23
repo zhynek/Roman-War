@@ -45,6 +45,36 @@ static func effect_max(data: GameData, settlement: Dictionary, effect: String) -
 	return best
 
 
+static func refresh_governors(data: GameData, state: Dictionary) -> void:
+	## Governorship is derived from presence, never stored independently: an
+	## adult family member standing in a settlement his faction owns governs it.
+	## March him away and the post falls vacant; no one governs two cities, and
+	## the most influential claimant present holds the seat.
+	var claims := {}  # region_id -> {char_id, influence}
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character["alive"] or character["role"] in ["spouse", "child"]:
+			continue
+		if character.get("gender", "male") != "male":
+			continue
+		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
+			continue
+		var location: String = character.get("location", "")
+		if location == "" or not state["settlements"].has(location):
+			continue
+		if state["settlements"][location]["owner"] != character["faction"]:
+			continue
+		var influence := CharacterRules.effective(data, character, "influence")
+		if not claims.has(location) or influence > int(claims[location]["influence"]):
+			claims[location] = {"char_id": char_id, "influence": influence}
+
+	for region_id in state["settlements"]:
+		var claim = claims.get(region_id)
+		state["settlements"][region_id]["governor"] = claim["char_id"] if claim != null else null
+
+
 static func garrison_soldiers(data: GameData, settlement: Dictionary) -> int:
 	var soldiers := 0
 	for unit in settlement["garrison"]:

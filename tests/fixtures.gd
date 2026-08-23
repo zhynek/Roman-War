@@ -148,7 +148,7 @@ static func data() -> GameData:
 		},
 		"test_pathfinder": {
 			"id": "test_pathfinder", "name": "Pathfinder",
-			"levels": [{"name": "Pathfinder", "threshold": 1, "effects": {"movement": 50}}],
+			"levels": [{"name": "Pathfinder", "threshold": 1, "effects": {"movement": 0.5}}],
 			"triggers": [{"when": "turn_end_campaigning", "chance": 0.5, "points": 1}],
 		},
 	}

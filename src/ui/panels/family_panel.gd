@@ -29,6 +29,7 @@ func open_for(current_game: Game) -> void:
 
 func _rebuild() -> void:
 	for child in _content.get_children():
+		_content.remove_child(child)
 		child.queue_free()
 	var members := game.family_of()
 	for entry in members:

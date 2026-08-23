@@ -161,25 +161,14 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):
+		var general = state["armies"].get(army_id, {}).get("general")
 		result["capture"] = CombatRules.capture_settlement(
 			data, state, rng, region_id, result["capture_pending_owner"], occupation)
-		_fire_occupation_triggers(rng, army_id, occupation, result)
+		var notices: Array = result.get("character_notices", [])
+		CombatRules.fire_occupation_triggers(data, state, rng, general, occupation, notices)
+		result["character_notices"] = notices
 	state["rng_state"] = rng.state_string()
 	return result
-
-
-func _fire_occupation_triggers(rng: CampaignRng, army_id: String, occupation: String, result: Dictionary) -> void:
-	## The conquering general remembers how the city was treated.
-	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty() or army["general"] == null:
-		return
-	var notices: Array = result.get("character_notices", [])
-	CharacterRules.fire_trigger(data, state, army["general"], "settlement_captured", {}, rng, notices)
-	if occupation == "enslave":
-		CharacterRules.fire_trigger(data, state, army["general"], "settlement_enslaved", {}, rng, notices)
-	elif occupation == "exterminate":
-		CharacterRules.fire_trigger(data, state, army["general"], "settlement_exterminated", {}, rng, notices)
-	result["character_notices"] = notices
 
 
 func garrison_army(army_id: String) -> bool:

@@ -207,7 +207,8 @@
       "resources": [
         "grain"
       ],
-      "description": "The broad Po plain, richest grainland of the west, settled thick with Gallic clans who mislike Roman surveyors."
+      "description": "The broad Po plain, richest grainland of the west, settled thick with Gallic clans who mislike Roman surveyors.",
+      "sea_zones": []
     },
     {
       "id": "venetia",
@@ -281,7 +282,7 @@
     },
     {
       "id": "sardinia",
-      "name": "Sardinia",
+      "name": "Corsica et Sardinia",
       "settlement_name": "Caralis",
       "position": {
         "x": 29.5,
@@ -299,7 +300,7 @@
         "silver",
         "grain"
       ],
-      "description": "Silver-veined highlands over fevered lowland grainfields, ringed by the stone towers of a people older than memory."
+      "description": "Two rugged islands counted as one province: hill clans, cork oak and sheep, and harbours that have sheltered every fleet to cross this sea."
     },
     {
       "id": "baetica",
@@ -318,7 +319,7 @@
         "mauretania"
       ],
       "sea_zones": [
-        "oceanus_cantabricus",
+        "oceanus_atlanticus",
         "mare_ibericum"
       ],
       "resources": [
@@ -344,7 +345,7 @@
         "gallaecia"
       ],
       "sea_zones": [
-        "oceanus_cantabricus"
+        "oceanus_atlanticus"
       ],
       "resources": [
         "horses"
@@ -371,7 +372,8 @@
       "resources": [
         "iron"
       ],
-      "description": "The harsh central plateau of Iberia, where the smiths of Numantia temper the finest blades in the west."
+      "description": "The harsh central plateau of Iberia, where the smiths of Numantia temper the finest blades in the west.",
+      "sea_zones": []
     },
     {
       "id": "edetania",
@@ -412,7 +414,7 @@
         "celtiberia"
       ],
       "sea_zones": [
-        "oceanus_cantabricus"
+        "oceanus_atlanticus"
       ],
       "resources": [
         "gold",
@@ -462,7 +464,7 @@
         "armorica"
       ],
       "sea_zones": [
-        "oceanus_cantabricus"
+        "oceanus_atlanticus"
       ],
       "resources": [
         "wine",
@@ -490,7 +492,8 @@
       "resources": [
         "iron"
       ],
-      "description": "The high hearth of Gaul, where the Arverni kings count their wealth in cattle, iron, and the fealty of lesser tribes."
+      "description": "The high hearth of Gaul, where the Arverni kings count their wealth in cattle, iron, and the fealty of lesser tribes.",
+      "sea_zones": []
     },
     {
       "id": "armorica",
@@ -509,7 +512,7 @@
       ],
       "sea_zones": [
         "oceanus_britannicus",
-        "oceanus_cantabricus"
+        "oceanus_atlanticus"
       ],
       "resources": [
         "copper",
@@ -604,14 +607,15 @@
         "furs",
         "timber"
       ],
-      "description": "Trackless oak and beech forest between the Rhine and the Elbe, home to war bands that own no master."
+      "description": "Trackless oak and beech forest between the Rhine and the Elbe, home to war bands that own no master.",
+      "sea_zones": []
     },
     {
       "id": "boiohaemum",
       "name": "Boiohaemum",
       "settlement_name": "Eburodunum",
       "position": {
-        "x": 38,
+        "x": 39.5,
         "y": 22.5
       },
       "terrain": "forest",
@@ -626,7 +630,8 @@
         "timber",
         "iron"
       ],
-      "description": "The wooded bowl of the Boii, hemmed in by mountains, its timber and iron floated down to the Danube."
+      "description": "The wooded bowl of the Boii, hemmed in by mountains, its timber and iron floated down to the Danube.",
+      "sea_zones": []
     },
     {
       "id": "raetia",
@@ -646,7 +651,8 @@
         "noricum"
       ],
       "resources": [],
-      "description": "High passes and thin alpine meadows where drovers and toll-takers live off the traffic between Italy and the north."
+      "description": "High passes and thin alpine meadows where drovers and toll-takers live off the traffic between Italy and the north.",
+      "sea_zones": []
     },
     {
       "id": "noricum",
@@ -668,7 +674,8 @@
         "iron",
         "salt"
       ],
-      "description": "A mountain kingdom of salt shafts and famous steel, whose smiths' blades command any price in Italy."
+      "description": "A mountain kingdom of salt shafts and famous steel, whose smiths' blades command any price in Italy.",
+      "sea_zones": []
     },
     {
       "id": "pannonia",
@@ -691,7 +698,8 @@
         "timber",
         "slaves"
       ],
-      "description": "Oak woods and river meadows inside the Danube bend, rich in herds, timber, and captive-taking wars."
+      "description": "Oak woods and river meadows inside the Danube bend, rich in herds, timber, and captive-taking wars.",
+      "sea_zones": []
     },
     {
       "id": "illyria",
@@ -739,7 +747,8 @@
         "salt",
         "iron"
       ],
-      "description": "Carpathian heights seamed with gold and salt, ruled from a fortress sanctuary above the clouds."
+      "description": "Carpathian heights seamed with gold and salt, ruled from a fortress sanctuary above the clouds.",
+      "sea_zones": []
     },
     {
       "id": "moesia",
@@ -786,7 +795,10 @@
         "horses",
         "slaves"
       ],
-      "description": "Horse-breeding uplands of the warlike Thracian tribes, sellers of mercenaries and slaves to every Greek war."
+      "description": "Horse-breeding uplands of the warlike Thracian tribes, sellers of mercenaries and slaves to every Greek war.",
+      "sea_zones": [
+        "pontus_euxinus"
+      ]
     },
     {
       "id": "europa",
@@ -1089,7 +1101,8 @@
         "cappadocia"
       ],
       "resources": [],
-      "description": "The bare Anatolian plateau lately seized by wandering Celts, who raid and levy tribute from richer neighbors."
+      "description": "The bare Anatolian plateau lately seized by wandering Celts, who raid and levy tribute from richer neighbors.",
+      "sea_zones": []
     },
     {
       "id": "pontus",
@@ -1137,7 +1150,8 @@
         "horses",
         "silver"
       ],
-      "description": "High pastureland of horse-lords and rock-cut strongholds, still loyal to the old Persian ways."
+      "description": "High pastureland of horse-lords and rock-cut strongholds, still loyal to the old Persian ways.",
+      "sea_zones": []
     },
     {
       "id": "cilicia",
@@ -1204,7 +1218,8 @@
         "horses",
         "iron"
       ],
-      "description": "A cold tableland of horse herds and fortified valleys, astride the caravan roads between two worlds."
+      "description": "A cold tableland of horse herds and fortified valleys, astride the caravan roads between two worlds.",
+      "sea_zones": []
     },
     {
       "id": "scythia",
@@ -1343,7 +1358,8 @@
         "incense",
         "salt"
       ],
-      "description": "Red desert of hidden cisterns, where Petra tolls the frankincense caravans coming up from the south."
+      "description": "Red desert of hidden cisterns, where Petra tolls the frankincense caravans coming up from the south.",
+      "sea_zones": []
     },
     {
       "id": "assyria",
@@ -1364,7 +1380,8 @@
       "resources": [
         "grain"
       ],
-      "description": "The old wheatlands between the upper rivers, tilled in the shadow of dead empires and ruled from Arbela."
+      "description": "The old wheatlands between the upper rivers, tilled in the shadow of dead empires and ruled from Arbela.",
+      "sea_zones": []
     },
     {
       "id": "babylonia",
@@ -1386,7 +1403,8 @@
         "textiles"
       ],
       "wonder": "hanging_gardens",
-      "description": "Canal-fed black earth of astonishing yield, where immortal Babylon endures beside its terraced marvel of green."
+      "description": "Canal-fed black earth of astonishing yield, where immortal Babylon endures beside its terraced marvel of green.",
+      "sea_zones": []
     },
     {
       "id": "media",
@@ -1408,7 +1426,8 @@
       "resources": [
         "horses"
       ],
-      "description": "Mountain pastures of the Nisaean herds, whose tall horses carry the armored riders of the east."
+      "description": "Mountain pastures of the Nisaean herds, whose tall horses carry the armored riders of the east.",
+      "sea_zones": []
     },
     {
       "id": "persis",
@@ -1428,7 +1447,8 @@
       "resources": [
         "textiles"
       ],
-      "description": "The old Persian homeland of dry hills and long memory, weaving carpets beneath the scorched terraces of Persepolis."
+      "description": "The old Persian homeland of dry hills and long memory, weaving carpets beneath the scorched terraces of Persepolis.",
+      "sea_zones": []
     },
     {
       "id": "parthia",
@@ -1448,7 +1468,8 @@
         "horses",
         "silk"
       ],
-      "description": "Dry steppe below the eastern hills, where horse-breeding clans watch the silk tracks that come out of the far east."
+      "description": "Dry steppe below the eastern hills, where horse-breeding clans watch the silk tracks that come out of the far east.",
+      "sea_zones": []
     },
     {
       "id": "aegyptus",
@@ -1495,7 +1516,8 @@
         "grain"
       ],
       "wonder": "great_pyramid",
-      "description": "The middle Nile of temple estates and pyramid fields, governed from immemorial Memphis in the shadow of the oldest tomb on earth."
+      "description": "The middle Nile of temple estates and pyramid fields, governed from immemorial Memphis in the shadow of the oldest tomb on earth.",
+      "sea_zones": []
     },
     {
       "id": "thebais",
@@ -1514,7 +1536,8 @@
         "gold",
         "incense"
       ],
-      "description": "Upper Egypt's narrow green ribbon between the deserts, gateway for Nubian gold and Red Sea incense."
+      "description": "Upper Egypt's narrow green ribbon between the deserts, gateway for Nubian gold and Red Sea incense.",
+      "sea_zones": []
     },
     {
       "id": "cyrenaica",
@@ -1625,7 +1648,7 @@
         "baetica"
       ],
       "sea_zones": [
-        "oceanus_cantabricus",
+        "oceanus_atlanticus",
         "mare_ibericum"
       ],
       "resources": [
@@ -1652,7 +1675,7 @@
       "name": "British Ocean",
       "adjacent": [
         "mare_suebicum",
-        "oceanus_cantabricus"
+        "oceanus_atlanticus"
       ],
       "position": {
         "x": 17,
@@ -1660,8 +1683,8 @@
       }
     },
     {
-      "id": "oceanus_cantabricus",
-      "name": "Cantabrian Ocean",
+      "id": "oceanus_atlanticus",
+      "name": "Atlantic Ocean",
       "adjacent": [
         "oceanus_britannicus",
         "mare_ibericum"
@@ -1675,7 +1698,7 @@
       "id": "mare_ibericum",
       "name": "Iberian Sea",
       "adjacent": [
-        "oceanus_cantabricus",
+        "oceanus_atlanticus",
         "mare_ligusticum",
         "mare_africum"
       ],

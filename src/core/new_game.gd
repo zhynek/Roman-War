@@ -98,14 +98,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 				if not stances.has(other):
 					stances[other] = reverse.get(fid, default_stance)
 
-	# Governors: a family character located in an owned settlement region governs it.
-	for char_id in state["characters"]:
-		var character: Dictionary = state["characters"][char_id]
-		var location: String = character.get("location", "")
-		if location != "" and state["settlements"].has(location):
-			var settlement: Dictionary = state["settlements"][location]
-			if settlement["owner"] == character["faction"] and settlement["governor"] == null:
-				settlement["governor"] = char_id
+	# Governorship is derived from presence, so it is simply computed, never seeded.
+	SettlementRules.refresh_governors(data, state)
 
 	# Mercenary pools start at their initial counts (fractional replenishment
 	# accumulates in the counts, so they are floats).

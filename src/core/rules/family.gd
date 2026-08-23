@@ -28,7 +28,9 @@ static func process_year(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				character["role"] = "family"
 				CharacterRules.fire_trigger(data, state, char_id, "came_of_age", {}, rng, notices)
 				notices.append({"kind": "came_of_age", "character": char_id, "faction": character["faction"]})
-			elif rng.chance(float(rules["marriage_suitor_chance_per_year"])):
+			elif age >= int(rules["marriageable_age"]) \
+					and _living_family_count(state, character["faction"]) < int(rules.get("max_family_size", 12)) \
+					and rng.chance(float(rules["marriage_suitor_chance_per_year"])):
 				_marry_in_suitor(data, state, rng, char_id, notices)
 
 	var faction_ids: Array = state["factions"].keys()
@@ -80,6 +82,10 @@ static func set_heir(data: GameData, state: Dictionary, faction_id: String, char
 	var current := _find_role(state, faction_id, "heir")
 	if current != "" and current != char_id:
 		state["characters"][current]["role"] = "family"
+		# Being passed over is remembered, and it costs the man his standing.
+		if data.traits.has("disinherited"):
+			var threshold := int(data.traits["disinherited"]["levels"][0]["threshold"])
+			CharacterRules.award_points(data, state["characters"][current], "disinherited", threshold)
 	character["role"] = "heir"
 	return true
 
@@ -111,8 +117,7 @@ static func maybe_man_of_the_hour(data: GameData, state: Dictionary, rng: Campai
 
 static func _births(data: GameData, state: Dictionary, rng: CampaignRng, faction_id: String, notices: Array) -> void:
 	var rules: Dictionary = data.balance["characters"]
-	if _living_family_count(state, faction_id) >= int(rules.get("max_family_size", 12)):
-		return
+	var cap := int(rules.get("max_family_size", 12))
 	var char_ids: Array = state["characters"].keys()
 	char_ids.sort()
 	for char_id in char_ids:
@@ -124,6 +129,8 @@ static func _births(data: GameData, state: Dictionary, rng: CampaignRng, faction
 		var age := int(father["age"])
 		if age < int(rules["birth_parent_min_age"]) or age > int(rules["birth_parent_max_age"]):
 			continue
+		if _living_family_count(state, faction_id) >= cap:
+			return
 		if not rng.chance(float(rules["birth_chance_per_year"])):
 			continue
 		var gender := "male" if rng.chance(0.5) else "female"
@@ -213,11 +220,30 @@ static func _best_heir_candidate(data: GameData, state: Dictionary, faction_id: 
 			continue
 		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
 			continue
-		var key := [CharacterRules.effective(data, character, "influence"), int(character["age"])]
+		var key := [_line_rank(state, faction_id, char_id),
+			CharacterRules.effective(data, character, "influence"), int(character["age"])]
 		if best == "" or key > best_key:
 			best = char_id
 			best_key = key
 	return best
+
+
+static func _line_rank(state: Dictionary, faction_id: String, char_id: String) -> int:
+	## 2 = son of the leader, 1 = descended from the leader's line, 0 = adopted
+	## or collateral. Sorted above influence so a stranger never leapfrogs a son.
+	var leader := _find_role(state, faction_id, "leader")
+	if leader == "":
+		return 0
+	var father = state["characters"][char_id].get("father")
+	if father == leader:
+		return 2
+	var depth := 0
+	while father != null and state["characters"].has(father) and depth < 8:
+		if father == leader:
+			return 1
+		father = state["characters"][father].get("father")
+		depth += 1
+	return 0
 
 
 static func _living_family_count(state: Dictionary, faction_id: String) -> int:

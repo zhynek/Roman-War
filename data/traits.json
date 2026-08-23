@@ -6,13 +6,51 @@
       "name": "Steady Governor",
       "anti_trait": "negligent_governor",
       "levels": [
-        { "name": "Attentive Administrator", "threshold": 1, "effects": { "management": 1 }, "description": "He reads the granary ledgers himself and knows which magistrates are lying. Little escapes him." },
-        { "name": "Steady Governor", "threshold": 3, "effects": { "management": 2, "law": 1 }, "description": "Years of patient administration have taught him where every denarius hides and every grievance festers." },
-        { "name": "Pillar of the Province", "threshold": 6, "effects": { "management": 3, "law": 2, "influence": 1 }, "description": "Merchants set their scales by his word. Provinces under his hand simply do not go wrong." }
+        {
+          "name": "Attentive Administrator",
+          "threshold": 1,
+          "effects": {
+            "management": 1
+          },
+          "description": "He reads the granary ledgers himself and knows which magistrates are lying. Little escapes him."
+        },
+        {
+          "name": "Steady Governor",
+          "threshold": 3,
+          "effects": {
+            "management": 2,
+            "law": 1
+          },
+          "description": "Years of patient administration have taught him where every denarius hides and every grievance festers."
+        },
+        {
+          "name": "Pillar of the Province",
+          "threshold": 6,
+          "effects": {
+            "management": 3,
+            "law": 2,
+            "influence": 1
+          },
+          "description": "Merchants set their scales by his word. Provinces under his hand simply do not go wrong."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "min_public_order": 80 }, "chance": 0.15, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "min_public_order": 95 }, "chance": 0.2, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_public_order": 80
+          },
+          "chance": 0.15,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_public_order": 95
+          },
+          "chance": 0.2,
+          "points": 1
+        }
       ]
     },
     {
@@ -20,13 +58,51 @@
       "name": "Negligent Governor",
       "anti_trait": "steady_governor",
       "levels": [
-        { "name": "Distracted", "threshold": 1, "effects": { "management": -1 }, "description": "Petitions pile up unread while he attends to his hunting dogs. The clerks have noticed." },
-        { "name": "Negligent", "threshold": 3, "effects": { "management": -2, "law": -1 }, "description": "The city runs itself, badly. Officials skim freely, knowing no audit will ever come." },
-        { "name": "Absent in Spirit", "threshold": 6, "effects": { "management": -3, "law": -2, "happiness": -1 }, "description": "He governs the way a shipwreck sails. The people have stopped bringing him their troubles and started solving them with knives." }
+        {
+          "name": "Distracted",
+          "threshold": 1,
+          "effects": {
+            "management": -1
+          },
+          "description": "Petitions pile up unread while he attends to his hunting dogs. The clerks have noticed."
+        },
+        {
+          "name": "Negligent",
+          "threshold": 3,
+          "effects": {
+            "management": -2,
+            "law": -1
+          },
+          "description": "The city runs itself, badly. Officials skim freely, knowing no audit will ever come."
+        },
+        {
+          "name": "Absent in Spirit",
+          "threshold": 6,
+          "effects": {
+            "management": -3,
+            "law": -2,
+            "happiness": -1
+          },
+          "description": "He governs the way a shipwreck sails. The people have stopped bringing him their troubles and started solving them with knives."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "max_public_order": 65 }, "chance": 0.2, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "max_public_order": 50 }, "chance": 0.25, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "max_public_order": 65
+          },
+          "chance": 0.2,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "max_public_order": 50
+          },
+          "chance": 0.25,
+          "points": 1
+        }
       ]
     },
     {
@@ -34,13 +110,47 @@
       "name": "Just",
       "anti_trait": "corrupt",
       "levels": [
-        { "name": "Fair-Dealing", "threshold": 1, "effects": { "law": 1 }, "description": "He hears both sides before he rules, a habit rare enough to be remarked upon in the market." },
-        { "name": "Just", "threshold": 3, "effects": { "law": 2, "influence": 1 }, "description": "His verdicts are quoted in neighboring towns. Bribes offered to him have a way of ending up as evidence." },
-        { "name": "Incorruptible", "threshold": 6, "effects": { "law": 4, "influence": 2 }, "description": "Men swear oaths on his name as if he were a temple. No purse has ever been found that fits his hand." }
+        {
+          "name": "Fair-Dealing",
+          "threshold": 1,
+          "effects": {
+            "law": 1
+          },
+          "description": "He hears both sides before he rules, a habit rare enough to be remarked upon in the market."
+        },
+        {
+          "name": "Just",
+          "threshold": 3,
+          "effects": {
+            "law": 2,
+            "influence": 1
+          },
+          "description": "His verdicts are quoted in neighboring towns. Bribes offered to him have a way of ending up as evidence."
+        },
+        {
+          "name": "Incorruptible",
+          "threshold": 6,
+          "effects": {
+            "law": 4,
+            "influence": 2
+          },
+          "description": "Men swear oaths on his name as if he were a temple. No purse has ever been found that fits his hand."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "min_public_order": 85 }, "chance": 0.1, "points": 1 },
-        { "when": "office_gained", "chance": 0.15, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_public_order": 85
+          },
+          "chance": 0.1,
+          "points": 1
+        },
+        {
+          "when": "office_gained",
+          "chance": 0.15,
+          "points": 1
+        }
       ]
     },
     {
@@ -48,13 +158,53 @@
       "name": "Corrupt",
       "anti_trait": "just",
       "levels": [
-        { "name": "Grasping", "threshold": 1, "effects": { "law": -1, "trade_pct": -1 }, "description": "Contracts in his district cost a little extra, paid quietly at his back door." },
-        { "name": "Corrupt", "threshold": 3, "effects": { "law": -2, "trade_pct": -2, "influence": -1 }, "description": "Justice here is an auction and he is the auctioneer. Honest traders have begun routing around his city." },
-        { "name": "Rotten to the Core", "threshold": 6, "effects": { "law": -4, "trade_pct": -4, "influence": -2 }, "description": "He has sold everything but the city walls, and those are under negotiation. His name is a curse in three languages." }
+        {
+          "name": "Grasping",
+          "threshold": 1,
+          "effects": {
+            "law": -1,
+            "trade_pct": -1
+          },
+          "description": "Contracts in his district cost a little extra, paid quietly at his back door."
+        },
+        {
+          "name": "Corrupt",
+          "threshold": 3,
+          "effects": {
+            "law": -2,
+            "trade_pct": -2,
+            "influence": -1
+          },
+          "description": "Justice here is an auction and he is the auctioneer. Honest traders have begun routing around his city."
+        },
+        {
+          "name": "Rotten to the Core",
+          "threshold": 6,
+          "effects": {
+            "law": -4,
+            "trade_pct": -4,
+            "influence": -2
+          },
+          "description": "He has sold everything but the city walls, and those are under negotiation. His name is a curse in three languages."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "min_tax_level": "very_high" }, "chance": 0.12, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "max_public_order": 60 }, "chance": 0.08, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_tax_level": "very_high"
+          },
+          "chance": 0.12,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "max_public_order": 60
+          },
+          "chance": 0.08,
+          "points": 1
+        }
       ]
     },
     {
@@ -62,13 +212,52 @@
       "name": "Harsh Taxman",
       "anti_trait": "openhanded",
       "levels": [
-        { "name": "Stern Assessor", "threshold": 1, "effects": { "management": 1, "happiness": -1 }, "description": "He counts olive trees from horseback and taxes accordingly. Nothing is written off." },
-        { "name": "Squeezer of Purses", "threshold": 3, "effects": { "management": 2, "happiness": -2 }, "description": "Farmers hide their best amphorae when his collectors ride out. The treasury, at least, is grateful." },
-        { "name": "Bleeder of Provinces", "threshold": 6, "effects": { "management": 3, "happiness": -4, "law": 1 }, "description": "It is said he could tax the shade of a fig tree. The revenue is magnificent and the muttering constant." }
+        {
+          "name": "Stern Assessor",
+          "threshold": 1,
+          "effects": {
+            "management": 1,
+            "happiness": -1
+          },
+          "description": "He counts olive trees from horseback and taxes accordingly. Nothing is written off."
+        },
+        {
+          "name": "Squeezer of Purses",
+          "threshold": 3,
+          "effects": {
+            "management": 2,
+            "happiness": -2
+          },
+          "description": "Farmers hide their best amphorae when his collectors ride out. The treasury, at least, is grateful."
+        },
+        {
+          "name": "Bleeder of Provinces",
+          "threshold": 6,
+          "effects": {
+            "management": 3,
+            "happiness": -4,
+            "law": 1
+          },
+          "description": "It is said he could tax the shade of a fig tree. The revenue is magnificent and the muttering constant."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "min_tax_level": "high" }, "chance": 0.15, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "min_tax_level": "very_high" }, "chance": 0.25, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_tax_level": "high"
+          },
+          "chance": 0.15,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_tax_level": "very_high"
+          },
+          "chance": 0.25,
+          "points": 1
+        }
       ]
     },
     {
@@ -76,11 +265,33 @@
       "name": "Openhanded",
       "anti_trait": "harsh_taxman",
       "levels": [
-        { "name": "Openhanded", "threshold": 1, "effects": { "happiness": 1 }, "description": "He funds a fountain here, a festival there. People wave when his litter passes." },
-        { "name": "Beloved Benefactor", "threshold": 3, "effects": { "happiness": 3, "influence": 1 }, "description": "His name is carved over a bathhouse he paid for himself. The crowd would carry him to office on their shoulders." }
+        {
+          "name": "Openhanded",
+          "threshold": 1,
+          "effects": {
+            "happiness": 1
+          },
+          "description": "He funds a fountain here, a festival there. People wave when his litter passes."
+        },
+        {
+          "name": "Beloved Benefactor",
+          "threshold": 3,
+          "effects": {
+            "happiness": 3,
+            "influence": 1
+          },
+          "description": "His name is carved over a bathhouse he paid for himself. The crowd would carry him to office on their shoulders."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "min_public_order": 90 }, "chance": 0.1, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_public_order": 90
+          },
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
@@ -88,14 +299,57 @@
       "name": "Brave",
       "anti_trait": "craven",
       "levels": [
-        { "name": "Bold", "threshold": 1, "effects": { "troop_morale": 1 }, "description": "When the line wavers he is seen where the spears are thickest, and it steadies men." },
-        { "name": "Brave", "threshold": 3, "effects": { "troop_morale": 2, "command": 1 }, "description": "He has led charges that older officers called suicide, and walked back from each one." },
-        { "name": "Lion of the Line", "threshold": 6, "effects": { "troop_morale": 3, "command": 1, "influence": 1, "personal_security": -1 }, "description": "Soldiers boast of serving under him and enemies aim for him first. He would not have it otherwise." }
+        {
+          "name": "Bold",
+          "threshold": 1,
+          "effects": {
+            "troop_morale": 1
+          },
+          "description": "When the line wavers he is seen where the spears are thickest, and it steadies men."
+        },
+        {
+          "name": "Brave",
+          "threshold": 3,
+          "effects": {
+            "troop_morale": 2,
+            "command": 1
+          },
+          "description": "He has led charges that older officers called suicide, and walked back from each one."
+        },
+        {
+          "name": "Lion of the Line",
+          "threshold": 6,
+          "effects": {
+            "troop_morale": 3,
+            "command": 1,
+            "influence": 1,
+            "personal_security": -1
+          },
+          "description": "Soldiers boast of serving under him and enemies aim for him first. He would not have it otherwise."
+        }
       ],
       "triggers": [
-        { "when": "battle_won", "condition": { "odds_against": true }, "chance": 0.35, "points": 2 },
-        { "when": "battle_won", "chance": 0.06, "points": 1 },
-        { "when": "battle_lost", "condition": { "odds_against": true }, "chance": 0.15, "points": 1 }
+        {
+          "when": "battle_won",
+          "condition": {
+            "odds_against": true
+          },
+          "chance": 0.35,
+          "points": 2
+        },
+        {
+          "when": "battle_won",
+          "chance": 0.06,
+          "points": 1
+        },
+        {
+          "when": "battle_lost",
+          "condition": {
+            "odds_against": true
+          },
+          "chance": 0.15,
+          "points": 1
+        }
       ]
     },
     {
@@ -103,12 +357,42 @@
       "name": "Craven",
       "anti_trait": "brave",
       "levels": [
-        { "name": "Hesitant", "threshold": 1, "effects": { "troop_morale": -1 }, "description": "He gives the order to advance a heartbeat too late, and the men feel that heartbeat." },
-        { "name": "Craven", "threshold": 3, "effects": { "troop_morale": -2, "command": -1, "personal_security": 1 }, "description": "His tent is always pitched nearest the road home. Veterans exchange looks when he speaks of glory." },
-        { "name": "Coward", "threshold": 6, "effects": { "troop_morale": -4, "command": -2, "influence": -2, "personal_security": 2 }, "description": "He has survived every defeat he caused, usually at a gallop. Assassins can never quite catch a man this practiced at fleeing." }
+        {
+          "name": "Hesitant",
+          "threshold": 1,
+          "effects": {
+            "troop_morale": -1
+          },
+          "description": "He gives the order to advance a heartbeat too late, and the men feel that heartbeat."
+        },
+        {
+          "name": "Craven",
+          "threshold": 3,
+          "effects": {
+            "troop_morale": -2,
+            "command": -1,
+            "personal_security": 1
+          },
+          "description": "His tent is always pitched nearest the road home. Veterans exchange looks when he speaks of glory."
+        },
+        {
+          "name": "Coward",
+          "threshold": 6,
+          "effects": {
+            "troop_morale": -4,
+            "command": -2,
+            "influence": -2,
+            "personal_security": 2
+          },
+          "description": "He has survived every defeat he caused, usually at a gallop. Assassins can never quite catch a man this practiced at fleeing."
+        }
       ],
       "triggers": [
-        { "when": "battle_lost", "chance": 0.15, "points": 1 }
+        {
+          "when": "battle_lost",
+          "chance": 0.15,
+          "points": 1
+        }
       ]
     },
     {
@@ -116,13 +400,43 @@
       "name": "Skilled Commander",
       "anti_trait": "indecisive_commander",
       "levels": [
-        { "name": "Competent Commander", "threshold": 1, "effects": { "command": 1 }, "description": "He reads ground the way a scribe reads a ledger, and posts his reserves where they will matter." },
-        { "name": "Skilled Commander", "threshold": 4, "effects": { "command": 2 }, "description": "His battles tend to be decided before the first javelin flies. Opposing captains have learned to dread his patience." },
-        { "name": "Master of the Field", "threshold": 8, "effects": { "command": 3, "troop_morale": 1 }, "description": "Students of war will argue over his maneuvers for a century. His soldiers simply say the old man does not lose." }
+        {
+          "name": "Competent Commander",
+          "threshold": 1,
+          "effects": {
+            "command": 1
+          },
+          "description": "He reads ground the way a scribe reads a ledger, and posts his reserves where they will matter."
+        },
+        {
+          "name": "Skilled Commander",
+          "threshold": 4,
+          "effects": {
+            "command": 2
+          },
+          "description": "His battles tend to be decided before the first javelin flies. Opposing captains have learned to dread his patience."
+        },
+        {
+          "name": "Master of the Field",
+          "threshold": 8,
+          "effects": {
+            "command": 3,
+            "troop_morale": 1
+          },
+          "description": "Students of war will argue over his maneuvers for a century. His soldiers simply say the old man does not lose."
+        }
       ],
       "triggers": [
-        { "when": "battle_won", "chance": 0.25, "points": 1 },
-        { "when": "siege_won", "chance": 0.2, "points": 1 }
+        {
+          "when": "battle_won",
+          "chance": 0.25,
+          "points": 1
+        },
+        {
+          "when": "siege_won",
+          "chance": 0.2,
+          "points": 1
+        }
       ]
     },
     {
@@ -130,48 +444,149 @@
       "name": "Indecisive Commander",
       "anti_trait": "skilled_commander",
       "levels": [
-        { "name": "Uncertain in Command", "threshold": 1, "effects": { "command": -1 }, "description": "He asks his council what they think, then asks again. Battles rarely wait for a third opinion." },
-        { "name": "Indecisive", "threshold": 4, "effects": { "command": -2, "troop_morale": -1 }, "description": "His orders arrive contradicting his previous orders. The ranks have started obeying whichever came first." }
+        {
+          "name": "Uncertain in Command",
+          "threshold": 1,
+          "effects": {
+            "command": -1
+          },
+          "description": "He asks his council what they think, then asks again. Battles rarely wait for a third opinion."
+        },
+        {
+          "name": "Indecisive",
+          "threshold": 4,
+          "effects": {
+            "command": -2,
+            "troop_morale": -1
+          },
+          "description": "His orders arrive contradicting his previous orders. The ranks have started obeying whichever came first."
+        }
       ],
       "triggers": [
-        { "when": "battle_lost", "chance": 0.25, "points": 1 }
+        {
+          "when": "battle_lost",
+          "chance": 0.25,
+          "points": 1
+        }
       ]
     },
     {
       "id": "scarred_veteran",
       "name": "Scarred Veteran",
       "levels": [
-        { "name": "Scarred", "threshold": 1, "effects": { "troop_morale": 1 }, "description": "The seam across his jaw ends any argument about whether he has stood in a shield wall." },
-        { "name": "Battle-Worn", "threshold": 4, "effects": { "troop_morale": 2, "influence": 1 }, "description": "He carries old iron weather in his bones and the respect of every man who has bled beside him." },
-        { "name": "Iron-Scarred", "threshold": 8, "effects": { "troop_morale": 3, "command": 1, "influence": 1 }, "description": "There is more scar than skin on his sword arm. Recruits stare; veterans salute." }
+        {
+          "name": "Scarred",
+          "threshold": 1,
+          "effects": {
+            "troop_morale": 1
+          },
+          "description": "The seam across his jaw ends any argument about whether he has stood in a shield wall."
+        },
+        {
+          "name": "Battle-Worn",
+          "threshold": 4,
+          "effects": {
+            "troop_morale": 2,
+            "influence": 1
+          },
+          "description": "He carries old iron weather in his bones and the respect of every man who has bled beside him."
+        },
+        {
+          "name": "Iron-Scarred",
+          "threshold": 8,
+          "effects": {
+            "troop_morale": 3,
+            "command": 1,
+            "influence": 1
+          },
+          "description": "There is more scar than skin on his sword arm. Recruits stare; veterans salute."
+        }
       ],
       "triggers": [
-        { "when": "battle_won", "chance": 0.08, "points": 1 },
-        { "when": "battle_lost", "chance": 0.12, "points": 1 }
+        {
+          "when": "battle_won",
+          "chance": 0.08,
+          "points": 1
+        },
+        {
+          "when": "battle_lost",
+          "chance": 0.12,
+          "points": 1
+        }
       ]
     },
     {
       "id": "siege_master",
       "name": "Siege Master",
       "levels": [
-        { "name": "Wall-Breaker", "threshold": 1, "effects": { "command": 1 }, "description": "He walks a city's perimeter once and knows where the mortar is old. Gates tend to open for him early." },
-        { "name": "Siege Master", "threshold": 3, "effects": { "command": 2 }, "description": "Rams, ramps, starvation, treachery — he uses whichever is cheapest. Walls are, to him, a temporary condition." }
+        {
+          "name": "Wall-Breaker",
+          "threshold": 1,
+          "effects": {
+            "command": 1
+          },
+          "description": "He walks a city's perimeter once and knows where the mortar is old. Gates tend to open for him early."
+        },
+        {
+          "name": "Siege Master",
+          "threshold": 3,
+          "effects": {
+            "command": 2
+          },
+          "description": "Rams, ramps, starvation, treachery — he uses whichever is cheapest. Walls are, to him, a temporary condition."
+        }
       ],
       "triggers": [
-        { "when": "siege_won", "chance": 0.3, "points": 1 }
+        {
+          "when": "siege_won",
+          "chance": 0.3,
+          "points": 1
+        }
       ]
     },
     {
       "id": "conqueror",
       "name": "Conqueror",
       "levels": [
-        { "name": "Taker of Towns", "threshold": 1, "effects": { "influence": 1 }, "description": "One captured settlement may be luck. His name now travels ahead of his army." },
-        { "name": "Conqueror", "threshold": 3, "effects": { "influence": 2, "command": 1 }, "description": "Cities he approaches begin negotiating before he arrives. It saves everyone time." },
-        { "name": "Overlord of Provinces", "threshold": 6, "effects": { "influence": 3, "command": 1, "troop_morale": 1 }, "description": "Maps must be redrawn because of him. His soldiers follow a legend and know it." }
+        {
+          "name": "Taker of Towns",
+          "threshold": 1,
+          "effects": {
+            "influence": 1
+          },
+          "description": "One captured settlement may be luck. His name now travels ahead of his army."
+        },
+        {
+          "name": "Conqueror",
+          "threshold": 3,
+          "effects": {
+            "influence": 2,
+            "command": 1
+          },
+          "description": "Cities he approaches begin negotiating before he arrives. It saves everyone time."
+        },
+        {
+          "name": "Overlord of Provinces",
+          "threshold": 6,
+          "effects": {
+            "influence": 3,
+            "command": 1,
+            "troop_morale": 1
+          },
+          "description": "Maps must be redrawn because of him. His soldiers follow a legend and know it."
+        }
       ],
       "triggers": [
-        { "when": "settlement_captured", "chance": 0.3, "points": 1 },
-        { "when": "siege_won", "chance": 0.1, "points": 1 }
+        {
+          "when": "settlement_captured",
+          "chance": 0.3,
+          "points": 1
+        },
+        {
+          "when": "siege_won",
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
@@ -179,13 +594,48 @@
       "name": "Cruel",
       "anti_trait": "merciful",
       "levels": [
-        { "name": "Harsh", "threshold": 1, "effects": { "law": 1, "happiness": -1 }, "description": "His punishments are exact, public, and remembered. Crime drops; so does laughter." },
-        { "name": "Cruel", "threshold": 3, "effects": { "law": 2, "happiness": -2, "influence": -1 }, "description": "He makes examples the way other men make speeches. Order holds in his lands the way ice holds a river." },
-        { "name": "The Butcher", "threshold": 6, "effects": { "law": 4, "happiness": -4, "influence": -2, "personal_security": 1 }, "description": "Whole towns went silent to buy his reputation. Even his allies check the wine, and nobody dares raise a hand against him." }
+        {
+          "name": "Harsh",
+          "threshold": 1,
+          "effects": {
+            "law": 1,
+            "happiness": -1
+          },
+          "description": "His punishments are exact, public, and remembered. Crime drops; so does laughter."
+        },
+        {
+          "name": "Cruel",
+          "threshold": 3,
+          "effects": {
+            "law": 2,
+            "happiness": -2,
+            "influence": -1
+          },
+          "description": "He makes examples the way other men make speeches. Order holds in his lands the way ice holds a river."
+        },
+        {
+          "name": "The Butcher",
+          "threshold": 6,
+          "effects": {
+            "law": 4,
+            "happiness": -4,
+            "influence": -2,
+            "personal_security": 1
+          },
+          "description": "Whole towns went silent to buy his reputation. Even his allies check the wine, and nobody dares raise a hand against him."
+        }
       ],
       "triggers": [
-        { "when": "settlement_exterminated", "chance": 0.6, "points": 2 },
-        { "when": "settlement_enslaved", "chance": 0.1, "points": 1 }
+        {
+          "when": "settlement_exterminated",
+          "chance": 0.6,
+          "points": 2
+        },
+        {
+          "when": "settlement_enslaved",
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
@@ -193,75 +643,278 @@
       "name": "Merciful",
       "anti_trait": "cruel",
       "levels": [
-        { "name": "Clement", "threshold": 1, "effects": { "happiness": 1 }, "description": "He spared a garrison that expected crucifixion. Word of such things spreads faster than armies." },
-        { "name": "Merciful", "threshold": 3, "effects": { "happiness": 2, "influence": 1, "law": -1 }, "description": "Conquered peoples petition to be governed by him. His enemies call it softness, quietly, from a distance." }
+        {
+          "name": "Clement",
+          "threshold": 1,
+          "effects": {
+            "happiness": 1
+          },
+          "description": "He spared a garrison that expected crucifixion. Word of such things spreads faster than armies."
+        },
+        {
+          "name": "Merciful",
+          "threshold": 3,
+          "effects": {
+            "happiness": 2,
+            "influence": 1,
+            "law": -1
+          },
+          "description": "Conquered peoples petition to be governed by him. His enemies call it softness, quietly, from a distance."
+        }
       ],
       "triggers": [
-        { "when": "settlement_captured", "chance": 0.25, "points": 1 }
+        {
+          "when": "settlement_captured",
+          "chance": 0.25,
+          "points": 1,
+          "condition": {
+            "occupation": "occupy"
+          }
+        }
       ]
     },
     {
       "id": "slaver",
       "name": "Slaver",
       "levels": [
-        { "name": "Dealer in Chains", "threshold": 1, "effects": { "trade_pct": 2, "happiness": -1 }, "description": "He knows the price of a strong back in every market from here to the coast." },
-        { "name": "Slave Lord", "threshold": 3, "effects": { "trade_pct": 4, "happiness": -2, "growth": 0.25 }, "description": "His estates run on captive labor and his ledgers run on captive sales. Wealth flows; goodwill does not." }
+        {
+          "name": "Dealer in Chains",
+          "threshold": 1,
+          "effects": {
+            "trade_pct": 2,
+            "happiness": -1
+          },
+          "description": "He knows the price of a strong back in every market from here to the coast."
+        },
+        {
+          "name": "Slave Lord",
+          "threshold": 3,
+          "effects": {
+            "trade_pct": 4,
+            "happiness": -2,
+            "growth": 0.25
+          },
+          "description": "His estates run on captive labor and his ledgers run on captive sales. Wealth flows; goodwill does not."
+        }
       ],
       "triggers": [
-        { "when": "settlement_enslaved", "chance": 0.5, "points": 1 }
+        {
+          "when": "settlement_enslaved",
+          "chance": 0.5,
+          "points": 1
+        }
       ]
     },
     {
       "id": "pious",
       "name": "Pious",
       "levels": [
-        { "name": "Observant", "threshold": 1, "effects": { "influence": 1 }, "description": "He makes the proper offerings on the proper days, and the priests speak well of him." },
-        { "name": "Pious", "threshold": 3, "effects": { "influence": 1, "happiness": 1, "law": 1 }, "description": "He has paid for altars from his own purse. The devout of the city count him one of their own." },
-        { "name": "Beloved of the Gods", "threshold": 6, "effects": { "influence": 2, "happiness": 2, "law": 1, "troop_morale": 1 }, "description": "Omens read in his presence come out favorable with suspicious regularity. Soldiers touch his cloak before battle." }
+        {
+          "name": "Observant",
+          "threshold": 1,
+          "effects": {
+            "influence": 1
+          },
+          "description": "He makes the proper offerings on the proper days, and the priests speak well of him."
+        },
+        {
+          "name": "Pious",
+          "threshold": 3,
+          "effects": {
+            "influence": 1,
+            "happiness": 1,
+            "law": 1
+          },
+          "description": "He has paid for altars from his own purse. The devout of the city count him one of their own."
+        },
+        {
+          "name": "Beloved of the Gods",
+          "threshold": 6,
+          "effects": {
+            "influence": 2,
+            "happiness": 2,
+            "law": 1,
+            "troop_morale": 1
+          },
+          "description": "Omens read in his presence come out favorable with suspicious regularity. Soldiers touch his cloak before battle."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "min_building_level": 2 }, "chance": 0.12, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "min_building_level": 4 }, "chance": 0.2, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "temple",
+            "min_building_level": 2
+          },
+          "chance": 0.12,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "temple",
+            "min_building_level": 4
+          },
+          "chance": 0.2,
+          "points": 1
+        }
       ]
     },
     {
       "id": "drunkard",
       "name": "Drunkard",
       "levels": [
-        { "name": "Fond of the Cup", "threshold": 1, "effects": { "management": -1 }, "description": "Morning audiences have moved to the afternoon, for everyone's comfort." },
-        { "name": "Drunkard", "threshold": 3, "effects": { "management": -2, "influence": -1 }, "description": "He signed a grain contract twice and a marriage contract once, remembering neither. His stewards now hide the seals." },
-        { "name": "Sodden Wreck", "threshold": 6, "effects": { "management": -3, "influence": -2, "command": -1, "personal_security": -1 }, "description": "The wine has finished what ambition started. An assassin would only have to follow the singing." }
+        {
+          "name": "Fond of the Cup",
+          "threshold": 1,
+          "effects": {
+            "management": -1
+          },
+          "description": "Morning audiences have moved to the afternoon, for everyone's comfort."
+        },
+        {
+          "name": "Drunkard",
+          "threshold": 3,
+          "effects": {
+            "management": -2,
+            "influence": -1
+          },
+          "description": "He signed a grain contract twice and a marriage contract once, remembering neither. His stewards now hide the seals."
+        },
+        {
+          "name": "Sodden Wreck",
+          "threshold": 6,
+          "effects": {
+            "management": -3,
+            "influence": -2,
+            "command": -1,
+            "personal_security": -1
+          },
+          "description": "The wine has finished what ambition started. An assassin would only have to follow the singing."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_idle", "chance": 0.08, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "entertainment", "min_building_level": 2 }, "chance": 0.06, "points": 1 }
+        {
+          "when": "turn_end_idle",
+          "chance": 0.08,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "entertainment",
+            "min_building_level": 2
+          },
+          "chance": 0.06,
+          "points": 1
+        }
       ]
     },
     {
       "id": "educated",
       "name": "Educated",
       "levels": [
-        { "name": "Lettered", "threshold": 1, "effects": { "management": 1 }, "description": "He can check his own accounts and quote enough verse to survive a dinner party." },
-        { "name": "Learned", "threshold": 3, "effects": { "management": 1, "influence": 1, "law": 1 }, "description": "Geometry, rhetoric, the histories — he has read them and, more unusually, remembers them." },
-        { "name": "Philosopher", "threshold": 6, "effects": { "management": 2, "influence": 2, "law": 1 }, "description": "Scholars travel to argue with him and leave converted. He governs as if administration were a branch of ethics." }
+        {
+          "name": "Lettered",
+          "threshold": 1,
+          "effects": {
+            "management": 1
+          },
+          "description": "He can check his own accounts and quote enough verse to survive a dinner party."
+        },
+        {
+          "name": "Learned",
+          "threshold": 3,
+          "effects": {
+            "management": 1,
+            "influence": 1,
+            "law": 1
+          },
+          "description": "Geometry, rhetoric, the histories — he has read them and, more unusually, remembers them."
+        },
+        {
+          "name": "Philosopher",
+          "threshold": 6,
+          "effects": {
+            "management": 2,
+            "influence": 2,
+            "law": 1
+          },
+          "description": "Scholars travel to argue with him and leave converted. He governs as if administration were a branch of ethics."
+        }
       ],
       "triggers": [
-        { "when": "came_of_age", "chance": 0.3, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 1 }, "chance": 0.15, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 3 }, "chance": 0.2, "points": 1 }
+        {
+          "when": "came_of_age",
+          "chance": 0.3,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "education",
+            "min_building_level": 1
+          },
+          "chance": 0.15,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "education",
+            "min_building_level": 3
+          },
+          "chance": 0.2,
+          "points": 1
+        }
       ]
     },
     {
       "id": "orator",
       "name": "Orator",
       "levels": [
-        { "name": "Clear Speaker", "threshold": 1, "effects": { "influence": 1 }, "description": "When he addresses the assembly, the back rows stop talking. That is rarer than it sounds." },
-        { "name": "Orator", "threshold": 3, "effects": { "influence": 2, "happiness": 1 }, "description": "He has talked down two riots and talked up one war. Crowds leave his speeches convinced they thought of it themselves." },
-        { "name": "Voice of the Assembly", "threshold": 6, "effects": { "influence": 4, "happiness": 1 }, "description": "His speeches are copied and sold by weight. Rivals hire men just to cough during them." }
+        {
+          "name": "Clear Speaker",
+          "threshold": 1,
+          "effects": {
+            "influence": 1
+          },
+          "description": "When he addresses the assembly, the back rows stop talking. That is rarer than it sounds."
+        },
+        {
+          "name": "Orator",
+          "threshold": 3,
+          "effects": {
+            "influence": 2,
+            "happiness": 1
+          },
+          "description": "He has talked down two riots and talked up one war. Crowds leave his speeches convinced they thought of it themselves."
+        },
+        {
+          "name": "Voice of the Assembly",
+          "threshold": 6,
+          "effects": {
+            "influence": 4,
+            "happiness": 1
+          },
+          "description": "His speeches are copied and sold by weight. Rivals hire men just to cough during them."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 2 }, "chance": 0.1, "points": 1 },
-        { "when": "office_gained", "chance": 0.2, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "education",
+            "min_building_level": 2
+          },
+          "chance": 0.1,
+          "points": 1
+        },
+        {
+          "when": "office_gained",
+          "chance": 0.2,
+          "points": 1
+        }
       ]
     },
     {
@@ -269,11 +922,31 @@
       "name": "Indolent",
       "anti_trait": "energetic",
       "levels": [
-        { "name": "Listless", "threshold": 1, "effects": { "movement": -0.25, "management": -1 }, "description": "The army breaks camp at noon because its general breaks fast at eleven." },
-        { "name": "Indolent", "threshold": 3, "effects": { "movement": -0.5, "management": -2 }, "description": "Opportunities have learned not to wait for him. His couch has a permanent impression." }
+        {
+          "name": "Listless",
+          "threshold": 1,
+          "effects": {
+            "movement": -0.25,
+            "management": -1
+          },
+          "description": "The army breaks camp at noon because its general breaks fast at eleven."
+        },
+        {
+          "name": "Indolent",
+          "threshold": 3,
+          "effects": {
+            "movement": -0.5,
+            "management": -2
+          },
+          "description": "Opportunities have learned not to wait for him. His couch has a permanent impression."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_idle", "chance": 0.12, "points": 1 }
+        {
+          "when": "turn_end_idle",
+          "chance": 0.12,
+          "points": 1
+        }
       ]
     },
     {
@@ -281,110 +954,389 @@
       "name": "Energetic",
       "anti_trait": "indolent",
       "levels": [
-        { "name": "Vigorous", "threshold": 1, "effects": { "movement": 0.25 }, "description": "He rides the column's length twice a day and wears out younger men's horses doing it." },
-        { "name": "Tireless", "threshold": 3, "effects": { "movement": 0.5, "management": 1 }, "description": "Dispatches leave his tent at all hours. His enemies' best scouts report that he is, somehow, already here." }
+        {
+          "name": "Vigorous",
+          "threshold": 1,
+          "effects": {
+            "movement": 0.25
+          },
+          "description": "He rides the column's length twice a day and wears out younger men's horses doing it."
+        },
+        {
+          "name": "Tireless",
+          "threshold": 3,
+          "effects": {
+            "movement": 0.5,
+            "management": 1
+          },
+          "description": "Dispatches leave his tent at all hours. His enemies' best scouts report that he is, somehow, already here."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_campaigning", "chance": 0.08, "points": 1 },
-        { "when": "battle_won", "chance": 0.04, "points": 1 }
+        {
+          "when": "turn_end_campaigning",
+          "chance": 0.08,
+          "points": 1
+        },
+        {
+          "when": "battle_won",
+          "chance": 0.04,
+          "points": 1
+        }
       ]
     },
     {
       "id": "logistician",
       "name": "Logistician",
       "levels": [
-        { "name": "Keeper of Stores", "threshold": 1, "effects": { "movement": 0.25 }, "description": "His columns march with full bellies and dry boots, which is most of the art of war." },
-        { "name": "Master of the March", "threshold": 4, "effects": { "movement": 0.5, "troop_morale": 1 }, "description": "He counts wagons the way poets count syllables. His armies arrive early, fed, and irritatingly cheerful." }
+        {
+          "name": "Keeper of Stores",
+          "threshold": 1,
+          "effects": {
+            "movement": 0.25
+          },
+          "description": "His columns march with full bellies and dry boots, which is most of the art of war."
+        },
+        {
+          "name": "Master of the March",
+          "threshold": 4,
+          "effects": {
+            "movement": 0.5,
+            "troop_morale": 1
+          },
+          "description": "He counts wagons the way poets count syllables. His armies arrive early, fed, and irritatingly cheerful."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_campaigning", "chance": 0.1, "points": 1 }
+        {
+          "when": "turn_end_campaigning",
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
       "id": "statesman",
       "name": "Statesman",
       "levels": [
-        { "name": "Magistrate's Bearing", "threshold": 1, "effects": { "influence": 1 }, "description": "Office sits on him like a well-cut cloak. Older men have started asking his opinion." },
-        { "name": "Statesman", "threshold": 3, "effects": { "influence": 2, "law": 1 }, "description": "He trades favors the way merchants trade grain, and always at a profit to the state — mostly." },
-        { "name": "Elder of the State", "threshold": 6, "effects": { "influence": 4, "law": 1, "management": 1 }, "description": "Factions that agree on nothing agree to hear him out. His silence in council is itself a form of argument." }
+        {
+          "name": "Magistrate's Bearing",
+          "threshold": 1,
+          "effects": {
+            "influence": 1
+          },
+          "description": "Office sits on him like a well-cut cloak. Older men have started asking his opinion."
+        },
+        {
+          "name": "Statesman",
+          "threshold": 3,
+          "effects": {
+            "influence": 2,
+            "law": 1
+          },
+          "description": "He trades favors the way merchants trade grain, and always at a profit to the state — mostly."
+        },
+        {
+          "name": "Elder of the State",
+          "threshold": 6,
+          "effects": {
+            "influence": 4,
+            "law": 1,
+            "management": 1
+          },
+          "description": "Factions that agree on nothing agree to hear him out. His silence in council is itself a form of argument."
+        }
       ],
       "triggers": [
-        { "when": "office_gained", "chance": 0.4, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "min_public_order": 90 }, "chance": 0.05, "points": 1 }
+        {
+          "when": "office_gained",
+          "chance": 0.4,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "min_public_order": 90
+          },
+          "chance": 0.05,
+          "points": 1
+        }
       ]
     },
     {
       "id": "arrogant",
       "name": "Arrogant",
       "levels": [
-        { "name": "Self-Assured", "threshold": 1, "effects": { "influence": 1 }, "description": "Confidence this loud is easily mistaken for greatness, and sometimes is." },
-        { "name": "Arrogant", "threshold": 3, "effects": { "influence": -1, "happiness": -1, "management": -1 }, "description": "He no longer hears advice, only interruptions. Capable men have begun requesting other postings." },
-        { "name": "Insufferable", "threshold": 6, "effects": { "influence": -3, "happiness": -2, "management": -1 }, "description": "He refers to his victories in the plural and his errors not at all. Allies endure him; subjects merely wait." }
+        {
+          "name": "Self-Assured",
+          "threshold": 1,
+          "effects": {
+            "influence": 1
+          },
+          "description": "Confidence this loud is easily mistaken for greatness, and sometimes is."
+        },
+        {
+          "name": "Arrogant",
+          "threshold": 3,
+          "effects": {
+            "influence": -1,
+            "happiness": -1,
+            "management": -1
+          },
+          "description": "He no longer hears advice, only interruptions. Capable men have begun requesting other postings."
+        },
+        {
+          "name": "Insufferable",
+          "threshold": 6,
+          "effects": {
+            "influence": -3,
+            "happiness": -2,
+            "management": -1
+          },
+          "description": "He refers to his victories in the plural and his errors not at all. Allies endure him; subjects merely wait."
+        }
       ],
       "triggers": [
-        { "when": "office_gained", "chance": 0.15, "points": 1 },
-        { "when": "battle_won", "chance": 0.05, "points": 1 },
-        { "when": "settlement_captured", "chance": 0.08, "points": 1 }
+        {
+          "when": "office_gained",
+          "chance": 0.15,
+          "points": 1
+        },
+        {
+          "when": "battle_won",
+          "chance": 0.05,
+          "points": 1
+        },
+        {
+          "when": "settlement_captured",
+          "chance": 0.08,
+          "points": 1
+        }
       ]
     },
     {
       "id": "keen_trader",
       "name": "Keen Trader",
       "levels": [
-        { "name": "Shrewd Bargainer", "threshold": 1, "effects": { "trade_pct": 2 }, "description": "He haggles for the city as if the coin were his own, which the merchants find deeply unsettling." },
-        { "name": "Keen Trader", "threshold": 3, "effects": { "trade_pct": 4, "management": 1 }, "description": "He knows the price of tin in three ports and the tides that move it. Caravans reroute to his markets." },
-        { "name": "Merchant Prince", "threshold": 6, "effects": { "trade_pct": 8, "management": 1, "influence": 1 }, "description": "Half the harbor owes him money and the other half owes him favors. Trade follows him like gulls follow a fishing boat." }
+        {
+          "name": "Shrewd Bargainer",
+          "threshold": 1,
+          "effects": {
+            "trade_pct": 2
+          },
+          "description": "He haggles for the city as if the coin were his own, which the merchants find deeply unsettling."
+        },
+        {
+          "name": "Keen Trader",
+          "threshold": 3,
+          "effects": {
+            "trade_pct": 4,
+            "management": 1
+          },
+          "description": "He knows the price of tin in three ports and the tides that move it. Caravans reroute to his markets."
+        },
+        {
+          "name": "Merchant Prince",
+          "threshold": 6,
+          "effects": {
+            "trade_pct": 8,
+            "management": 1,
+            "influence": 1
+          },
+          "description": "Half the harbor owes him money and the other half owes him favors. Trade follows him like gulls follow a fishing boat."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "building_kind": "market", "min_building_level": 2 }, "chance": 0.1, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "port", "min_building_level": 2 }, "chance": 0.08, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "market",
+            "min_building_level": 2
+          },
+          "chance": 0.1,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "port",
+            "min_building_level": 2
+          },
+          "chance": 0.08,
+          "points": 1
+        }
       ]
     },
     {
       "id": "master_builder",
       "name": "Master Builder",
       "levels": [
-        { "name": "Patron of Masons", "threshold": 1, "effects": { "growth": 0.25 }, "description": "He visits building sites uninvited and asks pointed questions about foundations. The work goes faster when he is near." },
-        { "name": "Master Builder", "threshold": 4, "effects": { "growth": 0.5, "management": 1, "happiness": 1 }, "description": "Aqueducts, drains, colonnades — he thinks in stone. Cities in his care visibly outgrow their neighbors." }
+        {
+          "name": "Patron of Masons",
+          "threshold": 1,
+          "effects": {
+            "growth": 0.25
+          },
+          "description": "He visits building sites uninvited and asks pointed questions about foundations. The work goes faster when he is near."
+        },
+        {
+          "name": "Master Builder",
+          "threshold": 4,
+          "effects": {
+            "growth": 0.5,
+            "management": 1,
+            "happiness": 1
+          },
+          "description": "Aqueducts, drains, colonnades — he thinks in stone. Cities in his care visibly outgrow their neighbors."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "building_kind": "government", "min_building_level": 3 }, "chance": 0.08, "points": 1 },
-        { "when": "turn_end_governing", "condition": { "building_kind": "health", "min_building_level": 2 }, "chance": 0.08, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "government",
+            "min_building_level": 3
+          },
+          "chance": 0.08,
+          "points": 1
+        },
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "health",
+            "min_building_level": 2
+          },
+          "chance": 0.08,
+          "points": 1
+        }
       ]
     },
     {
       "id": "lord_of_acres",
       "name": "Lord of Acres",
       "levels": [
-        { "name": "Improving Landlord", "threshold": 1, "effects": { "growth": 0.25 }, "description": "He walks his fields at dawn and argues with farmers about manure. The harvests take his side." },
-        { "name": "Lord of Acres", "threshold": 4, "effects": { "growth": 0.5, "management": 1 }, "description": "Under his eye the terraces climb the hills and the granaries need enlarging. Land simply yields more for him." }
+        {
+          "name": "Improving Landlord",
+          "threshold": 1,
+          "effects": {
+            "growth": 0.25
+          },
+          "description": "He walks his fields at dawn and argues with farmers about manure. The harvests take his side."
+        },
+        {
+          "name": "Lord of Acres",
+          "threshold": 4,
+          "effects": {
+            "growth": 0.5,
+            "management": 1
+          },
+          "description": "Under his eye the terraces climb the hills and the granaries need enlarging. Land simply yields more for him."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "building_kind": "farms", "min_building_level": 3 }, "chance": 0.1, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "building_kind": "farms",
+            "min_building_level": 3
+          },
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
       "id": "wary",
       "name": "Wary",
       "levels": [
-        { "name": "Watchful", "threshold": 1, "effects": { "personal_security": 1 }, "description": "He sits with his back to the wall and knows every face at his table. Sensible, in these times." },
-        { "name": "Sees Knives Everywhere", "threshold": 4, "effects": { "personal_security": 3, "influence": -1, "happiness": -1 }, "description": "Three food tasters, locked doors, letters read over a candle. Hard to kill; harder to befriend." }
+        {
+          "name": "Watchful",
+          "threshold": 1,
+          "effects": {
+            "personal_security": 1
+          },
+          "description": "He sits with his back to the wall and knows every face at his table. Sensible, in these times."
+        },
+        {
+          "name": "Sees Knives Everywhere",
+          "threshold": 4,
+          "effects": {
+            "personal_security": 3,
+            "influence": -1,
+            "happiness": -1
+          },
+          "description": "Three food tasters, locked doors, letters read over a candle. Hard to kill; harder to befriend."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_governing", "condition": { "max_public_order": 55 }, "chance": 0.1, "points": 1 }
+        {
+          "when": "turn_end_governing",
+          "condition": {
+            "max_public_order": 55
+          },
+          "chance": 0.1,
+          "points": 1
+        }
       ]
     },
     {
       "id": "disciplinarian",
       "name": "Disciplinarian",
       "levels": [
-        { "name": "Firm Hand", "threshold": 1, "effects": { "troop_morale": 1 }, "description": "Sentries in his camp stay awake. The one who didn't is the reason the rest do." },
-        { "name": "Disciplinarian", "threshold": 4, "effects": { "troop_morale": 2, "command": 1 }, "description": "His men grumble on the drill field and hold like bedrock in battle. They understand the exchange." }
+        {
+          "name": "Firm Hand",
+          "threshold": 1,
+          "effects": {
+            "troop_morale": 1
+          },
+          "description": "Sentries in his camp stay awake. The one who didn't is the reason the rest do."
+        },
+        {
+          "name": "Disciplinarian",
+          "threshold": 4,
+          "effects": {
+            "troop_morale": 2,
+            "command": 1
+          },
+          "description": "His men grumble on the drill field and hold like bedrock in battle. They understand the exchange."
+        }
       ],
       "triggers": [
-        { "when": "turn_end_campaigning", "chance": 0.06, "points": 1 },
-        { "when": "battle_won", "chance": 0.06, "points": 1 }
+        {
+          "when": "turn_end_campaigning",
+          "chance": 0.06,
+          "points": 1
+        },
+        {
+          "when": "battle_won",
+          "chance": 0.06,
+          "points": 1
+        }
       ]
+    },
+    {
+      "id": "disinherited",
+      "name": "Disinherited",
+      "levels": [
+        {
+          "name": "Passed Over",
+          "threshold": 1,
+          "effects": {
+            "influence": -1
+          },
+          "description": "The succession went elsewhere, and every client and creditor in the city knows it."
+        },
+        {
+          "name": "Disinherited",
+          "threshold": 3,
+          "effects": {
+            "influence": -2,
+            "management": -1
+          },
+          "description": "Twice set aside. He keeps his name and little else, and serves with a sullenness men notice."
+        }
+      ],
+      "triggers": []
     }
   ]
 }

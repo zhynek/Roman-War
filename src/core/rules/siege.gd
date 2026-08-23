@@ -16,6 +16,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	# Investing a settlement IS a declaration of war.
 	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
 	army["region"] = region_id
+	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
 	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
 	return true
@@ -80,13 +81,24 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	})
 
 	if result.get("attacker_general_died", false) and army["general"] != null:
-		CharacterRules.kill(state, army["general"])
+		CharacterRules.kill(state, army["general"], data)
 	if result.get("defender_general_died", false) and governor != null:
-		CharacterRules.kill(state, governor)
+		CharacterRules.kill(state, governor, data)
+
+	# Settle the attacker's fate BEFORE any laurels: an assault that leaves no
+	# man standing takes nothing, and its dead general wins no honours.
+	if army["units"].is_empty():
+		if army["general"] != null:
+			CharacterRules.kill(state, army["general"], data)
+		state["armies"].erase(army_id)
+		settlement["siege"] = null
+		result["captured"] = false
+		return result
 
 	if result["winner"] == "attacker":
 		result["captured"] = true
 		result["capture_pending_owner"] = army["owner"]
+		result["besieger_general"] = army["general"]
 		# Caller (Game.assault_settlement / turn engine) applies the
 		# occupy/enslave/exterminate decision via CombatRules.capture_settlement,
 		# and fires the siege_won / settlement_* triggers for the general.
@@ -96,12 +108,4 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 			result["character_notices"] = notices
 	else:
 		settlement["siege"] = null
-	if army["units"].is_empty():
-		# A pyrrhic assault that annihilates the attacker captures nothing.
-		if army["general"] != null:
-			CharacterRules.kill(state, army["general"])
-		state["armies"].erase(army_id)
-		settlement["siege"] = null
-		result["captured"] = false
-		result.erase("capture_pending_owner")
 	return result

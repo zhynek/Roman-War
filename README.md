@@ -27,7 +27,7 @@ schemas/             JSON Schemas — the contract every data table must satisfy
 src/core/            Deterministic campaign simulation (no scene/UI dependencies)
 src/core/rules/      One module per system: growth, order, economy, movement, ...
 src/core/rules/battle/  BattleResolver interface + auto-resolve implementation
-src/ui/              Minimal boot scene (placeholder UI)
+src/ui/              Campaign UI: start menu, map view, settlement/army/family panels
 tests/               Headless GDScript test suite (godot --headless --script)
 tools/               validate_data.py — schema + cross-reference validation
 docs/                Design document and research report
@@ -38,7 +38,7 @@ docs/                Design document and research report
 Requires [Godot 4.4+](https://godotengine.org/download). No other dependencies.
 
 ```sh
-# Boot the (placeholder) game
+# Play the campaign
 godot --path .
 
 # Run the headless test suite

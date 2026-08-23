@@ -43,6 +43,10 @@ TABLES = {
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
 
+# Trigger kinds authored ahead of the system that will fire them. Everything
+# else the engine never fires is flagged as dead content.
+FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
+
 errors: list[str] = []
 warnings: list[str] = []
 
@@ -404,6 +408,26 @@ def cross_checks(t: dict[str, dict]) -> None:
         anti = trait.get("anti_trait")
         if anti and anti not in trait_defs:
             err(f"traits: {trait['id']}: unknown anti_trait {anti}")
+
+    # Trigger kinds the engine actually fires. Anything else is dead content,
+    # so a warning names it rather than letting it rot silently.
+    fired_kinds = set()
+    engine_dir = ROOT / "src" / "core"
+    for source in engine_dir.rglob("*.gd"):
+        text = source.read_text()
+        for kind in ("turn_end_governing", "turn_end_idle", "turn_end_campaigning",
+                     "battle_won", "battle_lost", "siege_won", "settlement_captured",
+                     "settlement_exterminated", "settlement_enslaved", "office_gained",
+                     "came_of_age"):
+            if f'"{kind}"' in text:
+                fired_kinds.add(kind)
+    for source_name, key in (("traits.json", "traits"), ("ancillaries.json", "ancillaries")):
+        for entry in t.get(source_name, {}).get(key, []):
+            for trigger in entry.get("triggers", []):
+                if trigger["when"] in fired_kinds or trigger["when"] in FORWARD_TRIGGERS:
+                    continue
+                warn(f"{source_name}: {entry['id']}: trigger '{trigger['when']}' is never "
+                     f"fired by any engine call site (dead content)")
     for faction_setup in campaign.get("factions", []):
         for character in faction_setup.get("characters", []):
             for trait_id in character.get("traits", []):

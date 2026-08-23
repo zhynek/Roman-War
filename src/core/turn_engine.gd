@@ -33,14 +33,21 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		if faction_id != state["player_faction"]:
 			AiStub.take_turn(data, state, faction_id)
 
+	# Governorship follows presence, so it is re-derived before anything reads it.
+	SettlementRules.refresh_governors(data, state)
+
 	report["sieges"] = SiegeRules.advance_sieges(data, state, rng, resolver)
 	for siege_event in report["sieges"]:
 		var result: Dictionary = siege_event.get("result", {})
 		if result.get("captured", false):
-			# AI-side starve-outs default to occupation; the player's own
-			# assaults go through Game.assault_settlement, which asks.
+			# Starve-outs default to occupation; the player's own assaults go
+			# through Game.assault_settlement, which asks. Either way the
+			# besieging general answers for how the city was treated.
+			var besieger = result.get("besieger_general")
 			CombatRules.capture_settlement(data, state, rng,
 				siege_event["region"], result["capture_pending_owner"], "occupy")
+			CombatRules.fire_occupation_triggers(
+				data, state, rng, besieger, "occupy", report["characters"])
 
 	for region_id in region_ids:
 		var completed_buildings := ConstructionRules.advance_queues(data, state, region_id)
@@ -66,7 +73,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 
 	report["events"] = EventRules.process_turn(data, state, rng)
 	report["senate"] = SenateRules.process_turn(data, state, rng)
-	report["characters"] = CharacterRules.process_turn(data, state, rng)
+	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
 

@@ -241,7 +241,6 @@
     "odds_against_ratio": 1.5,
     "governor_management_income_pct_per_point": 2.0,
     "troop_morale_strength_pct_per_point": 2.0,
-    "movement_trait_is_pct": 1,
     "ancillary_max": 8,
     "max_family_size": 12
   }
