@@ -33,8 +33,9 @@ pack in `data/advisor.json` with a systems-status ledger for bug-vs-not-built
 triage), a Feedback form that files labeled GitHub issues with the world
 seed attached (`state.world_seed`, SAVE_VERSION 3), and
 `.github/workflows/claude-triage.yml` — issues labeled `in-game` wake
-claude-code-action to triage and, for small fixes, open PRs. User-side
-setup lives in repo issue #1. Keys/config: `user://advisor.cfg` only.
+claude-code-action to triage and, for small fixes, open PRs. The two
+credentials the owner must supply are walked through in §8 (repo issue #1
+tracks the same setup). Keys/config: `user://advisor.cfg` only.
 
 **Green as of the latest commit on `claude/handoff-repo-familiarization-jgqty6`:**
 113 tests / 0 failures, validator 0 errors / 0 warnings, clean boot.
@@ -168,3 +169,56 @@ in the thinned slice before shipping**, or the app will not launch.
   to `tools/validate_data.py` if it introduces a data table. Both gates must
   pass before committing. Old saves are invalidated by state-shape changes —
   bump `SaveGame.SAVE_VERSION` when you change the state dict.
+
+## 8. User-side setup: the two keys
+
+The Advisor works out of the box except for two credentials only the repo owner
+can create. Neither is in the repository, and neither ships with the game —
+both live outside it by design. GitHub issue #1 tracks this setup.
+
+### The GitHub token (lets Feedback file tickets directly)
+
+A **fine-grained** personal access token, scoped to this repo, with one permission:
+
+1. GitHub → profile photo (top right) → **Settings**.
+2. Left sidebar, scroll to the bottom → **Developer settings**.
+3. **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+4. **Token name**: anything (e.g. `roman-war-in-game-feedback`).
+5. **Resource owner**: your own account (`zhynek`).
+6. **Expiration**: 90 days is fine; the game says plainly when a token stops working.
+7. **Repository access**: *Only select repositories* → pick **`zhynek/Roman-War`**.
+8. **Permissions** → *Repository permissions* → find **Issues** → set to
+   **Read and write**. Leave everything else at *No access*. (`Metadata:
+   Read-only` is added automatically and is mandatory — that is expected.)
+9. **Generate token**, then copy it immediately — GitHub shows it exactly once.
+   It starts with `github_pat_`.
+10. In the game: **Advisor → Settings** → paste into the GitHub token field →
+    **Save settings**.
+
+Without a token nothing breaks: the Feedback form's **Copy as Markdown** button
+still produces a ready-to-paste ticket body.
+
+### The Anthropic key (lets Claude triage those tickets)
+
+1. Repo → **Settings** → **Secrets and variables** → **Actions** →
+   **New repository secret**.
+2. Name it exactly `ANTHROPIC_API_KEY`; paste an Anthropic API key as the value.
+3. Repo → **Settings** → **Actions** → **General** → enable *"Allow GitHub
+   Actions to create and approve pull requests."*
+
+`.github/workflows/claude-triage.yml` then fires on any issue labeled `in-game`
+(the game labels its own): verdict BUG / NOT BUILT / INTENDED against §6 and
+DESIGN §10, a seed reproduction through `tools/sim_campaign.gd`, a comment with
+the evidence, and a PR only for small fixes with the validator and tests green.
+The label gate is what keeps the API spend bounded.
+
+### Verifying the loop end to end
+
+File one ticket from inside the game (**Feedback → Bug → Send to GitHub**), then
+watch the run appear under the repo's **Actions** tab. The ticket carries the
+world seed, so triage can replay the exact campaign.
+
+> The in-game default repo slug must match GitHub's canonical casing
+> (`zhynek/Roman-War`). A case-mismatched slug still resolves, but by HTTP
+> redirect — and a redirected POST is commonly downgraded to GET, which would
+> silently break ticket filing.

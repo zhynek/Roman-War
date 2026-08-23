@@ -104,9 +104,9 @@ func test_issue_builders(t) -> void:
 		FeedbackPanel.gather_meta(game, []), "idea", "More ships", "Please")
 	t.check(not no_log.contains("<details>"), "no empty log block")
 
-	var cfg := {"github_repo": "zhynek/roman-war", "github_token": "github_pat_x"}
+	var cfg := {"github_repo": "zhynek/Roman-War", "github_token": "github_pat_x"}
 	var request := FeedbackPanel.build_issue_request(cfg, "bug", "Weird siege", markdown)
-	t.check_eq(request["url"], "https://api.github.com/repos/zhynek/roman-war/issues", "issues endpoint")
+	t.check_eq(request["url"], "https://api.github.com/repos/zhynek/Roman-War/issues", "issues endpoint")
 	t.check(Array(request["headers"]).has("Authorization: Bearer github_pat_x"), "PAT rides the bearer")
 	var body = JSON.parse_string(String(request["body"]))
 	t.check_eq(body["labels"], ["in-game", "bug"], "labels set")

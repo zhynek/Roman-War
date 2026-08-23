@@ -14,7 +14,7 @@ const DEFAULTS := {
 	"model": "llama3.1",
 	"api_key": "",
 	"github_token": "",
-	"github_repo": "zhynek/roman-war",
+	"github_repo": "zhynek/Roman-War",
 	"tutorial_seen": false,
 }
 
