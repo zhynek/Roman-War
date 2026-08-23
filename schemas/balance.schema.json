@@ -3,18 +3,50 @@
   "$id": "balance.schema.json",
   "title": "Balance constants (every tunable in one file)",
   "type": "object",
-  "required": ["time", "settlement_levels", "growth", "squalor", "public_order", "distance_to_capital", "taxes", "corruption", "economy", "occupation", "plague", "movement", "recruitment", "battle", "siege", "senate", "ai"],
+  "required": [
+    "time",
+    "settlement_levels",
+    "growth",
+    "squalor",
+    "public_order",
+    "distance_to_capital",
+    "taxes",
+    "corruption",
+    "economy",
+    "occupation",
+    "plague",
+    "movement",
+    "recruitment",
+    "battle",
+    "siege",
+    "senate",
+    "ai",
+    "characters"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "time": {
       "type": "object",
-      "required": ["start_year", "end_year", "turns_per_year"],
+      "required": [
+        "start_year",
+        "end_year",
+        "turns_per_year"
+      ],
       "additionalProperties": false,
       "properties": {
-        "start_year": { "type": "integer" },
-        "end_year": { "type": "integer" },
-        "turns_per_year": { "type": "integer", "minimum": 1 }
+        "start_year": {
+          "type": "integer"
+        },
+        "end_year": {
+          "type": "integer"
+        },
+        "turns_per_year": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "settlement_levels": {
@@ -22,29 +54,77 @@
       "minItems": 2,
       "items": {
         "type": "object",
-        "required": ["id", "min_population"],
+        "required": [
+          "id",
+          "min_population"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "enum": ["village", "town", "large_town", "minor_city", "large_city", "huge_city"] },
-          "min_population": { "type": "integer", "minimum": 0 }
+          "id": {
+            "enum": [
+              "village",
+              "town",
+              "large_town",
+              "minor_city",
+              "large_city",
+              "huge_city"
+            ]
+          },
+          "min_population": {
+            "type": "integer",
+            "minimum": 0
+          }
         }
       }
     },
-    "growth": { "$ref": "#/$defs/numeric_section" },
-    "squalor": { "$ref": "#/$defs/numeric_section" },
-    "public_order": { "$ref": "#/$defs/numeric_section" },
-    "distance_to_capital": { "$ref": "#/$defs/numeric_section" },
-    "taxes": { "$ref": "#/$defs/numeric_section" },
-    "corruption": { "$ref": "#/$defs/numeric_section" },
-    "economy": { "$ref": "#/$defs/numeric_section" },
-    "occupation": { "$ref": "#/$defs/numeric_section" },
-    "plague": { "$ref": "#/$defs/numeric_section" },
-    "movement": { "$ref": "#/$defs/numeric_section" },
-    "recruitment": { "$ref": "#/$defs/numeric_section" },
-    "battle": { "$ref": "#/$defs/numeric_section" },
-    "siege": { "$ref": "#/$defs/numeric_section" },
-    "senate": { "$ref": "#/$defs/numeric_section" },
-    "ai": { "$ref": "#/$defs/numeric_section" }
+    "growth": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "squalor": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "public_order": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "distance_to_capital": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "taxes": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "corruption": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "economy": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "occupation": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "plague": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "movement": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "recruitment": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "battle": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "siege": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "senate": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "ai": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "characters": {
+      "$ref": "#/$defs/numeric_section"
+    }
   },
   "$defs": {
     "numeric_section": {
@@ -52,9 +132,21 @@
       "minProperties": 1,
       "additionalProperties": {
         "anyOf": [
-          { "type": "number" },
-          { "type": "array", "items": { "type": "number" } },
-          { "type": "object", "additionalProperties": { "type": "number" } }
+          {
+            "type": "number"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
         ]
       }
     }

@@ -67,33 +67,39 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		wall_level = maxi(0, wall_level - 1)
 
 	var governor = settlement["governor"]
+	var governor_profile = null
+	if governor != null and state["characters"].has(governor):
+		governor_profile = CharacterRules.battle_profile(data, state["characters"][governor])
 	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"], {
 		"terrain": data.regions[region_id]["terrain"],
 		"wall_level": wall_level,
-		"attacker_general": state["characters"].get(army["general"]) if army["general"] != null else null,
-		"defender_general": state["characters"].get(governor) if governor != null else null,
+		"attacker_general": CombatRules.general_profile(data, state, army),
+		"defender_general": governor_profile,
 		"attacker_fatigued": false,
 		"sally": starving,
 	})
 
 	if result.get("attacker_general_died", false) and army["general"] != null:
-		state["characters"][army["general"]]["alive"] = false
-		army["general"] = null
+		CharacterRules.kill(state, army["general"])
 	if result.get("defender_general_died", false) and governor != null:
-		state["characters"][governor]["alive"] = false
-		settlement["governor"] = null
+		CharacterRules.kill(state, governor)
 
 	if result["winner"] == "attacker":
 		result["captured"] = true
 		result["capture_pending_owner"] = army["owner"]
 		# Caller (Game.assault_settlement / turn engine) applies the
-		# occupy/enslave/exterminate decision via CombatRules.capture_settlement.
+		# occupy/enslave/exterminate decision via CombatRules.capture_settlement,
+		# and fires the siege_won / settlement_* triggers for the general.
+		if army["general"] != null:
+			var notices: Array = []
+			CharacterRules.fire_trigger(data, state, army["general"], "siege_won", {}, rng, notices)
+			result["character_notices"] = notices
 	else:
 		settlement["siege"] = null
 	if army["units"].is_empty():
 		# A pyrrhic assault that annihilates the attacker captures nothing.
 		if army["general"] != null:
-			state["characters"][army["general"]]["alive"] = false
+			CharacterRules.kill(state, army["general"])
 		state["armies"].erase(army_id)
 		settlement["siege"] = null
 		result["captured"] = false

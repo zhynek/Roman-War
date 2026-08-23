@@ -222,5 +222,27 @@
       "hard": 10,
       "very_hard": 20
     }
+  },
+  "characters": {
+    "come_of_age": 16,
+    "natural_death_base_age": 50,
+    "natural_death_chance_per_year": 0.04,
+    "max_age": 85,
+    "birth_chance_per_year": 0.16,
+    "birth_parent_min_age": 20,
+    "birth_parent_max_age": 50,
+    "marriage_suitor_chance_per_year": 0.12,
+    "marriageable_age": 16,
+    "adoption_chance_per_year": 0.08,
+    "adoption_min_family": 3,
+    "adoption_candidate_age_min": 20,
+    "adoption_candidate_age_max": 35,
+    "man_of_the_hour_chance": 0.35,
+    "odds_against_ratio": 1.5,
+    "governor_management_income_pct_per_point": 2.0,
+    "troop_morale_strength_pct_per_point": 2.0,
+    "movement_trait_is_pct": 1,
+    "ancillary_max": 8,
+    "max_family_size": 12
   }
 }

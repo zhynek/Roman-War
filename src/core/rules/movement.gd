@@ -8,7 +8,12 @@ class_name MovementRules
 static func reset_movement(data: GameData, state: Dictionary) -> void:
 	var base := float(data.balance["movement"]["base_movement_points"])
 	for army in state["armies"].values():
-		army["movement_left"] = base
+		var points := base
+		if army["general"] != null and state["characters"].has(army["general"]):
+			# Logistics-minded generals stretch the column's daily march.
+			var bonus := CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
+			points *= 1.0 + bonus / 100.0
+		army["movement_left"] = points
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base

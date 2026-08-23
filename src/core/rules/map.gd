@@ -1,9 +1,16 @@
 class_name MapRules
 ## Pure graph helpers over the static region map. No campaign state mutation.
+## BFS results are cached per GameData instance — the map never changes after
+## load, and distance-to-capital/corruption query it constantly.
+
+static var _hops_cache := {}
 
 
 static func hops_from(data: GameData, origin: String) -> Dictionary:
 	## BFS hop counts over land adjacency from a region. {region_id: hops}
+	var cache_key := "%d:%s" % [data.get_instance_id(), origin]
+	if _hops_cache.has(cache_key):
+		return _hops_cache[cache_key]
 	if not data.regions.has(origin):
 		return {}
 	var hops := {origin: 0}
@@ -16,6 +23,9 @@ static func hops_from(data: GameData, origin: String) -> Dictionary:
 					hops[neighbor] = hops[region_id] + 1
 					next_frontier.append(neighbor)
 		frontier = next_frontier
+	if _hops_cache.size() > 4096:
+		_hops_cache.clear()
+	_hops_cache[cache_key] = hops
 	return hops
 
 

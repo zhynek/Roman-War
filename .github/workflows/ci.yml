@@ -38,5 +38,7 @@ jobs:
           unzip -o ~/godot/godot.zip -d ~/godot
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
           chmod +x ~/godot/godot
+      - name: Import project (builds the global class cache)
+        run: ~/godot/godot --headless --path . --import || true
       - name: Run test suite
         run: ~/godot/godot --headless --path . --script res://tests/run_tests.gd

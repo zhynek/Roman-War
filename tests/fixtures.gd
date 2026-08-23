@@ -125,6 +125,47 @@ static func data() -> GameData:
 		"units": [{"template": "test_merc", "max": 2, "initial": 1, "replenish_per_turn": 0.5, "cost_multiplier": 1.5}],
 	}]
 
+	game_data.traits = {
+		"test_steward": {
+			"id": "test_steward", "name": "Steward", "anti_trait": "test_slacker",
+			"levels": [
+				{"name": "Able Steward", "threshold": 2, "effects": {"management": 1, "law": 2}},
+				{"name": "Great Steward", "threshold": 5, "effects": {"management": 2, "law": 5}},
+			],
+			"triggers": [
+				{"when": "turn_end_governing", "condition": {"min_public_order": 80}, "chance": 1.0, "points": 1},
+			],
+		},
+		"test_slacker": {
+			"id": "test_slacker", "name": "Slacker", "anti_trait": "test_steward",
+			"levels": [{"name": "Idle Hands", "threshold": 2, "effects": {"management": -1}}],
+			"triggers": [{"when": "turn_end_idle", "chance": 1.0, "points": 1}],
+		},
+		"test_brave": {
+			"id": "test_brave", "name": "Brave",
+			"levels": [{"name": "Brave", "threshold": 1, "effects": {"command": 1, "troop_morale": 2}}],
+			"triggers": [{"when": "battle_won", "condition": {"odds_against": true}, "chance": 1.0, "points": 1}],
+		},
+		"test_pathfinder": {
+			"id": "test_pathfinder", "name": "Pathfinder",
+			"levels": [{"name": "Pathfinder", "threshold": 1, "effects": {"movement": 50}}],
+			"triggers": [{"when": "turn_end_campaigning", "chance": 0.5, "points": 1}],
+		},
+	}
+	game_data.ancillaries = {
+		"test_scribe": {
+			"id": "test_scribe", "name": "Scribe",
+			"effects": {"management": 1},
+			"triggers": [
+				{"when": "turn_end_governing", "condition": {"building_kind": "government", "min_building_level": 1}, "chance": 1.0},
+			],
+		},
+	}
+	game_data.names = {
+		"roman": {"male": ["Testus", "Probus", "Cassius"], "female": ["Testa", "Proba"], "surnames": ["Fixturus"]},
+		"barbarian": {"male": ["Brox", "Karn"], "female": ["Enna"]},
+	}
+
 	return game_data
 
 
@@ -152,6 +193,25 @@ static func state(game_data: GameData) -> Dictionary:
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}
 	campaign_state["factions"]["rebels"]["diplomacy"] = {"red": "war", "blue": "war"}
 	return campaign_state
+
+
+static func add_character(campaign_state: Dictionary, faction: String, char_id: String, overrides: Dictionary = {}) -> String:
+	campaign_state["characters"][char_id] = {
+		"faction": faction,
+		"name": overrides.get("name", char_id.capitalize()),
+		"age": int(overrides.get("age", 30)),
+		"role": overrides.get("role", "family"),
+		"gender": overrides.get("gender", "male"),
+		"father": overrides.get("father", null),
+		"command": int(overrides.get("command", 2)),
+		"management": int(overrides.get("management", 2)),
+		"influence": int(overrides.get("influence", 2)),
+		"trait_points": overrides.get("trait_points", {}).duplicate(),
+		"ancillaries": overrides.get("ancillaries", []).duplicate(),
+		"location": overrides.get("location", ""),
+		"alive": true,
+	}
+	return char_id
 
 
 static func add_army(campaign_state: Dictionary, owner: String, region: String, templates: Array) -> String:

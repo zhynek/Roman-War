@@ -29,9 +29,13 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if settlement["governor"] != null and state["characters"].has(settlement["governor"]):
 		var governor: Dictionary = state["characters"][settlement["governor"]]
 		var per_point := float(order_rules["governor_influence_pct_per_point"])
-		var influence_bonus := float(governor["influence"]) * per_point
+		var influence_bonus := float(CharacterRules.effective(data, governor, "influence")) * per_point
 		if influence_bonus != 0.0:
 			factors.append({"label": "governor", "value": influence_bonus})
+		var governor_traits := CharacterRules.effect_total(data, governor, "law") \
+			+ CharacterRules.effect_total(data, governor, "happiness")
+		if governor_traits != 0.0:
+			factors.append({"label": "governor_traits", "value": governor_traits})
 	else:
 		factors.append({"label": "no_governor", "value": -float(order_rules["no_governor_penalty"])})
 

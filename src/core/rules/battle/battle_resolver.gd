@@ -35,7 +35,9 @@ func resolve(_data: GameData, _rng: CampaignRng, _attacker_units: Array, _defend
 
 
 static func force_strength(data: GameData, units: Array, general: Variant, experience_pct_per_chevron: float) -> float:
-	## Shared strength estimate: soldiers x quality x experience, plus command.
+	## Shared strength estimate: soldiers x quality x experience, led by a
+	## general profile {command, troop_morale} of EFFECTIVE values (base
+	## attributes plus trait and retinue modifiers — see CharacterRules).
 	var strength := 0.0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
@@ -48,5 +50,11 @@ static func force_strength(data: GameData, units: Array, general: Variant, exper
 		var experience_bonus := 1.0 + float(unit["experience"]) * experience_pct_per_chevron / 100.0
 		strength += soldiers * quality * experience_bonus
 	if general is Dictionary and not (general as Dictionary).is_empty():
-		strength *= 1.0 + float((general as Dictionary).get("command", 0)) * 0.05
+		var profile := general as Dictionary
+		var battle_rules: Dictionary = data.balance["battle"]
+		var character_rules: Dictionary = data.balance["characters"]
+		strength *= 1.0 + float(profile.get("command", 0)) \
+			* float(battle_rules["general_command_bonus_pct"]) / 100.0
+		strength *= 1.0 + float(profile.get("troop_morale", 0)) \
+			* float(character_rules["troop_morale_strength_pct_per_point"]) / 100.0
 	return strength

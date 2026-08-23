@@ -93,6 +93,66 @@ func mercenaries_available(region_id: String) -> Array:
 	return MercenaryRules.available(data, state, region_id)
 
 
+## --- Family & characters --------------------------------------------------
+
+func family_of(faction_id: String = "") -> Array:
+	## Living characters of a faction, leader first, then heir, then the rest
+	## by id — the family panel's listing order.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var members: Array = []
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if character["faction"] == fid and character["alive"]:
+			members.append({"id": char_id, "character": character})
+	var role_rank := {"leader": 0, "heir": 1, "family": 2, "child": 3, "spouse": 4}
+	members.sort_custom(func(a, b):
+		var rank_a: int = role_rank.get(a["character"]["role"], 5)
+		var rank_b: int = role_rank.get(b["character"]["role"], 5)
+		return rank_a < rank_b if rank_a != rank_b else String(a["id"]) < String(b["id"]))
+	return members
+
+
+func character_sheet(char_id: String) -> Dictionary:
+	## Everything the UI shows for one character: effective attributes and
+	## named traits/ancillaries.
+	var character: Dictionary = state["characters"].get(char_id, {})
+	if character.is_empty():
+		return {}
+	var traits: Array = []
+	for entry in CharacterRules.active_trait_levels(data, character):
+		traits.append({"name": entry["level"]["name"], "effects": entry["level"].get("effects", {})})
+	var ancillaries: Array = []
+	for ancillary_id in character["ancillaries"]:
+		ancillaries.append(data.ancillaries.get(ancillary_id, {}).get("name", ancillary_id))
+	return {
+		"id": char_id,
+		"name": character["name"],
+		"age": character["age"],
+		"role": character["role"],
+		"faction": character["faction"],
+		"command": CharacterRules.effective(data, character, "command"),
+		"management": CharacterRules.effective(data, character, "management"),
+		"influence": CharacterRules.effective(data, character, "influence"),
+		"traits": traits,
+		"ancillaries": ancillaries,
+		"location": character.get("location", ""),
+	}
+
+
+func set_heir(char_id: String) -> bool:
+	return FamilyRules.set_heir(data, state, String(state["player_faction"]), char_id)
+
+
+func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String) -> bool:
+	## Player-only convenience, per the design: the AI never shuffles retinues.
+	var source: Dictionary = state["characters"].get(from_char, {})
+	if source.is_empty() or source["faction"] != state["player_faction"]:
+		return false
+	return CharacterRules.transfer_ancillary(data, state, from_char, to_char, ancillary_id)
+
+
 func besiege(army_id: String, region_id: String) -> bool:
 	return SiegeRules.begin_siege(data, state, army_id, region_id)
 
@@ -103,8 +163,23 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 	if result.get("captured", false):
 		result["capture"] = CombatRules.capture_settlement(
 			data, state, rng, region_id, result["capture_pending_owner"], occupation)
+		_fire_occupation_triggers(rng, army_id, occupation, result)
 	state["rng_state"] = rng.state_string()
 	return result
+
+
+func _fire_occupation_triggers(rng: CampaignRng, army_id: String, occupation: String, result: Dictionary) -> void:
+	## The conquering general remembers how the city was treated.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty() or army["general"] == null:
+		return
+	var notices: Array = result.get("character_notices", [])
+	CharacterRules.fire_trigger(data, state, army["general"], "settlement_captured", {}, rng, notices)
+	if occupation == "enslave":
+		CharacterRules.fire_trigger(data, state, army["general"], "settlement_enslaved", {}, rng, notices)
+	elif occupation == "exterminate":
+		CharacterRules.fire_trigger(data, state, army["general"], "settlement_exterminated", {}, rng, notices)
+	result["character_notices"] = notices
 
 
 func garrison_army(army_id: String) -> bool:

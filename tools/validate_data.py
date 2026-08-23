@@ -202,6 +202,24 @@ def cross_checks(t: dict[str, dict]) -> None:
         if unreachable:
             err(f"regions: unreachable from {next(iter(regions))}: {sorted(unreachable)[:10]}")
 
+    # --- map positions ----------------------------------------------------
+    for region in regions.values():
+        position = region.get("position")
+        if not position:
+            continue  # schema already errors; avoid cascading
+        for other in regions.values():
+            if other["id"] <= region["id"] or not other.get("position"):
+                continue
+            dx = position["x"] - other["position"]["x"]
+            dy = position["y"] - other["position"]["y"]
+            distance = (dx * dx + dy * dy) ** 0.5
+            if distance < 1.2:
+                err(f"regions: {region['id']} and {other['id']} overlap on the map "
+                    f"(distance {distance:.2f})")
+            elif other["id"] in region["adjacent"] and distance > 35:
+                warn(f"regions: adjacent {region['id']} and {other['id']} are far apart "
+                     f"on the map (distance {distance:.1f})")
+
     # --- wonders ----------------------------------------------------------
     wonders = {w["id"]: w for w in t.get("wonders.json", {}).get("wonders", [])}
     for wonder in wonders.values():

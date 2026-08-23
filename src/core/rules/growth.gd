@@ -32,6 +32,12 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 		var tiers: Array = growth_rules["grain_import_pct_by_routes"]
 		factors.append({"label": "grain_imports", "value": float(tiers[mini(grain_routes, tiers.size()) - 1])})
 
+	if settlement["governor"] != null and state["characters"].has(settlement["governor"]):
+		var governor_growth := CharacterRules.effect_total(
+			data, state["characters"][settlement["governor"]], "growth")
+		if governor_growth != 0.0:
+			factors.append({"label": "governor", "value": governor_growth})
+
 	var squalor := squalor_pct(data, settlement)
 	if squalor > 0.0:
 		factors.append({"label": "squalor", "value": -squalor})

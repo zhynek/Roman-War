@@ -34,6 +34,17 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 		factors.append({"label": "mines", "value": mines})
 
 	var gross := tax_income + farm_income + trade + mines
+
+	# A capable governor grows the whole take; trade-minded traits favor commerce.
+	if settlement["governor"] != null and state["characters"].has(settlement["governor"]):
+		var governor: Dictionary = state["characters"][settlement["governor"]]
+		var management_pct := float(CharacterRules.effective(data, governor, "management")) \
+			* float(data.balance["characters"]["governor_management_income_pct_per_point"])
+		var governor_income := gross * management_pct / 100.0 \
+			+ trade * CharacterRules.effect_total(data, governor, "trade_pct") / 100.0
+		if governor_income != 0.0:
+			factors.append({"label": "governor", "value": governor_income})
+
 	var corruption := corruption_pct(data, state, region_id) / 100.0 * gross
 	if corruption > 0.0:
 		factors.append({"label": "corruption", "value": -corruption})

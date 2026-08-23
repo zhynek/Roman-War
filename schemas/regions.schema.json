@@ -12,12 +12,22 @@
       "minItems": 10,
       "items": {
         "type": "object",
-        "required": ["id", "name", "settlement_name", "terrain", "fertility", "adjacent"],
+        "required": ["id", "name", "settlement_name", "terrain", "fertility", "adjacent", "position"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
           "name": { "type": "string", "minLength": 1 },
           "settlement_name": { "type": "string", "minLength": 1 },
+          "position": {
+            "type": "object",
+            "required": ["x", "y"],
+            "additionalProperties": false,
+            "properties": {
+              "x": { "type": "number", "minimum": 0, "maximum": 100, "description": "Map position, west 0 to east 100" },
+              "y": { "type": "number", "minimum": 0, "maximum": 100, "description": "Map position, north 0 to south 100" }
+            },
+            "description": "Approximate geographic position for map rendering"
+          },
           "terrain": { "enum": ["plains", "forest", "hills", "mountains", "desert", "steppe", "marsh"] },
           "fertility": { "type": "number", "minimum": 0, "maximum": 3, "description": "Base population growth % per turn from land quality" },
           "adjacent": {
@@ -62,6 +72,16 @@
             "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
             "uniqueItems": true,
             "description": "Adjacent sea zone ids; must be symmetric"
+          },
+          "position": {
+            "type": "object",
+            "required": ["x", "y"],
+            "additionalProperties": false,
+            "properties": {
+              "x": { "type": "number", "minimum": 0, "maximum": 100 },
+              "y": { "type": "number", "minimum": 0, "maximum": 100 }
+            },
+            "description": "Optional label position for map rendering (computed from coastal members when absent)"
           }
         }
       }

@@ -70,7 +70,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		for fleet_setup in faction_setup.get("fleets", []):
 			_add_fleet(state, fleet_setup, fid)
 		for character_setup in faction_setup.get("characters", []):
-			_add_character(state, character_setup, fid)
+			_add_character(data, state, character_setup, fid)
 
 	var rebels := "rebels"
 	state["factions"][rebels] = {
@@ -182,17 +182,24 @@ static func _add_fleet(state: Dictionary, setup: Dictionary, owner: String) -> v
 	}
 
 
-static func _add_character(state: Dictionary, setup: Dictionary, owner: String) -> void:
+static func _add_character(data: GameData, state: Dictionary, setup: Dictionary, owner: String) -> void:
+	# Starting trait ids become just enough points to hold the trait's first level.
+	var trait_points := {}
+	for trait_id in setup.get("traits", []):
+		var trait_def: Dictionary = data.traits.get(trait_id, {})
+		if not trait_def.is_empty():
+			trait_points[trait_id] = int(trait_def["levels"][0]["threshold"])
 	state["characters"][setup["id"]] = {
 		"faction": owner,
 		"name": setup["name"],
 		"age": int(setup["age"]),
 		"role": setup["role"],
+		"gender": setup.get("gender", "female" if setup["role"] == "spouse" else "male"),
 		"father": setup.get("father", null),
 		"command": int(setup.get("command", 0)),
 		"management": int(setup.get("management", 0)),
 		"influence": int(setup.get("influence", 0)),
-		"traits": setup.get("traits", []).duplicate(),
+		"trait_points": trait_points,
 		"ancillaries": [],
 		"location": setup.get("location", ""),
 		"alive": true,

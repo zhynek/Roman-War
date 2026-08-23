@@ -16,11 +16,14 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
 	var region: Dictionary = data.regions[defender["region"]]
 
+	var attacker_soldiers := soldiers_in(data, attacker["units"])
+	var defender_soldiers := soldiers_in(data, defender["units"])
+
 	var result := resolver.resolve(data, rng, attacker["units"], defender["units"], {
 		"terrain": region["terrain"],
 		"wall_level": 0,
-		"attacker_general": _general_of(state, attacker),
-		"defender_general": _general_of(state, defender),
+		"attacker_general": general_profile(data, state, attacker),
+		"defender_general": general_profile(data, state, defender),
 		"attacker_fatigued": attacker.get("forced_march", false),
 		"sally": false,
 	})
@@ -29,9 +32,46 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
 		attacker["movement_left"] = 0.0
+
+	# Battle records shape the victors and the beaten (surviving generals only),
+	# and a captain's unlikely victory can earn him adoption into the family.
+	var odds_ratio := float(data.balance["characters"]["odds_against_ratio"])
+	var notices: Array = []
+	var attacker_won: bool = result["winner"] == "attacker"
+	if attacker["general"] != null:
+		CharacterRules.fire_trigger(data, state, attacker["general"],
+			"battle_won" if attacker_won else "battle_lost",
+			{"odds_against": defender_soldiers >= attacker_soldiers * odds_ratio}, rng, notices)
+	if defender["general"] != null:
+		CharacterRules.fire_trigger(data, state, defender["general"],
+			"battle_won" if not attacker_won else "battle_lost",
+			{"odds_against": attacker_soldiers >= defender_soldiers * odds_ratio}, rng, notices)
+	var winner_army := attacker if attacker_won else defender
+	var winner_soldiers := attacker_soldiers if attacker_won else defender_soldiers
+	var loser_soldiers := defender_soldiers if attacker_won else attacker_soldiers
+	if not winner_army["units"].is_empty():
+		FamilyRules.maybe_man_of_the_hour(data, state, rng, winner_army,
+			winner_soldiers, loser_soldiers, notices)
+	result["character_notices"] = notices
+
 	_cleanup_destroyed_army(state, attacker_id)
 	_cleanup_destroyed_army(state, defender_id)
 	return result
+
+
+static func soldiers_in(data: GameData, units: Array) -> int:
+	var soldiers := 0
+	for unit in units:
+		var template: Dictionary = data.units.get(unit["template"], {})
+		soldiers += int(ceil(int(template.get("soldiers", 0)) * int(unit["strength_pct"]) / 100.0))
+	return soldiers
+
+
+static func general_profile(data: GameData, state: Dictionary, army: Dictionary) -> Variant:
+	## Effective command/morale (base + traits + retinue) for the resolver.
+	if army["general"] != null and state["characters"].has(army["general"]):
+		return CharacterRules.battle_profile(data, state["characters"][army["general"]])
+	return null
 
 
 static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignRng, region_id: String, new_owner: String, occupation: String) -> Dictionary:
@@ -101,27 +141,11 @@ static func _distribute_slaves(data: GameData, state: Dictionary, faction_id: St
 			other["slave_bonus_turns"] = turns
 
 
-static func _general_of(state: Dictionary, army: Dictionary) -> Variant:
-	if army["general"] != null and state["characters"].has(army["general"]):
-		return state["characters"][army["general"]]
-	return null
-
-
 static func _process_general_deaths(state: Dictionary, attacker: Dictionary, defender: Dictionary, result: Dictionary) -> void:
 	if result.get("attacker_general_died", false) and attacker["general"] != null:
-		_kill_character(state, attacker["general"])
-		attacker["general"] = null
+		CharacterRules.kill(state, attacker["general"])
 	if result.get("defender_general_died", false) and defender["general"] != null:
-		_kill_character(state, defender["general"])
-		defender["general"] = null
-
-
-static func _kill_character(state: Dictionary, char_id: String) -> void:
-	if state["characters"].has(char_id):
-		state["characters"][char_id]["alive"] = false
-	for settlement in state["settlements"].values():
-		if settlement["governor"] == char_id:
-			settlement["governor"] = null
+		CharacterRules.kill(state, defender["general"])
 
 
 static func _cleanup_destroyed_army(state: Dictionary, army_id: String) -> void:
@@ -130,7 +154,7 @@ static func _cleanup_destroyed_army(state: Dictionary, army_id: String) -> void:
 	var army: Dictionary = state["armies"][army_id]
 	if army["units"].is_empty():
 		if army["general"] != null:
-			_kill_character(state, army["general"])
+			CharacterRules.kill(state, army["general"])
 		state["armies"].erase(army_id)
 
 

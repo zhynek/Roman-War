@@ -18,7 +18,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "winner": null,
+		"senate": [], "characters": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -66,6 +66,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 
 	report["events"] = EventRules.process_turn(data, state, rng)
 	report["senate"] = SenateRules.process_turn(data, state, rng)
+	report["characters"] = CharacterRules.process_turn(data, state, rng)
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
 
@@ -79,16 +80,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		state["year"] = int(state["year"]) + 1
 		if int(state["year"]) == 0:
 			state["year"] = 1  # no year zero
-		_age_characters(state)
+		report["characters"].append_array(FamilyRules.process_year(data, state, rng))
 
 	MovementRules.reset_movement(data, state)
 	report["winner"] = VictoryRules.check(data, state)
 
 	state["rng_state"] = rng.state_string()
 	return report
-
-
-static func _age_characters(state: Dictionary) -> void:
-	for character in state["characters"].values():
-		if character["alive"]:
-			character["age"] = int(character["age"]) + 1
