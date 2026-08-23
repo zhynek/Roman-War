@@ -178,22 +178,30 @@ both live outside it by design. GitHub issue #1 tracks this setup.
 
 ### The GitHub token (lets Feedback file tickets directly)
 
-A **fine-grained** personal access token, scoped to this repo, with one permission:
+A **fine-grained** personal access token, scoped to this repo, with one permission.
 
-1. GitHub → profile photo (top right) → **Settings**.
-2. Left sidebar, scroll to the bottom → **Developer settings**.
-3. **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
-4. **Token name**: anything (e.g. `roman-war-in-game-feedback`).
-5. **Resource owner**: your own account (`zhynek`).
-6. **Expiration**: 90 days is fine; the game says plainly when a token stops working.
-7. **Repository access**: *Only select repositories* → pick **`zhynek/Roman-War`**.
-8. **Permissions** → *Repository permissions* → find **Issues** → set to
+> **This is not a GitHub App.** *Developer settings* opens on the *GitHub Apps*
+> tab, and its sidebar collapses behind a **☰** on narrow windows — it is easy
+> to land on `settings/apps/new` by mistake. If the form asks for a *Homepage
+> URL* or has a *Webhook* section, you are on the wrong page: close it without
+> filling anything in. The fine-grained token form has neither.
+
+1. Go straight to **<https://github.com/settings/personal-access-tokens/new>** —
+   that is the fine-grained token form, and it skips the navigation entirely.
+   (Fallback: profile photo → **Settings** → **Developer settings**; click the
+   **☰** at the top left if the sidebar is hidden → **Personal access tokens**
+   → **Fine-grained tokens** → **Generate new token**.)
+2. **Token name**: anything (e.g. `roman-war-in-game-feedback`).
+3. **Resource owner**: your own account (`zhynek`).
+4. **Expiration**: 90 days is fine; the game says plainly when a token stops working.
+5. **Repository access**: *Only select repositories* → pick **`zhynek/Roman-War`**.
+6. **Permissions** → *Repository permissions* → find **Issues** → set to
    **Read and write**. Leave everything else at *No access*. (`Metadata:
    Read-only` is added automatically and is mandatory — that is expected.)
-9. **Generate token**, then copy it immediately — GitHub shows it exactly once.
+7. **Generate token**, then copy it immediately — GitHub shows it exactly once.
    It starts with `github_pat_`.
-10. In the game: **Advisor → Settings** → paste into the GitHub token field →
-    **Save settings**.
+8. In the game: **Advisor → Settings** → paste into the GitHub token field →
+   **Save settings**.
 
 Without a token nothing breaks: the Feedback form's **Copy as Markdown** button
 still produces a ready-to-paste ticket body.
