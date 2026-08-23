@@ -2,7 +2,9 @@
 .godot/
 *.import
 export.cfg
-export_presets.cfg
+
+# Build outputs (export_presets.cfg IS tracked — it defines the builds)
+/build/
 
 # macOS
 .DS_Store
