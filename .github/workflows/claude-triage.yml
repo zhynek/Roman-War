@@ -1,0 +1,93 @@
+name: Advisor triage
+
+# Tickets filed from inside the game arrive with the 'in-game' label and a
+# world seed. This wakes Claude Code to triage each one: bug vs not-built vs
+# intended, with a reproduction attempt, a verdict comment, and — only for
+# small, clearly-scoped fixes — a PR. Requires the ANTHROPIC_API_KEY repo
+# secret; the label gate keeps API cost bounded to the game's own tickets.
+
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  triage:
+    if: >
+      (github.event.action == 'labeled' && github.event.label.name == 'in-game') ||
+      (github.event.action == 'opened' && contains(join(github.event.issue.labels.*.name, ','), 'in-game'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GODOT_VERSION: 4.4.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64
+      - name: Download Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o ~/godot/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -o ~/godot/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - name: Import project (builds the global class cache)
+        run: ~/godot/godot --headless --path . --import || true
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 40
+          prompt: |
+            You are triaging an in-game feedback ticket for the Roman War
+            strategy game (this repository).
+
+            REPO: ${{ github.repository }}
+            ISSUE NUMBER: ${{ github.event.issue.number }}
+
+            Do the following, in order:
+
+            1. Read the issue with `gh issue view ${{ github.event.issue.number }}`.
+               Its repro table carries the world seed, turn, faction, and
+               difficulty; the collapsed log shows what the player saw.
+
+            2. Decide the verdict:
+               - NOT BUILT — the report matches a verified gap in
+                 docs/HANDOFF.md section 6 or a pending row of the status
+                 table in docs/DESIGN.md section 10 (also mirrored in
+                 data/advisor.json's systems ledger).
+               - INTENDED — the behavior matches the documented design
+                 (PLAYING.md, docs/DESIGN.md).
+               - BUG — a built system is misbehaving.
+
+            3. For a suspected BUG with a seed in the table, attempt a
+               reproduction. Godot 4.4.1 is installed at ~/godot/godot and the
+               project class cache is already imported. Useful commands:
+                 ~/godot/godot --headless --path . --script res://tools/sim_campaign.gd -- <seed> <turns> <faction> <difficulty>
+                 ~/godot/godot --headless --path . --script res://tests/run_tests.gd
+                 python3 tools/validate_data.py   (pip install jsonschema first)
+
+            4. Comment your verdict on the issue with `gh issue comment`:
+               state BUG / NOT BUILT / INTENDED plainly in the first line,
+               then the evidence (what the sim or tests showed, or which
+               documented gap it matches). Apply the matching label with
+               `gh issue edit --add-label` (bug -> keep "bug"; not built or
+               idea -> "idea"). Be concise.
+
+            5. ONLY if the verdict is BUG and the fix is small and clearly
+               scoped (a few lines, one system): implement it following
+               CLAUDE.md's rules (determinism, sorted iteration, data-driven
+               content), run the validator AND the full test suite, and open
+               a PR referencing the issue only when both are green. For
+               anything larger, describe the suspected root cause and the
+               files involved in your comment instead — do not open a PR.

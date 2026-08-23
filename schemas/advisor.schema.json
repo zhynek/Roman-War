@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "advisor.schema.json",
+  "title": "Advisor knowledge pack",
+  "type": "object",
+  "required": ["advisor"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "advisor": {
+      "type": "object",
+      "required": ["persona", "overview", "systems", "faq"],
+      "additionalProperties": false,
+      "properties": {
+        "persona": { "type": "string", "minLength": 1 },
+        "overview": { "type": "string", "minLength": 1 },
+        "systems": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "status", "note"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "name": { "type": "string", "minLength": 1 },
+              "status": { "enum": ["built", "partial", "not_built", "intended"] },
+              "note": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "faq": {
+          "type": "array",
+          "minItems": 8,
+          "items": {
+            "type": "object",
+            "required": ["q", "a"],
+            "additionalProperties": false,
+            "properties": {
+              "q": { "type": "string", "minLength": 1 },
+              "a": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

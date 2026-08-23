@@ -15,6 +15,8 @@ var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var negotiation_panel: NegotiationPanel
 var senate_panel: SenatePanel
+var advisor_panel: AdvisorPanel
+var feedback_panel: FeedbackPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
@@ -95,6 +97,12 @@ func _ready() -> void:
 	senate_panel.senate_changed.connect(refresh)
 	add_child(senate_panel)
 
+	advisor_panel = AdvisorPanel.new()
+	add_child(advisor_panel)
+
+	feedback_panel = FeedbackPanel.new()
+	add_child(feedback_panel)
+
 	if tutorial_requested:
 		tutorial = TutorialController.create(game, self)
 		add_child(tutorial)
@@ -126,6 +134,8 @@ func _build_top_bar() -> HBoxContainer:
 
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Help", _show_help))
+	bar.add_child(_bar_button("Advisor", func(): advisor_panel.open_for(game, self)))
+	bar.add_child(_bar_button("Feedback", func(): feedback_panel.open_for(game, self)))
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):

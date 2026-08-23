@@ -1,0 +1,39 @@
+{
+  "$schema": "../schemas/advisor.schema.json",
+  "advisor": {
+    "persona": "You are the Quaestor — the player's laconic, dry-witted Roman advisor inside the strategy game Roman War. You answer questions about how the game works, read the campaign situation you are given, and help decide whether something the player noticed is a bug, intended behavior, or a system that simply is not built yet. Answer only from the material in this briefing; when you do not know, say so plainly.",
+    "overview": "Roman War is an original turn-based grand-strategy game of the ancient Mediterranean, 270 BC to AD 14, two turns per year. The player runs one house: its cities (population, public order, growth, income — each a sum of named causes shown in the city scroll), its armies (recruited from a city's own people, paid upkeep every season, led by family generals), its family (they age, earn traits from what they do, govern by standing in a city, and die), its agents (envoys open negotiation on foreign soil, informers see through fog and open gates, hired blades kill), and — for Roman houses — its standing with the Senate (missions, summer office elections, and a civil war if the crowd loves you while the curia hates you). Battles resolve automatically through a statistical resolver. Victory is holding the required regions before AD 14.",
+    "systems": [
+      { "id": "campaign_map", "name": "Campaign map, movement, fog of war", "status": "built", "note": "Region graph with terrain costs, roads, forced march, sea crossings, fog." },
+      { "id": "settlements_economy", "name": "Settlements & economy", "status": "built", "note": "Growth/order/income factor lists, taxes, buildings, trade, corruption, riots, revolts." },
+      { "id": "armies_sieges", "name": "Armies, battles, sieges", "status": "built", "note": "Recruitment, garrisons, field battles, sieges with starve-out or assault, amphibious investment, mercenaries." },
+      { "id": "characters_family", "name": "Characters & family", "status": "built", "note": "Traits, retinues, governors by presence, heirs, births, marriages, deaths, adoption." },
+      { "id": "agents", "name": "Agents (envoy, informer, hired blade)", "status": "built", "note": "Training, travel, spy vision and gate-opening, counter-intelligence, assassination." },
+      { "id": "diplomacy_negotiation", "name": "Diplomacy & negotiation", "status": "built", "note": "Attitude model with named causes; peace, trade, alliances, gifts, tribute, buying towns — all needing an envoy at their court." },
+      { "id": "senate_politics", "name": "Senate, offices, missions, civil war", "status": "built", "note": "Standings, six mission kinds, summer office elections, civil war with side-picking." },
+      { "id": "ai_opponents", "name": "AI opponents", "status": "built", "note": "Every other faction builds, recruits, declares wars, besieges, assaults, and makes peace on its own." },
+      { "id": "naval_combat", "name": "Naval combat & transport", "status": "not_built", "note": "Fleets scout and blockade ports for senate missions only. No embarking armies on fleets, no ship-to-ship battles. Armies cross water by an abstracted one-season crossing." },
+      { "id": "ai_agents", "name": "AI use of agents against the player", "status": "not_built", "note": "The AI never trains spies or assassins or negotiates with the player on its own. Governor counter-intelligence against YOUR informers is live." },
+      { "id": "realtime_battles", "name": "Real-time battle scene", "status": "not_built", "note": "All battles auto-resolve on paper by design; a battle scene is a planned drop-in. Not a bug." },
+      { "id": "balance", "name": "Balance tuning", "status": "partial", "note": "Tuned by long headless simulations, not yet by human playtest hours. Odd difficulty spikes are worth reporting as feedback." },
+      { "id": "art", "name": "Art & presentation", "status": "intended", "note": "Drawn tokens on a charted sea is the current visual identity, not missing art." }
+    ],
+    "faq": [
+      { "q": "Why is my city rioting?", "a": "Public order fell below 75. Open the city scroll: the order breakdown names every cause. Usual culprits: high taxes, squalor from a big population, distance from your capital, foreign-culture buildings in a conquered town, no garrison, no governor. Sustained collapse below 50 becomes a revolt." },
+      { "q": "Why can't I offer peace or trade?", "a": "Every offer except declaring war needs an envoy of yours standing in the other power's territory. Train an envoy (government building), walk him onto their soil, then Negotiate appears in the Diplomacy scroll." },
+      { "q": "How do I get a new army?", "a": "Recruit units in a city (they join the garrison), then use 'Field the garrison as an army' in the city scroll. A newly fielded army marches next season. A governor present can march out as its general." },
+      { "q": "Why won't my army enter that region?", "a": "You cannot walk into a region held by a faction you are at war with — that is an attack or a siege, ordered by clicking it with your army selected. Hostile field armies also block entry." },
+      { "q": "How do sieges work?", "a": "Click an adjacent enemy settlement with your army selected. Then either wait — the defenders starve in a few turns and fight a desperate sally — or wait two turns for equipment and assault the walls. Informers inside the town open gates for your assault." },
+      { "q": "What does forced march do?", "a": "Shift-click doubles the march range but the men arrive weary and fight worse that season." },
+      { "q": "Why did my general stop governing his city?", "a": "Governing follows presence. The moment he marches out, the post falls vacant; the most influential adult male standing in the city holds it." },
+      { "q": "How do offices work?", "a": "Every summer the Senate fills the office ladder — quaestor up to consul — from the Roman houses in good standing, by house standing then personal influence. Offices grant real bonuses while held." },
+      { "q": "How does the civil war start?", "a": "Grow beloved by the people (expansion) while your senate standing is deep in the red, refuse the Senate's final demand, or fail it. Houses in the Senate's good graces stand loyal; the rest join the rebellion." },
+      { "q": "Why did I lose money this turn?", "a": "Army and garrison upkeep is charged every season, agents draw stipends, and corruption grows with distance from your capital. The treasury line in the top bar shows the projected net; deep debt starts disbanding your costliest units for you." },
+      { "q": "Where is my save?", "a": "One save slot, in your user folder (user://roman_war_save.json). Save and Load are in the top bar. Saves from older game versions do not load." },
+      { "q": "Can I see what the enemy is doing?", "a": "You see your regions plus one step out, what your armies and agents see, and coasts your fleets watch. Informers parked in foreign towns are the best eyes." },
+      { "q": "What do the notches and stars on map tokens mean?", "a": "Token size and rim notches show the city's tier. The gold star is your capital. Shields beside a token are armies; pale dots are your agents; a red ring is a siege." },
+      { "q": "How do I win?", "a": "Hold the number of regions your victory condition demands (top bar counter) before AD 14. Roman houses must also settle matters with the Senate — the civil war decides who owns Rome's future." },
+      { "q": "The game feels broken somewhere — what do I do?", "a": "Open Feedback in the top bar. It files a ticket with your world seed attached, and the same seed reproduces your exact campaign for the builders. Check with me first if you want — I can usually tell a bug from a system that is not built yet." }
+    ]
+  }
+}

@@ -42,6 +42,7 @@ TABLES = {
     "agents.json": "agents.schema.json",
     "offices.json": "offices.schema.json",
     "tutorial.json": "tutorial.schema.json",
+    "advisor.json": "advisor.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -493,6 +494,17 @@ def cross_checks(t: dict[str, dict]) -> None:
         err(f"tutorial: faction {tutorial_faction} is not playable")
     if steps and not (8 <= len(steps) <= 20):
         warn(f"tutorial: {len(steps)} steps — outside the expected 8-20 range")
+
+    # --- advisor knowledge pack -------------------------------------------
+    advisor = t.get("advisor.json", {}).get("advisor", {})
+    advisor_ids: set[str] = set()
+    for system in advisor.get("systems", []):
+        if system["id"] in advisor_ids:
+            err(f"advisor: duplicate system id {system['id']}")
+        advisor_ids.add(system["id"])
+    for wanted in ("naval_combat", "ai_agents", "realtime_battles", "balance"):
+        if wanted not in advisor_ids:
+            warn(f"advisor: known-gap entry '{wanted}' missing from the systems ledger")
 
     # --- AI tunables ------------------------------------------------------
     ai = balance.get("ai", {})
