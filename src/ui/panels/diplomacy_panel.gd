@@ -21,9 +21,9 @@ const STANCE_NAMES := {
 
 func _init() -> void:
 	title = "Diplomacy & Fleets"
-	min_size = Vector2i(520, 560)
+	min_size = Vector2i(640, 560)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(490, 500)
+	scroll.custom_minimum_size = Vector2(610, 500)
 	_content = VBoxContainer.new()
 	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_content)
@@ -82,7 +82,8 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 	name_label.text = " %s — %s  (%+.0f)" % [faction["name"], STANCE_NAMES.get(stance, stance),
 		float(attitude["total"])]
 	name_label.add_theme_font_size_override("font_size", 12)
-	name_label.custom_minimum_size = Vector2(280, 0)
+	name_label.custom_minimum_size = Vector2(300, 0)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
 
 	if game.can_negotiate_with(faction_id):

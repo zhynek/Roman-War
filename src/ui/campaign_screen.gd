@@ -29,10 +29,15 @@ static func create(new_game: Game) -> CampaignScreen:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	theme = UiTheme.build()
+	var ground := ColorRect.new()
+	ground.color = UiTheme.INK
+	add_child(ground)
+	ground.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	root.add_child(_build_top_bar())
 
@@ -114,6 +119,7 @@ func _build_top_bar() -> HBoxContainer:
 	top_labels["faction"].text = " %s   " % faction["name"]
 
 	bar.add_child(_spacer())
+	bar.add_child(_bar_button("Help", _show_help))
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
@@ -128,7 +134,10 @@ func _build_top_bar() -> HBoxContainer:
 
 func refresh() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
-	top_labels["treasury"].text = "Treasury: %d   " % int(faction["treasury"])
+	var projection := EconomyRules.faction_turn_breakdown(game.data, game.state, game.state["player_faction"])
+	var net := float(projection["net"])
+	top_labels["treasury"].text = "Treasury: %d (%s%d)   " % [int(faction["treasury"]),
+		"+" if net >= 0 else "", int(round(net))]
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
 	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
@@ -431,6 +440,40 @@ func _show_victory_banner(winner: String) -> void:
 		dialog.dialog_text = "%s has won the age." % game.data.factions.get(winner, {}).get("name", winner)
 	add_child(dialog)
 	dialog.popup_centered()
+
+
+func _show_help() -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "How the campaign is played"
+	var help := RichTextLabel.new()
+	help.bbcode_enabled = true
+	help.custom_minimum_size = Vector2(560, 480)
+	help.text = """[b][color=#d4a938]The map[/color][/b]
+Left-click a settlement to inspect it. Right/middle-drag pans; the wheel zooms.
+
+[b][color=#d4a938]Settlements[/color][/b]
+Set taxes, queue buildings and troops, and watch the public order, growth and income breakdowns — every number is a sum of named causes. Riots come below 75 order; three ruinous turns below 50 and the town rises in revolt.
+
+[b][color=#d4a938]Armies[/color][/b]
+Select one of your armies, then click a region to march (Shift = forced march — double range, weary men). March onto an enemy or their city to attack or lay siege; assault once equipment is ready, or starve them out. \"Field the garrison\" turns a garrison into a marching army; it moves next season.
+
+[b][color=#d4a938]Agents[/color][/b]
+Train an [b]envoy[/b] and walk him onto a foreign power's soil to open negotiation — peace, trade, alliances, gifts, tribute, even buying a border town. An [b]informer[/b] reveals what fog hides and opens gates when you assault the town he is inside — but governors hunt him. A [b]hired blade[/b] kills generals, governors, and kings, if their bodyguards fail.
+
+[b][color=#d4a938]The Senate[/color][/b]
+Roman houses answer to the Senate: missions bring standing and rewards; offices go to houses in favor each summer. Expand too fast with too little favor and the Republic will break — be ready to win the civil war that follows.
+
+[b][color=#d4a938]The family[/color][/b]
+Your generals and governors are your family. Traits and retinues grow from what they do; name an heir; marry daughters well; the man on the spot governs.
+
+[b][color=#d4a938]Winning[/color][/b]
+Hold the regions your victory condition demands (the counter sits in the top bar) before AD 14 closes the age."""
+	dialog.add_child(help)
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.visibility_changed.connect(func():
+		if not dialog.visible:
+			dialog.queue_free())
 
 
 func _save_game() -> void:

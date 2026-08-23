@@ -134,7 +134,8 @@ func test_start_menu_scene_loads(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var menu: Control = scene.instantiate()
 	tree.root.add_child(menu)
-	var factions: OptionButton = menu.get_node("Center/Menu/FactionRow/Factions")
+	# The menu may be reframed inside decorative containers; find it by name.
+	var factions: OptionButton = menu.find_child("Factions", true, false)
 	t.check(factions.item_count >= 11, "all playable and unlockable houses offered (got %d)" % factions.item_count)
 	factions.selected = 1
 	menu._on_start_pressed()
