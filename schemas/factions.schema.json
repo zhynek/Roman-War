@@ -3,28 +3,96 @@
   "$id": "factions.schema.json",
   "title": "Factions",
   "type": "object",
-  "required": ["factions"],
+  "required": [
+    "factions"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "factions": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "culture", "playable", "color", "description"],
+        "required": [
+          "id",
+          "name",
+          "culture",
+          "playable",
+          "color",
+          "description"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-          "name": { "type": "string", "minLength": 1 },
-          "culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
-          "playable": { "enum": ["playable", "unlockable", "nonplayable"] },
-          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
-          "is_roman_house": { "type": "boolean", "default": false },
-          "is_senate": { "type": "boolean", "default": false },
-          "is_rebel": { "type": "boolean", "default": false },
-          "leader_title": { "type": "string" },
-          "description": { "type": "string" }
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "culture": {
+            "enum": [
+              "roman",
+              "greek",
+              "eastern",
+              "carthaginian",
+              "egyptian",
+              "barbarian",
+              "neutral"
+            ]
+          },
+          "playable": {
+            "enum": [
+              "playable",
+              "unlockable",
+              "nonplayable"
+            ]
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "is_roman_house": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_senate": {
+            "type": "boolean",
+            "default": false
+          },
+          "is_rebel": {
+            "type": "boolean",
+            "default": false
+          },
+          "leader_title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ai": {
+            "type": "object",
+            "description": "AI temperament: how eager the faction is for war, and whether it expands at all.",
+            "additionalProperties": false,
+            "required": [
+              "aggression"
+            ],
+            "properties": {
+              "aggression": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "expands": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          }
         }
       }
     }

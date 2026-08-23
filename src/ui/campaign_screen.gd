@@ -317,9 +317,36 @@ func _log_report(report: Dictionary) -> void:
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
 
+	var visible_set := game.visible_regions()
+	for notice in report.get("world", []):
+		match String(notice.get("kind", "")):
+			"war_declared":
+				_log("[color=#e08060]%s declares war on %s![/color]"
+					% [_faction_name(notice["faction"]), _faction_name(notice["other"])])
+			"peace":
+				_log("[color=#80b0d0]%s and %s have made peace.[/color]"
+					% [_faction_name(notice["faction"]), _faction_name(notice["other"])])
+			"battle":
+				if visible_set.has(notice.get("region", "")):
+					_log("Battle at %s — the %s prevail." % [
+						game.data.regions[notice["region"]]["name"],
+						"attackers" if notice.get("winner", "") == "attacker" else "defenders"])
+			"captured":
+				if visible_set.has(notice.get("region", "")) or notice.get("from", "") == player:
+					_log("[color=#e0a060]%s has taken %s from %s![/color]" % [
+						_faction_name(notice["faction"]),
+						game.data.regions[notice["region"]]["settlement_name"],
+						_faction_name(notice["from"])])
+	for faction_id in report.get("destroyed_factions", []):
+		_log("[color=#e06050][b]%s is no more.[/b][/color]" % _faction_name(faction_id))
+
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]
+
+
+func _faction_name(faction_id: String) -> String:
+	return game.data.factions.get(faction_id, {}).get("name", faction_id)
 
 
 func _show_victory_banner(winner: String) -> void:

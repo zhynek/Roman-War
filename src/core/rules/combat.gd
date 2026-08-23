@@ -128,6 +128,21 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	return {"loot": loot, "slaves": slaves, "occupation": occupation, "characters_taken": taken}
 
 
+static func assault_and_capture(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, army_id: String, region_id: String, occupation: String) -> Dictionary:
+	## The whole storming, shared by the player facade and the AI: assault the
+	## walls, and on a capture apply the occupation decision and let the
+	## general answer for it.
+	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
+	if result.get("captured", false):
+		var general = state["armies"].get(army_id, {}).get("general")
+		result["capture"] = capture_settlement(
+			data, state, rng, region_id, result["capture_pending_owner"], occupation)
+		var notices: Array = result.get("character_notices", [])
+		fire_occupation_triggers(data, state, rng, general, occupation, notices)
+		result["character_notices"] = notices
+	return result
+
+
 static func fire_occupation_triggers(data: GameData, state: Dictionary, rng: CampaignRng, general_id, occupation: String, notices: Array) -> void:
 	## The conquering general remembers how the city was treated. Every capture
 	## path (assault or starve-out, player or AI) must come through here.

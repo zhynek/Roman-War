@@ -439,6 +439,17 @@ def cross_checks(t: dict[str, dict]) -> None:
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
 
+    # --- AI tunables ------------------------------------------------------
+    ai = balance.get("ai", {})
+    chain_kinds = {c.get("kind") for c in t.get("buildings.json", {}).get("chains", [])} \
+        | {c.get("kind") for c in t.get("temples.json", {}).get("chains", [])}
+    for kind in ai.get("build_priority", {}):
+        if kind not in chain_kinds:
+            warn(f"balance: ai.build_priority names kind '{kind}' with no building chain")
+    garrison_targets = ai.get("garrison_units_by_level", [])
+    if len(garrison_targets) != len(balance.get("settlement_levels", [])):
+        err("balance: ai.garrison_units_by_level needs one entry per settlement level")
+
 
 def main() -> int:
     tables = load_tables()

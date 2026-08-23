@@ -159,16 +159,18 @@ func besiege(army_id: String, region_id: String) -> bool:
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
 	var rng := _rng()
-	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
-	if result.get("captured", false):
-		var general = state["armies"].get(army_id, {}).get("general")
-		result["capture"] = CombatRules.capture_settlement(
-			data, state, rng, region_id, result["capture_pending_owner"], occupation)
-		var notices: Array = result.get("character_notices", [])
-		CombatRules.fire_occupation_triggers(data, state, rng, general, occupation, notices)
-		result["character_notices"] = notices
+	var result := CombatRules.assault_and_capture(
+		data, state, rng, resolver, army_id, region_id, occupation)
 	state["rng_state"] = rng.state_string()
 	return result
+
+
+func form_army(region_id: String, unit_indices: Array = [], general_id: String = "") -> String:
+	## Field garrison units as a marching army; it moves next season.
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return ""
+	return ArmyRules.form_army(data, state, region_id, unit_indices, general_id)
 
 
 func garrison_army(army_id: String) -> bool:

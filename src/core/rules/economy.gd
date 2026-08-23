@@ -172,21 +172,39 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 
 
 static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_id: String) -> bool:
-	var worst_army: Dictionary = {}
+	## Field armies pay first; a faction with no army left starts thinning its
+	## garrisons, so a debt spiral always has a way out.
+	var worst_units: Array = []
 	var worst_index := -1
 	var worst_upkeep := 0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
 				worst_upkeep = upkeep
-				worst_army = army
+				worst_units = army["units"]
 				worst_index = i
 	if worst_index < 0:
+		var region_ids: Array = state["settlements"].keys()
+		region_ids.sort()
+		for region_id in region_ids:
+			var settlement: Dictionary = state["settlements"][region_id]
+			if settlement["owner"] != faction_id or settlement["garrison"].size() <= 1:
+				continue  # the last unit on the walls is never sold off
+			for i in range(settlement["garrison"].size()):
+				var upkeep := int(data.units.get(settlement["garrison"][i]["template"], {}).get("upkeep", 0))
+				if upkeep > worst_upkeep:
+					worst_upkeep = upkeep
+					worst_units = settlement["garrison"]
+					worst_index = i
+	if worst_index < 0:
 		return false
-	worst_army["units"].remove_at(worst_index)
+	worst_units.remove_at(worst_index)
 	return true
 
 

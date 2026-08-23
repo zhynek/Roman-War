@@ -117,6 +117,15 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
+		_action_button("Field the garrison as an army", func():
+			game.form_army(region_id)
+			action_taken.emit())
+		if settlement["governor"] != null:
+			var governor_sheet := game.character_sheet(settlement["governor"])
+			var governor_id: String = String(settlement["governor"])
+			_action_button("March out under %s" % governor_sheet["name"], func():
+				game.form_army(region_id, [], governor_id)
+				action_taken.emit())
 
 	# Construction
 	_header("Construction", 12)

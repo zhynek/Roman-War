@@ -18,7 +18,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "winner": null,
+		"senate": [], "characters": [], "winner": null, "world": [],
+		"destroyed_factions": [],
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -29,9 +30,23 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
 
+	var alive_before := {}
+	for faction_id in faction_ids:
+		if state["factions"][faction_id]["alive"]:
+			alive_before[faction_id] = true
+
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
-			AiStub.take_turn(data, state, faction_id)
+			AiRules.take_turn(data, state, faction_id, rng, resolver, report["world"])
+	# Character news that surfaced during AI battles belongs with the rest of
+	# the character notices, not the world dispatches.
+	var world_events: Array = []
+	for notice in report["world"]:
+		if notice.get("kind", "") in ["trait", "ancillary", "man_of_the_hour"]:
+			report["characters"].append(notice)
+		else:
+			world_events.append(notice)
+	report["world"] = world_events
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)
@@ -91,6 +106,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 
 	MovementRules.reset_movement(data, state)
 	report["winner"] = VictoryRules.check(data, state)
+
+	for faction_id in faction_ids:
+		if alive_before.has(faction_id) and not state["factions"][faction_id]["alive"]:
+			report["destroyed_factions"].append(faction_id)
 
 	state["rng_state"] = rng.state_string()
 	return report
