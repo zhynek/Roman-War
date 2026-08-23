@@ -7,9 +7,13 @@ class_name CombatRules
 static func attack_army(data: GameData, state: Dictionary, resolver: BattleResolver, rng: CampaignRng, attacker_id: String, defender_id: String) -> Dictionary:
 	var attacker: Dictionary = state["armies"][attacker_id]
 	var defender: Dictionary = state["armies"][defender_id]
+	if attacker["owner"] == defender["owner"]:
+		return {}
 	if attacker["region"] != defender["region"] \
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
+	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
+	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
 	var region: Dictionary = data.regions[defender["region"]]
 
 	var result := resolver.resolve(data, rng, attacker["units"], defender["units"], {

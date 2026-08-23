@@ -1,0 +1,86 @@
+{
+  "$schema": "../schemas/missions.schema.json",
+  "missions": [
+    {
+      "id": "annex_border_province",
+      "name": "Annex a Border Province",
+      "kind": "take_region",
+      "deadline_turns": 10,
+      "reward": { "treasury": 2000, "senate_standing": 1 },
+      "penalty": { "senate_standing": -1 },
+      "text": "The Senate judges that a neighboring province would be safer under Roman administration. Take its settlement and the conscript fathers will see your house rewarded."
+    },
+    {
+      "id": "punish_defiant_city",
+      "name": "Punish a Defiant City",
+      "kind": "take_region",
+      "deadline_turns": 8,
+      "reward": { "treasury": 3000, "senate_standing": 1, "units": [{ "template": "roman_hastati", "count": 2 }] },
+      "penalty": { "senate_standing": -2 },
+      "text": "A city has insulted Roman envoys and closed its gates to our merchants. The Senate demands it be brought to heel quickly, before others take courage from its example."
+    },
+    {
+      "id": "break_enemy_stronghold",
+      "name": "Break an Enemy Stronghold",
+      "kind": "take_region",
+      "deadline_turns": 12,
+      "reward": { "treasury": 4000, "senate_standing": 2, "units": [{ "template": "roman_principes", "count": 2 }] },
+      "penalty": { "senate_standing": -2 },
+      "text": "From this fortress an enemy of Rome musters armies and plots against the Republic. The Senate charges your house with its capture; the glory and the spoils will be considerable."
+    },
+    {
+      "id": "secure_the_grain_route",
+      "name": "Secure the Grain Route",
+      "kind": "take_region",
+      "deadline_turns": 10,
+      "reward": { "treasury": 2500, "senate_standing": 1 },
+      "penalty": { "senate_standing": -1 },
+      "text": "The city's grain ships pass within sight of a hostile shore, and the mob grows nervous when bread grows dear. Seize the province and put the supply beyond doubt."
+    },
+    {
+      "id": "strangle_their_harbor",
+      "name": "Strangle Their Harbor",
+      "kind": "blockade_port",
+      "deadline_turns": 8,
+      "reward": { "treasury": 1500, "senate_standing": 1 },
+      "penalty": { "senate_standing": -1 },
+      "text": "An enemy port grows fat on trade that should flow to Roman quays. The Senate wishes its sea lanes closed; a season of blockade will teach the lesson."
+    },
+    {
+      "id": "court_a_useful_friend",
+      "name": "Court a Useful Friend",
+      "kind": "make_alliance",
+      "deadline_turns": 8,
+      "reward": { "treasury": 1000, "senate_standing": 1 },
+      "text": "The Senate sees advantage in friendship with a foreign power whose enemies are our enemies. Send your diplomats and bind them to Rome by treaty."
+    },
+    {
+      "id": "open_the_markets",
+      "name": "Open the Markets",
+      "kind": "reach_trade_agreement",
+      "deadline_turns": 6,
+      "reward": { "treasury": 1000, "senate_standing": 1 },
+      "text": "Roman merchants petition the Senate for access to a foreign market now closed to them. Secure trading rights and the grateful publicani will remember your house."
+    },
+    {
+      "id": "remove_a_troublesome_king",
+      "name": "Remove a Troublesome King",
+      "kind": "assassinate_leader",
+      "deadline_turns": 8,
+      "min_year": -220,
+      "reward": { "treasury": 3000, "senate_standing": 1 },
+      "penalty": { "senate_standing": -2 },
+      "text": "A foreign ruler works ceaselessly against Roman interests, and open war would be costly. The Senate does not put such things in writing; see that the man does not trouble us further."
+    },
+    {
+      "id": "the_senate_demands_your_life",
+      "name": "The Senate Demands Your Life",
+      "kind": "leader_suicide",
+      "deadline_turns": 4,
+      "min_year": -60,
+      "reward": { "senate_standing": 2 },
+      "penalty": { "senate_standing": -5 },
+      "text": "Your house has grown too great, and the conscript fathers are afraid. They decree that your patriarch must open his veins for the good of the Republic; refuse, and be named an enemy of Rome."
+    }
+  ]
+}

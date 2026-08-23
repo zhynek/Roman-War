@@ -1,26 +1,199 @@
 {
   "$schema": "../schemas/factions.schema.json",
   "factions": [
-    { "id": "julii", "name": "House of Julii", "culture": "roman", "playable": "playable", "color": "#c22e28", "is_roman_house": true, "leader_title": "Patriarch", "description": "Frontier Romans of the north, hardened against the Gauls. The Senate points them at the wild lands beyond the Po." },
-    { "id": "brutii", "name": "House of Brutii", "culture": "roman", "playable": "playable", "color": "#2d7d46", "is_roman_house": true, "leader_title": "Patriarch", "description": "Ambitious southern Romans whose gaze falls across the Adriatic to Greece and Macedon." },
-    { "id": "scipii", "name": "House of Scipii", "culture": "roman", "playable": "playable", "color": "#2b5f9e", "is_roman_house": true, "leader_title": "Patriarch", "description": "Naval-minded Romans charged with Sicily and the long duel against Carthage." },
-    { "id": "senate", "name": "The Senate and People", "culture": "roman", "playable": "nonplayable", "color": "#6a5acd", "is_senate": true, "leader_title": "Princeps Senatus", "description": "The old authority of Rome itself: issuer of missions, arbiter of standing, and final obstacle to any would-be emperor." },
-    { "id": "macedon", "name": "Kingdom of Macedon", "culture": "greek", "playable": "nonplayable", "color": "#1f6e6e", "leader_title": "Basileus", "description": "The homeland of Alexander, holding the pike-hedges of the old army and the passes of the Balkans." },
-    { "id": "greek_cities", "name": "League of Free Cities", "culture": "greek", "playable": "unlockable", "color": "#3aa0c9", "leader_title": "Strategos", "description": "A defensive league of proud poleis: Sparta, Athens, Rhodes and their kin, rich in hoplites and harbors." },
-    { "id": "seleucia", "name": "Seleucid Realm", "culture": "greek", "playable": "unlockable", "color": "#b8a13a", "leader_title": "Basileus", "description": "The sprawling successor empire of the east — elephants, pikes, and enemies on every border." },
-    { "id": "thracia", "name": "Thracian Tribes", "culture": "greek", "playable": "nonplayable", "color": "#7a4f9d", "leader_title": "King", "description": "Falx-wielding hill peoples between the Greeks and the steppe, part Hellenized and wholly dangerous." },
-    { "id": "parthia", "name": "Parthian Kingdom", "culture": "eastern", "playable": "unlockable", "color": "#8c6d1f", "leader_title": "Shah", "description": "Horse lords of the Iranian plains: swarms of horse archers screening irresistible cataphracts." },
-    { "id": "armenia", "name": "Kingdom of Armenia", "culture": "eastern", "playable": "nonplayable", "color": "#a0522d", "leader_title": "King of Kings", "description": "A mountain kingdom astride the caravan routes, fielding both eastern horse and Hellenic foot." },
-    { "id": "pontus", "name": "Kingdom of Pontus", "culture": "eastern", "playable": "nonplayable", "color": "#4f7942", "leader_title": "Basileus", "description": "An Anatolian power of mixed Greek and Persian blood, with scythed chariots and imperial ambitions." },
-    { "id": "carthage", "name": "Republic of Carthage", "culture": "carthaginian", "playable": "unlockable", "color": "#e0e0e0", "leader_title": "Suffet", "description": "The merchant republic of the western Mediterranean: silver, ships, mercenaries, and the Sacred Band." },
-    { "id": "numidia", "name": "Numidian Kingdoms", "culture": "barbarian", "playable": "nonplayable", "color": "#d2a679", "leader_title": "King", "description": "Desert riders and skirmishers of the African interior, unmatched in raid and evasion." },
-    { "id": "egypt", "name": "Kingdom of the Nile", "culture": "egyptian", "playable": "unlockable", "color": "#e6c84c", "leader_title": "Pharaoh", "description": "The wealthiest farmland in the world, dense cities on the river, and armies in the old style." },
-    { "id": "gaul", "name": "Gallic Tribes", "culture": "barbarian", "playable": "unlockable", "color": "#4a7c3a", "leader_title": "High Chieftain", "description": "The great confederation of Celtic peoples: numberless warbands, fierce charges, restless chiefs." },
-    { "id": "germania", "name": "Germanic Tribes", "culture": "barbarian", "playable": "unlockable", "color": "#5b4a3a", "leader_title": "War-King", "description": "Forest peoples beyond the Rhine — spear hosts, night raids, and berserk fury." },
-    { "id": "britannia", "name": "British Tribes", "culture": "barbarian", "playable": "unlockable", "color": "#3a6ea5", "leader_title": "High King", "description": "Chariot-riding islanders behind the mists and the channel, painted for war." },
-    { "id": "dacia", "name": "Dacian Tribes", "culture": "barbarian", "playable": "nonplayable", "color": "#8a7f2a", "leader_title": "King", "description": "Carpathian highlanders rich in gold and iron, swinging the two-handed falx." },
-    { "id": "hispania", "name": "Iberian Tribes", "culture": "barbarian", "playable": "nonplayable", "color": "#b5651d", "leader_title": "War Leader", "description": "Hard peoples of the peninsula, masters of the ambush and the curved falcata." },
-    { "id": "scythia", "name": "Scythian Hordes", "culture": "barbarian", "playable": "nonplayable", "color": "#7f9f7f", "leader_title": "Khan", "description": "Nomads of the endless grass north of the Black Sea; every rider a bowman, every camp a fortress." },
-    { "id": "rebels", "name": "Independents", "culture": "neutral", "playable": "nonplayable", "color": "#808080", "is_rebel": true, "leader_title": "None", "description": "Free towns, brigand bands, secessionists, and pirates owing allegiance to no crown." }
+    {
+      "id": "julii",
+      "name": "House of the Julii",
+      "culture": "roman",
+      "playable": "playable",
+      "color": "#a67c00",
+      "is_roman_house": true,
+      "leader_title": "Patriarch",
+      "description": "Frontier Romans of the north, hardened against the Gauls. The Senate points them at the wild lands beyond the Po."
+    },
+    {
+      "id": "junii",
+      "name": "House of the Junii",
+      "culture": "roman",
+      "playable": "playable",
+      "color": "#7a1f2b",
+      "is_roman_house": true,
+      "leader_title": "Patriarch",
+      "description": "Ambitious southern Romans of the gens Junia, whose gaze falls across the Adriatic to Greece and Macedon."
+    },
+    {
+      "id": "cornelii",
+      "name": "House of the Cornelii",
+      "culture": "roman",
+      "playable": "playable",
+      "color": "#1f6e5e",
+      "is_roman_house": true,
+      "leader_title": "Patriarch",
+      "description": "Patrician Romans of the gens Cornelia charged with Sicily and the long duel against Carthage."
+    },
+    {
+      "id": "senate",
+      "name": "The Senate and People",
+      "culture": "roman",
+      "playable": "nonplayable",
+      "color": "#6a5acd",
+      "is_senate": true,
+      "leader_title": "Princeps Senatus",
+      "description": "The old authority of Rome itself: issuer of missions, arbiter of standing, and final obstacle to any would-be emperor."
+    },
+    {
+      "id": "macedon",
+      "name": "Kingdom of Macedon",
+      "culture": "greek",
+      "playable": "nonplayable",
+      "color": "#1f6e6e",
+      "leader_title": "Basileus",
+      "description": "The homeland of Alexander, holding the pike-hedges of the old army and the passes of the Balkans."
+    },
+    {
+      "id": "greek_cities",
+      "name": "League of Free Cities",
+      "culture": "greek",
+      "playable": "unlockable",
+      "color": "#3aa0c9",
+      "leader_title": "Strategos",
+      "description": "A defensive league of proud poleis: Sparta, Athens, Rhodes and their kin, rich in hoplites and harbors."
+    },
+    {
+      "id": "seleucia",
+      "name": "Seleucid Realm",
+      "culture": "greek",
+      "playable": "unlockable",
+      "color": "#b8a13a",
+      "leader_title": "Basileus",
+      "description": "The sprawling successor empire of the east — elephants, pikes, and enemies on every border."
+    },
+    {
+      "id": "thracia",
+      "name": "Thracian Tribes",
+      "culture": "greek",
+      "playable": "nonplayable",
+      "color": "#7a4f9d",
+      "leader_title": "King",
+      "description": "Falx-wielding hill peoples between the Greeks and the steppe, part Hellenized and wholly dangerous."
+    },
+    {
+      "id": "parthia",
+      "name": "Parthian Kingdom",
+      "culture": "eastern",
+      "playable": "unlockable",
+      "color": "#8c6d1f",
+      "leader_title": "Shah",
+      "description": "Horse lords of the Iranian plains: swarms of horse archers screening irresistible cataphracts."
+    },
+    {
+      "id": "armenia",
+      "name": "Kingdom of Armenia",
+      "culture": "eastern",
+      "playable": "nonplayable",
+      "color": "#a0522d",
+      "leader_title": "King of Kings",
+      "description": "A mountain kingdom astride the caravan routes, fielding both eastern horse and Hellenic foot."
+    },
+    {
+      "id": "pontus",
+      "name": "Kingdom of Pontus",
+      "culture": "eastern",
+      "playable": "nonplayable",
+      "color": "#4f7942",
+      "leader_title": "Basileus",
+      "description": "An Anatolian power of mixed Greek and Persian blood, with scythed chariots and imperial ambitions."
+    },
+    {
+      "id": "carthage",
+      "name": "Republic of Carthage",
+      "culture": "carthaginian",
+      "playable": "unlockable",
+      "color": "#e0e0e0",
+      "leader_title": "Suffet",
+      "description": "The merchant republic of the western Mediterranean: silver, ships, mercenaries, and the Sacred Band."
+    },
+    {
+      "id": "numidia",
+      "name": "Numidian Kingdoms",
+      "culture": "barbarian",
+      "playable": "nonplayable",
+      "color": "#d2a679",
+      "leader_title": "King",
+      "description": "Desert riders and skirmishers of the African interior, unmatched in raid and evasion."
+    },
+    {
+      "id": "egypt",
+      "name": "Kingdom of the Nile",
+      "culture": "egyptian",
+      "playable": "unlockable",
+      "color": "#e6c84c",
+      "leader_title": "Pharaoh",
+      "description": "The wealthiest farmland in the world under dynasts who rule in the old style: temple, chariot, and river. A deliberately archaizing court, part pageant, part power."
+    },
+    {
+      "id": "gaul",
+      "name": "Gallic Tribes",
+      "culture": "barbarian",
+      "playable": "unlockable",
+      "color": "#4a7c3a",
+      "leader_title": "High Chieftain",
+      "description": "The great confederation of Celtic peoples: numberless warbands, fierce charges, restless chiefs."
+    },
+    {
+      "id": "germania",
+      "name": "Germanic Tribes",
+      "culture": "barbarian",
+      "playable": "unlockable",
+      "color": "#5b4a3a",
+      "leader_title": "War-King",
+      "description": "Forest peoples beyond the Rhine — spear hosts, night raids, and berserk fury."
+    },
+    {
+      "id": "britannia",
+      "name": "British Tribes",
+      "culture": "barbarian",
+      "playable": "unlockable",
+      "color": "#3a6ea5",
+      "leader_title": "High King",
+      "description": "Chariot-riding islanders behind the mists and the channel, painted for war."
+    },
+    {
+      "id": "dacia",
+      "name": "Dacian Tribes",
+      "culture": "barbarian",
+      "playable": "nonplayable",
+      "color": "#8a7f2a",
+      "leader_title": "King",
+      "description": "Carpathian highlanders rich in gold and iron, swinging the two-handed falx."
+    },
+    {
+      "id": "hispania",
+      "name": "Iberian Tribes",
+      "culture": "barbarian",
+      "playable": "nonplayable",
+      "color": "#b5651d",
+      "leader_title": "War Leader",
+      "description": "Hard peoples of the peninsula, masters of the ambush and the curved falcata."
+    },
+    {
+      "id": "scythia",
+      "name": "Scythian Hordes",
+      "culture": "barbarian",
+      "playable": "nonplayable",
+      "color": "#7f9f7f",
+      "leader_title": "Khan",
+      "description": "Nomads of the endless grass north of the Black Sea; every rider a bowman, every camp a fortress."
+    },
+    {
+      "id": "rebels",
+      "name": "Independents",
+      "culture": "neutral",
+      "playable": "nonplayable",
+      "color": "#808080",
+      "is_rebel": true,
+      "leader_title": "None",
+      "description": "Free towns, brigand bands, secessionists, and pirates owing allegiance to no crown."
+    }
   ]
 }

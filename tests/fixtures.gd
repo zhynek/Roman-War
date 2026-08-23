@@ -25,9 +25,9 @@ static func data() -> GameData:
 			"id": "test_government", "kind": "government", "cultures": ["roman"], "name": "Government",
 			"levels": [
 				{"id": "gov_1", "name": "Meeting Hall", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"law": 5}, "description": ""},
-				{"id": "gov_2", "name": "Town Hall", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"law": 5}, "description": ""},
-				{"id": "gov_3", "name": "City Hall", "min_settlement_level": "large_town", "cost": 1600, "build_turns": 3, "effects": {"law": 5}, "description": ""},
-				{"id": "gov_4", "name": "Great Hall", "min_settlement_level": "minor_city", "cost": 3200, "build_turns": 4, "effects": {"law": 5}, "description": ""},
+				{"id": "gov_2", "name": "Town Hall", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"law": 10}, "description": ""},
+				{"id": "gov_3", "name": "City Hall", "min_settlement_level": "large_town", "cost": 1600, "build_turns": 3, "effects": {"law": 15}, "description": ""},
+				{"id": "gov_4", "name": "Great Hall", "min_settlement_level": "minor_city", "cost": 3200, "build_turns": 4, "effects": {"law": 20}, "description": ""},
 			],
 		},
 		{
@@ -43,7 +43,7 @@ static func data() -> GameData:
 			"id": "test_farms", "kind": "farms", "cultures": ["roman", "barbarian"], "name": "Farms", "indestructible": true,
 			"levels": [
 				{"id": "farm_1", "name": "Cleared Land", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"growth": 0.5, "farm_income": 40}, "description": ""},
-				{"id": "farm_2", "name": "Field Rows", "min_settlement_level": "town", "cost": 600, "build_turns": 2, "effects": {"growth": 0.5, "farm_income": 40}, "description": ""},
+				{"id": "farm_2", "name": "Field Rows", "min_settlement_level": "town", "cost": 600, "build_turns": 2, "effects": {"growth": 1.0, "farm_income": 80}, "description": ""},
 			],
 		},
 		{
@@ -111,7 +111,19 @@ static func data() -> GameData:
 		}
 	game_data.regions["alpha"]["sea_zones"] = ["test_sea"]
 	game_data.regions["alpha"]["resources"] = ["grain"]
+	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
 	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+
+	game_data.units["test_merc"] = {
+		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",
+		"factions": ["mercenary"], "soldiers": 60, "attack": 7, "defense": 7, "morale": 7,
+		"cost": 500, "upkeep": 150, "requirements": {"building_kind": "government", "building_level": 1},
+		"era": "any", "description": "",
+	}
+	game_data.mercenary_pools = [{
+		"id": "test_pool", "regions": ["gamma", "delta"],
+		"units": [{"template": "test_merc", "max": 2, "initial": 1, "replenish_per_turn": 0.5, "cost_multiplier": 1.5}],
+	}]
 
 	return game_data
 
@@ -119,7 +131,9 @@ static func data() -> GameData:
 static func state(game_data: GameData) -> Dictionary:
 	## Two-faction world: red holds beta (capital) and epsilon, blue holds alpha.
 	var campaign_state := {
-		"turn": 0, "year": -270, "season": "summer", "rng_state": 0,
+		"turn": 0, "year": -270, "season": "summer", "rng_state": "0",
+		"difficulty": "medium", "campaign_mode": "long", "event_happiness": null,
+		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
 		"factions": {
 			"red": _faction("beta"),

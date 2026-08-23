@@ -69,7 +69,7 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 		var loss_pct := float(data.balance["plague"]["population_loss_pct_per_turn"])
 		population = int(round(population * (1.0 - loss_pct / 100.0)))
 
-	settlement["population"] = maxi(population, 400)
+	settlement["population"] = maxi(population, int(data.balance["growth"]["min_population"]))
 
 	for counter in ["slave_bonus_turns", "recently_conquered"]:
 		if int(settlement[counter]) > 0:
@@ -83,7 +83,7 @@ static func _plague_turn(data: GameData, settlement: Dictionary, rng: CampaignRn
 		return
 	# Plague risk grows with population beyond what health infrastructure supports.
 	var health := SettlementRules.effect_total(data, settlement, "health")
-	var capacity := 2000.0 + health * float(plague_rules["health_capacity_per_health_pct"])
+	var capacity := float(plague_rules["base_capacity"]) + health * float(plague_rules["health_capacity_per_health_pct"])
 	var excess := float(settlement["population"]) - capacity
 	if excess <= 0.0:
 		return

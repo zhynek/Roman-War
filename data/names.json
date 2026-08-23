@@ -1,0 +1,98 @@
+{
+  "$schema": "../schemas/names.schema.json",
+  "pools": {
+    "roman": {
+      "male": [
+        "Gaius", "Titus", "Marcus", "Lucius", "Publius", "Quintus", "Gnaeus", "Aulus",
+        "Decimus", "Spurius", "Sextus", "Tiberius", "Manius", "Numerius", "Servius",
+        "Appius", "Kaeso", "Mamercus", "Postumus", "Vibius", "Faustus", "Hostus",
+        "Proculus", "Agrippa", "Paullus"
+      ],
+      "female": [
+        "Claudia", "Julia", "Cornelia", "Livia", "Aemilia", "Fulvia", "Tullia",
+        "Valeria", "Antonia", "Fabia", "Sempronia", "Terentia", "Pomponia",
+        "Caecilia", "Lucretia", "Octavia"
+      ],
+      "surnames": [
+        "Julius", "Cornelius", "Claudius", "Fabius", "Valerius", "Aemilius",
+        "Sempronius", "Junius", "Licinius", "Domitius", "Calpurnius", "Servilius",
+        "Furius", "Postumius", "Manlius", "Papirius", "Sulpicius", "Terentius",
+        "Livius", "Cassius", "Atilius", "Duilius", "Otacilius", "Fulvius",
+        "Marcius", "Curius", "Hostilius", "Quinctius", "Horatius", "Lutatius"
+      ]
+    },
+    "greek": {
+      "male": [
+        "Antigonos", "Lysandros", "Demetrios", "Philippos", "Alexandros", "Seleukos",
+        "Kassandros", "Perdikkas", "Kleomenes", "Aratos", "Nikanor", "Theron",
+        "Xenophon", "Kallias", "Menandros", "Diodoros", "Euandros", "Sosthenes",
+        "Polykrates", "Timoleon", "Chairon", "Hippias", "Leonidas", "Pyrrhos",
+        "Agathokles", "Straton", "Archelaos", "Pausanias", "Eumenes", "Attalos"
+      ],
+      "female": [
+        "Berenike", "Arsinoe", "Olympias", "Phila", "Stratonike", "Laodike",
+        "Apama", "Eurydike", "Thessalonike", "Kleopatra", "Agariste", "Chrysis"
+      ]
+    },
+    "eastern": {
+      "male": [
+        "Mithridates", "Farnakes", "Arsakes", "Tigranes", "Orontes", "Artabanos",
+        "Vardanes", "Gotarzes", "Phraates", "Surena", "Bagadates", "Ariobarzanes",
+        "Artavasdes", "Datames", "Spitamenes", "Vologases", "Sinatrukes",
+        "Zariadres", "Mihran", "Otanes", "Hydarnes", "Megabyzos", "Bessos", "Aryandes"
+      ],
+      "female": [
+        "Rhodogune", "Amastris", "Musa", "Anahid", "Roxana", "Statira",
+        "Parysatis", "Atossa", "Mandane", "Apame"
+      ]
+    },
+    "carthaginian": {
+      "male": [
+        "Hanno", "Mago", "Hamilcar", "Hasdrubal", "Hannibal", "Bomilcar", "Gisco",
+        "Maharbal", "Carthalo", "Himilco", "Adherbal", "Bostar", "Malchus",
+        "Milkyaton", "Bodmelqart", "Abdeshmun", "Eshmunazar", "Bodashtart",
+        "Baalyaton", "Hiram", "Ithobaal", "Tabnit"
+      ],
+      "female": [
+        "Sophonisba", "Elissa", "Imilce", "Batnoam", "Arishat", "Batbaal",
+        "Ummashtart", "Amashtart", "Izebel", "Saphanbaal"
+      ]
+    },
+    "egyptian": {
+      "male": [
+        "Ptahmose", "Amenakht", "Khaemwaset", "Ramose", "Nakhtmin", "Djedhor",
+        "Ankhhaf", "Pasherenptah", "Horemheb", "Nebamun", "Wennefer", "Padiamun",
+        "Meryptah", "Sobekhotep", "Intef", "Ahmose", "Thutmose", "Bakenkhonsu",
+        "Panehesy", "Hori", "Nakhthorheb", "Psamtik", "Wahibre", "Senemut"
+      ],
+      "female": [
+        "Nefertari", "Meritamun", "Henuttawy", "Isetnofret", "Tausret",
+        "Naunakhte", "Ahhotep", "Satiah", "Takhat", "Nubkhaes", "Neferura",
+        "Baketamun"
+      ]
+    },
+    "barbarian": {
+      "male": [
+        "Brennus", "Vercassius", "Dumnorix", "Orgetorix", "Cingetorix",
+        "Viridomarus", "Britomaris", "Catuvolcos", "Luernios", "Bituitos",
+        "Teutomalos", "Acichorios", "Bolgios", "Cerethrios", "Comontorios",
+        "Cavaros", "Indibilis", "Mandonius", "Istolatios", "Ateas", "Skilurus",
+        "Palakos", "Oroles", "Scorylo", "Rubobostes", "Masinissa", "Syphax",
+        "Naravas", "Gala", "Segimerus", "Chariovalda", "Boiorix"
+      ],
+      "female": [
+        "Chiomara", "Onomaris", "Camma", "Bodicca", "Adiega", "Banona",
+        "Tomyris", "Tirgatao", "Amage", "Nammeia", "Ricagambeda", "Vlatucia"
+      ]
+    },
+    "neutral": {
+      "male": [
+        "Agron", "Pleuratos", "Dazos", "Bato", "Skerdilaidas", "Genthios",
+        "Philon", "Damon", "Aristion", "Zenon", "Pinnes", "Ballaios"
+      ],
+      "female": [
+        "Teuta", "Triteuta", "Etuta", "Philotera", "Myrtis", "Glykera"
+      ]
+    }
+  }
+}

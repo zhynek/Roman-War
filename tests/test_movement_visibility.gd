@@ -20,7 +20,7 @@ func test_forced_march_stretches_range(t) -> void:
 	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
 	MovementRules.reset_movement(data, state)
 
-	t.check(MovementRules.move_army(data, state, army_id, "delta"))
+	t.check(MovementRules.move_army(data, state, army_id, "delta"), "first step within budget")
 	t.check(MovementRules.move_army(data, state, army_id, "epsilon", true), "forced march stretches the budget")
 	t.check(MovementRules.move_army(data, state, army_id, "delta", true), "three steps on two points, at a price")
 	t.check(state["armies"][army_id]["forced_march"], "army marked fatigued")

@@ -35,7 +35,9 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	else:
 		factors.append({"label": "no_governor", "value": -float(order_rules["no_governor_penalty"])})
 
-	var squalor := GrowthRules.squalor_pct(data, settlement)
+	var squalor_rules: Dictionary = data.balance["squalor"]
+	var squalor := minf(float(settlement["population"]) / float(squalor_rules["population_per_pct"]),
+		float(squalor_rules["max_order_penalty_pct"]))
 	if squalor > 0.0:
 		factors.append({"label": "squalor", "value": -squalor})
 
@@ -61,6 +63,16 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	var growth := GrowthRules.total_pct(data, state, region_id)
 	if growth >= float(data.balance["public_order"]["population_boom_growth_pct"]):
 		factors.append({"label": "population_boom", "value": float(order_rules["population_boom_bonus"])})
+
+	var event_happiness = state.get("event_happiness")
+	if event_happiness != null and float(event_happiness["value"]) != 0.0:
+		factors.append({"label": "events", "value": float(event_happiness["value"])})
+
+	if settlement["owner"] != state.get("player_faction", ""):
+		var ai_bonus := float(data.balance["ai"]["difficulty_order_bonus"].get(
+			state.get("difficulty", "medium"), 0.0))
+		if ai_bonus != 0.0:
+			factors.append({"label": "ai_difficulty", "value": ai_bonus})
 
 	return factors
 
@@ -130,6 +142,7 @@ static func _damage_random_building(settlement: Dictionary, rng: CampaignRng) ->
 	var chain_ids: Array = settlement["buildings"].keys()
 	if chain_ids.is_empty():
 		return
+	chain_ids.sort()
 	var chain_id: String = rng.pick(chain_ids)
 	var tier := int(settlement["buildings"][chain_id]) - 1
 	if tier <= 0:

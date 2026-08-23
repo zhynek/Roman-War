@@ -40,3 +40,15 @@ func get_state() -> int:
 
 func set_state(value: int) -> void:
 	_rng.state = value
+
+
+func state_string() -> String:
+	## RNG state is a full 64-bit integer; JSON numbers are float64 and would
+	## silently round it. It therefore travels through GameState as a string.
+	return str(_rng.state)
+
+
+static func from_state_string(value: String) -> CampaignRng:
+	var rng := CampaignRng.new()
+	rng._rng.state = value.to_int()
+	return rng

@@ -1,0 +1,2343 @@
+{
+  "$schema": "../schemas/units.schema.json",
+  "units": [
+    {
+      "id": "rural_levies",
+      "name": "Rural Levies",
+      "class": "peasant",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 240,
+      "attack": 1,
+      "charge": 1,
+      "defense": 1,
+      "morale": 2,
+      "speed": 4,
+      "cost": 150,
+      "upkeep": 50,
+      "requirements": {
+        "building_kind": "farms",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Farmhands pressed into service with mattocks and hunting spears. They fill a battle line and little else, but every village can raise them."
+    },
+    {
+      "id": "bolt_throwers",
+      "name": "Bolt Throwers",
+      "class": "siege",
+      "culture": "greek",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 40,
+      "attack": 2,
+      "missile_attack": 14,
+      "defense": 3,
+      "morale": 5,
+      "speed": 3,
+      "cost": 500,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "siege_workshop",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "can_sap"
+      ],
+      "description": "Torsion engines that hurl iron-tipped shafts through shield and man alike. Their crews double as sappers when walls must come down."
+    },
+    {
+      "id": "stone_onagers",
+      "name": "Stone Onagers",
+      "class": "siege",
+      "culture": "greek",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 40,
+      "attack": 2,
+      "missile_attack": 18,
+      "defense": 3,
+      "morale": 5,
+      "speed": 2,
+      "cost": 800,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "siege_workshop",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "can_sap"
+      ],
+      "description": "Kicking beasts of timber and sinew that lob quarried stone over any rampart. Slow on the march, terrible once emplaced."
+    },
+    {
+      "id": "coastal_galley",
+      "name": "Coastal Galley",
+      "class": "ship",
+      "culture": "greek",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 60,
+      "attack": 6,
+      "missile_attack": 2,
+      "defense": 5,
+      "morale": 6,
+      "speed": 6,
+      "cost": 420,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "A light two-banked galley fit for patrol work, escort duty, and ferrying troops along the shore. Every harbor town can lay one down."
+    },
+    {
+      "id": "roman_town_watch",
+      "name": "Town Watch",
+      "class": "spear",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 160,
+      "attack": 3,
+      "defense": 6,
+      "morale": 4,
+      "speed": 4,
+      "cost": 260,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Townsmen issued a spear, a shield, and a rota of wall duty. They keep order at home and die bravely enough when war finds them there."
+    },
+    {
+      "id": "roman_velites",
+      "name": "Velites",
+      "class": "missile",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 6,
+      "charge": 1,
+      "defense": 4,
+      "morale": 5,
+      "speed": 5,
+      "cost": 300,
+      "upkeep": 90,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "pre_marian",
+      "attributes": [
+        "can_hide_forest"
+      ],
+      "description": "Young men in wolfskin caps who open the battle with a hail of javelins, then slip back through the maniples. Poor, quick, and eager to be noticed."
+    },
+    {
+      "id": "roman_hastati",
+      "name": "Hastati",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 120,
+      "attack": 7,
+      "missile_attack": 4,
+      "charge": 4,
+      "defense": 9,
+      "morale": 8,
+      "speed": 5,
+      "cost": 440,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "pre_marian",
+      "description": "The first line of the legion: younger citizens with heavy javelin, short sword, and tall shield. They blunt the enemy so older men need not."
+    },
+    {
+      "id": "roman_principes",
+      "name": "Principes",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 120,
+      "attack": 9,
+      "missile_attack": 4,
+      "charge": 4,
+      "defense": 11,
+      "morale": 10,
+      "speed": 5,
+      "cost": 580,
+      "upkeep": 160,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "pre_marian",
+      "description": "Citizens in their prime, mailed and steady, who take the fight where the hastati faltered. The second line is where battles are usually decided."
+    },
+    {
+      "id": "roman_triarii",
+      "name": "Triarii",
+      "class": "spear",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 100,
+      "attack": 8,
+      "charge": 3,
+      "defense": 14,
+      "morale": 12,
+      "speed": 4,
+      "cost": 700,
+      "upkeep": 180,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 4
+      },
+      "era": "pre_marian",
+      "attributes": [
+        "shield_wall"
+      ],
+      "description": "Grey-bearded veterans who kneel behind their spears as the last line of the Republic. When matters come to the triarii, matters are grave indeed."
+    },
+    {
+      "id": "roman_equites",
+      "name": "Equites",
+      "class": "cavalry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 60,
+      "attack": 6,
+      "charge": 8,
+      "defense": 8,
+      "morale": 7,
+      "speed": 8,
+      "cost": 460,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "pre_marian",
+      "description": "Wealthy young citizens serving on horseback more from duty than aptitude. Adequate for scouting and pursuit; do not ask more of them."
+    },
+    {
+      "id": "cohort_legionaries",
+      "name": "Cohort Legionaries",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 160,
+      "attack": 10,
+      "missile_attack": 4,
+      "charge": 4,
+      "defense": 13,
+      "morale": 11,
+      "speed": 5,
+      "cost": 720,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "post_marian",
+      "attributes": [
+        "testudo"
+      ],
+      "description": "Professional soldiers of the reformed legions, uniformly armed and drilled to march, dig, and kill on command. The state pays them; the state owns them."
+    },
+    {
+      "id": "eagle_cohort",
+      "name": "Eagle Cohort",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 160,
+      "attack": 12,
+      "missile_attack": 4,
+      "charge": 5,
+      "defense": 15,
+      "morale": 14,
+      "speed": 5,
+      "cost": 1080,
+      "upkeep": 270,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 5
+      },
+      "era": "post_marian",
+      "attributes": [
+        "testudo"
+      ],
+      "description": "The senior cohort that marches beside the legion's eagle, filled with decorated veterans of twenty campaigns. Losing the standard is worse than dying."
+    },
+    {
+      "id": "auxilia_spearmen",
+      "name": "Auxilia Spearmen",
+      "class": "spear",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 160,
+      "attack": 6,
+      "defense": 10,
+      "morale": 7,
+      "speed": 5,
+      "cost": 420,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "post_marian",
+      "description": "Provincial subjects serving under Roman officers for pay and the promise of citizenship. Cheap, plentiful, and steadier than their paymasters admit."
+    },
+    {
+      "id": "auxilia_archers",
+      "name": "Auxilia Archers",
+      "class": "missile",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 7,
+      "defense": 4,
+      "morale": 6,
+      "speed": 5,
+      "cost": 380,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "post_marian",
+      "description": "Rome breeds few bowmen, so she hires the provinces' best and drills them into ranks. They give the legions the reach nature denied them."
+    },
+    {
+      "id": "legionary_cavalry",
+      "name": "Legionary Cavalry",
+      "class": "cavalry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 60,
+      "attack": 8,
+      "charge": 10,
+      "defense": 11,
+      "morale": 10,
+      "speed": 8,
+      "cost": 640,
+      "upkeep": 180,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "post_marian",
+      "description": "Professional horsemen attached to the reformed legions, better mounted and better paid than the old equites. They guard the flanks and finish the routed."
+    },
+    {
+      "id": "oathsworn_of_mars",
+      "name": "Oathsworn of Mars",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 80,
+      "attack": 13,
+      "charge": 5,
+      "defense": 16,
+      "morale": 16,
+      "speed": 5,
+      "cost": 1200,
+      "upkeep": 300,
+      "requirements": {
+        "building_kind": "temple",
+        "building_level": 4,
+        "temple_god": "Mars"
+      },
+      "era": "any",
+      "description": "Soldiers consecrated at the great altar of Mars, sworn to return with their shields or upon them. They do not break, because the god is watching."
+    },
+    {
+      "id": "roman_general_guard",
+      "name": "Praetorian Escort",
+      "class": "general_bodyguard",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 40,
+      "attack": 10,
+      "charge": 10,
+      "defense": 16,
+      "morale": 14,
+      "speed": 8,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Hand-picked horsemen bound to a commander's person and career. Where the general's crest goes, their blades follow."
+    },
+    {
+      "id": "corvus_quinquereme",
+      "name": "Corvus Quinquereme",
+      "class": "ship",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 100,
+      "attack": 10,
+      "missile_attack": 4,
+      "defense": 10,
+      "morale": 8,
+      "speed": 6,
+      "cost": 780,
+      "upkeep": 190,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "A heavy five fitted with a spiked boarding bridge that turns sea fights into land fights. Rome cannot out-sail her rivals, so she out-stabs them."
+    },
+    {
+      "id": "polis_garrison",
+      "name": "Polis Garrison",
+      "class": "spear",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 160,
+      "attack": 3,
+      "defense": 7,
+      "morale": 4,
+      "speed": 4,
+      "cost": 270,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Poorer citizens with an old spear and their grandfather's shield, mustered to man the walls. In close ranks they can still make a hedge of points."
+    },
+    {
+      "id": "peltasts",
+      "name": "Peltasts",
+      "class": "missile",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 6,
+      "charge": 1,
+      "defense": 4,
+      "morale": 5,
+      "speed": 5,
+      "cost": 310,
+      "upkeep": 90,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "can_hide_forest"
+      ],
+      "description": "Javelin men with crescent shields who harry, withdraw, and harry again. Cheap to raise and infuriating to catch."
+    },
+    {
+      "id": "hellenic_archers",
+      "name": "Hellenic Archers",
+      "class": "missile",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 8,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 400,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Bowmen trained in the island fashion to arc volleys over the phalanx's sarissas. The pike holds the enemy; the arrow bleeds him."
+    },
+    {
+      "id": "citizen_hoplites",
+      "name": "Citizen Hoplites",
+      "class": "spear",
+      "culture": "greek",
+      "factions": [
+        "greek_cities"
+      ],
+      "soldiers": 120,
+      "attack": 6,
+      "defense": 12,
+      "morale": 9,
+      "speed": 4,
+      "cost": 480,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Free men of the polis in bronze and linen, shoulder to shoulder behind the great round shield. Each protects his neighbor, and so the city stands."
+    },
+    {
+      "id": "chosen_hoplites",
+      "name": "Chosen Hoplites",
+      "class": "spear",
+      "culture": "greek",
+      "factions": [
+        "greek_cities"
+      ],
+      "soldiers": 100,
+      "attack": 9,
+      "defense": 16,
+      "morale": 14,
+      "speed": 4,
+      "cost": 950,
+      "upkeep": 240,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 5
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "The picked band of the league, drilled year-round at public expense in the old Laconian manner. Their line has never been bought and rarely been bent."
+    },
+    {
+      "id": "levy_pikemen",
+      "name": "Levy Pikemen",
+      "class": "pike",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 160,
+      "attack": 5,
+      "defense": 10,
+      "morale": 6,
+      "speed": 4,
+      "cost": 400,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Farm boys handed a sixteen-foot sarissa and taught to lower it on command. From the front, indistinguishable from veterans until the line shivers."
+    },
+    {
+      "id": "phalanx_pikemen",
+      "name": "Phalanx Pikemen",
+      "class": "pike",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "seleucia"
+      ],
+      "soldiers": 160,
+      "attack": 7,
+      "defense": 13,
+      "morale": 9,
+      "speed": 4,
+      "cost": 620,
+      "upkeep": 170,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "The standing pike blocks of the successor kingdoms, five ranks of iron points presented to the foe. Frontally unapproachable; guard the flanks."
+    },
+    {
+      "id": "silver_pikes",
+      "name": "Silver Pikes",
+      "class": "pike",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "seleucia"
+      ],
+      "soldiers": 160,
+      "attack": 9,
+      "defense": 16,
+      "morale": 13,
+      "speed": 4,
+      "cost": 1000,
+      "upkeep": 250,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 5
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Veterans of the royal army whose silvered shields mark a lifetime under the sarissa. Kings rise and fall on whether these men hold."
+    },
+    {
+      "id": "hellenic_light_horse",
+      "name": "Hellenic Light Horse",
+      "class": "cavalry",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "charge": 6,
+      "defense": 6,
+      "morale": 6,
+      "speed": 9,
+      "cost": 400,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Javelin-armed riders hired from the horse-breeding borderlands. They screen the phalanx and run down whatever it breaks."
+    },
+    {
+      "id": "companion_lancers",
+      "name": "Companion Lancers",
+      "class": "cavalry",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "seleucia"
+      ],
+      "soldiers": 60,
+      "attack": 10,
+      "charge": 14,
+      "defense": 12,
+      "morale": 13,
+      "speed": 8,
+      "cost": 920,
+      "upkeep": 240,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "Noble horsemen in the tradition of the great king's own squadron, striking with the long lance at the hinge of a battle. The hammer to the phalanx's anvil."
+    },
+    {
+      "id": "thracian_falxmen",
+      "name": "Thracian Falxmen",
+      "class": "infantry",
+      "culture": "greek",
+      "factions": [
+        "thracia"
+      ],
+      "soldiers": 140,
+      "attack": 9,
+      "charge": 5,
+      "defense": 5,
+      "morale": 8,
+      "speed": 5,
+      "cost": 450,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Hillmen swinging the two-handed curved blade that shears through shield-rims and helmets. What they lack in armor they repay in ruin."
+    },
+    {
+      "id": "armored_tuskers",
+      "name": "Armored Tuskers",
+      "class": "elephant",
+      "culture": "greek",
+      "factions": [
+        "seleucia"
+      ],
+      "soldiers": 18,
+      "attack": 12,
+      "charge": 18,
+      "defense": 16,
+      "morale": 11,
+      "speed": 6,
+      "cost": 1400,
+      "upkeep": 320,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_infantry",
+        "frighten_cavalry"
+      ],
+      "description": "Great eastern elephants plated in bronze, towers swaying with javelin men. Horses bolt and battle lines dissolve at their coming."
+    },
+    {
+      "id": "hellenic_general_guard",
+      "name": "Strategos Guard",
+      "class": "general_bodyguard",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia"
+      ],
+      "soldiers": 40,
+      "attack": 9,
+      "charge": 11,
+      "defense": 15,
+      "morale": 14,
+      "speed": 8,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Companions of the commander's own household, armored in the royal style. Their duty is his life; their reward is his memory of it."
+    },
+    {
+      "id": "war_trireme",
+      "name": "War Trireme",
+      "class": "ship",
+      "culture": "greek",
+      "factions": [
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia",
+        "pontus"
+      ],
+      "soldiers": 80,
+      "attack": 9,
+      "missile_attack": 3,
+      "defense": 8,
+      "morale": 8,
+      "speed": 6,
+      "cost": 650,
+      "upkeep": 160,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "The classic three-banked ram-ship, rowed by free men who know why they row. Handled well, it guts heavier vessels and is gone before they settle."
+    },
+    {
+      "id": "eastern_hill_levies",
+      "name": "Hill Levies",
+      "class": "infantry",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia",
+        "pontus"
+      ],
+      "soldiers": 160,
+      "attack": 4,
+      "charge": 2,
+      "defense": 4,
+      "morale": 5,
+      "speed": 5,
+      "cost": 260,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "hardy"
+      ],
+      "description": "Mountain villagers with axes, knives, and hide shields, called down when the satrap demands men. Poor soldiers, but tireless ones."
+    },
+    {
+      "id": "eastern_spearmen",
+      "name": "Eastern Spearmen",
+      "class": "spear",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia",
+        "pontus"
+      ],
+      "soldiers": 160,
+      "attack": 5,
+      "defense": 9,
+      "morale": 6,
+      "speed": 5,
+      "cost": 380,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Wicker-shielded spearmen in the old imperial pattern, raised to hold ground while the horse decides the day. They ask only that the horse hurry."
+    },
+    {
+      "id": "eastern_foot_archers",
+      "name": "Eastern Foot Archers",
+      "class": "missile",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia",
+        "pontus"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 7,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 340,
+      "upkeep": 100,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Bowmen raised in lands where every boy learns the string before the plow. Massed, their arrow-storms darken the ground they fall on."
+    },
+    {
+      "id": "bronze_shield_pikemen",
+      "name": "Bronze Shield Pikemen",
+      "class": "pike",
+      "culture": "eastern",
+      "factions": [
+        "pontus"
+      ],
+      "soldiers": 160,
+      "attack": 8,
+      "defense": 14,
+      "morale": 11,
+      "speed": 4,
+      "cost": 780,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 4
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "The kingdom's Hellenized guard regiments, pike-armed behind burnished bronze faces. Persian blood, Macedonian drill, royal pay."
+    },
+    {
+      "id": "eastern_horse_archers",
+      "name": "Steppe-Bred Horse Archers",
+      "class": "horse_archer",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia"
+      ],
+      "soldiers": 60,
+      "attack": 3,
+      "missile_attack": 8,
+      "defense": 4,
+      "morale": 6,
+      "speed": 9,
+      "cost": 430,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving"
+      ],
+      "description": "Riders who loose over the shoulder at full gallop and are gone before the shaft lands. Chasing them is how armies die tired."
+    },
+    {
+      "id": "armored_horse_archers",
+      "name": "Armored Horse Archers",
+      "class": "horse_archer",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "missile_attack": 9,
+      "charge": 4,
+      "defense": 9,
+      "morale": 9,
+      "speed": 8,
+      "cost": 720,
+      "upkeep": 190,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "Retainers of the great houses in scale corselets, shooting from the saddle and closing with the mace when the quivers run dry."
+    },
+    {
+      "id": "cataphracts",
+      "name": "Cataphracts",
+      "class": "cavalry",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia"
+      ],
+      "soldiers": 60,
+      "attack": 11,
+      "charge": 16,
+      "defense": 19,
+      "morale": 13,
+      "speed": 7,
+      "cost": 1100,
+      "upkeep": 280,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 4
+      },
+      "era": "any",
+      "description": "Man and horse sheathed entire in iron scale, a wall that gallops. Their lance-charge is the argument the horse archers were saving."
+    },
+    {
+      "id": "scythed_chariots",
+      "name": "Scythed Chariots",
+      "class": "chariot",
+      "culture": "eastern",
+      "factions": [
+        "pontus"
+      ],
+      "soldiers": 40,
+      "attack": 9,
+      "charge": 14,
+      "defense": 8,
+      "morale": 8,
+      "speed": 8,
+      "cost": 900,
+      "upkeep": 240,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_infantry"
+      ],
+      "description": "Four-horse cars with whirling blades bolted to the axles, driven flat-out at the enemy's center. Against steady troops a gamble; against shaken ones a massacre."
+    },
+    {
+      "id": "eastern_lancers",
+      "name": "Eastern Lancers",
+      "class": "cavalry",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia",
+        "pontus"
+      ],
+      "soldiers": 60,
+      "attack": 7,
+      "charge": 10,
+      "defense": 9,
+      "morale": 8,
+      "speed": 8,
+      "cost": 560,
+      "upkeep": 160,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Landed gentry with lance and light armor, the everyday cavalry of the eastern kingdoms. Not the iron fist, but a serviceable open hand."
+    },
+    {
+      "id": "eastern_general_guard",
+      "name": "Satrap's Chosen",
+      "class": "general_bodyguard",
+      "culture": "eastern",
+      "factions": [
+        "parthia",
+        "armenia",
+        "pontus"
+      ],
+      "soldiers": 40,
+      "attack": 10,
+      "charge": 12,
+      "defense": 17,
+      "morale": 14,
+      "speed": 7,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Armored kinsmen riding at their lord's stirrup, sworn by fire and salt. To outlive him in battle would be a disgrace none intends to suffer."
+    },
+    {
+      "id": "punic_levy_spears",
+      "name": "Punic Levy Spears",
+      "class": "spear",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 160,
+      "attack": 3,
+      "defense": 6,
+      "morale": 4,
+      "speed": 4,
+      "cost": 260,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Subject Libyans mustered under Punic officers to watch walls and caravans. The Republic prefers to spend silver, but sometimes it must spend these."
+    },
+    {
+      "id": "libyan_javelinmen",
+      "name": "Libyan Javelinmen",
+      "class": "missile",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 6,
+      "defense": 4,
+      "morale": 5,
+      "speed": 5,
+      "cost": 320,
+      "upkeep": 90,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Hard-running skirmishers from the African hinterland, casting darts and insults in equal measure. They soften a line the citizen bands will finish."
+    },
+    {
+      "id": "punic_citizen_band",
+      "name": "Citizen Band",
+      "class": "spear",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 120,
+      "attack": 7,
+      "defense": 13,
+      "morale": 10,
+      "speed": 4,
+      "cost": 600,
+      "upkeep": 170,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Merchants' sons in white linen and bronze, fighting in the close Hellenic manner. Carthage arms her own only when the stakes are her own."
+    },
+    {
+      "id": "sacred_band_of_baal",
+      "name": "Sacred Band of Baal",
+      "class": "spear",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 100,
+      "attack": 10,
+      "defense": 17,
+      "morale": 16,
+      "speed": 4,
+      "cost": 1150,
+      "upkeep": 290,
+      "requirements": {
+        "building_kind": "temple",
+        "building_level": 4,
+        "temple_god": "Baal Hammon"
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Sons of the noblest houses, dedicated before the fires of Baal Hammon and armored like temple statues. They are buried where they fall, facing the enemy."
+    },
+    {
+      "id": "punic_light_horse",
+      "name": "Punic Light Horse",
+      "class": "cavalry",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "charge": 6,
+      "defense": 6,
+      "morale": 6,
+      "speed": 9,
+      "cost": 390,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving"
+      ],
+      "description": "Riders schooled in the African fashion — no saddle, no rest, no warning. They circle a column for days until it forgets what safety felt like."
+    },
+    {
+      "id": "punic_noble_horse",
+      "name": "Punic Noble Horse",
+      "class": "cavalry",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 60,
+      "attack": 9,
+      "charge": 12,
+      "defense": 12,
+      "morale": 12,
+      "speed": 8,
+      "cost": 850,
+      "upkeep": 230,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "The great trading families' own squadrons, superbly mounted and jealous of their honor. Rare enough that generals hoard them like the silver they cost."
+    },
+    {
+      "id": "forest_war_elephants",
+      "name": "Forest War Elephants",
+      "class": "elephant",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 18,
+      "attack": 10,
+      "charge": 16,
+      "defense": 12,
+      "morale": 10,
+      "speed": 6,
+      "cost": 1200,
+      "upkeep": 300,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_infantry",
+        "frighten_cavalry"
+      ],
+      "description": "Smaller beasts taken from the Atlas woods, driven by hired mahouts who ride with a spike for emergencies. What they start, panic finishes."
+    },
+    {
+      "id": "punic_general_guard",
+      "name": "Suffet's Guard",
+      "class": "general_bodyguard",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 40,
+      "attack": 9,
+      "charge": 11,
+      "defense": 16,
+      "morale": 14,
+      "speed": 8,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Citizen horsemen of proven family who attend the Republic's commanders abroad. Their loyalty is to Carthage; the general merely carries it."
+    },
+    {
+      "id": "punic_war_quinquereme",
+      "name": "Punic Quinquereme",
+      "class": "ship",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 100,
+      "attack": 11,
+      "defense": 10,
+      "morale": 9,
+      "speed": 6,
+      "cost": 760,
+      "upkeep": 190,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "A five built to numbered patterns in the covered ship-sheds, crewed by rowers who learned the oar in the cradle. The sea has been Punic a long time."
+    },
+    {
+      "id": "punic_heptereme",
+      "name": "Heptereme of the Suffetes",
+      "class": "ship",
+      "culture": "carthaginian",
+      "factions": [
+        "carthage"
+      ],
+      "soldiers": 140,
+      "attack": 14,
+      "missile_attack": 5,
+      "defense": 13,
+      "morale": 11,
+      "speed": 5,
+      "cost": 1100,
+      "upkeep": 270,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "A towering seven that serves as flagship, floating fortress, and statement of policy. Few enemies fight it; most simply give way."
+    },
+    {
+      "id": "nile_spear_levies",
+      "name": "Nile Spear Levies",
+      "class": "spear",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 200,
+      "attack": 3,
+      "defense": 5,
+      "morale": 4,
+      "speed": 4,
+      "cost": 240,
+      "upkeep": 70,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Fellahin called up between flood and harvest, spears in hands more used to sickles. The river gives Egypt more of them than any rival can bury."
+    },
+    {
+      "id": "desert_axemen",
+      "name": "Desert Axemen",
+      "class": "infantry",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 140,
+      "attack": 7,
+      "charge": 3,
+      "defense": 8,
+      "morale": 7,
+      "speed": 5,
+      "cost": 430,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "hardy"
+      ],
+      "description": "Frontier soldiers with the bronze khopesh and heavy axe, garrisoning the desert roads. Heat, thirst, and raiders have already culled the weak ones."
+    },
+    {
+      "id": "river_guard_spears",
+      "name": "River Guard",
+      "class": "spear",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 120,
+      "attack": 7,
+      "defense": 13,
+      "morale": 10,
+      "speed": 4,
+      "cost": 620,
+      "upkeep": 170,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "The standing regiments of the river cities, drilled in the tight new fashion the dynasts brought from over the sea. Old land, new spears."
+    },
+    {
+      "id": "nile_bowmen",
+      "name": "Nile Bowmen",
+      "class": "missile",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 7,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 340,
+      "upkeep": 100,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Archery is Egypt's oldest trade after farming, and these levies practice both. Their massed volleys have opened battles for two thousand years."
+    },
+    {
+      "id": "pharaohs_bowmen",
+      "name": "Pharaoh's Bowmen",
+      "class": "missile",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 11,
+      "defense": 5,
+      "morale": 9,
+      "speed": 5,
+      "cost": 640,
+      "upkeep": 180,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "Picked archers of the royal establishment bearing composite bows of horn and sinew. At two hundred paces they choose which eye."
+    },
+    {
+      "id": "delta_horsemen",
+      "name": "Delta Horsemen",
+      "class": "cavalry",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "charge": 7,
+      "defense": 7,
+      "morale": 6,
+      "speed": 8,
+      "cost": 400,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Light riders from the delta estates, better at scouting the wadis than breaking a line. Egypt's strength was never in the saddle."
+    },
+    {
+      "id": "pharaohs_chariots",
+      "name": "Pharaoh's Chariots",
+      "class": "chariot",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 40,
+      "attack": 8,
+      "missile_attack": 6,
+      "charge": 12,
+      "defense": 9,
+      "morale": 9,
+      "speed": 8,
+      "cost": 880,
+      "upkeep": 230,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Gilded cars in the ancient style, each bearing a driver and a master archer of the royal school. Antique, splendid, and still lethal on open ground."
+    },
+    {
+      "id": "axemen_of_horus",
+      "name": "Axemen of Horus",
+      "class": "infantry",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 100,
+      "attack": 12,
+      "charge": 5,
+      "defense": 14,
+      "morale": 15,
+      "speed": 5,
+      "cost": 1050,
+      "upkeep": 270,
+      "requirements": {
+        "building_kind": "temple",
+        "building_level": 4,
+        "temple_god": "Horus"
+      },
+      "era": "any",
+      "description": "Temple soldiers marked with the falcon god's eye, wielding great bronze axes blessed at the sanctuary. They fight as men already promised to the sky."
+    },
+    {
+      "id": "egyptian_general_guard",
+      "name": "Companions of the Palace",
+      "class": "general_bodyguard",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 40,
+      "attack": 9,
+      "charge": 11,
+      "defense": 16,
+      "morale": 14,
+      "speed": 8,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Armored riders of the court who shadow the general as the god's living standard. While one still breathes, so does his lord."
+    },
+    {
+      "id": "delta_war_galley",
+      "name": "Delta War Galley",
+      "class": "ship",
+      "culture": "egyptian",
+      "factions": [
+        "egypt"
+      ],
+      "soldiers": 80,
+      "attack": 9,
+      "missile_attack": 3,
+      "defense": 8,
+      "morale": 8,
+      "speed": 6,
+      "cost": 640,
+      "upkeep": 160,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "A broad-beamed galley built of imported cedar, as at home in the river mouths as on the open sea. It carries archers enough to sting before it rams."
+    },
+    {
+      "id": "tribal_warband",
+      "name": "Tribal Warband",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia",
+        "hispania"
+      ],
+      "soldiers": 200,
+      "attack": 7,
+      "charge": 5,
+      "defense": 5,
+      "morale": 7,
+      "speed": 5,
+      "cost": 330,
+      "upkeep": 100,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Every free man of the tribe with spear, long shield, and something to prove. Their first charge can break a line; their second rarely comes."
+    },
+    {
+      "id": "tribal_javelin_skirmishers",
+      "name": "Tribal Skirmishers",
+      "class": "missile",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia",
+        "hispania"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 6,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 280,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "can_hide_forest"
+      ],
+      "description": "Landless youths who fight from the treeline with fistfuls of light javelins. Killing one is easy; finding one is the trick."
+    },
+    {
+      "id": "forest_hunters",
+      "name": "Forest Hunters",
+      "class": "missile",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 8,
+      "defense": 3,
+      "morale": 6,
+      "speed": 5,
+      "cost": 400,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "can_hide_forest"
+      ],
+      "description": "Bowmen who feed their families from the deep woods and feed the crows in war. They shoot from cover, and the forest is all cover to them."
+    },
+    {
+      "id": "tribal_light_horse",
+      "name": "Tribal Light Horse",
+      "class": "cavalry",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia",
+        "hispania"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "charge": 6,
+      "defense": 5,
+      "morale": 6,
+      "speed": 9,
+      "cost": 370,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving"
+      ],
+      "description": "Riders on shaggy ponies who raid at dawn and are legend by dusk. They fight for plunder, which keeps them wonderfully motivated."
+    },
+    {
+      "id": "gallic_long_swords",
+      "name": "Gallic Long Swords",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "gaul"
+      ],
+      "soldiers": 160,
+      "attack": 9,
+      "charge": 6,
+      "defense": 7,
+      "morale": 9,
+      "speed": 5,
+      "cost": 480,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Warriors of standing with the long slashing blade the smiths of Gaul are famous for. They come on singing, and the song is about you."
+    },
+    {
+      "id": "gallic_oathsworn",
+      "name": "Gallic Oathsworn",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "gaul"
+      ],
+      "soldiers": 120,
+      "attack": 12,
+      "charge": 7,
+      "defense": 11,
+      "morale": 13,
+      "speed": 5,
+      "cost": 820,
+      "upkeep": 220,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Champions bound by oath to a chieftain's table, wearing the torcs of men who have never run. Each has a name-song; none intends it to end badly."
+    },
+    {
+      "id": "gallic_noble_riders",
+      "name": "Gallic Noble Riders",
+      "class": "cavalry",
+      "culture": "barbarian",
+      "factions": [
+        "gaul"
+      ],
+      "soldiers": 60,
+      "attack": 8,
+      "charge": 11,
+      "defense": 10,
+      "morale": 11,
+      "speed": 8,
+      "cost": 700,
+      "upkeep": 190,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Chieftains' sons in mail their fathers paid for in cattle and iron. The best horsemen north of the Alps, and they will tell you so."
+    },
+    {
+      "id": "germanic_spear_wall",
+      "name": "Germanic Spear Wall",
+      "class": "spear",
+      "culture": "barbarian",
+      "factions": [
+        "germania"
+      ],
+      "soldiers": 200,
+      "attack": 6,
+      "defense": 9,
+      "morale": 9,
+      "speed": 5,
+      "cost": 460,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "shield_wall"
+      ],
+      "description": "Clansmen locked shield to shield in a wall their fathers taught them to build. It moves slowly, gives ground never."
+    },
+    {
+      "id": "germanic_berserkers",
+      "name": "Berserkers",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "germania"
+      ],
+      "soldiers": 40,
+      "attack": 15,
+      "charge": 8,
+      "defense": 4,
+      "morale": 16,
+      "speed": 5,
+      "cost": 750,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "attributes": [
+        "warcry",
+        "frighten_infantry"
+      ],
+      "description": "Men who go to battle bare-chested and god-mad, biting their shield rims until the fury takes them. They cannot be frightened, only killed, and killing them is slow."
+    },
+    {
+      "id": "woad_raiders",
+      "name": "Woad Raiders",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "britannia"
+      ],
+      "soldiers": 160,
+      "attack": 8,
+      "charge": 6,
+      "defense": 6,
+      "morale": 9,
+      "speed": 5,
+      "cost": 440,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "warcry",
+        "can_hide_forest"
+      ],
+      "description": "Island warriors painted in blue spirals that mark them as already claimed by their gods. They burst from the mists howling, which is usually enough."
+    },
+    {
+      "id": "british_war_chariots",
+      "name": "British War Chariots",
+      "class": "chariot",
+      "culture": "barbarian",
+      "factions": [
+        "britannia"
+      ],
+      "soldiers": 40,
+      "attack": 8,
+      "missile_attack": 5,
+      "charge": 12,
+      "defense": 8,
+      "morale": 10,
+      "speed": 8,
+      "cost": 860,
+      "upkeep": 230,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_cavalry"
+      ],
+      "description": "Light wicker cars that deliver a champion to the fight and snatch him out again, drivers running the yoke-pole at full gallop for show. Horses that have never seen one bolt outright."
+    },
+    {
+      "id": "dacian_falx_reapers",
+      "name": "Falx Reapers",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "dacia"
+      ],
+      "soldiers": 140,
+      "attack": 10,
+      "charge": 6,
+      "defense": 4,
+      "morale": 9,
+      "speed": 5,
+      "cost": 470,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Highlanders swinging the great two-handed falx that opens helmets like shellfish. They trade their own safety for wounds no surgeon will attempt."
+    },
+    {
+      "id": "iberian_falcata_warriors",
+      "name": "Falcata Warriors",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "hispania"
+      ],
+      "soldiers": 140,
+      "attack": 9,
+      "charge": 5,
+      "defense": 8,
+      "morale": 8,
+      "speed": 5,
+      "cost": 460,
+      "upkeep": 140,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "can_hide_forest"
+      ],
+      "description": "Peninsular fighters with the forward-curved blade that bites like an axe and cuts like a sword. They strike from ambush, vanish, and strike again."
+    },
+    {
+      "id": "numidian_desert_riders",
+      "name": "Numidian Desert Riders",
+      "class": "cavalry",
+      "culture": "barbarian",
+      "factions": [
+        "numidia"
+      ],
+      "soldiers": 60,
+      "attack": 4,
+      "missile_attack": 7,
+      "charge": 4,
+      "defense": 4,
+      "morale": 7,
+      "speed": 9,
+      "cost": 420,
+      "upkeep": 120,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving",
+        "hardy"
+      ],
+      "description": "Bridleless riders guiding their mounts with a stick and a word, casting javelins and melting away. No cavalry on earth catches them; most stop trying."
+    },
+    {
+      "id": "numidian_javelineers",
+      "name": "Numidian Javelineers",
+      "class": "missile",
+      "culture": "barbarian",
+      "factions": [
+        "numidia"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 6,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 270,
+      "upkeep": 80,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "hardy"
+      ],
+      "description": "Herdsmen who learn the javelin defending goats from lions and jackals. Armies, they find, are slower than either."
+    },
+    {
+      "id": "numidian_spear_levies",
+      "name": "Numidian Spear Levies",
+      "class": "spear",
+      "culture": "barbarian",
+      "factions": [
+        "numidia"
+      ],
+      "soldiers": 160,
+      "attack": 3,
+      "defense": 5,
+      "morale": 4,
+      "speed": 5,
+      "cost": 240,
+      "upkeep": 70,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "hardy"
+      ],
+      "description": "Villagers of the high plains with hide shields and light spears. They are not the kingdom's pride, but they hold a hilltop while the riders work."
+    },
+    {
+      "id": "numidian_camel_scouts",
+      "name": "Camel Scouts",
+      "class": "cavalry",
+      "culture": "barbarian",
+      "factions": [
+        "numidia"
+      ],
+      "soldiers": 60,
+      "attack": 5,
+      "charge": 5,
+      "defense": 6,
+      "morale": 7,
+      "speed": 8,
+      "cost": 520,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_cavalry",
+        "hardy"
+      ],
+      "description": "Riders on groaning desert beasts that cross sands no horse survives. The camels' reek alone throws enemy cavalry into confusion."
+    },
+    {
+      "id": "scythian_horse_archers",
+      "name": "Scythian Horse Archers",
+      "class": "horse_archer",
+      "culture": "barbarian",
+      "factions": [
+        "scythia"
+      ],
+      "soldiers": 60,
+      "attack": 3,
+      "missile_attack": 8,
+      "defense": 4,
+      "morale": 6,
+      "speed": 9,
+      "cost": 430,
+      "upkeep": 130,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving"
+      ],
+      "description": "Grass-sea nomads who ride before they walk and shoot before they speak. Their retreat is a weapon; their pursuit is a sentence."
+    },
+    {
+      "id": "scythian_noble_archers",
+      "name": "Scythian Noble Archers",
+      "class": "horse_archer",
+      "culture": "barbarian",
+      "factions": [
+        "scythia"
+      ],
+      "soldiers": 60,
+      "attack": 6,
+      "missile_attack": 9,
+      "charge": 6,
+      "defense": 9,
+      "morale": 10,
+      "speed": 8,
+      "cost": 750,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "stables",
+        "building_level": 2
+      },
+      "era": "any",
+      "description": "Chieftains' kin in scale shirts sewn from horse-hoof and bronze, as ready with the sword as the bow. Gold-hilted, grave-bound, and glorious."
+    },
+    {
+      "id": "scythian_foot_archers",
+      "name": "Scythian Foot Archers",
+      "class": "missile",
+      "culture": "barbarian",
+      "factions": [
+        "scythia"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 7,
+      "defense": 3,
+      "morale": 5,
+      "speed": 5,
+      "cost": 300,
+      "upkeep": 90,
+      "requirements": {
+        "building_kind": "archery_range",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Camp followers and the horse-poor, still deadly with the short recurved bow every wagon carries. Even a Scythian without a horse is a Scythian with a bow."
+    },
+    {
+      "id": "steppe_spear_levies",
+      "name": "Steppe Spear Levies",
+      "class": "spear",
+      "culture": "barbarian",
+      "factions": [
+        "scythia"
+      ],
+      "soldiers": 160,
+      "attack": 3,
+      "defense": 5,
+      "morale": 4,
+      "speed": 5,
+      "cost": 240,
+      "upkeep": 70,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "hardy"
+      ],
+      "description": "Settled tributaries of the horde, armed with pike-length spears to guard the wagon laagers. The steppe hardens even its farmers."
+    },
+    {
+      "id": "tribal_warlord_guard",
+      "name": "Warlord's Companions",
+      "class": "general_bodyguard",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia",
+        "hispania",
+        "numidia",
+        "scythia"
+      ],
+      "soldiers": 40,
+      "attack": 9,
+      "charge": 10,
+      "defense": 14,
+      "morale": 14,
+      "speed": 8,
+      "cost": 0,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Sworn companions who feast at the warlord's fire and die at his shoulder. To come home without him is to have no home."
+    },
+    {
+      "id": "raiding_longboats",
+      "name": "Raiding Longboats",
+      "class": "ship",
+      "culture": "barbarian",
+      "factions": [
+        "gaul",
+        "germania",
+        "britannia"
+      ],
+      "soldiers": 60,
+      "attack": 6,
+      "defense": 5,
+      "morale": 7,
+      "speed": 7,
+      "cost": 380,
+      "upkeep": 100,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Hide-sailed, shallow-drafted boats that slip up estuaries no war galley dares. Built for raiding, they fight at sea only when cornered."
+    },
+    {
+      "id": "merc_cretan_archers",
+      "name": "Cretan Archers",
+      "class": "missile",
+      "culture": "greek",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 10,
+      "defense": 4,
+      "morale": 8,
+      "speed": 5,
+      "cost": 600,
+      "upkeep": 180,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Islanders whose bows have decided other people's wars for generations. Expensive, professional, and worth every drachma they overcharge."
+    },
+    {
+      "id": "merc_balearic_slingers",
+      "name": "Balearic Slingers",
+      "class": "missile",
+      "culture": "barbarian",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 120,
+      "attack": 2,
+      "missile_attack": 9,
+      "defense": 2,
+      "morale": 7,
+      "speed": 5,
+      "cost": 520,
+      "upkeep": 160,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Islanders raised with a sling in each fist and fed, as boys, only what they could knock off a post. Their lead shot cracks helmets at absurd range."
+    },
+    {
+      "id": "merc_gallic_swords",
+      "name": "Gallic Sword-Hands",
+      "class": "infantry",
+      "culture": "barbarian",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 160,
+      "attack": 9,
+      "charge": 6,
+      "defense": 7,
+      "morale": 8,
+      "speed": 5,
+      "cost": 550,
+      "upkeep": 170,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "warcry"
+      ],
+      "description": "Exiles and younger sons selling the long blade to whoever pays in gold or glory. They fight like men with nothing to lose, which is precisely what they are."
+    },
+    {
+      "id": "merc_hoplites",
+      "name": "Hired Hoplites",
+      "class": "spear",
+      "culture": "greek",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 120,
+      "attack": 6,
+      "defense": 12,
+      "morale": 8,
+      "speed": 4,
+      "cost": 620,
+      "upkeep": 190,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "phalanx"
+      ],
+      "description": "Veterans of the endless Greek wars, spear and shield for rent by the season. Their loyalty runs exactly as deep as the pay chest."
+    },
+    {
+      "id": "merc_war_elephants",
+      "name": "Hired War Elephants",
+      "class": "elephant",
+      "culture": "carthaginian",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 12,
+      "attack": 10,
+      "charge": 16,
+      "defense": 12,
+      "morale": 9,
+      "speed": 6,
+      "cost": 1500,
+      "upkeep": 380,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "frighten_infantry",
+        "frighten_cavalry"
+      ],
+      "description": "Beasts and mahouts hired as a matched set from the southern trade towns. Ruinously costly, occasionally ruinous to their employer, always ruinous to someone."
+    },
+    {
+      "id": "merc_numidian_riders",
+      "name": "Numidian Hire-Riders",
+      "class": "cavalry",
+      "culture": "barbarian",
+      "factions": [
+        "mercenary"
+      ],
+      "soldiers": 60,
+      "attack": 4,
+      "missile_attack": 7,
+      "charge": 4,
+      "defense": 4,
+      "morale": 7,
+      "speed": 9,
+      "cost": 500,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "era": "any",
+      "attributes": [
+        "fast_moving",
+        "hardy"
+      ],
+      "description": "Desert horsemen who follow the wars north for silver and remounts. Ask them to skirmish forever; never ask them to hold a line."
+    }
+  ]
+}

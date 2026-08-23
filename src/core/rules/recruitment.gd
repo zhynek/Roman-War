@@ -35,7 +35,8 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	if int(faction["treasury"]) < int(template["cost"]):
 		return false
 	var soldiers := int(template["soldiers"])
-	if int(settlement["population"]) - soldiers < 400:
+	var min_population := int(data.balance["growth"]["min_population"])
+	if int(settlement["population"]) - soldiers < min_population:
 		return false
 
 	faction["treasury"] = int(faction["treasury"]) - int(template["cost"])
@@ -85,9 +86,11 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 		if not _requirements_met(data, settlement, template):
 			continue
 		var missing_fraction := (100 - strength) / 100.0
-		var cost := int(round(int(template["cost"]) * missing_fraction * 0.5))
+		var cost_factor := float(data.balance["recruitment"]["retrain_cost_factor"])
+		var cost := int(round(int(template["cost"]) * missing_fraction * cost_factor))
 		var men := int(round(int(template["soldiers"]) * missing_fraction))
-		if int(faction["treasury"]) < cost or int(settlement["population"]) - men < 400:
+		var min_population := int(data.balance["growth"]["min_population"])
+		if int(faction["treasury"]) < cost or int(settlement["population"]) - men < min_population:
 			continue
 		faction["treasury"] = int(faction["treasury"]) - cost
 		settlement["population"] = int(settlement["population"]) - men

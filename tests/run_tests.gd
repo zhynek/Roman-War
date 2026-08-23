@@ -27,6 +27,11 @@ func _init() -> void:
 			var context := TestContext.new()
 			context.current = "%s :: %s" % [script_path.get_file(), method_name]
 			suite.call(method_name, context)
+			if context.checks_run == 0:
+				# A script error aborts the method without failing anything;
+				# zero recorded assertions is the tell.
+				context.failed = true
+				context.messages.append("no assertions ran (script error inside the test?)")
 			if context.failed:
 				failures += 1
 				print("FAIL  %s" % context.current)
@@ -57,19 +62,23 @@ class TestContext:
 	extends RefCounted
 	var current := ""
 	var failed := false
+	var checks_run := 0
 	var messages: Array = []
 
 	func check(condition: bool, message: String) -> void:
+		checks_run += 1
 		if not condition:
 			failed = true
 			messages.append(message)
 
 	func check_eq(actual, expected, message: String) -> void:
+		checks_run += 1
 		if not _loose_eq(actual, expected):
 			failed = true
 			messages.append("%s (expected %s, got %s)" % [message, str(expected), str(actual)])
 
 	func check_near(actual: float, expected: float, tolerance: float, message: String) -> void:
+		checks_run += 1
 		if absf(actual - expected) > tolerance:
 			failed = true
 			messages.append("%s (expected %f ± %f, got %f)" % [message, expected, tolerance, actual])

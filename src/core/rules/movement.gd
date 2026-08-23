@@ -61,6 +61,42 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 	return true
 
 
+static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to_region: String) -> bool:
+	## Naval transport, abstracted for the foundation: an army in a coastal
+	## region may cross to another coastal region on the same or an adjacent
+	## sea zone, spending its whole turn. Explicit embark-on-fleet transport
+	## can replace this later without touching callers.
+	var army: Dictionary = state["armies"][army_id]
+	var from_zones: Array = data.regions.get(army["region"], {}).get("sea_zones", [])
+	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
+	if from_zones.is_empty() or to_zones.is_empty() or army["region"] == to_region:
+		return false
+	var connected := false
+	for zone in from_zones:
+		if to_zones.has(zone):
+			connected = true
+			break
+		for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
+			if to_zones.has(adjacent_zone):
+				connected = true
+				break
+	if not connected:
+		return false
+	var cost := float(data.balance["movement"]["sea_move_cost"])
+	if cost > float(army["movement_left"]) + 0.0001:
+		return false
+	if _hostile_army_in(state, army["owner"], to_region):
+		return false
+	if state["settlements"].has(to_region):
+		var holder: String = state["settlements"][to_region]["owner"]
+		if _at_war(state, army["owner"], holder):
+			return false
+	army["movement_left"] = 0.0
+	army["region"] = to_region
+	_move_general_with_army(state, army)
+	return true
+
+
 static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_zone: String) -> bool:
 	var fleet: Dictionary = state["fleets"][fleet_id]
 	if not data.sea_zones.has(to_zone):

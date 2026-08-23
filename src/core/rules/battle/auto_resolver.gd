@@ -23,7 +23,7 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 	defender_strength *= float(wall_multipliers[mini(wall_level, wall_multipliers.size() - 1)])
 
 	if context.get("attacker_fatigued", false):
-		attacker_strength *= 0.8
+		attacker_strength *= float(battle_rules["fatigue_multiplier"])
 	if context.get("sally", false):
 		defender_strength *= 1.0 + float(data.balance["siege"]["sally_strength_bonus_pct"]) / 100.0
 
@@ -41,11 +41,14 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 		defender_casualties += float(battle_rules["loser_extra_casualty_pct"])
 	else:
 		attacker_casualties += float(battle_rules["loser_extra_casualty_pct"])
-	attacker_casualties = clampf(attacker_casualties, 2.0, 95.0)
-	defender_casualties = clampf(defender_casualties, 2.0, 95.0)
+	var casualty_min := float(battle_rules["casualty_min_pct"])
+	var casualty_max := float(battle_rules["casualty_max_pct"])
+	attacker_casualties = clampf(attacker_casualties, casualty_min, casualty_max)
+	defender_casualties = clampf(defender_casualties, casualty_min, casualty_max)
 
-	_apply_casualties(attacker_units, attacker_casualties, rng)
-	_apply_casualties(defender_units, defender_casualties, rng)
+	var scatter := float(battle_rules["unit_casualty_scatter_pct"])
+	_apply_casualties(attacker_units, attacker_casualties, scatter, rng)
+	_apply_casualties(defender_units, defender_casualties, scatter, rng)
 
 	var experience_gain := int(battle_rules["experience_gain_on_victory"])
 	var experience_max := int(data.balance["recruitment"]["experience_max"])
@@ -69,10 +72,10 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 	}
 
 
-func _apply_casualties(units: Array, casualty_pct: float, rng: CampaignRng) -> void:
+func _apply_casualties(units: Array, casualty_pct: float, scatter_pct: float, rng: CampaignRng) -> void:
 	for i in range(units.size() - 1, -1, -1):
 		var unit: Dictionary = units[i]
-		var unit_casualties := casualty_pct * rng.randf_pct(30.0)
+		var unit_casualties := casualty_pct * rng.randf_pct(scatter_pct)
 		var remaining := int(round(float(unit["strength_pct"]) * (1.0 - unit_casualties / 100.0)))
 		if remaining < 10:
 			units.remove_at(i)

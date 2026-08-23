@@ -10,7 +10,7 @@ func test_order_breakdown_shape(t) -> void:
 	for factor in PublicOrderRules.breakdown(data, state, "beta"):
 		by_label[factor["label"]] = factor["value"]
 	t.check_near(by_label.get("base", 0.0), 100.0, 0.001, "base is 100")
-	t.check_near(by_label.get("law", 0.0), 10.0, 0.001, "two government tiers of +5 law")
+	t.check_near(by_label.get("law", 0.0), 10.0, 0.001, "tier-2 government law standing value")
 	t.check(by_label.get("no_governor", 0.0) < 0.0, "ungoverned settlements suffer")
 	t.check(by_label.get("squalor", 0.0) < 0.0, "squalor hurts order")
 

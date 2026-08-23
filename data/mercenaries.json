@@ -1,0 +1,92 @@
+{
+  "$schema": "../schemas/mercenaries.schema.json",
+  "pools": [
+    {
+      "id": "italia",
+      "regions": ["latium", "etruria", "umbria", "campania", "apulia", "bruttium", "liguria", "sicilia_graeca"],
+      "units": [
+        { "template": "merc_hoplites", "max": 2, "initial": 1, "replenish_per_turn": 0.15, "cost_multiplier": 1.5 },
+        { "template": "merc_gallic_swords", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 },
+        { "template": "merc_balearic_slingers", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.6 }
+      ]
+    },
+    {
+      "id": "gallia_and_the_north",
+      "regions": ["cisalpina", "venetia", "narbonensis", "aquitania", "arvernia", "armorica", "belgica", "britannia", "cimbria", "suebia", "boiohaemum", "raetia", "noricum"],
+      "units": [
+        { "template": "merc_gallic_swords", "max": 3, "initial": 2, "replenish_per_turn": 0.3, "cost_multiplier": 1.3 },
+        { "template": "merc_hoplites", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.8 }
+      ]
+    },
+    {
+      "id": "iberia",
+      "regions": ["baetica", "lusitania", "celtiberia", "edetania", "gallaecia"],
+      "units": [
+        { "template": "merc_balearic_slingers", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 },
+        { "template": "merc_gallic_swords", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 },
+        { "template": "merc_numidian_riders", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.6 }
+      ]
+    },
+    {
+      "id": "africa_and_the_isles",
+      "regions": ["africa", "numidia", "mauretania", "sicilia_punica", "sardinia", "syrtica"],
+      "units": [
+        { "template": "merc_numidian_riders", "max": 3, "initial": 2, "replenish_per_turn": 0.3, "cost_multiplier": 1.3 },
+        { "template": "merc_balearic_slingers", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 },
+        { "template": "merc_war_elephants", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 2.0 }
+      ]
+    },
+    {
+      "id": "hellas",
+      "regions": ["epirus", "macedonia", "thessalia", "attica", "achaea", "laconia", "illyria"],
+      "units": [
+        { "template": "merc_hoplites", "max": 3, "initial": 2, "replenish_per_turn": 0.25, "cost_multiplier": 1.3 },
+        { "template": "merc_cretan_archers", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.7 },
+        { "template": "merc_gallic_swords", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.6 }
+      ]
+    },
+    {
+      "id": "aegean_isles",
+      "regions": ["creta", "rhodes", "cyprus"],
+      "units": [
+        { "template": "merc_cretan_archers", "max": 3, "initial": 2, "replenish_per_turn": 0.3, "cost_multiplier": 1.3 },
+        { "template": "merc_hoplites", "max": 1, "initial": 1, "replenish_per_turn": 0.15, "cost_multiplier": 1.5 }
+      ]
+    },
+    {
+      "id": "thrace_and_the_danube",
+      "regions": ["pannonia", "moesia", "dacia", "thracia", "europa", "scythia", "taurica"],
+      "units": [
+        { "template": "merc_gallic_swords", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 },
+        { "template": "merc_hoplites", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.7 }
+      ]
+    },
+    {
+      "id": "anatolia",
+      "regions": ["bithynia", "ionia", "caria", "galatia", "pontus", "cappadocia", "cilicia"],
+      "units": [
+        { "template": "merc_gallic_swords", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.5 },
+        { "template": "merc_cretan_archers", "max": 2, "initial": 1, "replenish_per_turn": 0.15, "cost_multiplier": 1.5 },
+        { "template": "merc_hoplites", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.4 }
+      ]
+    },
+    {
+      "id": "the_orient",
+      "regions": ["syria", "phoenicia", "judaea", "nabataea", "assyria", "babylonia", "media", "persis", "parthia", "armenia"],
+      "units": [
+        { "template": "merc_hoplites", "max": 2, "initial": 1, "replenish_per_turn": 0.15, "cost_multiplier": 1.6 },
+        { "template": "merc_cretan_archers", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.8 },
+        { "template": "merc_war_elephants", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 2.0 }
+      ]
+    },
+    {
+      "id": "nile_and_cyrene",
+      "regions": ["aegyptus", "heptanomis", "thebais", "cyrenaica"],
+      "units": [
+        { "template": "merc_hoplites", "max": 2, "initial": 1, "replenish_per_turn": 0.2, "cost_multiplier": 1.5 },
+        { "template": "merc_cretan_archers", "max": 2, "initial": 1, "replenish_per_turn": 0.15, "cost_multiplier": 1.5 },
+        { "template": "merc_numidian_riders", "max": 1, "initial": 1, "replenish_per_turn": 0.1, "cost_multiplier": 1.5 }
+      ]
+    }
+  ]
+}

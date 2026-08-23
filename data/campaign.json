@@ -1,0 +1,2997 @@
+{
+  "$schema": "../schemas/campaign.schema.json",
+  "id": "imperial",
+  "name": "The Imperial Campaign",
+  "start_year": -270,
+  "factions": [
+    {
+      "id": "senate",
+      "treasury": 10000,
+      "capital": "latium",
+      "settlements": [
+        {
+          "region": "latium",
+          "population": 13500,
+          "buildings": [
+            "roman_gov_5",
+            "roman_walls_4",
+            "roman_brk_4",
+            "field_farms_3",
+            "roman_jupiter_3"
+          ],
+          "garrison": [
+            {
+              "template": "roman_triarii",
+              "experience": 2
+            },
+            {
+              "template": "roman_principes",
+              "experience": 1
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "sen_appius_claudius",
+          "name": "Appius Claudius",
+          "age": 58,
+          "role": "leader",
+          "command": 3,
+          "management": 6,
+          "influence": 8,
+          "traits": [
+            "statesman",
+            "orator"
+          ],
+          "location": "latium"
+        },
+        {
+          "id": "sen_manius_valerius",
+          "name": "Manius Valerius",
+          "age": 46,
+          "role": "family",
+          "command": 5,
+          "management": 5,
+          "influence": 6,
+          "traits": [
+            "just"
+          ],
+          "location": "latium"
+        },
+        {
+          "id": "sen_titus_aemilius",
+          "name": "Titus Aemilius",
+          "age": 39,
+          "role": "family",
+          "command": 4,
+          "management": 6,
+          "influence": 5,
+          "traits": [
+            "steady_governor"
+          ],
+          "location": "latium"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "julii",
+          "stance": "alliance"
+        },
+        {
+          "faction": "junii",
+          "stance": "alliance"
+        },
+        {
+          "faction": "cornelii",
+          "stance": "alliance"
+        }
+      ]
+    },
+    {
+      "id": "julii",
+      "treasury": 5000,
+      "capital": "etruria",
+      "settlements": [
+        {
+          "region": "etruria",
+          "population": 6500,
+          "buildings": [
+            "roman_gov_4",
+            "roman_walls_3",
+            "roman_brk_3",
+            "field_farms_2",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_velites"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        },
+        {
+          "region": "umbria",
+          "population": 2400,
+          "buildings": [
+            "roman_gov_3",
+            "roman_walls_2",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "umbria",
+          "general": "julii_lucius",
+          "units": [
+            {
+              "template": "roman_general_guard"
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_velites"
+            },
+            {
+              "template": "roman_equites"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "julii_caeso",
+          "name": "Caeso Julius",
+          "age": 54,
+          "role": "leader",
+          "command": 6,
+          "management": 5,
+          "influence": 7,
+          "traits": [
+            "skilled_commander",
+            "statesman"
+          ],
+          "location": "etruria"
+        },
+        {
+          "id": "julii_lucius",
+          "name": "Lucius Julius",
+          "age": 31,
+          "role": "heir",
+          "father": "julii_caeso",
+          "command": 7,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "brave",
+            "energetic"
+          ],
+          "location": "umbria"
+        },
+        {
+          "id": "julii_gaius",
+          "name": "Gaius Julius",
+          "age": 24,
+          "role": "family",
+          "father": "julii_caeso",
+          "command": 4,
+          "management": 6,
+          "influence": 3,
+          "traits": [
+            "educated"
+          ],
+          "location": "umbria"
+        },
+        {
+          "id": "julii_spurius",
+          "name": "Spurius Julius",
+          "age": 47,
+          "role": "family",
+          "command": 5,
+          "management": 4,
+          "influence": 4,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "etruria"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "senate",
+          "stance": "alliance"
+        },
+        {
+          "faction": "junii",
+          "stance": "alliance"
+        },
+        {
+          "faction": "cornelii",
+          "stance": "alliance"
+        }
+      ]
+    },
+    {
+      "id": "junii",
+      "treasury": 4500,
+      "capital": "apulia",
+      "settlements": [
+        {
+          "region": "apulia",
+          "population": 7000,
+          "buildings": [
+            "roman_gov_4",
+            "roman_walls_3",
+            "roman_brk_3",
+            "civic_port_1",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_velites"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        },
+        {
+          "region": "bruttium",
+          "population": 2200,
+          "buildings": [
+            "roman_gov_3",
+            "roman_walls_2",
+            "field_farms_1"
+          ],
+          "garrison": [
+            {
+              "template": "roman_town_watch"
+            },
+            {
+              "template": "roman_velites"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "apulia",
+          "general": "junii_titus",
+          "units": [
+            {
+              "template": "roman_general_guard"
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_equites"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "junii_decimus",
+          "name": "Decimus Junius",
+          "age": 51,
+          "role": "leader",
+          "command": 5,
+          "management": 6,
+          "influence": 6,
+          "traits": [
+            "steady_governor"
+          ],
+          "location": "apulia"
+        },
+        {
+          "id": "junii_titus",
+          "name": "Titus Junius",
+          "age": 28,
+          "role": "heir",
+          "father": "junii_decimus",
+          "command": 6,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "brave"
+          ],
+          "location": "apulia"
+        },
+        {
+          "id": "junii_marcus",
+          "name": "Marcus Junius",
+          "age": 22,
+          "role": "family",
+          "father": "junii_decimus",
+          "command": 3,
+          "management": 5,
+          "influence": 3,
+          "traits": [
+            "educated"
+          ],
+          "location": "bruttium"
+        },
+        {
+          "id": "junii_vibius",
+          "name": "Vibius Junius",
+          "age": 44,
+          "role": "family",
+          "command": 5,
+          "management": 4,
+          "influence": 3,
+          "traits": [
+            "wary"
+          ],
+          "location": "apulia"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "senate",
+          "stance": "alliance"
+        },
+        {
+          "faction": "julii",
+          "stance": "alliance"
+        },
+        {
+          "faction": "cornelii",
+          "stance": "alliance"
+        }
+      ]
+    },
+    {
+      "id": "cornelii",
+      "treasury": 4500,
+      "capital": "campania",
+      "settlements": [
+        {
+          "region": "campania",
+          "population": 7500,
+          "buildings": [
+            "roman_gov_4",
+            "roman_walls_3",
+            "roman_brk_3",
+            "field_farms_3",
+            "civic_mkt_2"
+          ],
+          "garrison": [
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_principes"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        },
+        {
+          "region": "sicilia_graeca",
+          "population": 8000,
+          "buildings": [
+            "roman_gov_4",
+            "roman_walls_3",
+            "civic_port_2",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_velites"
+            },
+            {
+              "template": "roman_town_watch"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "sicilia_graeca",
+          "general": "cornelii_publius",
+          "units": [
+            {
+              "template": "roman_general_guard"
+            },
+            {
+              "template": "roman_hastati"
+            },
+            {
+              "template": "roman_velites"
+            },
+            {
+              "template": "roman_equites"
+            }
+          ]
+        }
+      ],
+      "fleets": [
+        {
+          "sea_zone": "mare_tyrrhenum",
+          "ships": [
+            {
+              "template": "corvus_quinquereme"
+            },
+            {
+              "template": "coastal_galley"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "cornelii_gnaeus",
+          "name": "Gnaeus Cornelius",
+          "age": 49,
+          "role": "leader",
+          "command": 6,
+          "management": 5,
+          "influence": 6,
+          "traits": [
+            "skilled_commander"
+          ],
+          "location": "campania"
+        },
+        {
+          "id": "cornelii_publius",
+          "name": "Publius Cornelius",
+          "age": 27,
+          "role": "heir",
+          "father": "cornelii_gnaeus",
+          "command": 6,
+          "management": 4,
+          "influence": 4,
+          "traits": [
+            "energetic"
+          ],
+          "location": "sicilia_graeca"
+        },
+        {
+          "id": "cornelii_manius",
+          "name": "Manius Cornelius",
+          "age": 21,
+          "role": "family",
+          "father": "cornelii_gnaeus",
+          "command": 3,
+          "management": 5,
+          "influence": 3,
+          "location": "campania"
+        },
+        {
+          "id": "cornelii_aulus",
+          "name": "Aulus Cornelius",
+          "age": 42,
+          "role": "family",
+          "command": 4,
+          "management": 6,
+          "influence": 4,
+          "traits": [
+            "keen_trader"
+          ],
+          "location": "sicilia_graeca"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "senate",
+          "stance": "alliance"
+        },
+        {
+          "faction": "julii",
+          "stance": "alliance"
+        },
+        {
+          "faction": "junii",
+          "stance": "alliance"
+        }
+      ]
+    },
+    {
+      "id": "carthage",
+      "treasury": 7500,
+      "capital": "africa",
+      "settlements": [
+        {
+          "region": "africa",
+          "population": 16000,
+          "buildings": [
+            "punic_gov_5",
+            "city_walls_4",
+            "punic_mkt_3",
+            "punic_port_3",
+            "carthaginian_tanit_3"
+          ],
+          "garrison": [
+            {
+              "template": "sacred_band_of_baal",
+              "experience": 1
+            },
+            {
+              "template": "punic_citizen_band"
+            },
+            {
+              "template": "punic_levy_spears"
+            },
+            {
+              "template": "libyan_javelinmen"
+            }
+          ]
+        },
+        {
+          "region": "sicilia_punica",
+          "population": 4000,
+          "buildings": [
+            "punic_gov_3",
+            "city_walls_2",
+            "punic_port_2",
+            "punic_nvy_2"
+          ],
+          "garrison": [
+            {
+              "template": "punic_levy_spears"
+            },
+            {
+              "template": "libyan_javelinmen"
+            },
+            {
+              "template": "punic_light_horse"
+            }
+          ]
+        },
+        {
+          "region": "sardinia",
+          "population": 2600,
+          "buildings": [
+            "punic_gov_3",
+            "city_walls_1",
+            "punic_port_1",
+            "silver_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "punic_levy_spears"
+            },
+            {
+              "template": "libyan_javelinmen"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "africa",
+          "general": "carthage_hasdrubal",
+          "units": [
+            {
+              "template": "punic_general_guard"
+            },
+            {
+              "template": "punic_citizen_band"
+            },
+            {
+              "template": "punic_light_horse"
+            },
+            {
+              "template": "forest_war_elephants"
+            }
+          ]
+        }
+      ],
+      "fleets": [
+        {
+          "sea_zone": "mare_africum",
+          "ships": [
+            {
+              "template": "punic_war_quinquereme"
+            },
+            {
+              "template": "punic_war_quinquereme"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "carthage_hanno",
+          "name": "Hanno",
+          "age": 52,
+          "role": "leader",
+          "command": 4,
+          "management": 7,
+          "influence": 7,
+          "traits": [
+            "keen_trader",
+            "statesman"
+          ],
+          "location": "africa"
+        },
+        {
+          "id": "carthage_hasdrubal",
+          "name": "Hasdrubal",
+          "age": 29,
+          "role": "heir",
+          "father": "carthage_hanno",
+          "command": 6,
+          "management": 4,
+          "influence": 4,
+          "traits": [
+            "brave"
+          ],
+          "location": "africa"
+        },
+        {
+          "id": "carthage_mago",
+          "name": "Mago",
+          "age": 24,
+          "role": "family",
+          "father": "carthage_hanno",
+          "command": 4,
+          "management": 5,
+          "influence": 3,
+          "location": "sicilia_punica"
+        },
+        {
+          "id": "carthage_bomilcar",
+          "name": "Bomilcar",
+          "age": 45,
+          "role": "family",
+          "command": 5,
+          "management": 5,
+          "influence": 4,
+          "traits": [
+            "logistician"
+          ],
+          "location": "sardinia"
+        },
+        {
+          "id": "carthage_gisco",
+          "name": "Gisco",
+          "age": 33,
+          "role": "family",
+          "command": 5,
+          "management": 3,
+          "influence": 3,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "sicilia_punica"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "numidia",
+          "stance": "trade"
+        },
+        {
+          "faction": "hispania",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "greek_cities",
+      "treasury": 5500,
+      "capital": "attica",
+      "settlements": [
+        {
+          "region": "attica",
+          "population": 8500,
+          "buildings": [
+            "greek_gov_4",
+            "city_walls_3",
+            "civic_mkt_3",
+            "civic_port_2",
+            "silver_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "citizen_hoplites"
+            },
+            {
+              "template": "polis_garrison"
+            },
+            {
+              "template": "peltasts"
+            }
+          ]
+        },
+        {
+          "region": "laconia",
+          "population": 6800,
+          "buildings": [
+            "greek_gov_4",
+            "civic_brk_3",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "chosen_hoplites",
+              "experience": 2
+            },
+            {
+              "template": "citizen_hoplites"
+            },
+            {
+              "template": "polis_garrison"
+            }
+          ]
+        },
+        {
+          "region": "rhodes",
+          "population": 4200,
+          "buildings": [
+            "greek_gov_3",
+            "city_walls_3",
+            "civic_port_1",
+            "civic_mkt_2"
+          ],
+          "garrison": [
+            {
+              "template": "polis_garrison"
+            },
+            {
+              "template": "hellenic_archers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "attica",
+          "general": "greek_theron",
+          "units": [
+            {
+              "template": "hellenic_general_guard"
+            },
+            {
+              "template": "citizen_hoplites"
+            },
+            {
+              "template": "citizen_hoplites"
+            },
+            {
+              "template": "peltasts"
+            },
+            {
+              "template": "hellenic_light_horse"
+            }
+          ]
+        }
+      ],
+      "fleets": [
+        {
+          "sea_zone": "mare_aegaeum",
+          "ships": [
+            {
+              "template": "war_trireme"
+            },
+            {
+              "template": "war_trireme"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "greek_aratos",
+          "name": "Aratos",
+          "age": 50,
+          "role": "leader",
+          "command": 4,
+          "management": 6,
+          "influence": 7,
+          "traits": [
+            "orator",
+            "statesman"
+          ],
+          "location": "attica"
+        },
+        {
+          "id": "greek_kleomenes",
+          "name": "Kleomenes",
+          "age": 30,
+          "role": "heir",
+          "command": 6,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "brave",
+            "disciplinarian"
+          ],
+          "location": "laconia"
+        },
+        {
+          "id": "greek_theron",
+          "name": "Theron",
+          "age": 26,
+          "role": "family",
+          "father": "greek_aratos",
+          "command": 4,
+          "management": 4,
+          "influence": 3,
+          "location": "attica"
+        },
+        {
+          "id": "greek_timoleon",
+          "name": "Timoleon",
+          "age": 44,
+          "role": "family",
+          "command": 5,
+          "management": 5,
+          "influence": 4,
+          "traits": [
+            "just"
+          ],
+          "location": "rhodes"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "egypt",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "macedon",
+      "treasury": 4000,
+      "capital": "macedonia",
+      "settlements": [
+        {
+          "region": "macedonia",
+          "population": 8000,
+          "buildings": [
+            "greek_gov_4",
+            "city_walls_3",
+            "civic_brk_3",
+            "greek_ares_2"
+          ],
+          "garrison": [
+            {
+              "template": "phalanx_pikemen"
+            },
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "hellenic_light_horse"
+            }
+          ]
+        },
+        {
+          "region": "thessalia",
+          "population": 3000,
+          "buildings": [
+            "greek_gov_3",
+            "field_farms_2",
+            "civic_stb_1"
+          ],
+          "garrison": [
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "hellenic_light_horse"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "macedonia",
+          "general": "macedon_demetrios",
+          "units": [
+            {
+              "template": "hellenic_general_guard"
+            },
+            {
+              "template": "phalanx_pikemen"
+            },
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "companion_lancers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "macedon_antigonos",
+          "name": "Antigonos",
+          "age": 49,
+          "role": "leader",
+          "command": 7,
+          "management": 4,
+          "influence": 6,
+          "traits": [
+            "skilled_commander",
+            "educated"
+          ],
+          "location": "macedonia"
+        },
+        {
+          "id": "macedon_demetrios",
+          "name": "Demetrios",
+          "age": 24,
+          "role": "heir",
+          "father": "macedon_antigonos",
+          "command": 5,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "brave"
+          ],
+          "location": "macedonia"
+        },
+        {
+          "id": "macedon_philippos",
+          "name": "Philippos",
+          "age": 35,
+          "role": "family",
+          "command": 4,
+          "management": 5,
+          "influence": 3,
+          "location": "thessalia"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "seleucia",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "thracia",
+      "treasury": 3000,
+      "capital": "thracia",
+      "settlements": [
+        {
+          "region": "thracia",
+          "population": 2600,
+          "buildings": [
+            "greek_gov_3",
+            "city_walls_1",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "thracian_falxmen"
+            },
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "peltasts"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "thracia",
+          "units": [
+            {
+              "template": "thracian_falxmen"
+            },
+            {
+              "template": "peltasts"
+            },
+            {
+              "template": "hellenic_light_horse"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "thracia_straton",
+          "name": "Straton",
+          "age": 46,
+          "role": "leader",
+          "command": 5,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "cruel"
+          ],
+          "location": "thracia"
+        },
+        {
+          "id": "thracia_archelaos",
+          "name": "Archelaos",
+          "age": 22,
+          "role": "heir",
+          "father": "thracia_straton",
+          "command": 4,
+          "management": 2,
+          "influence": 2,
+          "location": "thracia"
+        }
+      ]
+    },
+    {
+      "id": "seleucia",
+      "treasury": 6000,
+      "capital": "syria",
+      "settlements": [
+        {
+          "region": "syria",
+          "population": 9500,
+          "buildings": [
+            "greek_gov_4",
+            "city_walls_3",
+            "civic_brk_3",
+            "civic_mkt_3",
+            "greek_zeus_3"
+          ],
+          "garrison": [
+            {
+              "template": "phalanx_pikemen"
+            },
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "hellenic_archers"
+            }
+          ]
+        },
+        {
+          "region": "assyria",
+          "population": 3200,
+          "buildings": [
+            "greek_gov_3",
+            "field_farms_2",
+            "common_roads_1"
+          ],
+          "garrison": [
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "peltasts"
+            }
+          ]
+        },
+        {
+          "region": "babylonia",
+          "population": 11000,
+          "buildings": [
+            "greek_gov_4",
+            "city_walls_2",
+            "field_farms_4",
+            "civic_mkt_3"
+          ],
+          "garrison": [
+            {
+              "template": "levy_pikemen"
+            },
+            {
+              "template": "polis_garrison"
+            },
+            {
+              "template": "hellenic_archers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "syria",
+          "general": "seleucia_alexandros",
+          "units": [
+            {
+              "template": "hellenic_general_guard"
+            },
+            {
+              "template": "phalanx_pikemen"
+            },
+            {
+              "template": "phalanx_pikemen"
+            },
+            {
+              "template": "companion_lancers"
+            },
+            {
+              "template": "armored_tuskers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "seleucia_seleukos",
+          "name": "Seleukos",
+          "age": 55,
+          "role": "leader",
+          "command": 6,
+          "management": 6,
+          "influence": 7,
+          "traits": [
+            "statesman",
+            "master_builder"
+          ],
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_alexandros",
+          "name": "Alexandros",
+          "age": 28,
+          "role": "heir",
+          "father": "seleucia_seleukos",
+          "command": 6,
+          "management": 3,
+          "influence": 4,
+          "traits": [
+            "brave"
+          ],
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_nikanor",
+          "name": "Nikanor",
+          "age": 33,
+          "role": "family",
+          "command": 5,
+          "management": 4,
+          "influence": 3,
+          "traits": [
+            "siege_master"
+          ],
+          "location": "babylonia"
+        },
+        {
+          "id": "seleucia_diodoros",
+          "name": "Diodoros",
+          "age": 41,
+          "role": "family",
+          "command": 3,
+          "management": 6,
+          "influence": 4,
+          "traits": [
+            "steady_governor"
+          ],
+          "location": "assyria"
+        },
+        {
+          "id": "seleucia_menandros",
+          "name": "Menandros",
+          "age": 19,
+          "role": "family",
+          "father": "seleucia_diodoros",
+          "command": 3,
+          "management": 3,
+          "influence": 2,
+          "location": "syria"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "macedon",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "egypt",
+      "treasury": 7000,
+      "capital": "aegyptus",
+      "settlements": [
+        {
+          "region": "aegyptus",
+          "population": 15000,
+          "buildings": [
+            "egypt_gov_5",
+            "city_walls_3",
+            "nile_farms_4",
+            "civic_port_2",
+            "egyptian_ra_3"
+          ],
+          "garrison": [
+            {
+              "template": "river_guard_spears"
+            },
+            {
+              "template": "nile_spear_levies"
+            },
+            {
+              "template": "nile_bowmen"
+            },
+            {
+              "template": "desert_axemen"
+            }
+          ]
+        },
+        {
+          "region": "heptanomis",
+          "population": 8500,
+          "buildings": [
+            "egypt_gov_4",
+            "nile_farms_3",
+            "city_walls_2",
+            "egyptian_osiris_3"
+          ],
+          "garrison": [
+            {
+              "template": "nile_spear_levies"
+            },
+            {
+              "template": "nile_bowmen"
+            },
+            {
+              "template": "desert_axemen"
+            }
+          ]
+        },
+        {
+          "region": "thebais",
+          "population": 5000,
+          "buildings": [
+            "egypt_gov_3",
+            "nile_farms_3",
+            "egyptian_horus_2"
+          ],
+          "garrison": [
+            {
+              "template": "nile_spear_levies"
+            },
+            {
+              "template": "nile_bowmen"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "aegyptus",
+          "general": "egypt_thutmose",
+          "units": [
+            {
+              "template": "egyptian_general_guard"
+            },
+            {
+              "template": "river_guard_spears"
+            },
+            {
+              "template": "nile_bowmen"
+            },
+            {
+              "template": "pharaohs_chariots"
+            }
+          ]
+        }
+      ],
+      "fleets": [
+        {
+          "sea_zone": "mare_aegyptium",
+          "ships": [
+            {
+              "template": "delta_war_galley"
+            },
+            {
+              "template": "delta_war_galley"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "egypt_ahmose",
+          "name": "Ahmose",
+          "age": 50,
+          "role": "leader",
+          "command": 4,
+          "management": 7,
+          "influence": 7,
+          "traits": [
+            "statesman",
+            "lord_of_acres"
+          ],
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_thutmose",
+          "name": "Thutmose",
+          "age": 26,
+          "role": "heir",
+          "father": "egypt_ahmose",
+          "command": 5,
+          "management": 4,
+          "influence": 4,
+          "traits": [
+            "energetic"
+          ],
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_ramose",
+          "name": "Ramose",
+          "age": 30,
+          "role": "family",
+          "father": "egypt_ahmose",
+          "command": 3,
+          "management": 6,
+          "influence": 3,
+          "traits": [
+            "harsh_taxman"
+          ],
+          "location": "heptanomis"
+        },
+        {
+          "id": "egypt_djedhor",
+          "name": "Djedhor",
+          "age": 45,
+          "role": "family",
+          "command": 4,
+          "management": 5,
+          "influence": 4,
+          "traits": [
+            "pious"
+          ],
+          "location": "thebais"
+        },
+        {
+          "id": "egypt_psamtik",
+          "name": "Psamtik",
+          "age": 19,
+          "role": "family",
+          "father": "egypt_djedhor",
+          "command": 3,
+          "management": 3,
+          "influence": 2,
+          "location": "aegyptus"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "greek_cities",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "parthia",
+      "treasury": 4000,
+      "capital": "parthia",
+      "settlements": [
+        {
+          "region": "parthia",
+          "population": 2400,
+          "buildings": [
+            "eastern_gov_3",
+            "city_walls_1",
+            "eastern_stb_3"
+          ],
+          "garrison": [
+            {
+              "template": "eastern_horse_archers"
+            },
+            {
+              "template": "eastern_hill_levies"
+            }
+          ]
+        },
+        {
+          "region": "persis",
+          "population": 3500,
+          "buildings": [
+            "eastern_gov_3",
+            "city_walls_2",
+            "field_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "eastern_spearmen"
+            },
+            {
+              "template": "eastern_foot_archers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "parthia",
+          "general": "parthia_phraates",
+          "units": [
+            {
+              "template": "eastern_general_guard"
+            },
+            {
+              "template": "eastern_horse_archers"
+            },
+            {
+              "template": "eastern_horse_archers"
+            },
+            {
+              "template": "eastern_lancers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "parthia_arsakes",
+          "name": "Arsakes",
+          "age": 48,
+          "role": "leader",
+          "command": 7,
+          "management": 4,
+          "influence": 6,
+          "traits": [
+            "skilled_commander",
+            "energetic"
+          ],
+          "location": "parthia"
+        },
+        {
+          "id": "parthia_phraates",
+          "name": "Phraates",
+          "age": 25,
+          "role": "heir",
+          "father": "parthia_arsakes",
+          "command": 6,
+          "management": 2,
+          "influence": 3,
+          "traits": [
+            "brave"
+          ],
+          "location": "parthia"
+        },
+        {
+          "id": "parthia_surena",
+          "name": "Surena",
+          "age": 38,
+          "role": "family",
+          "command": 6,
+          "management": 3,
+          "influence": 3,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "persis"
+        },
+        {
+          "id": "parthia_bagadates",
+          "name": "Bagadates",
+          "age": 29,
+          "role": "family",
+          "command": 4,
+          "management": 4,
+          "influence": 2,
+          "location": "parthia"
+        }
+      ]
+    },
+    {
+      "id": "armenia",
+      "treasury": 3500,
+      "capital": "armenia",
+      "settlements": [
+        {
+          "region": "armenia",
+          "population": 2600,
+          "buildings": [
+            "eastern_gov_3",
+            "city_walls_1",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "eastern_hill_levies"
+            },
+            {
+              "template": "eastern_horse_archers"
+            },
+            {
+              "template": "eastern_spearmen"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "armenia",
+          "units": [
+            {
+              "template": "eastern_horse_archers"
+            },
+            {
+              "template": "eastern_lancers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "armenia_orontes",
+          "name": "Orontes",
+          "age": 44,
+          "role": "leader",
+          "command": 5,
+          "management": 4,
+          "influence": 5,
+          "traits": [
+            "wary"
+          ],
+          "location": "armenia"
+        },
+        {
+          "id": "armenia_tigranes",
+          "name": "Tigranes",
+          "age": 20,
+          "role": "heir",
+          "father": "armenia_orontes",
+          "command": 4,
+          "management": 2,
+          "influence": 3,
+          "location": "armenia"
+        },
+        {
+          "id": "armenia_artavasdes",
+          "name": "Artavasdes",
+          "age": 36,
+          "role": "family",
+          "command": 4,
+          "management": 4,
+          "influence": 2,
+          "location": "armenia"
+        }
+      ]
+    },
+    {
+      "id": "pontus",
+      "treasury": 3500,
+      "capital": "pontus",
+      "settlements": [
+        {
+          "region": "pontus",
+          "population": 3800,
+          "buildings": [
+            "eastern_gov_3",
+            "city_walls_2",
+            "civic_port_1",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "eastern_spearmen"
+            },
+            {
+              "template": "eastern_foot_archers"
+            },
+            {
+              "template": "eastern_hill_levies"
+            }
+          ]
+        },
+        {
+          "region": "cappadocia",
+          "population": 2200,
+          "buildings": [
+            "eastern_gov_3",
+            "city_walls_1",
+            "silver_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "eastern_hill_levies"
+            },
+            {
+              "template": "eastern_lancers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "pontus",
+          "units": [
+            {
+              "template": "bronze_shield_pikemen"
+            },
+            {
+              "template": "eastern_foot_archers"
+            },
+            {
+              "template": "scythed_chariots"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "pontus_mithridates",
+          "name": "Mithridates",
+          "age": 47,
+          "role": "leader",
+          "command": 6,
+          "management": 4,
+          "influence": 6,
+          "traits": [
+            "skilled_commander",
+            "arrogant"
+          ],
+          "location": "pontus"
+        },
+        {
+          "id": "pontus_farnakes",
+          "name": "Farnakes",
+          "age": 23,
+          "role": "heir",
+          "father": "pontus_mithridates",
+          "command": 4,
+          "management": 3,
+          "influence": 3,
+          "location": "pontus"
+        },
+        {
+          "id": "pontus_ariobarzanes",
+          "name": "Ariobarzanes",
+          "age": 40,
+          "role": "family",
+          "command": 4,
+          "management": 5,
+          "influence": 3,
+          "traits": [
+            "steady_governor"
+          ],
+          "location": "cappadocia"
+        }
+      ]
+    },
+    {
+      "id": "gaul",
+      "treasury": 4000,
+      "capital": "arvernia",
+      "settlements": [
+        {
+          "region": "arvernia",
+          "population": 6500,
+          "buildings": [
+            "tribal_gov_4",
+            "tribal_walls_3",
+            "tribal_brk_3",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "gallic_long_swords"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_javelin_skirmishers"
+            }
+          ]
+        },
+        {
+          "region": "aquitania",
+          "population": 2400,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_2",
+            "tribal_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_light_horse"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "arvernia",
+          "general": "gaul_bituitos",
+          "units": [
+            {
+              "template": "tribal_warlord_guard"
+            },
+            {
+              "template": "gallic_long_swords"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "gallic_noble_riders"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "gaul_luernios",
+          "name": "Luernios",
+          "age": 45,
+          "role": "leader",
+          "command": 6,
+          "management": 4,
+          "influence": 7,
+          "traits": [
+            "openhanded"
+          ],
+          "location": "arvernia"
+        },
+        {
+          "id": "gaul_bituitos",
+          "name": "Bituitos",
+          "age": 21,
+          "role": "heir",
+          "father": "gaul_luernios",
+          "command": 5,
+          "management": 2,
+          "influence": 3,
+          "traits": [
+            "brave"
+          ],
+          "location": "arvernia"
+        },
+        {
+          "id": "gaul_dumnorix",
+          "name": "Dumnorix",
+          "age": 33,
+          "role": "family",
+          "command": 5,
+          "management": 4,
+          "influence": 4,
+          "traits": [
+            "keen_trader"
+          ],
+          "location": "aquitania"
+        },
+        {
+          "id": "gaul_orgetorix",
+          "name": "Orgetorix",
+          "age": 27,
+          "role": "family",
+          "command": 5,
+          "management": 3,
+          "influence": 3,
+          "location": "arvernia"
+        }
+      ]
+    },
+    {
+      "id": "germania",
+      "treasury": 3500,
+      "capital": "suebia",
+      "settlements": [
+        {
+          "region": "suebia",
+          "population": 2400,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_2",
+            "tribal_brk_2",
+            "tribal_farms_2"
+          ],
+          "garrison": [
+            {
+              "template": "germanic_spear_wall"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_javelin_skirmishers"
+            }
+          ]
+        },
+        {
+          "region": "cimbria",
+          "population": 1200,
+          "buildings": [
+            "tribal_gov_2",
+            "tribal_walls_1",
+            "tribal_port_1"
+          ],
+          "garrison": [
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "forest_hunters"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "suebia",
+          "general": "germania_chariovalda",
+          "units": [
+            {
+              "template": "tribal_warlord_guard"
+            },
+            {
+              "template": "germanic_spear_wall"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "germanic_berserkers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "germania_segimerus",
+          "name": "Segimerus",
+          "age": 42,
+          "role": "leader",
+          "command": 6,
+          "management": 3,
+          "influence": 5,
+          "traits": [
+            "brave",
+            "cruel"
+          ],
+          "location": "suebia"
+        },
+        {
+          "id": "germania_chariovalda",
+          "name": "Chariovalda",
+          "age": 19,
+          "role": "heir",
+          "father": "germania_segimerus",
+          "command": 5,
+          "management": 2,
+          "influence": 2,
+          "traits": [
+            "brave"
+          ],
+          "location": "suebia"
+        },
+        {
+          "id": "germania_boiorix",
+          "name": "Boiorix",
+          "age": 37,
+          "role": "family",
+          "command": 5,
+          "management": 3,
+          "influence": 3,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "cimbria"
+        }
+      ]
+    },
+    {
+      "id": "britannia",
+      "treasury": 3000,
+      "capital": "britannia",
+      "settlements": [
+        {
+          "region": "britannia",
+          "population": 2200,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_2",
+            "tribal_farms_2",
+            "tribal_port_1"
+          ],
+          "garrison": [
+            {
+              "template": "woad_raiders"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_javelin_skirmishers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "britannia",
+          "general": "britannia_catuvolcos",
+          "units": [
+            {
+              "template": "tribal_warlord_guard"
+            },
+            {
+              "template": "woad_raiders"
+            },
+            {
+              "template": "british_war_chariots"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "britannia_cingetorix",
+          "name": "Cingetorix",
+          "age": 40,
+          "role": "leader",
+          "command": 5,
+          "management": 3,
+          "influence": 5,
+          "traits": [
+            "brave"
+          ],
+          "location": "britannia"
+        },
+        {
+          "id": "britannia_catuvolcos",
+          "name": "Catuvolcos",
+          "age": 18,
+          "role": "heir",
+          "father": "britannia_cingetorix",
+          "command": 4,
+          "management": 2,
+          "influence": 2,
+          "location": "britannia"
+        },
+        {
+          "id": "britannia_viridomarus",
+          "name": "Viridomarus",
+          "age": 35,
+          "role": "family",
+          "command": 5,
+          "management": 3,
+          "influence": 2,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "britannia"
+        }
+      ]
+    },
+    {
+      "id": "dacia",
+      "treasury": 3000,
+      "capital": "dacia",
+      "settlements": [
+        {
+          "region": "dacia",
+          "population": 2600,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_3",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "dacian_falx_reapers"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "forest_hunters"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "dacia",
+          "units": [
+            {
+              "template": "dacian_falx_reapers"
+            },
+            {
+              "template": "tribal_javelin_skirmishers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "dacia_oroles",
+          "name": "Oroles",
+          "age": 43,
+          "role": "leader",
+          "command": 5,
+          "management": 4,
+          "influence": 5,
+          "traits": [
+            "brave"
+          ],
+          "location": "dacia"
+        },
+        {
+          "id": "dacia_scorylo",
+          "name": "Scorylo",
+          "age": 20,
+          "role": "heir",
+          "father": "dacia_oroles",
+          "command": 4,
+          "management": 2,
+          "influence": 2,
+          "location": "dacia"
+        },
+        {
+          "id": "dacia_rubobostes",
+          "name": "Rubobostes",
+          "age": 31,
+          "role": "family",
+          "command": 4,
+          "management": 4,
+          "influence": 3,
+          "traits": [
+            "master_builder"
+          ],
+          "location": "dacia"
+        }
+      ]
+    },
+    {
+      "id": "hispania",
+      "treasury": 3000,
+      "capital": "celtiberia",
+      "settlements": [
+        {
+          "region": "celtiberia",
+          "population": 2400,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_3",
+            "iron_mine_1"
+          ],
+          "garrison": [
+            {
+              "template": "iberian_falcata_warriors"
+            },
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_javelin_skirmishers"
+            }
+          ]
+        },
+        {
+          "region": "lusitania",
+          "population": 1400,
+          "buildings": [
+            "tribal_gov_2",
+            "tribal_walls_1",
+            "tribal_farms_1"
+          ],
+          "garrison": [
+            {
+              "template": "tribal_warband"
+            },
+            {
+              "template": "tribal_light_horse"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "celtiberia",
+          "units": [
+            {
+              "template": "iberian_falcata_warriors"
+            },
+            {
+              "template": "tribal_light_horse"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "hispania_indibilis",
+          "name": "Indibilis",
+          "age": 41,
+          "role": "leader",
+          "command": 6,
+          "management": 3,
+          "influence": 5,
+          "traits": [
+            "wary",
+            "brave"
+          ],
+          "location": "celtiberia"
+        },
+        {
+          "id": "hispania_istolatios",
+          "name": "Istolatios",
+          "age": 19,
+          "role": "heir",
+          "father": "hispania_indibilis",
+          "command": 4,
+          "management": 2,
+          "influence": 2,
+          "location": "celtiberia"
+        },
+        {
+          "id": "hispania_mandonius",
+          "name": "Mandonius",
+          "age": 38,
+          "role": "family",
+          "command": 5,
+          "management": 3,
+          "influence": 3,
+          "traits": [
+            "scarred_veteran"
+          ],
+          "location": "lusitania"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "carthage",
+          "stance": "trade"
+        }
+      ]
+    },
+    {
+      "id": "scythia",
+      "treasury": 3000,
+      "capital": "scythia",
+      "settlements": [
+        {
+          "region": "scythia",
+          "population": 2200,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_1",
+            "tribal_mkt_2"
+          ],
+          "garrison": [
+            {
+              "template": "scythian_horse_archers"
+            },
+            {
+              "template": "steppe_spear_levies"
+            },
+            {
+              "template": "scythian_foot_archers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "scythia",
+          "units": [
+            {
+              "template": "scythian_horse_archers"
+            },
+            {
+              "template": "scythian_horse_archers"
+            },
+            {
+              "template": "scythian_noble_archers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "scythia_ateas",
+          "name": "Ateas",
+          "age": 46,
+          "role": "leader",
+          "command": 6,
+          "management": 3,
+          "influence": 5,
+          "traits": [
+            "skilled_commander"
+          ],
+          "location": "scythia"
+        },
+        {
+          "id": "scythia_skilurus",
+          "name": "Skilurus",
+          "age": 22,
+          "role": "heir",
+          "father": "scythia_ateas",
+          "command": 5,
+          "management": 2,
+          "influence": 2,
+          "location": "scythia"
+        },
+        {
+          "id": "scythia_palakos",
+          "name": "Palakos",
+          "age": 30,
+          "role": "family",
+          "command": 4,
+          "management": 3,
+          "influence": 2,
+          "location": "scythia"
+        }
+      ]
+    },
+    {
+      "id": "numidia",
+      "treasury": 3000,
+      "capital": "numidia",
+      "settlements": [
+        {
+          "region": "numidia",
+          "population": 2400,
+          "buildings": [
+            "tribal_gov_3",
+            "tribal_walls_2",
+            "tribal_stb_1",
+            "tribal_farms_1"
+          ],
+          "garrison": [
+            {
+              "template": "numidian_desert_riders"
+            },
+            {
+              "template": "numidian_spear_levies"
+            },
+            {
+              "template": "numidian_javelineers"
+            }
+          ]
+        }
+      ],
+      "armies": [
+        {
+          "region": "numidia",
+          "units": [
+            {
+              "template": "numidian_desert_riders"
+            },
+            {
+              "template": "numidian_javelineers"
+            }
+          ]
+        }
+      ],
+      "characters": [
+        {
+          "id": "numidia_gala",
+          "name": "Gala",
+          "age": 48,
+          "role": "leader",
+          "command": 5,
+          "management": 4,
+          "influence": 5,
+          "traits": [
+            "wary"
+          ],
+          "location": "numidia"
+        },
+        {
+          "id": "numidia_naravas",
+          "name": "Naravas",
+          "age": 21,
+          "role": "heir",
+          "father": "numidia_gala",
+          "command": 5,
+          "management": 2,
+          "influence": 2,
+          "traits": [
+            "brave"
+          ],
+          "location": "numidia"
+        },
+        {
+          "id": "numidia_syphax",
+          "name": "Syphax",
+          "age": 39,
+          "role": "family",
+          "command": 4,
+          "management": 4,
+          "influence": 3,
+          "traits": [
+            "keen_trader"
+          ],
+          "location": "numidia"
+        }
+      ],
+      "diplomacy": [
+        {
+          "faction": "carthage",
+          "stance": "trade"
+        }
+      ]
+    }
+  ],
+  "rebel_settlements": [
+    {
+      "region": "liguria",
+      "population": 900,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "cisalpina",
+      "population": 3200,
+      "buildings": [
+        "neutral_gov_3",
+        "tribal_walls_2",
+        "tribal_farms_2"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_light_horse"
+        }
+      ]
+    },
+    {
+      "region": "venetia",
+      "population": 1600,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_farms_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_light_horse"
+        }
+      ]
+    },
+    {
+      "region": "baetica",
+      "population": 3600,
+      "buildings": [
+        "neutral_gov_3",
+        "tribal_walls_2",
+        "tribal_port_1",
+        "silver_mine_1"
+      ],
+      "garrison": [
+        {
+          "template": "punic_levy_spears"
+        },
+        {
+          "template": "iberian_falcata_warriors"
+        }
+      ]
+    },
+    {
+      "region": "edetania",
+      "population": 1800,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_2",
+        "tribal_farms_1"
+      ],
+      "garrison": [
+        {
+          "template": "iberian_falcata_warriors"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "gallaecia",
+      "population": 800,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        }
+      ]
+    },
+    {
+      "region": "narbonensis",
+      "population": 4200,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "civic_mkt_2"
+      ],
+      "garrison": [
+        {
+          "template": "citizen_hoplites"
+        },
+        {
+          "template": "peltasts"
+        },
+        {
+          "template": "polis_garrison"
+        }
+      ]
+    },
+    {
+      "region": "armorica",
+      "population": 1000,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "belgica",
+      "population": 1500,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_2",
+        "iron_mine_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_warband"
+        }
+      ]
+    },
+    {
+      "region": "boiohaemum",
+      "population": 1300,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_2",
+        "iron_mine_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "forest_hunters"
+        }
+      ]
+    },
+    {
+      "region": "raetia",
+      "population": 600,
+      "buildings": [
+        "neutral_gov_1",
+        "tribal_walls_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        }
+      ]
+    },
+    {
+      "region": "noricum",
+      "population": 1400,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_2",
+        "iron_mine_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "pannonia",
+      "population": 1200,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_farms_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_light_horse"
+        }
+      ]
+    },
+    {
+      "region": "illyria",
+      "population": 2400,
+      "buildings": [
+        "neutral_gov_3",
+        "tribal_walls_2",
+        "tribal_port_1",
+        "silver_mine_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "moesia",
+      "population": 1300,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_farms_1"
+      ],
+      "garrison": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "thracian_falxmen"
+        }
+      ]
+    },
+    {
+      "region": "europa",
+      "population": 3400,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "civic_mkt_2"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "citizen_hoplites"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "epirus",
+      "population": 3000,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_brk_2"
+      ],
+      "garrison": [
+        {
+          "template": "levy_pikemen"
+        },
+        {
+          "template": "hellenic_light_horse"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "achaea",
+      "population": 4600,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "civic_mkt_2"
+      ],
+      "garrison": [
+        {
+          "template": "citizen_hoplites"
+        },
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "creta",
+      "population": 1900,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "merc_cretan_archers"
+        },
+        {
+          "template": "polis_garrison"
+        }
+      ]
+    },
+    {
+      "region": "bithynia",
+      "population": 2400,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_1",
+        "civic_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "ionia",
+      "population": 5200,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "civic_mkt_2"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "citizen_hoplites"
+        },
+        {
+          "template": "hellenic_archers"
+        }
+      ]
+    },
+    {
+      "region": "caria",
+      "population": 3000,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "galatia",
+      "population": 1100,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1"
+      ],
+      "garrison": [
+        {
+          "template": "gallic_long_swords"
+        },
+        {
+          "template": "tribal_warband"
+        }
+      ]
+    },
+    {
+      "region": "cilicia",
+      "population": 2600,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_1",
+        "field_farms_2"
+      ],
+      "garrison": [
+        {
+          "template": "eastern_spearmen"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "cyprus",
+      "population": 2400,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_1",
+        "civic_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "taurica",
+      "population": 3200,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_1",
+        "civic_port_1",
+        "field_farms_2"
+      ],
+      "garrison": [
+        {
+          "template": "polis_garrison"
+        },
+        {
+          "template": "scythian_horse_archers"
+        },
+        {
+          "template": "hellenic_archers"
+        }
+      ]
+    },
+    {
+      "region": "phoenicia",
+      "population": 5200,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "civic_mkt_2"
+      ],
+      "garrison": [
+        {
+          "template": "punic_citizen_band"
+        },
+        {
+          "template": "peltasts"
+        }
+      ]
+    },
+    {
+      "region": "judaea",
+      "population": 3400,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "field_farms_2"
+      ],
+      "garrison": [
+        {
+          "template": "eastern_spearmen"
+        },
+        {
+          "template": "eastern_foot_archers"
+        },
+        {
+          "template": "eastern_hill_levies"
+        }
+      ]
+    },
+    {
+      "region": "nabataea",
+      "population": 1200,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_mkt_1"
+      ],
+      "garrison": [
+        {
+          "template": "eastern_hill_levies"
+        },
+        {
+          "template": "eastern_foot_archers"
+        }
+      ]
+    },
+    {
+      "region": "media",
+      "population": 4200,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "eastern_stb_3"
+      ],
+      "garrison": [
+        {
+          "template": "eastern_spearmen"
+        },
+        {
+          "template": "eastern_lancers"
+        },
+        {
+          "template": "eastern_foot_archers"
+        }
+      ]
+    },
+    {
+      "region": "cyrenaica",
+      "population": 3800,
+      "buildings": [
+        "neutral_gov_3",
+        "city_walls_2",
+        "civic_port_1",
+        "field_farms_2"
+      ],
+      "garrison": [
+        {
+          "template": "citizen_hoplites"
+        },
+        {
+          "template": "peltasts"
+        },
+        {
+          "template": "hellenic_light_horse"
+        }
+      ]
+    },
+    {
+      "region": "syrtica",
+      "population": 900,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "punic_levy_spears"
+        },
+        {
+          "template": "numidian_javelineers"
+        }
+      ]
+    },
+    {
+      "region": "mauretania",
+      "population": 1000,
+      "buildings": [
+        "neutral_gov_2",
+        "tribal_walls_1",
+        "tribal_port_1"
+      ],
+      "garrison": [
+        {
+          "template": "numidian_spear_levies"
+        },
+        {
+          "template": "numidian_javelineers"
+        }
+      ]
+    }
+  ],
+  "rebel_armies": [
+    {
+      "region": "raetia",
+      "units": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "galatia",
+      "units": [
+        {
+          "template": "gallic_long_swords"
+        },
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_light_horse"
+        }
+      ]
+    },
+    {
+      "region": "moesia",
+      "units": [
+        {
+          "template": "thracian_falxmen"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "gallaecia",
+      "units": [
+        {
+          "template": "tribal_warband"
+        },
+        {
+          "template": "tribal_javelin_skirmishers"
+        }
+      ]
+    },
+    {
+      "region": "media",
+      "units": [
+        {
+          "template": "eastern_hill_levies"
+        },
+        {
+          "template": "eastern_foot_archers"
+        },
+        {
+          "template": "eastern_lancers"
+        }
+      ]
+    }
+  ]
+}

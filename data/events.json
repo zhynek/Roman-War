@@ -1,0 +1,234 @@
+{
+  "$schema": "../schemas/events.schema.json",
+  "events": [
+    {
+      "id": "marian_reforms",
+      "name": "The Marian Reforms",
+      "trigger": {
+        "condition": "huge_city_with_hidden_resource",
+        "hidden_resource": "italia",
+        "culture": "roman",
+        "exclude_regions": [
+          "latium"
+        ]
+      },
+      "effects": {
+        "marian_reforms": true
+      },
+      "once": true,
+      "text": "A great Italian city outside Roma now rivals the capital itself, and with it comes a general bold enough to remake the army. The old property rules are swept aside: landless citizens take the standard, the state arms them, and the manipular lines give way to standing cohorts sworn to their commander."
+    },
+    {
+      "id": "death_of_epicurus",
+      "name": "Death of a Philosopher",
+      "trigger": {
+        "year": -269
+      },
+      "effects": {
+        "happiness_all_settlements": 1,
+        "happiness_turns": 2
+      },
+      "once": true,
+      "text": "Word spreads from Athens that Epicurus has died in his garden, calm to the last. His followers gather quietly to honor a teacher who preached that a modest life, well shared, is the highest good."
+    },
+    {
+      "id": "census_of_the_citizens",
+      "name": "The Census Rolls Are Read",
+      "trigger": {
+        "year": -265
+      },
+      "effects": {
+        "treasury": 500
+      },
+      "once": true,
+      "text": "The censors complete their count: hundreds of thousands of citizens fit to bear arms and pay their due. Tidier tax rolls put a little extra silver in the treasury."
+    },
+    {
+      "id": "first_funeral_games",
+      "name": "Funeral Games in the Forum",
+      "trigger": {
+        "year": -264
+      },
+      "effects": {
+        "happiness_all_settlements": 2,
+        "happiness_turns": 4
+      },
+      "once": true,
+      "text": "At a nobleman's funeral in Roma, matched pairs of armed men fight before the crowd for the honor of the dead. The spectacle is grim, new, and wildly popular; it will not be the last."
+    },
+    {
+      "id": "first_latin_play",
+      "name": "A Play in the Latin Tongue",
+      "trigger": {
+        "year": -240
+      },
+      "effects": {
+        "happiness_all_settlements": 1,
+        "happiness_turns": 2
+      },
+      "once": true,
+      "text": "A freedman of Tarentum stages the first drama written in Latin rather than Greek. The crowds are delighted to laugh and weep in their own language, and the games gain a new fixture."
+    },
+    {
+      "id": "death_of_archimedes",
+      "name": "The Geometer of Syracuse Is Dead",
+      "trigger": {
+        "year": -212
+      },
+      "once": true,
+      "text": "Amid the sack of a great Sicilian city, a soldier cuts down an old man bent over his diagrams. Engineers everywhere mourn Archimedes, whose levers, screws, and burning wit held off a fleet."
+    },
+    {
+      "id": "bacchic_rites_suppressed",
+      "name": "The Night Rites Suppressed",
+      "trigger": {
+        "year": -186
+      },
+      "effects": {
+        "happiness_all_settlements": -2,
+        "happiness_turns": 2
+      },
+      "once": true,
+      "text": "Magistrates move against the secret nocturnal cult of the wine god, alleging conspiracy behind its torchlit rites. Thousands are arrested and the shrines are pulled down; the mood in the streets turns sullen and watchful."
+    },
+    {
+      "id": "comet_over_the_world",
+      "name": "A Comet Blazes",
+      "trigger": {
+        "year": -164
+      },
+      "effects": {
+        "happiness_all_settlements": -1,
+        "happiness_turns": 2
+      },
+      "once": true,
+      "text": "A long-tailed star hangs in the evening sky for weeks, and no two soothsayers agree on its meaning. Kings consult their priests; the common folk bar their doors and wait."
+    },
+    {
+      "id": "silver_strike_announced",
+      "name": "New Veins of Silver",
+      "trigger": {
+        "year": -120
+      },
+      "effects": {
+        "treasury": 800
+      },
+      "once": true,
+      "text": "Prospectors report rich new silver workings in the hill country, and the smelters burn day and night. Mine leases and royalties briefly swell every treasury that touches the trade."
+    },
+    {
+      "id": "secular_games",
+      "name": "Games of a New Age",
+      "trigger": {
+        "year": -17
+      },
+      "effects": {
+        "treasury": -500,
+        "happiness_all_settlements": 3,
+        "happiness_turns": 4
+      },
+      "once": true,
+      "text": "Heralds proclaim festivals such as no living man has seen and none will see again: three days and nights of sacrifice, theatre, and song to mark the turning of an age. The expense is enormous and nobody minds."
+    },
+    {
+      "id": "the_republic_divided",
+      "name": "The Republic Divided",
+      "trigger": {
+        "condition": "first_civil_war"
+      },
+      "effects": {
+        "happiness_all_settlements": -3,
+        "happiness_turns": 4
+      },
+      "once": true,
+      "text": "Word runs through every forum: a great house has raised its standards against the Senate itself. Brother watches brother, and the markets are afraid."
+    }
+  ],
+  "disasters": [
+    {
+      "id": "etna_eruption",
+      "name": "Aetna Burns",
+      "kind": "volcano",
+      "chance_per_turn": 0.004,
+      "regions": [
+        "sicilia_graeca"
+      ],
+      "population_loss_pct": 5,
+      "building_damage_chance": 0.25,
+      "text": "Rivers of fire crawl down from Aetna's summit through vineyard and grove. The islanders say the giant beneath the mountain has turned in his sleep."
+    },
+    {
+      "id": "anatolian_earthquake",
+      "name": "Earthquake in Anatolia",
+      "kind": "earthquake",
+      "chance_per_turn": 0.006,
+      "regions": [
+        "ionia",
+        "caria",
+        "bithynia",
+        "galatia",
+        "cappadocia"
+      ],
+      "population_loss_pct": 4,
+      "building_damage_chance": 0.35,
+      "text": "The ground heaves along the old fault lines of Asia, throwing down colonnades and city walls alike. Survivors dig through the rubble as the aftershocks roll on."
+    },
+    {
+      "id": "levantine_earthquake",
+      "name": "Earthquake in the Levant",
+      "kind": "earthquake",
+      "chance_per_turn": 0.005,
+      "regions": [
+        "syria",
+        "phoenicia",
+        "judaea",
+        "cilicia"
+      ],
+      "population_loss_pct": 4,
+      "building_damage_chance": 0.3,
+      "text": "A shudder runs the length of the coast road, toppling warehouses in the ports and cracking the great temple platforms. Caravans arrive to find the markets in ruins."
+    },
+    {
+      "id": "nile_flood",
+      "name": "The Nile Rises Too High",
+      "kind": "flood",
+      "chance_per_turn": 0.008,
+      "regions": [
+        "aegyptus",
+        "heptanomis",
+        "thebais"
+      ],
+      "population_loss_pct": 2,
+      "building_damage_chance": 0.15,
+      "text": "The inundation the farmers pray for comes this year as a torrent, drowning dykes, granaries, and mud-brick villages together. The priests promise rich soil next season to those who live to till it."
+    },
+    {
+      "id": "po_valley_flood",
+      "name": "The Padus Breaks Its Banks",
+      "kind": "flood",
+      "chance_per_turn": 0.006,
+      "regions": [
+        "cisalpina",
+        "venetia"
+      ],
+      "population_loss_pct": 2,
+      "building_damage_chance": 0.2,
+      "text": "Autumn rains in the mountains send the great river spilling brown across the plain. Farmsteads stand roof-deep, and the roads north are mud for a season."
+    },
+    {
+      "id": "northern_winter_storms",
+      "name": "Storms off the Northern Coasts",
+      "kind": "storm",
+      "chance_per_turn": 0.01,
+      "regions": [
+        "britannia",
+        "armorica",
+        "belgica",
+        "cimbria"
+      ],
+      "population_loss_pct": 1,
+      "building_damage_chance": 0.15,
+      "text": "Weeks of gales scour the grey channel coasts, driving ships ashore and stripping roofs from the fishing towns. The old men say the sea gods take their tithe in winter."
+    }
+  ]
+}

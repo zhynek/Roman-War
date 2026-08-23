@@ -1,0 +1,69 @@
+{
+  "$schema": "../schemas/wonders.schema.json",
+  "wonders": [
+    {
+      "id": "colossus_of_rhodes",
+      "name": "Colossus of Rhodes",
+      "region": "rhodes",
+      "effects": {
+        "sea_trade_pct": 35
+      },
+      "description": "The bronze giant of Helios towers above the harbor mouth, a beacon every merchant captain steers by. Whoever holds Rhodes holds the goodwill of every trading fleet in the eastern sea."
+    },
+    {
+      "id": "statue_of_zeus",
+      "name": "Statue of Zeus at Olympia",
+      "region": "achaea",
+      "effects": {
+        "happiness_all_settlements": 4
+      },
+      "description": "Seated in gold and ivory, the king of the gods gazes down on all who enter his sanctuary. Pilgrims carry word of his majesty home, and the master of Olympia is spoken of with reverence in every marketplace."
+    },
+    {
+      "id": "temple_of_artemis",
+      "name": "Temple of Artemis at Ephesus",
+      "region": "ionia",
+      "effects": {
+        "religious_building_discount_pct": 30
+      },
+      "description": "Rebuilt grander after every fire, the marble house of the huntress draws craftsmen and priests from across the world. Their skill makes the raising of new sanctuaries far cheaper for its keeper."
+    },
+    {
+      "id": "hanging_gardens",
+      "name": "Hanging Gardens of Babylon",
+      "region": "babylonia",
+      "effects": {
+        "farm_income_pct": 20
+      },
+      "description": "Terraces of green climb the old palace walls, watered by screws and channels no other kingdom can match. The engineers who tend them teach their arts to every farm along the great rivers."
+    },
+    {
+      "id": "mausoleum_of_halicarnassus",
+      "name": "Mausoleum of Halicarnassus",
+      "region": "caria",
+      "effects": {
+        "build_time_reduction_turns": 1,
+        "build_time_reduction_min_turns": 5
+      },
+      "description": "The tomb of Mausolus rises in stepped marble above the harbor, proof of what patient stone-masons can achieve. Builders trained in its shadow finish even the greatest works a season sooner."
+    },
+    {
+      "id": "great_pyramid",
+      "name": "Great Pyramid of Giza",
+      "region": "heptanomis",
+      "effects": {
+        "cancel_culture_penalty_culture": "egyptian"
+      },
+      "description": "Older than any living kingdom, the pyramid stands as the seal of legitimate rule over the Nile. The people of Egypt bow to whoever commands it, and the customs of the river valley trouble its master no more."
+    },
+    {
+      "id": "pharos_of_alexandria",
+      "name": "Pharos of Alexandria",
+      "region": "aegyptus",
+      "effects": {
+        "naval_movement_pct": 10
+      },
+      "description": "By day a white tower, by night a fire seen thirty miles out to sea. Fleets that sail under its light waste fewer days groping along strange coasts."
+    }
+  ]
+}

@@ -4,46 +4,44 @@ class_name SettlementRules
 
 static func settlement_level(data: GameData, settlement: Dictionary) -> String:
 	## Settlement level IS the government building tier (index 1 = village).
-	var owner_culture := data.culture_of_faction(settlement["owner"])
-	var government := data.chain_for(owner_culture, "government")
+	## A conquered settlement keeps its foreign government building's tier until
+	## the new owner's own chain overtakes it, so captured cities never collapse
+	## back to villages.
 	var tier := 1
-	if not government.is_empty():
-		tier = maxi(1, int(settlement["buildings"].get(government["id"], 1)))
-	else:
-		# Foreign-culture government building present from conquest; use its tier.
-		for chain_id in settlement["buildings"]:
-			if data.chains.has(chain_id) and data.chains[chain_id]["kind"] == "government":
-				tier = maxi(tier, int(settlement["buildings"][chain_id]))
+	for chain_id in settlement["buildings"]:
+		if data.chains.get(chain_id, {}).get("kind", "") == "government":
+			tier = maxi(tier, int(settlement["buildings"][chain_id]))
 	return Constants.SETTLEMENT_LEVELS[mini(tier - 1, Constants.SETTLEMENT_LEVELS.size() - 1)]
 
 
 static func effect_total(data: GameData, settlement: Dictionary, effect: String) -> float:
-	## Sum an effect key across every built building level up to the built tier.
-	## Effects are cumulative within a chain (a level-3 market includes the
-	## bonuses of levels 1-2), matching how the data tables are authored
-	## (each level lists only its increment).
+	## Sum an effect key across built chains. WITHIN a chain, each level's
+	## effects value is the standing total at that tier (a level-3 market's
+	## trade_pct replaces level 2's — it does not stack on top of it). That is
+	## how the data tables are authored, matching the research report's shape
+	## (e.g. a fertility temple's happiness reads 5/10/15 up its tiers).
 	var total := 0.0
 	for chain_id in settlement["buildings"]:
 		var chain: Dictionary = data.chains.get(chain_id, {})
 		if chain.is_empty():
 			continue
-		var built_tier := int(settlement["buildings"][chain_id])
-		for i in range(mini(built_tier, chain["levels"].size())):
-			total += float(chain["levels"][i].get("effects", {}).get(effect, 0.0))
+		var built_tier := mini(int(settlement["buildings"][chain_id]), chain["levels"].size())
+		if built_tier > 0:
+			total += float(chain["levels"][built_tier - 1].get("effects", {}).get(effect, 0.0))
 	return total
 
 
 static func effect_max(data: GameData, settlement: Dictionary, effect: String) -> float:
-	## Highest single value of an effect key (for tier-like effects such as
-	## wall_level, road_level, port_level — these are not cumulative).
+	## Highest standing value of an effect key across built chains (for
+	## tier-like effects such as wall_level, road_level, port_level).
 	var best := 0.0
 	for chain_id in settlement["buildings"]:
 		var chain: Dictionary = data.chains.get(chain_id, {})
 		if chain.is_empty():
 			continue
-		var built_tier := int(settlement["buildings"][chain_id])
-		for i in range(mini(built_tier, chain["levels"].size())):
-			best = maxf(best, float(chain["levels"][i].get("effects", {}).get(effect, 0.0)))
+		var built_tier := mini(int(settlement["buildings"][chain_id]), chain["levels"].size())
+		if built_tier > 0:
+			best = maxf(best, float(chain["levels"][built_tier - 1].get("effects", {}).get(effect, 0.0)))
 	return best
 
 

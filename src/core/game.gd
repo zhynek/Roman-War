@@ -67,8 +67,30 @@ func move_fleet(fleet_id: String, to_zone: String) -> bool:
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
-	state["rng_state"] = rng.get_state()
+	state["rng_state"] = rng.state_string()
 	return result
+
+
+func declare_war(other_faction: String, faction_id: String = "") -> bool:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return DiplomacyRules.declare_war(state, fid, other_faction)
+
+
+func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
+
+
+func sea_move_army(army_id: String, to_region: String) -> bool:
+	return MovementRules.sea_move_army(data, state, army_id, to_region)
+
+
+func hire_mercenary(army_id: String, template_id: String) -> bool:
+	return MercenaryRules.hire(data, state, army_id, template_id)
+
+
+func mercenaries_available(region_id: String) -> Array:
+	return MercenaryRules.available(data, state, region_id)
 
 
 func besiege(army_id: String, region_id: String) -> bool:
@@ -81,7 +103,7 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 	if result.get("captured", false):
 		result["capture"] = CombatRules.capture_settlement(
 			data, state, rng, region_id, result["capture_pending_owner"], occupation)
-	state["rng_state"] = rng.get_state()
+	state["rng_state"] = rng.state_string()
 	return result
 
 
@@ -139,6 +161,4 @@ func load_from(path: String) -> bool:
 
 
 func _rng() -> CampaignRng:
-	var rng := CampaignRng.new()
-	rng.set_state(int(state["rng_state"]))
-	return rng
+	return CampaignRng.from_state_string(String(state["rng_state"]))

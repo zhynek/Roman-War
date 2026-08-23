@@ -11,9 +11,10 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if not MapRules.are_adjacent(data, army["region"], region_id) and army["region"] != region_id:
 		return false
 	var settlement: Dictionary = state["settlements"][region_id]
-	var stance: String = state["factions"][army["owner"]]["diplomacy"].get(settlement["owner"], "neutral")
-	if stance != "war" or settlement["siege"] != null:
+	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
+	# Investing a settlement IS a declaration of war.
+	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
 	army["region"] = region_id
 	army["movement_left"] = 0.0
 	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
@@ -25,7 +26,9 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 	## last sally at the walls once supplies run out. Returns event dicts.
 	var siege_rules: Dictionary = data.balance["siege"]
 	var results: Array = []
-	for region_id in state["settlements"]:
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
 		var settlement: Dictionary = state["settlements"][region_id]
 		var siege = settlement["siege"]
 		if siege == null:
@@ -88,8 +91,11 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	else:
 		settlement["siege"] = null
 	if army["units"].is_empty():
+		# A pyrrhic assault that annihilates the attacker captures nothing.
 		if army["general"] != null:
 			state["characters"][army["general"]]["alive"] = false
 		state["armies"].erase(army_id)
 		settlement["siege"] = null
+		result["captured"] = false
+		result.erase("capture_pending_owner")
 	return result

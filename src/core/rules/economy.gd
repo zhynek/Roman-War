@@ -73,7 +73,8 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 			if not own_resources.has(resource):
 				premium += float(economy_rules["trade_income_per_resource"])
 		if MapRules.are_adjacent(data, region_id, other_id):
-			var road_bonus := 1.0 + SettlementRules.effect_max(data, settlement, "road_level") * 0.1
+			var road_bonus := 1.0 + SettlementRules.effect_max(data, settlement, "road_level") \
+				* float(economy_rules["road_trade_bonus_per_level"])
 			land_total += (float(economy_rules["land_trade_route_base"]) + premium) * road_bonus
 		elif port_level > 0 and MapRules.shared_sea_zone(data, region_id, other_id) \
 				and SettlementRules.effect_max(data, other, "port_level") > 0.0:
@@ -82,7 +83,7 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	sea_routes.sort()
 	sea_routes.reverse()
 	var sea_total := 0.0
-	for i in range(mini(port_level * 2, sea_routes.size())):
+	for i in range(mini(port_level * int(economy_rules["sea_routes_per_port_level"]), sea_routes.size())):
 		sea_total += sea_routes[i]
 	sea_total *= 1.0 + sea_trade_wonder / 100.0
 
@@ -130,7 +131,9 @@ static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String
 
 static func faction_turn_breakdown(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng = null) -> Dictionary:
 	var income := 0.0
-	for region_id in state["settlements"]:
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
 		if state["settlements"][region_id]["owner"] == faction_id:
 			income += settlement_income(data, state, region_id, rng)
 

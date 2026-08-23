@@ -1,0 +1,154 @@
+{
+  "$schema": "../schemas/win_conditions.schema.json",
+  "conditions": [
+    {
+      "faction": "julii",
+      "campaign": "long",
+      "hold_regions_count": 50,
+      "must_hold_regions": ["latium"],
+      "outlive_factions": ["senate"],
+      "requires_civil_war_victory": true
+    },
+    {
+      "faction": "julii",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["etruria", "cisalpina"],
+      "outlive_factions": ["gaul"]
+    },
+    {
+      "faction": "junii",
+      "campaign": "long",
+      "hold_regions_count": 50,
+      "must_hold_regions": ["latium"],
+      "outlive_factions": ["senate"],
+      "requires_civil_war_victory": true
+    },
+    {
+      "faction": "junii",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["bruttium", "apulia"],
+      "outlive_factions": ["macedon", "greek_cities"]
+    },
+    {
+      "faction": "cornelii",
+      "campaign": "long",
+      "hold_regions_count": 50,
+      "must_hold_regions": ["latium"],
+      "outlive_factions": ["senate"],
+      "requires_civil_war_victory": true
+    },
+    {
+      "faction": "cornelii",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["campania", "sicilia_graeca", "sicilia_punica"],
+      "outlive_factions": ["carthage"]
+    },
+    {
+      "faction": "greek_cities",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["attica", "laconia", "achaea", "epirus", "macedonia", "ionia", "rhodes"]
+    },
+    {
+      "faction": "greek_cities",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["attica", "laconia", "achaea"],
+      "outlive_factions": ["macedon"]
+    },
+    {
+      "faction": "seleucia",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["syria", "babylonia", "media", "persis", "aegyptus", "macedonia"]
+    },
+    {
+      "faction": "seleucia",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["syria", "babylonia", "media"],
+      "outlive_factions": ["egypt"]
+    },
+    {
+      "faction": "parthia",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["parthia", "media", "persis", "babylonia", "assyria", "syria"]
+    },
+    {
+      "faction": "parthia",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["parthia", "media"],
+      "outlive_factions": ["seleucia", "armenia"]
+    },
+    {
+      "faction": "carthage",
+      "campaign": "long",
+      "hold_regions_count": 50,
+      "must_hold_regions": ["africa", "sicilia_punica", "sardinia", "baetica", "latium"]
+    },
+    {
+      "faction": "carthage",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["africa", "sicilia_punica", "sardinia"],
+      "outlive_factions": ["cornelii", "numidia"]
+    },
+    {
+      "faction": "egypt",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["aegyptus", "heptanomis", "thebais", "cyrenaica", "cyprus", "phoenicia", "syria"]
+    },
+    {
+      "faction": "egypt",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["aegyptus", "heptanomis", "thebais"],
+      "outlive_factions": ["seleucia"]
+    },
+    {
+      "faction": "gaul",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["arvernia", "narbonensis", "aquitania", "belgica", "latium"]
+    },
+    {
+      "faction": "gaul",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["arvernia", "narbonensis", "aquitania"],
+      "outlive_factions": ["julii"]
+    },
+    {
+      "faction": "germania",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["suebia", "cimbria", "boiohaemum", "belgica", "latium"]
+    },
+    {
+      "faction": "germania",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["suebia", "cimbria"],
+      "outlive_factions": ["gaul"]
+    },
+    {
+      "faction": "britannia",
+      "campaign": "long",
+      "hold_regions_count": 45,
+      "must_hold_regions": ["britannia", "armorica", "belgica", "latium"]
+    },
+    {
+      "faction": "britannia",
+      "campaign": "short",
+      "hold_regions_count": 15,
+      "must_hold_regions": ["britannia", "armorica", "belgica"],
+      "outlive_factions": ["gaul"]
+    }
+  ]
+}

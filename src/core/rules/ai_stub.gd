@@ -8,7 +8,9 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String) -> 
 	var faction: Dictionary = state["factions"][faction_id]
 	if not faction["alive"]:
 		return
-	for region_id in state["settlements"]:
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
 		var settlement: Dictionary = state["settlements"][region_id]
 		if settlement["owner"] != faction_id:
 			continue

@@ -11,7 +11,8 @@ static func to_json(state: Dictionary) -> String:
 
 static func from_json(text: String) -> Dictionary:
 	## Returns the state dict, or {} on failure. JSON numbers arrive as floats;
-	## the engine int()-coerces on read, so no fixup pass is needed.
+	## the engine int()-coerces on read, so no fixup pass is needed. The one
+	## precision-critical field, rng_state, travels as a string (see CampaignRng).
 	var parsed = JSON.parse_string(text)
 	if parsed == null or not (parsed is Dictionary):
 		return {}

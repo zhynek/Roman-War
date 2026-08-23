@@ -12,7 +12,7 @@ func test_data_loads_clean(t) -> void:
 	t.check(data.regions.size() >= 40, "map has a real region count (got %d)" % data.regions.size())
 	t.check(data.units.size() >= 40, "roster has real breadth (got %d)" % data.units.size())
 	t.check(data.factions.size() >= 15, "faction list complete (got %d)" % data.factions.size())
-	for faction_id in ["julii", "brutii", "scipii", "senate", "rebels"]:
+	for faction_id in ["julii", "junii", "cornelii", "senate", "rebels"]:
 		t.check(data.factions.has(faction_id), "core faction present: " + faction_id)
 
 
@@ -64,14 +64,20 @@ func test_save_round_trip(t) -> void:
 	var restored := SaveGame.from_json(json_before)
 	t.check(not restored.is_empty(), "save parses back")
 
-	# The restored state must continue identically to the original.
+	# The restored state must continue identically to the original. Compare in
+	# canonical JSON form: a parsed state holds 2.0 where the live one holds 2
+	# (JSON numbers are floats), which is meaningless — every reader coerces.
 	var resumed := Game.new()
 	resumed.data = game.data
 	resumed.resolver = AutoResolver.new()
 	resumed.state = restored
 	game.end_turn()
 	resumed.end_turn()
-	t.check_eq(JSON.stringify(game.state), JSON.stringify(resumed.state), "resumed game marches in step")
+	t.check_eq(_canonical(game.state), _canonical(resumed.state), "resumed game marches in step")
+
+
+func _canonical(state: Dictionary) -> String:
+	return JSON.stringify(JSON.parse_string(JSON.stringify(state)))
 
 
 func test_growth_order_income_queries(t) -> void:

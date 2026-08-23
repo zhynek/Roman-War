@@ -8,7 +8,9 @@ class_name SenateRules
 static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) -> Array:
 	var senate_rules: Dictionary = data.balance["senate"]
 	var notices: Array = []
-	for faction_id in state["factions"]:
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
 		var faction: Dictionary = state["factions"][faction_id]
 		if not faction["alive"] or not data.factions.get(faction_id, {}).get("is_roman_house", false):
 			continue
@@ -34,6 +36,7 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				faction["senate_standing"] = minf(float(senate_rules["max_standing"]),
 					float(faction["senate_standing"]) + float(reward.get("senate_standing",
 						senate_rules["mission_success_standing"])))
+				_grant_reward_units(state, faction_id, reward)
 				faction["mission"] = null
 				notices.append({"kind": "mission_complete", "faction": faction_id, "mission": mission["template"]})
 			elif int(mission["turns_left"]) <= 0:
@@ -69,7 +72,9 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 		return {}
 
 	var targets: Array = []
-	for region_id in state["settlements"]:
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()  # canonical order — targets feed rng.pick
+	for region_id in region_ids:
 		if state["settlements"][region_id]["owner"] == "rebels":
 			for neighbor in data.regions[region_id].get("adjacent", []):
 				if state["settlements"].has(neighbor) and state["settlements"][neighbor]["owner"] == faction_id:
@@ -84,6 +89,18 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 		"target_region": rng.pick(targets),
 		"turns_left": int(data.missions[template_id]["deadline_turns"]),
 	}
+
+
+static func _grant_reward_units(state: Dictionary, faction_id: String, reward: Dictionary) -> void:
+	## Granted units muster in the capital's garrison.
+	var capital: String = state["factions"][faction_id]["capital"]
+	if not state["settlements"].has(capital) or state["settlements"][capital]["owner"] != faction_id:
+		return
+	for grant in reward.get("units", []):
+		for i in range(int(grant["count"])):
+			state["settlements"][capital]["garrison"].append({
+				"template": grant["template"], "experience": 0, "strength_pct": 100,
+			})
 
 
 static func _mission_complete(state: Dictionary, faction_id: String, mission: Dictionary) -> bool:

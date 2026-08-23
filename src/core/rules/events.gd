@@ -76,18 +76,39 @@ static func _apply_event(data: GameData, state: Dictionary, event: Dictionary, c
 			if data.culture_of_faction(faction_id) == "roman":
 				state["factions"][faction_id]["era"] = "post_marian"
 	var target: String = context.get("faction", "")
-	if effects.has("treasury") and target != "" and state["factions"].has(target):
-		var faction: Dictionary = state["factions"][target]
-		faction["treasury"] = int(faction["treasury"]) + int(effects["treasury"])
+	if effects.has("treasury"):
+		# Targeted events pay one faction; global (dated) events touch everyone.
+		for faction_id in state["factions"]:
+			if target != "" and faction_id != target:
+				continue
+			var faction: Dictionary = state["factions"][faction_id]
+			if faction["alive"] and not data.factions.get(faction_id, {}).get("is_rebel", false):
+				faction["treasury"] = int(faction["treasury"]) + int(effects["treasury"])
+	if effects.has("happiness_all_settlements"):
+		state["event_happiness"] = {
+			"value": float(effects["happiness_all_settlements"]),
+			"turns": int(effects.get("happiness_turns", 2)),
+		}
+
+
+static func tick_event_happiness(state: Dictionary) -> void:
+	var event_happiness = state.get("event_happiness")
+	if event_happiness == null:
+		return
+	event_happiness["turns"] = int(event_happiness["turns"]) - 1
+	if int(event_happiness["turns"]) <= 0:
+		state["event_happiness"] = null
 
 
 static func _apply_disaster(state: Dictionary, disaster: Dictionary, region_id: String, rng: CampaignRng) -> void:
 	var settlement: Dictionary = state["settlements"][region_id]
 	var loss_pct := float(disaster.get("population_loss_pct", 0.0))
-	settlement["population"] = maxi(400, int(round(settlement["population"] * (1.0 - loss_pct / 100.0))))
+	var floor_population := 400
+	settlement["population"] = maxi(floor_population, int(round(settlement["population"] * (1.0 - loss_pct / 100.0))))
 	if rng.chance(float(disaster.get("building_damage_chance", 0.0))):
 		var chain_ids: Array = settlement["buildings"].keys()
 		if not chain_ids.is_empty():
+			chain_ids.sort()
 			var chain_id: String = rng.pick(chain_ids)
 			var tier := int(settlement["buildings"][chain_id]) - 1
 			if tier <= 0:

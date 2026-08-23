@@ -1,0 +1,1750 @@
+{
+  "$schema": "../schemas/buildings.schema.json",
+  "chains": [
+    {
+      "id": "roman_jupiter",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Jupiter",
+      "god": "Jupiter",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "roman_jupiter_1",
+          "name": "Shrine of Jupiter",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "A roadside altar to the Best and Greatest, where oaths are sworn under the open sky. Even a village thinks twice before breaking a promise made here."
+        },
+        {
+          "id": "roman_jupiter_2",
+          "name": "Temple of Jupiter",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "A proper temple with a painted terracotta roof, seat of the town's most binding contracts. The thunderer watches the magistrates as closely as the criminals."
+        },
+        {
+          "id": "roman_jupiter_3",
+          "name": "Great Temple of Jupiter",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "Stone columns and a gilded eagle proclaim that this city answers to law before all else. Court days draw crowds from the whole countryside."
+        },
+        {
+          "id": "roman_jupiter_4",
+          "name": "Sacred Precinct of Jupiter",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "A walled sanctuary on the city's highest point, with priests, archives, and festival games in the god's honor. Perjurers are said to feel the sky darken as they approach."
+        },
+        {
+          "id": "roman_jupiter_5",
+          "name": "Pantheon of Jupiter",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "law": 16, "happiness": 7 },
+          "description": "A colossal sanctuary crowning the city, where Jupiter presides over all the gods of the state. Its authority makes the whole province orderly, and its festivals make it proud."
+        }
+      ]
+    },
+    {
+      "id": "roman_mars",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Mars",
+      "god": "Mars",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "roman_mars_1",
+          "name": "Shrine of Mars",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A field altar hung with captured spears, tended by veterans. Farm boys linger here and dream of the eagle standards."
+        },
+        {
+          "id": "roman_mars_2",
+          "name": "Temple of Mars",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Recruits take their first oath before the war god's statue, and it steadies them. Men mustered here march like they have already seen a battle."
+        },
+        {
+          "id": "roman_mars_3",
+          "name": "Great Temple of Mars",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "description": "Priests bless the arsenals, and the smiths that serve the temple hold blades to a soldier's standard. The parade ground outside is never quiet for long."
+        },
+        {
+          "id": "roman_mars_4",
+          "name": "Sacred Precinct of Mars",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "A martial sanctuary of trophies, drill yards, and votive shields going back generations. Units raised in its shadow fight as if their ancestors were watching, because they believe they are."
+        },
+        {
+          "id": "roman_mars_5",
+          "name": "Pantheon of Mars",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "description": "The greatest war-sanctuary of the state, where triumphs end and campaigns begin. Soldiers consecrated here carry the god's favor in their arms and their iron."
+        }
+      ]
+    },
+    {
+      "id": "roman_ceres",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Ceres",
+      "god": "Ceres",
+      "archetype": "fertility",
+      "levels": [
+        {
+          "id": "roman_ceres_1",
+          "name": "Shrine of Ceres",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 4, "growth": 0.4 },
+          "description": "A humble altar of the grain mother, wreathed in wheat at every harvest. Families pray here for full granaries and full cradles alike."
+        },
+        {
+          "id": "roman_ceres_2",
+          "name": "Temple of Ceres",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 6, "growth": 0.6 },
+          "description": "The town's plebs hold their spring festival here, and the goddess repays them with easy years. Bread is cheaper in her shadow."
+        },
+        {
+          "id": "roman_ceres_3",
+          "name": "Great Temple of Ceres",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 9, "growth": 0.9 },
+          "description": "A stone temple ringed by grain doles and marriage feasts. The city swells with newcomers who trust the goddess to feed them."
+        },
+        {
+          "id": "roman_ceres_4",
+          "name": "Sacred Precinct of Ceres",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 12, "growth": 1.2 },
+          "description": "Granaries, gardens, and processional ways surround the sanctuary of plenty. Famine feels like a story told about other cities."
+        },
+        {
+          "id": "roman_ceres_5",
+          "name": "Pantheon of Ceres",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 15, "growth": 1.5 },
+          "description": "A vast sanctuary of the harvest whose festivals feed the poor of an entire metropolis. The city grows the way a field grows: quietly, and every year."
+        }
+      ]
+    },
+    {
+      "id": "roman_mercury",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Mercury",
+      "god": "Mercury",
+      "archetype": "trade",
+      "levels": [
+        {
+          "id": "roman_mercury_1",
+          "name": "Shrine of Mercury",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "trade_pct": 5, "happiness": 2 },
+          "description": "A crossroads altar where peddlers leave a coin for luck on the road. Somehow the carts from this village always arrive first to market."
+        },
+        {
+          "id": "roman_mercury_2",
+          "name": "Temple of Mercury",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "trade_pct": 10, "happiness": 4 },
+          "description": "Merchants seal bargains on the temple steps under the god of exchange. Honest scales and quick deals bring the caravans back."
+        },
+        {
+          "id": "roman_mercury_3",
+          "name": "Great Temple of Mercury",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "trade_pct": 15, "happiness": 6 },
+          "description": "The trading guilds keep their common chest in the god's vaults. A city under Mercury's wing haggles in six languages and profits in all of them."
+        },
+        {
+          "id": "roman_mercury_4",
+          "name": "Sacred Precinct of Mercury",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "trade_pct": 20, "happiness": 8 },
+          "description": "Warehouses, counting rooms, and shrines share the same colonnades. Fortunes are made here between the morning sacrifice and the evening one."
+        },
+        {
+          "id": "roman_mercury_5",
+          "name": "Pantheon of Mercury",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "description": "The great sanctuary of the swift god commands every road and quay in the region. Even the levies march faster, for Mercury teaches everyone in this city to move with purpose."
+        }
+      ]
+    },
+    {
+      "id": "roman_bacchus",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Bacchus",
+      "god": "Bacchus",
+      "archetype": "fun",
+      "levels": [
+        {
+          "id": "roman_bacchus_1",
+          "name": "Shrine of Bacchus",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 7 },
+          "description": "An ivy-hung altar beside the wine press, loud on festival nights. The village forgives a great deal after the vintage feast."
+        },
+        {
+          "id": "roman_bacchus_2",
+          "name": "Temple of Bacchus",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 11 },
+          "description": "Processions, masks, and free-flowing wine mark the god's days. Magistrates grumble about the noise and quietly fund it anyway."
+        },
+        {
+          "id": "roman_bacchus_3",
+          "name": "Great Temple of Bacchus",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 15 },
+          "description": "The revels now fill whole streets, and the city's troubles drown in song. Visitors come for one festival and stay for a season."
+        },
+        {
+          "id": "roman_bacchus_4",
+          "name": "Sacred Precinct of Bacchus",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 19 },
+          "description": "A sprawling pleasure-sanctuary of theaters, wine halls, and torchlit gardens. No city that keeps Bacchus this well has ever found the energy to riot."
+        }
+      ]
+    },
+    {
+      "id": "roman_vulcan",
+      "kind": "temple",
+      "cultures": ["roman"],
+      "name": "Cult of Vulcan",
+      "god": "Vulcan",
+      "archetype": "forge",
+      "levels": [
+        {
+          "id": "roman_vulcan_1",
+          "name": "Shrine of Vulcan",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 2 },
+          "description": "A soot-blackened altar kept outside the walls, as the fire god prefers. The smiths feed it charcoal and it keeps their sparks from spreading."
+        },
+        {
+          "id": "roman_vulcan_2",
+          "name": "Temple of Vulcan",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "description": "Forges cluster around the temple, and blades quenched under the god's eye hold a crueler edge. Apprentices swear their craft-oaths at the anvil-altar."
+        },
+        {
+          "id": "roman_vulcan_3",
+          "name": "Great Temple of Vulcan",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "description": "The temple workshops turn out mail and helms fit for parade and slaughter both. The night sky above this quarter glows like a banked hearth."
+        },
+        {
+          "id": "roman_vulcan_4",
+          "name": "Sacred Precinct of Vulcan",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "description": "A city within the city of furnaces, foundries, and master armorers under sacred charter. Armies equipped here gleam like something hammered out by the god himself."
+        }
+      ]
+    },
+    {
+      "id": "greek_zeus",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Zeus",
+      "god": "Zeus",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "greek_zeus_1",
+          "name": "Altar of Zeus",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "An open-air altar to the father of gods, guardian of guests and oaths. Disputes end here more often than they end in blood."
+        },
+        {
+          "id": "greek_zeus_2",
+          "name": "Temple of Zeus",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "A columned temple where the assembly swears in its magistrates. The thunderer's presence makes civic office feel heavier, and civic crime feel riskier."
+        },
+        {
+          "id": "greek_zeus_3",
+          "name": "Great Temple of Zeus",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "Marble, bronze, and a seated god who seems to watch the agora directly. The laws inscribed on the temple wall are read aloud each festival."
+        },
+        {
+          "id": "greek_zeus_4",
+          "name": "Sanctuary of Zeus",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "A great walled sanctuary with treasuries, courts, and games held in the god's honor. Exiles petition here, and tyrants sleep badly nearby."
+        },
+        {
+          "id": "greek_zeus_5",
+          "name": "Panhellenic Sanctuary of Zeus",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "law": 16, "happiness": 7 },
+          "description": "A sanctuary famous across the Greek world, drawing pilgrims, athletes, and envoys. Under its truce even feuding cities keep the peace, and this one keeps it best of all."
+        }
+      ]
+    },
+    {
+      "id": "greek_ares",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Ares",
+      "god": "Ares",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "greek_ares_1",
+          "name": "Altar of Ares",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A grim little altar of spears and dark stone, honored more than loved. The village keeps it fed so the war god looks elsewhere for prey."
+        },
+        {
+          "id": "greek_ares_2",
+          "name": "Temple of Ares",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Ephebes take their shield-oath here before joining the phalanx. The god cares nothing for their names, only that they hold the line."
+        },
+        {
+          "id": "greek_ares_3",
+          "name": "Great Temple of Ares",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "description": "Captured panoplies line the walls, and the temple smiths grind spearheads to a wicked point. Drill instructors quote the priests, and the priests quote no one."
+        },
+        {
+          "id": "greek_ares_4",
+          "name": "Sanctuary of Ares",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "A sanctuary of war where the city's regiments are consecrated banner by banner. Its festivals are mock battles that leave real bruises."
+        },
+        {
+          "id": "greek_ares_5",
+          "name": "Panhellenic Sanctuary of Ares",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "description": "The most feared war-sanctuary in the Greek world, its precinct paved with dedicated shields. Soldiers blessed here advance in silence that unnerves veterans."
+        }
+      ]
+    },
+    {
+      "id": "greek_hermes",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Hermes",
+      "god": "Hermes",
+      "archetype": "trade",
+      "levels": [
+        {
+          "id": "greek_hermes_1",
+          "name": "Altar of Hermes",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "trade_pct": 5, "happiness": 2 },
+          "description": "A herm at the crossroads, garlanded by travelers and traders. Goods seem to find their way here, and profits find their way home."
+        },
+        {
+          "id": "greek_hermes_2",
+          "name": "Temple of Hermes",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "trade_pct": 10, "happiness": 4 },
+          "description": "The market square grows around the messenger god's temple as if planted there. His priests keep the standard weights, and everyone pretends to trust them."
+        },
+        {
+          "id": "greek_hermes_3",
+          "name": "Great Temple of Hermes",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "trade_pct": 15, "happiness": 6 },
+          "description": "Caravans and coasting ships time their runs by the temple's festivals. A city of quick tongues, quick feet, and quicker arithmetic."
+        },
+        {
+          "id": "greek_hermes_4",
+          "name": "Sanctuary of Hermes",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "trade_pct": 20, "happiness": 8 },
+          "description": "Banking stoas and merchant treasuries crowd the sanctuary of the god of exchange. Deals struck here bind from Massalia to Antioch."
+        },
+        {
+          "id": "greek_hermes_5",
+          "name": "Panhellenic Sanctuary of Hermes",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "description": "The great emporium-sanctuary where half the sea's trade is sworn, weighed, and blessed. Even the city's soldiers learn the traveler-god's pace on the march."
+        }
+      ]
+    },
+    {
+      "id": "greek_dionysus",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Dionysus",
+      "god": "Dionysus",
+      "archetype": "fun",
+      "levels": [
+        {
+          "id": "greek_dionysus_1",
+          "name": "Altar of Dionysus",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 7 },
+          "description": "A vine-wrapped altar where the village dances off the year's grievances. The wine god asks only enthusiasm, and receives plenty."
+        },
+        {
+          "id": "greek_dionysus_2",
+          "name": "Temple of Dionysus",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 11 },
+          "description": "The temple sponsors choruses, comedies, and a festival that empties every cellar. Feuds started in winter rarely survive it."
+        },
+        {
+          "id": "greek_dionysus_3",
+          "name": "Great Temple of Dionysus",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 15 },
+          "description": "A theater grows beside the temple, and the whole city becomes its audience. Under the masks, rich and poor laugh at the same jokes."
+        },
+        {
+          "id": "greek_dionysus_4",
+          "name": "Sanctuary of Dionysus",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 19 },
+          "description": "A famous sanctuary of drama and revel whose festivals last for days and are argued about for years. Discontent cannot get a word in."
+        }
+      ]
+    },
+    {
+      "id": "greek_asclepius",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Asclepius",
+      "god": "Asclepius",
+      "archetype": "healing",
+      "levels": [
+        {
+          "id": "greek_asclepius_1",
+          "name": "Altar of Asclepius",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "description": "A spring-side altar where the sick sleep in hope of healing dreams. Some wake cured; all wake comforted."
+        },
+        {
+          "id": "greek_asclepius_2",
+          "name": "Temple of Asclepius",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "health": 7, "growth": 0.5, "happiness": 2 },
+          "description": "Priest-physicians set bones, mix draughts, and keep the sacred serpents fat. Fewer children are buried in this town than in its neighbors."
+        },
+        {
+          "id": "greek_asclepius_3",
+          "name": "Great Temple of Asclepius",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "health": 10, "growth": 0.8, "happiness": 3 },
+          "description": "Dormitories, baths, and herb gardens surround the healing god's house. The sick arrive by cartload and most walk home."
+        },
+        {
+          "id": "greek_asclepius_4",
+          "name": "Sanctuary of Asclepius",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "health": 13, "growth": 1.0, "happiness": 4 },
+          "description": "A renowned healing sanctuary where physicians train and pilgrims leave votive limbs in gratitude. Plague finds this city a discouraging host."
+        }
+      ]
+    },
+    {
+      "id": "greek_poseidon",
+      "kind": "temple",
+      "cultures": ["greek"],
+      "name": "Cult of Poseidon",
+      "god": "Poseidon",
+      "archetype": "naval",
+      "levels": [
+        {
+          "id": "greek_poseidon_1",
+          "name": "Altar of Poseidon",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A salt-stained altar on the headland where sailors pour wine to the deep. The sea takes fewer of them than it used to."
+        },
+        {
+          "id": "greek_poseidon_2",
+          "name": "Temple of Poseidon",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 5 },
+          "description": "Shipwrights and fishermen share the earth-shaker's temple, and his trident marks every new keel. Storm season is met with sacrifice instead of dread."
+        },
+        {
+          "id": "greek_poseidon_3",
+          "name": "Great Temple of Poseidon",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 7, "armor_upgrade": 1 },
+          "description": "The temple yards bless rams, hulls, and the bronze that marines wear. Crews consecrated here board with the confidence of men the sea has already spared once."
+        },
+        {
+          "id": "greek_poseidon_4",
+          "name": "Sanctuary of Poseidon",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 9, "armor_upgrade": 1, "weapon_upgrade": 1 },
+          "description": "A great maritime sanctuary of trophies, drowned bells, and dedicated prows. Its armories fit out soldiers and sailors alike in god-blessed bronze."
+        }
+      ]
+    },
+    {
+      "id": "eastern_ahura_mazda",
+      "kind": "temple",
+      "cultures": ["eastern"],
+      "name": "Cult of Ahura Mazda",
+      "god": "Ahura Mazda",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "eastern_ahura_mazda_1",
+          "name": "Fire Altar of Ahura Mazda",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "A small stone altar where the sacred flame is never allowed to die. Truth is spoken before it, for the Wise Lord abhors the lie."
+        },
+        {
+          "id": "eastern_ahura_mazda_2",
+          "name": "Fire Temple of Ahura Mazda",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "Magi tend the flame and hear disputes in its light. A contract sworn by the fire is worth more than one sealed in wax."
+        },
+        {
+          "id": "eastern_ahura_mazda_3",
+          "name": "Great Fire Temple of Ahura Mazda",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "A domed sanctuary whose flame has burned for generations without failing. The magi's judgments carry to every bazaar and caravanserai in the city."
+        },
+        {
+          "id": "eastern_ahura_mazda_4",
+          "name": "Royal Fire Temple of Ahura Mazda",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "Kings light their reigns from this fire and fear its extinction more than rebellion. Order flows outward from the sanctuary like heat from the hearth."
+        },
+        {
+          "id": "eastern_ahura_mazda_5",
+          "name": "Eternal Flame of Ahura Mazda",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "law": 16, "happiness": 7 },
+          "description": "One of the great fires of the world, guarded day and night by an unbroken line of magi. Under its glow the lie withers, and with it most of the city's crimes."
+        }
+      ]
+    },
+    {
+      "id": "eastern_verethragna",
+      "kind": "temple",
+      "cultures": ["eastern"],
+      "name": "Cult of Verethragna",
+      "god": "Verethragna",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "eastern_verethragna_1",
+          "name": "Shrine of Verethragna",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A hillside shrine to victory's many forms: the boar, the stallion, the storm-wind. Herdsmen leave arrowheads and take home courage."
+        },
+        {
+          "id": "eastern_verethragna_2",
+          "name": "Temple of Verethragna",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Young riders are consecrated here before their first campaign. The god of victory does not promise survival, only that they will be worth killing."
+        },
+        {
+          "id": "eastern_verethragna_3",
+          "name": "Great Temple of Verethragna",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "description": "Trophy standards of beaten enemies hang in the smoke of the victory god's fires. The temple's fletchers and swordsmiths serve soldiers at half their pride and twice their skill."
+        },
+        {
+          "id": "eastern_verethragna_4",
+          "name": "Royal Temple of Verethragna",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "Kings ride from this sanctuary to war and return to hang their enemies' banners in it. Regiments blessed here believe retreat is a foreign word."
+        },
+        {
+          "id": "eastern_verethragna_5",
+          "name": "Exalted House of Verethragna",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "description": "The greatest victory-sanctuary of the east, where the god is honored in all ten of his incarnations. Armies consecrated in its shadow strike like the storm-wind that is his first."
+        }
+      ]
+    },
+    {
+      "id": "eastern_anahita",
+      "kind": "temple",
+      "cultures": ["eastern"],
+      "name": "Cult of Anahita",
+      "god": "Anahita",
+      "archetype": "fertility",
+      "levels": [
+        {
+          "id": "eastern_anahita_1",
+          "name": "Spring Shrine of Anahita",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 4, "growth": 0.4 },
+          "description": "A shrine over a clear spring, sacred to the lady of the waters. Fields drink, herds calve, and the village gives her the credit."
+        },
+        {
+          "id": "eastern_anahita_2",
+          "name": "Temple of Anahita",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 6, "growth": 0.6 },
+          "description": "Canals and cisterns are dug under the goddess's protection, and brides are blessed at her doors. The town outgrows its walls politely but steadily."
+        },
+        {
+          "id": "eastern_anahita_3",
+          "name": "Great Temple of Anahita",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 9, "growth": 0.9 },
+          "description": "A pillared temple beside gardens that stay green through the worst summers. Pilgrims come for children, harvests, and rain, and complain of none of the three."
+        },
+        {
+          "id": "eastern_anahita_4",
+          "name": "Royal Temple of Anahita",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 12, "growth": 1.2 },
+          "description": "A royal sanctuary of fountains and orchards fed by sacred waterworks. The city drinks sweet water and multiplies."
+        },
+        {
+          "id": "eastern_anahita_5",
+          "name": "Exalted House of Anahita",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 15, "growth": 1.5 },
+          "description": "One of the wonders of the east: a vast water-sanctuary of pools, gold, and green shade. Around the strong lady of the waters, a metropolis blooms in the dust."
+        }
+      ]
+    },
+    {
+      "id": "eastern_mithra",
+      "kind": "temple",
+      "cultures": ["eastern"],
+      "name": "Cult of Mithra",
+      "god": "Mithra",
+      "archetype": "trade",
+      "levels": [
+        {
+          "id": "eastern_mithra_1",
+          "name": "Shrine of Mithra",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "trade_pct": 5, "happiness": 2 },
+          "description": "A sunrise-facing shrine to the lord of covenants. Caravans strike their bargains here, for Mithra sees every hand that cheats."
+        },
+        {
+          "id": "eastern_mithra_2",
+          "name": "Temple of Mithra",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "trade_pct": 10, "happiness": 4 },
+          "description": "The caravanserai and the temple share a courtyard, and contracts are sworn over the morning fire. Traders detour days to deal under his witness."
+        },
+        {
+          "id": "eastern_mithra_3",
+          "name": "Great Temple of Mithra",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "trade_pct": 15, "happiness": 6 },
+          "description": "The god of the unbroken word presides over a bazaar famous for honest scales. Silk, silver, and horses change hands beneath his thousand-eyed gaze."
+        },
+        {
+          "id": "eastern_mithra_4",
+          "name": "Royal Temple of Mithra",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "trade_pct": 20, "happiness": 8 },
+          "description": "Treaty-fires burn in the sanctuary where kings and caravan lords alike bind their promises. Trade follows trust, and trust lives here."
+        }
+      ]
+    },
+    {
+      "id": "eastern_atar",
+      "kind": "temple",
+      "cultures": ["eastern"],
+      "name": "Cult of Atar",
+      "god": "Atar",
+      "archetype": "forge",
+      "levels": [
+        {
+          "id": "eastern_atar_1",
+          "name": "Hearth Shrine of Atar",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 2 },
+          "description": "A shrine of the holy fire kept by the village smith, who feeds it before his own forge. Iron worked beside it is said to remember the flame."
+        },
+        {
+          "id": "eastern_atar_2",
+          "name": "Temple of Atar",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "description": "Forge and sanctuary stand wall to wall, and blades are drawn through the sacred flame at their finishing. Edges blessed by Atar bite deep and stay sharp."
+        },
+        {
+          "id": "eastern_atar_3",
+          "name": "Great Temple of Atar",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "description": "The fire-son's temple oversees a quarter of master armorers hammering scale and lamellar. Cataphract harness from these shops turns spearpoints like rain."
+        },
+        {
+          "id": "eastern_atar_4",
+          "name": "Royal Temple of Atar",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "description": "A royal fire-sanctuary whose consecrated furnaces never cool. The panoplies it produces are heirlooms the day they are made."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_baal_hammon",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Baal Hammon",
+      "god": "Baal Hammon",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "carthaginian_baal_hammon_1",
+          "name": "Shrine of Baal Hammon",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "A stern altar of the lord of the burning sky, first among the city's gods. His name alone keeps small men honest."
+        },
+        {
+          "id": "carthaginian_baal_hammon_2",
+          "name": "Temple of Baal Hammon",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "The suffets take their oaths of office before the great Baal. His priests audit the town's affairs with a rigor tax collectors envy."
+        },
+        {
+          "id": "carthaginian_baal_hammon_3",
+          "name": "Great Temple of Baal Hammon",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "A high sanctuary of bronze doors and smoke, dread and splendid at once. Council, court, and counting house all bend beneath his authority."
+        },
+        {
+          "id": "carthaginian_baal_hammon_4",
+          "name": "High Sanctuary of Baal Hammon",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "The lord of the city rules from a precinct of towers and sacred flame. Sedition dies in the throat within sight of it."
+        },
+        {
+          "id": "carthaginian_baal_hammon_5",
+          "name": "Sacred Precinct of Baal Hammon",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "law": 16, "happiness": 7 },
+          "description": "A precinct vast as a citadel, heart of the state's religion and its discipline. What Baal Hammon commands, the greatest city of the west performs."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_tanit",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Tanit",
+      "god": "Tanit",
+      "archetype": "fertility",
+      "levels": [
+        {
+          "id": "carthaginian_tanit_1",
+          "name": "Shrine of Tanit",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 4, "growth": 0.4 },
+          "description": "A white-washed shrine bearing the sign of the goddess: circle, line, and open arms. Mothers and farmers trust her with everything that grows."
+        },
+        {
+          "id": "carthaginian_tanit_2",
+          "name": "Temple of Tanit",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 6, "growth": 0.6 },
+          "description": "The lady of the town watches over its orchards, cradles, and quiet streets. Her festivals fill the lanes with lamplight and singing."
+        },
+        {
+          "id": "carthaginian_tanit_3",
+          "name": "Great Temple of Tanit",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 9, "growth": 0.9 },
+          "description": "A serene marble house for the face of Baal, ringed by gardens and votive stelae. The city under her sign is fruitful and strangely calm."
+        },
+        {
+          "id": "carthaginian_tanit_4",
+          "name": "High Sanctuary of Tanit",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 12, "growth": 1.2 },
+          "description": "Thousands of stelae crowd the great mother's precinct, one for every answered prayer. Her city wants for neither children nor bread."
+        },
+        {
+          "id": "carthaginian_tanit_5",
+          "name": "Sacred Precinct of Tanit",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 15, "growth": 1.5 },
+          "description": "The queen of the city reigns from a precinct of silver crescents and endless gardens. Under her open arms the metropolis grows like a tide coming in."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_melqart",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Melqart",
+      "god": "Melqart",
+      "archetype": "trade",
+      "levels": [
+        {
+          "id": "carthaginian_melqart_1",
+          "name": "Shrine of Melqart",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "trade_pct": 5, "happiness": 2 },
+          "description": "A harbor-side shrine to the king of the city of Tyre, patron of every Punic venture. Sailors touch its pillar before weighing anchor."
+        },
+        {
+          "id": "carthaginian_melqart_2",
+          "name": "Temple of Melqart",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "trade_pct": 10, "happiness": 4 },
+          "description": "Merchant houses register their ships and their oaths at the god's twin pillars. Cargo blessed by Melqart is said to outrun both storm and creditor."
+        },
+        {
+          "id": "carthaginian_melqart_3",
+          "name": "Great Temple of Melqart",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "trade_pct": 15, "happiness": 6 },
+          "description": "Tithes from a hundred trade routes gild the wanderer-god's house. Its priests know the price of tin in every port from Gades to Sidon."
+        },
+        {
+          "id": "carthaginian_melqart_4",
+          "name": "High Sanctuary of Melqart",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "trade_pct": 20, "happiness": 8 },
+          "description": "A treasury-sanctuary where trading companies are chartered and sea lanes divided. Half the western sea's silver passes its threshold in a year."
+        },
+        {
+          "id": "carthaginian_melqart_5",
+          "name": "Sacred Precinct of Melqart",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "description": "The mother-sanctuary of Punic commerce, its pillars sheathed in gold and its ledgers longer than epics. Even its levies drill hard, for Melqart's people protect what they own."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_eshmun",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Eshmun",
+      "god": "Eshmun",
+      "archetype": "healing",
+      "levels": [
+        {
+          "id": "carthaginian_eshmun_1",
+          "name": "Shrine of Eshmun",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "description": "A hillside shrine of the healer god, hung with small silver hands and feet. The sick climb up slowly and walk down faster."
+        },
+        {
+          "id": "carthaginian_eshmun_2",
+          "name": "Temple of Eshmun",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "health": 7, "growth": 0.5, "happiness": 2 },
+          "description": "Sacred pools and clean-handed priests make this temple the town's true physician. Fevers that ravage the coast pass this place by."
+        },
+        {
+          "id": "carthaginian_eshmun_3",
+          "name": "Great Temple of Eshmun",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "health": 10, "growth": 0.8, "happiness": 3 },
+          "description": "Terraced courts of baths and herb stores rise around the healer's sanctuary. Ship crews put in here just to have their wounds seen."
+        },
+        {
+          "id": "carthaginian_eshmun_4",
+          "name": "High Sanctuary of Eshmun",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "health": 13, "growth": 1.0, "happiness": 4 },
+          "description": "A famed healing sanctuary whose spring-fed basins never run dry. The city buries its people old, which is the only boast that matters."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_reshef",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Reshef",
+      "god": "Reshef",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "carthaginian_reshef_1",
+          "name": "Shrine of Reshef",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "An altar to the lord of the arrow and the plague-wind, placated more than adored. Better his fire aimed outward than in."
+        },
+        {
+          "id": "carthaginian_reshef_2",
+          "name": "Temple of Reshef",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Hired spears and citizen levies alike take the war god's mark before muster. His temple pays well for courage and nothing for excuses."
+        },
+        {
+          "id": "carthaginian_reshef_3",
+          "name": "Great Temple of Reshef",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "description": "The lightning god's armory-temple issues blades tempered under his own storm-sign. Officers pray here for aim; enemies pray he is not listening."
+        },
+        {
+          "id": "carthaginian_reshef_4",
+          "name": "High Sanctuary of Reshef",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "War-tithes from every campaign gild the god of the burning arrow. The regiments consecrated here are the ones other cities hire nightmares about."
+        },
+        {
+          "id": "carthaginian_reshef_5",
+          "name": "Sacred Precinct of Reshef",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "description": "The great war-precinct of the Punic state, where its most sacred bands are sworn to conquer or be carried home on their shields. Reshef's fire goes with them."
+        }
+      ]
+    },
+    {
+      "id": "carthaginian_astarte",
+      "kind": "temple",
+      "cultures": ["carthaginian"],
+      "name": "Cult of Astarte",
+      "god": "Astarte",
+      "archetype": "fun",
+      "levels": [
+        {
+          "id": "carthaginian_astarte_1",
+          "name": "Shrine of Astarte",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 7 },
+          "description": "A shrine of the evening star, bright with lamps and flute music after dark. The village keeps her feasts eagerly and her fasts loosely."
+        },
+        {
+          "id": "carthaginian_astarte_2",
+          "name": "Temple of Astarte",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 11 },
+          "description": "Music, incense, and festival nights spill from the goddess's doors into the streets. Sailors time their shore leave to her calendar."
+        },
+        {
+          "id": "carthaginian_astarte_3",
+          "name": "Great Temple of Astarte",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 15 },
+          "description": "The lady of joy holds court in a temple of mirrors, doves, and drums. Her festivals are the one appointment the whole city keeps."
+        },
+        {
+          "id": "carthaginian_astarte_4",
+          "name": "High Sanctuary of Astarte",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 19 },
+          "description": "A glittering pleasure-sanctuary famous from Iberia to the Levant. Grievances brought into this city rarely survive their first festival."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_ra",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Ra",
+      "god": "Ra",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "egyptian_ra_1",
+          "name": "Shrine of Ra",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "A sun-shrine where the village greets the god at his rising. Under the eye that sees everything, little goes missing."
+        },
+        {
+          "id": "egyptian_ra_2",
+          "name": "Temple of Ra",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "Priests of the sun keep the town's records, measures, and calendar. Order here is not enforced so much as risen with, daily."
+        },
+        {
+          "id": "egyptian_ra_3",
+          "name": "Great Temple of Ra",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "An obelisk-crowned temple whose priesthood administers oaths, courts, and granary seals. Ma'at is not an ideal here; it is a procedure."
+        },
+        {
+          "id": "egyptian_ra_4",
+          "name": "Temple Compound of Ra",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "Pylon gates, sacred lakes, and colleges of scribes serve the lord of the horizon. The city's business runs as reliably as his barque crosses the sky."
+        },
+        {
+          "id": "egyptian_ra_5",
+          "name": "Grand Precinct of Ra",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "law": 16, "happiness": 7 },
+          "description": "A precinct of gold-tipped obelisks visible from a day's sail away. Beneath the sun god's gaze, a metropolis of hundreds of thousands keeps time, keeps accounts, and keeps the peace."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_horus",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Horus",
+      "god": "Horus",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "egyptian_horus_1",
+          "name": "Shrine of Horus",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A falcon-shrine at the village edge, wings spread against every enemy. Boys salute it with reed spears, practicing."
+        },
+        {
+          "id": "egyptian_horus_2",
+          "name": "Temple of Horus",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Recruits are presented to the avenger-falcon before their first posting. His priests teach that the strong arm and the just cause are the same limb."
+        },
+        {
+          "id": "egyptian_horus_3",
+          "name": "Great Temple of Horus",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "description": "Reliefs of the falcon spearing chaos cover the walls, and the temple armories mean it. Companies blessed at its pylon fight like the god is perched on their standard."
+        },
+        {
+          "id": "egyptian_horus_4",
+          "name": "Temple Compound of Horus",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "A great compound where regiments receive their names, standards, and consecrated bronze. The falcon's shadow crossing the parade ground is taken as a promotion."
+        },
+        {
+          "id": "egyptian_horus_5",
+          "name": "Grand Precinct of Horus",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "description": "The war-falcon's grandest house, where kings are crowned as his living image. Armies sworn here carry the sky's own vengeance in close formation."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_osiris",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Osiris",
+      "god": "Osiris",
+      "archetype": "fertility",
+      "levels": [
+        {
+          "id": "egyptian_osiris_1",
+          "name": "Shrine of Osiris",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 4, "growth": 0.4 },
+          "description": "A green-painted shrine of the lord who dies and returns with the flood. The village plants by his festivals and rarely plants in vain."
+        },
+        {
+          "id": "egyptian_osiris_2",
+          "name": "Temple of Osiris",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 6, "growth": 0.6 },
+          "description": "Grain-beds of sprouting barley are raised in the god's image each year. Where Osiris is well kept, the black land gives double."
+        },
+        {
+          "id": "egyptian_osiris_3",
+          "name": "Great Temple of Osiris",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 9, "growth": 0.9 },
+          "description": "Pilgrims and mourners alike bring offerings to the lord of the faithful dead. His promise of return makes life on the riverbank fearless and full."
+        },
+        {
+          "id": "egyptian_osiris_4",
+          "name": "Temple Compound of Osiris",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 12, "growth": 1.2 },
+          "description": "Festival barges, granary courts, and mystery halls fill the risen lord's compound. The city trusts its dead to him and its harvests likewise."
+        },
+        {
+          "id": "egyptian_osiris_5",
+          "name": "Grand Precinct of Osiris",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "happiness": 15, "growth": 1.5 },
+          "description": "A precinct of pilgrimage famous the length of the river, thronged at every flood season. Around the lord of rebirth, the city itself is reborn larger every year."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_isis",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Isis",
+      "god": "Isis",
+      "archetype": "healing",
+      "levels": [
+        {
+          "id": "egyptian_isis_1",
+          "name": "Shrine of Isis",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "description": "A small shrine of the great enchantress, keeper of the words that mend. Mothers bring fevered children here first, and physicians second."
+        },
+        {
+          "id": "egyptian_isis_2",
+          "name": "Temple of Isis",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "health": 6, "growth": 0.5, "happiness": 2 },
+          "description": "Her priests bind wounds and mix remedies under the lady of magic's protection. The town's wells are cleaner for their fussing, and its people for their care."
+        },
+        {
+          "id": "egyptian_isis_3",
+          "name": "Great Temple of Isis",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "health": 9, "growth": 0.7, "happiness": 3 },
+          "description": "Healing sleep, herb courts, and the murmur of spells fill the great mother's house. Illness in this city meets an organized and ancient resistance."
+        },
+        {
+          "id": "egyptian_isis_4",
+          "name": "Temple Compound of Isis",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "health": 12, "growth": 1.0, "happiness": 4 },
+          "description": "A compound of sanatoria and sacred pools where the throne-crowned lady works her mercies. Pilgrims arrive on stretchers and leave on foot."
+        },
+        {
+          "id": "egyptian_isis_5",
+          "name": "Grand Precinct of Isis",
+          "min_settlement_level": "huge_city",
+          "cost": 6500,
+          "build_turns": 5,
+          "effects": { "health": 15, "growth": 1.2, "happiness": 5 },
+          "description": "The mistress of magic's grandest precinct, famous wherever ships sail. A metropolis in her keeping outlives plagues that empty other capitals."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_ptah",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Ptah",
+      "god": "Ptah",
+      "archetype": "forge",
+      "levels": [
+        {
+          "id": "egyptian_ptah_1",
+          "name": "Shrine of Ptah",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 2 },
+          "description": "A craftsman's shrine to the god who thought the world and spoke it into being. Local smiths and potters leave their best piece of the year at his feet."
+        },
+        {
+          "id": "egyptian_ptah_2",
+          "name": "Temple of Ptah",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "description": "The maker-god's temple charters the town's workshops and proves their bronze. Spearheads bearing his stamp pass inspection without argument."
+        },
+        {
+          "id": "egyptian_ptah_3",
+          "name": "Great Temple of Ptah",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "description": "Foundries, joineries, and sculptors' yards work under the great artificer's charter. Arms and armor from his city are copied everywhere and equaled nowhere nearby."
+        },
+        {
+          "id": "egyptian_ptah_4",
+          "name": "Temple Compound of Ptah",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "description": "A vast compound where the god of makers oversees a thousand workshops at once. What leaves its gates is finished in every sense of the word."
+        }
+      ]
+    },
+    {
+      "id": "egyptian_hathor",
+      "kind": "temple",
+      "cultures": ["egyptian"],
+      "name": "Cult of Hathor",
+      "god": "Hathor",
+      "archetype": "fun",
+      "levels": [
+        {
+          "id": "egyptian_hathor_1",
+          "name": "Shrine of Hathor",
+          "min_settlement_level": "village",
+          "cost": 300,
+          "build_turns": 1,
+          "effects": { "happiness": 7 },
+          "description": "A shrine of the golden lady, loud with sistrum rattles on feast days. The village works hard because it celebrates harder."
+        },
+        {
+          "id": "egyptian_hathor_2",
+          "name": "Temple of Hathor",
+          "min_settlement_level": "town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": { "happiness": 11 },
+          "description": "Music, beer, and dancing pour out of the lady of joy's house on her festivals. Even the tax scribes are seen smiling, briefly."
+        },
+        {
+          "id": "egyptian_hathor_3",
+          "name": "Great Temple of Hathor",
+          "min_settlement_level": "minor_city",
+          "cost": 1500,
+          "build_turns": 3,
+          "effects": { "happiness": 15 },
+          "description": "The city's great festivals of drunkenness and song are held in her columned courts. A people this well feasted forgives its rulers almost anything."
+        },
+        {
+          "id": "egyptian_hathor_4",
+          "name": "Temple Compound of Hathor",
+          "min_settlement_level": "large_city",
+          "cost": 3200,
+          "build_turns": 4,
+          "effects": { "happiness": 19 },
+          "description": "A radiant compound of music halls, birth houses, and festival courts. Her calendar keeps the city so busy rejoicing that discontent cannot book a date."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_taranis",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Taranis",
+      "god": "Taranis",
+      "archetype": "law",
+      "levels": [
+        {
+          "id": "barbarian_taranis_1",
+          "name": "Grove of Taranis",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "law": 4, "happiness": 2 },
+          "description": "A thunder-scarred oak marks the wheel-god's grove. Oaths sworn beneath it are kept, because everyone has seen what happens to that tree."
+        },
+        {
+          "id": "barbarian_taranis_2",
+          "name": "Sacred Grove of Taranis",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "law": 7, "happiness": 3 },
+          "description": "Carved wheels and offering pits ring the holy trees where the tribe's disputes are judged. The thunderer's silence during a verdict counts as agreement."
+        },
+        {
+          "id": "barbarian_taranis_3",
+          "name": "Nemeton of Taranis",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "law": 10, "happiness": 4 },
+          "description": "A great enclosure of standing timbers where chiefs are sworn and law is spoken from memory. Feuds are settled here before the sky god settles them harder."
+        },
+        {
+          "id": "barbarian_taranis_4",
+          "name": "Great Nemeton of Taranis",
+          "min_settlement_level": "minor_city",
+          "cost": 2400,
+          "build_turns": 3,
+          "effects": { "law": 13, "happiness": 5 },
+          "description": "The tribe's grandest sanctuary, its posts sheathed in bronze and its judgments final. Kings travel days to be crowned under the wheel."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_teutates",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Teutates",
+      "god": "Teutates",
+      "archetype": "battle",
+      "levels": [
+        {
+          "id": "barbarian_teutates_1",
+          "name": "Grove of Teutates",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "happiness": 3 },
+          "description": "A war-grove of the tribe's own protector, hung with the shields of the fallen. Boys leave their first hunting kill here and take home a warrior's nerve."
+        },
+        {
+          "id": "barbarian_teutates_2",
+          "name": "Sacred Grove of Teutates",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "description": "Warbands are sworn to the tribe-father before they march, blades touched to the sacred cauldron. Men bound by that oath do not break first."
+        },
+        {
+          "id": "barbarian_teutates_3",
+          "name": "Nemeton of Teutates",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "happiness": 5, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "Trophies of a dozen wars crowd the god's enclosure, and the smiths who serve it forge with old grudges in mind. Warbands raised here arrive angry and well armed."
+        },
+        {
+          "id": "barbarian_teutates_4",
+          "name": "Great Nemeton of Teutates",
+          "min_settlement_level": "minor_city",
+          "cost": 2400,
+          "build_turns": 3,
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "description": "The greatest war-sanctuary of the tribes, where whole confederations swear common cause. Its consecrated hosts have ended the histories of richer peoples."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_epona",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Epona",
+      "god": "Epona",
+      "archetype": "fertility",
+      "levels": [
+        {
+          "id": "barbarian_epona_1",
+          "name": "Grove of Epona",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "happiness": 4, "growth": 0.4 },
+          "description": "A meadow shrine of the horse mother, strewn with grain and mare's milk. Foals, calves, and children all seem to thrive within sight of it."
+        },
+        {
+          "id": "barbarian_epona_2",
+          "name": "Sacred Grove of Epona",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "happiness": 6, "growth": 0.7 },
+          "description": "The lady of the herds blesses paddock and hearth alike. Good grass, easy births, and full byres follow her festivals."
+        },
+        {
+          "id": "barbarian_epona_3",
+          "name": "Nemeton of Epona",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "happiness": 9, "growth": 1.0 },
+          "description": "Carved mares guard an enclosure rich with offerings of bread and bridles. The settlement grows like its herds: steadily, and with much noise."
+        },
+        {
+          "id": "barbarian_epona_4",
+          "name": "Great Nemeton of Epona",
+          "min_settlement_level": "minor_city",
+          "cost": 2400,
+          "build_turns": 3,
+          "effects": { "happiness": 12, "growth": 1.3 },
+          "description": "The great mother of horses keeps her finest sanctuary here, ringed by breeding runs. Wealth in this tribe is counted in hooves, and the count keeps rising."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_gobannos",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Gobannos",
+      "god": "Gobannos",
+      "archetype": "forge",
+      "levels": [
+        {
+          "id": "barbarian_gobannos_1",
+          "name": "Grove of Gobannos",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "happiness": 2 },
+          "description": "The smith god's grove stands beside the village forge, ashes mingling with offerings. Iron cooled in its spring is said to hate going dull."
+        },
+        {
+          "id": "barbarian_gobannos_2",
+          "name": "Sacred Grove of Gobannos",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "description": "Smiths take their hammer-oaths before the divine craftsman, and their longswords show it. Traders come from other tribes and pretend they haven't."
+        },
+        {
+          "id": "barbarian_gobannos_3",
+          "name": "Nemeton of Gobannos",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "description": "Forge-fires burn inside the sacred enclosure itself, worked by masters of the god's own line. Mail from these anvils is buried with chiefs and envied by kings."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_sucellus",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Sucellus",
+      "god": "Sucellus",
+      "archetype": "fun",
+      "levels": [
+        {
+          "id": "barbarian_sucellus_1",
+          "name": "Grove of Sucellus",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "happiness": 6 },
+          "description": "A cheerful grove of the mallet god, keeper of the cask and the feast. Village quarrels are drowned here in fair shares of ale."
+        },
+        {
+          "id": "barbarian_sucellus_2",
+          "name": "Sacred Grove of Sucellus",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "happiness": 10 },
+          "description": "The god of good striking and good drinking hosts feasts that last from moonrise to milking. A town that feasts together fights outsiders, not itself."
+        },
+        {
+          "id": "barbarian_sucellus_3",
+          "name": "Nemeton of Sucellus",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "happiness": 14 },
+          "description": "Great feasting halls flank the sanctuary, and the god's mallet taps every new barrel first. Chiefs settle rivalries here over meat and boasting instead of blood."
+        }
+      ]
+    },
+    {
+      "id": "barbarian_nerthus",
+      "kind": "temple",
+      "cultures": ["barbarian"],
+      "name": "Cult of Nerthus",
+      "god": "Nerthus",
+      "archetype": "healing",
+      "levels": [
+        {
+          "id": "barbarian_nerthus_1",
+          "name": "Grove of Nerthus",
+          "min_settlement_level": "village",
+          "cost": 250,
+          "build_turns": 1,
+          "effects": { "health": 3, "growth": 0.3, "happiness": 1 },
+          "description": "A lake-island grove of the earth mother, approached barefoot and in silence. Her peace lies on the village like deep water: sickness struggles to cross it."
+        },
+        {
+          "id": "barbarian_nerthus_2",
+          "name": "Sacred Grove of Nerthus",
+          "min_settlement_level": "town",
+          "cost": 600,
+          "build_turns": 2,
+          "effects": { "health": 6, "growth": 0.5, "happiness": 2 },
+          "description": "When the goddess's veiled wagon passes, all iron is put away and all wounds are tended. The wise women of her grove know every herb in the forest."
+        },
+        {
+          "id": "barbarian_nerthus_3",
+          "name": "Nemeton of Nerthus",
+          "min_settlement_level": "large_town",
+          "cost": 1300,
+          "build_turns": 3,
+          "effects": { "health": 9, "growth": 0.8, "happiness": 3 },
+          "description": "A great sanctuary of the mothering earth, its springs sacred and its truce absolute. The tribe's children grow up unusually many and unusually loud."
+        }
+      ]
+    }
+  ]
+}

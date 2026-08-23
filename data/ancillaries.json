@@ -1,0 +1,268 @@
+{
+  "$schema": "../schemas/ancillaries.schema.json",
+  "ancillaries": [
+    {
+      "id": "tutor",
+      "name": "Tutor",
+      "effects": { "management": 1 },
+      "triggers": [
+        { "when": "came_of_age", "chance": 0.15 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 1 }, "chance": 0.06 }
+      ],
+      "description": "A patient graybeard with a switch and a scroll case, hired to beat sums and syntax into a young gentleman. Some of it stuck."
+    },
+    {
+      "id": "philosopher_companion",
+      "name": "Philosopher Companion",
+      "effects": { "influence": 1, "management": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 3 }, "chance": 0.05 }
+      ],
+      "description": "He dines at his patron's table and questions every decision made there. Annoying, but the decisions have improved."
+    },
+    {
+      "id": "master_of_rhetoric",
+      "name": "Master of Rhetoric",
+      "effects": { "influence": 2 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "education", "min_building_level": 2 }, "chance": 0.04 }
+      ],
+      "description": "A teacher of speeches who can make a grain tariff sound like destiny. His patron's words now land where they are aimed."
+    },
+    {
+      "id": "scribe",
+      "name": "Scribe",
+      "effects": { "management": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "government", "min_building_level": 2 }, "chance": 0.05 }
+      ],
+      "description": "Ink-stained and indispensable, he remembers what was promised to whom and files it where it can be found again."
+    },
+    {
+      "id": "household_steward",
+      "name": "Household Steward",
+      "effects": { "management": 1, "trade_pct": 1 },
+      "triggers": [
+        { "when": "office_gained", "chance": 0.12 }
+      ],
+      "description": "He runs the estate so his master can run the province, and squeezes a profit out of both."
+    },
+    {
+      "id": "quartermaster",
+      "name": "Quartermaster",
+      "effects": { "movement": 0.25 },
+      "triggers": [
+        { "when": "turn_end_campaigning", "chance": 0.05 }
+      ],
+      "description": "A sour old soldier who counts every sack of barley twice. Columns he supplies do not straggle."
+    },
+    {
+      "id": "wilderness_guide",
+      "name": "Wilderness Guide",
+      "effects": { "movement": 0.5 },
+      "triggers": [
+        { "when": "turn_end_campaigning", "chance": 0.03 }
+      ],
+      "description": "Born in country the mapmakers gave up on. He knows the fords, the goat paths, and which valleys to never camp in."
+    },
+    {
+      "id": "drillmaster",
+      "name": "Drillmaster",
+      "effects": { "command": 1 },
+      "triggers": [
+        { "when": "battle_won", "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "barracks", "min_building_level": 3 }, "chance": 0.04 }
+      ],
+      "description": "His voice can cross a parade ground against the wind. Formations he has trained wheel like a single animal."
+    },
+    {
+      "id": "shieldbearer",
+      "name": "Shieldbearer",
+      "effects": { "personal_security": 2 },
+      "triggers": [
+        { "when": "battle_won", "chance": 0.06 }
+      ],
+      "description": "A silent giant who stands a pace behind his general and takes professionally what was meant for another."
+    },
+    {
+      "id": "field_surgeon",
+      "name": "Field Surgeon",
+      "effects": { "personal_security": 1, "troop_morale": 1 },
+      "triggers": [
+        { "when": "battle_won", "chance": 0.07 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "health", "min_building_level": 2 }, "chance": 0.04 }
+      ],
+      "description": "Quick with the probe and honest about the odds. Men fight harder knowing a wound need not be the end."
+    },
+    {
+      "id": "standard_bearer",
+      "name": "Standard Bearer",
+      "effects": { "troop_morale": 2 },
+      "triggers": [
+        { "when": "battle_won", "chance": 0.04 }
+      ],
+      "description": "He has carried the standard through three routs without lowering it. Where it stands, the line stands."
+    },
+    {
+      "id": "siege_engineer",
+      "name": "Siege Engineer",
+      "effects": { "command": 1 },
+      "triggers": [
+        { "when": "siege_won", "chance": 0.15 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "siege_workshop", "min_building_level": 1 }, "chance": 0.06 }
+      ],
+      "description": "He sketches a city's death on wax before supper. Rams, towers, and undermined corners are his correspondence."
+    },
+    {
+      "id": "master_of_horse",
+      "name": "Master of Horse",
+      "effects": { "command": 1, "movement": 0.25 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "stables", "min_building_level": 2 }, "chance": 0.05 }
+      ],
+      "description": "He judges a remount at forty paces and a cavalry officer faster than that. The squadrons have never been better mounted."
+    },
+    {
+      "id": "spy_catcher",
+      "name": "Catcher of Spies",
+      "effects": { "personal_security": 3, "agent_skill": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "government", "min_building_level": 3 }, "chance": 0.04 }
+      ],
+      "description": "A quiet man who notices new faces, counts doors, and asks the second question. Foreign agents find this city unlucky."
+    },
+    {
+      "id": "food_taster",
+      "name": "Food Taster",
+      "effects": { "personal_security": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "chance": 0.03 },
+        { "when": "office_gained", "chance": 0.05 }
+      ],
+      "description": "He eats first, pauses theatrically, and survives. Twice now, the pause was not theater."
+    },
+    {
+      "id": "temple_augur",
+      "name": "Augur",
+      "effects": { "influence": 1, "troop_morale": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "min_building_level": 2 }, "chance": 0.05 }
+      ],
+      "description": "He reads the flight of birds and the fold of a liver, and delivers heaven's opinion with a courtier's timing."
+    },
+    {
+      "id": "war_priest",
+      "name": "Priest of the War God",
+      "effects": { "troop_morale": 2 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Mars", "min_building_level": 3 }, "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Ares", "min_building_level": 3 }, "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Verethragna", "min_building_level": 3 }, "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Reshef", "min_building_level": 3 }, "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Horus", "min_building_level": 3 }, "chance": 0.05 },
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "temple_god": "Teutates", "min_building_level": 3 }, "chance": 0.05 }
+      ],
+      "description": "He blesses the blades the night before battle and marches in the front rank's dust. Soldiers fight differently when heaven is watching."
+    },
+    {
+      "id": "priestess_of_the_hearth",
+      "name": "Priestess of the Hearth",
+      "effects": { "happiness": 1, "influence": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "temple", "min_building_level": 3 }, "chance": 0.04 }
+      ],
+      "description": "Her presence in the household is a public vow of decency. Even the market gossips approve, and they approve of nothing."
+    },
+    {
+      "id": "merchant_factor",
+      "name": "Merchant Factor",
+      "effects": { "trade_pct": 3 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "market", "min_building_level": 3 }, "chance": 0.05 }
+      ],
+      "description": "An agent with correspondents in every port and a nose for shortage. Cargoes seem to arrive just as prices peak."
+    },
+    {
+      "id": "harbor_pilot",
+      "name": "Harbor Pilot",
+      "effects": { "trade_pct": 2 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "port", "min_building_level": 2 }, "chance": 0.05 }
+      ],
+      "description": "He has run this coast in every weather it owns. Captains pay gladly, and the harbor turns ships around in half the time."
+    },
+    {
+      "id": "mine_overseer",
+      "name": "Mine Overseer",
+      "effects": { "management": 1, "trade_pct": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "mines", "min_building_level": 1 }, "chance": 0.08 }
+      ],
+      "description": "He can smell a rich vein through rock and a lazy foreman through a wall. Output rises wherever he descends."
+    },
+    {
+      "id": "physician",
+      "name": "Physician",
+      "effects": { "personal_security": 1, "growth": 0.25 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "health", "min_building_level": 2 }, "chance": 0.05 }
+      ],
+      "description": "Trained in the Greek manner: observation, regimen, and a deep suspicion of miracle cures. His patients mostly live, which is the highest praise the trade allows."
+    },
+    {
+      "id": "architect",
+      "name": "Architect",
+      "effects": { "growth": 0.25, "management": 1 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "government", "min_building_level": 4 }, "chance": 0.04 }
+      ],
+      "description": "He carries a plumb line and strong opinions about drains. Cities he touches grow straighter, drier, and faster."
+    },
+    {
+      "id": "flattering_courtier",
+      "name": "Flattering Courtier",
+      "effects": { "influence": 1, "law": -1 },
+      "triggers": [
+        { "when": "office_gained", "chance": 0.08 }
+      ],
+      "description": "He praises beautifully, arranges introductions, and takes a small consideration for each. Doors open; standards slip."
+    },
+    {
+      "id": "captive_champion",
+      "name": "Captive Champion",
+      "effects": { "troop_morale": 1, "personal_security": 1 },
+      "triggers": [
+        { "when": "settlement_captured", "chance": 0.05 }
+      ],
+      "description": "A famous fighter taken in the sack who chose service over the block. The men admire him; sensible enemies avoid his master."
+    },
+    {
+      "id": "exiled_prince",
+      "name": "Exiled Prince",
+      "unique": true,
+      "effects": { "influence": 2, "command": 1 },
+      "triggers": [
+        { "when": "settlement_captured", "chance": 0.02 }
+      ],
+      "description": "A dispossessed royal with beautiful manners and a claim someone might one day find useful. Courts listen when his host speaks."
+    },
+    {
+      "id": "huntsman",
+      "name": "Huntsman",
+      "effects": { "movement": 0.25, "personal_security": 1 },
+      "triggers": [
+        { "when": "turn_end_campaigning", "chance": 0.04 }
+      ],
+      "description": "He reads broken grass like a letter. Nothing approaches the camp that he has not already seen leave its den."
+    },
+    {
+      "id": "informant",
+      "name": "Informant",
+      "effects": { "agent_skill": 2 },
+      "triggers": [
+        { "when": "turn_end_governing", "condition": { "building_kind": "market", "min_building_level": 2 }, "chance": 0.03 }
+      ],
+      "description": "A forgettable face who buys drinks and sells what he hears. Half the city's secrets pass through his hands, lightly used."
+    }
+  ]
+}

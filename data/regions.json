@@ -1,0 +1,1480 @@
+{
+  "$schema": "../schemas/regions.schema.json",
+  "regions": [
+    {
+      "id": "latium",
+      "name": "Latium",
+      "settlement_name": "Roma",
+      "terrain": "plains",
+      "fertility": 2.0,
+      "adjacent": [
+        "etruria",
+        "umbria",
+        "campania"
+      ],
+      "sea_zones": [
+        "mare_tyrrhenum"
+      ],
+      "resources": [
+        "wine"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "The old heart of the Roman confederation, where every road in Italy bends toward the walls of Roma."
+    },
+    {
+      "id": "etruria",
+      "name": "Etruria",
+      "settlement_name": "Arretium",
+      "terrain": "hills",
+      "fertility": 1.8,
+      "adjacent": [
+        "latium",
+        "umbria",
+        "liguria",
+        "cisalpina"
+      ],
+      "sea_zones": [
+        "mare_tyrrhenum"
+      ],
+      "resources": [
+        "iron",
+        "wine"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "Terraced hill country of the old Etruscan league, its island iron and famous vineyards long since bent to Roman purpose."
+    },
+    {
+      "id": "umbria",
+      "name": "Umbria",
+      "settlement_name": "Ariminum",
+      "terrain": "hills",
+      "fertility": 1.5,
+      "adjacent": [
+        "latium",
+        "etruria",
+        "cisalpina",
+        "apulia"
+      ],
+      "sea_zones": [
+        "mare_hadriaticum"
+      ],
+      "resources": [
+        "olive_oil"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "The Adriatic flank of the Apennines, a land of hill shrines and new colonies keeping watch on the Gallic road."
+    },
+    {
+      "id": "campania",
+      "name": "Campania",
+      "settlement_name": "Capua",
+      "terrain": "plains",
+      "fertility": 2.5,
+      "adjacent": [
+        "latium",
+        "apulia",
+        "bruttium"
+      ],
+      "sea_zones": [
+        "mare_tyrrhenum"
+      ],
+      "resources": [
+        "wine",
+        "olive_oil"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "Black volcanic soil and crowded orchards make this bay country the garden of Italy, and every conqueror's temptation."
+    },
+    {
+      "id": "apulia",
+      "name": "Apulia",
+      "settlement_name": "Tarentum",
+      "terrain": "plains",
+      "fertility": 1.8,
+      "adjacent": [
+        "umbria",
+        "campania",
+        "bruttium"
+      ],
+      "sea_zones": [
+        "mare_hadriaticum",
+        "mare_ionium"
+      ],
+      "resources": [
+        "textiles",
+        "olive_oil"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "Sun-bleached wool country of the southeast, ringing the great harbor of Tarentum and its restless Greek pride."
+    },
+    {
+      "id": "bruttium",
+      "name": "Bruttium",
+      "settlement_name": "Croton",
+      "terrain": "mountains",
+      "fertility": 1.2,
+      "adjacent": [
+        "campania",
+        "apulia",
+        "sicilia_graeca"
+      ],
+      "sea_zones": [
+        "mare_tyrrhenum",
+        "mare_ionium"
+      ],
+      "resources": [
+        "timber"
+      ],
+      "hidden_resources": [
+        "italia"
+      ],
+      "description": "The mountainous toe of Italy, where Greek coastal cities cling between the Sila forests and two seas."
+    },
+    {
+      "id": "liguria",
+      "name": "Liguria",
+      "settlement_name": "Genua",
+      "terrain": "mountains",
+      "fertility": 0.8,
+      "adjacent": [
+        "etruria",
+        "cisalpina",
+        "narbonensis"
+      ],
+      "sea_zones": [
+        "mare_ligusticum"
+      ],
+      "resources": [
+        "timber"
+      ],
+      "description": "A narrow, stony coast whose hard-living hill tribes cut ship timber above the harbor of Genua."
+    },
+    {
+      "id": "cisalpina",
+      "name": "Gallia Cisalpina",
+      "settlement_name": "Mediolanum",
+      "terrain": "plains",
+      "fertility": 2.8,
+      "adjacent": [
+        "liguria",
+        "etruria",
+        "umbria",
+        "venetia",
+        "raetia"
+      ],
+      "resources": [
+        "grain"
+      ],
+      "description": "The broad Po plain, richest grainland of the west, settled thick with Gallic clans who mislike Roman surveyors."
+    },
+    {
+      "id": "venetia",
+      "name": "Venetia",
+      "settlement_name": "Patavium",
+      "terrain": "marsh",
+      "fertility": 2.0,
+      "adjacent": [
+        "cisalpina",
+        "noricum",
+        "illyria"
+      ],
+      "sea_zones": [
+        "mare_hadriaticum"
+      ],
+      "resources": [
+        "horses"
+      ],
+      "description": "Lagoons and lush horse pastures at the head of the Adriatic, home of the Veneti and their famous white herds."
+    },
+    {
+      "id": "sicilia_graeca",
+      "name": "Greek Sicily",
+      "settlement_name": "Syracusae",
+      "terrain": "hills",
+      "fertility": 2.2,
+      "adjacent": [
+        "sicilia_punica",
+        "bruttium"
+      ],
+      "sea_zones": [
+        "mare_ionium",
+        "mare_africum"
+      ],
+      "resources": [
+        "grain",
+        "wine"
+      ],
+      "description": "The Greek east of Sicily, where the quarries and wheat fields of Syracusae have made and unmade tyrants."
+    },
+    {
+      "id": "sicilia_punica",
+      "name": "Punic Sicily",
+      "settlement_name": "Lilybaeum",
+      "terrain": "plains",
+      "fertility": 2.0,
+      "adjacent": [
+        "sicilia_graeca"
+      ],
+      "sea_zones": [
+        "mare_tyrrhenum",
+        "mare_africum"
+      ],
+      "resources": [
+        "grain",
+        "fish"
+      ],
+      "description": "The Punic west of the island, tuna shoals and wheat, held by Carthage as the anchor of her sea lanes."
+    },
+    {
+      "id": "sardinia",
+      "name": "Sardinia",
+      "settlement_name": "Caralis",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [],
+      "sea_zones": [
+        "mare_ligusticum",
+        "mare_tyrrhenum",
+        "mare_africum"
+      ],
+      "resources": [
+        "silver",
+        "grain"
+      ],
+      "description": "Silver-veined highlands over fevered lowland grainfields, ringed by the stone towers of a people older than memory."
+    },
+    {
+      "id": "baetica",
+      "name": "Baetica",
+      "settlement_name": "Gades",
+      "terrain": "plains",
+      "fertility": 1.8,
+      "adjacent": [
+        "lusitania",
+        "celtiberia",
+        "edetania",
+        "mauretania"
+      ],
+      "sea_zones": [
+        "oceanus_cantabricus",
+        "mare_ibericum"
+      ],
+      "resources": [
+        "silver",
+        "olive_oil",
+        "fish"
+      ],
+      "description": "The silver country beyond the Pillars, where ancient Gades grows fat on fish sauce, ore, and ocean trade."
+    },
+    {
+      "id": "lusitania",
+      "name": "Lusitania",
+      "settlement_name": "Olisipo",
+      "terrain": "hills",
+      "fertility": 1.2,
+      "adjacent": [
+        "baetica",
+        "celtiberia",
+        "gallaecia"
+      ],
+      "sea_zones": [
+        "oceanus_cantabricus"
+      ],
+      "resources": [
+        "horses"
+      ],
+      "description": "Rolling Atlantic uplands whose herdsmen breed swift horses and make war the way they hunt, by ambush."
+    },
+    {
+      "id": "celtiberia",
+      "name": "Celtiberia",
+      "settlement_name": "Numantia",
+      "terrain": "hills",
+      "fertility": 1.0,
+      "adjacent": [
+        "baetica",
+        "lusitania",
+        "gallaecia",
+        "edetania",
+        "aquitania"
+      ],
+      "resources": [
+        "iron"
+      ],
+      "description": "The harsh central plateau of Iberia, where the smiths of Numantia temper the finest blades in the west."
+    },
+    {
+      "id": "edetania",
+      "name": "Edetania",
+      "settlement_name": "Saguntum",
+      "terrain": "plains",
+      "fertility": 1.6,
+      "adjacent": [
+        "baetica",
+        "celtiberia",
+        "narbonensis"
+      ],
+      "sea_zones": [
+        "mare_ibericum"
+      ],
+      "resources": [
+        "wine",
+        "textiles"
+      ],
+      "description": "Vine terraces and esparto fields along Iberia's eastern shore, watched over by the proud walls of Saguntum."
+    },
+    {
+      "id": "gallaecia",
+      "name": "Gallaecia",
+      "settlement_name": "Brigantium",
+      "terrain": "hills",
+      "fertility": 1.0,
+      "adjacent": [
+        "lusitania",
+        "celtiberia"
+      ],
+      "sea_zones": [
+        "oceanus_cantabricus"
+      ],
+      "resources": [
+        "gold",
+        "copper"
+      ],
+      "description": "Mist-wrapped headlands of the far northwest, panning gold from cold rivers above tin-trading coves."
+    },
+    {
+      "id": "narbonensis",
+      "name": "Narbonensis",
+      "settlement_name": "Massilia",
+      "terrain": "plains",
+      "fertility": 1.6,
+      "adjacent": [
+        "edetania",
+        "liguria",
+        "aquitania",
+        "arvernia"
+      ],
+      "sea_zones": [
+        "mare_ligusticum"
+      ],
+      "resources": [
+        "wine",
+        "salt"
+      ],
+      "description": "Greek Massilia rules this coast of salt pans and vineyards, the hinge between Italy, Iberia, and the Gallic interior."
+    },
+    {
+      "id": "aquitania",
+      "name": "Aquitania",
+      "settlement_name": "Burdigala",
+      "terrain": "plains",
+      "fertility": 1.5,
+      "adjacent": [
+        "celtiberia",
+        "narbonensis",
+        "arvernia",
+        "armorica"
+      ],
+      "sea_zones": [
+        "oceanus_cantabricus"
+      ],
+      "resources": [
+        "wine",
+        "slaves"
+      ],
+      "description": "Broad river valleys running down to the ocean, whose tribes grow rich trading wine, hides, and captives."
+    },
+    {
+      "id": "arvernia",
+      "name": "Arvernia",
+      "settlement_name": "Gergovia",
+      "terrain": "hills",
+      "fertility": 1.3,
+      "adjacent": [
+        "aquitania",
+        "narbonensis",
+        "armorica",
+        "belgica",
+        "raetia"
+      ],
+      "resources": [
+        "iron"
+      ],
+      "description": "The high hearth of Gaul, where the Arverni kings count their wealth in cattle, iron, and the fealty of lesser tribes."
+    },
+    {
+      "id": "armorica",
+      "name": "Armorica",
+      "settlement_name": "Darioritum",
+      "terrain": "forest",
+      "fertility": 1.0,
+      "adjacent": [
+        "aquitania",
+        "arvernia",
+        "belgica"
+      ],
+      "sea_zones": [
+        "oceanus_britannicus",
+        "oceanus_cantabricus"
+      ],
+      "resources": [
+        "copper",
+        "fish"
+      ],
+      "description": "A granite peninsula of seagoing Veneti, whose heavy oaken ships carry tin and salt along the ocean coast."
+    },
+    {
+      "id": "belgica",
+      "name": "Belgica",
+      "settlement_name": "Durocortorum",
+      "terrain": "forest",
+      "fertility": 1.2,
+      "adjacent": [
+        "armorica",
+        "arvernia",
+        "suebia"
+      ],
+      "sea_zones": [
+        "oceanus_britannicus"
+      ],
+      "resources": [
+        "iron",
+        "textiles"
+      ],
+      "description": "Forested marches of the fierce Belgae, wool-weavers and iron-workers hardened by their Germanic neighbors."
+    },
+    {
+      "id": "britannia",
+      "name": "Britannia",
+      "settlement_name": "Camulodunum",
+      "terrain": "forest",
+      "fertility": 1.0,
+      "adjacent": [],
+      "sea_zones": [
+        "oceanus_britannicus"
+      ],
+      "resources": [
+        "copper",
+        "furs"
+      ],
+      "description": "The tin-rich island behind the fog, whose painted charioteers trade metal and furs across the narrow sea."
+    },
+    {
+      "id": "cimbria",
+      "name": "Cimbria",
+      "settlement_name": "Treva",
+      "terrain": "forest",
+      "fertility": 0.8,
+      "adjacent": [
+        "suebia"
+      ],
+      "sea_zones": [
+        "mare_suebicum",
+        "oceanus_britannicus"
+      ],
+      "resources": [
+        "amber",
+        "furs"
+      ],
+      "description": "The neck of the northern peninsula, where amber washes ashore and the sea peoples reckon wealth in pelts."
+    },
+    {
+      "id": "suebia",
+      "name": "Suebia",
+      "settlement_name": "Amisia",
+      "terrain": "forest",
+      "fertility": 0.9,
+      "adjacent": [
+        "cimbria",
+        "belgica",
+        "boiohaemum",
+        "raetia"
+      ],
+      "resources": [
+        "furs",
+        "timber"
+      ],
+      "description": "Trackless oak and beech forest between the Rhine and the Elbe, home to war bands that own no master."
+    },
+    {
+      "id": "boiohaemum",
+      "name": "Boiohaemum",
+      "settlement_name": "Eburodunum",
+      "terrain": "forest",
+      "fertility": 1.0,
+      "adjacent": [
+        "suebia",
+        "raetia",
+        "noricum",
+        "pannonia"
+      ],
+      "resources": [
+        "timber",
+        "iron"
+      ],
+      "description": "The wooded bowl of the Boii, hemmed in by mountains, its timber and iron floated down to the Danube."
+    },
+    {
+      "id": "raetia",
+      "name": "Raetia",
+      "settlement_name": "Curia",
+      "terrain": "mountains",
+      "fertility": 0.5,
+      "adjacent": [
+        "cisalpina",
+        "arvernia",
+        "suebia",
+        "boiohaemum",
+        "noricum"
+      ],
+      "resources": [],
+      "description": "High passes and thin alpine meadows where drovers and toll-takers live off the traffic between Italy and the north."
+    },
+    {
+      "id": "noricum",
+      "name": "Noricum",
+      "settlement_name": "Noreia",
+      "terrain": "mountains",
+      "fertility": 0.8,
+      "adjacent": [
+        "raetia",
+        "boiohaemum",
+        "venetia",
+        "pannonia"
+      ],
+      "resources": [
+        "iron",
+        "salt"
+      ],
+      "description": "A mountain kingdom of salt shafts and famous steel, whose smiths' blades command any price in Italy."
+    },
+    {
+      "id": "pannonia",
+      "name": "Pannonia",
+      "settlement_name": "Segestica",
+      "terrain": "forest",
+      "fertility": 1.5,
+      "adjacent": [
+        "noricum",
+        "boiohaemum",
+        "illyria",
+        "dacia",
+        "moesia"
+      ],
+      "resources": [
+        "timber",
+        "slaves"
+      ],
+      "description": "Oak woods and river meadows inside the Danube bend, rich in herds, timber, and captive-taking wars."
+    },
+    {
+      "id": "illyria",
+      "name": "Illyria",
+      "settlement_name": "Scodra",
+      "terrain": "hills",
+      "fertility": 1.1,
+      "adjacent": [
+        "venetia",
+        "pannonia",
+        "moesia",
+        "macedonia",
+        "epirus"
+      ],
+      "sea_zones": [
+        "mare_hadriaticum"
+      ],
+      "resources": [
+        "silver",
+        "timber"
+      ],
+      "description": "A pirate coast of island channels and mountain strongholds, its silver spent on fast war-galleys."
+    },
+    {
+      "id": "dacia",
+      "name": "Dacia",
+      "settlement_name": "Sarmizegetusa",
+      "terrain": "mountains",
+      "fertility": 1.2,
+      "adjacent": [
+        "pannonia",
+        "moesia",
+        "scythia"
+      ],
+      "resources": [
+        "gold",
+        "salt",
+        "iron"
+      ],
+      "description": "Carpathian heights seamed with gold and salt, ruled from a fortress sanctuary above the clouds."
+    },
+    {
+      "id": "moesia",
+      "name": "Moesia",
+      "settlement_name": "Naissus",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [
+        "pannonia",
+        "illyria",
+        "dacia",
+        "thracia",
+        "macedonia"
+      ],
+      "sea_zones": [
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "copper",
+        "grain"
+      ],
+      "description": "Hill country south of the lower Danube, where Celt, Thracian, and Scythian raid across one another's herds."
+    },
+    {
+      "id": "thracia",
+      "name": "Thracia",
+      "settlement_name": "Philippopolis",
+      "terrain": "hills",
+      "fertility": 1.3,
+      "adjacent": [
+        "moesia",
+        "macedonia",
+        "europa"
+      ],
+      "resources": [
+        "horses",
+        "slaves"
+      ],
+      "description": "Horse-breeding uplands of the warlike Thracian tribes, sellers of mercenaries and slaves to every Greek war."
+    },
+    {
+      "id": "europa",
+      "name": "Europa",
+      "settlement_name": "Byzantium",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [
+        "thracia",
+        "bithynia"
+      ],
+      "sea_zones": [
+        "mare_aegaeum",
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "fish"
+      ],
+      "description": "The strait-corner of Europe, where Byzantium tolls the Bosporus and nets the running tunny."
+    },
+    {
+      "id": "macedonia",
+      "name": "Macedonia",
+      "settlement_name": "Pella",
+      "terrain": "hills",
+      "fertility": 1.6,
+      "adjacent": [
+        "illyria",
+        "moesia",
+        "thracia",
+        "epirus",
+        "thessalia"
+      ],
+      "sea_zones": [
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "timber",
+        "gold"
+      ],
+      "description": "Timbered mountains above a coastal plain that raised the phalanx; Pella still keeps the pride of Alexander's line."
+    },
+    {
+      "id": "epirus",
+      "name": "Epirus",
+      "settlement_name": "Ambracia",
+      "terrain": "mountains",
+      "fertility": 1.0,
+      "adjacent": [
+        "illyria",
+        "macedonia",
+        "thessalia"
+      ],
+      "sea_zones": [
+        "mare_ionium"
+      ],
+      "resources": [],
+      "description": "Stern limestone country of the Molossians, where the court at Ambracia dreams of thrones across the sea."
+    },
+    {
+      "id": "thessalia",
+      "name": "Thessalia",
+      "settlement_name": "Larissa",
+      "terrain": "plains",
+      "fertility": 2.0,
+      "adjacent": [
+        "epirus",
+        "macedonia",
+        "attica"
+      ],
+      "sea_zones": [
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "horses",
+        "grain"
+      ],
+      "description": "The broadest plain in Greece, famous for wheat and the finest cavalry horses south of the steppe."
+    },
+    {
+      "id": "attica",
+      "name": "Attica",
+      "settlement_name": "Athenae",
+      "terrain": "hills",
+      "fertility": 1.0,
+      "adjacent": [
+        "thessalia",
+        "achaea"
+      ],
+      "sea_zones": [
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "silver",
+        "marble",
+        "olive_oil"
+      ],
+      "description": "Thin-soiled but silver-veined, Attica lives by its olives, its marble, and the far-flung trade of Athenae."
+    },
+    {
+      "id": "achaea",
+      "name": "Achaea",
+      "settlement_name": "Corinthus",
+      "terrain": "hills",
+      "fertility": 1.3,
+      "adjacent": [
+        "attica",
+        "laconia"
+      ],
+      "sea_zones": [
+        "mare_ionium",
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "pottery",
+        "wine"
+      ],
+      "wonder": "statue_of_zeus",
+      "description": "The isthmus and the western Peloponnese, where Corinthus taxes two seas and Olympia crowns the games beneath the great god's gaze."
+    },
+    {
+      "id": "laconia",
+      "name": "Laconia",
+      "settlement_name": "Sparta",
+      "terrain": "hills",
+      "fertility": 1.2,
+      "adjacent": [
+        "achaea"
+      ],
+      "sea_zones": [
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "olive_oil",
+        "purple_dye"
+      ],
+      "description": "The closed valley of the Eurotas, where Sparta drills beneath Taygetus and murex boats work the gulf."
+    },
+    {
+      "id": "creta",
+      "name": "Creta",
+      "settlement_name": "Cnossus",
+      "terrain": "mountains",
+      "fertility": 1.3,
+      "adjacent": [],
+      "sea_zones": [
+        "mare_aegaeum",
+        "mare_libycum"
+      ],
+      "resources": [
+        "olive_oil",
+        "wine"
+      ],
+      "description": "A long mountain island of feuding cities and old palaces, exporting oil, wine, and hired bowmen."
+    },
+    {
+      "id": "rhodes",
+      "name": "Rhodes",
+      "settlement_name": "Rhodus",
+      "terrain": "hills",
+      "fertility": 1.2,
+      "adjacent": [],
+      "sea_zones": [
+        "mare_aegaeum",
+        "mare_lycium"
+      ],
+      "resources": [
+        "wine"
+      ],
+      "wonder": "colossus_of_rhodes",
+      "description": "A merchant republic of shipwrights and stamped wine jars, its harbor law honored from Iberia to Syria beneath the great bronze at the mole."
+    },
+    {
+      "id": "bithynia",
+      "name": "Bithynia",
+      "settlement_name": "Nicomedia",
+      "terrain": "forest",
+      "fertility": 1.5,
+      "adjacent": [
+        "ionia",
+        "galatia",
+        "pontus",
+        "europa"
+      ],
+      "sea_zones": [
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "timber"
+      ],
+      "description": "Forested hill country on the Propontis, its new-built royal capital ambitious between the Greek and Asian worlds."
+    },
+    {
+      "id": "ionia",
+      "name": "Ionia",
+      "settlement_name": "Ephesus",
+      "terrain": "hills",
+      "fertility": 1.7,
+      "adjacent": [
+        "bithynia",
+        "galatia",
+        "caria"
+      ],
+      "sea_zones": [
+        "mare_aegaeum"
+      ],
+      "resources": [
+        "marble",
+        "textiles",
+        "wine"
+      ],
+      "wonder": "temple_of_artemis",
+      "description": "The jeweled coast of the Greek east, its marble cities grown wealthy on wool, wine, and pilgrims to the goddess at Ephesus."
+    },
+    {
+      "id": "caria",
+      "name": "Caria",
+      "settlement_name": "Halicarnassus",
+      "terrain": "hills",
+      "fertility": 1.3,
+      "adjacent": [
+        "ionia",
+        "galatia",
+        "cilicia"
+      ],
+      "sea_zones": [
+        "mare_aegaeum",
+        "mare_lycium"
+      ],
+      "resources": [
+        "marble",
+        "olive_oil"
+      ],
+      "wonder": "mausoleum_of_halicarnassus",
+      "description": "Rugged southwestern Anatolia, where Hellene and Carian mingle and Halicarnassus keeps a dead king's marble tomb."
+    },
+    {
+      "id": "galatia",
+      "name": "Galatia",
+      "settlement_name": "Ancyra",
+      "terrain": "steppe",
+      "fertility": 0.9,
+      "adjacent": [
+        "bithynia",
+        "ionia",
+        "caria",
+        "pontus",
+        "cappadocia"
+      ],
+      "resources": [],
+      "description": "The bare Anatolian plateau lately seized by wandering Celts, who raid and levy tribute from richer neighbors."
+    },
+    {
+      "id": "pontus",
+      "name": "Pontus",
+      "settlement_name": "Sinope",
+      "terrain": "mountains",
+      "fertility": 1.3,
+      "adjacent": [
+        "bithynia",
+        "galatia",
+        "cappadocia",
+        "armenia"
+      ],
+      "sea_zones": [
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "iron",
+        "timber"
+      ],
+      "description": "Rain-soaked mountains along the Euxine shore, rich in ship timber and the storied iron of the Chalybes."
+    },
+    {
+      "id": "cappadocia",
+      "name": "Cappadocia",
+      "settlement_name": "Mazaca",
+      "terrain": "hills",
+      "fertility": 1.1,
+      "adjacent": [
+        "galatia",
+        "pontus",
+        "cilicia",
+        "armenia",
+        "syria"
+      ],
+      "resources": [
+        "horses",
+        "silver"
+      ],
+      "description": "High pastureland of horse-lords and rock-cut strongholds, still loyal to the old Persian ways."
+    },
+    {
+      "id": "cilicia",
+      "name": "Cilicia",
+      "settlement_name": "Tarsus",
+      "terrain": "plains",
+      "fertility": 1.6,
+      "adjacent": [
+        "caria",
+        "cappadocia",
+        "syria"
+      ],
+      "sea_zones": [
+        "mare_lycium"
+      ],
+      "resources": [
+        "timber",
+        "textiles"
+      ],
+      "description": "A fertile coastal plain beneath cedar mountains, its narrow gates the only good road between Anatolia and Syria."
+    },
+    {
+      "id": "cyprus",
+      "name": "Cyprus",
+      "settlement_name": "Salamis",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [],
+      "sea_zones": [
+        "mare_lycium",
+        "mare_aegyptium"
+      ],
+      "resources": [
+        "copper",
+        "timber"
+      ],
+      "description": "The copper island, thick with mines and shipyards, prize of every fleet that sails the eastern sea."
+    },
+    {
+      "id": "armenia",
+      "name": "Armenia",
+      "settlement_name": "Armavir",
+      "terrain": "mountains",
+      "fertility": 0.9,
+      "adjacent": [
+        "pontus",
+        "cappadocia",
+        "assyria",
+        "media"
+      ],
+      "resources": [
+        "horses",
+        "iron"
+      ],
+      "description": "A cold tableland of horse herds and fortified valleys, astride the caravan roads between two worlds."
+    },
+    {
+      "id": "scythia",
+      "name": "Scythia",
+      "settlement_name": "Olbia",
+      "terrain": "steppe",
+      "fertility": 1.3,
+      "adjacent": [
+        "dacia",
+        "taurica"
+      ],
+      "sea_zones": [
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "horses",
+        "grain",
+        "slaves"
+      ],
+      "description": "Open grassland north of the Euxine, where Greek Olbia trades wheat at the river mouths and the Scyth rides free."
+    },
+    {
+      "id": "taurica",
+      "name": "Taurica",
+      "settlement_name": "Panticapaeum",
+      "terrain": "steppe",
+      "fertility": 1.6,
+      "adjacent": [
+        "scythia"
+      ],
+      "sea_zones": [
+        "pontus_euxinus"
+      ],
+      "resources": [
+        "grain",
+        "fish"
+      ],
+      "description": "The Tauric peninsula, whose Bosporan grain ships and salted fish feed hungry cities far to the south."
+    },
+    {
+      "id": "syria",
+      "name": "Syria",
+      "settlement_name": "Antiochia",
+      "terrain": "plains",
+      "fertility": 1.8,
+      "adjacent": [
+        "cilicia",
+        "cappadocia",
+        "phoenicia",
+        "assyria"
+      ],
+      "sea_zones": [
+        "mare_lycium"
+      ],
+      "resources": [
+        "elephants",
+        "olive_oil"
+      ],
+      "description": "The Seleucid heartland on the Orontes, with the royal elephant stables and a young capital of vast ambitions."
+    },
+    {
+      "id": "phoenicia",
+      "name": "Phoenicia",
+      "settlement_name": "Tyrus",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [
+        "syria",
+        "judaea"
+      ],
+      "sea_zones": [
+        "mare_aegyptium"
+      ],
+      "resources": [
+        "purple_dye",
+        "glass",
+        "timber"
+      ],
+      "description": "The ancient harbor cities beneath the cedar slopes, masters of purple cloth, blown glass, and deep-water trade."
+    },
+    {
+      "id": "judaea",
+      "name": "Judaea",
+      "settlement_name": "Hierosolyma",
+      "terrain": "hills",
+      "fertility": 1.4,
+      "adjacent": [
+        "phoenicia",
+        "nabataea",
+        "aegyptus"
+      ],
+      "sea_zones": [
+        "mare_aegyptium"
+      ],
+      "resources": [
+        "olive_oil",
+        "wine"
+      ],
+      "description": "Terraced hills of olive and vine around Hierosolyma, a stubborn land wedged between empires."
+    },
+    {
+      "id": "nabataea",
+      "name": "Nabataea",
+      "settlement_name": "Petra",
+      "terrain": "desert",
+      "fertility": 0.4,
+      "adjacent": [
+        "judaea",
+        "aegyptus"
+      ],
+      "resources": [
+        "incense",
+        "salt"
+      ],
+      "description": "Red desert of hidden cisterns, where Petra tolls the frankincense caravans coming up from the south."
+    },
+    {
+      "id": "assyria",
+      "name": "Assyria",
+      "settlement_name": "Arbela",
+      "terrain": "plains",
+      "fertility": 1.6,
+      "adjacent": [
+        "syria",
+        "armenia",
+        "media",
+        "babylonia"
+      ],
+      "resources": [
+        "grain"
+      ],
+      "description": "The old wheatlands between the upper rivers, tilled in the shadow of dead empires and ruled from Arbela."
+    },
+    {
+      "id": "babylonia",
+      "name": "Babylonia",
+      "settlement_name": "Babylon",
+      "terrain": "plains",
+      "fertility": 2.8,
+      "adjacent": [
+        "assyria",
+        "media",
+        "persis"
+      ],
+      "resources": [
+        "grain",
+        "textiles"
+      ],
+      "wonder": "hanging_gardens",
+      "description": "Canal-fed black earth of astonishing yield, where immortal Babylon endures beside its terraced marvel of green."
+    },
+    {
+      "id": "media",
+      "name": "Media",
+      "settlement_name": "Ecbatana",
+      "terrain": "mountains",
+      "fertility": 1.2,
+      "adjacent": [
+        "armenia",
+        "assyria",
+        "babylonia",
+        "persis",
+        "parthia"
+      ],
+      "resources": [
+        "horses"
+      ],
+      "description": "Mountain pastures of the Nisaean herds, whose tall horses carry the armored riders of the east."
+    },
+    {
+      "id": "persis",
+      "name": "Persis",
+      "settlement_name": "Persepolis",
+      "terrain": "hills",
+      "fertility": 1.1,
+      "adjacent": [
+        "babylonia",
+        "media",
+        "parthia"
+      ],
+      "resources": [
+        "textiles"
+      ],
+      "description": "The old Persian homeland of dry hills and long memory, weaving carpets beneath the scorched terraces of Persepolis."
+    },
+    {
+      "id": "parthia",
+      "name": "Parthia",
+      "settlement_name": "Hecatompylus",
+      "terrain": "steppe",
+      "fertility": 0.8,
+      "adjacent": [
+        "media",
+        "persis"
+      ],
+      "resources": [
+        "horses",
+        "silk"
+      ],
+      "description": "Dry steppe below the eastern hills, where horse-breeding clans watch the silk tracks that come out of the far east."
+    },
+    {
+      "id": "aegyptus",
+      "name": "Aegyptus",
+      "settlement_name": "Alexandria",
+      "terrain": "plains",
+      "fertility": 3.0,
+      "adjacent": [
+        "judaea",
+        "nabataea",
+        "heptanomis",
+        "cyrenaica"
+      ],
+      "sea_zones": [
+        "mare_aegyptium"
+      ],
+      "resources": [
+        "grain",
+        "glass",
+        "textiles"
+      ],
+      "wonder": "pharos_of_alexandria",
+      "description": "The delta of the Nile and the greatest city of the age, shipping grain, glass, and linen to every sea beneath its harbor flame."
+    },
+    {
+      "id": "heptanomis",
+      "name": "Heptanomis",
+      "settlement_name": "Memphis",
+      "terrain": "plains",
+      "fertility": 2.7,
+      "adjacent": [
+        "aegyptus",
+        "thebais"
+      ],
+      "resources": [
+        "grain"
+      ],
+      "wonder": "great_pyramid",
+      "description": "The middle Nile of temple estates and pyramid fields, governed from immemorial Memphis in the shadow of the oldest tomb on earth."
+    },
+    {
+      "id": "thebais",
+      "name": "Thebais",
+      "settlement_name": "Thebae",
+      "terrain": "plains",
+      "fertility": 2.4,
+      "adjacent": [
+        "heptanomis"
+      ],
+      "resources": [
+        "gold",
+        "incense"
+      ],
+      "description": "Upper Egypt's narrow green ribbon between the deserts, gateway for Nubian gold and Red Sea incense."
+    },
+    {
+      "id": "cyrenaica",
+      "name": "Cyrenaica",
+      "settlement_name": "Cyrene",
+      "terrain": "hills",
+      "fertility": 1.6,
+      "adjacent": [
+        "aegyptus",
+        "syrtica"
+      ],
+      "sea_zones": [
+        "mare_libycum"
+      ],
+      "resources": [
+        "grain",
+        "horses"
+      ],
+      "description": "A high green shelf above the Libyan sea, famous for its wheat, its physicians, and its prize-winning horses."
+    },
+    {
+      "id": "syrtica",
+      "name": "Syrtica",
+      "settlement_name": "Lepcis",
+      "terrain": "desert",
+      "fertility": 0.3,
+      "adjacent": [
+        "cyrenaica",
+        "africa"
+      ],
+      "sea_zones": [
+        "mare_libycum",
+        "mare_africum"
+      ],
+      "resources": [
+        "salt",
+        "slaves"
+      ],
+      "description": "The scorched shore of the Syrtes, where Punic Lepcis brokers salt and slaves brought out of the deep desert."
+    },
+    {
+      "id": "africa",
+      "name": "Africa",
+      "settlement_name": "Carthago",
+      "terrain": "plains",
+      "fertility": 2.3,
+      "adjacent": [
+        "syrtica",
+        "numidia"
+      ],
+      "sea_zones": [
+        "mare_africum"
+      ],
+      "resources": [
+        "grain",
+        "olive_oil"
+      ],
+      "description": "Carthage's rich hinterland of wheat estates and olive groves, the treasury of the western sea."
+    },
+    {
+      "id": "numidia",
+      "name": "Numidia",
+      "settlement_name": "Cirta",
+      "terrain": "hills",
+      "fertility": 1.0,
+      "adjacent": [
+        "africa",
+        "mauretania"
+      ],
+      "sea_zones": [
+        "mare_africum"
+      ],
+      "resources": [
+        "elephants",
+        "horses",
+        "marble"
+      ],
+      "description": "Dry hills of matchless horsemen, where war elephants are trapped in the forests and princes sell their spears."
+    },
+    {
+      "id": "mauretania",
+      "name": "Mauretania",
+      "settlement_name": "Tingis",
+      "terrain": "hills",
+      "fertility": 0.8,
+      "adjacent": [
+        "numidia",
+        "baetica"
+      ],
+      "sea_zones": [
+        "oceanus_cantabricus",
+        "mare_ibericum"
+      ],
+      "resources": [
+        "timber",
+        "gold"
+      ],
+      "description": "The far western kingdom at the ocean strait, cutting precious citrus wood and trading for dust-gold from beyond the sands."
+    }
+  ],
+  "sea_zones": [
+    {
+      "id": "mare_suebicum",
+      "name": "Suebian Sea",
+      "adjacent": [
+        "oceanus_britannicus"
+      ]
+    },
+    {
+      "id": "oceanus_britannicus",
+      "name": "British Ocean",
+      "adjacent": [
+        "mare_suebicum",
+        "oceanus_cantabricus"
+      ]
+    },
+    {
+      "id": "oceanus_cantabricus",
+      "name": "Cantabrian Ocean",
+      "adjacent": [
+        "oceanus_britannicus",
+        "mare_ibericum"
+      ]
+    },
+    {
+      "id": "mare_ibericum",
+      "name": "Iberian Sea",
+      "adjacent": [
+        "oceanus_cantabricus",
+        "mare_ligusticum",
+        "mare_africum"
+      ]
+    },
+    {
+      "id": "mare_ligusticum",
+      "name": "Ligurian Sea",
+      "adjacent": [
+        "mare_ibericum",
+        "mare_tyrrhenum"
+      ]
+    },
+    {
+      "id": "mare_tyrrhenum",
+      "name": "Tyrrhenian Sea",
+      "adjacent": [
+        "mare_ligusticum",
+        "mare_africum",
+        "mare_ionium"
+      ]
+    },
+    {
+      "id": "mare_africum",
+      "name": "African Sea",
+      "adjacent": [
+        "mare_ibericum",
+        "mare_tyrrhenum",
+        "mare_ionium",
+        "mare_libycum"
+      ]
+    },
+    {
+      "id": "mare_hadriaticum",
+      "name": "Adriatic Sea",
+      "adjacent": [
+        "mare_ionium"
+      ]
+    },
+    {
+      "id": "mare_ionium",
+      "name": "Ionian Sea",
+      "adjacent": [
+        "mare_hadriaticum",
+        "mare_tyrrhenum",
+        "mare_africum",
+        "mare_aegaeum",
+        "mare_libycum"
+      ]
+    },
+    {
+      "id": "mare_aegaeum",
+      "name": "Aegean Sea",
+      "adjacent": [
+        "mare_ionium",
+        "pontus_euxinus",
+        "mare_lycium",
+        "mare_libycum"
+      ]
+    },
+    {
+      "id": "pontus_euxinus",
+      "name": "Euxine Sea",
+      "adjacent": [
+        "mare_aegaeum"
+      ]
+    },
+    {
+      "id": "mare_lycium",
+      "name": "Lycian Sea",
+      "adjacent": [
+        "mare_aegaeum",
+        "mare_aegyptium"
+      ]
+    },
+    {
+      "id": "mare_aegyptium",
+      "name": "Egyptian Sea",
+      "adjacent": [
+        "mare_lycium",
+        "mare_libycum"
+      ]
+    },
+    {
+      "id": "mare_libycum",
+      "name": "Libyan Sea",
+      "adjacent": [
+        "mare_africum",
+        "mare_ionium",
+        "mare_aegaeum",
+        "mare_aegyptium"
+      ]
+    }
+  ]
+}

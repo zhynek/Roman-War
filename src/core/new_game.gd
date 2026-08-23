@@ -25,13 +25,16 @@ class_name NewGame
 const ConstantsScript = preload("res://src/core/constants.gd")
 
 
-static func build(data: GameData, player_faction: String, seed_value: int) -> Dictionary:
+static func build(data: GameData, player_faction: String, seed_value: int, difficulty: String = "medium", campaign_mode: String = "long") -> Dictionary:
 	var rng := CampaignRng.seeded(seed_value)
 	var state := {
 		"turn": 0,
 		"year": int(data.balance["time"]["start_year"]),
 		"season": "summer",
-		"rng_state": 0,
+		"rng_state": "0",
+		"difficulty": difficulty,
+		"campaign_mode": campaign_mode,
+		"event_happiness": null,
 		"player_faction": player_faction,
 		"factions": {},
 		"settlements": {},
@@ -104,7 +107,18 @@ static func build(data: GameData, player_faction: String, seed_value: int) -> Di
 			if settlement["owner"] == character["faction"] and settlement["governor"] == null:
 				settlement["governor"] = char_id
 
-	state["rng_state"] = rng.get_state()
+	# Mercenary pools start at their initial counts (fractional replenishment
+	# accumulates in the counts, so they are floats).
+	var pools := {}
+	for pool in data.mercenary_pools:
+		var counts := {}
+		for entry in pool["units"]:
+			counts[entry["template"]] = float(entry.get("initial", 0))
+		pools[pool["id"]] = counts
+	state["mercenary_pools"] = pools
+
+	MovementRules.reset_movement(data, state)
+	state["rng_state"] = rng.state_string()
 	return state
 
 
