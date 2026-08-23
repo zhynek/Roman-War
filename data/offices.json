@@ -1,0 +1,75 @@
+{
+  "$schema": "../schemas/offices.schema.json",
+  "offices": [
+    {
+      "id": "quaestor",
+      "name": "Quaestor",
+      "rank": 1,
+      "seats": 4,
+      "min_age": 20,
+      "effects": {
+        "management": 1
+      },
+      "description": "Keeper of accounts and stores. The first rung of the ladder, and the last one where honest work is expected."
+    },
+    {
+      "id": "aedile",
+      "name": "Aedile",
+      "rank": 2,
+      "seats": 2,
+      "min_age": 24,
+      "effects": {
+        "management": 1,
+        "influence": 1
+      },
+      "description": "Master of streets, markets, and games. Spends his own fortune on spectacles so the people remember his name."
+    },
+    {
+      "id": "praetor",
+      "name": "Praetor",
+      "rank": 3,
+      "seats": 2,
+      "min_age": 28,
+      "effects": {
+        "command": 1,
+        "influence": 1
+      },
+      "description": "Judge and, when the year demands it, general. Holds imperium — the right to command in the field."
+    },
+    {
+      "id": "censor",
+      "name": "Censor",
+      "rank": 4,
+      "seats": 1,
+      "min_age": 36,
+      "effects": {
+        "management": 2,
+        "influence": 1
+      },
+      "description": "Counter of citizens and judge of morals. Can strike a man from the rolls with a stroke of the stylus."
+    },
+    {
+      "id": "pontifex",
+      "name": "Pontifex Maximus",
+      "rank": 5,
+      "seats": 1,
+      "min_age": 40,
+      "effects": {
+        "influence": 2
+      },
+      "description": "Highest priest of the state cults. The gods speak through him — which makes him very hard to argue with."
+    },
+    {
+      "id": "consul",
+      "name": "Consul",
+      "rank": 6,
+      "seats": 2,
+      "min_age": 32,
+      "effects": {
+        "command": 2,
+        "influence": 2
+      },
+      "description": "One of the two heads of the Republic for a year. Armies, honors, and enemies follow the office."
+    }
+  ]
+}

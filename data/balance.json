@@ -207,7 +207,9 @@
     "mission_fail_standing": -2,
     "popular_standing_per_region": 0.3,
     "civil_war_popular_threshold": 6,
-    "civil_war_senate_threshold": -5
+    "civil_war_senate_threshold": -5,
+    "civil_war_join_threshold": 1.0,
+    "leader_suicide_standing": -6
   },
   "ai": {
     "difficulty_income_multiplier": {

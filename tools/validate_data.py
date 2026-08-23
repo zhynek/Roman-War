@@ -40,13 +40,14 @@ TABLES = {
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
     "agents.json": "agents.schema.json",
+    "offices.json": "offices.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
 
 # Trigger kinds authored ahead of the system that will fire them. Everything
 # else the engine never fires is flagged as dead content.
-FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
+FORWARD_TRIGGERS: set[str] = set()  # nothing authored ahead of the engine right now
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -457,6 +458,18 @@ def cross_checks(t: dict[str, dict]) -> None:
     for wanted in ("diplomat", "spy", "assassin"):
         if wanted not in seen_agent_ids:
             err(f"agents: kind '{wanted}' missing — the engine expects all three")
+
+    # --- offices ----------------------------------------------------------
+    offices = t.get("offices.json", {}).get("offices", [])
+    office_ids: set[str] = set()
+    ranks: list[int] = []
+    for office in offices:
+        if office["id"] in office_ids:
+            err(f"offices: duplicate id {office['id']}")
+        office_ids.add(office["id"])
+        ranks.append(office["rank"])
+    if len(set(ranks)) != len(ranks):
+        err("offices: ranks must be unique — the ladder needs a strict order")
 
     # --- AI tunables ------------------------------------------------------
     ai = balance.get("ai", {})

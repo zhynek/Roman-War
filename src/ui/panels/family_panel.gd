@@ -41,7 +41,10 @@ func _build_member(char_id: String, character: Dictionary) -> void:
 	var header := Label.new()
 	var role_tag: String = {"leader": "★ Leader", "heir": "◆ Heir", "family": "Family",
 		"child": "Child", "spouse": "Spouse"}.get(character["role"], "")
-	header.text = "%s — %s, age %d" % [sheet["name"], role_tag, int(sheet["age"])]
+	var office_tag := ""
+	if character.get("office") != null:
+		office_tag = " · %s" % game.data.offices.get(character["office"], {}).get("name", character["office"])
+	header.text = "%s — %s%s, age %d" % [sheet["name"], role_tag, office_tag, int(sheet["age"])]
 	header.add_theme_font_size_override("font_size", 14)
 	header.add_theme_color_override("font_color", Color(0.95, 0.9, 0.75))
 	_content.add_child(header)

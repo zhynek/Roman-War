@@ -61,9 +61,26 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 				return {"faction": target}
 			return {}
 		"first_civil_war":
-			for faction_id in state["factions"]:
+			var faction_ids: Array = state["factions"].keys()
+			faction_ids.sort()
+			for faction_id in faction_ids:
 				if state["factions"][faction_id]["at_civil_war"]:
 					return {"faction": faction_id}
+			return {}
+		"faction_holds_regions":
+			# The first power to hold this many regions (sorted id breaks ties).
+			var wanted := int(trigger.get("count", 999))
+			var counts := {}
+			for settlement in state["settlements"].values():
+				var owner: String = settlement["owner"]
+				counts[owner] = int(counts.get(owner, 0)) + 1
+			var owner_ids: Array = counts.keys()
+			owner_ids.sort()
+			for owner_id in owner_ids:
+				if data.factions.get(owner_id, {}).get("is_rebel", false):
+					continue
+				if int(counts[owner_id]) >= wanted:
+					return {"faction": owner_id}
 			return {}
 	return {}
 

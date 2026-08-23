@@ -142,6 +142,36 @@
       },
       "once": true,
       "text": "Word runs through every forum: a great house has raised its standards against the Senate itself. Brother watches brother, and the markets are afraid."
+    },
+    {
+      "id": "master_of_the_middle_sea",
+      "name": "Master of the Middle Sea",
+      "trigger": {
+        "condition": "faction_holds_regions",
+        "count": 18
+      },
+      "effects": {
+        "treasury": 5000,
+        "happiness_all_settlements": 5,
+        "happiness_turns": 4
+      },
+      "once": true,
+      "text": "One power now holds more of the world than any other in living memory. Merchants reroute, kings take note, and the crowds cheer whoever feeds them the news."
+    },
+    {
+      "id": "the_shadow_over_all_thrones",
+      "name": "The Shadow Over All Thrones",
+      "trigger": {
+        "condition": "faction_holds_regions",
+        "count": 30
+      },
+      "effects": {
+        "treasury": 10000,
+        "happiness_all_settlements": -5,
+        "happiness_turns": 4
+      },
+      "once": true,
+      "text": "Thirty lands under one banner. Every remaining court in the world now drafts the same letter: what do we do about them?"
     }
   ],
   "disasters": [

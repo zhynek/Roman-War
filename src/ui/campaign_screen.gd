@@ -14,6 +14,7 @@ var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var negotiation_panel: NegotiationPanel
+var senate_panel: SenatePanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
@@ -83,6 +84,10 @@ func _ready() -> void:
 	negotiation_panel.deal_made.connect(refresh)
 	add_child(negotiation_panel)
 
+	senate_panel = SenatePanel.new()
+	senate_panel.senate_changed.connect(refresh)
+	add_child(senate_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -111,6 +116,8 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
+		bar.add_child(_bar_button("Senate", func(): senate_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -338,10 +345,21 @@ func _log_report(report: Dictionary) -> void:
 			_log("[color=#e06050]Disaster strikes %s![/color]"
 				% game.data.regions.get(struck, {}).get("settlement_name", struck))
 	for notice in report["senate"]:
-		if notice["faction"] == player:
+		var senate_kind := String(notice.get("kind", ""))
+		if senate_kind == "office_gained":
+			if notice.get("faction", "") == player:
+				var who_name: String = game.state["characters"].get(notice.get("character", ""), {}).get("name", "")
+				_log("[color=#9090d0]Senate: %s is elected %s.[/color]" % [who_name,
+					game.data.offices.get(notice.get("office", ""), {}).get("name", notice.get("office", ""))])
+			continue
+		if senate_kind in ["civil_war", "joins_rebellion", "outlawed"]:
+			_log("[color=#e06050][b]%s: %s![/b][/color]" % [senate_kind.replace("_", " ").capitalize(),
+				_faction_name(str(notice.get("faction", "")))])
+			continue
+		if notice.get("faction", "") == player:
 			var mission_id: String = str(notice.get("mission", ""))
 			var mission_name: String = game.data.missions.get(mission_id, {}).get("name", mission_id)
-			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
+			_log("[color=#9090d0]Senate: %s%s[/color]" % [senate_kind.replace("_", " "),
 				"" if mission_name == "" else " — " + mission_name])
 	for notice in report["characters"]:
 		if notice.get("faction", "") != player and not _is_player_character(notice.get("character", "")):

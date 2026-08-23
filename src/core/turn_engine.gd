@@ -1,6 +1,6 @@
 class_name TurnEngine
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
-##   1. AI stub turns (non-player factions)
+##   1. AI turns (non-player factions play their whole hand)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
@@ -87,7 +87,14 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			report["revolted"].append(region_id)
 
 	report["events"] = EventRules.process_turn(data, state, rng)
-	report["senate"] = SenateRules.process_turn(data, state, rng)
+	var senate_notices := SenateRules.process_turn(data, state, rng)
+	# Trait/ancillary news earned during office elections belongs with the
+	# character notices, not the political dispatches.
+	for notice in senate_notices:
+		if notice.get("kind", "") in ["trait", "ancillary"]:
+			report["characters"].append(notice)
+		else:
+			report["senate"].append(notice)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)

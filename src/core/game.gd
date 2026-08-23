@@ -180,6 +180,56 @@ func garrison_army(army_id: String) -> bool:
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
+## --- Senate (Phase 7) ------------------------------------------------------
+
+func senate_overview() -> Dictionary:
+	## Standings, office holders, and the player's current mission.
+	var standings: Array = []
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		if not data.factions.get(faction_id, {}).get("is_roman_house", false):
+			continue
+		var faction: Dictionary = state["factions"][faction_id]
+		standings.append({
+			"faction": faction_id, "alive": faction["alive"],
+			"senate": float(faction["senate_standing"]),
+			"popular": float(faction["popular_standing"]),
+			"at_civil_war": faction["at_civil_war"],
+		})
+	var offices: Array = []
+	for entry in SenateRules.office_holders(data, state):
+		var character: Dictionary = state["characters"][entry["holder"]]
+		offices.append({
+			"office": entry["office"],
+			"office_name": data.offices.get(entry["office"], {}).get("name", entry["office"]),
+			"holder": entry["holder"], "holder_name": character["name"],
+			"faction": character["faction"],
+		})
+	return {
+		"senate_alive": state["factions"].has("senate") and state["factions"]["senate"]["alive"],
+		"standings": standings,
+		"offices": offices,
+		"mission": state["factions"][state["player_faction"]]["mission"],
+	}
+
+
+func comply_senate_demand() -> bool:
+	## The honorable exit: the leader falls on his sword, the house endures.
+	var faction: Dictionary = state["factions"][state["player_faction"]]
+	var mission = faction["mission"]
+	if mission == null:
+		return false
+	var template: Dictionary = data.missions.get(mission.get("template", ""), {})
+	if String(template.get("kind", "")) != "leader_suicide":
+		return false
+	var target: String = mission.get("target_char", "")
+	if target == "" or not state["characters"].get(target, {}).get("alive", false):
+		return false
+	CharacterRules.kill(state, target, data)
+	return true
+
+
 ## --- Agents & negotiation (Phase 5) ---------------------------------------
 
 func agents_available(region_id: String) -> Array:
