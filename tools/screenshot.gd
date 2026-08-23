@@ -60,6 +60,31 @@ func _tick() -> void:
 			_screen.senate_panel.open_for(_screen.game)
 		6:
 			_capture("senate.png")
+			_screen.senate_panel.hide()
+			# An owned settlement's full panel (queues, breakdowns, actions).
+			var player: String = _screen.game.state["player_faction"]
+			var owned := ""
+			var region_ids: Array = _screen.game.state["settlements"].keys()
+			region_ids.sort()
+			for region_id in region_ids:
+				if _screen.game.state["settlements"][region_id]["owner"] == player:
+					owned = region_id
+					break
+			_screen.map_view.center_on(owned)
+			_screen._on_region_clicked(owned)
+		7:
+			_capture("owned_region.png")
+			# Plant an envoy on a foreign court and open negotiation.
+			var game := _screen.game
+			game.state["agents"]["agent_shot"] = {
+				"owner": game.state["player_faction"], "kind": "diplomat",
+				"region": "latium", "name": "Camera", "skill": 1,
+				"movement_left": 0.0, "turns_abroad": 0, "alive": true,
+			}
+			var court: String = game.state["settlements"]["latium"]["owner"]
+			_screen.negotiation_panel.open_for(game, court)
+		8:
+			_capture("negotiation.png")
 			print("screenshots written to " + _out)
 			quit(0)
 	_step += 1
