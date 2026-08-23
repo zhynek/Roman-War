@@ -9,11 +9,11 @@ var state: Dictionary = {}
 var resolver: BattleResolver
 
 
-static func new_campaign(player_faction: String, seed_value: int = 1, data_dir: String = "res://data") -> Game:
+static func new_campaign(player_faction: String, seed_value: int = 1, difficulty: String = "medium", campaign_mode: String = "long", data_dir: String = "res://data") -> Game:
 	var game := Game.new()
 	game.data = GameData.load_from(data_dir)
 	game.resolver = AutoResolver.new()
-	game.state = NewGame.build(game.data, player_faction, seed_value)
+	game.state = NewGame.build(game.data, player_faction, seed_value, difficulty, campaign_mode)
 	return game
 
 

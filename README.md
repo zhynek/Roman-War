@@ -66,12 +66,14 @@ python3 tools/validate_data.py
 
 ## Status
 
-Foundation phase (Phases 0–2 of the roadmap in the research report, plus the
-Phase 3 `BattleResolver` interface): campaign map, turn loop, settlements,
-economy, recruitment, auto-resolved battles, sieges, events, victory checks —
-all headless-testable. UI, campaign AI, characters/traits consumption, agents,
-and diplomacy engines are subsequent phases; their data tables and state hooks
-already exist so they will not require retrofits.
+Phases 0–4 of the research report's roadmap are built and tested: campaign
+map, turn loop, settlements, economy, recruitment, auto-resolved battles,
+sieges, mercenaries, events, victory checks, and the full character layer
+(traits, retinues, family tree, succession). A playable campaign-map UI sits
+on top: geographic map with fog of war, settlement/army panels driven by the
+engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
+passive stub today), agents & diplomacy negotiation, and senate depth are the
+next phases; their data tables and state hooks already exist.
 
 ## Clean-room policy
 

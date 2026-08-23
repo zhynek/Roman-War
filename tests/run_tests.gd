@@ -6,8 +6,19 @@ extends SceneTree
 
 const TEST_DIR := "res://tests"
 
+var _ran := false
+
 
 func _init() -> void:
+	# Wait for the first frame: by then the engine has registered this tree as
+	# the main loop, so UI tests can reach the root via Engine.get_main_loop().
+	process_frame.connect(_run_suite)
+
+
+func _run_suite() -> void:
+	if _ran:
+		return
+	_ran = true
 	var failures := 0
 	var total := 0
 	var scripts := _find_test_scripts()
