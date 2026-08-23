@@ -19,6 +19,8 @@ var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
 var selected_agent := ""
+var tutorial_requested := false
+var tutorial: TutorialController = null
 var _victory_shown := false
 
 
@@ -93,6 +95,10 @@ func _ready() -> void:
 	senate_panel.senate_changed.connect(refresh)
 	add_child(senate_panel)
 
+	if tutorial_requested:
+		tutorial = TutorialController.create(game, self)
+		add_child(tutorial)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -155,6 +161,9 @@ func refresh() -> void:
 
 	if game.state["winner"] != null and not _victory_shown:
 		_show_victory_banner(String(game.state["winner"]))
+
+	if tutorial != null and is_instance_valid(tutorial):
+		tutorial.on_refresh()
 
 
 func _on_region_clicked(region_id: String) -> void:

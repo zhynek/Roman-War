@@ -5,6 +5,7 @@ extends Control
 
 var _data: GameData
 var _faction_ids: Array = []
+var _guided_check: CheckBox
 
 @onready var faction_options: OptionButton = $Center/Menu/FactionRow/Factions
 @onready var difficulty_options: OptionButton = $Center/Menu/DifficultyRow/Difficulty
@@ -84,12 +85,44 @@ func _decorate_menu() -> void:
 	menu.add_child(rule)
 	menu.move_child(rule, subtitle.get_index() + 1)
 
+	# The guided opening: on by default until it has been played once.
+	_guided_check = CheckBox.new()
+	_guided_check.text = "Guided opening (recommended for your first campaign)"
+	_guided_check.add_theme_font_size_override("font_size", 12)
+	_guided_check.button_pressed = not AdvisorConfig.tutorial_seen()
+	_guided_check.toggled.connect(_on_guided_toggled)
+	var start_button: Button = menu.get_node("Start")
+	menu.add_child(_guided_check)
+	menu.move_child(_guided_check, start_button.get_index())
+
+
+func _on_guided_toggled(pressed: bool) -> void:
+	## The walkthrough plays a fixed opening so its script matches the world.
+	faction_options.disabled = pressed
+	difficulty_options.disabled = pressed
+	seed_spin.editable = not pressed
+	if pressed:
+		status_label.text = "The guided opening plays House Julii on a fixed seed."
+	elif _data != null:
+		status_label.text = "%d factions · %d regions · %d unit types" \
+			% [_data.factions.size(), _data.regions.size(), _data.units.size()]
+
 
 func _on_start_pressed() -> void:
 	if _faction_ids.is_empty():
 		return
-	var faction_id: String = _faction_ids[faction_options.selected]
-	var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
-	var game := Game.new_campaign(faction_id, int(seed_spin.value), difficulty)
+	var guided: bool = _guided_check != null and _guided_check.button_pressed
+	var game: Game
+	if guided:
+		var setup = JSON.parse_string(
+			FileAccess.get_file_as_string("res://data/tutorial.json")).get("tutorial", {})
+		game = Game.new_campaign(String(setup.get("faction", "julii")),
+			int(setup.get("seed", 42)), String(setup.get("difficulty", "easy")))
+	else:
+		var faction_id: String = _faction_ids[faction_options.selected]
+		var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
+		game = Game.new_campaign(faction_id, int(seed_spin.value), difficulty)
 	$Center.visible = false
-	add_child(CampaignScreen.create(game))
+	var screen := CampaignScreen.create(game)
+	screen.tutorial_requested = guided
+	add_child(screen)

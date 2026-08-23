@@ -2,7 +2,7 @@ class_name SaveGame
 ## Save/load is nothing more than JSON round-tripping the GameState dict —
 ## by design. Data tables are content, not state, so only the state travels.
 
-const SAVE_VERSION := 2  # v2: Phase 5 added agents and attitude ledgers
+const SAVE_VERSION := 3  # v3: world_seed recorded for bug-report reproduction
 
 
 static func to_json(state: Dictionary) -> String:

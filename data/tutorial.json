@@ -1,0 +1,113 @@
+{
+  "$schema": "../schemas/tutorial.schema.json",
+  "tutorial": {
+    "faction": "julii",
+    "seed": 42,
+    "difficulty": "easy",
+    "steps": [
+      {
+        "id": "welcome",
+        "title": "Welcome, Patriarch",
+        "body": "The year is 270 BC and the House of the Julii holds the northern marches of Italy. This card will walk you through your first seasons.\n\n[b]Next[/b] moves on. [b]Skip[/b] ends the walkthrough — every step also completes on its own the moment you do the thing it describes.",
+        "center_on": "etruria",
+        "advance": { "kind": "manual" }
+      },
+      {
+        "id": "inspect_capital",
+        "title": "Your capital: Arretium",
+        "body": "The map shows every region as a token — colour is the owner, size is the city's tier, and the gold star marks your capital.\n\nDrag with the [b]right mouse button[/b] to pan, [b]scroll[/b] to zoom, and [b]left-click the glowing token[/b] — Arretium, in Etruria — to open its scroll.",
+        "center_on": "etruria",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "region_selected", "region": "etruria" }
+      },
+      {
+        "id": "read_breakdowns",
+        "title": "Every number explains itself",
+        "body": "Look at the right panel. [b]Public order[/b], [b]growth[/b], and [b]income[/b] are each a list of named causes that add up — never an opaque number. If a city struggles, the list says exactly why.\n\nOrder below 75% means riots; a long collapse becomes a revolt.",
+        "advance": { "kind": "manual" }
+      },
+      {
+        "id": "set_taxes",
+        "title": "Turn the tax screw",
+        "body": "Taxes are the lever you will touch most: higher rates pay for armies but anger the streets and slow growth.\n\n[b]Change Arretium's tax level[/b] with the Taxes dropdown in the panel — watch the order and income breakdowns move. Any change completes this step; set it back after if you like.",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "tax_changed", "region": "etruria" }
+      },
+      {
+        "id": "queue_building",
+        "title": "Lay a foundation",
+        "body": "Cities improve through building chains — government, farms, walls, markets, temples. Each project costs money up front and takes seasons to finish.\n\n[b]Queue any building in Arretium[/b] from the Construction list.",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "building_queued", "region": "etruria" }
+      },
+      {
+        "id": "recruit_unit",
+        "title": "Muster soldiers",
+        "body": "Soldiers cost denarii [i]and people[/i] — recruits are drawn from the city's own population, and every unit draws upkeep each season forever after. The army is the thing that wins regions and the thing that bankrupts houses.\n\n[b]Recruit any unit in Arretium[/b] from the Recruitment list. It will join the garrison next season.",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "unit_queued", "region": "etruria" }
+      },
+      {
+        "id": "first_end_turn",
+        "title": "Let the season turn",
+        "body": "Each turn is half a year. When you press [b]END TURN[/b], every other power moves, sieges advance, queues progress, treasuries settle, and the log at the bottom right tells you what mattered.\n\n[b]Press END TURN[/b] now.",
+        "advance": { "kind": "turn_ended" }
+      },
+      {
+        "id": "select_army",
+        "title": "Your army in the field",
+        "body": "Your field army waits at Ariminum in Umbria under [b]Lucius Julius[/b], your heir. Generals matter: their command sharpens every battle, and what they do shapes who they become.\n\n[b]Click Ariminum[/b], then [b]click the army[/b] in the right panel to take command.",
+        "center_on": "umbria",
+        "highlight_regions": ["umbria"],
+        "advance": { "kind": "army_selected" }
+      },
+      {
+        "id": "march_army",
+        "title": "March west",
+        "body": "With the army selected, [b]click a destination region[/b] to march — roads make it cheaper, rough country costs more, and [b]Shift-click[/b] forces a double march that leaves the men weary.\n\nMarch the army to [b]Etruria[/b] (Arretium). If its legs give out, END TURN and march again.",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "army_in_region", "region": "etruria" }
+      },
+      {
+        "id": "lay_siege",
+        "title": "Genua must fall",
+        "body": "The rebel town of [b]Genua in Liguria[/b] sits on your border with two ragged warbands behind a palisade. Everyone is already at war with the rebels — taking their lands is how every house grows.\n\n[b]Click Liguria[/b] with your army selected to lay siege. Then you may starve them out over the seasons, or build equipment (two turns) and storm the walls.",
+        "center_on": "liguria",
+        "highlight_regions": ["liguria"],
+        "advance": { "kind": "siege_laid", "region": "liguria" }
+      },
+      {
+        "id": "train_envoy",
+        "title": "Eyes and voices abroad",
+        "body": "Cities also train [b]agents[/b]: envoys carry your word to foreign courts, informers see through fog and open gates, hired blades end arguments.\n\n[b]Train an Envoy in Arretium[/b] — the button is in the Agents section of the city panel (350 denarii).",
+        "center_on": "etruria",
+        "highlight_regions": ["etruria"],
+        "advance": { "kind": "agent_trained", "agent_kind": "diplomat" }
+      },
+      {
+        "id": "open_diplomacy",
+        "title": "The powers of the world",
+        "body": "Open [b]Diplomacy[/b] in the top bar. Every power's stance and how warmly they regard you is a sum of named causes — culture, treaties, borders, remembered deeds.\n\nWar can be declared from that scroll directly. Everything else — peace, trade, alliances, gifts, tribute, even buying towns — needs your envoy standing on their soil first.",
+        "advance": { "kind": "panel_opened", "panel": "diplomacy" }
+      },
+      {
+        "id": "open_senate",
+        "title": "The Senate watches",
+        "body": "As a Roman house you answer to the Senate. Open [b]Senate[/b] in the top bar: your standing with the conscript fathers and the people, the offices of the Republic (elected every summer), and the mission they have set you.\n\nServe well and standing rises. Grow too loved by the crowd with too little favor in the curia... and the Republic breaks.",
+        "advance": { "kind": "panel_opened", "panel": "senate" }
+      },
+      {
+        "id": "family_and_heir",
+        "title": "Blood is the house",
+        "body": "Open [b]Family[/b] in the top bar. These are your governors and generals — they age, earn traits from what you actually do with them, gather retinues, hold office, and die.\n\nA family member standing in one of your cities governs it. You may name any adult male [b]heir[/b]; the man passed over will remember.",
+        "advance": { "kind": "panel_opened", "panel": "family" }
+      },
+      {
+        "id": "victory_wrap",
+        "title": "The age is yours to take",
+        "body": "The top bar counts your regions toward victory — and the age closes at AD 14 with or without you.\n\nWhen anything confuses you, the [b]Advisor[/b] button opens a counselor who knows this world; [b]Feedback[/b] files what you find directly to the builders, world seed attached. Your campaign truly begins now. [i]Fortuna audaces iuvat.[/i]",
+        "advance": { "kind": "manual" }
+      }
+    ]
+  }
+}

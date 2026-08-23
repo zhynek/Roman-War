@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tutorial.schema.json",
+  "title": "Guided opening tutorial",
+  "type": "object",
+  "required": ["tutorial"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "tutorial": {
+      "type": "object",
+      "required": ["faction", "seed", "difficulty", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "faction": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "seed": { "type": "integer", "minimum": 0 },
+        "difficulty": { "enum": ["easy", "medium", "hard", "very_hard"] },
+        "steps": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "body", "advance"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "title": { "type": "string", "minLength": 1 },
+              "body": { "type": "string", "minLength": 1 },
+              "center_on": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "highlight_regions": {
+                "type": "array",
+                "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                "uniqueItems": true
+              },
+              "advance": {
+                "type": "object",
+                "required": ["kind"],
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "manual", "region_selected", "tax_changed", "building_queued",
+                      "unit_queued", "turn_ended", "army_selected", "army_in_region",
+                      "siege_laid", "agent_trained", "panel_opened"
+                    ]
+                  },
+                  "region": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                  "panel": { "enum": ["family", "diplomacy", "senate"] },
+                  "agent_kind": { "enum": ["diplomat", "spy", "assassin"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

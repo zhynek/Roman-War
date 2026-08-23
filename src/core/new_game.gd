@@ -3,6 +3,7 @@ class_name NewGame
 ## GameState is a plain Dictionary (JSON-serializable, deep-comparable):
 ##
 ##  turn: int (0-based), year: int, season: "summer"|"winter"
+##  world_seed: int — the seed that built this world; reproduces any bug report
 ##  rng_state: int
 ##  player_faction: String
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
@@ -33,6 +34,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"season": "summer",
 		"rng_state": "0",
 		"difficulty": difficulty,
+		"world_seed": seed_value,
 		"campaign_mode": campaign_mode,
 		"event_happiness": null,
 		"player_faction": player_faction,

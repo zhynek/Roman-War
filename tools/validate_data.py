@@ -41,6 +41,7 @@ TABLES = {
     "mercenaries.json": "mercenaries.schema.json",
     "agents.json": "agents.schema.json",
     "offices.json": "offices.schema.json",
+    "tutorial.json": "tutorial.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -470,6 +471,28 @@ def cross_checks(t: dict[str, dict]) -> None:
         ranks.append(office["rank"])
     if len(set(ranks)) != len(ranks):
         err("offices: ranks must be unique — the ladder needs a strict order")
+
+    # --- tutorial ---------------------------------------------------------
+    tutorial = t.get("tutorial.json", {}).get("tutorial", {})
+    region_ids = {r["id"] for r in t.get("regions.json", {}).get("regions", [])}
+    steps = tutorial.get("steps", [])
+    step_ids: set[str] = set()
+    for step in steps:
+        if step["id"] in step_ids:
+            err(f"tutorial: duplicate step id {step['id']}")
+        step_ids.add(step["id"])
+        for region in [step.get("center_on")] + step.get("highlight_regions", []) \
+                + [step.get("advance", {}).get("region")]:
+            if region is not None and region not in region_ids:
+                err(f"tutorial: step {step['id']}: unknown region {region}")
+    tutorial_faction = tutorial.get("faction")
+    faction_def = factions.get(tutorial_faction)
+    if faction_def is None:
+        err(f"tutorial: unknown faction {tutorial_faction}")
+    elif faction_def.get("playable") not in ("playable", "unlockable"):
+        err(f"tutorial: faction {tutorial_faction} is not playable")
+    if steps and not (8 <= len(steps) <= 20):
+        warn(f"tutorial: {len(steps)} steps — outside the expected 8-20 range")
 
     # --- AI tunables ------------------------------------------------------
     ai = balance.get("ai", {})

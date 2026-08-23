@@ -34,8 +34,22 @@ func _tick() -> void:
 			root.add_child(_menu)
 		1:
 			_capture("menu.png")
-			# Go through the real menu flow so the campaign screen is parented
-			# exactly as in play.
+			# First: the guided opening, exactly as a first-time player sees it.
+			_menu._guided_check.button_pressed = true
+			_menu._on_start_pressed()
+			for child in _menu.get_children():
+				if child is CampaignScreen:
+					_screen = child
+		2:
+			_capture("tutorial.png")
+			# Tear the guided game down and go through the normal flow.
+			if _screen.tutorial != null:
+				_screen.tutorial.config_path = "user://shot_advisor.cfg"
+				_screen.tutorial._finish()
+			_screen.queue_free()
+			_screen = null
+			_menu.get_node("Center").visible = true
+			_menu._guided_check.button_pressed = false
 			_menu._on_start_pressed()
 			for child in _menu.get_children():
 				if child is CampaignScreen:
@@ -43,22 +57,22 @@ func _tick() -> void:
 			for i in range(4):
 				_screen.game.end_turn()
 			_screen.refresh()
-		2:
+		3:
 			_capture("campaign.png")
 			_screen.map_view.center_on("latium")
 			_screen._on_region_clicked("latium")
-		3:
+		4:
 			_capture("region.png")
 			_screen.diplomacy_panel.open_for(_screen.game)
-		4:
+		5:
 			_capture("diplomacy.png")
 			_screen.diplomacy_panel.hide()
 			_screen.family_panel.open_for(_screen.game)
-		5:
+		6:
 			_capture("family.png")
 			_screen.family_panel.hide()
 			_screen.senate_panel.open_for(_screen.game)
-		6:
+		7:
 			_capture("senate.png")
 			_screen.senate_panel.hide()
 			# An owned settlement's full panel (queues, breakdowns, actions).
@@ -72,7 +86,7 @@ func _tick() -> void:
 					break
 			_screen.map_view.center_on(owned)
 			_screen._on_region_clicked(owned)
-		7:
+		8:
 			_capture("owned_region.png")
 			# Plant an envoy on a foreign court and open negotiation.
 			var game := _screen.game
@@ -83,7 +97,7 @@ func _tick() -> void:
 			}
 			var court: String = game.state["settlements"]["latium"]["owner"]
 			_screen.negotiation_panel.open_for(game, court)
-		8:
+		9:
 			_capture("negotiation.png")
 			print("screenshots written to " + _out)
 			quit(0)
