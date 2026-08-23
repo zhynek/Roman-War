@@ -123,6 +123,18 @@ func test_buying_a_town(t) -> void:
 		"the sold town resents it a little")
 
 
+func test_peace_lifts_sieges(t) -> void:
+	var world := _world()
+	var data: GameData = world[0]
+	var state: Dictionary = world[1]
+	var besieger := Fixtures.add_army(state, "red", "beta", ["test_elites", "test_elites", "test_elites"])
+	SiegeRules.begin_siege(data, state, besieger, "alpha")
+	t.check(state["settlements"]["alpha"]["siege"] != null, "siege laid")
+	var verdict := NegotiationRules.execute(data, state, "red", "blue", {"kind": "peace"})
+	t.check(verdict["accept"], "the outmatched defender takes the peace")
+	t.check(state["settlements"]["alpha"]["siege"] == null, "peace brings the siege lines down")
+
+
 func test_war_declaration_scars_attitude(t) -> void:
 	var world := _world()
 	var data: GameData = world[0]

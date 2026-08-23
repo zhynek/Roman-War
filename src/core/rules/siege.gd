@@ -38,6 +38,10 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 				or state["armies"][siege["besieger"]]["region"] != region_id:
 			settlement["siege"] = null
 			continue
+		# Belt and braces: a siege between powers no longer at war dissolves.
+		if not DiplomacyRules.at_war(state, state["armies"][siege["besieger"]]["owner"], settlement["owner"]):
+			settlement["siege"] = null
+			continue
 		siege["turns"] = int(siege["turns"]) + 1
 		if int(siege["turns"]) >= int(siege_rules["equipment_turns"]):
 			siege["equipment_ready"] = true

@@ -35,6 +35,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		if state["factions"][faction_id]["alive"]:
 			alive_before[faction_id] = true
 
+	# Governorship follows presence; the player may have marched governors away
+	# during their turn, so it is re-derived before the AI reads any of it.
+	SettlementRules.refresh_governors(data, state)
+
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
 			AiRules.take_turn(data, state, faction_id, rng, resolver, report["world"])
@@ -54,6 +58,11 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["sieges"] = SiegeRules.advance_sieges(data, state, rng, resolver)
 	for siege_event in report["sieges"]:
 		var result: Dictionary = siege_event.get("result", {})
+		# A faction destroyed earlier in this same pass takes nothing: its
+		# armies have already defected and its cause died with its last city.
+		if result.get("captured", false) \
+				and not state["factions"].get(result.get("capture_pending_owner", ""), {}).get("alive", false):
+			continue
 		if result.get("captured", false):
 			# Starve-outs default to occupation; the player's own assaults go
 			# through Game.assault_settlement, which asks. Either way the

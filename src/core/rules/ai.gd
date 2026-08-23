@@ -134,6 +134,10 @@ static func _defence(data: GameData, state: Dictionary, faction_id: String, rng:
 		var besieger_id: String = siege["besieger"]
 		if not state["armies"].has(besieger_id):
 			continue
+		# Never a first strike here: a stale siege after a peace must not let
+		# a "relief" attack silently re-declare the war.
+		if not DiplomacyRules.at_war(state, faction_id, state["armies"][besieger_id]["owner"]):
+			continue
 		var besieger_strength := _army_strength(data, state, state["armies"][besieger_id])
 		for army_id in _faction_army_ids(state, faction_id):
 			if not state["armies"].has(besieger_id):
@@ -443,7 +447,7 @@ static func _muster(data: GameData, state: Dictionary, faction_id: String, targe
 
 	var settlement: Dictionary = state["settlements"][best_region]
 	var keep := _garrison_target(data, settlement, ai_rules)
-	var surplus: int = settlement["garrison"].size() - keep
+	var surplus: int = mini(settlement["garrison"].size() - keep, int(ai_rules["army_unit_cap"]))
 	var indices := _strongest_indices(data, settlement["garrison"], surplus)
 
 	# Reinforce an army already mustered here rather than splitting commands.

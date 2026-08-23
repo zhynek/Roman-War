@@ -21,7 +21,22 @@ static func set_stance(state: Dictionary, a: String, b: String, stance: String) 
 		return false
 	state["factions"][a]["diplomacy"][b] = stance
 	state["factions"][b]["diplomacy"][a] = stance
+	if stance != "war":
+		_lift_sieges_between(state, a, b)
 	return true
+
+
+static func _lift_sieges_between(state: Dictionary, a: String, b: String) -> void:
+	## Peace means the siege lines come down — a parked army must never starve
+	## out a settlement its faction is no longer at war with.
+	for settlement in state["settlements"].values():
+		var siege = settlement["siege"]
+		if siege == null or not state["armies"].has(siege["besieger"]):
+			continue
+		var besieger: String = state["armies"][siege["besieger"]]["owner"]
+		var holder: String = settlement["owner"]
+		if (besieger == a and holder == b) or (besieger == b and holder == a):
+			settlement["siege"] = null
 
 
 static func declare_war(data: GameData, state: Dictionary, a: String, b: String) -> bool:
