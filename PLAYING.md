@@ -5,6 +5,17 @@ house, its cities, its money, and its armies. Battles are resolved
 automatically for now (a real-time battle mode is designed for later, and the
 game is built so it can drop in without changing anything else).
 
+## Your first game: the guided opening
+
+Leave **"Guided opening"** checked on the start menu and the game walks you
+through your first seasons on a card over the map — selecting your capital,
+reading the breakdowns, taxes, building, recruiting, marching, laying your
+first siege, training an envoy, and the Diplomacy/Senate/Family scrolls.
+Every step completes on its own the moment you do the thing it describes;
+**Next** and **Skip** are always available. It plays House Julii on a fixed
+seed so the script always matches the world. Once finished (or skipped), the
+box stays unchecked on later launches.
+
 ## Starting a campaign
 
 You pick three things and press **BEGIN THE CAMPAIGN**:
@@ -210,6 +221,32 @@ Terminal window after typing `xattr -cr ` to fill the path in automatically.)
 Failing both, `BUILDING.md` documents a no-build route: install Godot from
 godotengine.org (notarized, so it opens normally), open this project folder in
 it, and press Play.
+
+## The Advisor and Feedback
+
+Two buttons in the top bar connect the game to its builders:
+
+- **Advisor** opens *the Quaestor* — a chat with an AI counselor who knows
+  the rules, the current state of your campaign, and exactly which systems
+  are built, partial, or not built yet. Ask him "is this a bug?" and he
+  answers from that ledger. He needs a brain: by default the game talks to a
+  **local Ollama** (`brew install ollama`, run `ollama serve`, and
+  `ollama pull llama3.1`, then Advisor → Settings → *List local models* →
+  *Test connection* — free, private, no account). The Settings scroll can
+  switch to the **Anthropic API** (paste your key; `claude-haiku-4-5` is
+  prefilled — fast and cheap; `claude-opus-5` answers best) or any
+  OpenAI-compatible endpoint. Keys are stored in plain text in your user
+  folder only — never in the game's files or anything you send.
+- **Feedback** files what you find straight to the builders: pick bug /
+  confusing / idea, describe it, and send. Your **world seed**, date,
+  faction, difficulty, version, and recent log go along automatically — the
+  seed reproduces your exact campaign, which is what makes a report
+  debuggable. Direct filing needs a GitHub token pasted once into Advisor →
+  Settings (fine-grained, Issues-only); without one, **Copy as Markdown**
+  puts a ready-to-paste ticket on your clipboard. Tickets labeled `in-game`
+  wake an automatic Claude triage run on the repository: a verdict (bug /
+  not built / intended), a reproduction attempt with your seed, and a fix PR
+  when the fix is small and clear.
 
 ## If something goes wrong
 

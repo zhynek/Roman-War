@@ -99,6 +99,18 @@ func _tick() -> void:
 			_screen.negotiation_panel.open_for(game, court)
 		9:
 			_capture("negotiation.png")
+			_screen.negotiation_panel.hide()
+			_screen.feedback_panel.open_for(_screen.game, _screen)
+			_screen.feedback_panel._title_input.text = "Example: my army froze at a river"
+			_screen.feedback_panel._description.text = "Marched from Umbria toward Liguria; the army stopped and the button greyed out."
+		10:
+			_capture("feedback.png")
+			_screen.feedback_panel.hide()
+			_screen.advisor_panel.open_for(_screen.game, _screen)
+			_screen.advisor_panel._line("[b][color=#d4a938]You:[/color][/b] Ships never fight each other — bug?")
+			_screen.advisor_panel._line("[b][color=#7fa15a]Quaestor:[/color][/b] Not a bug — naval combat is not built yet. Fleets scout and blockade ports only; armies cross water by an abstracted one-season crossing. Worth filing through Feedback as an idea, if you want it sooner.")
+		11:
+			_capture("advisor.png")
 			print("screenshots written to " + _out)
 			quit(0)
 	_step += 1

@@ -26,8 +26,18 @@ the Senate's office ladder, six mission kinds, and civil-war side-picking;
 seeded households in every house; a code-built visual identity (`UiTheme`)
 over a full-window campaign screen. Remaining headline gaps are listed in §6.
 
+**Also built: the Advisor stack** (`src/ui/advisor/`) — a data-driven guided
+opening tutorial (`data/tutorial.json`, replayed end-to-end in CI), an
+in-game LLM chat ("the Quaestor": provider-agnostic `LlmClient`, knowledge
+pack in `data/advisor.json` with a systems-status ledger for bug-vs-not-built
+triage), a Feedback form that files labeled GitHub issues with the world
+seed attached (`state.world_seed`, SAVE_VERSION 3), and
+`.github/workflows/claude-triage.yml` — issues labeled `in-game` wake
+claude-code-action to triage and, for small fixes, open PRs. User-side
+setup lives in repo issue #1. Keys/config: `user://advisor.cfg` only.
+
 **Green as of the latest commit on `claude/handoff-repo-familiarization-jgqty6`:**
-100 tests / 0 failures, validator 0 errors / 0 warnings, clean boot.
+113 tests / 0 failures, validator 0 errors / 0 warnings, clean boot.
 
 ## 2. Get productive in five minutes
 
@@ -54,7 +64,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 100 tests, 0 failures (~15s)
+godot --headless --path . --script res://tests/run_tests.gd      # 113 tests, 0 failures (~20s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
