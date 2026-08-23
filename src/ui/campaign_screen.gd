@@ -329,6 +329,7 @@ func _log_report(report: Dictionary) -> void:
 	_log("[b]— %s, %s —[/b]" % [year_text, String(game.state["season"]).capitalize()])
 
 	var player: String = game.state["player_faction"]
+	var visible_set := game.visible_regions()
 	for region_id in report["completed_buildings"]:
 		if game.state["settlements"].has(region_id) and game.state["settlements"][region_id]["owner"] == player:
 			for level_id in report["completed_buildings"][region_id]:
@@ -343,7 +344,8 @@ func _log_report(report: Dictionary) -> void:
 		if game.state["settlements"][region_id]["owner"] == player:
 			_log("[color=#e0a060]Riots in %s![/color]" % game.data.regions[region_id]["settlement_name"])
 	for region_id in report["revolted"]:
-		_log("[color=#e06050]%s has risen in revolt![/color]" % game.data.regions[region_id]["settlement_name"])
+		if visible_set.has(region_id):
+			_log("[color=#e06050]%s has risen in revolt![/color]" % game.data.regions[region_id]["settlement_name"])
 	for event in report["events"]:
 		if event["kind"] == "event":
 			var event_def := {}
@@ -383,9 +385,9 @@ func _log_report(report: Dictionary) -> void:
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
-		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+		if visible_set.has(siege_event.get("region", "")):
+			_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
 
-	var visible_set := game.visible_regions()
 	for notice in report.get("world", []):
 		match String(notice.get("kind", "")):
 			"war_declared":
@@ -485,6 +487,7 @@ func _save_game() -> void:
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
+		selected_agent = ""
 		map_view.selected_region = ""
 		region_panel.clear_panel()
 		_victory_shown = false
