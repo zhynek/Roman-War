@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/agents.schema.json",
+  "kinds": [
+    {
+      "id": "diplomat",
+      "name": "Envoy",
+      "cost": 350,
+      "upkeep": 40,
+      "movement": 3,
+      "base_skill": 1,
+      "requirements": {
+        "building_kind": "government",
+        "building_level": 1
+      },
+      "description": "Carries the house's word abroad. Treating with a foreign power needs an envoy standing on their soil — stances, tribute, and the sale of whole towns all pass through his hands."
+    },
+    {
+      "id": "spy",
+      "name": "Informer",
+      "cost": 450,
+      "upkeep": 50,
+      "movement": 3,
+      "base_skill": 1,
+      "requirements": {
+        "building_kind": "market",
+        "building_level": 1
+      },
+      "description": "Eyes inside foreign walls: reveals what the fog hides, and when the army storms a town he has already unbarred more than one gate. Watchful governors hunt him."
+    },
+    {
+      "id": "assassin",
+      "name": "Hired Blade",
+      "cost": 700,
+      "upkeep": 60,
+      "movement": 3,
+      "base_skill": 1,
+      "requirements": {
+        "building_kind": "market",
+        "building_level": 2
+      },
+      "description": "A quiet solution to a loud problem. Sent against a general, a governor, or a king; bodyguards and food-tasters are the only argument he respects. Failure tends to be final."
+    }
+  ]
+}

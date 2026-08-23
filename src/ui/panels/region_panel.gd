@@ -8,22 +8,28 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal agent_selected(agent_id: String)
+signal negotiate_requested(faction_id: String)
+signal log_message(text: String)
 
 var game: Game
 var region_id := ""
 var selected_army := ""
+var selected_agent := ""
 
 
-func show_region(current_game: Game, new_region_id: String, army_id: String = "") -> void:
+func show_region(current_game: Game, new_region_id: String, army_id: String = "", agent_id: String = "") -> void:
 	game = current_game
 	region_id = new_region_id
 	selected_army = army_id
+	selected_agent = agent_id
 	_rebuild()
 
 
 func clear_panel() -> void:
 	region_id = ""
 	selected_army = ""
+	selected_agent = ""
 	_clear_children()
 
 
@@ -58,6 +64,7 @@ func _rebuild() -> void:
 	if not settlement.is_empty():
 		_build_settlement_section(settlement)
 	_build_armies_section()
+	_build_agents_section()
 
 
 func _build_settlement_section(settlement: Dictionary) -> void:
@@ -234,6 +241,75 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 			_action_button("Hire %s (%d)" % [_template_name(offer["template"]), int(offer["cost"])],
 				func():
 					game.hire_mercenary(army_id, offer["template"])
+					action_taken.emit())
+
+
+func _build_agents_section() -> void:
+	var player: String = game.state["player_faction"]
+	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+
+	# Training, in our own settlements.
+	if not settlement.is_empty() and settlement["owner"] == player:
+		var trainable := game.agents_available(region_id)
+		if not trainable.is_empty():
+			_header("Agents", 12)
+			for kind in trainable:
+				var kind_id: String = kind["id"]
+				_action_button("Train %s (%d)" % [kind["name"], int(kind["cost"])], func():
+					game.train_agent(region_id, kind_id)
+					action_taken.emit())
+
+	# Our agents standing here.
+	var here := AgentRules.agents_in(game.state, region_id, player)
+	if here.is_empty():
+		return
+	_separator()
+	_header("Our agents here", 13)
+	for agent_id in here:
+		var agent: Dictionary = game.state["agents"][agent_id]
+		var kind: Dictionary = game.data.agent_kinds.get(agent["kind"], {})
+		var button := Button.new()
+		button.text = "%s%s — %s (skill %d)" % ["▶ " if agent_id == selected_agent else "",
+			kind.get("name", agent["kind"]), agent["name"], int(agent["skill"])]
+		button.add_theme_font_size_override("font_size", 11)
+		button.pressed.connect(func(): agent_selected.emit(agent_id))
+		add_child(button)
+		if agent_id == selected_agent:
+			_build_selected_agent_detail(agent_id, agent, settlement)
+
+
+func _build_selected_agent_detail(agent_id: String, agent: Dictionary, settlement: Dictionary) -> void:
+	var player: String = game.state["player_faction"]
+	_label("Movement left: %.1f — click a region to travel there." % float(agent["movement_left"]),
+		Color(0.7, 0.8, 0.9))
+
+	if agent["kind"] == "diplomat" and not settlement.is_empty() and settlement["owner"] != player:
+		var owner: String = settlement["owner"]
+		if not game.data.factions.get(owner, {}).get("is_rebel", false):
+			_action_button("Negotiate with %s" % game.data.factions.get(owner, {}).get("name", owner),
+				func(): negotiate_requested.emit(owner))
+
+	if agent["kind"] == "assassin" and float(agent["movement_left"]) > 0.0:
+		var char_ids: Array = game.state["characters"].keys()
+		char_ids.sort()
+		for char_id in char_ids:
+			var character: Dictionary = game.state["characters"][char_id]
+			if not character["alive"] or character["faction"] == player:
+				continue
+			if character.get("location", "") != region_id:
+				continue
+			var target_id: String = char_id
+			var target_name: String = character["name"]
+			_action_button("Strike at %s (%s)" % [character["name"],
+				game.data.factions.get(character["faction"], {}).get("name", character["faction"])],
+				func():
+					var result := game.assassinate(agent_id, target_id)
+					if result.get("killed", false):
+						log_message.emit("[color=#e06050]The blade finds %s in the night.[/color]" % target_name)
+					elif result.get("caught", false):
+						log_message.emit("[color=#e08060]The attempt fails — our blade is taken, and they know who sent him.[/color]")
+					elif result.get("attempted", false):
+						log_message.emit("The attempt on %s fails; our blade slips away." % target_name)
 					action_taken.emit())
 
 

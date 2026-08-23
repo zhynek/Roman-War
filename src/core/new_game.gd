@@ -41,6 +41,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"armies": {},
 		"fleets": {},
 		"characters": {},
+		"agents": {},
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,
@@ -60,6 +61,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"mission": null,
 			"at_civil_war": false,
 			"ai_memory": {"target": null, "war_since": {}},
+			"attitude": {},
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -79,6 +81,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
 		"ai_memory": {"target": null, "war_since": {}},
+		"attitude": {},
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)

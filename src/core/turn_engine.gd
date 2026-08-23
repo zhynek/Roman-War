@@ -91,6 +91,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
+	report["world"].append_array(AgentRules.process_turn(data, state, rng))
+	NegotiationRules.decay_turn(data, state)
 
 	state["turn"] = int(state["turn"]) + 1
 	var turns_per_year := int(data.balance["time"]["turns_per_year"])

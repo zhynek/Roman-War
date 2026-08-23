@@ -13,9 +13,11 @@ var map_view: MapView
 var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
+var negotiation_panel: NegotiationPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_agent := ""
 var _victory_shown := false
 
 
@@ -57,6 +59,9 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.agent_selected.connect(_on_agent_selected)
+	region_panel.negotiate_requested.connect(_open_negotiation)
+	region_panel.log_message.connect(_log)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -71,7 +76,12 @@ func _ready() -> void:
 
 	diplomacy_panel = DiplomacyPanel.new()
 	diplomacy_panel.stance_changed.connect(refresh)
+	diplomacy_panel.negotiate_requested.connect(_open_negotiation)
 	add_child(diplomacy_panel)
+
+	negotiation_panel = NegotiationPanel.new()
+	negotiation_panel.deal_made.connect(refresh)
+	add_child(negotiation_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
@@ -124,7 +134,7 @@ func refresh() -> void:
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
 	if map_view.selected_region != "":
-		region_panel.show_region(game, map_view.selected_region, selected_army)
+		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:
@@ -138,15 +148,43 @@ func _on_region_clicked(region_id: String) -> void:
 			and region_id != game.state["armies"][selected_army]["region"]:
 		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
 		return
+	# With an agent selected, a click sends him traveling.
+	if selected_agent != "" and game.state.get("agents", {}).has(selected_agent) \
+			and region_id != game.state["agents"][selected_agent]["region"]:
+		_agent_order(region_id)
+		return
 	map_view.selected_region = region_id
 	selected_army = ""
+	selected_agent = ""
 	region_panel.show_region(game, region_id)
 	map_view.queue_redraw()
 
 
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
+	selected_agent = ""
 	region_panel.show_region(game, map_view.selected_region, selected_army)
+
+
+func _on_agent_selected(agent_id: String) -> void:
+	selected_agent = "" if selected_agent == agent_id else agent_id
+	selected_army = ""
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+
+
+func _agent_order(target_region: String) -> void:
+	var reached := game.move_agent_towards(selected_agent, target_region)
+	if reached == target_region:
+		_log("Our agent reaches %s." % game.data.regions[target_region]["name"])
+	elif reached != "":
+		_log("Our agent travels as far as %s." % game.data.regions[reached]["name"])
+	map_view.selected_region = reached if reached != "" else map_view.selected_region
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+	refresh()
+
+
+func _open_negotiation(faction_id: String) -> void:
+	negotiation_panel.open_for(game, faction_id)
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -263,6 +301,7 @@ func _end_turn() -> void:
 	var report := game.end_turn()
 	_log_report(report)
 	selected_army = ""
+	selected_agent = ""
 	refresh()
 
 
@@ -337,6 +376,19 @@ func _log_report(report: Dictionary) -> void:
 						_faction_name(notice["faction"]),
 						game.data.regions[notice["region"]]["settlement_name"],
 						_faction_name(notice["from"])])
+			"agent_caught":
+				if notice.get("faction", "") == player:
+					_log("[color=#e08060]Our %s was caught and killed in %s.[/color]" % [
+						String(notice.get("agent_kind", "agent")),
+						game.data.regions.get(notice.get("region", ""), {}).get("settlement_name", "a foreign town")])
+				elif notice.get("by", "") == player:
+					_log("We caught a foreign %s skulking in %s." % [
+						String(notice.get("agent_kind", "agent")),
+						game.data.regions.get(notice.get("region", ""), {}).get("settlement_name", "our town")])
+			"assassination":
+				var victim: Dictionary = game.state["characters"].get(notice.get("character", ""), {})
+				if notice.get("faction", "") == player:
+					_log("[color=#e06050][b]%s has been murdered![/b][/color]" % victim.get("name", "One of ours"))
 	for faction_id in report.get("destroyed_factions", []):
 		_log("[color=#e06050][b]%s is no more.[/b][/color]" % _faction_name(faction_id))
 

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents.schema.json",
+  "title": "Campaign agents",
+  "type": "object",
+  "required": ["kinds"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "kinds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "cost", "upkeep", "movement", "base_skill", "requirements", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["diplomat", "spy", "assassin"] },
+          "name": { "type": "string", "minLength": 1 },
+          "cost": { "type": "integer", "minimum": 0 },
+          "upkeep": { "type": "integer", "minimum": 0 },
+          "movement": { "type": "number", "exclusiveMinimum": 0 },
+          "base_skill": { "type": "integer", "minimum": 0 },
+          "requirements": {
+            "type": "object",
+            "required": ["building_kind", "building_level"],
+            "additionalProperties": false,
+            "properties": {
+              "building_kind": { "type": "string" },
+              "building_level": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

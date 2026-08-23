@@ -211,7 +211,7 @@ static func _diplomacy(data: GameData, state: Dictionary, faction_id: String, rn
 		return
 	if not rng.chance(aggression * float(ai_rules["declare_war_chance"])):
 		return
-	DiplomacyRules.declare_war(state, faction_id, candidate)
+	DiplomacyRules.declare_war(data, state, faction_id, candidate)
 	war_since[candidate] = turn
 	notices.append({"kind": "war_declared", "faction": faction_id, "other": candidate})
 
@@ -240,9 +240,12 @@ static func _war_candidate(data: GameData, state: Dictionary, faction_id: String
 		var their_strength := _faction_strength(data, state, other_id)
 		if my_strength < their_strength * float(ai_rules["declare_war_strength_ratio"]):
 			continue
-		if best == "" or their_strength < best_strength:
+		# Hated neighbors are struck first; among equals, the weakest.
+		var attitude := NegotiationRules.attitude_total(data, state, other_id, faction_id)
+		var score := their_strength * (1.0 + clampf(attitude, -100.0, 100.0) / 200.0)
+		if best == "" or score < best_strength:
 			best = other_id
-			best_strength = their_strength
+			best_strength = score
 	return best
 
 

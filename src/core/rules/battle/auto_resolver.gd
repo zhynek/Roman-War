@@ -26,6 +26,7 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 		attacker_strength *= float(battle_rules["fatigue_multiplier"])
 	if context.get("sally", false):
 		defender_strength *= 1.0 + float(data.balance["siege"]["sally_strength_bonus_pct"]) / 100.0
+	attacker_strength *= 1.0 + float(context.get("attacker_bonus_pct", 0.0)) / 100.0
 
 	attacker_strength *= rng.randf_pct(float(battle_rules["randomness_pct"]))
 	defender_strength *= rng.randf_pct(float(battle_rules["randomness_pct"]))

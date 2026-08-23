@@ -8,7 +8,7 @@ func test_declare_war_is_symmetric(t) -> void:
 	var state := Fixtures.state(data)
 	DiplomacyRules.set_stance(state, "red", "blue", "alliance")
 	t.check_eq(DiplomacyRules.stance_between(state, "blue", "red"), "alliance", "stances are symmetric")
-	t.check(DiplomacyRules.declare_war(state, "red", "blue"), "war can be declared")
+	t.check(DiplomacyRules.declare_war(data, state, "red", "blue"), "war can be declared")
 	t.check(DiplomacyRules.at_war(state, "blue", "red"), "war is mutual")
 
 

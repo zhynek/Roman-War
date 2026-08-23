@@ -39,6 +39,7 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "agents.json": "agents.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -438,6 +439,24 @@ def cross_checks(t: dict[str, dict]) -> None:
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+
+    # --- agents -----------------------------------------------------------
+    agent_kinds = t.get("agents.json", {}).get("kinds", [])
+    seen_agent_ids: set[str] = set()
+    for kind in agent_kinds:
+        if kind["id"] in seen_agent_ids:
+            err(f"agents: duplicate kind {kind['id']}")
+        seen_agent_ids.add(kind["id"])
+    for kind in agent_kinds:
+        req_kind = kind["requirements"]["building_kind"]
+        matched = any(c.get("kind") == req_kind
+                      for c in t.get("buildings.json", {}).get("chains", [])
+                      + t.get("temples.json", {}).get("chains", []))
+        if not matched:
+            err(f"agents: {kind['id']} requires building kind '{req_kind}' that no chain provides")
+    for wanted in ("diplomat", "spy", "assassin"):
+        if wanted not in seen_agent_ids:
+            err(f"agents: kind '{wanted}' missing — the engine expects all three")
 
     # --- AI tunables ------------------------------------------------------
     ai = balance.get("ai", {})

@@ -14,7 +14,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
 	# Investing a settlement IS a declaration of war.
-	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
+	DiplomacyRules.declare_war(data, state, army["owner"], settlement["owner"])
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
@@ -78,6 +78,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		"defender_general": governor_profile,
 		"attacker_fatigued": false,
 		"sally": starving,
+		# Informers inside the walls (Phase 5) open gates for their master.
+		"attacker_bonus_pct": AgentRules.spy_assault_bonus_pct(data, state, army["owner"], region_id),
 	})
 
 	if result.get("attacker_general_died", false) and army["general"] != null:

@@ -161,6 +161,16 @@ func _draw_region(region_id: String, is_visible: bool) -> void:
 		draw_rect(Rect2(badge_pos, Vector2(8, 10) * _zoom), Color(0, 0, 0, 0.6), false, 1.0 * _zoom)
 		badge_offset += 1
 
+	# Our agents: small hooded marks under the token's left shoulder.
+	var agent_count := 0
+	for agent in game.state.get("agents", {}).values():
+		if agent["owner"] == game.state["player_faction"] and agent["region"] == region_id:
+			agent_count += 1
+	for i in range(agent_count):
+		var mark := screen + Vector2(-radius - (4.0 + i * 8.0) * _zoom, radius * 0.5)
+		draw_circle(mark, 3.0 * _zoom, Color(0.85, 0.85, 0.95))
+		draw_circle(mark, 1.6 * _zoom, Color(0.2, 0.2, 0.3))
+
 	if _zoom >= 0.55 and _font != null:
 		var label: String = region.get("settlement_name", region_id)
 		var text_size := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, 12)

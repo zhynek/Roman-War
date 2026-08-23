@@ -1,12 +1,14 @@
 class_name DiplomacyPanel
 extends AcceptDialog
-## The stances scroll: where every house stands with us, and the blunt
-## instruments available before the Phase 5 negotiation engine exists —
-## declare war, or offer terms the other side simply accepts.
+## The stances scroll: where every house stands with us and how warmly they
+## regard us. War can be declared from here (no consent needed); everything
+## else — peace, trade, alliances, gifts, tribute, buying towns — goes
+## through the negotiation scroll, and only with an envoy at their court.
 ## Fleets share this window: they live in sea zones, not regions, so the map
 ## click cannot reach them.
 
 signal stance_changed
+signal negotiate_requested(faction_id: String)
 
 var game: Game
 var _content: VBoxContainer
@@ -75,24 +77,36 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 	swatch.custom_minimum_size = Vector2(14, 14)
 	row.add_child(swatch)
 
+	var attitude := game.attitude_of(faction_id)
 	var name_label := Label.new()
-	name_label.text = " %s — %s" % [faction["name"], STANCE_NAMES.get(stance, stance)]
+	name_label.text = " %s — %s  (%+.0f)" % [faction["name"], STANCE_NAMES.get(stance, stance),
+		float(attitude["total"])]
 	name_label.add_theme_font_size_override("font_size", 12)
 	name_label.custom_minimum_size = Vector2(280, 0)
 	row.add_child(name_label)
 
-	for offer in ["war", "neutral", "trade", "alliance"]:
-		if offer == stance:
-			continue
-		var button := Button.new()
-		button.text = {"war": "Declare war", "neutral": "Peace",
-			"trade": "Trade", "alliance": "Alliance"}[offer]
-		button.add_theme_font_size_override("font_size", 11)
-		button.pressed.connect(func():
-			game.set_stance(faction_id, offer)
+	if game.can_negotiate_with(faction_id):
+		var negotiate := Button.new()
+		negotiate.text = "Negotiate"
+		negotiate.add_theme_font_size_override("font_size", 11)
+		negotiate.pressed.connect(func(): negotiate_requested.emit(faction_id))
+		row.add_child(negotiate)
+	else:
+		var hint := Label.new()
+		hint.text = "(no envoy at their court)"
+		hint.add_theme_font_size_override("font_size", 10)
+		hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		row.add_child(hint)
+
+	if stance != "war":
+		var war_button := Button.new()
+		war_button.text = "Declare war"
+		war_button.add_theme_font_size_override("font_size", 11)
+		war_button.pressed.connect(func():
+			game.declare_war(faction_id)
 			stance_changed.emit()
 			_rebuild())
-		row.add_child(button)
+		row.add_child(war_button)
 	_content.add_child(row)
 
 

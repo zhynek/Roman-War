@@ -19,6 +19,7 @@ extends RefCounted
 ##     defender_general: Dictionary|null,
 ##     attacker_fatigued: bool,    # forced march
 ##     sally: bool,                # defenders sallying out of a siege
+##     attacker_bonus_pct: float,  # optional: e.g. spies opening gates (Phase 5)
 ##   }
 ##
 ##   BattleResult: {

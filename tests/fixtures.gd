@@ -8,6 +8,11 @@ static func data() -> GameData:
 	var game_data := GameData.new()
 	var balance_text := FileAccess.get_file_as_string("res://data/balance.json")
 	game_data.balance = JSON.parse_string(balance_text)
+	# Agent kinds are structural (the engine expects all three) and tiny, so
+	# the fixtures use the real table — like balance, it is the contract under test.
+	var agents_text := FileAccess.get_file_as_string("res://data/agents.json")
+	for kind in JSON.parse_string(agents_text).get("kinds", []):
+		game_data.agent_kinds[kind["id"]] = kind
 
 	game_data.cultures = {
 		"roman": {"id": "roman", "name": "Roman", "max_settlement_level": "huge_city"},
@@ -186,7 +191,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"epsilon": _settlement("red", 6000, {"test_government": 2}),
 			"alpha": _settlement("blue", 1200, {"tribal_government": 1}),
 		},
-		"armies": {}, "fleets": {}, "characters": {},
+		"armies": {}, "fleets": {}, "characters": {}, "agents": {},
 		"events_fired": [], "winner": null, "next_id": 1,
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
@@ -232,6 +237,7 @@ static func _faction(capital: String) -> Dictionary:
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
+		"ai_memory": {"target": null, "war_since": {}}, "attitude": {},
 	}
 
 

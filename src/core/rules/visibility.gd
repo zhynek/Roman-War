@@ -27,4 +27,12 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 			if data.regions[region_id].get("sea_zones", []).has(fleet["sea_zone"]):
 				visible[region_id] = true
 
+	# Agents are eyes abroad: each reveals where he stands and one hop out.
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] != faction_id or not agent["alive"]:
+			continue
+		visible[agent["region"]] = true
+		for neighbor in data.regions.get(agent["region"], {}).get("adjacent", []):
+			visible[neighbor] = true
+
 	return visible

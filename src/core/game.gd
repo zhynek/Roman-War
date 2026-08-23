@@ -73,7 +73,7 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 
 func declare_war(other_faction: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
-	return DiplomacyRules.declare_war(state, fid, other_faction)
+	return DiplomacyRules.declare_war(data, state, fid, other_faction)
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
@@ -178,6 +178,81 @@ func garrison_army(army_id: String) -> bool:
 	if army.is_empty():
 		return false
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
+
+
+## --- Agents & negotiation (Phase 5) ---------------------------------------
+
+func agents_available(region_id: String) -> Array:
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return []
+	return AgentRules.available_kinds(data, state, region_id)
+
+
+func train_agent(region_id: String, kind_id: String) -> String:
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return ""
+	var rng := _rng()
+	var agent_id := AgentRules.train(data, state, region_id, kind_id, rng)
+	state["rng_state"] = rng.state_string()
+	return agent_id
+
+
+func move_agent_towards(agent_id: String, target_region: String) -> String:
+	var agent: Dictionary = state.get("agents", {}).get(agent_id, {})
+	if agent.is_empty() or agent["owner"] != state["player_faction"]:
+		return ""
+	return AgentRules.move_towards(data, state, agent_id, target_region)
+
+
+func assassinate(agent_id: String, char_id: String) -> Dictionary:
+	## Returns {attempted, killed, caught, notices}.
+	var agent: Dictionary = state.get("agents", {}).get(agent_id, {})
+	if agent.is_empty() or agent["owner"] != state["player_faction"]:
+		return {"attempted": false, "killed": false, "caught": false, "notices": []}
+	var rng := _rng()
+	var notices: Array = []
+	var result := AgentRules.assassinate(data, state, rng, agent_id, char_id, notices)
+	result["notices"] = notices
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func can_negotiate_with(other_faction: String) -> bool:
+	## Treating with a foreign power needs an envoy of ours on their soil.
+	return AgentRules.has_envoy_with(data, state, String(state["player_faction"]), other_faction)
+
+
+func attitude_of(other_faction: String) -> Dictionary:
+	## How they regard us: {total, factors}.
+	var player := String(state["player_faction"])
+	return {
+		"total": NegotiationRules.attitude_total(data, state, player, other_faction),
+		"factors": NegotiationRules.attitude_breakdown(data, state, player, other_faction),
+	}
+
+
+func propose(other_faction: String, offer: Dictionary) -> Dictionary:
+	## Put an offer to a foreign power through our envoy. Offer kinds: peace,
+	## trade, alliance, gift, demand_tribute, buy_region — see NegotiationRules.
+	if not can_negotiate_with(other_faction):
+		return {"accept": false, "reason": "no_envoy"}
+	return NegotiationRules.execute(data, state, String(state["player_faction"]), other_faction, offer)
+
+
+func preview_offer(other_faction: String, offer: Dictionary) -> Dictionary:
+	if not can_negotiate_with(other_faction):
+		return {"accept": false, "reason": "no_envoy"}
+	return NegotiationRules.evaluate(data, state, String(state["player_faction"]), other_faction, offer)
+
+
+func buyable_regions(other_faction: String) -> Array:
+	## Their border towns an envoy could buy, with prices: [{region, price}].
+	var offers: Array = []
+	for region_id in NegotiationRules.sellable_regions(data, state, String(state["player_faction"]), other_faction):
+		offers.append({"region": region_id, "price": NegotiationRules.region_price(data, state, region_id)})
+	return offers
 
 
 ## --- Queries (for UI scrolls) --------------------------------------------
