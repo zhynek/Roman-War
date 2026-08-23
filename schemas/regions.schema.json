@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "regions.schema.json",
+  "title": "Campaign map: regions and sea zones",
+  "type": "object",
+  "required": ["regions", "sea_zones"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "regions": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "settlement_name", "terrain", "fertility", "adjacent"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "settlement_name": { "type": "string", "minLength": 1 },
+          "terrain": { "enum": ["plains", "forest", "hills", "mountains", "desert", "steppe", "marsh"] },
+          "fertility": { "type": "number", "minimum": 0, "maximum": 3, "description": "Base population growth % per turn from land quality" },
+          "adjacent": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "uniqueItems": true,
+            "description": "Land-adjacent region ids; must be symmetric"
+          },
+          "sea_zones": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "uniqueItems": true,
+            "description": "Sea zones this region touches; non-empty means coastal"
+          },
+          "resources": {
+            "type": "array",
+            "items": { "enum": ["grain", "wine", "olive_oil", "silk", "purple_dye", "silver", "gold", "iron", "copper", "timber", "slaves", "horses", "elephants", "amber", "furs", "glass", "pottery", "salt", "incense", "marble", "fish", "textiles"] },
+            "uniqueItems": true
+          },
+          "hidden_resources": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "uniqueItems": true,
+            "description": "Invisible flags used by event/building conditions (e.g. italia)"
+          },
+          "wonder": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Wonder id located here, if any" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "sea_zones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "adjacent"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "adjacent": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "uniqueItems": true,
+            "description": "Adjacent sea zone ids; must be symmetric"
+          }
+        }
+      }
+    }
+  }
+}

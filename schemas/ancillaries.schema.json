@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ancillaries.schema.json",
+  "title": "Character ancillaries (retinue)",
+  "type": "object",
+  "required": ["ancillaries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "ancillaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "effects", "triggers"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "unique": { "type": "boolean", "default": false },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "command": { "type": "integer" },
+              "management": { "type": "integer" },
+              "influence": { "type": "integer" },
+              "law": { "type": "number" },
+              "happiness": { "type": "number" },
+              "growth": { "type": "number" },
+              "trade_pct": { "type": "number" },
+              "movement": { "type": "number" },
+              "personal_security": { "type": "integer" },
+              "troop_morale": { "type": "integer" },
+              "agent_skill": { "type": "integer" }
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["when", "chance"],
+              "additionalProperties": false,
+              "properties": {
+                "when": {
+                  "enum": ["turn_end_governing", "turn_end_campaigning", "battle_won", "siege_won", "settlement_captured", "office_gained", "came_of_age"]
+                },
+                "condition": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "building_kind": { "type": "string" },
+                    "min_building_level": { "type": "integer", "minimum": 1 },
+                    "temple_god": { "type": "string" }
+                  }
+                },
+                "chance": { "type": "number", "minimum": 0, "maximum": 1 }
+              }
+            }
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

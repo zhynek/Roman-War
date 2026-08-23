@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "events.schema.json",
+  "title": "Scripted, historical, and disaster events",
+  "type": "object",
+  "required": ["events", "disasters"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "trigger", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "trigger": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "year": { "type": "integer", "description": "Fires at the first turn of this year" },
+              "condition": {
+                "enum": ["huge_city_with_hidden_resource", "faction_destroyed", "first_civil_war"],
+                "description": "Condition-based trigger evaluated each turn"
+              },
+              "hidden_resource": { "type": "string" },
+              "exclude_regions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+              "culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+              "faction": { "type": "string" }
+            }
+          },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "marian_reforms": { "type": "boolean", "description": "Switch triggering faction's roman roster to post_marian era" },
+              "treasury": { "type": "integer" },
+              "happiness_all_settlements": { "type": "number" },
+              "happiness_turns": { "type": "integer" }
+            }
+          },
+          "once": { "type": "boolean", "default": true },
+          "text": { "type": "string" }
+        }
+      }
+    },
+    "disasters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "kind", "chance_per_turn", "regions", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["earthquake", "flood", "volcano", "storm"] },
+          "chance_per_turn": { "type": "number", "minimum": 0, "maximum": 0.05 },
+          "regions": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }, "uniqueItems": true },
+          "population_loss_pct": { "type": "number", "minimum": 0, "maximum": 50 },
+          "building_damage_chance": { "type": "number", "minimum": 0, "maximum": 1 },
+          "text": { "type": "string" }
+        }
+      }
+    }
+  }
+}

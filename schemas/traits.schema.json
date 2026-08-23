@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "traits.schema.json",
+  "title": "Character traits",
+  "type": "object",
+  "required": ["traits"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "traits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "levels", "triggers"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "anti_trait": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "levels": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["name", "threshold", "effects"],
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string", "minLength": 1 },
+                "threshold": { "type": "integer", "minimum": 1, "description": "Trait points needed to reach this level" },
+                "effects": { "$ref": "#/$defs/effects" },
+                "description": { "type": "string" }
+              }
+            }
+          },
+          "triggers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["when", "chance", "points"],
+              "additionalProperties": false,
+              "properties": {
+                "when": {
+                  "enum": ["turn_end_governing", "turn_end_idle", "turn_end_campaigning", "battle_won", "battle_lost", "siege_won", "settlement_captured", "settlement_exterminated", "settlement_enslaved", "office_gained", "came_of_age"]
+                },
+                "condition": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "min_tax_level": { "enum": ["very_low", "low", "normal", "high", "very_high"] },
+                    "building_kind": { "type": "string" },
+                    "min_building_level": { "type": "integer", "minimum": 1 },
+                    "min_public_order": { "type": "number" },
+                    "max_public_order": { "type": "number" },
+                    "odds_against": { "type": "boolean", "description": "Battle triggers: fought outnumbered" }
+                  }
+                },
+                "chance": { "type": "number", "minimum": 0, "maximum": 1 },
+                "points": { "type": "integer" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "effects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command": { "type": "integer" },
+        "management": { "type": "integer" },
+        "influence": { "type": "integer" },
+        "law": { "type": "number" },
+        "happiness": { "type": "number" },
+        "growth": { "type": "number" },
+        "trade_pct": { "type": "number" },
+        "movement": { "type": "number" },
+        "personal_security": { "type": "integer" },
+        "troop_morale": { "type": "integer" }
+      }
+    }
+  }
+}

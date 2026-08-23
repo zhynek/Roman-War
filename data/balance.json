@@ -1,0 +1,131 @@
+{
+  "$schema": "../schemas/balance.schema.json",
+  "time": {
+    "start_year": -270,
+    "end_year": 14,
+    "turns_per_year": 2
+  },
+  "settlement_levels": [
+    { "id": "village", "min_population": 0 },
+    { "id": "town", "min_population": 800 },
+    { "id": "large_town", "min_population": 2000 },
+    { "id": "minor_city", "min_population": 6000 },
+    { "id": "large_city", "min_population": 12000 },
+    { "id": "huge_city", "min_population": 24000 }
+  ],
+  "growth": {
+    "farm_level_pct": 0.5,
+    "health_pct_per_10_health": 1.0,
+    "tax_growth_pct": { "very_low": 1.0, "low": 0.5, "normal": 0.0, "high": -0.5, "very_high": -1.0 },
+    "slave_influx_pct": 0.5,
+    "slave_influx_turns": 20,
+    "grain_import_pct_by_routes": [1.5, 3.0, 4.0],
+    "plague_growth_pct": -10.0,
+    "recently_conquered_growth_pct": -1.0,
+    "max_growth_pct": 6.0,
+    "min_growth_pct": -10.0
+  },
+  "squalor": {
+    "population_per_pct": 3000,
+    "max_growth_penalty_pct": 25.0,
+    "max_order_penalty_pct": 25.0
+  },
+  "public_order": {
+    "base": 100,
+    "riot_threshold": 75,
+    "revolt_threshold": 50,
+    "revolt_consecutive_turns": 3,
+    "riot_population_loss_pct": 1.0,
+    "riot_building_damage_chance": 0.25,
+    "tax_happiness": { "very_low": 15, "low": 5, "normal": 0, "high": -5, "very_high": -15 },
+    "garrison_ratio_scale": 400.0,
+    "garrison_max_bonus": 80,
+    "governor_influence_pct_per_point": 5,
+    "no_governor_penalty": 5,
+    "recently_conquered_penalty": 30,
+    "recently_conquered_decay_per_turn": 5,
+    "culture_penalty_scale": 40.0,
+    "population_boom_bonus": 5,
+    "population_boom_growth_pct": 2.5
+  },
+  "distance_to_capital": {
+    "free_hops": 2,
+    "pct_per_hop": 8,
+    "max_penalty_pct": 80
+  },
+  "taxes": {
+    "income_multiplier": { "very_low": 0.5, "low": 0.75, "normal": 1.0, "high": 1.25, "very_high": 1.5 },
+    "base_income_per_1000_pop": 100
+  },
+  "corruption": {
+    "pct_per_hop_beyond_free": 1.5,
+    "max_pct": 30.0,
+    "law_reduction_factor": 0.01
+  },
+  "economy": {
+    "farm_income_fertility_multiplier": 80,
+    "harvest_variance_pct": 20,
+    "sea_trade_route_base": 120,
+    "land_trade_route_base": 80,
+    "trade_income_per_resource": 60,
+    "debt_disband_threshold": -5000,
+    "loot_per_occupied_pop": 0.1,
+    "loot_per_enslaved_pop": 0.5,
+    "loot_per_exterminated_pop": 1.0
+  },
+  "occupation": {
+    "enslave_population_removed_pct": 50,
+    "exterminate_population_killed_pct": 75,
+    "occupy_order_penalty": 30,
+    "enslave_order_penalty": 20,
+    "exterminate_order_penalty": 10
+  },
+  "plague": {
+    "base_chance_per_1000_over_health_capacity": 0.02,
+    "health_capacity_per_health_pct": 300,
+    "duration_turns_min": 2,
+    "duration_turns_max": 6,
+    "population_loss_pct_per_turn": 2.0
+  },
+  "movement": {
+    "base_movement_points": 2,
+    "forced_march_multiplier": 2.0,
+    "terrain_cost": { "plains": 1.0, "forest": 1.5, "hills": 1.5, "mountains": 2.0, "desert": 1.5, "steppe": 1.0, "marsh": 2.0 },
+    "road_cost_multiplier": [1.0, 0.75, 0.6, 0.5],
+    "sea_lane_cost": 1.0
+  },
+  "recruitment": {
+    "experience_max": 9,
+    "retrain_heal_pct": 100
+  },
+  "battle": {
+    "experience_strength_pct_per_chevron": 10,
+    "wall_defense_multiplier": [1.0, 1.3, 1.6, 2.0, 2.5, 3.0],
+    "terrain_defense_multiplier": { "plains": 1.0, "forest": 1.15, "hills": 1.2, "mountains": 1.35, "desert": 1.0, "steppe": 1.0, "marsh": 1.1 },
+    "attacker_casualty_base_pct": 25,
+    "defender_casualty_base_pct": 25,
+    "loser_extra_casualty_pct": 35,
+    "randomness_pct": 20,
+    "experience_gain_on_victory": 1,
+    "general_death_chance_on_defeat": 0.1
+  },
+  "siege": {
+    "equipment_turns": 2,
+    "starve_turns_per_settlement_level": [2, 3, 4, 5, 6, 8],
+    "sally_strength_bonus_pct": 10
+  },
+  "senate": {
+    "start_standing": 5,
+    "max_standing": 10,
+    "min_standing": -10,
+    "mission_success_standing": 1,
+    "mission_fail_standing": -2,
+    "popular_standing_per_region": 0.2,
+    "civil_war_popular_threshold": 8,
+    "civil_war_senate_threshold": -5
+  },
+  "ai": {
+    "difficulty_income_multiplier": { "easy": 0.8, "medium": 1.0, "hard": 1.2, "very_hard": 1.4 },
+    "difficulty_order_bonus": { "easy": 0, "medium": 0, "hard": 10, "very_hard": 20 }
+  }
+}

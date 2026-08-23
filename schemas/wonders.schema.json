@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wonders.schema.json",
+  "title": "Wonders of the world",
+  "type": "object",
+  "required": ["wonders"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "wonders": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "region", "effects", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "region": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sea_trade_pct": { "type": "number" },
+              "happiness_all_settlements": { "type": "number" },
+              "religious_building_discount_pct": { "type": "number" },
+              "farm_income_pct": { "type": "number" },
+              "build_time_reduction_turns": { "type": "integer" },
+              "build_time_reduction_min_turns": { "type": "integer" },
+              "cancel_culture_penalty_culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+              "naval_movement_pct": { "type": "number" }
+            }
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

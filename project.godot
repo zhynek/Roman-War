@@ -1,0 +1,21 @@
+; Engine configuration format
+; https://docs.godotengine.org/en/stable/classes/class_projectsettings.html
+
+config_version=5
+
+[application]
+
+config/name="Roman War"
+config/description="An original turn-based grand-strategy game of the ancient Mediterranean. Data-driven campaign engine; battles resolve through a swappable BattleResolver."
+run/main_scene="res://src/ui/main.tscn"
+config/features=PackedStringArray("4.4")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=800
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

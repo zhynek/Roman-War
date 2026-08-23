@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "names.schema.json",
+  "title": "Character name pools per culture",
+  "type": "object",
+  "required": ["pools"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "pools": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(roman|greek|eastern|carthaginian|egyptian|barbarian|neutral)$": {
+          "type": "object",
+          "required": ["male", "female"],
+          "additionalProperties": false,
+          "properties": {
+            "male": { "type": "array", "minItems": 10, "items": { "type": "string", "minLength": 2 }, "uniqueItems": true },
+            "female": { "type": "array", "minItems": 5, "items": { "type": "string", "minLength": 2 }, "uniqueItems": true },
+            "surnames": { "type": "array", "items": { "type": "string", "minLength": 2 }, "uniqueItems": true }
+          }
+        }
+      }
+    }
+  }
+}

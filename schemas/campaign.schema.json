@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "campaign.schema.json",
+  "title": "Imperial campaign start state",
+  "type": "object",
+  "required": ["id", "name", "start_year", "factions", "rebel_settlements"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "name": { "type": "string" },
+    "start_year": { "type": "integer" },
+    "factions": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id", "treasury", "capital", "settlements", "characters"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "treasury": { "type": "integer" },
+          "capital": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Region id of the faction capital" },
+          "settlements": { "type": "array", "items": { "$ref": "#/$defs/settlement" } },
+          "armies": { "type": "array", "items": { "$ref": "#/$defs/army" } },
+          "fleets": { "type": "array", "items": { "$ref": "#/$defs/fleet" } },
+          "characters": { "type": "array", "items": { "$ref": "#/$defs/character" } },
+          "diplomacy": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["faction", "stance"],
+              "additionalProperties": false,
+              "properties": {
+                "faction": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                "stance": { "enum": ["war", "neutral", "trade", "alliance", "protectorate"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rebel_settlements": { "type": "array", "items": { "$ref": "#/$defs/settlement" } },
+    "rebel_armies": { "type": "array", "items": { "$ref": "#/$defs/army" } }
+  },
+  "$defs": {
+    "settlement": {
+      "type": "object",
+      "required": ["region", "population", "buildings"],
+      "additionalProperties": false,
+      "properties": {
+        "region": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "population": { "type": "integer", "minimum": 400 },
+        "buildings": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "uniqueItems": true,
+          "description": "Building level ids present at start (at most one level per chain)"
+        },
+        "garrison": { "type": "array", "items": { "$ref": "#/$defs/unit_instance" } },
+        "tax_level": { "enum": ["very_low", "low", "normal", "high", "very_high"], "default": "normal" }
+      }
+    },
+    "unit_instance": {
+      "type": "object",
+      "required": ["template"],
+      "additionalProperties": false,
+      "properties": {
+        "template": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "experience": { "type": "integer", "minimum": 0, "maximum": 9, "default": 0 },
+        "strength_pct": { "type": "integer", "minimum": 1, "maximum": 100, "default": 100 }
+      }
+    },
+    "army": {
+      "type": "object",
+      "required": ["region", "units"],
+      "additionalProperties": false,
+      "properties": {
+        "region": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "general": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Character id leading this army; omit for a captain" },
+        "units": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/unit_instance" } }
+      }
+    },
+    "fleet": {
+      "type": "object",
+      "required": ["sea_zone", "ships"],
+      "additionalProperties": false,
+      "properties": {
+        "sea_zone": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "ships": { "type": "array", "minItems": 1, "maxItems": 20, "items": { "$ref": "#/$defs/unit_instance" } }
+      }
+    },
+    "character": {
+      "type": "object",
+      "required": ["id", "name", "age", "role"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "age": { "type": "integer", "minimum": 0, "maximum": 90 },
+        "role": { "enum": ["leader", "heir", "family", "spouse", "child"] },
+        "father": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "command": { "type": "integer", "minimum": 0, "maximum": 10, "default": 0 },
+        "management": { "type": "integer", "minimum": 0, "maximum": 10, "default": 0 },
+        "influence": { "type": "integer", "minimum": 0, "maximum": 10, "default": 0 },
+        "traits": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }, "uniqueItems": true },
+        "location": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$", "description": "Region id; governors sit in their settlement's region" }
+      }
+    }
+  }
+}

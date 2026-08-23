@@ -1,0 +1,122 @@
+class_name GrowthRules
+## Population growth as a summed list of named factors, mirroring the
+## settlement-details breakdown. All constants come from data/balance.json.
+
+
+static func breakdown(data: GameData, state: Dictionary, region_id: String) -> Array:
+	var settlement: Dictionary = state["settlements"][region_id]
+	var region: Dictionary = data.regions[region_id]
+	var growth_rules: Dictionary = data.balance["growth"]
+	var factors: Array = []
+
+	factors.append({"label": "base_fertility", "value": float(region["fertility"])})
+
+	var farm_growth := SettlementRules.effect_total(data, settlement, "growth")
+	if farm_growth != 0.0:
+		factors.append({"label": "buildings", "value": farm_growth})
+
+	var health := SettlementRules.effect_total(data, settlement, "health")
+	if health != 0.0:
+		var per_10: float = growth_rules["health_pct_per_10_health"]
+		factors.append({"label": "health", "value": health / 10.0 * per_10})
+
+	var tax_growth: float = growth_rules["tax_growth_pct"][settlement["tax_level"]]
+	if tax_growth != 0.0:
+		factors.append({"label": "taxes", "value": tax_growth})
+
+	if int(settlement["slave_bonus_turns"]) > 0:
+		factors.append({"label": "slaves", "value": float(growth_rules["slave_influx_pct"])})
+
+	var grain_routes := _grain_routes(data, state, region_id)
+	if grain_routes > 0:
+		var tiers: Array = growth_rules["grain_import_pct_by_routes"]
+		factors.append({"label": "grain_imports", "value": float(tiers[mini(grain_routes, tiers.size()) - 1])})
+
+	var squalor := squalor_pct(data, settlement)
+	if squalor > 0.0:
+		factors.append({"label": "squalor", "value": -squalor})
+
+	if int(settlement["plague_turns"]) > 0:
+		factors.append({"label": "plague", "value": float(growth_rules["plague_growth_pct"])})
+
+	if int(settlement["recently_conquered"]) > 0:
+		factors.append({"label": "recently_conquered", "value": float(growth_rules["recently_conquered_growth_pct"])})
+
+	return factors
+
+
+static func total_pct(data: GameData, state: Dictionary, region_id: String) -> float:
+	var total := 0.0
+	for factor in breakdown(data, state, region_id):
+		total += factor["value"]
+	var growth_rules: Dictionary = data.balance["growth"]
+	return clampf(total, float(growth_rules["min_growth_pct"]), float(growth_rules["max_growth_pct"]))
+
+
+static func squalor_pct(data: GameData, settlement: Dictionary) -> float:
+	var squalor_rules: Dictionary = data.balance["squalor"]
+	var squalor := float(settlement["population"]) / float(squalor_rules["population_per_pct"])
+	return minf(squalor, float(squalor_rules["max_growth_penalty_pct"]))
+
+
+static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng: CampaignRng) -> void:
+	var settlement: Dictionary = state["settlements"][region_id]
+	var population := int(settlement["population"])
+	population = int(round(population * (1.0 + total_pct(data, state, region_id) / 100.0)))
+
+	_plague_turn(data, settlement, rng)
+	if int(settlement["plague_turns"]) > 0:
+		var loss_pct := float(data.balance["plague"]["population_loss_pct_per_turn"])
+		population = int(round(population * (1.0 - loss_pct / 100.0)))
+
+	settlement["population"] = maxi(population, 400)
+
+	for counter in ["slave_bonus_turns", "recently_conquered"]:
+		if int(settlement[counter]) > 0:
+			settlement[counter] = int(settlement[counter]) - 1
+
+
+static func _plague_turn(data: GameData, settlement: Dictionary, rng: CampaignRng) -> void:
+	var plague_rules: Dictionary = data.balance["plague"]
+	if int(settlement["plague_turns"]) > 0:
+		settlement["plague_turns"] = int(settlement["plague_turns"]) - 1
+		return
+	# Plague risk grows with population beyond what health infrastructure supports.
+	var health := SettlementRules.effect_total(data, settlement, "health")
+	var capacity := 2000.0 + health * float(plague_rules["health_capacity_per_health_pct"])
+	var excess := float(settlement["population"]) - capacity
+	if excess <= 0.0:
+		return
+	var outbreak_chance := excess / 1000.0 * float(plague_rules["base_chance_per_1000_over_health_capacity"])
+	if rng.chance(outbreak_chance):
+		settlement["plague_turns"] = rng.randi_range(
+			int(plague_rules["duration_turns_min"]), int(plague_rules["duration_turns_max"]))
+
+
+static func _grain_routes(data: GameData, state: Dictionary, region_id: String) -> int:
+	## Grain flows in from trading-partner or own regions that produce grain and
+	## are reachable by land adjacency or a shared sea zone (needs a port here).
+	var settlement: Dictionary = state["settlements"][region_id]
+	var owner: String = settlement["owner"]
+	var has_port := SettlementRules.effect_max(data, settlement, "port_level") > 0.0
+	var routes := 0
+	for other_id in state["settlements"]:
+		if other_id == region_id:
+			continue
+		if not data.regions[other_id].get("resources", []).has("grain"):
+			continue
+		var other: Dictionary = state["settlements"][other_id]
+		if not _trades_with(state, owner, other["owner"]):
+			continue
+		var land := MapRules.are_adjacent(data, region_id, other_id)
+		var sea: bool = has_port and MapRules.shared_sea_zone(data, region_id, other_id)
+		if land or sea:
+			routes += 1
+	return routes
+
+
+static func _trades_with(state: Dictionary, a: String, b: String) -> bool:
+	if a == b:
+		return true
+	var stance: String = state["factions"][a]["diplomacy"].get(b, "neutral")
+	return stance in ["trade", "alliance", "protectorate"]

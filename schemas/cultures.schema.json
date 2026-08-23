@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cultures.schema.json",
+  "title": "Cultures",
+  "type": "object",
+  "required": ["cultures"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "cultures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "max_settlement_level", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+          "name": { "type": "string", "minLength": 1 },
+          "max_settlement_level": { "enum": ["village", "town", "large_town", "minor_city", "large_city", "huge_city"] },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

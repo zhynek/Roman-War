@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/cultures.schema.json",
+  "cultures": [
+    {
+      "id": "roman",
+      "name": "Roman",
+      "max_settlement_level": "huge_city",
+      "description": "Disciplined city-builders of Italy. Full building trees, legionary infantry, and the burden of Senate politics."
+    },
+    {
+      "id": "greek",
+      "name": "Hellenic",
+      "max_settlement_level": "huge_city",
+      "description": "Heirs of Alexander and the free poleis. Superb phalanx infantry, great cities, strong trade and learning."
+    },
+    {
+      "id": "eastern",
+      "name": "Eastern",
+      "max_settlement_level": "huge_city",
+      "description": "Kingdoms of the Iranian plateau and Anatolia. Horse archers, armored cataphracts, and vast open country."
+    },
+    {
+      "id": "carthaginian",
+      "name": "Punic",
+      "max_settlement_level": "huge_city",
+      "description": "Maritime merchant empire of the western sea. Wealthy ports, hired armies, and elite citizen bands."
+    },
+    {
+      "id": "egyptian",
+      "name": "Nile",
+      "max_settlement_level": "huge_city",
+      "description": "The old riches of the Nile under new dynasts. Unmatched farmland and dense, wealthy cities."
+    },
+    {
+      "id": "barbarian",
+      "name": "Tribal",
+      "max_settlement_level": "minor_city",
+      "description": "The proud peoples beyond the olive line. Cheap, fierce warbands and swollen towns, but no taste for marble: settlement growth is capped below the great-city tiers."
+    },
+    {
+      "id": "neutral",
+      "name": "Independent",
+      "max_settlement_level": "large_city",
+      "description": "Free towns, brigands, and peoples owing allegiance to no great power."
+    }
+  ]
+}

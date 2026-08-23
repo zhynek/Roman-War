@@ -1,0 +1,95 @@
+class_name SiegeRules
+## Sieges: an army invests a hostile settlement, builds equipment over turns or
+## starves the defenders out; assaults resolve through the BattleResolver with
+## the wall tier stacked in the defenders' favor.
+
+
+static func begin_siege(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
+	var army: Dictionary = state["armies"][army_id]
+	if not state["settlements"].has(region_id):
+		return false
+	if not MapRules.are_adjacent(data, army["region"], region_id) and army["region"] != region_id:
+		return false
+	var settlement: Dictionary = state["settlements"][region_id]
+	var stance: String = state["factions"][army["owner"]]["diplomacy"].get(settlement["owner"], "neutral")
+	if stance != "war" or settlement["siege"] != null:
+		return false
+	army["region"] = region_id
+	army["movement_left"] = 0.0
+	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
+	return true
+
+
+static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver) -> Array:
+	## Called once per turn end. Starvation forces the garrison to fight a
+	## last sally at the walls once supplies run out. Returns event dicts.
+	var siege_rules: Dictionary = data.balance["siege"]
+	var results: Array = []
+	for region_id in state["settlements"]:
+		var settlement: Dictionary = state["settlements"][region_id]
+		var siege = settlement["siege"]
+		if siege == null:
+			continue
+		if not state["armies"].has(siege["besieger"]) \
+				or state["armies"][siege["besieger"]]["region"] != region_id:
+			settlement["siege"] = null
+			continue
+		siege["turns"] = int(siege["turns"]) + 1
+		if int(siege["turns"]) >= int(siege_rules["equipment_turns"]):
+			siege["equipment_ready"] = true
+
+		var level := SettlementRules.settlement_level(data, settlement)
+		var starve_turns: Array = siege_rules["starve_turns_per_settlement_level"]
+		var supplies := int(starve_turns[Constants.level_index(level)])
+		if int(siege["turns"]) >= supplies:
+			results.append({
+				"kind": "starved_out", "region": region_id,
+				"result": assault(data, state, rng, resolver, siege["besieger"], region_id, true),
+			})
+	return results
+
+
+static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, army_id: String, region_id: String, starving: bool = false) -> Dictionary:
+	var army: Dictionary = state["armies"][army_id]
+	var settlement: Dictionary = state["settlements"][region_id]
+	var siege = settlement["siege"]
+	if siege == null or siege["besieger"] != army_id:
+		return {}
+	# Without equipment you can only assault once the garrison is starving.
+	if not siege["equipment_ready"] and not starving:
+		return {}
+
+	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
+	if starving:
+		wall_level = maxi(0, wall_level - 1)
+
+	var governor = settlement["governor"]
+	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"], {
+		"terrain": data.regions[region_id]["terrain"],
+		"wall_level": wall_level,
+		"attacker_general": state["characters"].get(army["general"]) if army["general"] != null else null,
+		"defender_general": state["characters"].get(governor) if governor != null else null,
+		"attacker_fatigued": false,
+		"sally": starving,
+	})
+
+	if result.get("attacker_general_died", false) and army["general"] != null:
+		state["characters"][army["general"]]["alive"] = false
+		army["general"] = null
+	if result.get("defender_general_died", false) and governor != null:
+		state["characters"][governor]["alive"] = false
+		settlement["governor"] = null
+
+	if result["winner"] == "attacker":
+		result["captured"] = true
+		result["capture_pending_owner"] = army["owner"]
+		# Caller (Game.assault_settlement / turn engine) applies the
+		# occupy/enslave/exterminate decision via CombatRules.capture_settlement.
+	else:
+		settlement["siege"] = null
+	if army["units"].is_empty():
+		if army["general"] != null:
+			state["characters"][army["general"]]["alive"] = false
+		state["armies"].erase(army_id)
+		settlement["siege"] = null
+	return result
