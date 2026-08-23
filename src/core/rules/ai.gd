@@ -348,11 +348,11 @@ static func _pick_target(data: GameData, state: Dictionary, faction_id: String) 
 		if hops < 0:
 			if not _sea_reachable(data, state, faction_id, region_id):
 				continue
-			hops = 6  # a sea crossing counts as a long march
+			hops = int(data.balance["ai"]["sea_target_hop_cost"])
 		var garrison_strength := BattleResolver.force_strength(
 			data, settlement["garrison"], null,
 			float(data.balance["battle"]["experience_strength_pct_per_chevron"]))
-		var score := float(hops) + garrison_strength / 2000.0
+		var score := float(hops) + garrison_strength / float(data.balance["ai"]["target_strength_divisor"])
 		if best == "" or score < best_score:
 			best = region_id
 			best_score = score
@@ -528,7 +528,9 @@ static func _march_one_army(data: GameData, state: Dictionary, army_id: String, 
 		var army: Dictionary = state["armies"][army_id]
 		var region: String = army["region"]
 
-		if region == target or MapRules.are_adjacent(data, region, target):
+		if region == target or MapRules.are_adjacent(data, region, target) \
+				or (MovementRules.sea_adjacent(data, region, target)
+					and float(army["movement_left"]) + 0.0001 >= float(data.balance["movement"]["sea_move_cost"])):
 			_press_the_siege(data, state, army_id, target, rng, resolver, ai_rules, notices)
 			return
 

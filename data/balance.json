@@ -263,7 +263,9 @@
     "assault_strength_ratio": 1.4,
     "expedition_units": 5,
     "war_chest_reserve": 4000,
-    "army_unit_cap": 20
+    "army_unit_cap": 20,
+    "sea_target_hop_cost": 6,
+    "target_strength_divisor": 2000
   },
   "agents": {
     "max_per_kind": 4,

@@ -87,6 +87,39 @@ func test_form_army_with_general(t) -> void:
 	t.check_eq(state["armies"][second]["general"], null, "no man leads two armies")
 
 
+func test_war_candidate_gates(t) -> void:
+	## The declaration gates themselves: strength ratio, borders, and the
+	## protection of existing treaties.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	var ai_rules: Dictionary = data.balance["ai"]
+
+	# Red is not 1.4x blue's strength: no candidate.
+	state["settlements"]["alpha"]["garrison"] = [
+		{"template": "test_mob", "experience": 0, "strength_pct": 100},
+		{"template": "test_mob", "experience": 0, "strength_pct": 100},
+	]
+	var red_strength := AiRules._faction_strength(data, state, "red")
+	t.check_eq(AiRules._war_candidate(data, state, "red", red_strength, ai_rules), "",
+		"too weak to pick a fight")
+
+	# Overwhelming strength finds the neighbor.
+	state["settlements"]["beta"]["garrison"] = [
+		{"template": "test_elites", "experience": 3, "strength_pct": 100},
+		{"template": "test_elites", "experience": 3, "strength_pct": 100},
+		{"template": "test_elites", "experience": 3, "strength_pct": 100},
+	]
+	red_strength = AiRules._faction_strength(data, state, "red")
+	t.check_eq(AiRules._war_candidate(data, state, "red", red_strength, ai_rules), "blue",
+		"a weak bordering neighbor is the candidate")
+
+	# An alliance protects the weak neighbor entirely.
+	DiplomacyRules.set_stance(state, "red", "blue", "alliance")
+	t.check_eq(AiRules._war_candidate(data, state, "red", red_strength, ai_rules), "",
+		"allies are never candidates")
+
+
 func test_ai_declares_no_war_without_cause(t) -> void:
 	## At war already (with red): the war cap stops any new declaration, so no
 	## RNG is even drawn for diplomacy.

@@ -22,14 +22,17 @@ campaign runs to AD 14.
 
 ## The screen
 
-- **Top bar** — your treasury, the date, your standing with the Senate and with
-  the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
-- **The map** — every region is a circle at its real geographic place, coloured
-  by who owns it and sized by how big its city is. Lines are roads between
-  neighbouring regions; dashed lines are sea routes. Small squares beside a
-  city are armies. A red ring means the city is under siege. Grey circles are
-  land you have not scouted.
+- **Top bar** — your treasury (with the projected net for the coming turn), the
+  date, your standing with the Senate and with the people (Roman houses only),
+  and how many regions you hold toward victory. Buttons: **Help**, **Family**,
+  **Diplomacy**, **Senate** (Roman houses), **Save**, **Load**, and **END TURN**.
+- **The map** — every region is a token at its real geographic place, coloured
+  by who owns it and sized by how big its city is; notches on the rim count the
+  city's tier, and the seas carry their names. Lines are roads between
+  neighbouring regions; dashed lines are sea routes. Shields beside a city are
+  armies (with a count when more than one); pale dots under a token's shoulder
+  are your agents. A gold star marks your capital; a red ring means siege.
+  Dark tokens are land you have not scouted.
   - **Drag with the right mouse button** to move the map.
   - **Scroll** to zoom in and out.
   - **Left-click** a region to select it.
@@ -82,6 +85,10 @@ panel to select it. Now:
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
+- **Field the garrison as an army** turns city troops into a marching army (it
+  moves next season); with a governor present you can march out under his
+  command. The reverse — garrisoning an army in a friendly city — saves its
+  field upkeep and calms the streets.
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.
@@ -102,14 +109,54 @@ one who exterminates cities becomes cruel, and everyone knows it.
 - When your leader dies, the heir succeeds. If a captain wins a battle while
   badly outnumbered, he may be adopted into the family on the spot.
 
-## Diplomacy
+## Agents
 
-Open **Diplomacy**. You can see where every house stands with you and set a
-stance directly — declare war, offer peace, trade rights, or an alliance. The
-proper negotiation system (offers, tribute, bribery, an AI that has opinions
-about you) is the next phase of development; today the other side simply
-accepts. Your fleets are in this window too, because they live on the sea
-rather than in a region.
+Cities with the right buildings train three kinds of agent (each with a cap,
+an upkeep, and a skill that grows with the work):
+
+- **Envoy** (government building) — diplomacy's legs. Walk him onto a foreign
+  power's soil and the **Negotiate** button opens their court.
+- **Informer** (market) — reveals whatever region he stands in, and when you
+  assault a city he is inside, gates open for you. Watchful governors hunt
+  informers; a spymaster in the governor's retinue is what catches them.
+- **Hired blade** (market, tier 2) — sent against a general, governor, or king
+  in his region. Bodyguards and food-tasters (personal security) are the
+  defence; a failed attempt can cost you the blade — and be traced back.
+
+Select an agent like an army and click anywhere on the map; he walks (or
+sails) as far as his legs allow, through any territory.
+
+## Diplomacy & negotiation
+
+Open **Diplomacy** for the ledger: every power, your stance, and how they
+regard you — a number built from named causes (culture, treaties, wars, border
+friction, remembered deeds; open Negotiation to see the full breakdown). War
+can be declared from here directly. Everything else needs an **envoy at their
+court**, and their consent:
+
+- **Peace** — a losing enemy takes it; a winning one wants silver on the table.
+- **Trade rights / Alliance** — goodwill thresholds; payments sweeten the ask.
+- **Gifts** — buy remembered goodwill that fades slowly.
+- **Demand tribute** — pays if they fear you; insults them if they don't.
+- **Buy a border town** — possible at high goodwill and full price, never
+  their capital or last holding.
+
+Deeds are remembered: declaring war scars how a power regards you for a long
+time. Your fleets are in the Diplomacy window too, because they live on the
+sea rather than in a region — and a fleet parked on an enemy port's sea lane
+is how blockade missions are done.
+
+## The Senate
+
+Roman houses answer to the Senate (its own scroll in the top bar): standings
+of all houses, the offices of the Republic — filled every summer by the houses
+in favor, and worth real bonuses to the men who hold them — and the Senate's
+current charge to you. Missions range from taking a rebel region to courting
+an ally, opening markets, blockading a port, or removing a troublesome king.
+Standing rises with service and falls with failure; the people love conquest.
+Grow too loved with too little favor and the Republic breaks: houses choose
+sides, and the civil war decides everything. At the very bottom of the
+Senate's patience is one final demand — and refusing it means outlawry.
 
 ## Winning
 
@@ -122,15 +169,13 @@ it by AD 14, the age simply closes.
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, but they do not scheme, invade, or negotiate. Real opponents are
-  the next phase. Expect a quiet world.
-- **Battles resolve on paper.** You see the outcome, not the fight.
-- **Agents** (spies, diplomats, assassins) are designed and their data exists,
-  but they are not playable yet.
-- **The Senate** issues missions and the civil war can trigger, but the full
-  political system (offices, elections) is later.
-- **The art is placeholder.** Coloured circles, not painted maps.
+- **Battles resolve on paper.** You see the outcome, not the fight. The
+  campaign is built so a real-time battle mode can drop in later.
+- **Naval combat** — fleets scout, blockade and carry the flag, but ships do
+  not yet fight ships.
+- **The AI does not use agents against you** — its knives stay sheathed; its
+  wars, economies, sieges and peace treaties are all real.
+- **The art is stylised** — drawn tokens and a charted sea, not painted terrain.
 
 ## macOS blocks the app on first launch
 

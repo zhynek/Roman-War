@@ -104,6 +104,21 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	return true
 
 
+static func sea_adjacent(data: GameData, from_region: String, to_region: String) -> bool:
+	## Two coasts within one crossing: the same sea zone, or adjacent zones.
+	var from_zones: Array = data.regions.get(from_region, {}).get("sea_zones", [])
+	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
+	if from_zones.is_empty() or to_zones.is_empty() or from_region == to_region:
+		return false
+	for zone in from_zones:
+		if to_zones.has(zone):
+			return true
+		for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
+			if to_zones.has(adjacent_zone):
+				return true
+	return false
+
+
 static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_zone: String) -> bool:
 	var fleet: Dictionary = state["fleets"][fleet_id]
 	if not data.sea_zones.has(to_zone):

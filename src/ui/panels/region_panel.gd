@@ -127,7 +127,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Field the garrison as an army", func():
 			game.form_army(region_id)
 			action_taken.emit())
-		if settlement["governor"] != null:
+		if settlement["governor"] != null and not _already_commands(String(settlement["governor"])):
 			var governor_sheet := game.character_sheet(settlement["governor"])
 			var governor_id: String = String(settlement["governor"])
 			_action_button("March out under %s" % governor_sheet["name"], func():
@@ -311,6 +311,13 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary, settlemen
 					elif result.get("attempted", false):
 						log_message.emit("The attempt on %s fails; our blade slips away." % target_name)
 					action_taken.emit())
+
+
+func _already_commands(char_id: String) -> bool:
+	for army in game.state["armies"].values():
+		if army["general"] == char_id:
+			return true
+	return false
 
 
 ## --- Small builders -------------------------------------------------------

@@ -8,8 +8,15 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	var army: Dictionary = state["armies"][army_id]
 	if not state["settlements"].has(region_id):
 		return false
-	if not MapRules.are_adjacent(data, army["region"], region_id) and army["region"] != region_id:
-		return false
+	# The siege lines can be drawn from a neighboring region — or, with a
+	# whole season's sailing in hand, from a coast one crossing away (how an
+	# island with no friendly shore is ever taken).
+	var adjacent: bool = MapRules.are_adjacent(data, army["region"], region_id) or army["region"] == region_id
+	if not adjacent:
+		if not MovementRules.sea_adjacent(data, army["region"], region_id):
+			return false
+		if float(army["movement_left"]) + 0.0001 < float(data.balance["movement"]["sea_move_cost"]):
+			return false
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false

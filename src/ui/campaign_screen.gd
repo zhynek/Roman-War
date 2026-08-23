@@ -215,11 +215,13 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		attack_army_order(defender)
 		return
 
-	# A settlement of a faction we are at war with can be invested.
+	# A settlement of a faction we are at war with can be invested — from a
+	# neighboring region, or across one sea crossing with the season in hand.
 	var settlement: Dictionary = game.state["settlements"].get(target_region, {})
 	if not settlement.is_empty() and settlement["owner"] != player \
 			and DiplomacyRules.at_war(game.state, player, settlement["owner"]) \
-			and MapRules.are_adjacent(game.data, army["region"], target_region):
+			and (MapRules.are_adjacent(game.data, army["region"], target_region)
+				or MovementRules.sea_adjacent(game.data, army["region"], target_region)):
 		besiege_order(target_region)
 		return
 
