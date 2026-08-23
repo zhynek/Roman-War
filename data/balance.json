@@ -307,6 +307,7 @@
     "peace_losing_ratio": 0.7,
     "tribute_demand_fear_ratio": 1.6,
     "tribute_amount": 2000,
+    "tribute_cooldown_turns": 8,
     "tribute_paid_attitude": -5,
     "tribute_refused_attitude": -15,
     "accept_sell_region_threshold": 45,

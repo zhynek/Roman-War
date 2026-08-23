@@ -181,10 +181,13 @@ static func _diplomacy(data: GameData, state: Dictionary, faction_id: String, rn
 
 	# Weariness: a long war we are losing ends when the other side, also an AI,
 	# does not smell victory — and any war old enough exhausts both thrones no
-	# matter who is ahead. Peace with the player is a Phase 5 negotiation.
+	# matter who is ahead. Peace with the player is a Phase 5 negotiation, and
+	# a civil war is never talked away: it ends when one side is destroyed.
 	var my_strength := _faction_strength(data, state, faction_id)
 	for other_id in partner_ids:
 		if not war_since.has(other_id) or other_id == state["player_faction"]:
+			continue
+		if _civil_war_front(data, state, faction_id, other_id):
 			continue
 		var at_war_for := turn - int(war_since[other_id])
 		if at_war_for < int(ai_rules["war_weariness_turns"]):
@@ -251,6 +254,18 @@ static func _war_candidate(data: GameData, state: Dictionary, faction_id: String
 			best = other_id
 			best_strength = score
 	return best
+
+
+static func _civil_war_front(data: GameData, state: Dictionary, a: String, b: String) -> bool:
+	## A war between Roman parties while either house is in rebellion is the
+	## civil war, not an ordinary quarrel.
+	var def_a: Dictionary = data.factions.get(a, {})
+	var def_b: Dictionary = data.factions.get(b, {})
+	var roman_a: bool = def_a.get("is_roman_house", false) or def_a.get("is_senate", false)
+	var roman_b: bool = def_b.get("is_roman_house", false) or def_b.get("is_senate", false)
+	if not (roman_a and roman_b):
+		return false
+	return state["factions"][a]["at_civil_war"] or state["factions"][b]["at_civil_war"]
 
 
 static func _bordering_factions(data: GameData, state: Dictionary, faction_id: String) -> Array:

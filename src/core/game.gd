@@ -256,6 +256,15 @@ func move_agent_towards(agent_id: String, target_region: String) -> String:
 	return AgentRules.move_towards(data, state, agent_id, target_region)
 
 
+func dismiss_agent(agent_id: String) -> bool:
+	## Strike an agent from the payroll wherever he stands.
+	var agent: Dictionary = state.get("agents", {}).get(agent_id, {})
+	if agent.is_empty() or agent["owner"] != state["player_faction"]:
+		return false
+	state["agents"].erase(agent_id)
+	return true
+
+
 func assassinate(agent_id: String, char_id: String) -> Dictionary:
 	## Returns {attempted, killed, caught, notices}.
 	var agent: Dictionary = state.get("agents", {}).get(agent_id, {})

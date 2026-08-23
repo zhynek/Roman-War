@@ -203,9 +203,26 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 					worst_upkeep = upkeep
 					worst_units = settlement["garrison"]
 					worst_index = i
-	if worst_index < 0:
+	if worst_index >= 0:
+		worst_units.remove_at(worst_index)
+		return true
+	# Nothing in the field or on the walls to let go: the payroll of agents is
+	# the last thing a bankrupt court can still cut.
+	var costliest := ""
+	var costliest_upkeep := 0
+	var agent_ids: Array = state.get("agents", {}).keys()
+	agent_ids.sort()
+	for agent_id in agent_ids:
+		var agent: Dictionary = state["agents"][agent_id]
+		if not agent["alive"] or agent["owner"] != faction_id:
+			continue
+		var upkeep := int(data.agent_kinds.get(agent["kind"], {}).get("upkeep", 0))
+		if upkeep > costliest_upkeep:
+			costliest_upkeep = upkeep
+			costliest = agent_id
+	if costliest == "":
 		return false
-	worst_units.remove_at(worst_index)
+	state["agents"].erase(costliest)
 	return true
 
 

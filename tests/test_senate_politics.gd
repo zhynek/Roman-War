@@ -125,6 +125,7 @@ func test_leader_suicide_comply_and_outlaw(t) -> void:
 	Fixtures.add_character(state, "red", "old_lion", {"age": 60, "role": "leader"})
 	Fixtures.add_character(state, "red", "cub", {"age": 30, "role": "heir"})
 	state["factions"]["red"]["senate_standing"] = -8.0
+	state["year"] = -50  # the demand is a late-Republic horror (min_year -60)
 	var rng := CampaignRng.seeded(2)
 	SenateRules.process_turn(data, state, rng)
 	var mission = state["factions"]["red"]["mission"]

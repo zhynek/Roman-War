@@ -134,6 +134,10 @@ static func evaluate(data: GameData, state: Dictionary, from_id: String, to_id: 
 		"demand_tribute":
 			if at_war:
 				return {"accept": false, "reason": "at_war"}
+			var paid_log: Dictionary = state["factions"][to_id].get("tribute_paid_turn", {})
+			var cooldown := int(rules["tribute_cooldown_turns"])
+			if paid_log.has(from_id) and int(state["turn"]) - int(paid_log[from_id]) < cooldown:
+				return {"accept": false, "reason": "they_have_already_paid"}
 			var amount := int(rules["tribute_amount"])
 			if int(state["factions"][to_id]["treasury"]) < amount:
 				return {"accept": false, "reason": "they_are_poor"}
@@ -185,6 +189,11 @@ static func execute(data: GameData, state: Dictionary, from_id: String, to_id: S
 			var amount := int(rules["tribute_amount"])
 			_pay(state, to_id, from_id, amount)
 			shift_stored_attitude(data, state, to_id, from_id, float(rules["tribute_paid_attitude"]))
+			# A purse opened once stays shut for a while — no draining a court
+			# with the same demand repeated in one season.
+			if not state["factions"][to_id].has("tribute_paid_turn"):
+				state["factions"][to_id]["tribute_paid_turn"] = {}
+			state["factions"][to_id]["tribute_paid_turn"][from_id] = int(state["turn"])
 			verdict["amount"] = amount
 		"buy_region":
 			var region_id := String(offer.get("region", ""))

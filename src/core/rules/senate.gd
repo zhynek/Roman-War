@@ -36,6 +36,7 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				and float(faction["popular_standing"]) >= float(senate_rules["civil_war_popular_threshold"]) \
 				and float(faction["senate_standing"]) <= float(senate_rules["civil_war_senate_threshold"]):
 			faction["at_civil_war"] = true
+			faction["mission"] = null  # the senate's charges die with the break
 			_declare_civil_war(data, state, faction_id, notices)
 			notices.append({"kind": "civil_war", "faction": faction_id})
 	return notices
@@ -65,7 +66,9 @@ static func _assign_offices(data: GameData, state: Dictionary, rng: CampaignRng,
 		var influence := CharacterRules.effective(data, character, "influence")
 		var office = character.get("office")
 		if office != null:
-			influence -= int(data.offices.get(office, {}).get("effects", {}).get("influence", 0.0))
+			# Strip the office's own bonus, but never below the floor a man
+			# without any office would stand on.
+			influence = maxi(0, influence - int(data.offices.get(office, {}).get("effects", {}).get("influence", 0.0)))
 		candidates.append([[-float(faction["senate_standing"]), -float(influence),
 			-float(character["age"]), char_id], char_id])
 	candidates.sort()
@@ -152,6 +155,8 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 		for mission_id in mission_ids:
 			var template: Dictionary = data.missions[mission_id]
 			if String(template["kind"]) != "leader_suicide":
+				continue
+			if template.has("min_year") and int(state["year"]) < int(template["min_year"]):
 				continue
 			var leader := _leader_of(state, faction_id)
 			if leader == "":
@@ -253,6 +258,7 @@ static func _declare_civil_war(data: GameData, state: Dictionary, rebel_house: S
 			if not state["factions"][other_id]["at_civil_war"] \
 					and float(state["factions"][other_id]["senate_standing"]) <= join_threshold:
 				state["factions"][other_id]["at_civil_war"] = true
+				state["factions"][other_id]["mission"] = null
 				joiners.append(other_id)
 				notices.append({"kind": "joins_rebellion", "faction": other_id})
 			else:

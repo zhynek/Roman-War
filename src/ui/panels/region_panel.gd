@@ -282,6 +282,10 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary, settlemen
 	var player: String = game.state["player_faction"]
 	_label("Movement left: %.1f — click a region to travel there." % float(agent["movement_left"]),
 		Color(0.7, 0.8, 0.9))
+	_action_button("Dismiss from service", func():
+		game.dismiss_agent(agent_id)
+		agent_selected.emit(agent_id)  # clears the selection (toggle)
+		action_taken.emit())
 
 	if agent["kind"] == "diplomat" and not settlement.is_empty() and settlement["owner"] != player:
 		var owner: String = settlement["owner"]

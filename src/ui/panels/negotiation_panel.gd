@@ -21,6 +21,7 @@ const RESPONSE_TEXT := {
 	"too_little_goodwill": "They refuse — there is too little goodwill.",
 	"they_smell_victory": "They refuse — they believe they are winning.",
 	"they_do_not_fear_us": "They laugh at the demand. Word of the insult spreads.",
+	"they_have_already_paid": "They have paid once already; the purse stays shut for now.",
 	"they_are_poor": "Their treasury could not pay it.",
 	"cannot_pay": "Our treasury cannot cover the sum.",
 	"empty_handed": "An empty-handed gift flatters no one.",
