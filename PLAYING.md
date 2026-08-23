@@ -132,6 +132,40 @@ Honest list, so you know what you are looking at:
   political system (offices, elections) is later.
 - **The art is placeholder.** Coloured circles, not painted maps.
 
+## macOS blocks the app on first launch
+
+Expected, and not a sign of a broken build. macOS shows:
+
+> **"Roman War" Not Opened** — Apple could not verify "Roman War" is free of
+> malware that may harm your Mac or compromise your privacy.
+
+That is the message for any app that has not been through Apple's paid
+notarization service. The app *is* code-signed (macOS would say "is damaged"
+otherwise) — it simply is not notarized.
+
+1. Click **Done**. **Never "Move to Trash."**
+2. Open **System Settings → Privacy & Security**, scroll down to **Security**.
+3. Next to *""Roman War" was blocked to protect your Mac"*, click **Open Anyway**.
+4. Authenticate with Touch ID or your password.
+5. Launch the app again. One more dialog appears — click **Open Anyway**.
+
+macOS only asks once; afterwards it opens like any other app.
+
+If the **Open Anyway** button is not in Privacy & Security, the quarantine flag
+can be cleared directly. Open **Terminal** (Spotlight → "Terminal"), paste this
+exact line, press Return, then launch the app:
+
+```sh
+xattr -cr "/Applications/Roman War.app"
+```
+
+(If the app is not in Applications, replace the path — or drag the app onto the
+Terminal window after typing `xattr -cr ` to fill the path in automatically.)
+
+Failing both, `BUILDING.md` documents a no-build route: install Godot from
+godotengine.org (notarized, so it opens normally), open this project folder in
+it, and press Play.
+
 ## If something goes wrong
 
 The game writes its save to your user folder and never touches the project. If
