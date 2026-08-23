@@ -8,7 +8,8 @@ The design philosophy, researched in depth in
 [`docs/research/rtw-research-report.md`](docs/research/rtw-research-report.md), is:
 
 1. **Campaign layer first.** The turn-based strategy map — settlements, population,
-   public order, economy, armies, characters — is the game. It is built and tested
+   public order, economy, armies, characters, agents, diplomacy, the Senate, and
+   AI opponents that play the whole game — is the game. It is built and tested
    before any battle presentation exists.
 2. **Everything is data.** Factions, cultures, buildings, temples, units, regions,
    traits, events, wonders, and the campaign start state live in JSON tables under
@@ -27,9 +28,12 @@ schemas/             JSON Schemas — the contract every data table must satisfy
 src/core/            Deterministic campaign simulation (no scene/UI dependencies)
 src/core/rules/      One module per system: growth, order, economy, movement, ...
 src/core/rules/battle/  BattleResolver interface + auto-resolve implementation
-src/ui/              Campaign UI: start menu, map view, settlement/army/family panels
+src/ui/              Campaign UI: start menu, themed map view, settlement/army/family/
+                     diplomacy/negotiation/senate panels (visual identity in ui_theme.gd)
 tests/               Headless GDScript test suite (godot --headless --script)
-tools/               validate_data.py — schema + cross-reference validation
+tools/               validate_data.py (schema + cross-reference validation),
+                     sim_campaign.gd (watch the AI play whole campaigns headless),
+                     screenshot.gd (capture the real UI under xvfb)
 docs/                Design document and research report
 ```
 
