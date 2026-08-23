@@ -14,18 +14,20 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
-**Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
-foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+**Built: Phases 0–8.** The world plays itself (`AiRules`: economy, defence,
+diplomacy with an attitude model, expedition warfare with amphibious sieges);
+agents (envoys / informers / hired blades) and a full negotiation model;
+the Senate's office ladder, six mission kinds, and civil-war side-picking;
+seeded households in every house; a code-built visual identity (`UiTheme`)
+over a full-window campaign screen. Remaining headline gaps are listed in §6.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of the latest commit on `claude/handoff-repo-familiarization-jgqty6`:**
+100 tests / 0 failures, validator 0 errors / 0 warnings, clean boot.
 
 ## 2. Get productive in five minutes
 
@@ -45,18 +47,30 @@ unzip -q godot.zip && chmod +x Godot_v4.4.1-stable_linux.x86_64
 > `.godot/` class cache produces bogus `Identifier "X" not declared in the
 > current scope` parse errors on globals that plainly exist, causes test files
 > to fail to load *while the runner still prints passes for them*, and can make
-> the suite look like it is hanging. It cost time twice in one session. CI does
-> this step explicitly for the same reason.
+> the suite look like it is hanging. CI does this step explicitly for the same
+> reason.
 
 Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 100 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
 `pip install jsonschema` if the validator complains about the import.
+
+Two more tools earn their keep:
+
+```sh
+# Watch a whole campaign play itself; prints captures, wars, peaces, and a
+# world table every 10 turns. The balance workhorse.
+godot --headless --path . --script res://tools/sim_campaign.gd -- [seed] [turns] [faction] [difficulty]
+
+# Screenshot the real UI without a desktop (menu, campaign, panels).
+xvfb-run -a -s "-screen 0 1600x1000x24" godot --path . \
+  --rendering-driver opengl3 --script res://tools/screenshot.gd -- /tmp/shots
+```
 
 ## 3. Building a playable app
 
@@ -75,84 +89,72 @@ godot --headless --path . --quit-after 5                         # clean boot, n
   merely warning.
 
 Delivering the build: `SendUserFile` caps at **30 MiB** and the universal zip is
-56 MB. The fix used was to extract the arm64 slice from the Mach-O fat binary in
-Python (fat header at offset 0, `cputype 0x0100000c`), overwrite the executable,
-re-zip → 27 MB. **Verify `LC_CODE_SIGNATURE` (cmd `0x1d`) survives in the thinned
-slice before shipping**, or the app will not launch.
+~56 MB. The fix used was to extract the arm64 slice from the Mach-O fat binary
+in Python (fat header at offset 0, `cputype 0x0100000c`), overwrite the
+executable, re-zip → ~27 MB. **Verify `LC_CODE_SIGNATURE` (cmd `0x1d`) survives
+in the thinned slice before shipping**, or the app will not launch.
 
-## 4. Two determinism traps not in CLAUDE.md
+## 4. Determinism traps (the two in CLAUDE.md, plus what they cost)
 
-1. **Sort keys in any loop that can steer an RNG draw.** A JSON round-trip
-   reorders dictionaries, so an unsorted iteration makes a loaded save diverge
-   from the live game. This shipped as a real bug once and the save round-trip
-   test caught it only after the RNG fix below.
+1. **Sort keys in any loop that can steer an RNG draw or a decision.** A JSON
+   round-trip reorders dictionaries, so an unsorted iteration makes a loaded
+   save diverge from the live game. This shipped as a real bug once; the AI
+   layer (`ai.gd`, `agents.gd`, `negotiation.gd`, `senate.gd`) is written
+   sorted-first everywhere — keep it that way.
 2. **`state.rng_state` is a decimal *string*, not an int.** JSON numbers are
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
+3. `test_ai.gd::test_ai_expands_into_the_world` ends with a save-resume
+   lockstep check over the whole AI layer — it is the canary for both traps.
 
-## 5. Three ways forward
+## 5. Hard-won lessons of the overnight build (worth more than the code)
 
-The user has not committed to a direction. Each is self-contained; pick one and
-paste its prompt.
-
-### Phase 6 — AI opponents
-The world currently feels empty: `src/core/rules/ai_stub.gd` is **33 lines** of
-passive settlement management. Nothing expands, declares war, or defends. The
-difficulty multipliers already exist and are already read
-(`balance.json → ai.difficulty_income_multiplier`, `ai.difficulty_order_bonus`).
-
-> Build Phase 6: replace the passive `AiStub` with real modular AI behaviours —
-> economy, expansion, war, and defence — so factions actually play the game.
-> Keep it deterministic and data-tunable, wire the existing difficulty
-> constants, and verify with a long headless campaign that the map changes hands.
-
-### Phase 5 — Agents & diplomacy
-`DiplomacyRules` currently offers only symmetric stances and war declaration;
-the UI sets a stance directly and the other side simply accepts. The
-`personal_security` and `agent_skill` ancillary effects are authored in the data
-and have **no engine reader** — they exist for this phase.
-
-> Build Phase 5: diplomats, spies and assassins as campaign agents, plus a real
-> negotiation model (offers, tribute, region deals, bribery) and an AI attitude
-> model, replacing the direct set-a-stance panel.
-
-### Phase 8 — Balance & polish
-Driven by whatever the playtest surfaced.
-
-> Here is what felt wrong when I played: <notes>. Tune the balance constants and
-> UI accordingly.
-
-If the user reports a problem, **ask for the world seed** — the same seed
-reproduces their exact campaign, which makes any bug directly debuggable.
+- **`set_anchors_preset` sets anchors only.** The campaign screen spent its
+  whole life huddled at minimum size in the window's corner because of it.
+  Use `set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)` for
+  code-built full-screen layouts, and verify with `tools/screenshot.gd`
+  rather than trusting the scene tree.
+- **Run the sim after every AI change.** The first AI cut looked correct and
+  passed every unit test, yet the world froze at turn 21 — garrisons recruited
+  only to their defensive target, so no expedition surplus ever formed again.
+  Only `sim_campaign.gd` showed it. Its later runs also caught the dead-faction
+  war counter pinning `max_active_wars` forever, and eternal stalemate wars
+  (both fixed: dead factions drop out of `war_since`; `war_exhaustion_turns`).
+- **Adversarial review workflows keep paying.** Two rounds (three and four
+  lenses, every finding adversarially verified) found 12+ real defects the
+  100-test suite missed — among them: peace leaving siege lines standing (a
+  parked army could starve out a city its faction was at peace with), stale
+  governors being killed in absentia by AI assaults, and the AI deadlocking
+  forever on hostile single-region islands (fixed with amphibious sieges).
+  Pin reviewers to `git show HEAD:` so they read a stable tree.
+- **The senate/character notice streams must be split.** Trait/ancillary
+  notices lack a `faction` key; routing them into `report["senate"]`
+  crashed the UI log. TurnEngine now partitions notice streams by kind.
 
 ## 6. Known gaps (verified, not guesses)
 
-- **Starting families are adult men only**: 20 leaders, 19 heirs, 32 family, and
-  **no spouses, no children, no `gender` field set** in `campaign.json`. The
-  marriage path only opens once in-game births produce daughters, so the family
-  tree bootstraps slowly. Seeding real households would fix it.
-- **Sea-zone anchor positions** in `regions.json` are unused — `map_view.gd`
-  draws sea lanes from shared-zone membership and never renders zone labels.
-- **`office_gained` triggers are dead** until Phase 7 offices exist. The
-  validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
-  them, and warns about any *other* trigger kind no engine call site fires.
-- **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
-  abstracted crossing today), naval battles, port blockades, forts and
-  watchtowers, ambush.
-- **Art is placeholder** — coloured circles on a geographic map.
+- **Naval combat**: fleets scout, blockade (a Phase 7 mission), and carry no
+  one — embark-on-fleet transport, ship battles, forts/watchtowers and ambush
+  remain the Phase 3 tail.
+- **The AI never uses agents** — no AI spies in player towns, no AI
+  assassination attempts, no AI-initiated negotiation *with the player*
+  (AI↔AI peace works engine-side). The counter-intelligence machinery
+  (governors hunting player informers) is live.
+- **Battles resolve on paper** (`AutoResolver`); the real-time battle scene
+  remains a designed drop-in behind `BattleResolver`.
+- **Balance is sim-tuned, not playtest-tuned.** `sim_campaign.gd` shows a
+  living, non-degenerate world across seeds and difficulties; whether it is
+  *fun* needs human hours. If the user reports a problem, **ask for the world
+  seed** — the same seed reproduces their exact campaign.
+- **Art is a styled chart** — drawn tokens, named seas, no painted terrain.
 
 ## 7. Process notes
 
-- **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
-  or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
-- **Run adversarial review agents after building anything substantial.** Three
-  reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
-  issues** the 60-strong test suite had missed — including armies declaring war
-  by accident on the first turn, a save-determinism break, movement traits that
-  silently did nothing, and generals still governing cities they had marched away
-  from. Give each reviewer the research report plus a specific lens, tell them to
-  run the suite themselves, and require findings-only output.
-- When adding a rules module, add tests to `tests/` **and** cross-reference
-  checks to `tools/validate_data.py` if it introduces a data table. Both gates
-  must pass before committing.
+- **Git identity must be `noreply@anthropic.com` / `Claude`** before
+  committing, or a stop hook flags the commits as unverified.
+- Develop on `claude/handoff-repo-familiarization-jgqty6` (all overnight work
+  lives there; `claude/new-session-3g3s4m` is the pre-AI history).
+- When adding a rules module, add tests to `tests/` **and** validator checks
+  to `tools/validate_data.py` if it introduces a data table. Both gates must
+  pass before committing. Old saves are invalidated by state-shape changes —
+  bump `SaveGame.SAVE_VERSION` when you change the state dict.
