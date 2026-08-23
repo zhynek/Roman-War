@@ -40,8 +40,7 @@ func _ready() -> void:
 		difficulty_options.add_item(difficulty.capitalize().replace("_", " "))
 	difficulty_options.selected = 1
 
-	status_label.text = "%d factions · %d regions · %d unit types" \
-		% [_data.factions.size(), _data.regions.size(), _data.units.size()]
+	status_label.text = _status_line()
 
 
 func _decorate_menu() -> void:
@@ -96,6 +95,13 @@ func _decorate_menu() -> void:
 	menu.move_child(_guided_check, start_button.get_index())
 
 
+func _status_line() -> String:
+	## The version is on screen so a stale copy of the app is obvious at a glance.
+	return "v%s  ·  %d factions · %d regions · %d unit types" \
+		% [AdvisorConfig.GAME_VERSION, _data.factions.size(), _data.regions.size(),
+			_data.units.size()]
+
+
 func _on_guided_toggled(pressed: bool) -> void:
 	## The walkthrough plays a fixed opening so its script matches the world.
 	faction_options.disabled = pressed
@@ -104,8 +110,7 @@ func _on_guided_toggled(pressed: bool) -> void:
 	if pressed:
 		status_label.text = "The guided opening plays House Julii on a fixed seed."
 	elif _data != null:
-		status_label.text = "%d factions · %d regions · %d unit types" \
-			% [_data.factions.size(), _data.regions.size(), _data.units.size()]
+		status_label.text = _status_line()
 
 
 func _on_start_pressed() -> void:
