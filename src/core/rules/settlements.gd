@@ -105,7 +105,12 @@ static func culture_penalty_pct(data: GameData, state: Dictionary, region_id: St
 				foreign += 1
 	if total == 0:
 		return 0.0
-	return float(foreign) / float(total) * float(data.balance["public_order"]["culture_penalty_scale"])
+	var penalty := float(foreign) / float(total) * float(data.balance["public_order"]["culture_penalty_scale"])
+	# The citizenship lever: franchise and cult edicts soften what foreign
+	# stones cost in loyalty.
+	penalty *= maxf(0.0, 1.0 - EdictRules.faction_effect_total(
+		data, state, settlement["owner"], "culture_penalty_reduction_pct") / 100.0)
+	return penalty
 
 
 static func _cancelled_cultures(data: GameData, state: Dictionary, faction_id: String) -> Array:

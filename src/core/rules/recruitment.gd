@@ -37,14 +37,15 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 			break
 	if not allowed:
 		return false
-	if int(faction["treasury"]) < int(template["cost"]):
+	var cost := recruit_cost(data, state, settlement["owner"], template)
+	if int(faction["treasury"]) < cost:
 		return false
 	var soldiers := int(template["soldiers"])
 	var min_population := int(data.balance["growth"]["min_population"])
 	if int(settlement["population"]) - soldiers < min_population:
 		return false
 
-	faction["treasury"] = int(faction["treasury"]) - int(template["cost"])
+	faction["treasury"] = int(faction["treasury"]) - cost
 	settlement["population"] = int(settlement["population"]) - soldiers
 	settlement["recruitment_queue"].append({
 		"template": template_id,
@@ -69,7 +70,8 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			first = false
 		if int(job["turns_left"]) <= 0:
 			var experience := clampi(int(SettlementRules.effect_max(data, settlement, "recruit_xp")) \
-				+ int(KnowledgeRules.faction_effect_total(data, state, owner, "recruit_xp")),
+				+ int(KnowledgeRules.faction_effect_total(data, state, owner, "recruit_xp")) \
+				+ int(EdictRules.faction_effect_total(data, state, owner, "recruit_xp")),
 				0, int(data.balance["recruitment"]["experience_max"]))
 			settlement["garrison"].append({
 				"template": job["template"],
@@ -116,7 +118,8 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 			continue
 		var missing_fraction := (100 - strength) / 100.0
 		var cost_factor := float(data.balance["recruitment"]["retrain_cost_factor"])
-		var cost := int(round(int(template["cost"]) * missing_fraction * cost_factor))
+		var cost := int(round(recruit_cost(data, state, settlement["owner"], template) \
+			* missing_fraction * cost_factor))
 		var men := int(round(int(template["soldiers"]) * missing_fraction))
 		var min_population := int(data.balance["growth"]["min_population"])
 		if int(faction["treasury"]) < cost or int(settlement["population"]) - men < min_population:
@@ -126,6 +129,14 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 		unit["strength_pct"] = 100
 		healed += 1
 	return healed
+
+
+static func recruit_cost(data: GameData, state: Dictionary, faction_id: String, template: Dictionary) -> int:
+	## Template cost under the owner's military edicts (the citizen levy
+	## musters cheap, veteran land draws volunteers). Retraining prices off
+	## the same number.
+	return int(round(int(template.get("cost", 0)) * (1.0 + EdictRules.faction_effect_total(
+		data, state, faction_id, "recruit_cost_pct") / 100.0)))
 
 
 static func merge_units(units: Array) -> void:

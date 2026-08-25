@@ -246,6 +246,70 @@ static func data() -> GameData:
 		},
 	}
 
+	game_data.edicts = {
+		"test_dole": {
+			"id": "test_dole", "name": "Bread for the City", "category": "welfare", "kind": "standing",
+			"historical_basis": "fixture",
+			"availability": {"cultures": ["roman"]},
+			"prerequisites": {"building_kind": "farms", "building_level": 1, "techniques": []},
+			"enact_cost": 400, "upkeep_per_turn": 50, "upkeep_per_1000_pop": 10.0,
+			"effects": {"happiness": 4, "popular_standing_per_turn": 0.2},
+			"tensions": {"exclusive_with": [], "repeal_unrest": {"penalty": 6, "turns": 4},
+				"senate_standing_delta": -1.0, "popular_standing_delta": 1.0},
+		},
+		"test_census_tax": {
+			"id": "test_census_tax", "name": "Census Levy", "category": "taxation", "kind": "standing",
+			"historical_basis": "fixture",
+			"availability": {"cultures": []},
+			"prerequisites": {"building_kind": "government", "building_level": 2, "techniques": ["test_letters"]},
+			"enact_cost": 300, "upkeep_per_turn": 40, "upkeep_per_1000_pop": 0.0,
+			"effects": {"tax_income_pct": 10, "corruption_reduction_pct": 10, "law": 2},
+			"tensions": {"exclusive_with": ["test_farm_tax"], "repeal_unrest": {"penalty": 0, "turns": 0},
+				"senate_standing_delta": 0.0, "popular_standing_delta": 0.0},
+		},
+		"test_farm_tax": {
+			"id": "test_farm_tax", "name": "Farmed Taxes", "category": "taxation", "kind": "standing",
+			"historical_basis": "fixture",
+			"availability": {"cultures": []},
+			"prerequisites": {"building_kind": "government", "building_level": 1, "techniques": []},
+			"enact_cost": 100, "upkeep_per_turn": 0, "upkeep_per_1000_pop": 0.0,
+			"effects": {"tax_income_pct": 20, "happiness": -3},
+			"tensions": {"exclusive_with": ["test_census_tax"], "repeal_unrest": {"penalty": 0, "turns": 0},
+				"senate_standing_delta": 0.0, "popular_standing_delta": -0.5},
+		},
+		"test_games": {
+			"id": "test_games", "name": "Games", "category": "welfare", "kind": "decree",
+			"historical_basis": "fixture",
+			"availability": {"cultures": []},
+			"prerequisites": {"building_kind": "government", "building_level": 1, "techniques": []},
+			"enact_cost": 300, "upkeep_per_turn": 0, "upkeep_per_1000_pop": 0.0,
+			"effects": {},
+			"timed_happiness": {"value": 5, "turns": 3},
+			"tensions": {"exclusive_with": [], "repeal_unrest": {"penalty": 0, "turns": 0},
+				"senate_standing_delta": 0.0, "popular_standing_delta": 1.0},
+		},
+		"test_muster": {
+			"id": "test_muster", "name": "Citizen Muster", "category": "military", "kind": "standing",
+			"historical_basis": "fixture",
+			"availability": {"cultures": []},
+			"prerequisites": {"building_kind": "barracks", "building_level": 1, "techniques": []},
+			"enact_cost": 200, "upkeep_per_turn": 0, "upkeep_per_1000_pop": 0.0,
+			"effects": {"recruit_cost_pct": -25, "unit_upkeep_pct": 10, "recruit_xp": 1},
+			"tensions": {"exclusive_with": [], "repeal_unrest": {"penalty": 0, "turns": 0},
+				"senate_standing_delta": 0.0, "popular_standing_delta": 0.0},
+		},
+		"test_franchise": {
+			"id": "test_franchise", "name": "Wider Franchise", "category": "citizenship", "kind": "standing",
+			"historical_basis": "fixture",
+			"availability": {"cultures": []},
+			"prerequisites": {"building_kind": "government", "building_level": 1, "techniques": []},
+			"enact_cost": 250, "upkeep_per_turn": 30, "upkeep_per_1000_pop": 0.0,
+			"effects": {"culture_penalty_reduction_pct": 50, "growth": 0.5, "farm_income_pct": 10, "trade_pct": 10},
+			"tensions": {"exclusive_with": [], "repeal_unrest": {"penalty": 4, "turns": 3},
+				"senate_standing_delta": 0.0, "popular_standing_delta": 0.0},
+		},
+	}
+
 	return game_data
 
 
@@ -254,6 +318,7 @@ static func state(game_data: GameData) -> Dictionary:
 	var campaign_state := {
 		"turn": 0, "year": -270, "season": "summer", "rng_state": "0",
 		"difficulty": "medium", "campaign_mode": "long", "event_happiness": null,
+		"modifiers": [],
 		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
 		"factions": {
@@ -313,7 +378,7 @@ static func _faction(capital: String) -> Dictionary:
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
-		"knowledge": {}, "reform_pressure": 0.0,
+		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
 	}
 
 

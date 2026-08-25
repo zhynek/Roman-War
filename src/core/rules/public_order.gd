@@ -10,7 +10,9 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 
 	factors.append({"label": "base", "value": float(order_rules["base"])})
 
-	var law := law_total(data, state, region_id)
+	# Building law only — edict law arrives via its own edict:<id> factor
+	# below (law_total, which feeds corruption, sums both).
+	var law := SettlementRules.effect_total(data, settlement, "law")
 	if law != 0.0:
 		factors.append({"label": "law", "value": law})
 
@@ -21,6 +23,21 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	var knowledge_happiness := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "happiness")
 	if knowledge_happiness != 0.0:
 		factors.append({"label": "knowledge", "value": knowledge_happiness})
+
+	# Each standing edict shows its hand by name (happiness and law both feed
+	# order one-for-one); decree moods and repeal shocks sum as one factor.
+	var held: Dictionary = state["factions"][settlement["owner"]].get("edicts", {})
+	if not held.is_empty():
+		var edict_ids: Array = held.keys()
+		edict_ids.sort()
+		for eid in edict_ids:
+			var effects: Dictionary = data.edicts.get(eid, {}).get("effects", {})
+			var value := float(effects.get("happiness", 0.0)) + float(effects.get("law", 0.0))
+			if value != 0.0:
+				factors.append({"label": "edict:" + String(eid), "value": value})
+	var moods := ModifierRules.sum_for(state, settlement["owner"], region_id, "happiness")
+	if moods != 0.0:
+		factors.append({"label": "decrees", "value": moods})
 
 	var tax_happiness: float = order_rules["tax_happiness"][settlement["tax_level"]]
 	if tax_happiness != 0.0:
@@ -93,8 +110,10 @@ static func total(data: GameData, state: Dictionary, region_id: String) -> float
 
 
 static func law_total(data: GameData, state: Dictionary, region_id: String) -> float:
+	## Building law plus standing-edict law — corruption suppression reads this.
 	var settlement: Dictionary = state["settlements"][region_id]
-	return SettlementRules.effect_total(data, settlement, "law")
+	return SettlementRules.effect_total(data, settlement, "law") \
+		+ EdictRules.faction_effect_total(data, state, settlement["owner"], "law")
 
 
 static func garrison_bonus(data: GameData, settlement: Dictionary) -> float:

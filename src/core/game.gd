@@ -263,6 +263,34 @@ func begin_adoption(technique_id: String) -> Dictionary:
 	return KnowledgeRules.begin_adoption(data, state, String(state["player_faction"]), technique_id)
 
 
+## --- Edicts (Phase 6) -------------------------------------------------------
+
+func edict_overview() -> Dictionary:
+	## The book of policies: what the court holds (with its cost per turn) and
+	## everything it could hold, each priced with the first bar named.
+	var fid := String(state["player_faction"])
+	var held: Dictionary = EdictRules.enacted(state, fid)
+	var held_entries: Array = []
+	var edict_ids: Array = held.keys()
+	edict_ids.sort()
+	for eid in edict_ids:
+		held_entries.append({"id": eid, "edict": data.edicts.get(eid, {})})
+	return {
+		"held": held_entries,
+		"available": EdictRules.available(data, state, fid),
+		"upkeep": EdictRules.upkeep(data, state, fid),
+		"max_enacted": int(data.balance["edicts"]["max_enacted"]),
+	}
+
+
+func enact_edict(edict_id: String) -> Dictionary:
+	return EdictRules.enact(data, state, String(state["player_faction"]), edict_id)
+
+
+func repeal_edict(edict_id: String) -> bool:
+	return EdictRules.repeal(data, state, String(state["player_faction"]), edict_id)
+
+
 ## --- Family & characters --------------------------------------------------
 
 func family_of(faction_id: String = "") -> Array:

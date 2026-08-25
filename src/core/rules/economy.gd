@@ -15,13 +15,17 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 	var tax_income := float(settlement["population"]) / 1000.0 \
 		* float(tax_rules["base_income_per_1000_pop"]) \
 		* float(tax_rules["income_multiplier"][settlement["tax_level"]])
+	# Fiscal edicts (tax farming, the census levy, toll charters) move the
+	# take itself — additive on the base component, never compounding.
+	tax_income *= 1.0 + EdictRules.faction_effect_total(data, state, settlement["owner"], "tax_income_pct") / 100.0
 	factors.append({"label": "taxes", "value": tax_income})
 
 	var farm_income := float(region["fertility"]) * float(economy_rules["farm_income_fertility_multiplier"]) \
 		+ SettlementRules.effect_total(data, settlement, "farm_income")
 	farm_income *= 1.0 + (SettlementRules.faction_owns_wonder_effect(
 			data, state, settlement["owner"], "farm_income_pct")
-		+ KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")) / 100.0
+		+ KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")
+		+ EdictRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")) / 100.0
 	if rng != null:
 		farm_income *= rng.randf_pct(float(economy_rules["harvest_variance_pct"]))
 	factors.append({"label": "farming", "value": farm_income})
@@ -71,7 +75,8 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var own_resources: Array = data.regions[region_id].get("resources", [])
 	var port_level := int(SettlementRules.effect_max(data, settlement, "port_level"))
 	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct") \
-		+ KnowledgeRules.faction_effect_total(data, state, owner, "trade_pct")
+		+ KnowledgeRules.faction_effect_total(data, state, owner, "trade_pct") \
+		+ EdictRules.faction_effect_total(data, state, owner, "trade_pct")
 	var sea_trade_wonder := SettlementRules.faction_owns_wonder_effect(data, state, owner, "sea_trade_pct")
 
 	var land_total := 0.0
@@ -119,9 +124,12 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 		float(corruption_rules["max_pct"]))
 	var law := PublicOrderRules.law_total(data, state, region_id)
 	corruption *= maxf(0.0, 1.0 - law * float(corruption_rules["law_reduction_factor"]))
-	# Archival statecraft (census rolls, courier posts) audits the far provinces.
-	corruption *= maxf(0.0, 1.0 - KnowledgeRules.faction_effect_total(
-		data, state, settlement["owner"], "corruption_reduction_pct") / 100.0)
+	# Archival statecraft audits the far provinces — census rolls and courier
+	# posts as techniques, the census levy and road posts as standing edicts.
+	corruption *= maxf(0.0, 1.0 - (KnowledgeRules.faction_effect_total(
+			data, state, settlement["owner"], "corruption_reduction_pct")
+		+ EdictRules.faction_effect_total(
+			data, state, settlement["owner"], "corruption_reduction_pct")) / 100.0)
 	return corruption
 
 
@@ -133,16 +141,20 @@ static func army_upkeep(data: GameData, units: Array) -> int:
 
 
 static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String) -> int:
-	var upkeep := 0
+	var soldiery := 0
 	for army in state["armies"].values():
 		if army["owner"] == faction_id:
-			upkeep += army_upkeep(data, army["units"])
+			soldiery += army_upkeep(data, army["units"])
 	for fleet in state["fleets"].values():
 		if fleet["owner"] == faction_id:
-			upkeep += army_upkeep(data, fleet["ships"])
+			soldiery += army_upkeep(data, fleet["ships"])
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
-			upkeep += army_upkeep(data, settlement["garrison"])
+			soldiery += army_upkeep(data, settlement["garrison"])
+	# Military edicts (the citizen levy, hired companies) scale the wage bill
+	# of soldiers only — agents are paid from another purse.
+	var upkeep := int(round(soldiery * (1.0 + EdictRules.faction_effect_total(
+		data, state, faction_id, "unit_upkeep_pct") / 100.0)))
 	for agent in state.get("agents", {}).values():
 		if agent["owner"] == faction_id:
 			upkeep += int(data.agent_kinds.get(agent["kind"], {}).get("upkeep", 0))
@@ -164,7 +176,7 @@ static func faction_turn_breakdown(data: GameData, state: Dictionary, faction_id
 			state.get("difficulty", "medium"), 1.0))
 	income *= difficulty_multiplier
 
-	var upkeep := faction_upkeep(data, state, faction_id)
+	var upkeep := faction_upkeep(data, state, faction_id) + EdictRules.upkeep(data, state, faction_id)
 	return {"income": income, "upkeep": upkeep, "net": income - float(upkeep)}
 
 

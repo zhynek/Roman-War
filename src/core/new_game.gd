@@ -35,6 +35,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"difficulty": difficulty,
 		"campaign_mode": campaign_mode,
 		"event_happiness": null,
+		"modifiers": [],
 		"player_faction": player_faction,
 		"factions": {},
 		"settlements": {},
@@ -66,6 +67,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"attitude_memory": {},
 			"knowledge": _starting_knowledge(data, fid),
 			"reform_pressure": 0.0,
+			"edicts": {},
+			"edict_cooldowns": {},
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -84,7 +87,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
-		"knowledge": {}, "reform_pressure": 0.0,
+		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -144,6 +147,12 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		if not faction.has("knowledge"):
 			faction["knowledge"] = {} if (data == null or faction_id == "rebels") \
 				else _starting_knowledge(data, faction_id)
+		if not faction.has("edicts"):
+			faction["edicts"] = {}
+		if not faction.has("edict_cooldowns"):
+			faction["edict_cooldowns"] = {}
+	if not state.has("modifiers"):
+		state["modifiers"] = []
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):

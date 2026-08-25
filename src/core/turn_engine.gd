@@ -19,7 +19,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"knowledge": [], "senate": [], "characters": [], "ai": [],
+		"knowledge": [], "edicts": [], "senate": [], "characters": [], "ai": [],
 		"diplomacy": [], "winner": null,
 	}
 
@@ -65,6 +65,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		if state["factions"][faction_id]["alive"]:
 			EconomyRules.apply_faction_turn(data, state, faction_id, rng)
 
+	# Right after the treasuries settle: standing drips, cooldowns, and the
+	# insolvency rule — the dole collapses the turn the silver runs out.
+	report["edicts"] = EdictRules.process_turn(data, state)
+
 	for region_id in region_ids:
 		GrowthRules.apply_turn(data, state, region_id, rng)
 
@@ -80,6 +84,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)
+	ModifierRules.tick(state)
 	MercenaryRules.replenish(data, state)
 
 	state["turn"] = int(state["turn"]) + 1
