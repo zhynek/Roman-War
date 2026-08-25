@@ -74,12 +74,27 @@ succession), the agents & diplomacy layer (attitude model with memory,
 negotiation offers with tribute and region deals, diplomats/spies/assassins
 on the map), and a persona-driven campaign AI that garrisons, builds, raises
 armies, clears the independents, declares wars it thinks it can win, and sues
-for peace when losing — the world moves without the player. A playable
-campaign-map UI sits on top: geographic map with fog of war, settlement/army/
-agent panels driven by the engine's factor breakdowns, a negotiation scroll
-with live appraisal, family scroll, world-news turn log, and save/load.
-Senate/politics depth, naval combat, and a real-time battle scene are the
-next phases; their data tables and state hooks already exist.
+for peace when losing — the world moves without the player.
+
+On top of that sits the Deep Strategy layer (DESIGN.md §12): 37 historical
+techniques that spread by contact, conquest and espionage — awareness is
+free, institutionalizing costs treasury and years, defeat discounts military
+reform (the corvus law), and recruits are armed to their city's standard for
+life; 16 edicts with real consequence webs (the grain dole that collapses
+with the treasury, tax farming against the census levy, repeal shocks); and
+a structured chronicle that writes each campaign's history — wars ledgered
+and summarized, reigns summed, generals earning epithets from their deeds —
+rendered as prose in an annals scroll and stored as machine-readable data
+(the contract for an optional future AI narrator). Every technique, edict
+and epithet carries its documented historical basis; ten players end in ten
+measurably different worlds, and the soak prints the divergence as a number.
+
+A playable campaign-map UI covers it all: geographic map with fog of war,
+settlement/army/agent panels driven by the engine's factor breakdowns, a
+negotiation scroll with live appraisal, knowledge/edicts/annals/family
+scrolls, world-news turn log, and save/load. Senate/politics depth, naval
+combat, and a real-time battle scene are the next phases; their data tables
+and state hooks already exist.
 
 ## Clean-room policy
 

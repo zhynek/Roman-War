@@ -667,6 +667,7 @@ Phases follow the research report (§17). Status as of this document:
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done.** Persona-driven (data/ai.json) modular AI: economy, objectives/muster, armies (raise/merge/attack/besiege/assault/defend, land & amphibious movement), war-and-peace initiative with war hunger; difficulty wired as income/order bonuses plus player-attitude bias. Verified by a 60-turn harness (map changes hands, byte-identical replay, save/resume lockstep) and 100-turn soaks. Deferred: AI use of agents, AI retinue management |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, agent diamonds, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail/land, attack, besiege, assault with occupation choice, mercenaries, garrison), agent orders (travel, scout, assassinate with live odds, bribe), diplomacy scroll (attitudes, negotiation dialog with live appraisal, envoys, confirmed war), family scroll (heir, retinue transfer), world-news turn log, save/load. First AI-era balance soak done (war hunger, debt discipline); tutorial pending |
+| 9 — Deep Strategy | Knowledge (techniques), edicts, the chronicle — §12 | **Done.** 37 techniques with real provenance spreading by contact/conquest/espionage; awareness→adoption lifecycle with culture resistance and crisis-driven reform pressure; 16 effect keys wired (weapon/armor recruit stamping wakes 45 dormant building effects); 16 edicts with tensions, the insolvency rule, and the stacking modifier container; AI adoption + policy by persona priorities; the structured chronicle with war/reign ledgers, deeds, 12 epithets, rendered annals; divergence measured in the soak (`divergence: 0.xx`). Deferred: the optional online narrator (contract shipped), edict regional scoping |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy
@@ -685,3 +686,89 @@ Roman War is a spiritual successor at the *mechanics* level only.
   tuned constants in `balance.json`.
 - Working title "Roman War"; original visual identity to come. If open-sourced:
   permissive license for code, CC-BY/CC0 for original assets.
+
+## 12. Knowledge, Edicts & the Chronicle (the Deep Strategy layer)
+
+The 2004-era genre template had no technology system — one hardcoded army
+reform and a building tree. Instead of bolting on an abstract research
+counter, this layer models how ancient innovation actually worked, which is
+also the more interesting game. Every entry in its three content tables
+carries a `historical_basis` field: original prose naming the real origin of
+the thing — the "real history only" rule enforced at the data level.
+
+### Techniques: knowledge moves by contact
+
+A technique (`data/techniques.json`, 37 at ship) is a real craft of the age
+— the boarding bridge, torsion artillery, Punic estate husbandry, census
+registration, monsoon navigation. It exists somewhere in the world at 270 BC
+(`start_adopted` per culture or faction) and moves along CONTACT, not a
+beaker counter:
+
+- **Aware ≠ adopted.** Awareness is free and travels — by origination
+  (education buildings and practiced scholarship raise the odds), diffusion
+  (one rng draw per contact pair per turn; alliance > trade > border > war
+  as channels, same-culture quicker), conquest (the victor walks the fallen
+  city's archives: awareness of everything its owner practiced, with a
+  discount — the Senate kept nothing of Carthage but Mago's books), and
+  espionage (a spy steals awareness plus a head-start discount, against the
+  governor's counter-intelligence). ADOPTION is the investment: paid up
+  front, seasons of institutionalization, one program at a time, priced by
+  culture resistance.
+- **Crisis drives military reform.** Defeats and lost cities accumulate
+  `reform_pressure`, which discounts military-group adoption and quickens
+  origination — Rome built the corvus because she was losing at sea. The one
+  reform the old genre hardcoded is here a general law of the world.
+- **Effects are faction-wide** through `KnowledgeRules.faction_effect_total`
+  (the fourth effect accessor) and legible: growth and order carry a named
+  `knowledge` factor; farm/mine/trade/corruption take percentages; armies
+  march and fleets sail faster; siege works build quicker and ramparts
+  defend a tier above the stones; units and building levels accept
+  `requires_technique` gates beside the era gate. Weapon/armor upgrades
+  stamp units AT RECRUIT TIME from city forges plus practiced techniques —
+  the stamp travels with the unit for life, retraining is re-arming, merges
+  keep the better arms, and both resolvers price it.
+
+### Edicts: policy with a consequence web
+
+`data/edicts.json` (16 at ship) is the statecraft lever beside the building
+queue: standing policies held at upkeep (the grain dole scales with the
+mouths it feeds) and one-time decrees whose moods fade through the stacking
+modifier container (`state.modifiers` — the generalization of the old
+single event slot, which survives untouched). The web is historical: tax
+farming against the census levy as an exclusive pair (the census requiring
+the census-registration technique — systems chaining into systems), repeal
+shocks (take away the dole and the crowd remembers), senate/popular
+standing deltas, and the self-balancing insolvency rule — when the silver
+runs out, the costliest policy collapses on its own, shock included.
+Effects flow through named `edict:<id>` factors so every consequence is
+legible in the breakdowns.
+
+### The chronicle: the campaign writes its own history
+
+Everything notable lands in `state.chronicle` as a structured entry —
+`schemas/chronicle_entry.schema.json` is the **narrator contract**: stable
+resolvable ids, scalar details, no prose. Entries record at the same choke
+points that serve player and AI alike; a collect pass derives what needs
+before-and-after comparison: the running war ledger (opened by the first
+battle if the fighting outruns the scribes, closed into war summaries
+counted from the ledger), reigns tracked by leader id (kill-path deaths
+emit no notices), faction destruction from the alive-set diff. Characters
+accrue deeds — battles, sieges, cities, crafts, laws — and earn EPITHETS
+from them (`data/epithets.json`, 12): one name per man, ever, the
+Hellenistic convention, each citing its real pattern (Poliorketes, Soter,
+Felix, Cunctator, Nikator, pater patriae…).
+
+In-game, `data/annals.json` renders entries as prose (variant by entry id —
+stable, no rng) in the Annals panel. The FUTURE optional online narrator
+reads the same feed (`ChronicleRules.resolved()` — display names resolved
+from the save alone, dead characters included) and may replace the prose;
+it can never replace the entries. Structured data first; prose is flavor.
+
+### Divergence is the point — and a number
+
+Ten players should end in ten different worlds. The soak prints the claim
+as a measurement: distinct adopted-set signatures among living courts
+(18/18 at 100 turns, seed 42) and the cross-seed mean Jaccard distance of
+adopted sets — `divergence: 0.xx`. Tuning raises the number; the harness
+asserts adoption, signature divergence, enacted policy, and the narrator
+contract on every entry, inside the bounded annals.

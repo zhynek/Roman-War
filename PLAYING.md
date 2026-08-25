@@ -140,11 +140,63 @@ cross **any** border, and cost upkeep like troops.
   offer you make them. Standing next to a leaderless warband, he can simply
   **buy it off the map** — priced per head; troops under a general refuse.
 - **Informer (spy)** — reads any city he stands in: garrison, works, mood. In
-  a city you are assaulting, his opened gate counts against their walls.
+  a city you are assaulting, his opened gate counts against their walls. In a
+  foreign city whose masters practice a craft your court has never heard of,
+  he can **steal it** — odds shown up front; success brings the drawings home
+  with a head start on taking it up, failure can cost you the man.
 - **Hired Blade (assassin)** — pick a target in his region and see the odds
   before you commit. Success sharpens him; failure can cost you the man. Wary
   targets with careful retinues (bodyguards, food tasters) are far harder — and
   a governor with spy-catchers hardens his whole city against all of it.
+
+## Knowledge
+
+The crafts of the age — warship designs, siege engines, field husbandry,
+drains and aqueducts, coinage, the census — live in the **Knowledge** scroll.
+Your court starts with its culture's endowment and hears of the rest by
+contact: trade partners and allies talk, neighbors are watched, enemies teach
+hard lessons, conquest opens a fallen city's archives, and your informers
+steal. **Hearing of a craft is free; practicing it is the investment** — paid
+up front, seasons of work, one program at a time, and dearer where it cuts
+against your people's grain. Schools and practiced scholarship make your own
+craftsmen likelier to devise something first.
+
+Each craft states plainly what it grants — faster columns, richer farms,
+tougher walls, cheaper building — and tells the true story it is drawn from.
+Recruits are **armed at muster** to the city's current standard (forges plus
+practiced crafts); retraining a garrison re-arms it free, so marching
+veterans home to a better-equipped city is a real decision.
+
+Lose battles and the pressure for reform mounts: military crafts come
+cheaper and your people invent under duress — the log colors those
+adoptions differently. Watch the world news: when a rival court takes up a
+new practice, everyone hears of it.
+
+## Edicts
+
+The **Edicts** scroll is the book of policies — the statecraft lever beside
+the building queue. Standing policies are held at upkeep until struck down:
+the grain dole (dear, and dearer the more mouths), cult patronage, land for
+veterans, tax farming *or* the census levy (never both), the citizen levy
+*or* hired companies, the wider franchise, free harbors, the royal post.
+One-time decrees — games, debt remission, a sacred truce — buy a mood that
+fades. Every effect appears by name in your city breakdowns.
+
+Mind the tensions: enacting moves your standing with Senate and people,
+repealing angers whoever loved the policy (the scroll states the price
+before you strike it down), and **if your treasury runs dry the costliest
+policy collapses on its own** — the dole ends when the silver does, and the
+crowd does not care whose fault it was.
+
+## The Annals
+
+The **Annals** scroll is your campaign written as history: wars declared and
+summarized battle by battle, cities taken and sacked, crafts devised and
+taken up, laws proclaimed and lapsed, reigns summed when a leader dies, and
+the names men earn — win enough sieges and your general is *called Breaker
+of Walls* for life, one name per man, ever. Filter by Wars, Court, or
+Wisdom & World. Everything there really happened in your campaign; the
+scribes only wrote it down.
 
 ## Missions
 

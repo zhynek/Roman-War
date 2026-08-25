@@ -14,26 +14,38 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 22
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
 **Built:** Phases 0–6 — map & turns, settlements & economy, armies & sieges
-(now including amphibious landings on at-war shores), the full
-character/family layer **with seeded households**, the Phase 5 agents &
-diplomacy layer (attitude model with decaying memory, offers/tribute/cessions
-with a live-appraisal negotiation UI, diplomats/spies/assassins on the map),
-the Phase 6 campaign AI (persona-driven: economy, objectives, armies, war and
-peace with real truces — the world genuinely fights, trades and dies), the
-Phase 7 senate foundation with four live mission kinds, and the Phase 8
-campaign UI with world news. A 100-turn soak (`tools/soak.gd`) shows 36–50
-wars, 27–43 negotiated peaces that hold, the rebels all but cleared (2/33
-regions), zero factions in debt, 4–5 powers destroyed in 50 years — and the
-idle player besieged.
+(including amphibious landings on at-war shores), the full character/family
+layer **with seeded households**, the Phase 5 agents & diplomacy layer
+(attitude model with decaying memory, offers/tribute/cessions with a
+live-appraisal negotiation UI, diplomats/spies/assassins on the map), the
+Phase 6 campaign AI (persona-driven: economy, objectives, armies, war and
+peace with real truces), the Phase 7 senate foundation with four live
+mission kinds, the Phase 8 campaign UI with world news — and the **Phase 9
+Deep Strategy layer** (DESIGN.md §12): 37 techniques spreading by
+contact/conquest/espionage with an awareness→adoption lifecycle, culture
+resistance and crisis reform pressure; recruit-time weapon/armor stamping
+(the 45 long-dormant building effects live); 16 edicts with exclusivity
+tensions, repeal shocks, the insolvency collapse and a stacking modifier
+container; AI adoption + policy by persona priorities; the structured
+chronicle (narrator contract in `schemas/chronicle_entry.schema.json`) with
+war/reign ledgers, character deeds, 12 epithets and prose annals; event
+vocabulary (repeatable events on cooldowns, faction moods, scripted
+technique grants, obituaries for the great powers). A 100-turn soak
+(`tools/soak.gd`) shows ~185 adoptions with every living court holding a
+distinct knowledge signature, 50+ edicts held, ~600-entry chronicles, and
+`divergence: 0.20` across seeds — one seed an age of statecraft (15 wars),
+the other an age of iron (48).
 
-**Green as of the head of this branch:** 120 tests / 0 failures, validator 0
-errors / 0 warnings, clean boot, end_turn ≈ 240 ms late-game. Branch
+**Green as of the head of this branch:** 176 tests / 0 failures, validator 0
+errors / 0 warnings, clean boot, end_turn ≈ 235 ms average over 60 turns
+(the harness ceiling is 250 and this machine's variance is ±10 — if the
+perf assertion flakes, re-run before touching anything). Branch
 `claude/project-handoff-familiarization-565ba5`, everything pushed.
 
 ## 2. Get productive in five minutes
@@ -62,7 +74,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 112 tests, 0 failures (~40s)
+godot --headless --path . --script res://tests/run_tests.gd      # 176 tests, 0 failures (~2 min)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -118,18 +130,51 @@ slice before shipping**, or the app will not launch.
    AND `fire_occupation_triggers`** (assault, starve-out, AI, player alike).
    Peaceful cessions (`DiplomacyRules.cede_region`) are the deliberate
    exception: no loot, no triggers, garrison marches home.
+7. **`NewGame.ensure_state_keys(state, data = null)` grew an optional data
+   param** — pass `game.data` on load so pre-knowledge saves receive their
+   culture's technique endowment; without it they get empty ledgers. Every
+   new state key must appear in build + ensure + fixtures, and readers still
+   tolerate its absence.
+8. **`GrowthRules._plague_turn(data, state, settlement, rng)` takes state
+   now** (plague_resistance is faction-wide) — a merge that drops the param
+   compiles nowhere near the bug it causes.
+9. **Chronicle recording happens at the CHOKE POINTS** (combat, capture,
+   revolt, knowledge, edicts, apply_offer) with the LIVE pre-increment date;
+   `ChronicleRules.collect` at the very end derives wars/reigns/destruction
+   against the top-of-turn snapshot and stamps entries with the snapshot's
+   date. Add new record calls at the acting site, never in the UI, and keep
+   collect's fixed order (wars open → close → destroyed → epithets →
+   reigns) — reordering changes entry ids and breaks replay byte-compares.
+10. **Hot-path readers avoid `.get(key, {})` default allocations** — the
+   breakdown paths (order/growth/income) run thousands of times per turn and
+   the null-check pattern in `KnowledgeRules.faction_effect_total` /
+   `EdictRules.faction_effect_total` / `ModifierRules.sum_for` is what keeps
+   end_turn under the 250 ms harness ceiling. Copy that pattern for any new
+   per-breakdown effect source; probe with the 60-turn timing in
+   `tests/test_ai_campaign.gd` before and after.
 
 ## 5. Ways forward
 
 The user has not committed to a direction. Each is self-contained.
 
 ### Balance & feel (playtest-driven)
-The world is alive for the first time — the numbers in `balance.json → ai`
-and `→ diplomacy` (war hunger, attitude weights, peace pricing) plus the five
-personas in `data/ai.json` shipped after one soak pass, not a hundred games.
+The world is alive — the numbers in `balance.json → ai`, `→ diplomacy`,
+`→ knowledge` and `→ edicts` (war hunger, attitude weights, peace pricing,
+diffusion/origination odds, reform pressure, upkeep shares) plus the five
+personas in `data/ai.json` shipped after soak passes, not a hundred games.
+The divergence number the soak prints is a tuning target: raise
+diffusion/origination variance and it climbs.
 
 > Here is what felt wrong when I played: <notes>. Tune the balance constants
 > and UI accordingly. Run tools/soak.gd before and after.
+
+### The optional online narrator
+The chronicle is the machine-readable feed
+(`schemas/chronicle_entry.schema.json`, `ChronicleRules.resolved()`); the
+annals templates render it offline today. An OPTIONAL online narrator —
+prose only, never state — is a self-contained slice: export resolved
+entries, send to a model, render the returned prose in the annals panel
+with the offline templates as fallback.
 
 ### Phase 7 — Senate offices & politics depth
 `office_gained` triggers and the `leader_suicide` mission are authored and
