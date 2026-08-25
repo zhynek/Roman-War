@@ -318,12 +318,12 @@ func test_ai_adopts_the_best_priced_craft(t) -> void:
 	state["settlements"]["beta"]["buildings"]["test_education"] = 1
 	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
-	AiKnowledge.run(data, state, "red", persona)
+	AiPolicy.run(data, state, "red", persona, [])
 	t.check_eq(String(red["knowledge"]["test_letters"]["stage"]), "adopting",
 		"at peace the court funds the cheap civic craft")
 	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
 		"and only one program at a time")
-	AiKnowledge.run(data, state, "red", persona)
+	AiPolicy.run(data, state, "red", persona, [])
 	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
 		"hands stay full while the program runs")
 
@@ -338,7 +338,7 @@ func test_ai_at_war_arms_first(t) -> void:
 	state["settlements"]["beta"]["buildings"]["test_education"] = 1
 	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
-	AiKnowledge.run(data, state, "red", persona)
+	AiPolicy.run(data, state, "red", persona, [])
 	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "adopting",
 		"a court at war funds the arsenal first")
 
@@ -351,8 +351,44 @@ func test_ai_adoption_respects_reserve_and_prerequisites(t) -> void:
 	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["treasury"] = 2000
-	AiKnowledge.run(data, state, "red", persona)
+	AiPolicy.run(data, state, "red", persona, [])
 	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
 		"600 would break the 1500 reserve: the war craft waits")
 	t.check_eq(String(red["knowledge"]["test_letters"]["stage"]), "aware",
 		"and the school-less court cannot take up letters at any price")
+
+
+func test_ai_enacts_edicts_within_its_means(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var persona: Dictionary = data.ai_personas["default"]
+	var red: Dictionary = state["factions"]["red"]
+	var events: Array = []
+	AiPolicy.run(data, state, "red", persona, events)
+	t.check(EdictRules.enacted(state, "red").is_empty(),
+		"no measured income yet: the court holds its hand")
+	red["ai"]["last_income"] = 2000.0
+	AiPolicy.run(data, state, "red", persona, events)
+	t.check(not EdictRules.enacted(state, "red").is_empty(),
+		"with income measured, the statecraft step enacts")
+	var proclaimed := false
+	for event in events:
+		if event.get("kind", "") == "edict_enacted" and event.get("faction", "") == "red":
+			proclaimed = true
+	t.check(proclaimed, "and proclaims the act")
+
+	# The upkeep budget binds: with the dole the only candidate, a lean income
+	# refuses it and a fat one takes it up.
+	var lean := Fixtures.state(data)
+	var dole_only := {"test_dole": data.edicts["test_dole"]}
+	var all_edicts := data.edicts
+	data.edicts = dole_only
+	lean["factions"]["red"]["ai"]["last_income"] = 100.0
+	AiPolicy.run(data, lean, "red", persona, [])
+	t.check(EdictRules.enacted(lean, "red").is_empty(),
+		"the dole's upkeep would outrun a lean income's share")
+	lean["factions"]["red"]["ai"]["last_income"] = 2000.0
+	AiPolicy.run(data, lean, "red", persona, [])
+	t.check(EdictRules.enacted(lean, "red").has("test_dole"),
+		"a fat income carries it")
+	data.edicts = all_edicts

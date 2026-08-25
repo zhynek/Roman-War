@@ -190,6 +190,8 @@ static func data() -> GameData:
 			"occupation": "occupy",
 			"build_weights": {"order": 1.0, "growth": 1.0, "income": 1.0, "military": 1.0, "walls": 1.0},
 			"knowledge_priorities": {"military": 1.0, "economic": 1.0, "civic": 1.0},
+			"edict_priorities": {"welfare": 1.0, "religion": 1.0, "land": 1.0, "citizenship": 1.0,
+				"taxation": 1.0, "debt": 1.0, "military": 1.0, "trade": 1.0},
 			"garrison_min_units": 2, "garrison_frontier_units": 4, "army_size_target": 8,
 		},
 	}

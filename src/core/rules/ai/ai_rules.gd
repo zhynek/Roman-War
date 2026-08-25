@@ -36,7 +36,7 @@ static func take_turn(data: GameData, state: Dictionary, rng: CampaignRng, resol
 	AiStrategy.refresh_objective(data, state, faction_id, persona)
 	AiMilitary.run(data, state, rng, resolver, faction_id, persona, events)
 	AiEconomy.run(data, state, faction_id, persona, AiStrategy.muster_region(state, faction_id))
-	AiKnowledge.run(data, state, faction_id, persona)
+	AiPolicy.run(data, state, faction_id, persona, events)
 	return events
 
 

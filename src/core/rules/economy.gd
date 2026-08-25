@@ -184,6 +184,9 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	var result := faction_turn_breakdown(data, state, faction_id, rng)
 	var faction: Dictionary = state["factions"][faction_id]
 	faction["treasury"] = int(faction["treasury"]) + int(round(result["net"]))
+	# The AI's statecraft step budgets next turn's edict upkeep against a
+	# share of measured income — stash it in the ai scratch as it resolves.
+	faction["ai"]["last_income"] = float(result["income"])
 
 	# Sustained deep debt forces disbandment: one costliest field unit per turn.
 	var threshold := int(data.balance["economy"]["debt_disband_threshold"])

@@ -14,6 +14,7 @@ var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var knowledge_panel: KnowledgePanel
+var edicts_panel: EdictsPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var top_swatch: ColorRect
@@ -85,6 +86,10 @@ func _ready() -> void:
 	knowledge_panel.knowledge_changed.connect(refresh)
 	add_child(knowledge_panel)
 
+	edicts_panel = EdictsPanel.new()
+	edicts_panel.edicts_changed.connect(refresh)
+	add_child(edicts_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -111,6 +116,7 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
+	bar.add_child(_bar_button("Edicts", func(): edicts_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -426,8 +432,29 @@ func _log_report(report: Dictionary) -> void:
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	_log_knowledge_news(report)
+	_log_edict_news(report)
 	_log_starved_sieges(report)
 	_log_world_news(report)
+
+
+func _log_edict_news(report: Dictionary) -> void:
+	## Lapses from the engine's insolvency rule; foreign enactments arrive in
+	## the ai stream (edicts are proclaimed acts — public by nature).
+	var player: String = game.state["player_faction"]
+	for event in report["edicts"]:
+		if String(event.get("kind", "")) != "edict_lapsed":
+			continue
+		var edict_name: String = game.data.edicts.get(event.get("edict", ""), {}).get("name", event.get("edict", ""))
+		if event.get("faction", "") == player:
+			_log("[color=#e06050][b]The treasury can no longer bear %s — it lapses.[/b][/color]" % edict_name)
+		else:
+			_log("[color=#9090d0]%s can no longer pay for %s.[/color]"
+				% [_faction_name(String(event.get("faction", ""))), edict_name])
+	for event in report["ai"]:
+		if String(event.get("kind", "")) == "edict_enacted":
+			_log("[color=#9090d0]%s enacts %s.[/color]"
+				% [_faction_name(String(event.get("faction", ""))),
+					game.data.edicts.get(event.get("edict", ""), {}).get("name", event.get("edict", ""))])
 
 
 func _log_knowledge_news(report: Dictionary) -> void:
