@@ -23,6 +23,7 @@ var mercenary_pools: Array = []
 var ai_personas: Dictionary = {}       # id -> persona dict
 var agent_kinds: Dictionary = {}       # id -> agent kind dict (diplomat/spy/assassin)
 var techniques: Dictionary = {}        # id -> technique dict (the knowledge of the age)
+var edicts: Dictionary = {}            # id -> edict dict (standing policies and decrees)
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -93,6 +94,8 @@ func _load_all(dir: String) -> void:
 		agent_kinds[agent_kind["id"]] = agent_kind
 	for technique in _read_json(dir + "/techniques.json").get("techniques", []):
 		techniques[technique["id"]] = technique
+	for edict in _read_json(dir + "/edicts.json").get("edicts", []):
+		edicts[edict["id"]] = edict
 
 
 func _read_json(path: String) -> Dictionary:

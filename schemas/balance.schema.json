@@ -24,6 +24,7 @@
     "diplomacy",
     "agents",
     "knowledge",
+    "edicts",
     "characters"
   ],
   "additionalProperties": false,
@@ -244,6 +245,21 @@
     },
     "characters": {
       "$ref": "#/$defs/numeric_section"
+    },
+    "edicts": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "ai_upkeep_income_share",
+            "insolvency_repeal_treasury",
+            "max_enacted",
+            "reenact_cooldown_turns"
+          ]
+        }
+      ]
     },
     "knowledge": {
       "allOf": [

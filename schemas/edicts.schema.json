@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edicts.schema.json",
+  "title": "Edicts (standing policies and one-time decrees)",
+  "type": "object",
+  "required": ["edicts"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "edicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "category", "kind", "historical_basis", "availability",
+          "prerequisites", "enact_cost", "upkeep_per_turn", "upkeep_per_1000_pop",
+          "effects", "tensions"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "category": {
+            "enum": ["welfare", "religion", "land", "citizenship", "taxation",
+              "debt", "military", "trade"]
+          },
+          "kind": {
+            "enum": ["standing", "decree"],
+            "description": "standing = held policy with upkeep until repealed; decree = one-time act with timed effects"
+          },
+          "historical_basis": { "type": "string", "minLength": 40 },
+          "availability": {
+            "type": "object",
+            "required": ["cultures"],
+            "additionalProperties": false,
+            "properties": {
+              "cultures": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/culture" },
+                "description": "Cultures whose courts may enact it; empty = any"
+              }
+            }
+          },
+          "prerequisites": {
+            "type": "object",
+            "required": ["building_kind", "building_level", "techniques"],
+            "additionalProperties": false,
+            "properties": {
+              "building_kind": {
+                "enum": ["", "government", "walls", "barracks", "stables", "archery_range",
+                  "siege_workshop", "naval", "market", "farms", "roads", "port", "mines",
+                  "health", "entertainment", "execution", "education", "temple"]
+              },
+              "building_level": { "type": "integer", "minimum": 0 },
+              "techniques": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "enact_cost": { "type": "integer", "minimum": 0 },
+          "upkeep_per_turn": { "type": "integer", "minimum": 0 },
+          "upkeep_per_1000_pop": { "type": "number", "minimum": 0 },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "happiness": { "type": "number" },
+              "law": { "type": "number" },
+              "growth": { "type": "number" },
+              "tax_income_pct": { "type": "number" },
+              "trade_pct": { "type": "number" },
+              "farm_income_pct": { "type": "number" },
+              "recruit_cost_pct": { "type": "number" },
+              "unit_upkeep_pct": { "type": "number" },
+              "recruit_xp": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "corruption_reduction_pct": { "type": "number" },
+              "culture_penalty_reduction_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+              "popular_standing_per_turn": { "type": "number" },
+              "senate_standing_per_turn": { "type": "number" }
+            }
+          },
+          "timed_happiness": {
+            "type": "object",
+            "required": ["value", "turns"],
+            "additionalProperties": false,
+            "properties": {
+              "value": { "type": "number" },
+              "turns": { "type": "integer", "minimum": 1 }
+            },
+            "description": "Decrees only: a happiness mood that fades after its turns"
+          },
+          "tensions": {
+            "type": "object",
+            "required": ["exclusive_with", "repeal_unrest", "senate_standing_delta", "popular_standing_delta"],
+            "additionalProperties": false,
+            "properties": {
+              "exclusive_with": { "type": "array", "items": { "type": "string" } },
+              "repeal_unrest": {
+                "type": "object",
+                "required": ["penalty", "turns"],
+                "additionalProperties": false,
+                "properties": {
+                  "penalty": { "type": "number", "minimum": 0 },
+                  "turns": { "type": "integer", "minimum": 0 }
+                }
+              },
+              "senate_standing_delta": { "type": "number" },
+              "popular_standing_delta": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "culture": {
+      "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"]
+    }
+  }
+}

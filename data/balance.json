@@ -325,6 +325,12 @@
     "infiltration_wall_reduction": 1,
     "envoy_offer_bonus_per_skill": 400
   },
+  "edicts": {
+    "max_enacted": 4,
+    "reenact_cooldown_turns": 8,
+    "insolvency_repeal_treasury": 0,
+    "ai_upkeep_income_share": 0.15
+  },
   "knowledge": {
     "origination_base_chance": 0.02,
     "origination_education_bonus_per_level": 0.01,

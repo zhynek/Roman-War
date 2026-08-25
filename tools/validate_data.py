@@ -27,6 +27,7 @@ TABLES = {
     "ai.json": "ai.schema.json",
     "agents.json": "agents.schema.json",
     "techniques.json": "techniques.schema.json",
+    "edicts.json": "edicts.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -276,6 +277,54 @@ def cross_checks(t: dict[str, dict]) -> None:
             gate = level.get("requires_technique", "")
             if gate and gate not in techniques:
                 err(f"buildings: {level['id']}: unknown requires_technique {gate}")
+
+    # --- edicts -----------------------------------------------------------
+    edicts = {}
+    for edict in t.get("edicts.json", {}).get("edicts", []):
+        if edict["id"] in edicts:
+            err(f"edicts: duplicate id {edict['id']}")
+        edicts[edict["id"]] = edict
+
+    for edict in edicts.values():
+        eid = edict["id"]
+        for dependency in edict["prerequisites"].get("techniques", []):
+            if dependency not in techniques:
+                err(f"edicts: {eid}: unknown prerequisite technique {dependency}")
+        for other in edict["tensions"]["exclusive_with"]:
+            if other not in edicts:
+                err(f"edicts: {eid}: unknown exclusive_with edict {other}")
+            elif eid not in edicts[other]["tensions"]["exclusive_with"]:
+                err(f"edicts: exclusivity must be symmetric: {eid} names {other} "
+                    f"but not the reverse")
+            elif other == eid:
+                err(f"edicts: {eid}: exclusive with itself")
+        if edict["kind"] == "decree":
+            # A decree is a one-time act: its whole payload is the timed mood
+            # and standing deltas — never per-turn upkeep or passive effects.
+            if edict["upkeep_per_turn"] or edict["upkeep_per_1000_pop"]:
+                err(f"edicts: {eid}: decrees carry no upkeep")
+            if edict["effects"]:
+                err(f"edicts: {eid}: decrees carry no standing effects "
+                    f"(use timed_happiness)")
+            if "timed_happiness" not in edict:
+                err(f"edicts: {eid}: a decree without timed_happiness does nothing")
+        else:
+            if "timed_happiness" in edict:
+                err(f"edicts: {eid}: standing edicts hold effects, not timed moods")
+            if not edict["effects"]:
+                err(f"edicts: {eid}: a standing edict with no effects does nothing")
+        need_kind = edict["prerequisites"]["building_kind"]
+        need_level = edict["prerequisites"]["building_level"]
+        if need_kind:
+            available_cultures = set(edict["availability"]["cultures"]) or cultures - {"neutral"}
+            for culture in sorted(available_cultures):
+                satisfiable = any(
+                    c["kind"] == need_kind and len(c["levels"]) >= need_level
+                    and culture in c["cultures"]
+                    for c in chains.values())
+                if not satisfiable:
+                    warn(f"edicts: {eid}: culture {culture} may enact it but can "
+                         f"never build {need_kind} L{need_level}")
 
     # Hidden resources must be referenced by SOMETHING (event or technique) —
     # and vice versa the events check below already validates its own refs.
@@ -632,7 +681,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "personas", "agents", "techniques"):
+                "personas", "agents", "techniques", "edicts"):
         if key in document:
             return len(document[key])
     return 0
