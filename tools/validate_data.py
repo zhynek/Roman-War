@@ -371,12 +371,23 @@ def cross_checks(t: dict[str, dict]) -> None:
             gender = character.get("gender", "female" if character["role"] == "spouse" else "male")
             if gender == "female":
                 females += 1
-            if character["role"] == "child" and int(character["age"]) >= come_of_age:
-                err(f"campaign: character {character['id']}: a child of {character['age']} "
-                    f"is past coming of age ({come_of_age})")
+            # Only BOYS must be re-roled by coming of age: the engine keeps
+            # daughters as role "child" past 16 until a suitor marries in, so a
+            # seeded 16-17-year-old marriageable daughter is legal data.
+            if character["role"] == "child" and gender == "male" \
+                    and int(character["age"]) >= come_of_age:
+                err(f"campaign: character {character['id']}: a boy of {character['age']} "
+                    f"is past coming of age ({come_of_age}) — seed him as 'family'")
             if character["role"] == "spouse" and gender == "male":
                 warn(f"campaign: character {character['id']}: a male spouse will confuse "
                      f"the family tree (marriage brings husbands in as 'family')")
+            if character["role"] in ("leader", "heir") and gender == "female":
+                err(f"campaign: character {character['id']}: a female {character['role']} "
+                    f"breaks succession (the engine only seats adult men)")
+            location = character.get("location", "")
+            if location and location in regions and location not in own_regions:
+                err(f"campaign: character {character['id']}: stands in {location}, "
+                    f"which {fid} does not hold at start")
         known = {c["id"]: c for c in faction_setup.get("characters", [])}
         for character in faction_setup.get("characters", []):
             father = character.get("father")

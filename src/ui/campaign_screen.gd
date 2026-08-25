@@ -15,6 +15,7 @@ var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
+var top_swatch: ColorRect
 var selected_army := ""
 var selected_agent := ""
 var _victory_shown := false
@@ -90,18 +91,15 @@ func _build_top_bar() -> HBoxContainer:
 	var bar := HBoxContainer.new()
 	bar.custom_minimum_size = Vector2(0, 34)
 
-	var faction: Dictionary = game.data.factions[game.state["player_faction"]]
-	var swatch := ColorRect.new()
-	swatch.color = Color.html(faction.get("color", "#808080"))
-	swatch.custom_minimum_size = Vector2(18, 18)
-	bar.add_child(swatch)
+	top_swatch = ColorRect.new()
+	top_swatch.custom_minimum_size = Vector2(18, 18)
+	bar.add_child(top_swatch)
 
 	for key in ["faction", "treasury", "date", "senate", "victory"]:
 		var label := Label.new()
 		label.add_theme_font_size_override("font_size", 13)
 		bar.add_child(label)
 		top_labels[key] = label
-	top_labels["faction"].text = " %s   " % faction["name"]
 
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
@@ -116,13 +114,20 @@ func _build_top_bar() -> HBoxContainer:
 
 func refresh() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
+	# The whole identity re-derives here, not just at build time — a loaded
+	# save may belong to a different house than the campaign that was running.
+	var faction_info: Dictionary = game.data.factions[game.state["player_faction"]]
+	top_swatch.color = Color.html(faction_info.get("color", "#808080"))
+	top_labels["faction"].text = " %s   " % faction_info["name"]
 	top_labels["treasury"].text = "Treasury: %d   " % int(faction["treasury"])
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
 	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
-	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
+	if faction_info.get("is_roman_house", false):
 		top_labels["senate"].text = "Senate %.0f · People %.0f   " \
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
+	else:
+		top_labels["senate"].text = ""
 	var progress := game.victory_progress()
 	if not progress.is_empty():
 		top_labels["victory"].text = "Regions %d/%d" \
@@ -399,10 +404,33 @@ func _log_report(report: Dictionary) -> void:
 		elif notice.has("ancillary"):
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
-	for siege_event in report["sieges"]:
-		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
-
+	_log_starved_sieges(report)
 	_log_world_news(report)
+
+
+func _log_starved_sieges(report: Dictionary) -> void:
+	## Starve-out resolutions, with the outcome stated — and only the ones the
+	## player can see or is party to (fogged sieges stay unheard of).
+	var player: String = game.state["player_faction"]
+	var visible_set := game.visible_regions()
+	for siege_event in report["sieges"]:
+		var region_id: String = siege_event["region"]
+		var result: Dictionary = siege_event.get("result", {})
+		var captured: bool = result.get("captured", false)
+		var new_owner: String = result.get("capture_pending_owner", "")
+		var previous_owner: String = siege_event.get("previous_owner", "")
+		if new_owner != player and previous_owner != player and not visible_set.has(region_id):
+			continue
+		var settlement_name: String = game.data.regions[region_id]["settlement_name"]
+		if captured and new_owner == player:
+			_log("[color=#80c080][b]%s has starved out — the city is ours.[/b][/color]" % settlement_name)
+		elif captured and previous_owner == player:
+			_log("[color=#e06050][b]%s has fallen — starved out by %s.[/b][/color]"
+				% [settlement_name, _faction_name(new_owner)])
+		elif captured:
+			_log("%s starved out and fell to %s." % [settlement_name, _faction_name(new_owner)])
+		else:
+			_log("The defenders of %s broke the siege at the walls." % settlement_name)
 
 
 func _log_world_news(report: Dictionary) -> void:

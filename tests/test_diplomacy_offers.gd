@@ -125,6 +125,7 @@ func test_offer_never_takes_capital_or_last_home(t) -> void:
 func test_pending_offer_expires(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
 	state["pending_offers"].append({"id": "offer_1", "from": "blue", "to": "red",
 		"stance": "trade", "expires_turn": 2})
 	var events := DiplomacyRules.process_turn(data, state)
@@ -137,6 +138,112 @@ func test_pending_offer_expires(t) -> void:
 		if event.get("kind", "") == "offer_expired":
 			expired = true
 	t.check(expired, "the player hears the offer lapsed")
+
+
+func test_offer_cannot_gift_what_is_not_theirs(t) -> void:
+	## The probe-confirmed exploit: "ceding" the receiver's own region (or a
+	## third party's) once bought treaties with a no-op. Now it is a named veto
+	## and the transfer never happens.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["factions"]["red"]["treasury"] = 100000
+	var sly := {"from": "red", "to": "blue", "stance": "neutral",
+		"give_payment": 0, "give_tribute": null, "give_regions": ["alpha"],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": []}
+	var verdict := DiplomacyRules.evaluate_offer(data, state, "red", "blue", sly)
+	t.check(not verdict["accept"], "gifting the receiver their own city buys nothing")
+	t.check(verdict["vetoes"].has("not_theirs_to_give"), "and the veto is named")
+	DiplomacyRules.apply_offer(data, state, sly)
+	t.check_eq(state["settlements"]["alpha"]["owner"], "blue", "no phantom transfer either")
+
+	# An honestly-owned region still counts and still transfers.
+	var honest := {"from": "red", "to": "blue", "stance": "neutral",
+		"give_payment": 0, "give_tribute": null, "give_regions": ["epsilon"],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": []}
+	var valued := DiplomacyRules.evaluate_offer(data, state, "red", "blue", honest)
+	var credited := false
+	for factor in valued["breakdown"]:
+		if factor["label"] == "ceded_to_us" and float(factor["value"]) > 0.0:
+			credited = true
+	t.check(credited, "land the proposer holds is priced")
+	DiplomacyRules.apply_offer(data, state, honest)
+	t.check_eq(state["settlements"]["epsilon"]["owner"], "blue", "and actually changes hands")
+
+
+func test_no_treating_with_brigands(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["factions"]["red"]["treasury"] = 1000000
+	var bribe := {"from": "red", "to": "rebels", "stance": "neutral",
+		"give_payment": 500000, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": []}
+	var verdict := DiplomacyRules.evaluate_offer(data, state, "red", "rebels", bribe)
+	t.check(not verdict["accept"], "no mountain of silver buys peace with the rebels")
+	t.check(verdict["vetoes"].has("no_treating_with_brigands"), "and the reason is named")
+
+
+func test_tribute_defaults_when_the_purse_is_empty(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["factions"]["red"]["treasury"] = 100
+	state["tributes"].append({"from": "red", "to": "blue", "amount": 6000, "turns_left": 5})
+	var events := DiplomacyRules.process_turn(data, state)
+	t.check(state["tributes"].is_empty(), "the unpayable schedule collapses")
+	t.check_eq(int(state["factions"]["red"]["treasury"]), 100, "no denarii are minted from debt")
+	var defaulted := false
+	for event in events:
+		if event.get("kind", "") == "tribute_defaulted":
+			defaulted = true
+	t.check(defaulted, "the default is reported")
+	t.check(float(state["factions"]["blue"]["attitude_memory"].get("red", 0.0)) < 0.0,
+		"and the stiffed side remembers it")
+
+
+func test_stale_offers_are_withdrawn(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	var game := Game.new()
+	game.data = data
+	game.resolver = AutoResolver.new()
+	game.state = state
+	state["pending_offers"].append({"id": "offer_gold", "from": "blue", "to": "red",
+		"stance": "", "give_payment": 500, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": [], "expires_turn": 99})
+	t.check_eq(game.pending_offers().size(), 1, "the envoy waits while the promise holds")
+
+	# The proposer goes broke: the promise no longer stands.
+	state["factions"]["blue"]["treasury"] = 0
+	t.check(game.pending_offers().is_empty(), "a promise the purse cannot cover is hidden")
+	var treasury_before := int(state["factions"]["red"]["treasury"])
+	t.check(not game.respond_offer("offer_gold", true), "accepting it fails — the envoy withdrew")
+	t.check_eq(int(state["factions"]["red"]["treasury"]), treasury_before, "no money moved")
+
+	# A friendship offer does not survive a war begun since it was made.
+	state["pending_offers"].append({"id": "offer_trade", "from": "blue", "to": "red",
+		"stance": "trade", "give_payment": 0, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": [], "expires_turn": 99})
+	DiplomacyRules.declare_war(data, state, "red", "blue")
+	t.check(game.pending_offers().is_empty(), "war voids the friendly envoy's brief")
+
+
+func test_senate_voids_missions_against_the_dead(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	data.missions = {"seal_a_friendship": {"id": "seal_a_friendship", "kind": "make_alliance",
+		"deadline_turns": 8, "reward": {"treasury": 500}}}
+	state["factions"]["red"]["mission"] = {"template": "seal_a_friendship",
+		"target_faction": "blue", "turns_left": 4}
+	state["factions"]["blue"]["alive"] = false
+	var standing_before := float(state["factions"]["red"]["senate_standing"])
+	var notices := SenateRules.process_turn(data, state, CampaignRng.seeded(1))
+	var voided := false
+	for notice in notices:
+		if notice.get("kind", "") == "mission_voided":
+			voided = true
+	t.check(voided, "the mission against a dead power is voided")
+	t.check(float(state["factions"]["red"]["senate_standing"]) >= standing_before,
+		"with no penalty for failing to court a corpse")
 
 
 func test_senate_courtship_missions(t) -> void:
@@ -204,7 +311,9 @@ func test_ai_sues_for_peace_when_losing(t) -> void:
 	Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears", "test_spears"])
 	var events: Array = []
 	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
-	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "neutral",
+	# The truce goodwill can warm the pair straight into trade the same season,
+	# so the assertion is "the war ended", not the exact resting stance.
+	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
 		"the losing side bought its peace")
 	t.check_eq(state["tributes"].size(), 1, "with tribute it could not pay in silver")
 	var made := false

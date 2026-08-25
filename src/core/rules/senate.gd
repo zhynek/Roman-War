@@ -22,6 +22,13 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 			float(region_count) * float(senate_rules["popular_standing_per_region"]))
 
 		var mission = faction["mission"]
+		if mission != null and _mission_target_gone(data, state, mission):
+			# The senate does not punish a house for failing to court a corpse:
+			# a courtship mission whose target power died is quietly voided.
+			# (Assassination missions instead COMPLETE on the target's fall.)
+			notices.append({"kind": "mission_voided", "faction": faction_id, "mission": mission["template"]})
+			faction["mission"] = null
+			mission = null
 		if mission == null:
 			var new_mission := _issue_mission(data, state, faction_id, rng)
 			if not new_mission.is_empty():
@@ -121,6 +128,14 @@ static func _take_region_targets(data: GameData, state: Dictionary, faction_id: 
 					targets.append(region_id)
 					break
 	return targets
+
+
+static func _mission_target_gone(data: GameData, state: Dictionary, mission: Dictionary) -> bool:
+	var target_faction: String = mission.get("target_faction", "")
+	if target_faction == "" or state["factions"][target_faction]["alive"]:
+		return false
+	# Assassination completes on the power's fall; courtship cannot.
+	return String(data.missions.get(mission["template"], {}).get("kind", "")) != "assassinate_leader"
 
 
 static func _assassination_targets(data: GameData, state: Dictionary, faction_id: String) -> Array:

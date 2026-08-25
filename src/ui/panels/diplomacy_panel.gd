@@ -144,9 +144,10 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 	row.add_child(swatch)
 
 	var attitude := DiplomacyRules.attitude_total(game.data, game.state, faction_id, player)
+	var temperament: String = AiRules.persona_for(game.data, faction_id).get("name", "")
 	var name_label := Label.new()
-	name_label.text = " %s — %s · %s (%+.0f)" \
-		% [faction["name"], STANCE_NAMES.get(stance, stance), _attitude_word(attitude), attitude]
+	name_label.text = " %s — %s · %s (%+.0f) · %s" \
+		% [faction["name"], STANCE_NAMES.get(stance, stance), _attitude_word(attitude), attitude, temperament]
 	name_label.add_theme_font_size_override("font_size", 12)
 	name_label.custom_minimum_size = Vector2(320, 0)
 	row.add_child(name_label)

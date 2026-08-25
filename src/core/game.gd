@@ -22,27 +22,38 @@ func end_turn() -> Dictionary:
 
 
 ## --- Settlement actions --------------------------------------------------
+## Every player action verifies ownership first: the facade is the UI, test
+## and mod surface, and must never let "player" input drive another faction's
+## pieces (that would also perturb the deterministic simulation).
 
 func set_tax_level(region_id: String, tax_level: String) -> bool:
-	if not Constants.TAX_LEVELS.has(tax_level):
+	if not _owns_settlement(region_id) or not Constants.TAX_LEVELS.has(tax_level):
 		return false
 	state["settlements"][region_id]["tax_level"] = tax_level
 	return true
 
 
 func queue_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return ConstructionRules.queue_project(data, state, region_id, chain_id)
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return ConstructionRules.demolish(data, state, region_id, chain_id)
 
 
 func queue_unit(region_id: String, template_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return RecruitmentRules.queue_unit(data, state, region_id, template_id)
 
 
 func retrain_garrison(region_id: String) -> int:
+	if not _owns_settlement(region_id):
+		return 0
 	return RecruitmentRules.retrain_garrison(data, state, region_id)
 
 
@@ -57,14 +68,20 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
+	if not _owns_army(army_id):
+		return false
 	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
+	if state["fleets"].get(fleet_id, {}).get("owner", "") != state["player_faction"]:
+		return false
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	if not _owns_army(attacker_id):
+		return {}
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
@@ -91,12 +108,16 @@ func attitude_of(other_faction: String) -> Array:
 func preview_offer(offer: Dictionary) -> Dictionary:
 	## Price an offer without proposing it — the negotiation dialog's live hint.
 	offer["from"] = String(state["player_faction"])
+	if not state["factions"].get(offer.get("to", ""), {}).get("alive", false):
+		return {"accept": false, "score": 0.0, "breakdown": [], "vetoes": ["their_court_is_ashes"]}
 	return DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
 
 
 func propose_offer(offer: Dictionary) -> Dictionary:
 	## Put the offer to the other side; it takes effect at once if accepted.
 	offer["from"] = String(state["player_faction"])
+	if not state["factions"].get(offer.get("to", ""), {}).get("alive", false):
+		return {"accept": false, "score": 0.0, "breakdown": [], "vetoes": ["their_court_is_ashes"]}
 	var verdict := DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
 	if verdict["accept"]:
 		DiplomacyRules.apply_offer(data, state, offer)
@@ -104,31 +125,42 @@ func propose_offer(offer: Dictionary) -> Dictionary:
 
 
 func pending_offers() -> Array:
-	## Offers other factions have laid before the player, oldest first.
+	## Offers other factions have laid before the player, oldest first — only
+	## those that still stand (the proposer alive, solvent, and not at a war
+	## begun since the envoy set out).
 	var mine: Array = []
 	for offer in state["pending_offers"]:
-		if offer.get("to", "") == state["player_faction"]:
+		if offer.get("to", "") == state["player_faction"] \
+				and DiplomacyRules.offer_still_stands(data, state, offer):
 			mine.append(offer)
 	return mine
 
 
 func respond_offer(offer_id: String, accept: bool) -> bool:
+	## Returns true when the offer was applied (or declined); false when it was
+	## found but no longer stands — the envoy has quietly withdrawn.
 	for i in range(state["pending_offers"].size()):
 		var offer: Dictionary = state["pending_offers"][i]
 		if offer.get("id", "") != offer_id or offer.get("to", "") != state["player_faction"]:
 			continue
 		state["pending_offers"].remove_at(i)
 		if accept:
+			if not DiplomacyRules.offer_still_stands(data, state, offer):
+				return false
 			DiplomacyRules.apply_offer(data, state, offer)
 		return true
 	return false
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
+	if not _owns_army(army_id):
+		return false
 	return MovementRules.sea_move_army(data, state, army_id, to_region)
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
+	if not _owns_army(army_id):
+		return false
 	return MercenaryRules.hire(data, state, army_id, template_id)
 
 
@@ -241,10 +273,14 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
+	if not _owns_army(army_id):
+		return false
 	return SiegeRules.begin_siege(data, state, army_id, region_id)
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	if not _owns_army(army_id):
+		return {}
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):
@@ -259,9 +295,9 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 
 
 func garrison_army(army_id: String) -> bool:
-	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if not _owns_army(army_id):
 		return false
+	var army: Dictionary = state["armies"][army_id]
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
@@ -314,3 +350,11 @@ func load_from(path: String) -> bool:
 
 func _rng() -> CampaignRng:
 	return CampaignRng.from_state_string(String(state["rng_state"]))
+
+
+func _owns_army(army_id: String) -> bool:
+	return state["armies"].get(army_id, {}).get("owner", "") == state["player_faction"]
+
+
+func _owns_settlement(region_id: String) -> bool:
+	return state["settlements"].get(region_id, {}).get("owner", "") == state["player_faction"]

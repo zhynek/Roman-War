@@ -128,7 +128,7 @@ static func _most_threatened_settlement(data: GameData, state: Dictionary, facti
 		var threat := threat_near(data, state, faction_id, region_id, radius)
 		if settlement["siege"] != null:
 			# A siege in progress is the emergency, whatever the raw numbers.
-			threat *= 2.0
+			threat *= float(data.balance["ai"]["siege_threat_multiplier"])
 		if threat > worst_threat:
 			worst_threat = threat
 			worst = region_id

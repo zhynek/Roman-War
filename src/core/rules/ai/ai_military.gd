@@ -66,7 +66,10 @@ static func _merge_with_colocated(data: GameData, state: Dictionary, faction_id:
 	## The survivor is the one with a general, else the lower (older) id; two
 	## generals never share a tent.
 	var army: Dictionary = state["armies"][army_id]
-	var ceiling := int(ceil(float(persona.get("army_size_target", 8)) * 1.5))
+	var ceiling := int(ceil(float(persona.get("army_size_target", 8))
+		* float(data.balance["ai"]["merge_ceiling_factor"])))
+	if _besieges_something(state, army_id):
+		return  # a besieger must survive as itself, or settlement.siege dangles
 	var other_ids: Array = state["armies"].keys()
 	other_ids.sort()
 	for other_id in other_ids:
@@ -75,6 +78,8 @@ static func _merge_with_colocated(data: GameData, state: Dictionary, faction_id:
 		army = state["armies"][army_id]
 		var other: Dictionary = state["armies"][other_id]
 		if other["owner"] != faction_id or other["region"] != army["region"]:
+			continue
+		if _besieges_something(state, other_id):
 			continue
 		if army["units"].size() + other["units"].size() > ceiling:
 			continue
@@ -104,6 +109,14 @@ static func _army_seniority(army_id: String) -> int:
 	return army_id.trim_prefix("army_").to_int()
 
 
+static func _besieges_something(state: Dictionary, army_id: String) -> bool:
+	for settlement in state["settlements"].values():
+		var siege = settlement["siege"]
+		if siege != null and siege["besieger"] == army_id:
+			return true
+	return false
+
+
 ## --- One army's turn -------------------------------------------------------
 
 static func _run_army(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, faction_id: String, army_id: String, persona: Dictionary, events: Array) -> void:
@@ -113,7 +126,8 @@ static func _run_army(data: GameData, state: Dictionary, rng: CampaignRng, resol
 		return
 
 	var steps := 0
-	while steps < 12 and state["armies"].has(army_id):
+	var action_cap := int(data.balance["ai"]["army_action_cap"])
+	while steps < action_cap and state["armies"].has(army_id):
 		steps += 1
 		if _attack_best_adjacent(data, state, rng, resolver, faction_id, army_id, events):
 			continue

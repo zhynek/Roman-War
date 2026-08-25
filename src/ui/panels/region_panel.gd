@@ -126,7 +126,9 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 			game.retrain_garrison(region_id)
 			action_taken.emit())
 
-	# Construction
+	# Construction. Unaffordable actions render disabled instead of silently
+	# doing nothing when clicked.
+	var treasury := int(game.state["factions"][player]["treasury"])
 	_header("Construction", 12)
 	for job in settlement["construction_queue"]:
 		_label("  building %s — %d turns left" % [_chain_name(job["chain"]), int(job["turns_left"])])
@@ -134,7 +136,8 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Build %s (%d, %dt)" % [project["name"], int(project["cost"]), int(project["build_turns"])],
 			func():
 				game.queue_building(region_id, project["chain"])
-				action_taken.emit())
+				action_taken.emit(),
+			treasury < int(project["cost"]))
 
 	# Demolition — the way a conqueror works off a foreign culture penalty.
 	var demolishable: Array = []
@@ -158,20 +161,30 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Recruit %s (%d)" % [unit["name"], int(unit["cost"])],
 			func():
 				game.queue_unit(region_id, unit["id"])
-				action_taken.emit())
+				action_taken.emit(),
+			treasury < int(unit["cost"]))
 
 	# Agents train here too, behind their building gates.
+	var agent_count := 0
+	for agent in game.state["agents"].values():
+		if agent["owner"] == player:
+			agent_count += 1
+	var at_cap: bool = agent_count >= int(game.data.balance["agents"]["max_per_faction"])
 	var agent_kind_ids: Array = game.data.agent_kinds.keys()
 	agent_kind_ids.sort()
 	for kind in agent_kind_ids:
 		var template: Dictionary = game.data.agent_kinds[kind]
 		if not AgentRules.building_gate_met(game.data, settlement, template):
 			continue
-		_action_button("Train %s (%d)" % [template["name"], int(template["cost"])],
+		var label := "Train %s (%d)" % [template["name"], int(template["cost"])]
+		if at_cap:
+			label += " — all hands employed"
+		var button := _action_button(label,
 			func():
-				if game.recruit_agent(region_id, kind) == "":
-					pass  # cap or purse refused; the panel simply re-renders
-				action_taken.emit())
+				game.recruit_agent(region_id, kind)
+				action_taken.emit(),
+			at_cap or treasury < int(template["cost"]))
+		button.tooltip_text = String(template.get("description", ""))
 
 
 func _build_armies_section() -> void:
@@ -241,12 +254,14 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 
 	var offers := game.mercenaries_available(region_id)
 	if not offers.is_empty():
+		var treasury := int(game.state["factions"][game.state["player_faction"]]["treasury"])
 		_header("Mercenaries for hire", 12)
 		for offer in offers:
 			_action_button("Hire %s (%d)" % [_template_name(offer["template"]), int(offer["cost"])],
 				func():
 					game.hire_mercenary(army_id, offer["template"])
-					action_taken.emit())
+					action_taken.emit(),
+				treasury < int(offer["cost"]))
 
 
 func _build_agents_section() -> void:
@@ -347,12 +362,14 @@ func _breakdown(title: String, factors: Array) -> void:
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 
-func _action_button(text: String, handler: Callable) -> void:
+func _action_button(text: String, handler: Callable, unaffordable: bool = false) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
+	button.disabled = unaffordable
 	add_child(button)
+	return button
 
 
 func _separator() -> void:

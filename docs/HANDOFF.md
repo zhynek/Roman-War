@@ -25,13 +25,15 @@ character/family layer **with seeded households**, the Phase 5 agents &
 diplomacy layer (attitude model with decaying memory, offers/tribute/cessions
 with a live-appraisal negotiation UI, diplomats/spies/assassins on the map),
 the Phase 6 campaign AI (persona-driven: economy, objectives, armies, war and
-peace — the world genuinely fights, trades and dies), the Phase 7 senate
-foundation with four live mission kinds, and the Phase 8 campaign UI with
-world news. A 100-turn soak (`tools/soak.gd`) shows 31–58 wars, 23–41
-negotiated peaces, and 4–6 factions destroyed in 50 years.
+peace with real truces — the world genuinely fights, trades and dies), the
+Phase 7 senate foundation with four live mission kinds, and the Phase 8
+campaign UI with world news. A 100-turn soak (`tools/soak.gd`) shows 36–50
+wars, 27–43 negotiated peaces that hold, the rebels all but cleared (2/33
+regions), zero factions in debt, 4–5 powers destroyed in 50 years — and the
+idle player besieged.
 
-**Green as of the head of this branch:** 112 tests / 0 failures, validator 0
-errors / 0 warnings, clean boot, end_turn ≈ 230 ms late-game. Branch
+**Green as of the head of this branch:** 120 tests / 0 failures, validator 0
+errors / 0 warnings, clean boot, end_turn ≈ 240 ms late-game. Branch
 `claude/project-handoff-familiarization-565ba5`, everything pushed.
 
 ## 2. Get productive in five minutes
@@ -183,7 +185,11 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   reviewers (engine correctness & determinism, UI behaviour, data/doc
   fidelity), each given the research report plus a specific lens, told to run
   the suite themselves, findings-only output. The Phase 4 round found 37 real
-  issues the tests had missed. Budget a fix commit after each round.
+  issues the tests had missed; the Phase 5+6 round found 28 more — among them
+  four probe-confirmed economy exploits (gifting third-party regions, minting
+  tribute from empty purses, stale envoy offers, purchasable peace with the
+  rebels) and, chasing one of its test regressions, the peace↔war flap the
+  truce memory now prevents. Budget a fix commit after each round.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.

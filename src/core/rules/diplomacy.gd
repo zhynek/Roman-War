@@ -4,7 +4,8 @@ class_name DiplomacyRules
 ## grievances and favors that decay over time, offers priced in denarii
 ## (payments, recurring tribute, region cessions, stance changes), and the
 ## peaceful transfer of settlements. Everything here is deterministic — no rng;
-## every weight lives in balance.json → diplomacy.
+## every weight lives in balance.json → diplomacy, except the difficulty bias
+## toward the player, which sits with its sibling difficulty tables in → ai.
 ##
 ## An offer dict is written from the PROPOSER's side:
 ##   {from, to, stance, give_payment, give_tribute: {amount, turns}|null,
@@ -148,10 +149,19 @@ static func decay_memories(data: GameData, state: Dictionary) -> void:
 
 static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, to_id: String, offer: Dictionary, strengths: Dictionary = {}) -> Dictionary:
 	## Price the offer in denarii from the RECEIVER's chair. Returns
-	## {accept, score, breakdown} — the breakdown feeds the negotiation UI's
-	## live hint, factor-list style.
+	## {accept, score, breakdown, vetoes} — the breakdown feeds the negotiation
+	## UI's live hint, factor-list style; vetoes are the named hard floors no
+	## price overrides, shown so a refusal is never a mystery.
 	var rules: Dictionary = data.balance["diplomacy"]
 	var factors: Array = []
+	var vetoes: Array = []
+
+	if data.factions.get(from_id, {}).get("is_rebel", false) \
+			or data.factions.get(to_id, {}).get("is_rebel", false):
+		# There is no treating with brigands — from either chair. Without this,
+		# silver could buy a permanent peace no rebel would ever break.
+		return {"accept": false, "score": 0.0, "breakdown": [],
+			"vetoes": ["no_treating_with_brigands"]}
 
 	var give_payment := int(offer.get("give_payment", 0))
 	if give_payment > 0:
@@ -168,6 +178,11 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 		factors.append({"label": "our_tribute", "value": -_tribute_value(data, ask_tribute)})
 
 	for region_id in offer.get("give_regions", []):
+		# Only land the proposer actually holds is worth anything — no gifting
+		# a third party's region, no "ceding" what the receiver already owns.
+		if state["settlements"].get(region_id, {}).get("owner", "") != from_id:
+			vetoes.append("not_theirs_to_give")
+			continue
 		factors.append({"label": "ceded_to_us", "value": region_value(data, state, region_id)})
 	for region_id in offer.get("ask_regions", []):
 		factors.append({"label": "ceded_by_us", "value": -region_value(data, state, region_id)})
@@ -189,12 +204,32 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 	for factor in factors:
 		score += factor["value"]
 
-	var accept := score >= float(rules["accept_threshold"])
-	if not _offer_is_bearable(state, to_id, offer):
-		accept = false
+	vetoes.append_array(_bearability_vetoes(state, to_id, offer))
+	if give_payment > int(state["factions"][from_id]["treasury"]):
+		vetoes.append("their_purse_cannot_cover_it")  # nobody banks an empty promise
+	var accept := score >= float(rules["accept_threshold"]) and vetoes.is_empty()
+	return {"accept": accept, "score": score, "breakdown": factors, "vetoes": vetoes}
+
+
+static func offer_still_stands(data: GameData, state: Dictionary, offer: Dictionary) -> bool:
+	## A pending offer is a promise, and promises age: the proposer must still
+	## be alive, still able to pay, still hold every region offered — and an
+	## offer of friendship does not survive a war begun since it was made.
+	var from_id: String = offer.get("from", "")
+	var to_id: String = offer.get("to", "")
+	if not state["factions"].get(from_id, {}).get("alive", false):
+		return false
+	if not state["factions"].get(to_id, {}).get("alive", false):
+		return false
 	if int(offer.get("give_payment", 0)) > int(state["factions"][from_id]["treasury"]):
-		accept = false  # nobody banks a promise the proposer cannot cover
-	return {"accept": accept, "score": score, "breakdown": factors}
+		return false
+	for region_id in offer.get("give_regions", []):
+		if state["settlements"].get(region_id, {}).get("owner", "") != from_id:
+			return false
+	var stance: String = offer.get("stance", "")
+	if stance != "" and stance != "neutral" and at_war(state, from_id, to_id):
+		return false
+	return true
 
 
 static func apply_offer(data: GameData, state: Dictionary, offer: Dictionary) -> void:
@@ -227,13 +262,24 @@ static func apply_offer(data: GameData, state: Dictionary, offer: Dictionary) ->
 			"amount": int(ask_tribute["amount"]), "turns_left": int(ask_tribute["turns"])})
 
 	for region_id in offer.get("give_regions", []):
-		cede_region(data, state, region_id, to_id)
+		# Ownership re-checked at the moment of transfer: only the proposer's
+		# own land moves — never a third party's, never the receiver's own.
+		if state["settlements"].get(region_id, {}).get("owner", "") == from_id:
+			cede_region(data, state, region_id, to_id)
 	for region_id in offer.get("ask_regions", []):
-		cede_region(data, state, region_id, from_id)
+		if state["settlements"].get(region_id, {}).get("owner", "") == to_id:
+			cede_region(data, state, region_id, from_id)
 
 	var stance: String = offer.get("stance", "")
 	if stance != "" and Constants.STANCES.has(stance):
+		var ends_a_war := at_war(state, from_id, to_id) and stance != "war"
 		set_stance(state, from_id, to_id, stance)
+		if ends_a_war:
+			# A concluded peace is a truce, not a mood: both courts bank enough
+			# goodwill that the war cannot simply be re-declared next season.
+			# It decays like any memory, so old wars can rekindle — later.
+			record_memory(data, state, from_id, to_id, float(rules["peace_concluded_memory"]))
+			record_memory(data, state, to_id, from_id, float(rules["peace_concluded_memory"]))
 		if stance == "alliance":
 			record_memory(data, state, from_id, to_id, float(rules["alliance_formed_memory"]))
 			record_memory(data, state, to_id, from_id, float(rules["alliance_formed_memory"]))
@@ -283,18 +329,28 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 	## TurnEngine step 1.5: tribute changes hands, grudges fade, stale offers
 	## lapse. Returns report events. Deterministic — arrays keep their order
 	## through a save, and the faction loop is sorted.
+	var rules: Dictionary = data.balance["diplomacy"]
 	var events: Array = []
 	var remaining: Array = []
 	for tribute in state["tributes"]:
 		var payer: Dictionary = state["factions"][tribute["from"]]
 		var receiver: Dictionary = state["factions"][tribute["to"]]
-		if payer["alive"] and receiver["alive"]:
-			payer["treasury"] = int(payer["treasury"]) - int(tribute["amount"])
-			receiver["treasury"] = int(receiver["treasury"]) + int(tribute["amount"])
-			events.append({"kind": "tribute_paid", "from": tribute["from"],
+		if not payer["alive"] or not receiver["alive"]:
+			continue
+		if int(payer["treasury"]) < int(tribute["amount"]):
+			# An empty purse cannot mint denarii: the schedule collapses, and
+			# the stiffed side remembers the default.
+			events.append({"kind": "tribute_defaulted", "from": tribute["from"],
 				"to": tribute["to"], "amount": int(tribute["amount"])})
-			tribute["turns_left"] = int(tribute["turns_left"]) - 1
-		if payer["alive"] and receiver["alive"] and int(tribute["turns_left"]) > 0:
+			record_memory(data, state, tribute["to"], tribute["from"],
+				float(rules["tribute_default_memory"]))
+			continue
+		payer["treasury"] = int(payer["treasury"]) - int(tribute["amount"])
+		receiver["treasury"] = int(receiver["treasury"]) + int(tribute["amount"])
+		events.append({"kind": "tribute_paid", "from": tribute["from"],
+			"to": tribute["to"], "amount": int(tribute["amount"])})
+		tribute["turns_left"] = int(tribute["turns_left"]) - 1
+		if int(tribute["turns_left"]) > 0:
 			remaining.append(tribute)
 	state["tributes"] = remaining
 
@@ -303,7 +359,7 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 	var open_offers: Array = []
 	for offer in state["pending_offers"]:
 		if int(offer.get("expires_turn", 0)) > int(state["turn"]) \
-				and state["factions"][offer["from"]]["alive"]:
+				and offer_still_stands(data, state, offer):
 			open_offers.append(offer)
 		elif offer.get("to", "") == state.get("player_faction", ""):
 			events.append({"kind": "offer_expired", "from": offer["from"]})
@@ -364,28 +420,30 @@ static func _peace_value(data: GameData, state: Dictionary, evaluator: String, o
 		float(rules["peace_value_max"]))
 
 
-static func _offer_is_bearable(state: Dictionary, evaluator: String, offer: Dictionary) -> bool:
-	## Hard floors no price overrides: never cede the capital, never cede the
-	## last settlement, never promise money that cannot exist.
+static func _bearability_vetoes(state: Dictionary, evaluator: String, offer: Dictionary) -> Array:
+	## Hard floors no price overrides, as named labels for the appraisal UI:
+	## never cede the capital, never cede the last settlement, never promise
+	## money that cannot exist.
+	var vetoes: Array = []
 	if int(offer.get("ask_payment", 0)) > int(state["factions"][evaluator]["treasury"]):
-		return false
+		vetoes.append("beyond_our_purse")
 	var asked: Array = offer.get("ask_regions", [])
 	if asked.is_empty():
-		return true
+		return vetoes
 	var owned := 0
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == evaluator:
 			owned += 1
 	if asked.size() >= owned:
-		return false
+		vetoes.append("never_the_last_home")
 	var capital: String = state["factions"][evaluator]["capital"]
 	for region_id in asked:
 		if region_id == capital:
-			return false
-		if not state["settlements"].has(region_id) \
+			vetoes.append("never_the_capital")
+		elif not state["settlements"].has(region_id) \
 				or state["settlements"][region_id]["owner"] != evaluator:
-			return false
-	return true
+			vetoes.append("not_ours_to_cede")
+	return vetoes
 
 
 static func _nearest_owned_settlement(data: GameData, state: Dictionary, from_region: String, faction_id: String) -> String:

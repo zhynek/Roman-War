@@ -8,6 +8,7 @@ class_name AiEconomy
 const KIND_GROUPS := {
 	"government": "order", "temple": "order", "entertainment": "order", "execution": "order",
 	"farms": "growth", "health": "growth",
+	"education": "order",
 	"market": "income", "port": "income", "roads": "income", "mines": "income",
 	"barracks": "military", "stables": "military", "archery_range": "military",
 	"siege_workshop": "military", "naval": "military",

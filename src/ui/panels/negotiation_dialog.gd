@@ -129,9 +129,12 @@ func build_offer() -> Dictionary:
 func _propose() -> void:
 	var verdict := game.propose_offer(build_offer())
 	if verdict["accept"]:
-		_hint.text = "[color=#80c080][b]They accept the terms.[/b][/color]"
+		# The agreement stands. Rebuild the form so the same terms cannot be
+		# proposed (and applied) a second time by another click, and so the
+		# payment cap reflects the treasury the deal just emptied.
 		offer_concluded.emit()
-		# The agreement stands; the scroll can close at leisure.
+		_build_form()
+		_hint.text = "[color=#80c080][b]They accept the terms. The agreement stands.[/b][/color]"
 	else:
 		_refresh_hint()
 		_hint.append_text("\n[color=#e06050][b]They refuse these terms.[/b][/color]")
@@ -146,6 +149,10 @@ func _refresh_hint() -> void:
 		var value := float(factor["value"])
 		var color := "#80c080" if value >= 0 else "#e0a060"
 		lines += "[color=%s]%+.0f[/color]  %s\n" % [color, value, String(factor["label"]).replace("_", " ")]
+	# Hard vetoes are not priced — they are named, so a refusal above any
+	# mountain of silver is never a mystery.
+	for veto in verdict.get("vetoes", []):
+		lines += "[color=#e06050]✕ %s[/color]\n" % String(veto).replace("_", " ")
 	var leaning := "[color=#80c080]They would accept.[/color]" if verdict["accept"] \
 		else "[color=#e0a060]They would refuse.[/color]"
 	_hint.text = lines + leaning
@@ -183,19 +190,24 @@ func _tribute_row(parent: VBoxContainer) -> Array:
 	return [amount, turns]
 
 
-func _region_row(parent: VBoxContainer, caption: String, owner: String, into_ids: Array, exclude_capital: bool) -> OptionButton:
+func _region_row(parent: VBoxContainer, caption: String, owner: String, into_ids: Array, own_side: bool) -> OptionButton:
 	var row := HBoxContainer.new()
 	_label(row, caption, 12)
 	var picker := OptionButton.new()
 	picker.add_item(NONE_REGION)
 	into_ids.clear()
 	var capital: String = game.state["factions"][owner]["capital"]
+	# Asking for THEIR land only lists cities our maps actually show — the
+	# negotiation scroll must not become an all-seeing census of the world.
+	var visible_set := {} if own_side else game.visible_regions()
 	var region_ids: Array = game.state["settlements"].keys()
 	region_ids.sort()
 	for region_id in region_ids:
 		if game.state["settlements"][region_id]["owner"] != owner:
 			continue
-		if exclude_capital and region_id == capital:
+		if own_side and region_id == capital:
+			continue  # we never put our own capital on the table
+		if not own_side and not visible_set.has(region_id):
 			continue
 		picker.add_item(game.data.regions[region_id]["settlement_name"])
 		into_ids.append(region_id)

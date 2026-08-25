@@ -71,6 +71,18 @@ func test_revolt_after_streak(t) -> void:
 	t.check_eq(settlement["owner"], "rebels", "settlement secedes to the rebels")
 
 
+func test_revolt_of_last_settlement_destroys_the_faction(t) -> void:
+	## The destruction check must run on revolts exactly as it does on capture
+	## and cession — otherwise a landless zombie faction keeps playing.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var stray := Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
+	PublicOrderRules._revolt(data, state, "alpha")
+	t.check_eq(state["settlements"]["alpha"]["owner"], "rebels", "the city joined the rebels")
+	t.check(not state["factions"]["blue"]["alive"], "and its landless master is destroyed")
+	t.check_eq(state["armies"][stray]["owner"], "rebels", "his field army defects to the rebels")
+
+
 func test_culture_penalty(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

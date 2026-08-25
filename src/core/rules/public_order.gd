@@ -171,4 +171,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	settlement["siege"] = null
 	settlement["tax_level"] = "normal"
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
+	# A revolt can take a faction's LAST settlement — the destruction check
+	# must run here just as it does after capture and cession, or a landless
+	# zombie faction keeps playing full turns.
+	CombatRules.check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)

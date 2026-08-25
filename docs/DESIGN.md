@@ -438,8 +438,13 @@ replaced.
   side and costs the winner (`peace value` scales with relative strength);
   alliances demand real regard, not just coin. Hard floors no price overrides:
   the capital, the last settlement, promises that cannot be paid. The
-  negotiation dialog previews the appraisal live; AI↔AI offers resolve
-  immediately; AI→player offers wait in `state.pending_offers` with an expiry.
+  negotiation dialog previews the appraisal live (hard vetoes are shown by
+  name); AI↔AI offers resolve immediately; AI→player offers wait in
+  `state.pending_offers` with an expiry, and are honored only while they
+  still stand (proposer alive and solvent, land still held, no war begun
+  since). A concluded peace banks decaying goodwill on both sides — a truce
+  that stops the winner re-declaring the same season; an unpayable tribute
+  schedule collapses in default, remembered against the debtor.
 - **Agents** (`AgentRules`, `data/agents.json`, `state.agents`): diplomats,
   spies and assassins walk the terrain map across **any** border, cost hire
   and upkeep, and grant sight where they stand. A **spy** reads a settlement

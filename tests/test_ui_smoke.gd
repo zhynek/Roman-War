@@ -152,6 +152,12 @@ func test_negotiation_and_envoys(t) -> void:
 	t.check_eq(offer["stance"], "trade", "with the chosen stance")
 	negotiation._propose()
 	t.check(negotiation._hint.get_parsed_text().length() > 0, "the verdict is shown either way")
+	# A second click must never re-apply an agreement (the accepted form
+	# rebuilds empty; a refused one just gets refused again).
+	var state_after_first := JSON.stringify(JSON.parse_string(JSON.stringify(game.state)))
+	negotiation._propose()
+	t.check_eq(JSON.stringify(JSON.parse_string(JSON.stringify(game.state))), state_after_first,
+		"proposing twice changes nothing the first click did not")
 	negotiation.hide()
 
 	# A pending envoy renders and can be answered.

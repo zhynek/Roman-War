@@ -145,18 +145,35 @@ func test_defends_and_relieves_a_siege(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
 	state["player_faction"] = "rebels"
-	# Blue lands a raider that will besiege epsilon; red's field army must
-	# march the length of the line and break the siege.
+	# Blue is made incapable of suing for peace (a rational lone raider would
+	# simply buy one) and pointed at epsilon. Red starts with NO field army —
+	# otherwise blue would honestly defend its home instead of raiding — and
+	# the relief force marches in only once the siege is real.
+	data.ai_personas["warlike"] = data.ai_personas["default"].duplicate(true)
+	data.ai_personas["warlike"]["peace_willingness"] = 0.0
+	data.factions["blue"]["ai_persona"] = "warlike"
+	state["factions"]["blue"]["ai"] = {
+		"objective": {"kind": "take", "region": "epsilon", "set_turn": 0},
+		"muster": "alpha",
+	}
 	Fixtures.add_army(state, "blue", "delta", ["test_mob"])
-	Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears", "test_spears"])
 	MovementRules.reset_movement(data, state)
 
 	var game := Game.new()
 	game.data = data
 	game.resolver = AutoResolver.new()
 	game.state = state
+	var siege_seen := false
+	var relief_sent := false
 	for i in range(8):
 		game.end_turn()
+		if state["settlements"]["epsilon"]["siege"] != null:
+			siege_seen = true
+			if not relief_sent:
+				relief_sent = true
+				Fixtures.add_army(state, "red", "gamma", ["test_spears", "test_spears", "test_spears"])
+	t.check(siege_seen, "the raider actually invested epsilon")
+	t.check(relief_sent, "and a relief force marched")
 	t.check_eq(state["settlements"]["epsilon"]["owner"], "red", "epsilon held")
 	t.check(state["settlements"]["epsilon"]["siege"] == null, "the siege was broken")
 	var blue_armies := 0
@@ -164,6 +181,34 @@ func test_defends_and_relieves_a_siege(t) -> void:
 		if army["owner"] == "blue":
 			blue_armies += 1
 	t.check_eq(blue_armies, 0, "the raider was destroyed")
+
+
+func test_bought_peace_holds_as_a_truce(t) -> void:
+	## The flap this guards against: a losing side buys peace, and the winner
+	## re-declares the same season, forever. A concluded peace banks decaying
+	## goodwill on both sides, so the truce holds until it fades.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["player_faction"] = "rebels"  # red and blue are both AI here
+	Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears", "test_spears"])
+	Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	var events: Array = []
+	AiDiplomacy.run(data, state, "blue", data.ai_personas["default"], events)
+	var made := false
+	for event in events:
+		if event.get("kind", "") == "peace_made":
+			made = true
+	t.check(made, "the outmatched side bought its peace")
+
+	events.clear()
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
+		"the winner does not re-declare the same season — the truce holds")
+	for i in range(6):
+		DiplomacyRules.decay_memories(data, state)
+		AiDiplomacy.run(data, state, "red", data.ai_personas["default"], [])
+	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
+		"and still holds three years on, while the goodwill lasts")
 
 
 func test_musters_and_raises_field_army(t) -> void:
@@ -204,6 +249,30 @@ func test_musters_and_raises_field_army(t) -> void:
 	AiMilitary.run(data, state, rng, resolver, "blue", persona, events)
 	var siege = state["settlements"]["beta"]["siege"]
 	t.check(siege != null and siege["besieger"] == raised, "the raised army invests the objective")
+
+
+func test_merge_never_eats_a_besieger(t) -> void:
+	## A besieging army merged away leaves settlement.siege pointing at a dead
+	## id and silently resets the siege — so besiegers never merge at all.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var besieger := Fixtures.add_army(state, "blue", "alpha", ["test_mob", "test_mob"])
+	MovementRules.reset_movement(data, state)
+	t.check(SiegeRules.begin_siege(data, state, besieger, "beta"), "the siege is laid")
+
+	# A general-led relief stack arrives in the same region: normally the
+	# generaled army absorbs the leaderless one.
+	var relief := Fixtures.add_army(state, "blue", "beta", ["test_mob"])
+	Fixtures.add_character(state, "blue", "blue_general", {"location": "beta"})
+	state["armies"][relief]["general"] = "blue_general"
+
+	state["factions"]["blue"]["ai"] = {"objective": {"kind": "take", "region": "beta", "set_turn": 0}, "muster": "alpha"}
+	var events: Array = []
+	AiMilitary.run(data, state, CampaignRng.seeded(2), AutoResolver.new(), "blue",
+		data.ai_personas["default"], events)
+	t.check(state["armies"].has(besieger), "the besieger survives as itself")
+	var siege = state["settlements"]["beta"]["siege"]
+	t.check(siege != null and siege["besieger"] == besieger, "and the siege pointer holds")
 
 
 func test_ai_turn_is_deterministic(t) -> void:
