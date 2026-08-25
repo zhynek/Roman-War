@@ -23,6 +23,7 @@
     "ai",
     "diplomacy",
     "agents",
+    "knowledge",
     "characters"
   ],
   "additionalProperties": false,
@@ -241,6 +242,42 @@
     },
     "characters": {
       "$ref": "#/$defs/numeric_section"
+    },
+    "knowledge": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "conquest_discount_pct",
+            "diffusion_alliance_mult",
+            "diffusion_base_chance",
+            "diffusion_border_mult",
+            "diffusion_same_culture_mult",
+            "diffusion_scholarship_mult_per_point",
+            "diffusion_trade_mult",
+            "diffusion_war_mult",
+            "espionage_discount_pct",
+            "max_concurrent_adoptions",
+            "origination_base_chance",
+            "origination_education_bonus_per_level",
+            "origination_scholarship_mult_per_point",
+            "reform_military_discount_pct_at_max",
+            "reform_origination_bonus_at_max",
+            "reform_pressure_decay_per_turn",
+            "reform_pressure_max",
+            "reform_pressure_per_battle_loss",
+            "reform_pressure_per_settlement_lost",
+            "steal_base_chance",
+            "steal_failure_death_chance",
+            "steal_max_chance",
+            "steal_min_chance",
+            "steal_per_counter_intel",
+            "steal_per_skill"
+          ]
+        }
+      ]
     }
   },
   "$defs": {

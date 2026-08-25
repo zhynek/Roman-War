@@ -26,6 +26,7 @@ TABLES = {
     "balance.json": "balance.schema.json",
     "ai.json": "ai.schema.json",
     "agents.json": "agents.schema.json",
+    "techniques.json": "techniques.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -122,6 +123,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         if required_kind not in agent_kinds:
             err(f"agents: kind {required_kind} missing (the engine expects all three)")
 
+
     # --- buildings + temples ---------------------------------------------
     chains: dict[str, dict] = {}
     level_ids: dict[str, str] = {}  # level id -> chain id
@@ -198,6 +200,96 @@ def cross_checks(t: dict[str, dict]) -> None:
                        if faction_id in u["factions"] or "all" in u["factions"]]
         if len(recruitable) < 3:
             err(f"units: faction {faction_id} can recruit only {len(recruitable)} unit types")
+
+    # --- techniques -------------------------------------------------------
+    techniques = {}
+    for technique in t.get("techniques.json", {}).get("techniques", []):
+        if technique["id"] in techniques:
+            err(f"techniques: duplicate id {technique['id']}")
+        techniques[technique["id"]] = technique
+
+    all_resources = set()
+    all_hidden = set()
+    for region in t.get("regions.json", {}).get("regions", []):
+        all_resources.update(region.get("resources", []))
+        all_hidden.update(region.get("hidden_resources", []))
+
+    for technique in techniques.values():
+        tid = technique["id"]
+        for fid in technique["start_adopted"].get("factions", []):
+            if fid not in factions:
+                err(f"techniques: {tid}: unknown start_adopted faction {fid}")
+        prereq = technique["prerequisites"]
+        for dependency in prereq.get("techniques", []):
+            if dependency not in techniques:
+                err(f"techniques: {tid}: unknown prerequisite technique {dependency}")
+        if prereq["resource"] and prereq["resource"] not in all_resources:
+            err(f"techniques: {tid}: prerequisite resource {prereq['resource']} "
+                f"appears in no region")
+        if prereq["hidden_resource"] and prereq["hidden_resource"] not in all_hidden:
+            err(f"techniques: {tid}: prerequisite hidden_resource "
+                f"{prereq['hidden_resource']} appears in no region")
+
+    # Prerequisite graph must be acyclic (DFS with colors).
+    color = {}  # 0 unvisited, 1 in-stack, 2 done
+
+    def visit(tid: str) -> bool:
+        if color.get(tid, 0) == 1:
+            return False
+        if color.get(tid, 0) == 2:
+            return True
+        color[tid] = 1
+        for dependency in techniques.get(tid, {}).get("prerequisites", {}).get("techniques", []):
+            if dependency in techniques and not visit(dependency):
+                err(f"techniques: prerequisite cycle through {tid} -> {dependency}")
+                return False
+        color[tid] = 2
+        return True
+
+    for tid in sorted(techniques):
+        visit(tid)
+
+    # Per-culture reachability: warn when a technique names a culture as
+    # originator or starting holder whose building tree can never satisfy the
+    # institution gate (history has holes, but authored ones should be meant).
+    for technique in techniques.values():
+        need_kind = technique["prerequisites"]["building_kind"]
+        need_level = technique["prerequisites"]["building_level"]
+        if not need_kind or need_level <= 0:
+            continue
+        for culture in set(technique["origin_cultures"]) | set(technique["start_adopted"]["cultures"]):
+            satisfiable = any(
+                c["kind"] == need_kind and len(c["levels"]) >= need_level
+                and culture in c["cultures"]
+                for c in chains.values())
+            if not satisfiable and culture != "neutral":
+                warn(f"techniques: {technique['id']}: culture {culture} is named as "
+                     f"origin/holder but can never build {need_kind} L{need_level}")
+
+    # requires_technique gates on units and building levels must resolve.
+    for unit in units.values():
+        gate = unit.get("requires_technique", "")
+        if gate and gate not in techniques:
+            err(f"units: {unit['id']}: unknown requires_technique {gate}")
+    for chain in chains.values():
+        for level in chain["levels"]:
+            gate = level.get("requires_technique", "")
+            if gate and gate not in techniques:
+                err(f"buildings: {level['id']}: unknown requires_technique {gate}")
+
+    # Hidden resources must be referenced by SOMETHING (event or technique) —
+    # and vice versa the events check below already validates its own refs.
+    referenced_hidden = {technique["prerequisites"]["hidden_resource"]
+                         for technique in techniques.values()
+                         if technique["prerequisites"]["hidden_resource"]}
+    for event in t.get("events.json", {}).get("events", []):
+        hidden = event.get("trigger", {}).get("hidden_resource", "")
+        if hidden:
+            referenced_hidden.add(hidden)
+            if hidden not in all_hidden:
+                err(f"events: {event['id']}: hidden_resource {hidden} appears in no region")
+    for hidden in sorted(all_hidden - referenced_hidden):
+        warn(f"regions: hidden resource {hidden} is referenced by no event or technique")
 
     # --- regions ----------------------------------------------------------
     regions = {r["id"]: r for r in t.get("regions.json", {}).get("regions", [])}
@@ -540,7 +632,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "personas", "agents"):
+                "personas", "agents", "techniques"):
         if key in document:
             return len(document[key])
     return 0

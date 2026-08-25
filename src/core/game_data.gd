@@ -22,6 +22,7 @@ var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
 var ai_personas: Dictionary = {}       # id -> persona dict
 var agent_kinds: Dictionary = {}       # id -> agent kind dict (diplomat/spy/assassin)
+var techniques: Dictionary = {}        # id -> technique dict (the knowledge of the age)
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -90,6 +91,8 @@ func _load_all(dir: String) -> void:
 		ai_personas[persona["id"]] = persona
 	for agent_kind in _read_json(dir + "/agents.json").get("agents", []):
 		agent_kinds[agent_kind["id"]] = agent_kind
+	for technique in _read_json(dir + "/techniques.json").get("techniques", []):
+		techniques[technique["id"]] = technique
 
 
 func _read_json(path: String) -> Dictionary:

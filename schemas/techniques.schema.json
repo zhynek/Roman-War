@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "techniques.schema.json",
+  "title": "Techniques (the knowledge of the ancient world)",
+  "type": "object",
+  "required": ["techniques"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "techniques": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "domain", "historical_basis", "start_adopted",
+          "origin_cultures", "prerequisites", "adoption", "culture_resistance",
+          "effects"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "domain": {
+            "enum": ["military_engineering", "naval", "agrarian", "hydraulic_civic",
+              "metallurgy_craft", "medicine", "scholarship_statecraft", "logistics_trade"]
+          },
+          "historical_basis": { "type": "string", "minLength": 40 },
+          "start_adopted": {
+            "type": "object",
+            "required": ["cultures", "factions"],
+            "additionalProperties": false,
+            "properties": {
+              "cultures": { "type": "array", "items": { "$ref": "#/$defs/culture" } },
+              "factions": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "origin_cultures": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/culture" },
+            "description": "Cultures that can independently originate it; empty = anyone meeting the prerequisites"
+          },
+          "prerequisites": {
+            "type": "object",
+            "required": ["building_kind", "building_level", "resource", "hidden_resource", "coastal", "techniques"],
+            "additionalProperties": false,
+            "properties": {
+              "building_kind": {
+                "enum": ["", "government", "walls", "barracks", "stables", "archery_range",
+                  "siege_workshop", "naval", "market", "farms", "roads", "port", "mines",
+                  "health", "entertainment", "execution", "education", "temple"]
+              },
+              "building_level": { "type": "integer", "minimum": 0 },
+              "resource": { "type": "string" },
+              "hidden_resource": { "type": "string" },
+              "coastal": { "type": "boolean" },
+              "techniques": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "adoption": {
+            "type": "object",
+            "required": ["cost", "turns"],
+            "additionalProperties": false,
+            "properties": {
+              "cost": { "type": "integer", "minimum": 0 },
+              "turns": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "culture_resistance": {
+            "type": "object",
+            "additionalProperties": false,
+            "propertyNames": { "$ref": "#/$defs/culture" },
+            "patternProperties": {
+              "^[a-z]+$": { "type": "number", "minimum": 1.0, "maximum": 3.0 }
+            }
+          },
+          "effects": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "growth": { "type": "number" },
+              "happiness": { "type": "number" },
+              "trade_pct": { "type": "number" },
+              "farm_income_pct": { "type": "number" },
+              "mine_income_pct": { "type": "number" },
+              "plague_resistance": { "type": "number" },
+              "corruption_reduction_pct": { "type": "number" },
+              "weapon_upgrade": { "type": "integer", "minimum": 1, "maximum": 2 },
+              "armor_upgrade": { "type": "integer", "minimum": 1, "maximum": 2 },
+              "recruit_xp": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "naval_movement_pct": { "type": "number" },
+              "movement_points": { "type": "number" },
+              "siege_equipment_turns_delta": { "type": "integer", "maximum": 0 },
+              "wall_level_bonus": { "type": "integer", "minimum": 1, "maximum": 2 },
+              "scholarship": { "type": "number", "minimum": 0 },
+              "build_cost_pct": { "type": "number", "maximum": 0 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "culture": {
+      "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"]
+    }
+  }
+}
