@@ -19,7 +19,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "ai": [], "diplomacy": [], "winner": null,
+		"knowledge": [], "senate": [], "characters": [], "ai": [],
+		"diplomacy": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -75,6 +76,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			report["revolted"].append(region_id)
 
 	report["events"] = EventRules.process_turn(data, state, rng)
+	report["knowledge"] = KnowledgeRules.process_turn(data, state, rng)
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)

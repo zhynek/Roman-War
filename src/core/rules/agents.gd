@@ -213,6 +213,61 @@ static func envoy_bonus(data: GameData, state: Dictionary, from_id: String, to_i
 	return best
 
 
+static func steal_chance(data: GameData, state: Dictionary, agent: Dictionary) -> float:
+	## Exposed odds for stealing a craft from the city the spy stands in, so
+	## the UI can price the risk. Counter-intelligence is the governor's
+	## agent_skill, same as assassination.
+	var rules: Dictionary = data.balance["knowledge"]
+	var counter := counter_intelligence(data, state, String(agent["region"]))
+	var chance := float(rules["steal_base_chance"]) \
+		+ float(agent["skill"]) * float(rules["steal_per_skill"]) \
+		- counter * float(rules["steal_per_counter_intel"])
+	return clampf(chance, float(rules["steal_min_chance"]), float(rules["steal_max_chance"]))
+
+
+static func steal_technique(data: GameData, state: Dictionary, rng: CampaignRng, agent_id: String, technique_id: String) -> Dictionary:
+	## A spy copies drawings, hires away a master craftsman, bribes a clerk of
+	## the works: success brings home AWARENESS of a craft the city's owner has
+	## institutionalized, plus a head start on adopting it (the espionage
+	## discount). Failure risks the spy. Returns
+	## {attempted, success, agent_lost, chance}.
+	var refused := {"attempted": false, "success": false, "agent_lost": false, "chance": 0.0}
+	var agent: Dictionary = state["agents"].get(agent_id, {})
+	if agent.is_empty() or agent["kind"] != "spy":
+		return refused
+	var region_id: String = agent["region"]
+	if not state["settlements"].has(region_id):
+		return refused
+	var owner: String = state["settlements"][region_id]["owner"]
+	if owner == agent["owner"]:
+		return refused
+	# The city cannot teach what its masters do not practice.
+	var source: Dictionary = KnowledgeRules.knowledge_of(state, owner)
+	if String(source.get(technique_id, {}).get("stage", "")) != "adopted":
+		return refused
+	# A court already aware (however it learned) has nothing left to steal —
+	# awareness IS the stolen good.
+	var thief_knowledge := KnowledgeRules.knowledge_of(state, String(agent["owner"]))
+	if String(thief_knowledge.get(technique_id, {}).get("stage", "")) != "":
+		return refused
+
+	var rules: Dictionary = data.balance["knowledge"]
+	var chance := steal_chance(data, state, agent)
+	var result := {"attempted": true, "success": false, "agent_lost": false, "chance": chance}
+	if rng.chance(chance):
+		thief_knowledge[technique_id] = {
+			"stage": "aware", "turn": int(state["turn"]), "progress": 0,
+			"discount_pct": float(rules["espionage_discount_pct"]),
+		}
+		agent["skill"] = mini(int(agent["skill"]) + 1, int(data.balance["agents"]["skill_max"]))
+		result["success"] = true
+	elif rng.chance(float(rules["steal_failure_death_chance"])):
+		state["agents"].erase(agent_id)
+		result["agent_lost"] = true
+	agent["movement_left"] = 0.0
+	return result
+
+
 static func reset_movement(data: GameData, state: Dictionary) -> void:
 	for agent in state["agents"].values():
 		agent["movement_left"] = float(data.agent_kinds.get(agent["kind"], {}).get("movement_points", 2))

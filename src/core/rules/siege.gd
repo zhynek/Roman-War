@@ -88,6 +88,11 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	if result.get("defender_general_died", false) and governor != null:
 		CharacterRules.kill(state, governor, data)
 
+	# A bloody repulse at the walls teaches the attacker (the defender's own
+	# reckoning, if the city falls, comes through capture_settlement).
+	if result["winner"] != "attacker":
+		KnowledgeRules.on_battle_lost(data, state, String(army["owner"]))
+
 	# Settle the attacker's fate BEFORE any laurels: an assault that leaves no
 	# man standing takes nothing, and its dead general wins no honours.
 	if army["units"].is_empty():

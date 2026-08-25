@@ -77,7 +77,7 @@ func test_save_resume_equivalence_with_ai(t) -> void:
 
 	var restored := SaveGame.from_json(SaveGame.to_json(game.state))
 	t.check(not restored.is_empty(), "mid-campaign save parses back")
-	NewGame.ensure_state_keys(restored)
+	NewGame.ensure_state_keys(restored, game.data)
 	var resumed := Game.new()
 	resumed.data = game.data
 	resumed.resolver = AutoResolver.new()

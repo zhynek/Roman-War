@@ -31,6 +31,10 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	})
 
 	_process_general_deaths(data, state, attacker, defender, result)
+	# Defeat teaches: the beaten court accumulates reform pressure (the
+	# boarding-bridge law — see KnowledgeRules).
+	KnowledgeRules.on_battle_lost(data, state,
+		String(defender["owner"] if result["winner"] == "attacker" else attacker["owner"]))
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
 		MovementRules.sync_general_location(state, attacker)
@@ -121,6 +125,12 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 
 	var taken := displace_characters(data, state, region_id, previous_owner)
+
+	# The fall of a city both teaches and warns: the victor gains awareness of
+	# every craft its late owner practiced (with a conquest discount toward
+	# adopting them), and the loser's court accumulates reform pressure.
+	KnowledgeRules.on_settlement_captured(data, state, new_owner, previous_owner)
+	KnowledgeRules.on_settlement_lost(data, state, previous_owner)
 
 	# Losing your last settlement destroys the faction.
 	_check_faction_destroyed(state)

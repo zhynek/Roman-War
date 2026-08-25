@@ -64,6 +64,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"at_civil_war": false,
 			"ai": {},
 			"attitude_memory": {},
+			"knowledge": _starting_knowledge(data, fid),
+			"reform_pressure": 0.0,
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -82,6 +84,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
+		"knowledge": {}, "reform_pressure": 0.0,
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -121,11 +124,13 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	return state
 
 
-static func ensure_state_keys(state: Dictionary) -> void:
+static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## Fill state keys added by later phases with their defaults, so a save
 	## written before those phases loads cleanly (save compatibility is
 	## additive; SAVE_VERSION stays 1). Every new engine reader ALSO tolerates
 	## the missing key via .get — this just normalizes eagerly on load.
+	## With `data` supplied, a pre-knowledge save's factions receive their
+	## culture's 270 BC technique endowment instead of an empty ledger.
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 	for faction_id in faction_ids:
@@ -134,12 +139,31 @@ static func ensure_state_keys(state: Dictionary) -> void:
 			faction["ai"] = {}
 		if not faction.has("attitude_memory"):
 			faction["attitude_memory"] = {}
+		if not faction.has("reform_pressure"):
+			faction["reform_pressure"] = 0.0
+		if not faction.has("knowledge"):
+			faction["knowledge"] = {} if (data == null or faction_id == "rebels") \
+				else _starting_knowledge(data, faction_id)
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):
 		state["pending_offers"] = []
 	if not state.has("agents"):
 		state["agents"] = {}
+
+
+static func _starting_knowledge(data: GameData, faction_id: String) -> Dictionary:
+	## The 270 BC endowment: crafts this court's culture (or the court itself,
+	## by faction id) already practices when the campaign opens.
+	var culture := data.culture_of_faction(faction_id)
+	var knowledge := {}
+	var technique_ids: Array = data.techniques.keys()
+	technique_ids.sort()
+	for tid in technique_ids:
+		var start: Dictionary = data.techniques[tid].get("start_adopted", {})
+		if start.get("cultures", []).has(culture) or start.get("factions", []).has(faction_id):
+			knowledge[tid] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	return knowledge
 
 
 static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dictionary:

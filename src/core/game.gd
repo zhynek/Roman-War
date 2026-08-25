@@ -201,6 +201,15 @@ func agent_bribe(agent_id: String, army_id: String) -> Dictionary:
 	return AgentRules.bribe_army(data, state, agent_id, army_id)
 
 
+func agent_steal_technique(agent_id: String, technique_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	var rng := _rng()
+	var result := AgentRules.steal_technique(data, state, rng, agent_id, technique_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
 func agents_in(region_id: String) -> Array:
 	## Agents standing in a region, sorted by id — [{id, agent}] for the UI.
 	var found: Array = []
@@ -210,6 +219,48 @@ func agents_in(region_id: String) -> Array:
 		if state["agents"][agent_id]["region"] == region_id:
 			found.append({"id": agent_id, "agent": state["agents"][agent_id]})
 	return found
+
+
+## --- Knowledge (Phase 6) ---------------------------------------------------
+
+func technique_overview(faction_id: String = "") -> Dictionary:
+	## Everything the knowledge panel shows for one court: what it practices,
+	## what its craftsmen are institutionalizing, what it merely knows of (with
+	## the price of taking it up), and the reform pressure on its arsenal.
+	## Fog of knowledge: only techniques in the faction's own ledger appear.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	if not state["factions"].has(fid):
+		return {"entries": [], "reform_pressure": 0.0}
+	var caches := KnowledgeRules.build_caches(data, state)
+	var knowledge := KnowledgeRules.knowledge_of(state, fid)
+	var entries: Array = []
+	var tids: Array = knowledge.keys()
+	tids.sort()
+	for tid in tids:
+		var technique: Dictionary = data.techniques.get(tid, {})
+		if technique.is_empty():
+			continue
+		var entry: Dictionary = knowledge[tid]
+		entries.append({
+			"id": tid,
+			"name": technique["name"],
+			"domain": technique["domain"],
+			"stage": entry["stage"],
+			"progress": int(entry.get("progress", 0)),
+			"turns": int(technique["adoption"]["turns"]),
+			"cost": KnowledgeRules.adoption_cost(data, state, fid, tid),
+			"ready": KnowledgeRules.prerequisites_met(data, state, caches, fid, technique),
+			"effects": technique.get("effects", {}),
+			"historical_basis": technique["historical_basis"],
+		})
+	return {
+		"entries": entries,
+		"reform_pressure": float(state["factions"][fid].get("reform_pressure", 0.0)),
+	}
+
+
+func begin_adoption(technique_id: String) -> Dictionary:
+	return KnowledgeRules.begin_adoption(data, state, String(state["player_faction"]), technique_id)
 
 
 ## --- Family & characters --------------------------------------------------
@@ -343,7 +394,7 @@ func load_from(path: String) -> bool:
 	var loaded := SaveGame.read_file(path)
 	if loaded.is_empty():
 		return false
-	NewGame.ensure_state_keys(loaded)
+	NewGame.ensure_state_keys(loaded, data)
 	state = loaded
 	return true
 

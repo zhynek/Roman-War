@@ -66,6 +66,13 @@ static func data() -> GameData:
 				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {}, "description": ""},
 			],
 		},
+		{
+			"id": "test_education", "kind": "education", "cultures": ["roman"], "name": "Learning",
+			"levels": [
+				{"id": "edu_1", "name": "School", "min_settlement_level": "village", "cost": 500, "build_turns": 1, "effects": {}, "description": ""},
+				{"id": "edu_2", "name": "Academy", "min_settlement_level": "town", "cost": 1000, "build_turns": 2, "effects": {}, "description": ""},
+			],
+		},
 	]
 	for chain in chains:
 		game_data.chains[chain["id"]] = chain
@@ -195,6 +202,49 @@ static func data() -> GameData:
 			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
 	}
 
+	game_data.techniques = {
+		"test_smithing": {
+			"id": "test_smithing", "name": "Pattern Smithing", "domain": "metallurgy_craft",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": ["barbarian"], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "barracks", "building_level": 1, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 600, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"weapon_upgrade": 1},
+		},
+		"test_letters": {
+			"id": "test_letters", "name": "Letters", "domain": "scholarship_statecraft",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": ["roman"],
+			"prerequisites": {"building_kind": "education", "building_level": 1, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 400, "turns": 1},
+			"culture_resistance": {"barbarian": 2.0},
+			"effects": {"scholarship": 1},
+		},
+		"test_irrigation": {
+			"id": "test_irrigation", "name": "Ditch Irrigation", "domain": "agrarian",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "farms", "building_level": 1, "resource": "grain", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 500, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"growth": 0.5, "farm_income_pct": 10},
+		},
+		"test_greatworks": {
+			"id": "test_greatworks", "name": "Great Works", "domain": "military_engineering",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "", "building_level": 0, "resource": "", "hidden_resource": "", "coastal": false, "techniques": ["test_letters"]},
+			"adoption": {"cost": 800, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"wall_level_bonus": 1},
+		},
+	}
+
 	return game_data
 
 
@@ -262,6 +312,7 @@ static func _faction(capital: String) -> Dictionary:
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
+		"knowledge": {}, "reform_pressure": 0.0,
 	}
 
 
