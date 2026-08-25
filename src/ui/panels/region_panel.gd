@@ -12,6 +12,7 @@ signal agent_selected(agent_id: String)
 signal scout_requested(agent_id: String)
 signal assassinate_requested(agent_id: String, target_char_id: String)
 signal bribe_requested(agent_id: String, army_id: String)
+signal steal_requested(agent_id: String, technique_id: String)
 
 var game: Game
 var region_id := ""
@@ -298,6 +299,7 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
 		"spy":
 			if game.state["settlements"].has(region_id):
 				_action_button("Scout the settlement", func(): scout_requested.emit(agent_id))
+				_build_steal_options(agent_id, agent)
 		"assassin":
 			var targets: Array = []
 			var char_ids: Array = game.state["characters"].keys()
@@ -332,6 +334,33 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
 				var owner_name: String = game.data.factions.get(army["owner"], {}).get("name", army["owner"])
 				_action_button("Bribe the %s band — %d units (%d)" % [owner_name, army["units"].size(), cost],
 					func(): bribe_requested.emit(agent_id, army_id))
+
+
+func _build_steal_options(agent_id: String, agent: Dictionary) -> void:
+	## Crafts the city's owner practices and our court has never heard of —
+	## the spy can bring the drawings home, with the odds shown up front.
+	var owner: String = game.state["settlements"][region_id]["owner"]
+	var player: String = game.state["player_faction"]
+	if owner == player:
+		return
+	var ours: Dictionary = game.state["factions"][player].get("knowledge", {})
+	var theirs: Dictionary = game.state["factions"].get(owner, {}).get("knowledge", {})
+	var stealable: Array = []
+	var tids: Array = theirs.keys()
+	tids.sort()
+	for tid in tids:
+		if String(theirs[tid].get("stage", "")) == "adopted" and not ours.has(tid):
+			stealable.append(tid)
+	if stealable.is_empty():
+		return
+	var odds := AgentRules.steal_chance(game.data, game.state, agent)
+	var picker := OptionButton.new()
+	for tid in stealable:
+		picker.add_item(String(game.data.techniques.get(tid, {}).get("name", tid)))
+	add_child(picker)
+	_action_button("Steal the craft (%d%%)" % int(round(odds * 100)), func():
+		if picker.selected >= 0:
+			steal_requested.emit(agent_id, stealable[picker.selected]))
 
 
 ## --- Small builders -------------------------------------------------------

@@ -13,6 +13,7 @@ var map_view: MapView
 var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
+var knowledge_panel: KnowledgePanel
 var report_log: RichTextLabel
 var top_labels := {}
 var top_swatch: ColorRect
@@ -63,6 +64,7 @@ func _ready() -> void:
 	region_panel.scout_requested.connect(_scout_order)
 	region_panel.assassinate_requested.connect(_assassinate_order)
 	region_panel.bribe_requested.connect(_bribe_order)
+	region_panel.steal_requested.connect(_steal_order)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -78,6 +80,10 @@ func _ready() -> void:
 	diplomacy_panel = DiplomacyPanel.new()
 	diplomacy_panel.stance_changed.connect(refresh)
 	add_child(diplomacy_panel)
+
+	knowledge_panel = KnowledgePanel.new()
+	knowledge_panel.knowledge_changed.connect(refresh)
+	add_child(knowledge_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
@@ -104,6 +110,7 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -219,6 +226,20 @@ func _assassinate_order(agent_id: String, target_char_id: String) -> void:
 				% target["name"])
 		elif result.get("attempted", false):
 			_log("The attempt on %s failed; our man slipped away." % target["name"])
+		refresh())
+
+
+func _steal_order(agent_id: String, technique_id: String) -> void:
+	var technique_name: String = game.data.techniques.get(technique_id, {}).get("name", technique_id)
+	_confirm("Send our informer after the secrets of %s? Failure may cost us the man." % technique_name, func():
+		var result := game.agent_steal_technique(agent_id, technique_id)
+		if result.get("success", false):
+			_log("[color=#80a0c0][b]The drawings of %s are ours.[/b] Taking it up will come cheaper now (Knowledge).[/color]"
+				% technique_name)
+		elif result.get("agent_lost", false):
+			_log("[color=#e0a060]Our informer was taken copying the secrets of %s.[/color]" % technique_name)
+		elif result.get("attempted", false):
+			_log("Our informer came away empty-handed; the %s secrets are still kept." % technique_name)
 		refresh())
 
 
@@ -404,8 +425,36 @@ func _log_report(report: Dictionary) -> void:
 		elif notice.has("ancillary"):
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
+	_log_knowledge_news(report)
 	_log_starved_sieges(report)
 	_log_world_news(report)
+
+
+func _log_knowledge_news(report: Dictionary) -> void:
+	## The player's own court in full; foreign courts only when a craft is
+	## institutionalized (a fleet with boarding bridges is visible to all —
+	## rumors and half-built programs are what spies are for).
+	var player: String = game.state["player_faction"]
+	for event in report["knowledge"]:
+		var technique_name: String = game.data.techniques.get(event.get("technique", ""), {}).get("name", event.get("technique", ""))
+		var faction_id := String(event.get("faction", ""))
+		match String(event.get("kind", "")):
+			"technique_adopted":
+				if faction_id == player:
+					var crisis: bool = float(game.state["factions"][player].get("reform_pressure", 0.0)) > 0.0
+					var color := "#e0a060" if crisis else "#c0b060"
+					_log("[color=%s][b]Our craftsmen now practice %s.[/b][/color]" % [color, technique_name])
+				else:
+					_log("[color=#9090d0]%s now practices %s.[/color]"
+						% [_faction_name(faction_id), technique_name])
+			"technique_originated":
+				if faction_id == player:
+					_log("[color=#c0b060][b]Our own people have devised %s![/b][/color] The court may take it up (Knowledge)."
+						% technique_name)
+			"technique_spread":
+				if faction_id == player:
+					_log("[color=#80a0c0]Word of %s reaches our court from %s (Knowledge).[/color]"
+						% [technique_name, _faction_name(String(event.get("from", "")))])
 
 
 func _log_starved_sieges(report: Dictionary) -> void:

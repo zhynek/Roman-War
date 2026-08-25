@@ -70,6 +70,11 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	t.check(screen.family_panel._content.get_child_count() > 0, "family listed")
 	screen.family_panel.hide()
 
+	# The knowledge scroll opens with the Roman endowment already practiced.
+	screen.knowledge_panel.open_for(game)
+	t.check(screen.knowledge_panel._content.get_child_count() > 0, "knowledge scroll populated")
+	screen.knowledge_panel.hide()
+
 	screen.free()
 
 
