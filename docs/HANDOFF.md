@@ -37,10 +37,9 @@ chronicle (narrator contract in `schemas/chronicle_entry.schema.json`) with
 war/reign ledgers, character deeds, 12 epithets and prose annals; event
 vocabulary (repeatable events on cooldowns, faction moods, scripted
 technique grants, obituaries for the great powers). A 100-turn soak
-(`tools/soak.gd`) shows ~185 adoptions with every living court holding a
-distinct knowledge signature, 50+ edicts held, ~600-entry chronicles, and
-`divergence: 0.20` across seeds — one seed an age of statecraft (15 wars),
-the other an age of iron (48).
+(`tools/soak.gd`) shows 139–186 adoptions with nearly every living court
+holding a distinct knowledge signature, ~50 edicts held across all seven
+categories, ~600-entry chronicles, and `divergence: 0.29` across seeds.
 
 **Green as of the head of this branch:** 176 tests / 0 failures, validator 0
 errors / 0 warnings, clean boot, end_turn ≈ 235 ms average over 60 turns
@@ -234,7 +233,12 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   four probe-confirmed economy exploits (gifting third-party regions, minting
   tribute from empty purses, stale envoy offers, purchasable peace with the
   rebels) and, chasing one of its test regressions, the peace↔war flap the
-  truce memory now prevents. Budget a fix commit after each round.
+  truce memory now prevents. The Deep Strategy round found 24 more — among
+  them the senate silently overwriting `popular_standing` every turn (which
+  had made ALL edict political tensions dead code), a free enact→repeal
+  standing mint, the AI freezing on the four cheapest edicts forever, and
+  two epithets that were provably unreachable under one-name-ever. Budget a
+  fix commit after each round.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.
