@@ -352,7 +352,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"alpha": _settlement("blue", 1200, {"tribal_government": 1}),
 		},
 		"armies": {}, "fleets": {}, "characters": {},
-		"events_fired": [], "winner": null, "next_id": 1,
+		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
 		"tributes": [], "pending_offers": [], "agents": {},
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}

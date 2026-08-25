@@ -45,6 +45,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"fleets": {},
 		"characters": {},
 		"events_fired": [],
+		"event_cooldowns": {},
 		"winner": null,
 		"next_id": 1,
 		"tributes": [],
@@ -159,6 +160,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		state["chronicle"] = []
 	if not state.has("wars"):
 		state["wars"] = []
+	if not state.has("event_cooldowns"):
+		state["event_cooldowns"] = {}
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):

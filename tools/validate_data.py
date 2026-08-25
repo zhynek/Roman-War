@@ -368,6 +368,19 @@ def cross_checks(t: dict[str, dict]) -> None:
     for hidden in sorted(all_hidden - referenced_hidden):
         warn(f"regions: hidden resource {hidden} is referenced by no event or technique")
 
+    # Repeatable events must rest (a cooldown-less once:false event would fire
+    # every single turn its condition holds), and scripted technique grants
+    # must name real crafts.
+    for event in t.get("events.json", {}).get("events", []):
+        if event.get("once", True) is False and "cooldown_turns" not in event:
+            err(f"events: {event['id']}: once:false requires cooldown_turns")
+        granted = event.get("effects", {}).get("grant_technique", "")
+        if granted and granted not in techniques:
+            err(f"events: {event['id']}: unknown grant_technique {granted}")
+        target = event.get("trigger", {}).get("faction", "")
+        if target and target not in factions:
+            err(f"events: {event['id']}: unknown trigger faction {target}")
+
     # --- regions ----------------------------------------------------------
     regions = {r["id"]: r for r in t.get("regions.json", {}).get("regions", [])}
     zones = {z["id"]: z for z in t.get("regions.json", {}).get("sea_zones", [])}

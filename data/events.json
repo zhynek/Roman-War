@@ -142,6 +142,42 @@
       },
       "once": true,
       "text": "Word runs through every forum: a great house has raised its standards against the Senate itself. Brother watches brother, and the markets are afraid."
+    },
+    {
+      "id": "fall_of_carthage",
+      "name": "The Punic Sea Falls Silent",
+      "trigger": {
+        "condition": "faction_destroyed",
+        "faction": "carthage"
+      },
+      "text": "Carthage is finished. The double harbor that sheltered a hundred warships stands empty to the gulls; the counting-houses that priced every cargo from the Pillars to the Levant are ash and broken tile. Merchants who steered by her lighthouses now steer by her ruin. Somewhere her scattered captains still hold the old sailing-books - but the city that wrote them will write no more."
+    },
+    {
+      "id": "fall_of_macedon",
+      "name": "The Phalanx Breaks Forever",
+      "trigger": {
+        "condition": "faction_destroyed",
+        "faction": "macedon"
+      },
+      "text": "The kingdom of the mountain kings is no more. From these valleys a boy-king once marched the sarissa to the edge of the known world; now the drill-fields lie under grass and the royal tombs keep their gold for robbers. Every court that apes Macedonian fashion, every phalanx that fronts a battle line, is a quotation from a book now closed."
+    },
+    {
+      "id": "fall_of_seleucia",
+      "name": "The Scepter of the East Is Broken",
+      "trigger": {
+        "condition": "faction_destroyed",
+        "faction": "seleucia"
+      },
+      "text": "The house that inherited the largest share of the conqueror's world has lost its last city. Its roads and river-ports bound Greek to Persian to Babylonian for a century and a half; its founder took the name Conqueror and earned it. The satrapies will keep the roads and forget the dynasty - that is how the East buries its kings."
+    },
+    {
+      "id": "fall_of_egypt",
+      "name": "The Last Light on the Delta",
+      "trigger": {
+        "condition": "faction_destroyed",
+        "faction": "egypt"
+      },
+      "text": "The oldest throne in the world stands empty. The granary of the sea, the treasury that outbid every rival, the Museum where the age kept its learning - all of it passes to other hands. The river will flood on schedule, indifferent; the scholars will serve new patrons, as scholars do. But no one again will rule as god-king over the gift of the Nile."
     }
   ],
   "disasters": [
