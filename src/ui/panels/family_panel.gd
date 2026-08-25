@@ -41,7 +41,10 @@ func _build_member(char_id: String, character: Dictionary) -> void:
 	var header := Label.new()
 	var role_tag: String = {"leader": "★ Leader", "heir": "◆ Heir", "family": "Family",
 		"child": "Child", "spouse": "Spouse"}.get(character["role"], "")
-	header.text = "%s — %s, age %d" % [sheet["name"], role_tag, int(sheet["age"])]
+	var called := ""
+	if String(sheet.get("epithet", "")) != "":
+		called = ", called %s" % sheet["epithet"]
+	header.text = "%s%s — %s, age %d" % [sheet["name"], called, role_tag, int(sheet["age"])]
 	header.add_theme_font_size_override("font_size", 14)
 	header.add_theme_color_override("font_color", Color(0.95, 0.9, 0.75))
 	_content.add_child(header)

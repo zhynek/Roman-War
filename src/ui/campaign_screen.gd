@@ -15,6 +15,7 @@ var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var knowledge_panel: KnowledgePanel
 var edicts_panel: EdictsPanel
+var annals_panel: AnnalsPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var top_swatch: ColorRect
@@ -90,6 +91,9 @@ func _ready() -> void:
 	edicts_panel.edicts_changed.connect(refresh)
 	add_child(edicts_panel)
 
+	annals_panel = AnnalsPanel.new()
+	add_child(annals_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -117,6 +121,7 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
 	bar.add_child(_bar_button("Edicts", func(): edicts_panel.open_for(game)))
+	bar.add_child(_bar_button("Annals", func(): annals_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)

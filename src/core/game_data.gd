@@ -25,6 +25,8 @@ var ai_personas: Dictionary = {}       # id -> persona dict
 var agent_kinds: Dictionary = {}       # id -> agent kind dict (diplomat/spy/assassin)
 var techniques: Dictionary = {}        # id -> technique dict (the knowledge of the age)
 var edicts: Dictionary = {}            # id -> edict dict (standing policies and decrees)
+var epithets: Dictionary = {}          # id -> epithet dict (names earned by deeds)
+var annals: Dictionary = {}            # chronicle kind -> [prose template variants]
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -98,6 +100,9 @@ func _load_all(dir: String) -> void:
 		techniques[technique["id"]] = technique
 	for edict in _read_json(dir + "/edicts.json").get("edicts", []):
 		edicts[edict["id"]] = edict
+	for epithet in _read_json(dir + "/epithets.json").get("epithets", []):
+		epithets[epithet["id"]] = epithet
+	annals = _read_json(dir + "/annals.json").get("templates", {})
 
 
 func index_grain_regions() -> void:

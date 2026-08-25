@@ -1,0 +1,101 @@
+{
+  "$schema": "../schemas/epithets.schema.json",
+  "epithets": [
+    {
+      "id": "breaker_of_walls",
+      "name": "Breaker of Walls",
+      "historical_basis": "Demetrius son of Antigonus was called Poliorketes, the Besieger, for the monstrous engines he brought against Rhodes and Salamis - the surname stuck though the great siege itself failed, because the age had never seen cities assaulted so. A man who storms walls again and again is named for it.",
+      "precedence": 20,
+      "requires": { "sieges_won": 5 },
+      "limits": {}
+    },
+    {
+      "id": "shield_of_the_people",
+      "name": "Shield of the People",
+      "historical_basis": "Soter - Savior - was the surname grateful cities gave: the Rhodians hailed the first Ptolemy with it for shielding them through the great siege, and Antiochus I earned it turning back the Gauls. It honored not conquest but protection: many victories won, and nothing of one's own let fall.",
+      "precedence": 10,
+      "requires": { "battles_won": 5 },
+      "limits": { "cities_lost": 0 }
+    },
+    {
+      "id": "the_unbowed",
+      "name": "the Unbowed",
+      "historical_basis": "Invictus - unconquered - was the style Roman generals coveted and Greek kings claimed as Aniketos; it attached to men whose defeats, if any, the world agreed not to count. A soldier who takes the field year upon year and is never mastered wears the name whether granted or not.",
+      "precedence": 30,
+      "requires": { "battles_won": 8 },
+      "limits": {}
+    },
+    {
+      "id": "the_open_hand",
+      "name": "the Open Hand",
+      "historical_basis": "Euergetes - Benefactor - was the reigning-name of Ptolemies who fed cities, endowed temples and remitted taxes, and free cities voted the same title to any king whose gifts were great enough. Generosity institutionalized, decree upon decree, earned a man the name before his face was forgotten.",
+      "precedence": 40,
+      "requires": { "edicts_enacted": 3 },
+      "limits": {}
+    },
+    {
+      "id": "friend_of_wisdom",
+      "name": "Friend of Wisdom",
+      "historical_basis": "The philo- names of the Hellenistic courts - Philadelphos, Philopator, Philometor - declared what a king loved; the philosophoi declared themselves lovers of wisdom outright. A ruler under whom the crafts and letters of the age were gathered and taken up was remembered as learning's friend.",
+      "precedence": 40,
+      "requires": { "techniques_completed": 3 },
+      "limits": {}
+    },
+    {
+      "id": "the_fortunate",
+      "name": "the Fortunate",
+      "historical_basis": "Sulla took the surname Felix - fortune's favorite - and meant it as theology: the goddess had never once let him lose. The name belongs to commanders whose record shows victories in number and defeats not at all, however the gods arranged it.",
+      "precedence": 15,
+      "requires": { "battles_won": 4 },
+      "limits": { "battles_lost": 0 }
+    },
+    {
+      "id": "the_delayer",
+      "name": "the Delayer",
+      "historical_basis": "Fabius Maximus was mocked as Cunctator - the Delayer - for refusing Hannibal a battle, and then honored with the same word when delay proved the one strategy that worked. The name marks a man beaten in the field more than once who nonetheless let no city of his fall.",
+      "precedence": 50,
+      "requires": { "battles_lost": 3 },
+      "limits": { "cities_lost": 0 }
+    },
+    {
+      "id": "the_conqueror",
+      "name": "the Conqueror",
+      "historical_basis": "Seleucus was Nikator - Conqueror - having marched from a single satrapy to an empire of cities from the Aegean to the Indus. The name follows a man who does not merely win fields but takes and keeps the towns behind them, one after another.",
+      "precedence": 25,
+      "requires": { "cities_taken": 4 },
+      "limits": {}
+    },
+    {
+      "id": "father_of_the_country",
+      "name": "Father of the Country",
+      "historical_basis": "Rome voted Cicero the style pater patriae for saving the state by statecraft rather than the sword, and later fixed it on Augustus as the highest of all his honors. It names the builder of institutions: the leader remembered for what he founded, endowed and set in order.",
+      "precedence": 35,
+      "requires": { "edicts_enacted": 2, "techniques_completed": 2 },
+      "limits": {}
+    },
+    {
+      "id": "the_thunderbolt",
+      "name": "the Thunderbolt",
+      "historical_basis": "Hamilcar was Barca - the lightning - for the speed of his descents, and Ptolemy Keraunos carried Thunderbolt as his whole name; Seleucus III was another. The style belongs to strikers: commanders whose victories come fast and carry cities with them.",
+      "precedence": 22,
+      "requires": { "battles_won": 5, "cities_taken": 2 },
+      "limits": {}
+    },
+    {
+      "id": "the_magnificent",
+      "name": "the Magnificent",
+      "historical_basis": "Megas - the Great - attached itself to Alexander and was claimed after him by Antiochus III and granted by acclamation to Pompey. It is the name of scale: campaigns past counting, all of them won, until greatness is simply the record's plain description.",
+      "precedence": 60,
+      "requires": { "battles_won": 10 },
+      "limits": {}
+    },
+    {
+      "id": "the_lawgiver",
+      "name": "the Lawgiver",
+      "historical_basis": "Solon of Athens and Lycurgus of Sparta were remembered above all as nomothetai - lawgivers - and centuries later cities still dated their liberties from them. A ruler whose acts of state outnumber his battles is written into memory by his laws.",
+      "precedence": 45,
+      "requires": { "edicts_enacted": 4 },
+      "limits": {}
+    }
+  ]
+}

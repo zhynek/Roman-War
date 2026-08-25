@@ -8,6 +8,7 @@ coherence). Exits nonzero on any error. Run from anywhere:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -28,6 +29,8 @@ TABLES = {
     "agents.json": "agents.schema.json",
     "techniques.json": "techniques.schema.json",
     "edicts.json": "edicts.schema.json",
+    "epithets.json": "epithets.schema.json",
+    "annals.json": "annals.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -325,6 +328,31 @@ def cross_checks(t: dict[str, dict]) -> None:
                 if not satisfiable:
                     warn(f"edicts: {eid}: culture {culture} may enact it but can "
                          f"never build {need_kind} L{need_level}")
+
+    # --- epithets and annals ----------------------------------------------
+    epithet_ids = set()
+    for epithet in t.get("epithets.json", {}).get("epithets", []):
+        if epithet["id"] in epithet_ids:
+            err(f"epithets: duplicate id {epithet['id']}")
+        epithet_ids.add(epithet["id"])
+
+    # Annals templates: placeholders must be resolvable — subject names, the
+    # date, or a detail key the engine actually writes for that kind.
+    ANNALS_TOKENS = {
+        "faction", "other_faction", "character", "region", "technique",
+        "edict", "epithet", "year", "season",
+        # detail keys per the recording sites:
+        "winner", "attacker_soldiers", "defender_soldiers", "occupation",
+        "loot", "population", "assault", "turns", "battles",
+        "cities_taken_a", "cities_taken_b", "age", "battles_won",
+        "cities_taken", "techniques_completed", "edicts_enacted", "disaster",
+        "index",
+    }
+    for kind, variants in t.get("annals.json", {}).get("templates", {}).items():
+        for template in variants:
+            for token in re.findall(r"\{([a-z_]+)\}", template):
+                if token not in ANNALS_TOKENS:
+                    err(f"annals: {kind}: unknown placeholder {{{token}}}")
 
     # Hidden resources must be referenced by SOMETHING (event or technique) —
     # and vice versa the events check below already validates its own refs.
@@ -681,7 +709,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "personas", "agents", "techniques", "edicts"):
+                "personas", "agents", "techniques", "edicts", "epithets", "templates"):
         if key in document:
             return len(document[key])
     return 0

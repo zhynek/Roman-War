@@ -324,9 +324,12 @@ func character_sheet(char_id: String) -> Dictionary:
 	var ancillaries: Array = []
 	for ancillary_id in character["ancillaries"]:
 		ancillaries.append(data.ancillaries.get(ancillary_id, {}).get("name", ancillary_id))
+	var epithet_id := String(character.get("epithet", ""))
 	return {
 		"id": char_id,
 		"name": character["name"],
+		"epithet": String(data.epithets.get(epithet_id, {}).get("name", "")) if epithet_id != "" else "",
+		"deeds": character.get("deeds", {}),
 		"age": character["age"],
 		"role": character["role"],
 		"faction": character["faction"],

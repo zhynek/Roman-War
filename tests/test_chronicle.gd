@@ -192,3 +192,61 @@ func _last_of(state: Dictionary, kind: String) -> Dictionary:
 		if String(entry["kind"]) == kind:
 			found = entry
 	return found
+
+func test_epithets_are_earned_once_by_precedence(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.add_character(state, "red", "hero", {})
+	Fixtures.add_character(state, "red", "burned_hand", {})
+	Fixtures.add_character(state, "red", "young_blade", {})
+	ChronicleRules.add_deed(state, "hero", "battles_won", 2)
+	ChronicleRules.add_deed(state, "burned_hand", "battles_won", 1)
+	ChronicleRules.add_deed(state, "burned_hand", "cities_lost", 1)
+	ChronicleRules.add_deed(state, "young_blade", "battles_won", 1)
+	var report := {"characters": []}
+	ChronicleRules.collect(data, state, report, ChronicleRules.snapshot(state))
+
+	t.check_eq(String(state["characters"]["hero"].get("epithet", "")), "test_victor",
+		"two victories earn the Victor — precedence picks it over the Guardian")
+	t.check_eq(String(state["characters"]["young_blade"].get("epithet", "")), "test_guardian",
+		"one victory and nothing lost earns the Guardian")
+	t.check_eq(String(state["characters"]["burned_hand"].get("epithet", "")), "",
+		"a lost city bars the Guardian's spotless record")
+	t.check(not _last_of(state, "epithet_earned").is_empty(), "the naming is chronicled")
+	t.check_eq(report["characters"].size(), 2, "and carried to the player's log")
+
+	ChronicleRules.add_deed(state, "young_blade", "battles_won", 5)
+	ChronicleRules.collect(data, state, {}, ChronicleRules.snapshot(state))
+	t.check_eq(String(state["characters"]["young_blade"].get("epithet", "")), "test_guardian",
+		"one name per man, ever — the first earned sticks for life")
+
+
+func test_annals_render_prose(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.add_character(state, "red", "hero", {"name": "Testus"})
+	ChronicleRules.record(data, state, "battle",
+		{"faction": "red", "other_faction": "blue", "region": "alpha"}, 4, {"winner": "attacker"})
+	var battle: Dictionary = state["chronicle"][0]
+	t.check_eq(ChronicleRules.render_entry(data, state, battle),
+		"Red and Blue met in battle near Alpha.", "templates fill from resolved names")
+	t.check_eq(ChronicleRules.render_entry(data, state, battle),
+		ChronicleRules.render_entry(data, state, battle), "and render the same twice — no rng")
+
+	ChronicleRules.record(data, state, "city_taken",
+		{"faction": "red", "other_faction": "blue", "region": "alpha"}, 6, {})
+	ChronicleRules.record(data, state, "city_taken",
+		{"faction": "red", "other_faction": "blue", "region": "alpha"}, 6, {})
+	var first := ChronicleRules.render_entry(data, state, state["chronicle"][1])
+	var second := ChronicleRules.render_entry(data, state, state["chronicle"][2])
+	t.check(first != second, "consecutive ids pick different variants — stable, not random")
+
+	state["characters"]["hero"]["epithet"] = "test_victor"
+	ChronicleRules.record(data, state, "epithet_earned",
+		{"character": "hero", "faction": "red", "epithet": "test_victor"}, 5, {})
+	t.check_eq(ChronicleRules.render_entry(data, state, state["chronicle"][3]),
+		"Testus of Red was named the Victor.", "epithet names resolve too")
+
+	ChronicleRules.record(data, state, "succession", {"faction": "red"}, 5, {})
+	t.check_eq(ChronicleRules.render_entry(data, state, state["chronicle"][4]),
+		"succession", "a kind without templates falls back to its plain name")

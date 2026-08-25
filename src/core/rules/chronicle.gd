@@ -56,7 +56,7 @@ static func snapshot(state: Dictionary) -> Dictionary:
 
 static func collect(data: GameData, state: Dictionary, report: Dictionary, pre: Dictionary) -> void:
 	## END of end_turn, fixed order: wars open → wars close (summaries from
-	## the ledger, no scan) → factions destroyed → reigns.
+	## the ledger, no scan) → factions destroyed → epithets earned → reigns.
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 
@@ -117,7 +117,39 @@ static func collect(data: GameData, state: Dictionary, report: Dictionary, pre: 
 			_push(data, state, _dated(state, pre, "faction_destroyed",
 				{"faction": faction_id}, 9, {}))
 
-	# 4. Reigns: one pass over characters finds every living leader; a faction
+	# 4. Epithets: the deeds vocabulary earns names, ONE per man, EVER — the
+	# Hellenistic convention: the first name earned sticks for life. Lower
+	# precedence checks first; report notices carry it to the player's log.
+	if not data.epithets.is_empty():
+		var epithet_order: Array = data.epithets.keys()
+		epithet_order.sort_custom(func(x, y):
+			var px := int(data.epithets[x]["precedence"])
+			var py := int(data.epithets[y]["precedence"])
+			return px < py if px != py else String(x) < String(y))
+		var char_ids: Array = state["characters"].keys()
+		char_ids.sort()
+		for char_id in char_ids:
+			var character: Dictionary = state["characters"][char_id]
+			if not character["alive"] or character.get("epithet", "") != "":
+				continue
+			var deeds = character.get("deeds")
+			if deeds == null:
+				continue
+			for epithet_id in epithet_order:
+				if not _epithet_earned(data.epithets[epithet_id], deeds as Dictionary):
+					continue
+				character["epithet"] = epithet_id
+				_push(data, state, _dated(state, pre, "epithet_earned", {
+					"character": char_id, "faction": character["faction"],
+					"epithet": epithet_id,
+				}, 5, {}))
+				if report.has("characters"):
+					report["characters"].append({"kind": "epithet_earned",
+						"character": char_id, "faction": character["faction"],
+						"name": String(data.epithets[epithet_id]["name"])})
+				break
+
+	# 5. Reigns: one pass over characters finds every living leader; a faction
 	# whose reign ledger names someone else has seen a succession (however the
 	# old leader went — battle, blade, or age; kill paths emit no notices).
 	var leaders := _living_leaders(state)
@@ -201,30 +233,67 @@ static func resolved(data: GameData, state: Dictionary) -> Array:
 	## persist in state, so the save alone suffices. Read-only.
 	var out: Array = []
 	for entry in state.get("chronicle", []):
-		var names := {}
-		var subjects: Dictionary = entry["subjects"]
-		for key in subjects:
-			var subject_id := String(subjects[key])
-			match String(key):
-				"faction", "other_faction":
-					names[key] = String(data.factions.get(subject_id, {}).get("name", subject_id))
-				"character":
-					names[key] = String(state["characters"].get(subject_id, {}).get("name", subject_id))
-				"region":
-					names[key] = String(data.regions.get(subject_id, {}).get("settlement_name", subject_id))
-				"technique":
-					names[key] = String(data.techniques.get(subject_id, {}).get("name", subject_id))
-				"edict":
-					names[key] = String(data.edicts.get(subject_id, {}).get("name", subject_id))
-				_:
-					names[key] = subject_id
 		var resolved_entry: Dictionary = entry.duplicate(true)
-		resolved_entry["names"] = names
+		resolved_entry["names"] = _names_for(data, state, entry)
 		out.append(resolved_entry)
 	return out
 
 
+static func render_entry(data: GameData, state: Dictionary, entry: Dictionary) -> String:
+	## In-game prose from data/annals.json templates: variant chosen by entry
+	## id (stable — no rng), placeholders filled from resolved names, the
+	## date, and scalar details. The future narrator replaces this prose,
+	## never the entries.
+	var variants: Array = data.annals.get(String(entry["kind"]), [])
+	if variants.is_empty():
+		return String(entry["kind"]).replace("_", " ")
+	var template := String(variants[int(entry["id"]) % variants.size()])
+	var values := _names_for(data, state, entry)
+	for key in entry["details"]:
+		values[key] = str(entry["details"][key])
+	values["year"] = year_text(int(entry["year"]))
+	values["season"] = String(entry["season"]).capitalize()
+	return template.format(values)
+
+
+static func year_text(year: int) -> String:
+	return "%d BC" % -year if year < 0 else "AD %d" % year
+
+
+static func _names_for(data: GameData, state: Dictionary, entry: Dictionary) -> Dictionary:
+	var names := {}
+	var subjects: Dictionary = entry["subjects"]
+	for key in subjects:
+		var subject_id := String(subjects[key])
+		match String(key):
+			"faction", "other_faction":
+				names[key] = String(data.factions.get(subject_id, {}).get("name", subject_id))
+			"character":
+				names[key] = String(state["characters"].get(subject_id, {}).get("name", subject_id))
+			"region":
+				names[key] = String(data.regions.get(subject_id, {}).get("settlement_name", subject_id))
+			"technique":
+				names[key] = String(data.techniques.get(subject_id, {}).get("name", subject_id))
+			"edict":
+				names[key] = String(data.edicts.get(subject_id, {}).get("name", subject_id))
+			"epithet":
+				names[key] = String(data.epithets.get(subject_id, {}).get("name", subject_id))
+			_:
+				names[key] = subject_id
+	return names
+
+
 ## --- Internals -------------------------------------------------------------
+
+static func _epithet_earned(epithet: Dictionary, deeds: Dictionary) -> bool:
+	for key in epithet["requires"]:
+		if int(deeds.get(key, 0)) < int(epithet["requires"][key]):
+			return false
+	for key in epithet["limits"]:
+		if int(deeds.get(key, 0)) > int(epithet["limits"][key]):
+			return false
+	return true
+
 
 static func _living_leaders(state: Dictionary) -> Dictionary:
 	## One sorted pass: {faction_id: leader_char_id} for every living leader.

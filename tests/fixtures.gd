@@ -313,6 +313,23 @@ static func data() -> GameData:
 		},
 	}
 
+	game_data.epithets = {
+		"test_victor": {
+			"id": "test_victor", "name": "the Victor", "historical_basis": "fixture",
+			"precedence": 10, "requires": {"battles_won": 2}, "limits": {},
+		},
+		"test_guardian": {
+			"id": "test_guardian", "name": "the Guardian", "historical_basis": "fixture",
+			"precedence": 20, "requires": {"battles_won": 1}, "limits": {"cities_lost": 0},
+		},
+	}
+	game_data.annals = {
+		"battle": ["{faction} and {other_faction} met in battle near {region}."],
+		"city_taken": ["{faction} took {region} from {other_faction}.",
+			"The gates of {region} were opened to {faction}."],
+		"epithet_earned": ["{character} of {faction} was named {epithet}."],
+	}
+
 	return game_data
 
 

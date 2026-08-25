@@ -80,6 +80,11 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	t.check(screen.edicts_panel._content.get_child_count() > 0, "book of policies populated")
 	screen.edicts_panel.hide()
 
+	# The annals open (a turn has passed — the scribes have something).
+	screen.annals_panel.open_for(game)
+	t.check(screen.annals_panel._content.get_child_count() > 0, "the annals render")
+	screen.annals_panel.hide()
+
 	screen.free()
 
 
