@@ -53,6 +53,53 @@ func test_map_changes_hands(t) -> void:
 		t.check(typeof(treasury) == TYPE_INT or typeof(treasury) == TYPE_FLOAT,
 			"treasury numeric for " + faction_id)
 
+	# The knowledge world is alive: courts institutionalize crafts beyond
+	# their 270 BC endowment, and the map's portfolios genuinely diverge.
+	var adoptions := 0
+	var signatures := {}
+	for faction_id in game.state["factions"]:
+		if not game.state["factions"][faction_id]["alive"]:
+			continue
+		var adopted: Array = []
+		var knowledge: Dictionary = game.state["factions"][faction_id].get("knowledge", {})
+		var tids: Array = knowledge.keys()
+		tids.sort()
+		for tid in tids:
+			if String(knowledge[tid].get("stage", "")) == "adopted":
+				adopted.append(tid)
+				if int(knowledge[tid].get("turn", 0)) > 0:
+					adoptions += 1
+		signatures["+".join(adopted)] = true
+	t.check(adoptions >= 5, "techniques are adopted beyond the endowment (%d)" % adoptions)
+	t.check(signatures.size() >= 2, "living factions hold distinct knowledge (%d signatures)" % signatures.size())
+
+	# Statecraft is practiced and chronicled, and the annals stay bounded and
+	# schema-shaped (the narrator contract holds for every entry).
+	var edict_entries := 0
+	var kinds := {}
+	for template_kind in ["war_declared", "battle", "city_taken", "city_sacked", "city_revolted",
+			"peace_made", "alliance_made", "technique_originated", "technique_adopted",
+			"edict_enacted", "edict_lapsed", "leader_died", "succession", "reign_summary",
+			"war_summary", "faction_destroyed", "disaster", "epithet_earned"]:
+		kinds[template_kind] = true
+	var chronicle: Array = game.state["chronicle"]
+	t.check(chronicle.size() > 0, "the scribes have been busy")
+	t.check(chronicle.size() <= int(game.data.balance["chronicle"]["max_entries"]),
+		"and the annals stay bounded (%d entries)" % chronicle.size())
+	var shaped := true
+	for entry in chronicle:
+		for key in ["id", "turn", "year", "season", "kind", "subjects", "magnitude", "details"]:
+			if not entry.has(key):
+				shaped = false
+		if not kinds.has(String(entry["kind"])):
+			shaped = false
+		if int(entry["magnitude"]) < 1 or int(entry["magnitude"]) > 10:
+			shaped = false
+		if String(entry["kind"]) == "edict_enacted":
+			edict_entries += 1
+	t.check(shaped, "every entry keeps the narrator contract")
+	t.check(edict_entries >= 1, "courts enact policy (%d edicts chronicled)" % edict_entries)
+
 	var average_ms := float(total_ms) / float(LONG_TURNS)
 	t.check(average_ms < 250.0, "end_turn stays fast (%.0f ms average)" % average_ms)
 
