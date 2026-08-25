@@ -317,6 +317,60 @@ func _log_report(report: Dictionary) -> void:
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
 
+	_log_world_news(report)
+
+
+func _log_world_news(report: Dictionary) -> void:
+	## The living world: wars, conquests, treaties and envoys. World-shaking
+	## news is always heard; skirmish detail only when it touches the player.
+	var player: String = game.state["player_faction"]
+	for event in report["ai"]:
+		match String(event.get("kind", "")):
+			"war_declared":
+				var color := "#e06050" if event["on"] == player else "#d0a0a0"
+				_log("[color=%s][b]%s declares war on %s![/b][/color]"
+					% [color, _faction_name(event["by"]), _faction_name(event["on"])])
+			"ai_conquest":
+				_log("[color=#d0a0a0]%s has taken %s from %s.[/color]"
+					% [_faction_name(event["faction"]),
+						game.data.regions.get(event["region"], {}).get("settlement_name", event["region"]),
+						_faction_name(event["from"])])
+			"peace_made":
+				_log("[color=#a0c0a0]Peace between %s and %s.[/color]"
+					% [_faction_name(event["between"][0]), _faction_name(event["between"][1])])
+			"trade_agreed":
+				_log("[color=#a0c0a0]%s and %s open their markets to each other.[/color]"
+					% [_faction_name(event["between"][0]), _faction_name(event["between"][1])])
+			"offer_sent":
+				if event["to"] == player:
+					_log("[color=#c0b060][b]An envoy from %s awaits our answer (Diplomacy).[/b][/color]"
+						% _faction_name(event["from"]))
+			"ai_attack":
+				if event["defender"] == player:
+					_log("[color=#e06050][b]%s attacks our army near %s — the %s prevail.[/b][/color]"
+						% [_faction_name(event["faction"]),
+							game.data.regions.get(event["region"], {}).get("name", event["region"]),
+							"attackers" if event.get("winner", "") == "attacker" else "defenders"])
+			"ai_siege":
+				if event["owner"] == player:
+					_log("[color=#e06050][b]%s lays siege to %s![/b][/color]"
+						% [_faction_name(event["faction"]),
+							game.data.regions.get(event["region"], {}).get("settlement_name", event["region"])])
+	for event in report["diplomacy"]:
+		match String(event.get("kind", "")):
+			"tribute_paid":
+				if event["from"] == player:
+					_log("We pay %d in tribute to %s." % [int(event["amount"]), _faction_name(event["to"])])
+				elif event["to"] == player:
+					_log("[color=#a0c0a0]Tribute of %d arrives from %s.[/color]"
+						% [int(event["amount"]), _faction_name(event["from"])])
+			"offer_expired":
+				_log("The envoy from %s departs unanswered." % _faction_name(event["from"]))
+
+
+func _faction_name(faction_id: String) -> String:
+	return game.data.factions.get(faction_id, {}).get("name", faction_id)
+
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]

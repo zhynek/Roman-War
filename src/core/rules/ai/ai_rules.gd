@@ -12,11 +12,12 @@ class_name AiRules
 ## a revisitable decision, isolated behind this module.
 ##
 ## Temperament comes from data/ai.json personas (factions.json ai_persona,
-## falling back to "default"); every numeric knob lives in balance.json → ai.
-## Order within a faction's turn: strategy → military → economy, so armies act
-## on this turn's objective and the treasury the military left is what the
-## settlements spend. Rebels run the economy module only — their armies stand
-## as threats, never campaign.
+## falling back to "default"); every numeric knob lives in balance.json → ai
+## and → diplomacy. Order within a faction's turn: diplomacy → strategy →
+## military → economy, so a fresh war shapes this turn's objective, armies act
+## on that objective, and the settlements spend whatever the war effort left.
+## Rebels run the economy module only — their armies stand as threats, never
+## campaign.
 
 
 static func take_turn(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, faction_id: String) -> Array:
@@ -31,6 +32,7 @@ static func take_turn(data: GameData, state: Dictionary, rng: CampaignRng, resol
 		AiEconomy.run(data, state, faction_id, persona)
 		return events
 
+	AiDiplomacy.run(data, state, faction_id, persona, events)
 	AiStrategy.refresh_objective(data, state, faction_id, persona)
 	AiMilitary.run(data, state, rng, resolver, faction_id, persona, events)
 	AiEconomy.run(data, state, faction_id, persona, AiStrategy.muster_region(state, faction_id))

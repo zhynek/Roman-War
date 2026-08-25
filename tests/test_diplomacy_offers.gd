@@ -165,6 +165,99 @@ func test_senate_courtship_missions(t) -> void:
 	t.check(state["factions"]["red"]["mission"] == null, "the slate is clean again")
 
 
+func test_ai_declares_war_on_weak_hated_neighbor(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
+	DiplomacyRules.record_memory(data, state, "red", "blue", -35.0)
+	var events: Array = []
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check(DiplomacyRules.at_war(state, "red", "blue"), "the grudge, the border and the weakness add up to war")
+	var declared := false
+	for event in events:
+		if event.get("kind", "") == "war_declared" and event.get("on", "") == "blue":
+			declared = true
+	t.check(declared, "the declaration is reported")
+
+
+func test_ai_holds_when_outmatched(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
+	for i in range(6):
+		state["settlements"]["alpha"]["garrison"].append(
+			{"template": "test_elites", "experience": 0, "strength_pct": 100})
+	DiplomacyRules.record_memory(data, state, "red", "blue", -35.0)
+	var events: Array = []
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
+		"hatred without the strength to act on it stays hatred")
+
+
+func test_ai_sues_for_peace_when_losing(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.add_army(state, "red", "beta", ["test_mob"])
+	Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears", "test_spears"])
+	Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears", "test_spears"])
+	var events: Array = []
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "neutral",
+		"the losing side bought its peace")
+	t.check_eq(state["tributes"].size(), 1, "with tribute it could not pay in silver")
+	var made := false
+	for event in events:
+		if event.get("kind", "") == "peace_made":
+			made = true
+	t.check(made, "the peace is reported")
+
+
+func test_ai_courts_player_with_pending_offer(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["player_faction"] = "blue"
+	Fixtures.add_army(state, "red", "beta", ["test_mob"])
+	Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears", "test_spears"])
+	Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears", "test_spears"])
+	var events: Array = []
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check_eq(state["pending_offers"].size(), 1, "an envoy waits at the player's door")
+	t.check(DiplomacyRules.at_war(state, "red", "blue"), "nothing changes until the player answers")
+
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check_eq(state["pending_offers"].size(), 1, "one envoy at a time — no spam")
+
+	var game := Game.new()
+	game.data = data
+	game.resolver = AutoResolver.new()
+	game.state = state
+	var offer_id: String = state["pending_offers"][0]["id"]
+	t.check(game.respond_offer(offer_id, true), "the player can accept it")
+	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "neutral", "and peace follows")
+
+
+func test_ai_trades_with_compatible_neighbor(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	for i in range(2):
+		state["settlements"]["beta"]["garrison"].append(
+			{"template": "test_spears", "experience": 0, "strength_pct": 100})
+		state["settlements"]["alpha"]["garrison"].append(
+			{"template": "test_spears", "experience": 0, "strength_pct": 100})
+	var events: Array = []
+	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
+	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "trade",
+		"well-matched neutral neighbors open their markets")
+	var agreed := false
+	for event in events:
+		if event.get("kind", "") == "trade_agreed":
+			agreed = true
+	t.check(agreed, "the agreement is reported")
+
+
 func test_trade_mission_accepts_trade_or_alliance(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

@@ -50,15 +50,13 @@ static func force_strength(data: GameData, units: Array) -> float:
 static func settlement_defense(data: GameData, state: Dictionary, region_id: String) -> float:
 	## Garrison strength behind its walls, plus any of the owner's field armies
 	## standing in the region — what an attacker must expect to beat.
+	## (A pure sum — iteration order cannot matter, so no sort is needed.)
 	var settlement: Dictionary = state["settlements"][region_id]
 	var wall_multipliers: Array = data.balance["battle"]["wall_defense_multiplier"]
 	var wall_level := mini(int(SettlementRules.effect_max(data, settlement, "wall_level")),
 		wall_multipliers.size() - 1)
 	var defense := force_strength(data, settlement["garrison"]) * float(wall_multipliers[wall_level])
-	var army_ids: Array = state["armies"].keys()
-	army_ids.sort()
-	for army_id in army_ids:
-		var army: Dictionary = state["armies"][army_id]
+	for army in state["armies"].values():
 		if army["region"] == region_id and army["owner"] == settlement["owner"]:
 			defense += force_strength(data, army["units"])
 	return defense
@@ -66,11 +64,9 @@ static func settlement_defense(data: GameData, state: Dictionary, region_id: Str
 
 static func faction_field_strength(data: GameData, state: Dictionary, faction_id: String) -> float:
 	## Total army strength (field only — garrisons defend, they do not project).
+	## Pure sum: order-free, no sort.
 	var total := 0.0
-	var army_ids: Array = state["armies"].keys()
-	army_ids.sort()
-	for army_id in army_ids:
-		var army: Dictionary = state["armies"][army_id]
+	for army in state["armies"].values():
 		if army["owner"] == faction_id:
 			total += force_strength(data, army["units"])
 	return total
@@ -79,24 +75,36 @@ static func faction_field_strength(data: GameData, state: Dictionary, faction_id
 static func faction_total_strength(data: GameData, state: Dictionary, faction_id: String) -> float:
 	## Field armies plus garrisons — the weight a faction throws on the scales
 	## of diplomacy, where a wall of spears counts even if it never marches.
+	## Pure sum: order-free, no sort.
 	var total := faction_field_strength(data, state, faction_id)
-	var region_ids: Array = state["settlements"].keys()
-	region_ids.sort()
-	for region_id in region_ids:
-		var settlement: Dictionary = state["settlements"][region_id]
+	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
 			total += force_strength(data, settlement["garrison"])
 	return total
 
 
+static func all_faction_strengths(data: GameData, state: Dictionary) -> Dictionary:
+	## Every faction's total strength in ONE pass over the world — the per-turn
+	## cache the diplomacy layer hands to attitude_total, which would otherwise
+	## recompute strengths per faction pair.
+	var strengths := {}
+	for faction_id in state["factions"]:
+		strengths[faction_id] = 0.0
+	for army in state["armies"].values():
+		strengths[army["owner"]] = float(strengths.get(army["owner"], 0.0)) \
+			+ force_strength(data, army["units"])
+	for settlement in state["settlements"].values():
+		strengths[settlement["owner"]] = float(strengths.get(settlement["owner"], 0.0)) \
+			+ force_strength(data, settlement["garrison"])
+	return strengths
+
+
 static func threat_near(data: GameData, state: Dictionary, faction_id: String, region_id: String, radius: int) -> float:
 	## Summed strength of at-war armies within `radius` land hops of a region.
+	## Pure sum: order-free, no sort.
 	var hops := MapRules.hops_from(data, region_id)
 	var total := 0.0
-	var army_ids: Array = state["armies"].keys()
-	army_ids.sort()
-	for army_id in army_ids:
-		var army: Dictionary = state["armies"][army_id]
+	for army in state["armies"].values():
 		if not DiplomacyRules.at_war(state, faction_id, army["owner"]):
 			continue
 		var distance := int(hops.get(army["region"], -1))
@@ -199,12 +207,12 @@ static func _distance_from_any(data: GameData, state: Dictionary, own_regions: A
 	if best >= 0:
 		return best
 	for region_id in own_regions:
-		if _sea_linked(data, region_id, target):
+		if sea_linked(data, region_id, target):
 			return int(data.balance["ai"]["sea_target_hops"])
 	return -1
 
 
-static func _sea_linked(data: GameData, from_region: String, to_region: String) -> bool:
+static func sea_linked(data: GameData, from_region: String, to_region: String) -> bool:
 	## Mirrors MovementRules.sea_move_army's reachability: same or adjacent zone.
 	var from_zones: Array = data.regions.get(from_region, {}).get("sea_zones", [])
 	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])

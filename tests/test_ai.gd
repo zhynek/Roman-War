@@ -84,9 +84,11 @@ func test_no_hostile_act_without_war(t) -> void:
 	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
 	var events := AiRules.take_turn(data, state, rng, resolver, "red")
 	t.check(state["armies"].has(blue_army), "the neutral army is untouched")
-	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "neutral",
+	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
 		"no war was declared by the AI's turn")
-	t.check(events.is_empty(), "nothing hostile to report")
+	for event in events:
+		t.check(not event.get("kind", "") in ["war_declared", "ai_attack", "ai_siege", "ai_conquest"],
+			"nothing hostile to report (got %s)" % event.get("kind", ""))
 	t.check(state["armies"].has(red_army), "own army stands")
 
 

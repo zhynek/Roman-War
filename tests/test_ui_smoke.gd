@@ -128,6 +128,67 @@ func test_many_turns_through_the_ui(t) -> void:
 	screen.free()
 
 
+func test_negotiation_and_envoys(t) -> void:
+	## The diplomacy scroll's new machinery, driven headless: attitude rows,
+	## the negotiation dialog's live appraisal and proposal path, a pending
+	## envoy answered, and the world-news log formatting.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	screen.diplomacy_panel.open_for(game)
+	t.check(screen.diplomacy_panel._content.get_child_count() > 0, "the powers are listed")
+
+	# The negotiation dialog previews and proposes a trade offer.
+	var negotiation: NegotiationDialog = screen.diplomacy_panel.negotiation
+	negotiation.open_for(game, "carthage")
+	t.check(negotiation._hint.get_parsed_text().length() > 0, "the live appraisal renders")
+	var trade_index := negotiation._stance_values.find("trade")
+	t.check(trade_index >= 0, "trade is on the table with a neutral power")
+	negotiation._stance.selected = trade_index
+	var offer := negotiation.build_offer()
+	t.check_eq(offer["to"], "carthage", "the offer addresses the right court")
+	t.check_eq(offer["stance"], "trade", "with the chosen stance")
+	negotiation._propose()
+	t.check(negotiation._hint.get_parsed_text().length() > 0, "the verdict is shown either way")
+	negotiation.hide()
+
+	# A pending envoy renders and can be answered.
+	game.state["pending_offers"].append({"id": "offer_test", "from": "carthage", "to": "julii",
+		"stance": "trade", "give_payment": 0, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": [], "expires_turn": 999})
+	screen.diplomacy_panel._rebuild()
+	t.check(screen.diplomacy_panel._content.get_child_count() > 0, "the envoy section renders")
+	t.check(game.respond_offer("offer_test", true), "the envoy is answered")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "carthage"), "trade",
+		"and the agreement stands")
+	screen.diplomacy_panel.hide()
+
+	# World news formatting covers every event kind without touching state.
+	var log_before: int = screen.report_log.get_parsed_text().length()
+	screen._log_world_news({
+		"ai": [
+			{"kind": "war_declared", "by": "gaul", "on": "julii"},
+			{"kind": "war_declared", "by": "gaul", "on": "germania"},
+			{"kind": "ai_conquest", "faction": "gaul", "region": "latium", "occupation": "occupy", "from": "rebels"},
+			{"kind": "peace_made", "between": ["gaul", "germania"]},
+			{"kind": "trade_agreed", "between": ["carthage", "egypt"]},
+			{"kind": "offer_sent", "from": "carthage", "to": "julii"},
+			{"kind": "ai_attack", "faction": "gaul", "defender": "julii", "region": "latium", "winner": "attacker"},
+			{"kind": "ai_siege", "faction": "gaul", "region": "latium", "owner": "julii"},
+		],
+		"diplomacy": [
+			{"kind": "tribute_paid", "from": "julii", "to": "gaul", "amount": 100},
+			{"kind": "tribute_paid", "from": "gaul", "to": "julii", "amount": 100},
+			{"kind": "offer_expired", "from": "carthage"},
+		],
+	})
+	t.check(screen.report_log.get_parsed_text().length() > log_before, "world news reached the log")
+
+	screen.free()
+
+
 func test_start_menu_scene_loads(t) -> void:
 	var scene: PackedScene = load("res://src/ui/main.tscn")
 	t.check(scene != null, "main scene parses")

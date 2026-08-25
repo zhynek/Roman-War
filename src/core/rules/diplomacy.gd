@@ -49,8 +49,11 @@ static func declare_war(data: GameData, state: Dictionary, a: String, b: String)
 
 ## --- Attitude --------------------------------------------------------------
 
-static func attitude_breakdown(data: GameData, state: Dictionary, a: String, b: String) -> Array:
+static func attitude_breakdown(data: GameData, state: Dictionary, a: String, b: String, strengths: Dictionary = {}) -> Array:
 	## How faction a feels about faction b, as named factors. Pure and rng-free.
+	## `strengths` is an optional per-turn cache from
+	## AiStrategy.all_faction_strengths — the AI passes it so a whole turn of
+	## pairwise attitudes costs one world pass instead of hundreds.
 	var rules: Dictionary = data.balance["diplomacy"]
 	var factors: Array = []
 
@@ -63,12 +66,26 @@ static func attitude_breakdown(data: GameData, state: Dictionary, a: String, b: 
 	if share_border(data, state, a, b):
 		factors.append({"label": "shared_border", "value": float(rules["shared_border_penalty"])})
 
-	var own_strength := AiStrategy.faction_total_strength(data, state, a)
-	var their_strength := AiStrategy.faction_total_strength(data, state, b)
+	var own_strength: float = strengths[a] if strengths.has(a) \
+		else AiStrategy.faction_total_strength(data, state, a)
+	var their_strength: float = strengths[b] if strengths.has(b) \
+		else AiStrategy.faction_total_strength(data, state, b)
 	if their_strength > own_strength:
 		var fear := minf((their_strength / maxf(own_strength, 1.0) - 1.0)
 			* float(rules["strength_fear_scale"]), float(rules["strength_fear_max"]))
 		factors.append({"label": "their_strength", "value": -fear})
+	elif own_strength > their_strength:
+		# Predators circle: a clearly weaker neighbor tempts, and the temptation
+		# shows in the ledger the weaker side can read.
+		var temptation := minf((own_strength / maxf(their_strength, 1.0) - 1.0)
+			* float(rules["weakness_temptation_scale"]), float(rules["weakness_temptation_max"]))
+		if temptation > 0.0:
+			factors.append({"label": "their_weakness", "value": -temptation})
+
+	var aggression := float(AiRules.persona_for(data, a).get("aggression", 1.0))
+	if aggression > 1.0:
+		factors.append({"label": "ambition",
+			"value": -(aggression - 1.0) * float(rules["ambition_attitude_scale"])})
 
 	var memory := float(state["factions"][a].get("attitude_memory", {}).get(b, 0.0))
 	if memory != 0.0:
@@ -90,9 +107,9 @@ static func attitude_breakdown(data: GameData, state: Dictionary, a: String, b: 
 	return factors
 
 
-static func attitude_total(data: GameData, state: Dictionary, a: String, b: String) -> float:
+static func attitude_total(data: GameData, state: Dictionary, a: String, b: String, strengths: Dictionary = {}) -> float:
 	var total := 0.0
-	for factor in attitude_breakdown(data, state, a, b):
+	for factor in attitude_breakdown(data, state, a, b, strengths):
 		total += factor["value"]
 	return total
 
@@ -129,7 +146,7 @@ static func decay_memories(data: GameData, state: Dictionary) -> void:
 
 ## --- Offers ----------------------------------------------------------------
 
-static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, to_id: String, offer: Dictionary) -> Dictionary:
+static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, to_id: String, offer: Dictionary, strengths: Dictionary = {}) -> Dictionary:
 	## Price the offer in denarii from the RECEIVER's chair. Returns
 	## {accept, score, breakdown} — the breakdown feeds the negotiation UI's
 	## live hint, factor-list style.
@@ -156,11 +173,11 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 		factors.append({"label": "ceded_by_us", "value": -region_value(data, state, region_id)})
 
 	var stance: String = offer.get("stance", "")
-	var stance_value := _stance_change_value(data, state, to_id, from_id, stance)
+	var stance_value := _stance_change_value(data, state, to_id, from_id, stance, strengths)
 	if stance_value != 0.0:
 		factors.append({"label": "new_stance", "value": stance_value})
 
-	var attitude := attitude_total(data, state, to_id, from_id)
+	var attitude := attitude_total(data, state, to_id, from_id, strengths)
 	if attitude != 0.0:
 		factors.append({"label": "attitude", "value": attitude * float(rules["attitude_value_per_point"])})
 
@@ -307,7 +324,7 @@ static func _tribute_value(data: GameData, tribute: Dictionary) -> float:
 		* float(data.balance["diplomacy"]["tribute_value_factor"])
 
 
-static func _stance_change_value(data: GameData, state: Dictionary, evaluator: String, other: String, new_stance: String) -> float:
+static func _stance_change_value(data: GameData, state: Dictionary, evaluator: String, other: String, new_stance: String, strengths: Dictionary = {}) -> float:
 	if new_stance == "" or not Constants.STANCES.has(new_stance):
 		return 0.0
 	var rules: Dictionary = data.balance["diplomacy"]
@@ -316,13 +333,13 @@ static func _stance_change_value(data: GameData, state: Dictionary, evaluator: S
 		return 0.0
 	var value := 0.0
 	if current == "war":
-		value += _peace_value(data, state, evaluator, other)
+		value += _peace_value(data, state, evaluator, other, strengths)
 	match new_stance:
 		"trade":
 			value += float(rules["trade_stance_value"])
 		"alliance", "protectorate":
 			value += float(rules["alliance_stance_value"])
-			var attitude := attitude_total(data, state, evaluator, other)
+			var attitude := attitude_total(data, state, evaluator, other, strengths)
 			var shortfall := float(rules["alliance_min_attitude"]) - attitude
 			if shortfall > 0.0:
 				# Nobody swears an oath to a stranger they distrust.
@@ -330,12 +347,14 @@ static func _stance_change_value(data: GameData, state: Dictionary, evaluator: S
 	return value
 
 
-static func _peace_value(data: GameData, state: Dictionary, evaluator: String, other: String) -> float:
+static func _peace_value(data: GameData, state: Dictionary, evaluator: String, other: String, strengths: Dictionary = {}) -> float:
 	## What ending the war is worth to the evaluator: the losing side pays for
 	## peace, the winning side must be paid to stop.
 	var rules: Dictionary = data.balance["diplomacy"]
-	var own := AiStrategy.faction_total_strength(data, state, evaluator)
-	var theirs := AiStrategy.faction_total_strength(data, state, other)
+	var own: float = strengths[evaluator] if strengths.has(evaluator) \
+		else AiStrategy.faction_total_strength(data, state, evaluator)
+	var theirs: float = strengths[other] if strengths.has(other) \
+		else AiStrategy.faction_total_strength(data, state, other)
 	var ratio := theirs / maxf(own, 1.0)
 	return minf(float(rules["peace_base_value"]) + (ratio - 1.0) * float(rules["peace_strength_scale"]),
 		float(rules["peace_value_max"]))
