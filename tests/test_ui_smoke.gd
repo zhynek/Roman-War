@@ -189,6 +189,77 @@ func test_negotiation_and_envoys(t) -> void:
 	screen.free()
 
 
+func test_agent_orders_through_the_ui(t) -> void:
+	## Recruit an agent, select him in the panel, walk him across a border by
+	## clicking the map, and read a spy's report — the whole loop headless.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	# Find any julii settlement able to train any agent kind at campaign start
+	# (spies want a market, which a young province may not have built yet).
+	var home := ""
+	var kind := ""
+	var region_ids: Array = game.state["settlements"].keys()
+	region_ids.sort()
+	var kind_ids: Array = game.data.agent_kinds.keys()
+	kind_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = game.state["settlements"][region_id]
+		if settlement["owner"] != "julii":
+			continue
+		for candidate in kind_ids:
+			if candidate != "spy" and home != "":
+				continue  # prefer a spy so the report path gets exercised
+			if AgentRules.building_gate_met(game.data, settlement, game.data.agent_kinds[candidate]):
+				home = region_id
+				kind = candidate
+				if kind == "spy":
+					break
+		if kind == "spy":
+			break
+	t.check(home != "", "some julii town can train an agent at the start")
+
+	var agent_id := game.recruit_agent(home, kind)
+	t.check(agent_id != "", "the agent is hired through the facade")
+
+	screen._on_region_clicked(home)
+	var rows_before: int = screen.region_panel.get_child_count()
+	screen._on_agent_selected(agent_id)
+	t.check_eq(screen.selected_agent, agent_id, "the agent is selected")
+	t.check(screen.region_panel.get_child_count() > rows_before, "his orders unfold in the panel")
+
+	AgentRules.reset_movement(game.data, game.state)
+	var neighbors: Array = game.data.regions[home].get("adjacent", []).duplicate()
+	neighbors.sort()
+	var destination: String = neighbors[0]
+	screen._on_region_clicked(destination)
+	t.check_eq(game.state["agents"][agent_id]["region"], destination,
+		"a map click walks the agent across any border")
+	t.check_eq(screen.selected_agent, agent_id, "and he stays selected for the next step")
+
+	if kind == "spy":
+		screen._scout_order(agent_id)
+		t.check(screen.report_log.get_parsed_text().contains("informer reports"),
+			"the spy's report reaches the log")
+
+	# Selecting an army drops the agent selection, and vice versa.
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		if game.state["armies"][candidate]["owner"] == "julii":
+			army_id = candidate
+			break
+	if army_id != "":
+		screen._on_region_clicked(game.state["armies"][army_id]["region"])
+		screen._on_army_selected(army_id)
+		t.check_eq(screen.selected_agent, "", "army selection clears the agent")
+
+	screen.free()
+
+
 func test_start_menu_scene_loads(t) -> void:
 	var scene: PackedScene = load("res://src/ui/main.tscn")
 	t.check(scene != null, "main scene parses")

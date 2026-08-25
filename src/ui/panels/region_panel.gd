@@ -8,22 +8,29 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal agent_selected(agent_id: String)
+signal scout_requested(agent_id: String)
+signal assassinate_requested(agent_id: String, target_char_id: String)
+signal bribe_requested(agent_id: String, army_id: String)
 
 var game: Game
 var region_id := ""
 var selected_army := ""
+var selected_agent := ""
 
 
-func show_region(current_game: Game, new_region_id: String, army_id: String = "") -> void:
+func show_region(current_game: Game, new_region_id: String, army_id: String = "", agent_id: String = "") -> void:
 	game = current_game
 	region_id = new_region_id
 	selected_army = army_id
+	selected_agent = agent_id
 	_rebuild()
 
 
 func clear_panel() -> void:
 	region_id = ""
 	selected_army = ""
+	selected_agent = ""
 	_clear_children()
 
 
@@ -58,6 +65,7 @@ func _rebuild() -> void:
 	if not settlement.is_empty():
 		_build_settlement_section(settlement)
 	_build_armies_section()
+	_build_agents_section()
 
 
 func _build_settlement_section(settlement: Dictionary) -> void:
@@ -152,6 +160,19 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 				game.queue_unit(region_id, unit["id"])
 				action_taken.emit())
 
+	# Agents train here too, behind their building gates.
+	var agent_kind_ids: Array = game.data.agent_kinds.keys()
+	agent_kind_ids.sort()
+	for kind in agent_kind_ids:
+		var template: Dictionary = game.data.agent_kinds[kind]
+		if not AgentRules.building_gate_met(game.data, settlement, template):
+			continue
+		_action_button("Train %s (%d)" % [template["name"], int(template["cost"])],
+			func():
+				if game.recruit_agent(region_id, kind) == "":
+					pass  # cap or purse refused; the panel simply re-renders
+				action_taken.emit())
+
 
 func _build_armies_section() -> void:
 	var player: String = game.state["player_faction"]
@@ -226,6 +247,76 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 				func():
 					game.hire_mercenary(army_id, offer["template"])
 					action_taken.emit())
+
+
+func _build_agents_section() -> void:
+	var player: String = game.state["player_faction"]
+	var here := game.agents_in(region_id)
+	if here.is_empty():
+		return
+	_separator()
+	_header("Agents here", 13)
+	for entry in here:
+		var agent: Dictionary = entry["agent"]
+		var agent_id: String = entry["id"]
+		var faction: Dictionary = game.data.factions.get(agent["owner"], {})
+		var kind_name: String = game.data.agent_kinds.get(agent["kind"], {}).get("name", agent["kind"])
+		var title := "%s %s (skill %d)" % [kind_name, agent["name"], int(agent["skill"])]
+		if agent["owner"] == player:
+			var button := Button.new()
+			button.text = ("◆ " if agent_id == selected_agent else "") + title
+			button.add_theme_font_size_override("font_size", 11)
+			button.pressed.connect(func(): agent_selected.emit(agent_id))
+			add_child(button)
+			if agent_id == selected_agent:
+				_build_selected_agent_detail(agent_id, agent)
+		else:
+			_label("%s — %s" % [faction.get("name", agent["owner"]), title],
+				Color.html(faction.get("color", "#808080")))
+
+
+func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
+	_label("Movement left: %.1f" % float(agent["movement_left"]))
+	_label("Click an adjacent region to travel — any border is open to him.", Color(0.7, 0.8, 0.9))
+
+	match String(agent["kind"]):
+		"spy":
+			if game.state["settlements"].has(region_id):
+				_action_button("Scout the settlement", func(): scout_requested.emit(agent_id))
+		"assassin":
+			var targets: Array = []
+			var char_ids: Array = game.state["characters"].keys()
+			char_ids.sort()
+			for char_id in char_ids:
+				var character: Dictionary = game.state["characters"][char_id]
+				if character["alive"] and character.get("location", "") == region_id \
+						and character["faction"] != game.state["player_faction"]:
+					targets.append(char_id)
+			if not targets.is_empty():
+				var picker := OptionButton.new()
+				for char_id in targets:
+					var character: Dictionary = game.state["characters"][char_id]
+					var odds := AgentRules.assassination_chance(game.data, game.state, agent, character)
+					picker.add_item("%s (%d%%)" % [character["name"], int(round(odds * 100))])
+				add_child(picker)
+				_action_button("Send the blade", func():
+					if picker.selected >= 0:
+						assassinate_requested.emit(agent_id, targets[picker.selected]))
+		"diplomat":
+			var bands: Array = []
+			var army_ids: Array = game.state["armies"].keys()
+			army_ids.sort()
+			for army_id in army_ids:
+				var army: Dictionary = game.state["armies"][army_id]
+				if army["region"] == region_id and army["owner"] != game.state["player_faction"] \
+						and army["general"] == null:
+					bands.append(army_id)
+			for army_id in bands:
+				var army: Dictionary = game.state["armies"][army_id]
+				var cost := AgentRules.bribe_cost(game.data, army)
+				var owner_name: String = game.data.factions.get(army["owner"], {}).get("name", army["owner"])
+				_action_button("Bribe the %s band — %d units (%d)" % [owner_name, army["units"].size(), cost],
+					func(): bribe_requested.emit(agent_id, army_id))
 
 
 ## --- Small builders -------------------------------------------------------

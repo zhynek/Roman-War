@@ -161,6 +161,27 @@ func _draw_region(region_id: String, is_visible: bool) -> void:
 		draw_rect(Rect2(badge_pos, Vector2(8, 10) * _zoom), Color(0, 0, 0, 0.6), false, 1.0 * _zoom)
 		badge_offset += 1
 
+	# Agent badges: one small diamond per owner with agents here, below the
+	# army squares so the quiet men read differently from the loud ones.
+	var diamond_offset := 0
+	var agent_owners := {}
+	for agent in game.state.get("agents", {}).values():
+		if agent["region"] == region_id:
+			agent_owners[agent["owner"]] = true
+	var agent_owner_ids: Array = agent_owners.keys()
+	agent_owner_ids.sort()
+	for agent_owner in agent_owner_ids:
+		var diamond_color := Color.html(game.data.factions.get(agent_owner, {}).get("color", "#808080"))
+		var center := screen + Vector2(radius + (8.0 + diamond_offset * 11.0) * _zoom, radius * 0.7)
+		var half := 4.0 * _zoom
+		var points := PackedVector2Array([
+			center + Vector2(0, -half), center + Vector2(half, 0),
+			center + Vector2(0, half), center + Vector2(-half, 0),
+		])
+		draw_colored_polygon(points, diamond_color)
+		draw_polyline(points + PackedVector2Array([points[0]]), Color(0, 0, 0, 0.6), 1.0 * _zoom)
+		diamond_offset += 1
+
 	if _zoom >= 0.55 and _font != null:
 		var label: String = region.get("settlement_name", region_id)
 		var text_size := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_CENTER, -1, 12)

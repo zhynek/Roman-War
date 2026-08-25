@@ -16,6 +16,7 @@ var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_agent := ""
 var _victory_shown := false
 
 
@@ -57,6 +58,10 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.agent_selected.connect(_on_agent_selected)
+	region_panel.scout_requested.connect(_scout_order)
+	region_panel.assassinate_requested.connect(_assassinate_order)
+	region_panel.bribe_requested.connect(_bribe_order)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -124,7 +129,7 @@ func refresh() -> void:
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
 	if map_view.selected_region != "":
-		region_panel.show_region(game, map_view.selected_region, selected_army)
+		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:
@@ -132,21 +137,100 @@ func refresh() -> void:
 
 
 func _on_region_clicked(region_id: String) -> void:
-	# With one of our armies selected, a click on another region is an order.
-	# Shift makes it a forced march: double range, weary men.
+	# With one of our armies (or agents) selected, a click on another region is
+	# an order. Shift makes an army's march forced: double range, weary men.
 	if selected_army != "" and game.state["armies"].has(selected_army) \
 			and region_id != game.state["armies"][selected_army]["region"]:
 		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
 		return
+	if selected_agent != "" and game.state["agents"].has(selected_agent) \
+			and region_id != game.state["agents"][selected_agent]["region"]:
+		_agent_order(region_id)
+		return
 	map_view.selected_region = region_id
 	selected_army = ""
+	selected_agent = ""
 	region_panel.show_region(game, region_id)
 	map_view.queue_redraw()
 
 
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
+	selected_agent = ""
 	region_panel.show_region(game, map_view.selected_region, selected_army)
+
+
+func _on_agent_selected(agent_id: String) -> void:
+	selected_agent = "" if selected_agent == agent_id else agent_id
+	selected_army = ""
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+
+
+func _agent_order(target_region: String) -> void:
+	if game.move_agent(selected_agent, target_region):
+		_log("Our agent slips away toward %s." % game.data.regions[target_region]["name"])
+	else:
+		_log("Our agent cannot reach %s this season." % game.data.regions[target_region]["name"])
+	if game.state["agents"].has(selected_agent):
+		map_view.selected_region = game.state["agents"][selected_agent]["region"]
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+	refresh()
+
+
+func _scout_order(agent_id: String) -> void:
+	var report := game.agent_scout(agent_id)
+	if report.is_empty():
+		return
+	var lines := "Population %d, public order %d%%.\n" \
+		% [int(report["population"]), int(report["public_order"])]
+	if report["under_siege"]:
+		lines += "The city is under siege.\n"
+	lines += "\nGarrison (%d):\n" % report["garrison"].size()
+	for unit in report["garrison"]:
+		lines += "  %s — %d%%\n" % [unit["name"], int(unit["strength_pct"])]
+	lines += "\nWorks:\n"
+	for building in report["buildings"]:
+		lines += "  %s\n" % building
+	var dialog := AcceptDialog.new()
+	dialog.title = "The informer's report: %s" \
+		% game.data.regions[report["region"]]["settlement_name"]
+	dialog.dialog_text = lines
+	add_child(dialog)
+	dialog.popup_centered()
+	_log("Our informer reports from %s." % game.data.regions[report["region"]]["settlement_name"])
+
+
+func _assassinate_order(agent_id: String, target_char_id: String) -> void:
+	var target: Dictionary = game.state["characters"].get(target_char_id, {})
+	if target.is_empty():
+		return
+	_confirm("Send the blade against %s? Failure may cost us the man." % target["name"], func():
+		var result := game.agent_assassinate(agent_id, target_char_id)
+		if result.get("success", false):
+			_log("[color=#e06050][b]%s is dead.[/b] No one knows whose coin paid for it.[/color]"
+				% target["name"])
+		elif result.get("agent_lost", false):
+			_log("[color=#e0a060]The attempt on %s failed — our blade was taken.[/color]"
+				% target["name"])
+		elif result.get("attempted", false):
+			_log("The attempt on %s failed; our man slipped away." % target["name"])
+		refresh())
+
+
+func _bribe_order(agent_id: String, army_id: String) -> void:
+	var army: Dictionary = game.state["armies"].get(army_id, {})
+	if army.is_empty():
+		return
+	var cost := AgentRules.bribe_cost(game.data, army)
+	_confirm("Pay %d to send this band home?" % cost, func():
+		var result := game.agent_bribe(agent_id, army_id)
+		if result.get("success", false):
+			_log("The band took our %d and scattered." % int(result["cost"]))
+		elif result.get("refused_loyal", false):
+			_log("They follow their general, not our purse.")
+		else:
+			_log("Our purse cannot meet their price.")
+		refresh())
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -263,6 +347,7 @@ func _end_turn() -> void:
 	var report := game.end_turn()
 	_log_report(report)
 	selected_army = ""
+	selected_agent = ""
 	refresh()
 
 
@@ -397,6 +482,7 @@ func _save_game() -> void:
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
+		selected_agent = ""
 		map_view.selected_region = ""
 		region_panel.clear_panel()
 		_victory_shown = false

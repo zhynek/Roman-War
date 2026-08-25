@@ -19,7 +19,7 @@ static func recruit_agent(data: GameData, state: Dictionary, region_id: String, 
 		return ""
 	var settlement: Dictionary = state["settlements"][region_id]
 	var owner: String = settlement["owner"]
-	if not _building_gate_met(data, settlement, template):
+	if not building_gate_met(data, settlement, template):
 		return ""
 	var owned := 0
 	for agent in state["agents"].values():
@@ -218,7 +218,7 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 		agent["movement_left"] = float(data.agent_kinds.get(agent["kind"], {}).get("movement_points", 2))
 
 
-static func _building_gate_met(data: GameData, settlement: Dictionary, template: Dictionary) -> bool:
+static func building_gate_met(data: GameData, settlement: Dictionary, template: Dictionary) -> bool:
 	var needed_kind: String = template["building_kind"]
 	var needed_level := int(template["building_level"])
 	for chain_id in settlement["buildings"]:
