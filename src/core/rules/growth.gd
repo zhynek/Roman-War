@@ -19,9 +19,9 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if knowledge_growth != 0.0:
 		factors.append({"label": "knowledge", "value": knowledge_growth})
 
-	var held: Dictionary = state["factions"][settlement["owner"]].get("edicts", {})
-	if not held.is_empty():
-		var edict_ids: Array = held.keys()
+	var held = state["factions"][settlement["owner"]].get("edicts")
+	if held != null and not (held as Dictionary).is_empty():
+		var edict_ids: Array = (held as Dictionary).keys()
 		edict_ids.sort()
 		for eid in edict_ids:
 			var edict_growth := float(data.edicts.get(eid, {}).get("effects", {}).get("growth", 0.0))

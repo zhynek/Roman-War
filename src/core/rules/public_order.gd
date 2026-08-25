@@ -26,9 +26,10 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 
 	# Each standing edict shows its hand by name (happiness and law both feed
 	# order one-for-one); decree moods and repeal shocks sum as one factor.
-	var held: Dictionary = state["factions"][settlement["owner"]].get("edicts", {})
-	if not held.is_empty():
-		var edict_ids: Array = held.keys()
+	# Null-checks over .get defaults: this is the breakdown hot path.
+	var held = state["factions"][settlement["owner"]].get("edicts")
+	if held != null and not (held as Dictionary).is_empty():
+		var edict_ids: Array = (held as Dictionary).keys()
 		edict_ids.sort()
 		for eid in edict_ids:
 			var effects: Dictionary = data.edicts.get(eid, {}).get("effects", {})

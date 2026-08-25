@@ -20,9 +20,12 @@ static func add(state: Dictionary, faction_id: String, region_id: String, effect
 
 static func sum_for(state: Dictionary, faction_id: String, region_id: String, effect: String) -> float:
 	## Everything that applies here: global + this faction's, faction-wide +
-	## this region's. Pure sum — order-free.
+	## this region's. Pure sum — order-free. Hot path: no default allocation.
+	var modifiers = state.get("modifiers")
+	if modifiers == null or (modifiers as Array).is_empty():
+		return 0.0
 	var total := 0.0
-	for modifier in state.get("modifiers", []):
+	for modifier in modifiers:
 		if modifier["effect"] != effect:
 			continue
 		if modifier["faction"] != "" and modifier["faction"] != faction_id:
