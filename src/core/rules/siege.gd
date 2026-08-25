@@ -14,7 +14,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
 	# Investing a settlement IS a declaration of war.
-	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
+	DiplomacyRules.declare_war(data, state, army["owner"], settlement["owner"])
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0

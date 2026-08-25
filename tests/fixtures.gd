@@ -198,6 +198,7 @@ static func state(game_data: GameData) -> Dictionary:
 		},
 		"armies": {}, "fleets": {}, "characters": {},
 		"events_fired": [], "winner": null, "next_id": 1,
+		"tributes": [], "pending_offers": [],
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}
@@ -241,7 +242,7 @@ static func _faction(capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false, "ai": {},
+		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
 	}
 
 

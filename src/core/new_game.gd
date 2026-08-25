@@ -44,6 +44,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,
+		"tributes": [],
+		"pending_offers": [],
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -60,6 +62,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"mission": null,
 			"at_civil_war": false,
 			"ai": {},
+			"attitude_memory": {},
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -77,7 +80,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false, "ai": {},
+		"mission": null, "at_civil_war": false, "ai": {}, "attitude_memory": {},
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -128,6 +131,12 @@ static func ensure_state_keys(state: Dictionary) -> void:
 		var faction: Dictionary = state["factions"][faction_id]
 		if not faction.has("ai"):
 			faction["ai"] = {}
+		if not faction.has("attitude_memory"):
+			faction["attitude_memory"] = {}
+	if not state.has("tributes"):
+		state["tributes"] = []
+	if not state.has("pending_offers"):
+		state["pending_offers"] = []
 
 
 static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dictionary:

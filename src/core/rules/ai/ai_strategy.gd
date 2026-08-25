@@ -76,6 +76,19 @@ static func faction_field_strength(data: GameData, state: Dictionary, faction_id
 	return total
 
 
+static func faction_total_strength(data: GameData, state: Dictionary, faction_id: String) -> float:
+	## Field armies plus garrisons — the weight a faction throws on the scales
+	## of diplomacy, where a wall of spears counts even if it never marches.
+	var total := faction_field_strength(data, state, faction_id)
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = state["settlements"][region_id]
+		if settlement["owner"] == faction_id:
+			total += force_strength(data, settlement["garrison"])
+	return total
+
+
 static func threat_near(data: GameData, state: Dictionary, faction_id: String, region_id: String, radius: int) -> float:
 	## Summed strength of at-war armies within `radius` land hops of a region.
 	var hops := MapRules.hops_from(data, region_id)

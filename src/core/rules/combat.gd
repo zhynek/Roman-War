@@ -13,7 +13,7 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
-	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
+	DiplomacyRules.declare_war(data, state, attacker["owner"], defender["owner"])
 	var region: Dictionary = data.regions[defender["region"]]
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
@@ -225,6 +225,11 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 		if army["general"] != null:
 			CharacterRules.kill(state, army["general"], data)
 		state["armies"].erase(army_id)
+
+
+static func check_faction_destroyed(state: Dictionary) -> void:
+	## Public entry for other modules that transfer settlements (cessions).
+	_check_faction_destroyed(state)
 
 
 static func _check_faction_destroyed(state: Dictionary) -> void:

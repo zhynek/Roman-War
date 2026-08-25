@@ -73,12 +73,55 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 
 func declare_war(other_faction: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
-	return DiplomacyRules.declare_war(state, fid, other_faction)
+	return DiplomacyRules.declare_war(data, state, fid, other_faction)
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
+
+
+## --- Diplomacy (Phase 5) ---------------------------------------------------
+
+func attitude_of(other_faction: String) -> Array:
+	## How the other faction currently feels about the player, as named factors.
+	return DiplomacyRules.attitude_breakdown(data, state, other_faction, String(state["player_faction"]))
+
+
+func preview_offer(offer: Dictionary) -> Dictionary:
+	## Price an offer without proposing it — the negotiation dialog's live hint.
+	offer["from"] = String(state["player_faction"])
+	return DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
+
+
+func propose_offer(offer: Dictionary) -> Dictionary:
+	## Put the offer to the other side; it takes effect at once if accepted.
+	offer["from"] = String(state["player_faction"])
+	var verdict := DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
+	if verdict["accept"]:
+		DiplomacyRules.apply_offer(data, state, offer)
+	return verdict
+
+
+func pending_offers() -> Array:
+	## Offers other factions have laid before the player, oldest first.
+	var mine: Array = []
+	for offer in state["pending_offers"]:
+		if offer.get("to", "") == state["player_faction"]:
+			mine.append(offer)
+	return mine
+
+
+func respond_offer(offer_id: String, accept: bool) -> bool:
+	for i in range(state["pending_offers"].size()):
+		var offer: Dictionary = state["pending_offers"][i]
+		if offer.get("id", "") != offer_id or offer.get("to", "") != state["player_faction"]:
+			continue
+		state["pending_offers"].remove_at(i)
+		if accept:
+			DiplomacyRules.apply_offer(data, state, offer)
+		return true
+	return false
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:

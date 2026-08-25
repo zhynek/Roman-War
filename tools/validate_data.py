@@ -48,6 +48,11 @@ LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_cit
 # else the engine never fires is flagged as dead content.
 FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
 
+# Mission kinds authored ahead of their systems, same idea: port blockades are
+# the Phase 3 naval remainder; assassinations arrive with campaign agents;
+# leader_suicide needs Phase 7 senate depth.
+FORWARD_MISSIONS = {"blockade_port", "leader_suicide", "assassinate_leader"}
+
 errors: list[str] = []
 warnings: list[str] = []
 
@@ -446,6 +451,20 @@ def cross_checks(t: dict[str, dict]) -> None:
                     continue
                 warn(f"{source_name}: {entry['id']}: trigger '{trigger['when']}' is never "
                      f"fired by any engine call site (dead content)")
+
+    # Same discipline for mission kinds: every kind must either be issued by an
+    # engine call site or be explicitly forward-authored.
+    issued_kinds = set()
+    for source in engine_dir.rglob("*.gd"):
+        text = source.read_text()
+        for kind in ("take_region", "make_alliance", "reach_trade_agreement",
+                     "assassinate_leader", "blockade_port", "leader_suicide"):
+            if f'"{kind}"' in text:
+                issued_kinds.add(kind)
+    for mission in t.get("missions.json", {}).get("missions", []):
+        if mission["kind"] not in issued_kinds and mission["kind"] not in FORWARD_MISSIONS:
+            warn(f"missions: {mission['id']}: kind '{mission['kind']}' is never "
+                 f"issued by any engine call site (dead content)")
     for faction_setup in campaign.get("factions", []):
         for character in faction_setup.get("characters", []):
             for trait_id in character.get("traits", []):

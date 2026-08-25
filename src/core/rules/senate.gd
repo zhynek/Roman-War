@@ -29,7 +29,7 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				notices.append({"kind": "mission_issued", "faction": faction_id, "mission": new_mission["template"]})
 		else:
 			mission["turns_left"] = int(mission["turns_left"]) - 1
-			if _mission_complete(state, faction_id, mission):
+			if _mission_complete(data, state, faction_id, mission):
 				var template: Dictionary = data.missions[mission["template"]]
 				var reward: Dictionary = template.get("reward", {})
 				faction["treasury"] = int(faction["treasury"]) + int(reward.get("treasury", 0))
@@ -59,36 +59,80 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 
 
 static func _issue_mission(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng) -> Dictionary:
-	## Foundation scope: take_region missions targeting a nearby rebel region.
+	## take_region targets a nearby rebel region; make_alliance and
+	## reach_trade_agreement court a bordering foreign power. The template is
+	## drawn among kinds that currently have a valid target, then the target —
+	## all candidate lists in canonical sorted order, since they feed rng.pick.
+	var take_targets := _take_region_targets(data, state, faction_id)
+	var alliance_targets := _courtship_targets(data, state, faction_id, ["neutral", "trade"])
+	var trade_targets := _courtship_targets(data, state, faction_id, ["neutral"])
+
 	var candidates: Array = []
-	for mission_id in data.missions:
+	var mission_ids: Array = data.missions.keys()
+	mission_ids.sort()
+	for mission_id in mission_ids:
 		var template: Dictionary = data.missions[mission_id]
-		if template["kind"] != "take_region":
-			continue
 		if template.has("min_year") and int(state["year"]) < int(template["min_year"]):
 			continue
-		candidates.append(mission_id)
+		match String(template["kind"]):
+			"take_region":
+				if not take_targets.is_empty():
+					candidates.append(mission_id)
+			"make_alliance":
+				if not alliance_targets.is_empty():
+					candidates.append(mission_id)
+			"reach_trade_agreement":
+				if not trade_targets.is_empty():
+					candidates.append(mission_id)
 	if candidates.is_empty():
 		return {}
 
+	var template_id: String = rng.pick(candidates)
+	var mission := {
+		"template": template_id,
+		"turns_left": int(data.missions[template_id]["deadline_turns"]),
+	}
+	match String(data.missions[template_id]["kind"]):
+		"take_region":
+			mission["target_region"] = rng.pick(take_targets)
+		"make_alliance":
+			mission["target_faction"] = rng.pick(alliance_targets)
+		"reach_trade_agreement":
+			mission["target_faction"] = rng.pick(trade_targets)
+	return mission
+
+
+static func _take_region_targets(data: GameData, state: Dictionary, faction_id: String) -> Array:
 	var targets: Array = []
 	var region_ids: Array = state["settlements"].keys()
-	region_ids.sort()  # canonical order — targets feed rng.pick
+	region_ids.sort()
 	for region_id in region_ids:
 		if state["settlements"][region_id]["owner"] == "rebels":
 			for neighbor in data.regions[region_id].get("adjacent", []):
 				if state["settlements"].has(neighbor) and state["settlements"][neighbor]["owner"] == faction_id:
 					targets.append(region_id)
 					break
-	if targets.is_empty():
-		return {}
+	return targets
 
-	var template_id: String = rng.pick(candidates)
-	return {
-		"template": template_id,
-		"target_region": rng.pick(targets),
-		"turns_left": int(data.missions[template_id]["deadline_turns"]),
-	}
+
+static func _courtship_targets(data: GameData, state: Dictionary, faction_id: String, allowed_stances: Array) -> Array:
+	## Foreign (non-Roman) bordering powers whose current stance leaves room
+	## for the asked-for agreement.
+	var targets: Array = []
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for other_id in faction_ids:
+		if other_id == faction_id or not state["factions"][other_id]["alive"]:
+			continue
+		var info: Dictionary = data.factions.get(other_id, {})
+		if info.get("is_rebel", false) or info.get("is_roman_house", false) or info.get("is_senate", false):
+			continue
+		if not allowed_stances.has(DiplomacyRules.stance_between(state, faction_id, other_id)):
+			continue
+		if not DiplomacyRules.share_border(data, state, faction_id, other_id):
+			continue
+		targets.append(other_id)
+	return targets
 
 
 static func _grant_reward_units(state: Dictionary, faction_id: String, reward: Dictionary) -> void:
@@ -103,10 +147,20 @@ static func _grant_reward_units(state: Dictionary, faction_id: String, reward: D
 			})
 
 
-static func _mission_complete(state: Dictionary, faction_id: String, mission: Dictionary) -> bool:
-	var target: String = mission.get("target_region", "")
-	return target != "" and state["settlements"].has(target) \
-		and state["settlements"][target]["owner"] == faction_id
+static func _mission_complete(data: GameData, state: Dictionary, faction_id: String, mission: Dictionary) -> bool:
+	match String(data.missions.get(mission["template"], {}).get("kind", "")):
+		"take_region":
+			var target: String = mission.get("target_region", "")
+			return target != "" and state["settlements"].has(target) \
+				and state["settlements"][target]["owner"] == faction_id
+		"make_alliance":
+			var ally: String = mission.get("target_faction", "")
+			return ally != "" and DiplomacyRules.stance_between(state, faction_id, ally) == "alliance"
+		"reach_trade_agreement":
+			var partner: String = mission.get("target_faction", "")
+			# An alliance carries trade rights with it, so either seals the deal.
+			return partner != "" and DiplomacyRules.stance_between(state, faction_id, partner) in ["trade", "alliance"]
+	return false
 
 
 static func _region_count(state: Dictionary, faction_id: String) -> int:
