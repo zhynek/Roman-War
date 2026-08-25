@@ -32,14 +32,20 @@ static func muster_region(state: Dictionary, faction_id: String) -> String:
 
 static func force_strength(data: GameData, units: Array) -> float:
 	## Paper strength of a unit list: quality × soldiers × condition, with the
-	## battle experience chevron bonus counted the way the resolver does.
+	## battle experience chevron bonus and the weapons/armor stamp counted the
+	## way the resolver does — an AI that ignored arming would misjudge every
+	## upgraded enemy.
 	var ai_rules: Dictionary = data.balance["ai"]
 	var chevron_pct := float(data.balance["battle"]["experience_strength_pct_per_chevron"])
+	var weapon_pct := float(data.balance["battle"].get("weapon_upgrade_attack_pct", 0.0))
+	var armor_pct := float(data.balance["battle"].get("armor_upgrade_defense_pct", 0.0))
 	var total := 0.0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
-		var quality := float(template.get("attack", 0)) * float(ai_rules["strength_attack_weight"]) \
-			+ float(template.get("defense", 0)) * float(ai_rules["strength_defense_weight"]) \
+		var weapon_bonus := 1.0 + float(unit.get("weapons", 0)) * weapon_pct / 100.0
+		var armor_bonus := 1.0 + float(unit.get("armor", 0)) * armor_pct / 100.0
+		var quality := float(template.get("attack", 0)) * weapon_bonus * float(ai_rules["strength_attack_weight"]) \
+			+ float(template.get("defense", 0)) * armor_bonus * float(ai_rules["strength_defense_weight"]) \
 			+ float(template.get("morale", 0)) * float(ai_rules["strength_morale_weight"])
 		var condition := float(unit.get("strength_pct", 100)) / 100.0
 		var experience := 1.0 + float(unit.get("experience", 0)) * chevron_pct / 100.0
@@ -53,7 +59,10 @@ static func settlement_defense(data: GameData, state: Dictionary, region_id: Str
 	## (A pure sum — iteration order cannot matter, so no sort is needed.)
 	var settlement: Dictionary = state["settlements"][region_id]
 	var wall_multipliers: Array = data.balance["battle"]["wall_defense_multiplier"]
-	var wall_level := mini(int(SettlementRules.effect_max(data, settlement, "wall_level")),
+	# Counting the defender's wallcraft technique keeps the AI's estimate
+	# honest against rampart-holding cities (mirrors SiegeRules.assault).
+	var wall_level := mini(int(SettlementRules.effect_max(data, settlement, "wall_level"))
+		+ int(KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "wall_level_bonus")),
 		wall_multipliers.size() - 1)
 	var defense := force_strength(data, settlement["garrison"]) * float(wall_multipliers[wall_level])
 	for army in state["armies"].values():

@@ -15,6 +15,10 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if farm_growth != 0.0:
 		factors.append({"label": "buildings", "value": farm_growth})
 
+	var knowledge_growth := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "growth")
+	if knowledge_growth != 0.0:
+		factors.append({"label": "knowledge", "value": knowledge_growth})
+
 	var health := SettlementRules.effect_total(data, settlement, "health")
 	if health != 0.0:
 		var per_10: float = growth_rules["health_pct_per_10_health"]
@@ -70,7 +74,7 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	var population := int(settlement["population"])
 	population = int(round(population * (1.0 + total_pct(data, state, region_id) / 100.0)))
 
-	_plague_turn(data, settlement, rng)
+	_plague_turn(data, state, settlement, rng)
 	if int(settlement["plague_turns"]) > 0:
 		var loss_pct := float(data.balance["plague"]["population_loss_pct_per_turn"])
 		population = int(round(population * (1.0 - loss_pct / 100.0)))
@@ -82,14 +86,17 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 			settlement[counter] = int(settlement[counter]) - 1
 
 
-static func _plague_turn(data: GameData, settlement: Dictionary, rng: CampaignRng) -> void:
+static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictionary, rng: CampaignRng) -> void:
 	var plague_rules: Dictionary = data.balance["plague"]
 	if int(settlement["plague_turns"]) > 0:
 		settlement["plague_turns"] = int(settlement["plague_turns"]) - 1
 		return
-	# Plague risk grows with population beyond what health infrastructure supports.
+	# Plague risk grows with population beyond what health infrastructure
+	# supports; practiced techniques (drains, aqueducts, physicians' regimens —
+	# plague_resistance, in people sheltered) raise the whole faction's capacity.
 	var health := SettlementRules.effect_total(data, settlement, "health")
-	var capacity := float(plague_rules["base_capacity"]) + health * float(plague_rules["health_capacity_per_health_pct"])
+	var capacity := float(plague_rules["base_capacity"]) + health * float(plague_rules["health_capacity_per_health_pct"]) \
+		+ KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "plague_resistance")
 	var excess := float(settlement["population"]) - capacity
 	if excess <= 0.0:
 		return

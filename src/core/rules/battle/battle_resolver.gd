@@ -38,14 +38,20 @@ static func force_strength(data: GameData, units: Array, general: Variant, exper
 	## Shared strength estimate: soldiers x quality x experience, led by a
 	## general profile {command, troop_morale} of EFFECTIVE values (base
 	## attributes plus trait and retinue modifiers — see CharacterRules).
+	## A unit's weapons/armor stamp (recruit-time arming from city forges and
+	## practiced techniques) scales its attack and defense respectively.
+	var weapon_pct := float(data.balance["battle"].get("weapon_upgrade_attack_pct", 0.0))
+	var armor_pct := float(data.balance["battle"].get("armor_upgrade_defense_pct", 0.0))
 	var strength := 0.0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if template.is_empty():
 			continue
 		var soldiers := float(template["soldiers"]) * float(unit["strength_pct"]) / 100.0
-		var quality := float(template["attack"]) + float(template.get("missile_attack", 0)) * 0.5 \
-			+ float(template["defense"]) + float(template["morale"]) * 0.5 \
+		var weapon_bonus := 1.0 + float(unit.get("weapons", 0)) * weapon_pct / 100.0
+		var armor_bonus := 1.0 + float(unit.get("armor", 0)) * armor_pct / 100.0
+		var quality := (float(template["attack"]) + float(template.get("missile_attack", 0)) * 0.5) * weapon_bonus \
+			+ float(template["defense"]) * armor_bonus + float(template["morale"]) * 0.5 \
 			+ float(template.get("charge", 0)) * 0.25
 		var experience_bonus := 1.0 + float(unit["experience"]) * experience_pct_per_chevron / 100.0
 		strength += soldiers * quality * experience_bonus

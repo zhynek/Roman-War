@@ -18,6 +18,10 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if happiness != 0.0:
 		factors.append({"label": "happiness_buildings", "value": happiness})
 
+	var knowledge_happiness := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "happiness")
+	if knowledge_happiness != 0.0:
+		factors.append({"label": "knowledge", "value": knowledge_happiness})
+
 	var tax_happiness: float = order_rules["tax_happiness"][settlement["tax_level"]]
 	if tax_happiness != 0.0:
 		factors.append({"label": "taxes", "value": tax_happiness})

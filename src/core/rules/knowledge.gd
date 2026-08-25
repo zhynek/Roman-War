@@ -120,15 +120,36 @@ static func prerequisites_met(data: GameData, state: Dictionary, caches: Diction
 	return true
 
 
+static func adopted(state: Dictionary, faction_id: String, technique_id: String) -> bool:
+	## The gate readers ask: does this court PRACTICE the craft?
+	return String(state["factions"].get(faction_id, {}).get("knowledge", {}) \
+		.get(technique_id, {}).get("stage", "")) == "adopted"
+
+
 static func faction_effect_total(data: GameData, state: Dictionary, faction_id: String, effect: String) -> float:
 	## Sum an effect key across the faction's ADOPTED techniques only —
-	## awareness and half-built programs grant nothing.
+	## awareness and half-built programs grant nothing. This sits on the
+	## growth/order/economy hot paths (thousands of calls per turn), so the
+	## inner loop avoids allocating defaults; null-checks stand in for .get
+	## fallback dictionaries.
+	var faction = state["factions"].get(faction_id)
+	if faction == null:
+		return 0.0
+	var knowledge = faction.get("knowledge")
+	if knowledge == null or (knowledge as Dictionary).is_empty():
+		return 0.0
 	var total := 0.0
-	var knowledge: Dictionary = state["factions"].get(faction_id, {}).get("knowledge", {})
+	var techniques := data.techniques
 	for tid in knowledge:  # pure sum — iteration order cannot steer anything
-		if String(knowledge[tid].get("stage", "")) != "adopted":
+		var entry: Dictionary = knowledge[tid]
+		if entry.get("stage") != "adopted":
 			continue
-		total += float(data.techniques.get(tid, {}).get("effects", {}).get(effect, 0.0))
+		var technique = techniques.get(tid)
+		if technique == null:
+			continue
+		var effects = (technique as Dictionary).get("effects")
+		if effects != null:
+			total += float((effects as Dictionary).get(effect, 0.0))
 	return total
 
 

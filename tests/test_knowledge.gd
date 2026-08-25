@@ -334,3 +334,84 @@ func test_process_turn_lockstep_after_json_round_trip(t) -> void:
 
 func _canonical(state: Dictionary) -> String:
 	return JSON.stringify(JSON.parse_string(JSON.stringify(state)))
+
+func test_effects_reach_growth_order_and_economy(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	data.techniques["test_omni"] = {
+		"id": "test_omni", "name": "Omni", "domain": "scholarship_statecraft",
+		"historical_basis": "fixture",
+		"start_adopted": {"cultures": [], "factions": []}, "origin_cultures": [],
+		"prerequisites": {"building_kind": "", "building_level": 0, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+		"adoption": {"cost": 100, "turns": 1}, "culture_resistance": {},
+		"effects": {"growth": 0.5, "happiness": 3, "trade_pct": 10, "farm_income_pct": 10,
+			"mine_income_pct": 10, "corruption_reduction_pct": 50},
+	}
+	var farming_before := _factor(EconomyRules.settlement_income_breakdown(data, state, "beta"), "farming")
+	state["factions"]["red"]["knowledge"]["test_omni"] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+
+	t.check_near(_factor(GrowthRules.breakdown(data, state, "beta"), "knowledge"), 0.5, 0.001,
+		"growth breakdown carries a named knowledge factor")
+	t.check_near(_factor(PublicOrderRules.breakdown(data, state, "beta"), "knowledge"), 3.0, 0.001,
+		"public order likewise")
+	t.check_near(_factor(GrowthRules.breakdown(data, state, "alpha"), "knowledge"), 0.0, 0.001,
+		"and only for the court that practices it")
+	var farming_after := _factor(EconomyRules.settlement_income_breakdown(data, state, "beta"), "farming")
+	t.check_near(farming_after, farming_before * 1.1, 0.01, "farm income rises ten parts in a hundred")
+
+
+func test_effects_reach_movement_and_siege(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	data.techniques["test_logistics"] = {
+		"id": "test_logistics", "name": "Logistics", "domain": "logistics_trade",
+		"historical_basis": "fixture",
+		"start_adopted": {"cultures": [], "factions": []}, "origin_cultures": [],
+		"prerequisites": {"building_kind": "", "building_level": 0, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+		"adoption": {"cost": 100, "turns": 1}, "culture_resistance": {},
+		"effects": {"movement_points": 0.25, "naval_movement_pct": 10, "siege_equipment_turns_delta": -1},
+	}
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	state["fleets"]["fleet_1"] = {"owner": "red", "sea_zone": "test_sea", "ships": [], "movement_left": 0.0}
+	MovementRules.reset_movement(data, state)
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 2.0, 0.001, "base march")
+	t.check_near(float(state["fleets"]["fleet_1"]["movement_left"]), 2.0, 0.001, "base sailing")
+	state["factions"]["red"]["knowledge"]["test_logistics"] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	MovementRules.reset_movement(data, state)
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 2.25, 0.001,
+		"practiced logistics stretch the column's march")
+	t.check_near(float(state["fleets"]["fleet_1"]["movement_left"]), 2.2, 0.001,
+		"and the season's sailing — the dormant naval effect lives")
+
+	# Siege works: the delta shortens equipment building, never below one turn.
+	var enemy_army := Fixtures.add_army(state, "red", "alpha", ["test_spears"])
+	SiegeRules.begin_siege(data, state, enemy_army, "alpha")
+	var quiet := QuietResolver.new()
+	SiegeRules.advance_sieges(data, state, CampaignRng.seeded(1), quiet)
+	var siege = state["settlements"]["alpha"]["siege"]
+	t.check(siege != null and bool(siege["equipment_ready"]),
+		"torsion-craft besiegers raise their works in a single season")
+
+	# The defender's wallcraft raises the AI's honest estimate of the assault.
+	var defense_before := AiStrategy.settlement_defense(data, state, "alpha")
+	state["settlements"]["alpha"]["garrison"].append({"template": "test_mob", "experience": 0, "strength_pct": 100})
+	defense_before = AiStrategy.settlement_defense(data, state, "alpha")
+	state["factions"]["blue"]["knowledge"]["test_greatworks"] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	t.check(AiStrategy.settlement_defense(data, state, "alpha") > defense_before,
+		"timber-laced ramparts fight a tier above the stones")
+
+
+class QuietResolver:
+	extends BattleResolver
+	## A resolver that never fights — lets siege-progression tests advance
+	## turns without a starve-out battle steering the assertions.
+	func resolve(_data: GameData, _rng: CampaignRng, _attacker_units: Array, _defender_units: Array, _context: Dictionary) -> Dictionary:
+		return {"winner": "defender", "attacker_casualty_pct": 0.0, "defender_casualty_pct": 0.0,
+			"attacker_general_died": false, "defender_general_died": false, "experience_gained": 0}
+
+
+func _factor(factors: Array, label: String) -> float:
+	for factor in factors:
+		if factor["label"] == label:
+			return float(factor["value"])
+	return 0.0

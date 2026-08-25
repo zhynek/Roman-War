@@ -19,8 +19,9 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 
 	var farm_income := float(region["fertility"]) * float(economy_rules["farm_income_fertility_multiplier"]) \
 		+ SettlementRules.effect_total(data, settlement, "farm_income")
-	farm_income *= 1.0 + SettlementRules.faction_owns_wonder_effect(
-		data, state, settlement["owner"], "farm_income_pct") / 100.0
+	farm_income *= 1.0 + (SettlementRules.faction_owns_wonder_effect(
+			data, state, settlement["owner"], "farm_income_pct")
+		+ KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")) / 100.0
 	if rng != null:
 		farm_income *= rng.randf_pct(float(economy_rules["harvest_variance_pct"]))
 	factors.append({"label": "farming", "value": farm_income})
@@ -30,6 +31,7 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 		factors.append({"label": "trade", "value": trade})
 
 	var mines := SettlementRules.effect_total(data, settlement, "mine_income")
+	mines *= 1.0 + KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "mine_income_pct") / 100.0
 	if mines > 0.0:
 		factors.append({"label": "mines", "value": mines})
 
@@ -68,7 +70,8 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var economy_rules: Dictionary = data.balance["economy"]
 	var own_resources: Array = data.regions[region_id].get("resources", [])
 	var port_level := int(SettlementRules.effect_max(data, settlement, "port_level"))
-	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct")
+	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct") \
+		+ KnowledgeRules.faction_effect_total(data, state, owner, "trade_pct")
 	var sea_trade_wonder := SettlementRules.faction_owns_wonder_effect(data, state, owner, "sea_trade_pct")
 
 	var land_total := 0.0
@@ -116,6 +119,9 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 		float(corruption_rules["max_pct"]))
 	var law := PublicOrderRules.law_total(data, state, region_id)
 	corruption *= maxf(0.0, 1.0 - law * float(corruption_rules["law_reduction_factor"]))
+	# Archival statecraft (census rolls, courier posts) audits the far provinces.
+	corruption *= maxf(0.0, 1.0 - KnowledgeRules.faction_effect_total(
+		data, state, settlement["owner"], "corruption_reduction_pct") / 100.0)
 	return corruption
 
 

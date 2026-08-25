@@ -14,10 +14,16 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 			# "movement" effect is a flat bonus in movement points (base 2.0),
 			# so a Quartermaster's +0.25 is a real quarter-step, not a rounding.
 			points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
+		# Practiced logistics (marching camps, surveyed roads) speed every column.
+		points += KnowledgeRules.faction_effect_total(data, state, String(army["owner"]), "movement_points")
 		army["movement_left"] = maxf(points, 0.5)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
-		fleet["movement_left"] = base
+		# Naval technique and the great lighthouse (the wonder's long-dormant
+		# naval_movement_pct, wired at last) stretch a season's sailing.
+		var naval_pct := KnowledgeRules.faction_effect_total(data, state, String(fleet["owner"]), "naval_movement_pct") \
+			+ SettlementRules.faction_owns_wonder_effect(data, state, String(fleet["owner"]), "naval_movement_pct")
+		fleet["movement_left"] = base * (1.0 + naval_pct / 100.0)
 	AgentRules.reset_movement(data, state)
 
 

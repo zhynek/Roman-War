@@ -185,7 +185,9 @@
     "casualty_min_pct": 2,
     "casualty_max_pct": 95,
     "unit_casualty_scatter_pct": 30,
-    "general_command_bonus_pct": 5
+    "general_command_bonus_pct": 5,
+    "weapon_upgrade_attack_pct": 6.0,
+    "armor_upgrade_defense_pct": 6.0
   },
   "siege": {
     "equipment_turns": 2,

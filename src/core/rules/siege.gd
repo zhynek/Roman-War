@@ -39,7 +39,12 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 			settlement["siege"] = null
 			continue
 		siege["turns"] = int(siege["turns"]) + 1
-		if int(siege["turns"]) >= int(siege_rules["equipment_turns"]):
+		# Practiced siegecraft (torsion engines, rolling towers) shortens the
+		# building of works — never below one season at the walls.
+		var besieger_owner: String = state["armies"][siege["besieger"]]["owner"]
+		var equipment_turns := maxi(1, int(siege_rules["equipment_turns"]) + int(
+			KnowledgeRules.faction_effect_total(data, state, besieger_owner, "siege_equipment_turns_delta")))
+		if int(siege["turns"]) >= equipment_turns:
 			siege["equipment_ready"] = true
 
 		var level := SettlementRules.settlement_level(data, settlement)
@@ -65,6 +70,10 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		return {}
 
 	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
+	# The defender's practiced wallcraft (timber-laced ramparts) fights a tier
+	# above the stones themselves; the resolver contract is untouched — only
+	# the wall_level context it receives changes.
+	wall_level += int(KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "wall_level_bonus"))
 	# A spy of the attacker inside the city opens a gate for the storming party.
 	wall_level = maxi(0, wall_level - AgentRules.infiltration_bonus(data, state, region_id, army["owner"]))
 	if starving:

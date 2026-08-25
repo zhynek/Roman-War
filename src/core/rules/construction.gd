@@ -32,6 +32,11 @@ static func available_projects(data: GameData, state: Dictionary, region_id: Str
 			continue
 		var next_level: Dictionary = chain["levels"][built_tier]
 
+		# A level may require a PRACTICED technique (the era gate generalized).
+		var needed_technique: String = next_level.get("requires_technique", "")
+		if needed_technique != "" and not KnowledgeRules.adopted(state, settlement["owner"], needed_technique):
+			continue
+
 		if chain["kind"] == "government":
 			if not _government_upgrade_allowed(data, settlement, culture, built_tier):
 				continue
@@ -134,7 +139,10 @@ static func _discounted_cost(data: GameData, state: Dictionary, faction_id: Stri
 		var discount := SettlementRules.faction_owns_wonder_effect(
 			data, state, faction_id, "religious_building_discount_pct")
 		cost *= 1.0 - discount / 100.0
-	return int(round(cost))
+	# Practiced builder's craft (concrete) cheapens every project: the effect
+	# is authored negative, so this multiplier only ever shrinks the bill.
+	cost *= 1.0 + KnowledgeRules.faction_effect_total(data, state, faction_id, "build_cost_pct") / 100.0
+	return int(round(maxf(cost, 0.0)))
 
 
 static func _discounted_turns(data: GameData, state: Dictionary, faction_id: String, level: Dictionary) -> int:
