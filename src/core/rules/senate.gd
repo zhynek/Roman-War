@@ -66,6 +66,7 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 	var take_targets := _take_region_targets(data, state, faction_id)
 	var alliance_targets := _courtship_targets(data, state, faction_id, ["neutral", "trade"])
 	var trade_targets := _courtship_targets(data, state, faction_id, ["neutral"])
+	var kill_targets := _assassination_targets(data, state, faction_id)
 
 	var candidates: Array = []
 	var mission_ids: Array = data.missions.keys()
@@ -84,6 +85,9 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 			"reach_trade_agreement":
 				if not trade_targets.is_empty():
 					candidates.append(mission_id)
+			"assassinate_leader":
+				if not kill_targets.is_empty():
+					candidates.append(mission_id)
 	if candidates.is_empty():
 		return {}
 
@@ -99,6 +103,10 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 			mission["target_faction"] = rng.pick(alliance_targets)
 		"reach_trade_agreement":
 			mission["target_faction"] = rng.pick(trade_targets)
+		"assassinate_leader":
+			var target: Dictionary = rng.pick(kill_targets)
+			mission["target_faction"] = target["faction"]
+			mission["target_character"] = target["character"]
 	return mission
 
 
@@ -113,6 +121,36 @@ static func _take_region_targets(data: GameData, state: Dictionary, faction_id: 
 					targets.append(region_id)
 					break
 	return targets
+
+
+static func _assassination_targets(data: GameData, state: Dictionary, faction_id: String) -> Array:
+	## The senate points the house's blades at the crowned head of a foreign
+	## power the house is already at war with. [{faction, character}]
+	var targets: Array = []
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for other_id in faction_ids:
+		if other_id == faction_id or not state["factions"][other_id]["alive"]:
+			continue
+		var info: Dictionary = data.factions.get(other_id, {})
+		if info.get("is_rebel", false) or info.get("is_roman_house", false) or info.get("is_senate", false):
+			continue
+		if not DiplomacyRules.at_war(state, faction_id, other_id):
+			continue
+		var leader := _leader_of(state, other_id)
+		if leader != "":
+			targets.append({"faction": other_id, "character": leader})
+	return targets
+
+
+static func _leader_of(state: Dictionary, faction_id: String) -> String:
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if character["faction"] == faction_id and character["alive"] and character["role"] == "leader":
+			return char_id
+	return ""
 
 
 static func _courtship_targets(data: GameData, state: Dictionary, faction_id: String, allowed_stances: Array) -> Array:
@@ -160,6 +198,15 @@ static func _mission_complete(data: GameData, state: Dictionary, faction_id: Str
 			var partner: String = mission.get("target_faction", "")
 			# An alliance carries trade rights with it, so either seals the deal.
 			return partner != "" and DiplomacyRules.stance_between(state, faction_id, partner) in ["trade", "alliance"]
+		"assassinate_leader":
+			# The named head must fall — by blade, battle or misadventure — or
+			# the whole power be destroyed outright.
+			var quarry: String = mission.get("target_character", "")
+			var victim_faction: String = mission.get("target_faction", "")
+			if victim_faction != "" and not state["factions"][victim_faction]["alive"]:
+				return true
+			return quarry != "" and state["characters"].has(quarry) \
+				and not state["characters"][quarry]["alive"]
 	return false
 
 

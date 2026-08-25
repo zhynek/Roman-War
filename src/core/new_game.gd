@@ -46,6 +46,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"next_id": 1,
 		"tributes": [],
 		"pending_offers": [],
+		"agents": {},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -137,6 +138,8 @@ static func ensure_state_keys(state: Dictionary) -> void:
 		state["tributes"] = []
 	if not state.has("pending_offers"):
 		state["pending_offers"] = []
+	if not state.has("agents"):
+		state["agents"] = {}
 
 
 static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dictionary:

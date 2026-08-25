@@ -300,6 +300,21 @@
     "trade_min_attitude": -25,
     "cede_order_penalty": 10
   },
+  "agents": {
+    "max_per_faction": 6,
+    "assassinate_base_chance": 0.5,
+    "assassinate_per_skill": 0.05,
+    "assassinate_per_security": 0.08,
+    "assassinate_per_counter_intel": 0.05,
+    "assassinate_min_chance": 0.05,
+    "assassinate_max_chance": 0.95,
+    "failure_death_chance": 0.5,
+    "skill_max": 6,
+    "bribe_cost_per_soldier": 3.0,
+    "bribe_experience_factor": 0.5,
+    "infiltration_wall_reduction": 1,
+    "envoy_offer_bonus_per_skill": 400
+  },
   "characters": {
     "come_of_age": 16,
     "natural_death_base_age": 50,

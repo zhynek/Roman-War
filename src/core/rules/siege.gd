@@ -64,6 +64,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		return {}
 
 	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
+	# A spy of the attacker inside the city opens a gate for the storming party.
+	wall_level = maxi(0, wall_level - AgentRules.infiltration_bonus(data, state, region_id, army["owner"]))
 	if starving:
 		wall_level = maxi(0, wall_level - 1)
 

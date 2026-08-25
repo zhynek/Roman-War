@@ -22,6 +22,7 @@
     "senate",
     "ai",
     "diplomacy",
+    "agents",
     "characters"
   ],
   "additionalProperties": false,
@@ -124,6 +125,9 @@
       "$ref": "#/$defs/numeric_section"
     },
     "diplomacy": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "agents": {
       "$ref": "#/$defs/numeric_section"
     },
     "characters": {

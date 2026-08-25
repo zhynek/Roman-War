@@ -27,4 +27,11 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 			if data.regions[region_id].get("sea_zones", []).has(fleet["sea_zone"]):
 				visible[region_id] = true
 
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] != faction_id:
+			continue
+		visible[agent["region"]] = true
+		for neighbor in data.regions.get(agent["region"], {}).get("adjacent", []):
+			visible[neighbor] = true
+
 	return visible

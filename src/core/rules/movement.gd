@@ -18,6 +18,7 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base
+	AgentRules.reset_movement(data, state)
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String) -> float:

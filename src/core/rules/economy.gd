@@ -137,6 +137,9 @@ static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
 			upkeep += army_upkeep(data, settlement["garrison"])
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] == faction_id:
+			upkeep += int(data.agent_kinds.get(agent["kind"], {}).get("upkeep", 0))
 	return upkeep
 
 

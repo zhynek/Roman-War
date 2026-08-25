@@ -136,6 +136,50 @@ func mercenaries_available(region_id: String) -> Array:
 	return MercenaryRules.available(data, state, region_id)
 
 
+## --- Agents (Phase 5) ------------------------------------------------------
+
+func recruit_agent(region_id: String, kind: String) -> String:
+	if state["settlements"].get(region_id, {}).get("owner", "") != state["player_faction"]:
+		return ""
+	return AgentRules.recruit_agent(data, state, region_id, kind)
+
+
+func move_agent(agent_id: String, to_region: String) -> bool:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return false
+	return AgentRules.move_agent(data, state, agent_id, to_region)
+
+
+func agent_scout(agent_id: String) -> Dictionary:
+	return AgentRules.scout_report(data, state, agent_id)
+
+
+func agent_assassinate(agent_id: String, target_char_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	var rng := _rng()
+	var result := AgentRules.assassinate(data, state, rng, agent_id, target_char_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func agent_bribe(agent_id: String, army_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	return AgentRules.bribe_army(data, state, agent_id, army_id)
+
+
+func agents_in(region_id: String) -> Array:
+	## Agents standing in a region, sorted by id — [{id, agent}] for the UI.
+	var found: Array = []
+	var agent_ids: Array = state["agents"].keys()
+	agent_ids.sort()
+	for agent_id in agent_ids:
+		if state["agents"][agent_id]["region"] == region_id:
+			found.append({"id": agent_id, "agent": state["agents"][agent_id]})
+	return found
+
+
 ## --- Family & characters --------------------------------------------------
 
 func family_of(faction_id: String = "") -> Array:

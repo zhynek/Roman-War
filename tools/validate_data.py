@@ -25,6 +25,7 @@ SCHEMAS = ROOT / "schemas"
 TABLES = {
     "balance.json": "balance.schema.json",
     "ai.json": "ai.schema.json",
+    "agents.json": "agents.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -49,9 +50,8 @@ LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_cit
 FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
 
 # Mission kinds authored ahead of their systems, same idea: port blockades are
-# the Phase 3 naval remainder; assassinations arrive with campaign agents;
-# leader_suicide needs Phase 7 senate depth.
-FORWARD_MISSIONS = {"blockade_port", "leader_suicide", "assassinate_leader"}
+# the Phase 3 naval remainder; leader_suicide needs Phase 7 senate depth.
+FORWARD_MISSIONS = {"blockade_port", "leader_suicide"}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -116,6 +116,12 @@ def cross_checks(t: dict[str, dict]) -> None:
         if persona_id != "default" and persona_id not in referenced:
             warn(f"ai: persona {persona_id} is referenced by no faction")
 
+    # --- agents -----------------------------------------------------------
+    agent_kinds = {a["id"]: a for a in t.get("agents.json", {}).get("agents", [])}
+    for required_kind in ("diplomat", "spy", "assassin"):
+        if required_kind not in agent_kinds:
+            err(f"agents: kind {required_kind} missing (the engine expects all three)")
+
     # --- buildings + temples ---------------------------------------------
     chains: dict[str, dict] = {}
     level_ids: dict[str, str] = {}  # level id -> chain id
@@ -154,6 +160,15 @@ def cross_checks(t: dict[str, dict]) -> None:
             if not any(c["kind"] == kind and culture in c["cultures"] for c in chains.values()):
                 if culture != "neutral":
                     warn(f"buildings: culture {culture} has no {kind} chain")
+        for agent_kind in agent_kinds.values():
+            satisfiable = any(
+                c["kind"] == agent_kind["building_kind"]
+                and len(c["levels"]) >= agent_kind["building_level"]
+                and culture in c["cultures"]
+                for c in chains.values())
+            if not satisfiable and culture != "neutral":
+                warn(f"agents: {agent_kind['id']} gate {agent_kind['building_kind']} "
+                     f"L{agent_kind['building_level']} unsatisfiable for culture {culture}")
 
     # --- units ------------------------------------------------------------
     units = {u["id"]: u for u in t.get("units.json", {}).get("units", [])}
@@ -485,7 +500,10 @@ def main() -> int:
         print(f"WARN  {message}")
     for message in errors:
         print(f"ERROR {message}")
-    counts = {name: _entity_count(doc) for name, doc in tables.items()}
+    # balance.json is sections of constants, not entities — keep it out of the
+    # entity summary (its "agents" section would otherwise miscount).
+    counts = {name: (0 if name == "balance.json" else _entity_count(doc))
+              for name, doc in tables.items()}
     summary = ", ".join(f"{name.removesuffix('.json')}={count}" for name, count in counts.items() if count)
     print(f"\n{len(errors)} errors, {len(warnings)} warnings [{summary}]")
     return 1 if errors else 0
@@ -494,7 +512,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "personas"):
+                "personas", "agents"):
         if key in document:
             return len(document[key])
     return 0

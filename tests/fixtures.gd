@@ -160,6 +160,16 @@ static func data() -> GameData:
 				{"when": "turn_end_governing", "condition": {"building_kind": "government", "min_building_level": 1}, "chance": 1.0},
 			],
 		},
+		"test_bodyguard": {
+			"id": "test_bodyguard", "name": "Bodyguard",
+			"effects": {"personal_security": 4},
+			"triggers": [],
+		},
+		"test_spycatcher": {
+			"id": "test_spycatcher", "name": "Spy Catcher",
+			"effects": {"agent_skill": 3},
+			"triggers": [],
+		},
 	}
 	game_data.names = {
 		"roman": {"male": ["Testus", "Probus", "Cassius"], "female": ["Testa", "Proba"], "surnames": ["Fixturus"]},
@@ -174,6 +184,15 @@ static func data() -> GameData:
 			"build_weights": {"order": 1.0, "growth": 1.0, "income": 1.0, "military": 1.0, "walls": 1.0},
 			"garrison_min_units": 2, "garrison_frontier_units": 4, "army_size_target": 8,
 		},
+	}
+
+	game_data.agent_kinds = {
+		"diplomat": {"id": "diplomat", "name": "Envoy", "cost": 250, "upkeep": 30,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
+		"spy": {"id": "spy", "name": "Informer", "cost": 300, "upkeep": 40,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
+		"assassin": {"id": "assassin", "name": "Hired Blade", "cost": 500, "upkeep": 60,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
 	}
 
 	return game_data
@@ -198,7 +217,7 @@ static func state(game_data: GameData) -> Dictionary:
 		},
 		"armies": {}, "fleets": {}, "characters": {},
 		"events_fired": [], "winner": null, "next_id": 1,
-		"tributes": [], "pending_offers": [],
+		"tributes": [], "pending_offers": [], "agents": {},
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}

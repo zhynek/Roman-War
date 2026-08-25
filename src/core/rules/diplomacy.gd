@@ -181,6 +181,10 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 	if attitude != 0.0:
 		factors.append({"label": "attitude", "value": attitude * float(rules["attitude_value_per_point"])})
 
+	var envoy := AgentRules.envoy_bonus(data, state, from_id, to_id)
+	if envoy > 0.0:
+		factors.append({"label": "envoy", "value": envoy})
+
 	var score := 0.0
 	for factor in factors:
 		score += factor["value"]
