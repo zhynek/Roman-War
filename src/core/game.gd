@@ -231,7 +231,7 @@ func technique_overview(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	if not state["factions"].has(fid):
 		return {"entries": [], "reform_pressure": 0.0}
-	var caches := KnowledgeRules.build_caches(data, state)
+	var caches := KnowledgeRules.build_caches(data, state, false)
 	var knowledge := KnowledgeRules.knowledge_of(state, fid)
 	var entries: Array = []
 	var tids: Array = knowledge.keys()

@@ -304,3 +304,55 @@ func test_ensure_state_keys_fills_ai(t) -> void:
 	state["factions"]["red"].erase("ai")
 	NewGame.ensure_state_keys(state)
 	t.check(state["factions"]["red"].has("ai"), "a pre-phase save gains the ai key on load")
+
+
+func test_ai_adopts_the_best_priced_craft(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var persona: Dictionary = data.ai_personas["default"]
+	var red: Dictionary = state["factions"]["red"]
+	# At peace, with a school built: letters (civic, 400) out-prices smithing
+	# (military, 600) on the value-per-denarius score.
+	state["factions"]["red"]["diplomacy"]["blue"] = "neutral"
+	state["factions"]["blue"]["diplomacy"]["red"] = "neutral"
+	state["settlements"]["beta"]["buildings"]["test_education"] = 1
+	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	AiKnowledge.run(data, state, "red", persona)
+	t.check_eq(String(red["knowledge"]["test_letters"]["stage"]), "adopting",
+		"at peace the court funds the cheap civic craft")
+	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
+		"and only one program at a time")
+	AiKnowledge.run(data, state, "red", persona)
+	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
+		"hands stay full while the program runs")
+
+
+func test_ai_at_war_arms_first(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var persona: Dictionary = data.ai_personas["default"]
+	var red: Dictionary = state["factions"]["red"]
+	# Red is at war with blue (fixture default): the war boost doubles the
+	# military score, 2.0/600 beating 1.0/400.
+	state["settlements"]["beta"]["buildings"]["test_education"] = 1
+	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	AiKnowledge.run(data, state, "red", persona)
+	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "adopting",
+		"a court at war funds the arsenal first")
+
+
+func test_ai_adoption_respects_reserve_and_prerequisites(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var persona: Dictionary = data.ai_personas["default"]
+	var red: Dictionary = state["factions"]["red"]
+	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	red["treasury"] = 2000
+	AiKnowledge.run(data, state, "red", persona)
+	t.check_eq(String(red["knowledge"]["test_smithing"]["stage"]), "aware",
+		"600 would break the 1500 reserve: the war craft waits")
+	t.check_eq(String(red["knowledge"]["test_letters"]["stage"]), "aware",
+		"and the school-less court cannot take up letters at any price")

@@ -137,6 +137,8 @@
             "difficulty_player_attitude",
             "growth_need_boost",
             "growth_need_threshold",
+            "knowledge_order_boost",
+            "knowledge_war_boost",
             "merge_ceiling_factor",
             "military_muster_boost",
             "min_attack_ratio",

@@ -20,17 +20,27 @@ static func run(data: GameData, state: Dictionary, faction_id: String, persona: 
 	var ai_rules: Dictionary = data.balance["ai"]
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
+	# Public order per settlement is computed ONCE here and passed down —
+	# construction scoring and tax policy read the same number, and the
+	# faction-wide minimum lands in the ai scratch dict for AiKnowledge's
+	# civic-need signal (so it never re-runs the breakdown sweep).
+	var min_order := 200.0
 	for region_id in region_ids:
 		var settlement: Dictionary = state["settlements"][region_id]
 		if settlement["owner"] != faction_id:
 			continue
 		var frontier := is_frontier(data, state, faction_id, region_id)
 		_manage_garrison(data, state, faction_id, region_id, persona, frontier, muster_region)
-		_manage_construction(data, state, faction_id, region_id, persona, frontier, muster_region)
-		_manage_taxes(data, state, region_id)
+		# After garrison queueing (which draws population), exactly where the
+		# construction pass used to compute it — the dedupe changes no decision.
+		var order := PublicOrderRules.total(data, state, region_id)
+		min_order = minf(min_order, order)
+		_manage_construction(data, state, faction_id, region_id, persona, frontier, muster_region, order)
+		_manage_taxes(data, state, region_id, order)
 		if int(state["factions"][faction_id]["treasury"]) \
 				> int(ai_rules["treasury_reserve"]) + int(ai_rules["retrain_treasury_margin"]):
 			RecruitmentRules.retrain_garrison(data, state, region_id)
+	state["factions"][faction_id]["ai"]["min_order"] = min_order
 
 
 static func is_frontier(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> bool:
@@ -91,13 +101,12 @@ static func _manage_garrison(data: GameData, state: Dictionary, faction_id: Stri
 		count += 1
 
 
-static func _manage_construction(data: GameData, state: Dictionary, faction_id: String, region_id: String, persona: Dictionary, frontier: bool, muster_region: String) -> void:
+static func _manage_construction(data: GameData, state: Dictionary, faction_id: String, region_id: String, persona: Dictionary, frontier: bool, muster_region: String, order: float) -> void:
 	var settlement: Dictionary = state["settlements"][region_id]
 	if not settlement["construction_queue"].is_empty():
 		return
 	var ai_rules: Dictionary = data.balance["ai"]
 	var weights: Dictionary = persona.get("build_weights", {})
-	var order := PublicOrderRules.total(data, state, region_id)
 	var growth := GrowthRules.total_pct(data, state, region_id)
 
 	var candidates := ConstructionRules.available_projects(data, state, region_id)
@@ -129,10 +138,9 @@ static func _manage_construction(data: GameData, state: Dictionary, faction_id: 
 	ConstructionRules.queue_project(data, state, region_id, best["chain"])
 
 
-static func _manage_taxes(data: GameData, state: Dictionary, region_id: String) -> void:
+static func _manage_taxes(data: GameData, state: Dictionary, region_id: String, order: float) -> void:
 	var settlement: Dictionary = state["settlements"][region_id]
 	var ai_rules: Dictionary = data.balance["ai"]
-	var order := PublicOrderRules.total(data, state, region_id)
 	var index := Constants.TAX_LEVELS.find(String(settlement["tax_level"]))
 	if index < 0:
 		return

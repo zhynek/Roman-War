@@ -14,8 +14,8 @@
         "type": "object",
         "required": [
           "id", "name", "aggression", "expansion_drive", "peace_willingness",
-          "occupation", "build_weights", "garrison_min_units",
-          "garrison_frontier_units", "army_size_target"
+          "occupation", "build_weights", "knowledge_priorities",
+          "garrison_min_units", "garrison_frontier_units", "army_size_target"
         ],
         "additionalProperties": false,
         "properties": {
@@ -35,6 +35,16 @@
               "income": { "type": "number", "minimum": 0 },
               "military": { "type": "number", "minimum": 0 },
               "walls": { "type": "number", "minimum": 0 }
+            }
+          },
+          "knowledge_priorities": {
+            "type": "object",
+            "required": ["military", "economic", "civic"],
+            "additionalProperties": false,
+            "properties": {
+              "military": { "type": "number", "minimum": 0 },
+              "economic": { "type": "number", "minimum": 0 },
+              "civic": { "type": "number", "minimum": 0 }
             }
           },
           "garrison_min_units": { "type": "integer", "minimum": 0 },

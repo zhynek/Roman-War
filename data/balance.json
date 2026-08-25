@@ -258,7 +258,9 @@
     "target_population_weight": 0.01,
     "target_defense_weight": 0.005,
     "target_min_score": 5,
-    "sea_target_hops": 3
+    "sea_target_hops": 3,
+    "knowledge_war_boost": 2.0,
+    "knowledge_order_boost": 1.75
   },
   "diplomacy": {
     "stance_attitude": {

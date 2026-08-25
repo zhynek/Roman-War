@@ -51,12 +51,13 @@ static func knowledge_of(state: Dictionary, faction_id: String) -> Dictionary:
 	return faction["knowledge"]
 
 
-static func build_caches(data: GameData, state: Dictionary) -> Dictionary:
+static func build_caches(data: GameData, state: Dictionary, with_borders: bool = true) -> Dictionary:
 	## ONE pass over settlements answering every prerequisite and contact
 	## question for the turn (the AiStrategy.all_faction_strengths precedent):
 	## per-faction best building level by kind, resources, hidden resources and
 	## coastal access from owned regions, plus the set of faction pairs whose
-	## lands touch ("a|b" keys with a < b).
+	## lands touch ("a|b" keys with a < b). Callers that only feed
+	## prerequisites_met (AI adoption, the facade) skip the border scan.
 	var kind_levels := {}
 	var resources := {}
 	var hidden := {}
@@ -85,13 +86,14 @@ static func build_caches(data: GameData, state: Dictionary) -> Dictionary:
 			hidden[owner][resource] = true
 		if not region.get("sea_zones", []).is_empty():
 			coastal[owner] = true
-		for neighbor in region.get("adjacent", []):
-			var other: Dictionary = state["settlements"].get(neighbor, {})
-			if other.is_empty() or other["owner"] == owner:
-				continue
-			var pair: Array = [owner, other["owner"]]
-			pair.sort()
-			border_pairs["%s|%s" % [pair[0], pair[1]]] = true
+		if with_borders:
+			for neighbor in region.get("adjacent", []):
+				var other: Dictionary = state["settlements"].get(neighbor, {})
+				if other.is_empty() or other["owner"] == owner:
+					continue
+				var pair: Array = [owner, other["owner"]]
+				pair.sort()
+				border_pairs["%s|%s" % [pair[0], pair[1]]] = true
 	return {
 		"kind_levels": kind_levels, "resources": resources, "hidden": hidden,
 		"coastal": coastal, "border_pairs": border_pairs,
@@ -167,7 +169,7 @@ static func adoption_cost(data: GameData, state: Dictionary, faction_id: String,
 	cost *= 1.0 - float(entry.get("discount_pct", 0.0)) / 100.0
 	if DOMAIN_GROUPS.get(String(technique["domain"]), "") == "military":
 		cost *= 1.0 - float(rules["reform_military_discount_pct_at_max"]) / 100.0 \
-			* _pressure_ratio(data, state["factions"][faction_id])
+			* pressure_ratio(data, state["factions"][faction_id])
 	return int(ceil(maxf(cost, 0.0)))
 
 
@@ -192,7 +194,7 @@ static func begin_adoption(data: GameData, state: Dictionary, faction_id: String
 	if adopting >= int(data.balance["knowledge"]["max_concurrent_adoptions"]):
 		refused["reason"] = "hands_full"
 		return refused
-	var effective_caches := caches if not caches.is_empty() else build_caches(data, state)
+	var effective_caches := caches if not caches.is_empty() else build_caches(data, state, false)
 	if not prerequisites_met(data, state, effective_caches, faction_id, technique):
 		refused["reason"] = "prerequisites"
 		return refused
@@ -264,7 +266,7 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				candidates.append(tid)
 		if candidates.is_empty():
 			continue
-		var pressure_ratio := _pressure_ratio(data, faction)
+		var pressure_ratio := pressure_ratio(data, faction)
 		var education := int(caches["kind_levels"].get(faction_id, {}).get("education", 0))
 		var scholarship := faction_effect_total(data, state, faction_id, "scholarship")
 		var chance := (float(rules["origination_base_chance"]) \
@@ -378,7 +380,8 @@ static func _add_pressure(data: GameData, state: Dictionary, faction_id: String,
 	faction["reform_pressure"] = clampf(float(faction.get("reform_pressure", 0.0)) + amount, 0.0, cap)
 
 
-static func _pressure_ratio(data: GameData, faction: Dictionary) -> float:
+static func pressure_ratio(data: GameData, faction: Dictionary) -> float:
+	## Reform pressure as a 0–1 share of the cap (the AI and UI read it too).
 	var cap := float(data.balance["knowledge"]["reform_pressure_max"])
 	if cap <= 0.0:
 		return 0.0
