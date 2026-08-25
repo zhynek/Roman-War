@@ -70,7 +70,10 @@ panel to select it. Now:
 - **Shift-click** to force march — roughly double the range, but the men arrive
   tired and fight worse.
 - **Click a coastal region across a sea** to sail there (it takes the whole
-  turn).
+  turn). Sailing onto the shore of a faction you are **at war** with is an
+  amphibious landing: allowed as long as no enemy field army holds the beach —
+  the garrison waits behind its walls, and you besiege it next turn. This is
+  how islands are taken.
 - **Click an enemy region** to attack the army there or lay siege to the city.
   If you are not already at war, the game asks first — it will never start a
   war by accident.
@@ -104,12 +107,51 @@ one who exterminates cities becomes cruel, and everyone knows it.
 
 ## Diplomacy
 
-Open **Diplomacy**. You can see where every house stands with you and set a
-stance directly — declare war, offer peace, trade rights, or an alliance. The
-proper negotiation system (offers, tribute, bribery, an AI that has opinions
-about you) is the next phase of development; today the other side simply
-accepts. Your fleets are in this window too, because they live on the sea
-rather than in a region.
+Open **Diplomacy**. Every living power is listed with its stance toward you and
+its *attitude* — a word and a number summing how it actually regards you
+(grudges and favors are remembered, and fade; borders chafe; the weak tempt the
+strong; the strong are feared; aggressive rulers covet). Two instruments:
+
+- **Negotiate** opens the offer scroll. Compose terms — a new stance (peace,
+  trade rights, an alliance), payments and seasonal tribute in either
+  direction, even a region changing hands — and watch their live appraisal
+  price every part of it before you commit. The losing side of a war pays for
+  peace; the winning side must be paid to stop. A diplomat of yours standing
+  in their lands sweetens any terms you lay before them.
+- **Declare war** does what it says, after a confirmation. Wars declared are
+  long remembered — and a war declared on an *ally* is remembered twice over.
+
+Envoys from other powers appear at the top of the scroll with their offers;
+accept or decline at your leisure, but they lapse after a few seasons. The
+other powers negotiate among themselves too — the turn log carries the world's
+wars, peaces and pacts.
+
+Your fleets are in this window too, because they live on the sea rather than
+in a region.
+
+## Agents
+
+Cities can train three kinds of agent alongside troops (each behind a building
+requirement — an envoy needs a proper government hall, informers and blades
+come out of the markets). Agents are diamonds on the map, walk like armies but
+cross **any** border, and cost upkeep like troops.
+
+- **Envoy (diplomat)** — parked in a foreign power's lands, he sweetens every
+  offer you make them. Standing next to a leaderless warband, he can simply
+  **buy it off the map** — priced per head; troops under a general refuse.
+- **Informer (spy)** — reads any city he stands in: garrison, works, mood. In
+  a city you are assaulting, his opened gate counts against their walls.
+- **Hired Blade (assassin)** — pick a target in his region and see the odds
+  before you commit. Success sharpens him; failure can cost you the man. Wary
+  targets with careful retinues (bodyguards, food tasters) are far harder — and
+  a governor with spy-catchers hardens his whole city against all of it.
+
+## Missions
+
+The Senate's demands now range wider than "take that region": it may ask you
+to court a foreign power into an **alliance** or a **trade agreement**, or —
+when you are at war — to arrange for a foreign king to **stop being alive**.
+The negotiation scroll and your agents are how those get done.
 
 ## Winning
 
@@ -118,16 +160,26 @@ including Rome; a Roman house must also settle matters with the Senate. A short
 campaign wants about 15 regions and specific rivals destroyed. If nobody manages
 it by AD 14, the age simply closes.
 
+## The world fights back
+
+The computer players now actually play: they garrison and build by need, raise
+armies, clear the independents from their borders, declare wars they think
+they can win (and the hungrier an empire, the lower its bar), defend and
+relieve their own cities, sue for peace with silver or tribute when they are
+losing, and trade with neighbors they like. Houses keep wives and children
+now, so successions and marriages start mattering from the first decade.
+Difficulty still works the honest way — money and contentment for the AI, and
+a colder attitude toward you, never extra cleverness.
+
 ## What is not in this build yet
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, but they do not scheme, invade, or negotiate. Real opponents are
-  the next phase. Expect a quiet world.
 - **Battles resolve on paper.** You see the outcome, not the fight.
-- **Agents** (spies, diplomats, assassins) are designed and their data exists,
-  but they are not playable yet.
+- **The AI does not use agents** against you yet — your spies and blades are
+  a player's edge this build (their counter-intelligence still works).
+- **Naval combat** — fleets move and watch the coasts, but do not fight or
+  blockade yet.
 - **The Senate** issues missions and the civil war can trigger, but the full
   political system (offices, elections) is later.
 - **The art is placeholder.** Coloured circles, not painted maps.
