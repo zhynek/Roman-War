@@ -1,6 +1,6 @@
 class_name TurnEngine
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
-##   1. AI stub turns (non-player factions)
+##   1. AI turns (non-player factions: strategy, armies, settlements)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
@@ -18,7 +18,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "winner": null,
+		"senate": [], "characters": [], "ai": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -31,7 +31,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
-			AiStub.take_turn(data, state, faction_id)
+			report["ai"].append_array(AiRules.take_turn(data, state, rng, resolver, faction_id))
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)

@@ -24,6 +24,7 @@ SCHEMAS = ROOT / "schemas"
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
     "balance.json": "balance.schema.json",
+    "ai.json": "ai.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -92,6 +93,23 @@ def cross_checks(t: dict[str, dict]) -> None:
         err("factions: exactly one rebel faction required")
     if sum(1 for f in factions.values() if f.get("is_senate")) != 1:
         err("factions: exactly one senate faction required")
+
+    # --- ai personas ------------------------------------------------------
+    personas = {p["id"]: p for p in t.get("ai.json", {}).get("personas", [])}
+    if "default" not in personas:
+        err("ai: a persona with id 'default' is required (the engine's fallback)")
+    referenced = set()
+    for faction in factions.values():
+        persona_id = faction.get("ai_persona")
+        if persona_id is None:
+            continue
+        if persona_id not in personas:
+            err(f"factions: {faction['id']}: unknown ai_persona {persona_id}")
+        else:
+            referenced.add(persona_id)
+    for persona_id in personas:
+        if persona_id != "default" and persona_id not in referenced:
+            warn(f"ai: persona {persona_id} is referenced by no faction")
 
     # --- buildings + temples ---------------------------------------------
     chains: dict[str, dict] = {}
@@ -456,7 +474,8 @@ def main() -> int:
 
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
+                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
+                "personas"):
         if key in document:
             return len(document[key])
     return 0

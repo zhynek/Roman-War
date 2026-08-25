@@ -20,6 +20,7 @@ var missions: Dictionary = {}          # id -> mission template dict
 var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
+var ai_personas: Dictionary = {}       # id -> persona dict
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -84,6 +85,8 @@ func _load_all(dir: String) -> void:
 	win_conditions = _read_json(dir + "/win_conditions.json").get("conditions", [])
 	names = _read_json(dir + "/names.json").get("pools", {})
 	mercenary_pools = _read_json(dir + "/mercenaries.json").get("pools", [])
+	for persona in _read_json(dir + "/ai.json").get("personas", []):
+		ai_personas[persona["id"]] = persona
 
 
 func _read_json(path: String) -> Dictionary:

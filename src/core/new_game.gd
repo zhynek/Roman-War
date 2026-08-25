@@ -59,6 +59,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
+			"ai": {},
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -76,7 +77,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false,
+		"mission": null, "at_civil_war": false, "ai": {},
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -114,6 +115,19 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	MovementRules.reset_movement(data, state)
 	state["rng_state"] = rng.state_string()
 	return state
+
+
+static func ensure_state_keys(state: Dictionary) -> void:
+	## Fill state keys added by later phases with their defaults, so a save
+	## written before those phases loads cleanly (save compatibility is
+	## additive; SAVE_VERSION stays 1). Every new engine reader ALSO tolerates
+	## the missing key via .get — this just normalizes eagerly on load.
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		if not faction.has("ai"):
+			faction["ai"] = {}
 
 
 static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dictionary:

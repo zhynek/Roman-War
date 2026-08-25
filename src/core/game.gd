@@ -220,6 +220,7 @@ func load_from(path: String) -> bool:
 	var loaded := SaveGame.read_file(path)
 	if loaded.is_empty():
 		return false
+	NewGame.ensure_state_keys(loaded)
 	state = loaded
 	return true
 

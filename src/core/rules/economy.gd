@@ -172,21 +172,31 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 
 
 static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_id: String) -> bool:
-	var worst_army: Dictionary = {}
+	# Sorted iteration with strict > keeps tie-breaks identical after a save's
+	# JSON round trip re-orders the armies dict.
+	var worst_army_id := ""
 	var worst_index := -1
 	var worst_upkeep := 0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
 				worst_upkeep = upkeep
-				worst_army = army
+				worst_army_id = army_id
 				worst_index = i
 	if worst_index < 0:
 		return false
+	var worst_army: Dictionary = state["armies"][worst_army_id]
 	worst_army["units"].remove_at(worst_index)
+	if worst_army["units"].is_empty():
+		# The last unit's discharge disbands the standard itself — no empty
+		# husk armies on the map. Its general simply stands where he is.
+		state["armies"].erase(worst_army_id)
 	return true
 
 

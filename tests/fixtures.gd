@@ -166,6 +166,16 @@ static func data() -> GameData:
 		"barbarian": {"male": ["Brox", "Karn"], "female": ["Enna"]},
 	}
 
+	game_data.ai_personas = {
+		"default": {
+			"id": "default", "name": "Balanced",
+			"aggression": 1.0, "expansion_drive": 1.0, "peace_willingness": 1.0,
+			"occupation": "occupy",
+			"build_weights": {"order": 1.0, "growth": 1.0, "income": 1.0, "military": 1.0, "walls": 1.0},
+			"garrison_min_units": 2, "garrison_frontier_units": 4, "army_size_target": 8,
+		},
+	}
+
 	return game_data
 
 
@@ -231,7 +241,7 @@ static func _faction(capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false,
+		"mission": null, "at_civil_war": false, "ai": {},
 	}
 
 

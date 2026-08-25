@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ai.schema.json",
+  "title": "AI personas (per-faction campaign temperaments)",
+  "type": "object",
+  "required": ["personas"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "personas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "aggression", "expansion_drive", "peace_willingness",
+          "occupation", "build_weights", "garrison_min_units",
+          "garrison_frontier_units", "army_size_target"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "aggression": { "type": "number", "minimum": 0 },
+          "expansion_drive": { "type": "number", "minimum": 0 },
+          "peace_willingness": { "type": "number", "minimum": 0 },
+          "occupation": { "enum": ["occupy", "enslave", "exterminate"] },
+          "build_weights": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "order": { "type": "number", "minimum": 0 },
+              "growth": { "type": "number", "minimum": 0 },
+              "income": { "type": "number", "minimum": 0 },
+              "military": { "type": "number", "minimum": 0 },
+              "walls": { "type": "number", "minimum": 0 }
+            }
+          },
+          "garrison_min_units": { "type": "integer", "minimum": 0 },
+          "garrison_frontier_units": { "type": "integer", "minimum": 0 },
+          "army_size_target": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

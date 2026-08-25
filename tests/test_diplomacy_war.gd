@@ -50,13 +50,18 @@ func test_besieging_declares_war(t) -> void:
 func test_sea_move(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
-	# epsilon and alpha share test_sea; alpha is hostile (blue at war) so it is
-	# closed, but after peace the crossing opens.
+	# epsilon and alpha share test_sea; alpha belongs to blue, who is at war
+	# with red. Crossing onto a war shore is an amphibious landing: blocked
+	# while a hostile field army holds the beach, allowed once it is gone
+	# (the garrison waits behind its walls).
 	var army_id := Fixtures.add_army(state, "red", "epsilon", ["test_spears"])
+	var defender_id := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
 	MovementRules.reset_movement(data, state)
-	t.check(not MovementRules.sea_move_army(data, state, army_id, "alpha"), "no landing on a war shore")
-	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
-	t.check(MovementRules.sea_move_army(data, state, army_id, "alpha"), "peaceful crossing works")
+	t.check(not MovementRules.sea_move_army(data, state, army_id, "alpha"),
+		"a hostile field army contests the landing")
+	state["armies"].erase(defender_id)
+	t.check(MovementRules.sea_move_army(data, state, army_id, "alpha"),
+		"amphibious landing on an open war shore")
 	t.check_eq(state["armies"][army_id]["region"], "alpha", "army crossed the sea")
 	t.check_near(float(state["armies"][army_id]["movement_left"]), 0.0, 0.001, "crossing takes the whole turn")
 	t.check(not MovementRules.sea_move_army(data, state, army_id, "epsilon"), "no second crossing this turn")

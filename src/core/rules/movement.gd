@@ -72,6 +72,13 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	## region may cross to another coastal region on the same or an adjacent
 	## sea zone, spending its whole turn. Explicit embark-on-fleet transport
 	## can replace this later without touching callers.
+	##
+	## Landing on the shore of a faction you are AT WAR with is an amphibious
+	## invasion: allowed as long as no hostile field army contests the beach
+	## (the garrison waits behind its walls — besiege it next turn). Without
+	## this, island regions with no land link — rebel-held Creta and Cyprus
+	## among them — could never change hands, and Egypt's long campaign could
+	## never be won.
 	var army: Dictionary = state["armies"][army_id]
 	var from_zones: Array = data.regions.get(army["region"], {}).get("sea_zones", [])
 	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
@@ -93,10 +100,6 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 		return false
 	if _hostile_army_in(state, army["owner"], to_region):
 		return false
-	if state["settlements"].has(to_region):
-		var holder: String = state["settlements"][to_region]["owner"]
-		if _at_war(state, army["owner"], holder):
-			return false
 	army["movement_left"] = 0.0
 	army["region"] = to_region
 	sync_general_location(state, army)
