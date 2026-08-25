@@ -192,14 +192,34 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 				worst_upkeep = upkeep
 				worst_army_id = army_id
 				worst_index = i
+	if worst_index >= 0:
+		var worst_army: Dictionary = state["armies"][worst_army_id]
+		worst_army["units"].remove_at(worst_index)
+		if worst_army["units"].is_empty():
+			# The last unit's discharge disbands the standard itself — no empty
+			# husk armies on the map. Its general simply stands where he is.
+			state["armies"].erase(worst_army_id)
+		return true
+
+	# No field army left to thin: a garrison-heavy debtor discharges city
+	# troops instead (never below a last unit — a stripped city just riots,
+	# which pays nobody's debts).
+	var worst_region := ""
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = state["settlements"][region_id]
+		if settlement["owner"] != faction_id or settlement["garrison"].size() <= 1:
+			continue
+		for i in range(settlement["garrison"].size()):
+			var upkeep := int(data.units.get(settlement["garrison"][i]["template"], {}).get("upkeep", 0))
+			if upkeep > worst_upkeep:
+				worst_upkeep = upkeep
+				worst_region = region_id
+				worst_index = i
 	if worst_index < 0:
 		return false
-	var worst_army: Dictionary = state["armies"][worst_army_id]
-	worst_army["units"].remove_at(worst_index)
-	if worst_army["units"].is_empty():
-		# The last unit's discharge disbands the standard itself — no empty
-		# husk armies on the map. Its general simply stands where he is.
-		state["armies"].erase(worst_army_id)
+	state["settlements"][worst_region]["garrison"].remove_at(worst_index)
 	return true
 
 

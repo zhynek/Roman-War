@@ -96,3 +96,38 @@ func test_fog_of_war(t) -> void:
 	var visible := game.visible_regions()
 	t.check(visible.size() > 0, "player sees something")
 	t.check(visible.size() < game.data.regions.size(), "player does not see everything")
+
+
+func test_seeded_households(t) -> void:
+	## Every house starts as a household, not a barracks: wives and children
+	## are seeded so marriages, births and successions have soil to grow in.
+	var game := Game.new_campaign("julii", 42)
+	var faction_ids: Array = game.state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		if game.data.factions.get(faction_id, {}).get("is_rebel", false):
+			continue
+		var females := 0
+		var children := 0
+		for character in game.state["characters"].values():
+			if character["faction"] != faction_id or not character["alive"]:
+				continue
+			if character.get("gender", "male") == "female":
+				females += 1
+			if character["role"] == "child":
+				children += 1
+		t.check(females >= 1, "house %s has women" % faction_id)
+		t.check(children >= 1, "house %s has children" % faction_id)
+
+
+func test_seeded_daughters_marry_in_time(t) -> void:
+	## The seeded daughters reach marriageable age quickly, so the suitor path
+	## opens in the first decade instead of waiting a generation for births.
+	var game := Game.new_campaign("julii", 42)
+	var marriages := 0
+	for i in range(30):
+		var report := game.end_turn()
+		for notice in report["characters"]:
+			if notice.get("kind", "") == "marriage":
+				marriages += 1
+	t.check(marriages >= 1, "somewhere in the world a suitor married in (got %d)" % marriages)

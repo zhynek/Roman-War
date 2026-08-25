@@ -80,10 +80,12 @@ func test_no_hostile_act_without_war(t) -> void:
 	var rng := CampaignRng.seeded(3)
 	var resolver := AutoResolver.new()
 	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	# Blue matches red in strength: neither weakness tempts nor the strength
+	# gate opens, so the peace must simply hold.
 	var red_army := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
-	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears"])
 	var events := AiRules.take_turn(data, state, rng, resolver, "red")
-	t.check(state["armies"].has(blue_army), "the neutral army is untouched")
+	t.check(state["armies"].has(blue_army), "the matched army is untouched")
 	t.check(not DiplomacyRules.at_war(state, "red", "blue"),
 		"no war was declared by the AI's turn")
 	for event in events:

@@ -77,6 +77,32 @@
             "steady_governor"
           ],
           "location": "latium"
+        },
+        {
+          "id": "senate_claudia",
+          "name": "Claudia",
+          "age": 52,
+          "role": "spouse",
+          "gender": "female",
+          "location": "latium"
+        },
+        {
+          "id": "senate_quintus",
+          "name": "Quintus Claudius",
+          "age": 8,
+          "role": "child",
+          "gender": "male",
+          "father": "sen_appius_claudius",
+          "location": "latium"
+        },
+        {
+          "id": "senate_julia",
+          "name": "Julia",
+          "age": 12,
+          "role": "child",
+          "gender": "female",
+          "father": "sen_appius_claudius",
+          "location": "latium"
         }
       ],
       "diplomacy": [
@@ -218,6 +244,49 @@
             "scarred_veteran"
           ],
           "location": "etruria"
+        },
+        {
+          "id": "julii_cornelia",
+          "name": "Cornelia",
+          "age": 48,
+          "role": "spouse",
+          "gender": "female",
+          "location": "etruria"
+        },
+        {
+          "id": "julii_sextus",
+          "name": "Sextus Julius",
+          "age": 9,
+          "role": "child",
+          "gender": "male",
+          "father": "julii_caeso",
+          "location": "etruria"
+        },
+        {
+          "id": "julii_livia",
+          "name": "Livia",
+          "age": 13,
+          "role": "child",
+          "gender": "female",
+          "father": "julii_caeso",
+          "location": "etruria"
+        },
+        {
+          "id": "julii_aemilia",
+          "name": "Aemilia",
+          "age": 27,
+          "role": "spouse",
+          "gender": "female",
+          "location": "umbria"
+        },
+        {
+          "id": "julii_fulvia",
+          "name": "Fulvia",
+          "age": 3,
+          "role": "child",
+          "gender": "female",
+          "father": "julii_lucius",
+          "location": "umbria"
         }
       ],
       "diplomacy": [
@@ -353,6 +422,49 @@
           "traits": [
             "wary"
           ],
+          "location": "apulia"
+        },
+        {
+          "id": "junii_tullia",
+          "name": "Tullia",
+          "age": 45,
+          "role": "spouse",
+          "gender": "female",
+          "location": "apulia"
+        },
+        {
+          "id": "junii_tiberius",
+          "name": "Tiberius Junius",
+          "age": 10,
+          "role": "child",
+          "gender": "male",
+          "father": "junii_decimus",
+          "location": "apulia"
+        },
+        {
+          "id": "junii_valeria",
+          "name": "Valeria",
+          "age": 14,
+          "role": "child",
+          "gender": "female",
+          "father": "junii_decimus",
+          "location": "apulia"
+        },
+        {
+          "id": "junii_antonia",
+          "name": "Antonia",
+          "age": 24,
+          "role": "spouse",
+          "gender": "female",
+          "location": "apulia"
+        },
+        {
+          "id": "junii_numerius",
+          "name": "Numerius Junius",
+          "age": 4,
+          "role": "child",
+          "gender": "male",
+          "father": "junii_titus",
           "location": "apulia"
         }
       ],
@@ -503,6 +615,49 @@
           "traits": [
             "keen_trader"
           ],
+          "location": "sicilia_graeca"
+        },
+        {
+          "id": "cornelii_fabia",
+          "name": "Fabia",
+          "age": 43,
+          "role": "spouse",
+          "gender": "female",
+          "location": "campania"
+        },
+        {
+          "id": "cornelii_servius",
+          "name": "Servius Cornelius",
+          "age": 11,
+          "role": "child",
+          "gender": "male",
+          "father": "cornelii_gnaeus",
+          "location": "campania"
+        },
+        {
+          "id": "cornelii_sempronia",
+          "name": "Sempronia",
+          "age": 15,
+          "role": "child",
+          "gender": "female",
+          "father": "cornelii_gnaeus",
+          "location": "campania"
+        },
+        {
+          "id": "cornelii_terentia",
+          "name": "Terentia",
+          "age": 23,
+          "role": "spouse",
+          "gender": "female",
+          "location": "sicilia_graeca"
+        },
+        {
+          "id": "cornelii_pomponia",
+          "name": "Pomponia",
+          "age": 5,
+          "role": "child",
+          "gender": "female",
+          "father": "cornelii_publius",
           "location": "sicilia_graeca"
         }
       ],
@@ -690,6 +845,49 @@
             "scarred_veteran"
           ],
           "location": "sicilia_punica"
+        },
+        {
+          "id": "carthage_sophonisba",
+          "name": "Sophonisba",
+          "age": 46,
+          "role": "spouse",
+          "gender": "female",
+          "location": "africa"
+        },
+        {
+          "id": "carthage_hamilcar",
+          "name": "Hamilcar",
+          "age": 12,
+          "role": "child",
+          "gender": "male",
+          "father": "carthage_hanno",
+          "location": "africa"
+        },
+        {
+          "id": "carthage_elissa",
+          "name": "Elissa",
+          "age": 12,
+          "role": "child",
+          "gender": "female",
+          "father": "carthage_hanno",
+          "location": "africa"
+        },
+        {
+          "id": "carthage_imilce",
+          "name": "Imilce",
+          "age": 25,
+          "role": "spouse",
+          "gender": "female",
+          "location": "africa"
+        },
+        {
+          "id": "carthage_hannibal",
+          "name": "Hannibal",
+          "age": 6,
+          "role": "child",
+          "gender": "male",
+          "father": "carthage_hasdrubal",
+          "location": "africa"
         }
       ],
       "diplomacy": [
@@ -858,6 +1056,49 @@
             "just"
           ],
           "location": "rhodes"
+        },
+        {
+          "id": "greek_cities_berenike",
+          "name": "Berenike",
+          "age": 44,
+          "role": "spouse",
+          "gender": "female",
+          "location": "attica"
+        },
+        {
+          "id": "greek_cities_lysandros",
+          "name": "Lysandros",
+          "age": 13,
+          "role": "child",
+          "gender": "male",
+          "father": "greek_aratos",
+          "location": "attica"
+        },
+        {
+          "id": "greek_cities_arsinoe",
+          "name": "Arsinoe",
+          "age": 13,
+          "role": "child",
+          "gender": "female",
+          "father": "greek_aratos",
+          "location": "attica"
+        },
+        {
+          "id": "greek_cities_olympias",
+          "name": "Olympias",
+          "age": 26,
+          "role": "spouse",
+          "gender": "female",
+          "location": "laconia"
+        },
+        {
+          "id": "greek_cities_phila",
+          "name": "Phila",
+          "age": 2,
+          "role": "child",
+          "gender": "female",
+          "father": "greek_kleomenes",
+          "location": "laconia"
         }
       ],
       "diplomacy": [
@@ -969,6 +1210,32 @@
           "management": 5,
           "influence": 3,
           "location": "thessalia"
+        },
+        {
+          "id": "macedon_stratonike",
+          "name": "Stratonike",
+          "age": 43,
+          "role": "spouse",
+          "gender": "female",
+          "location": "macedonia"
+        },
+        {
+          "id": "macedon_kassandros",
+          "name": "Kassandros",
+          "age": 14,
+          "role": "child",
+          "gender": "male",
+          "father": "macedon_antigonos",
+          "location": "macedonia"
+        },
+        {
+          "id": "macedon_laodike",
+          "name": "Laodike",
+          "age": 14,
+          "role": "child",
+          "gender": "female",
+          "father": "macedon_antigonos",
+          "location": "macedonia"
         }
       ],
       "diplomacy": [
@@ -1043,6 +1310,32 @@
           "command": 4,
           "management": 2,
           "influence": 2,
+          "location": "thracia"
+        },
+        {
+          "id": "thracia_apama",
+          "name": "Apama",
+          "age": 40,
+          "role": "spouse",
+          "gender": "female",
+          "location": "thracia"
+        },
+        {
+          "id": "thracia_perdikkas",
+          "name": "Perdikkas",
+          "age": 8,
+          "role": "child",
+          "gender": "male",
+          "father": "thracia_straton",
+          "location": "thracia"
+        },
+        {
+          "id": "thracia_eurydike",
+          "name": "Eurydike",
+          "age": 15,
+          "role": "child",
+          "gender": "female",
+          "father": "thracia_straton",
           "location": "thracia"
         }
       ]
@@ -1200,6 +1493,49 @@
           "command": 3,
           "management": 3,
           "influence": 2,
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_thessalonike",
+          "name": "Thessalonike",
+          "age": 49,
+          "role": "spouse",
+          "gender": "female",
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_xenophon",
+          "name": "Xenophon",
+          "age": 9,
+          "role": "child",
+          "gender": "male",
+          "father": "seleucia_seleukos",
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_kleopatra",
+          "name": "Kleopatra",
+          "age": 12,
+          "role": "child",
+          "gender": "female",
+          "father": "seleucia_seleukos",
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_agariste",
+          "name": "Agariste",
+          "age": 24,
+          "role": "spouse",
+          "gender": "female",
+          "location": "syria"
+        },
+        {
+          "id": "seleucia_kallias",
+          "name": "Kallias",
+          "age": 5,
+          "role": "child",
+          "gender": "male",
+          "father": "seleucia_alexandros",
           "location": "syria"
         }
       ],
@@ -1378,6 +1714,49 @@
           "management": 3,
           "influence": 2,
           "location": "aegyptus"
+        },
+        {
+          "id": "egypt_nefertari",
+          "name": "Nefertari",
+          "age": 44,
+          "role": "spouse",
+          "gender": "female",
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_ptahmose",
+          "name": "Ptahmose",
+          "age": 10,
+          "role": "child",
+          "gender": "male",
+          "father": "egypt_ahmose",
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_meritamun",
+          "name": "Meritamun",
+          "age": 13,
+          "role": "child",
+          "gender": "female",
+          "father": "egypt_ahmose",
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_henuttawy",
+          "name": "Henuttawy",
+          "age": 22,
+          "role": "spouse",
+          "gender": "female",
+          "location": "aegyptus"
+        },
+        {
+          "id": "egypt_isetnofret",
+          "name": "Isetnofret",
+          "age": 6,
+          "role": "child",
+          "gender": "female",
+          "father": "egypt_thutmose",
+          "location": "aegyptus"
         }
       ],
       "diplomacy": [
@@ -1498,6 +1877,32 @@
           "management": 4,
           "influence": 2,
           "location": "parthia"
+        },
+        {
+          "id": "parthia_rhodogune",
+          "name": "Rhodogune",
+          "age": 42,
+          "role": "spouse",
+          "gender": "female",
+          "location": "parthia"
+        },
+        {
+          "id": "parthia_artabanos",
+          "name": "Artabanos",
+          "age": 11,
+          "role": "child",
+          "gender": "male",
+          "father": "parthia_arsakes",
+          "location": "parthia"
+        },
+        {
+          "id": "parthia_amastris",
+          "name": "Amastris",
+          "age": 14,
+          "role": "child",
+          "gender": "female",
+          "father": "parthia_arsakes",
+          "location": "parthia"
         }
       ]
     },
@@ -1573,6 +1978,32 @@
           "command": 4,
           "management": 4,
           "influence": 2,
+          "location": "armenia"
+        },
+        {
+          "id": "armenia_musa",
+          "name": "Musa",
+          "age": 38,
+          "role": "spouse",
+          "gender": "female",
+          "location": "armenia"
+        },
+        {
+          "id": "armenia_vardanes",
+          "name": "Vardanes",
+          "age": 12,
+          "role": "child",
+          "gender": "male",
+          "father": "armenia_orontes",
+          "location": "armenia"
+        },
+        {
+          "id": "armenia_anahid",
+          "name": "Anahid",
+          "age": 15,
+          "role": "child",
+          "gender": "female",
+          "father": "armenia_orontes",
           "location": "armenia"
         }
       ]
@@ -1675,6 +2106,32 @@
             "steady_governor"
           ],
           "location": "cappadocia"
+        },
+        {
+          "id": "pontus_roxana",
+          "name": "Roxana",
+          "age": 41,
+          "role": "spouse",
+          "gender": "female",
+          "location": "pontus"
+        },
+        {
+          "id": "pontus_gotarzes",
+          "name": "Gotarzes",
+          "age": 13,
+          "role": "child",
+          "gender": "male",
+          "father": "pontus_mithridates",
+          "location": "pontus"
+        },
+        {
+          "id": "pontus_statira",
+          "name": "Statira",
+          "age": 12,
+          "role": "child",
+          "gender": "female",
+          "father": "pontus_mithridates",
+          "location": "pontus"
         }
       ]
     },
@@ -1792,6 +2249,32 @@
           "management": 3,
           "influence": 3,
           "location": "arvernia"
+        },
+        {
+          "id": "gaul_chiomara",
+          "name": "Chiomara",
+          "age": 39,
+          "role": "spouse",
+          "gender": "female",
+          "location": "arvernia"
+        },
+        {
+          "id": "gaul_brennus",
+          "name": "Brennus",
+          "age": 14,
+          "role": "child",
+          "gender": "male",
+          "father": "gaul_luernios",
+          "location": "arvernia"
+        },
+        {
+          "id": "gaul_onomaris",
+          "name": "Onomaris",
+          "age": 13,
+          "role": "child",
+          "gender": "female",
+          "father": "gaul_luernios",
+          "location": "arvernia"
         }
       ]
     },
@@ -1900,6 +2383,32 @@
             "scarred_veteran"
           ],
           "location": "cimbria"
+        },
+        {
+          "id": "germania_camma",
+          "name": "Camma",
+          "age": 36,
+          "role": "spouse",
+          "gender": "female",
+          "location": "suebia"
+        },
+        {
+          "id": "germania_vercassius",
+          "name": "Vercassius",
+          "age": 8,
+          "role": "child",
+          "gender": "male",
+          "father": "germania_segimerus",
+          "location": "suebia"
+        },
+        {
+          "id": "germania_bodicca",
+          "name": "Bodicca",
+          "age": 14,
+          "role": "child",
+          "gender": "female",
+          "father": "germania_segimerus",
+          "location": "suebia"
         }
       ]
     },
@@ -1984,6 +2493,32 @@
             "scarred_veteran"
           ],
           "location": "britannia"
+        },
+        {
+          "id": "britannia_adiega",
+          "name": "Adiega",
+          "age": 34,
+          "role": "spouse",
+          "gender": "female",
+          "location": "britannia"
+        },
+        {
+          "id": "britannia_britomaris",
+          "name": "Britomaris",
+          "age": 9,
+          "role": "child",
+          "gender": "male",
+          "father": "britannia_cingetorix",
+          "location": "britannia"
+        },
+        {
+          "id": "britannia_banona",
+          "name": "Banona",
+          "age": 15,
+          "role": "child",
+          "gender": "female",
+          "father": "britannia_cingetorix",
+          "location": "britannia"
         }
       ]
     },
@@ -2062,6 +2597,32 @@
           "traits": [
             "master_builder"
           ],
+          "location": "dacia"
+        },
+        {
+          "id": "dacia_tomyris",
+          "name": "Tomyris",
+          "age": 37,
+          "role": "spouse",
+          "gender": "female",
+          "location": "dacia"
+        },
+        {
+          "id": "dacia_teutomalos",
+          "name": "Teutomalos",
+          "age": 10,
+          "role": "child",
+          "gender": "male",
+          "father": "dacia_oroles",
+          "location": "dacia"
+        },
+        {
+          "id": "dacia_tirgatao",
+          "name": "Tirgatao",
+          "age": 12,
+          "role": "child",
+          "gender": "female",
+          "father": "dacia_oroles",
           "location": "dacia"
         }
       ]
@@ -2160,6 +2721,32 @@
             "scarred_veteran"
           ],
           "location": "lusitania"
+        },
+        {
+          "id": "hispania_amage",
+          "name": "Amage",
+          "age": 35,
+          "role": "spouse",
+          "gender": "female",
+          "location": "celtiberia"
+        },
+        {
+          "id": "hispania_acichorios",
+          "name": "Acichorios",
+          "age": 11,
+          "role": "child",
+          "gender": "male",
+          "father": "hispania_indibilis",
+          "location": "celtiberia"
+        },
+        {
+          "id": "hispania_nammeia",
+          "name": "Nammeia",
+          "age": 13,
+          "role": "child",
+          "gender": "female",
+          "father": "hispania_indibilis",
+          "location": "celtiberia"
         }
       ],
       "diplomacy": [
@@ -2245,6 +2832,32 @@
           "management": 3,
           "influence": 2,
           "location": "scythia"
+        },
+        {
+          "id": "scythia_ricagambeda",
+          "name": "Ricagambeda",
+          "age": 40,
+          "role": "spouse",
+          "gender": "female",
+          "location": "scythia"
+        },
+        {
+          "id": "scythia_bolgios",
+          "name": "Bolgios",
+          "age": 12,
+          "role": "child",
+          "gender": "male",
+          "father": "scythia_ateas",
+          "location": "scythia"
+        },
+        {
+          "id": "scythia_vlatucia",
+          "name": "Vlatucia",
+          "age": 14,
+          "role": "child",
+          "gender": "female",
+          "father": "scythia_ateas",
+          "location": "scythia"
         }
       ]
     },
@@ -2327,6 +2940,32 @@
           "traits": [
             "keen_trader"
           ],
+          "location": "numidia"
+        },
+        {
+          "id": "numidia_chiomara",
+          "name": "Chiomara",
+          "age": 42,
+          "role": "spouse",
+          "gender": "female",
+          "location": "numidia"
+        },
+        {
+          "id": "numidia_cerethrios",
+          "name": "Cerethrios",
+          "age": 13,
+          "role": "child",
+          "gender": "male",
+          "father": "numidia_gala",
+          "location": "numidia"
+        },
+        {
+          "id": "numidia_chiomara_2",
+          "name": "Chiomara",
+          "age": 15,
+          "role": "child",
+          "gender": "female",
+          "father": "numidia_gala",
           "location": "numidia"
         }
       ],

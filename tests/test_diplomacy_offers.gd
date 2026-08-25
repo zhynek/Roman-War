@@ -247,10 +247,14 @@ func test_ai_trades_with_compatible_neighbor(t) -> void:
 			{"template": "test_spears", "experience": 0, "strength_pct": 100})
 		state["settlements"]["alpha"]["garrison"].append(
 			{"template": "test_spears", "experience": 0, "strength_pct": 100})
+	# Border tension alone (-10) sits below the trade gate; a remembered favor
+	# tips the pair into partnership.
+	DiplomacyRules.record_memory(data, state, "red", "blue", 10.0)
+	DiplomacyRules.record_memory(data, state, "blue", "red", 10.0)
 	var events: Array = []
 	AiDiplomacy.run(data, state, "red", data.ai_personas["default"], events)
 	t.check_eq(DiplomacyRules.stance_between(state, "red", "blue"), "trade",
-		"well-matched neutral neighbors open their markets")
+		"well-matched neighbors with warm memory open their markets")
 	var agreed := false
 	for event in events:
 		if event.get("kind", "") == "trade_agreed":

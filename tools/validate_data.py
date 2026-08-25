@@ -359,6 +359,8 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"campaign: {fid}: needs exactly one leader, has {roles.count('leader')}")
         if roles.count("heir") > 1:
             err(f"campaign: {fid}: more than one heir")
+        come_of_age = int(balance.get("characters", {}).get("come_of_age", 16))
+        females = 0
         for character in faction_setup.get("characters", []):
             if character["id"] in character_ids:
                 err(f"campaign: duplicate character id {character['id']}")
@@ -366,11 +368,26 @@ def cross_checks(t: dict[str, dict]) -> None:
             location = character.get("location", "")
             if location and location not in regions:
                 err(f"campaign: character {character['id']}: unknown location {location}")
-        known = {c["id"] for c in faction_setup.get("characters", [])}
+            gender = character.get("gender", "female" if character["role"] == "spouse" else "male")
+            if gender == "female":
+                females += 1
+            if character["role"] == "child" and int(character["age"]) >= come_of_age:
+                err(f"campaign: character {character['id']}: a child of {character['age']} "
+                    f"is past coming of age ({come_of_age})")
+            if character["role"] == "spouse" and gender == "male":
+                warn(f"campaign: character {character['id']}: a male spouse will confuse "
+                     f"the family tree (marriage brings husbands in as 'family')")
+        known = {c["id"]: c for c in faction_setup.get("characters", [])}
         for character in faction_setup.get("characters", []):
             father = character.get("father")
             if father and father not in known:
                 err(f"campaign: character {character['id']}: unknown father {father}")
+            elif father and int(known[father]["age"]) - int(character["age"]) < 16:
+                err(f"campaign: character {character['id']}: father {father} is only "
+                    f"{int(known[father]['age']) - int(character['age'])} years older")
+        if faction_setup.get("characters", []) and females == 0:
+            warn(f"campaign: {fid}: a house seeded with no women bootstraps its "
+                 f"family tree very slowly")
         for army in faction_setup.get("armies", []):
             general = army.get("general")
             if general and general not in known:

@@ -12,18 +12,27 @@ class_name AiDiplomacy
 
 
 static func run(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array) -> void:
-	# One world pass prices every faction; every attitude below reuses it.
+	# One world pass prices every faction, another maps who can be touched;
+	# every consideration below reuses both.
 	var strengths := AiStrategy.all_faction_strengths(data, state)
-	_consider_war(data, state, faction_id, persona, events, strengths)
+	var reach := _build_reach_map(data, state, faction_id)
+	_consider_war(data, state, faction_id, persona, events, strengths, reach)
 	_consider_peace(data, state, faction_id, persona, events, strengths)
-	_consider_trade(data, state, faction_id, persona, events, strengths)
+	_consider_trade(data, state, faction_id, persona, events, strengths, reach)
 
 
-static func _consider_war(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary) -> void:
+static func _consider_war(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary, reach: Dictionary) -> void:
 	var rules: Dictionary = data.balance["diplomacy"]
 	var my_strength: float = strengths[faction_id]
 	var needed_ratio := float(rules["war_strength_ratio"]) \
 		/ maxf(float(persona.get("aggression", 1.0)), 0.01)
+
+	# While brigand land remains in reach, appetite goes there; once the map
+	# offers no free room, hungry empires turn on their neighbors.
+	var threshold := float(rules["war_declare_attitude"])
+	if not _reachable_via(reach, "rebels"):
+		threshold += float(rules["war_no_room_shift"]) * float(persona.get("expansion_drive", 1.0))
+
 	var best_target := ""
 	var best_attitude := 0.0
 	var faction_ids: Array = state["factions"].keys()
@@ -40,11 +49,11 @@ static func _consider_war(data: GameData, state: Dictionary, faction_id: String,
 					or state["factions"][other_id]["at_civil_war"]):
 			continue  # Roman quarrels stay in the forum until a civil war breaks
 		var attitude := DiplomacyRules.attitude_total(data, state, faction_id, other_id, strengths)
-		if attitude >= float(rules["war_declare_attitude"]):
+		if attitude >= threshold:
 			continue
 		if my_strength < float(strengths[other_id]) * needed_ratio:
 			continue
-		if not _reachable(data, state, faction_id, other_id):
+		if not _reachable_via(reach, other_id):
 			continue
 		if best_target == "" or attitude < best_attitude:
 			best_target = other_id
@@ -96,7 +105,7 @@ static func _consider_peace(data: GameData, state: Dictionary, faction_id: Strin
 		return  # one suit for peace a turn
 
 
-static func _consider_trade(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary) -> void:
+static func _consider_trade(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary, reach: Dictionary) -> void:
 	var rules: Dictionary = data.balance["diplomacy"]
 	if float(persona.get("peace_willingness", 1.0)) < float(rules["trade_propose_min_willingness"]):
 		return  # raiders do not send trade envoys
@@ -112,7 +121,7 @@ static func _consider_trade(data: GameData, state: Dictionary, faction_id: Strin
 		if DiplomacyRules.attitude_total(data, state, faction_id, other_id, strengths) \
 				< float(rules["trade_min_attitude"]):
 			continue
-		if not _reachable(data, state, faction_id, other_id):
+		if not _reachable_via(reach, other_id):
 			continue
 		var offer := {"from": faction_id, "to": other_id, "stance": "trade",
 			"give_payment": 0, "give_tribute": null, "give_regions": [],
@@ -145,25 +154,38 @@ static func _queue_offer_to_player(data: GameData, state: Dictionary, offer: Dic
 	events.append({"kind": "offer_sent", "from": offer["from"], "to": offer["to"]})
 
 
-static func _reachable(data: GameData, state: Dictionary, faction_id: String, other_id: String) -> bool:
-	## A war (or trade route) needs a way to touch: a land border, or a sea link
-	## between a coastal holding of each side.
-	if DiplomacyRules.share_border(data, state, faction_id, other_id):
-		return true
-	var mine: Array = []
-	var theirs: Array = []
-	var region_ids: Array = state["settlements"].keys()
-	region_ids.sort()
-	for region_id in region_ids:
+static func _build_reach_map(data: GameData, state: Dictionary, faction_id: String) -> Dictionary:
+	## Who this faction can touch, from ONE world pass: land borders, plus the
+	## sea zones its coasts reach (own zones and their neighbors) against every
+	## other faction's direct coastal zones. Mirrors sea_move_army's
+	## same-or-adjacent-zone rule. Set-building only — order-free.
+	var borders := {}
+	var my_zones := {}
+	var their_zones := {}
+	for region_id in state["settlements"]:
 		var owner: String = state["settlements"][region_id]["owner"]
-		if owner == faction_id and MapRules.coastal(data, region_id):
-			mine.append(region_id)
-		elif owner == other_id and MapRules.coastal(data, region_id):
-			theirs.append(region_id)
-	for own_region in mine:
-		for their_region in theirs:
-			if AiStrategy.sea_linked(data, own_region, their_region):
-				return true
+		if owner == faction_id:
+			for neighbor in data.regions[region_id].get("adjacent", []):
+				if state["settlements"].has(neighbor):
+					var other: String = state["settlements"][neighbor]["owner"]
+					if other != faction_id:
+						borders[other] = true
+			for zone in data.regions[region_id].get("sea_zones", []):
+				my_zones[zone] = true
+				for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
+					my_zones[adjacent_zone] = true
+		else:
+			for zone in data.regions[region_id].get("sea_zones", []):
+				their_zones.get_or_add(owner, {})[zone] = true
+	return {"borders": borders, "my_zones": my_zones, "their_zones": their_zones}
+
+
+static func _reachable_via(reach: Dictionary, other_id: String) -> bool:
+	if reach["borders"].has(other_id):
+		return true
+	for zone in reach["their_zones"].get(other_id, {}):
+		if reach["my_zones"].has(zone):
+			return true
 	return false
 
 
