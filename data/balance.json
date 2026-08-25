@@ -331,6 +331,11 @@
     "insolvency_repeal_treasury": 0,
     "ai_upkeep_income_share": 0.15
   },
+  "chronicle": {
+    "per_turn_cap": 10,
+    "max_entries": 2000,
+    "compact_min_magnitude": 1
+  },
   "knowledge": {
     "origination_base_chance": 0.02,
     "origination_education_bonus_per_level": 0.01,

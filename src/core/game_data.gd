@@ -10,6 +10,7 @@ var chains: Dictionary = {}            # chain id -> chain dict (buildings + tem
 var building_levels: Dictionary = {}   # level id -> {chain, kind, index(1-based), level(dict)}
 var units: Dictionary = {}             # id -> unit template dict
 var regions: Dictionary = {}           # id -> region dict
+var grain_regions: Array = []          # sorted region ids producing grain (hot-path index)
 var sea_zones: Dictionary = {}         # id -> sea zone dict
 var traits: Dictionary = {}            # id -> trait dict
 var ancillaries: Dictionary = {}       # id -> ancillary dict
@@ -70,6 +71,7 @@ func _load_all(dir: String) -> void:
 		regions[region["id"]] = region
 	for zone in map_data.get("sea_zones", []):
 		sea_zones[zone["id"]] = zone
+	index_grain_regions()
 
 	for trait_def in _read_json(dir + "/traits.json").get("traits", []):
 		traits[trait_def["id"]] = trait_def
@@ -96,6 +98,19 @@ func _load_all(dir: String) -> void:
 		techniques[technique["id"]] = technique
 	for edict in _read_json(dir + "/edicts.json").get("edicts", []):
 		edicts[edict["id"]] = edict
+
+
+func index_grain_regions() -> void:
+	## The grain map is immutable data; growth's grain-route scan runs against
+	## this short index instead of every settlement (a real hot-path saving —
+	## order breakdowns recompute growth constantly). Fixture builders that
+	## fill `regions` by hand call this afterward.
+	grain_regions = []
+	var region_ids: Array = regions.keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		if regions[region_id].get("resources", []).has("grain"):
+			grain_regions.append(region_id)
 
 
 func _read_json(path: String) -> Dictionary:

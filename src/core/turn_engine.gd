@@ -23,6 +23,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		"diplomacy": [], "winner": null,
 	}
 
+	# The chronicle diffs the world before and after the season resolves
+	# (wars, reigns, alliances, destructions) — snapshot first.
+	var pre := ChronicleRules.snapshot(state)
+
 	# World loops iterate in sorted id order so the RNG stream is identical
 	# no matter how the state dictionaries were built (fresh game or loaded
 	# save — JSON round trips re-order keys).
@@ -101,6 +105,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 
 	MovementRules.reset_movement(data, state)
 	report["winner"] = VictoryRules.check(data, state)
+
+	# The scribes write last: derived records (wars, reigns, alliances,
+	# destructions) against the snapshot, then compaction. No rng.
+	ChronicleRules.collect(data, state, report, pre)
 
 	state["rng_state"] = rng.state_string()
 	return report

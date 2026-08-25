@@ -12,11 +12,16 @@ class_name AiPolicy
 
 
 static func run(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array) -> void:
-	_consider_adoption(data, state, faction_id, persona)
-	_consider_edict(data, state, faction_id, persona, events)
+	# One prerequisite-cache build serves both steps (it is the step's main
+	# cost); a court below its reserve skips everything.
+	if int(state["factions"][faction_id]["treasury"]) <= int(data.balance["ai"]["treasury_reserve"]):
+		return
+	var caches := KnowledgeRules.build_caches(data, state, false)
+	_consider_adoption(data, state, faction_id, persona, caches)
+	_consider_edict(data, state, faction_id, persona, events, caches)
 
 
-static func _consider_adoption(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary) -> void:
+static func _consider_adoption(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, caches: Dictionary) -> void:
 	## Score = persona group priority × need boost (war or reform pressure
 	## favors the arsenal, unrest favors civic works) ÷ adoption cost — cheap
 	## useful crafts first, dear prestige later. One program at a time.
@@ -32,12 +37,9 @@ static func _consider_adoption(data: GameData, state: Dictionary, faction_id: St
 	if aware.is_empty():
 		return
 	var ai_rules: Dictionary = data.balance["ai"]
-	if int(faction["treasury"]) <= int(ai_rules["treasury_reserve"]):
-		return  # nothing is affordable; spare the cache build
 	aware.sort()
 
 	var priorities: Dictionary = persona.get("knowledge_priorities", {})
-	var caches := KnowledgeRules.build_caches(data, state, false)
 	var at_war := _at_war_with_anyone(state, faction_id)
 	var pressed := KnowledgeRules.pressure_ratio(data, faction) > 0.0
 	# AiEconomy already swept public order this turn; its minimum is the
@@ -70,15 +72,13 @@ static func _consider_adoption(data: GameData, state: Dictionary, faction_id: St
 		KnowledgeRules.begin_adoption(data, state, faction_id, best_tid, caches)
 
 
-static func _consider_edict(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array) -> void:
+static func _consider_edict(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, caches: Dictionary) -> void:
 	## At most one enactment per turn, capped by an upkeep share of last
 	## turn's income so the book never outruns the purse — the insolvency
 	## rule is the backstop, not the plan. Decrees are emergency levers:
 	## weighed only when order is actually failing.
 	var faction: Dictionary = state["factions"][faction_id]
 	var ai_rules: Dictionary = data.balance["ai"]
-	if int(faction["treasury"]) <= int(ai_rules["treasury_reserve"]):
-		return
 	var edict_rules: Dictionary = data.balance["edicts"]
 	var last_income := float(faction["ai"].get("last_income", 0.0))
 	if last_income <= 0.0:
@@ -94,7 +94,6 @@ static func _consider_edict(data: GameData, state: Dictionary, faction_id: Strin
 	var at_war := _at_war_with_anyone(state, faction_id)
 	var order_need: bool = float(faction["ai"].get("min_order", 200.0)) \
 		< float(ai_rules["order_need_threshold"])
-	var caches := KnowledgeRules.build_caches(data, state, false)
 
 	var best_eid := ""
 	var best_score := 0.0

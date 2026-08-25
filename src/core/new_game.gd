@@ -36,6 +36,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"campaign_mode": campaign_mode,
 		"event_happiness": null,
 		"modifiers": [],
+		"chronicle": [],
+		"wars": [],
 		"player_faction": player_faction,
 		"factions": {},
 		"settlements": {},
@@ -153,6 +155,10 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 			faction["edict_cooldowns"] = {}
 	if not state.has("modifiers"):
 		state["modifiers"] = []
+	if not state.has("chronicle"):
+		state["chronicle"] = []
+	if not state.has("wars"):
+		state["wars"] = []
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):

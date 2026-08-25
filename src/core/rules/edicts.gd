@@ -85,6 +85,9 @@ static func enact(data: GameData, state: Dictionary, faction_id: String, edict_i
 		cooldowns(state, faction_id)[edict_id] = int(data.balance["edicts"]["reenact_cooldown_turns"])
 	else:
 		enacted(state, faction_id)[edict_id] = {"turn": int(state["turn"])}
+	ChronicleRules.record(data, state, "edict_enacted",
+		{"faction": faction_id, "edict": edict_id}, 4)
+	ChronicleRules.add_deed(state, ChronicleRules.leader_of(state, faction_id), "edicts_enacted")
 	return {"ok": true, "reason": "", "cost": cost}
 
 
@@ -170,6 +173,8 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 				if costliest != "":
 					repeal(data, state, faction_id, costliest)
 					events.append({"kind": "edict_lapsed", "faction": faction_id, "edict": costliest})
+					ChronicleRules.record(data, state, "edict_lapsed",
+						{"faction": faction_id, "edict": costliest}, 4)
 
 		var cooling := cooldowns(state, faction_id)
 		var edict_ids: Array = cooling.keys()

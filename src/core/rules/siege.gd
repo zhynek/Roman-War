@@ -98,9 +98,18 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		CharacterRules.kill(state, governor, data)
 
 	# A bloody repulse at the walls teaches the attacker (the defender's own
-	# reckoning, if the city falls, comes through capture_settlement).
+	# reckoning, if the city falls, comes through capture_settlement). Either
+	# way a storming is a battle for the war ledger; a repulse gets its own
+	# annals entry here, while a taken city's entry comes from the capture.
+	ChronicleRules.on_battle(state, String(army["owner"]), String(settlement["owner"]))
 	if result["winner"] != "attacker":
 		KnowledgeRules.on_battle_lost(data, state, String(army["owner"]))
+		ChronicleRules.record(data, state, "battle", {
+			"faction": army["owner"], "other_faction": settlement["owner"],
+			"region": region_id,
+		}, 5, {"winner": "defender", "assault": true})
+		ChronicleRules.add_deed(state, army["general"], "battles_lost")
+		ChronicleRules.add_deed(state, governor, "battles_won")
 
 	# Settle the attacker's fate BEFORE any laurels: an assault that leaves no
 	# man standing takes nothing, and its dead general wins no honours.
@@ -119,6 +128,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		# Caller (Game.assault_settlement / turn engine) applies the
 		# occupy/enslave/exterminate decision via CombatRules.capture_settlement,
 		# and fires the siege_won / settlement_* triggers for the general.
+		ChronicleRules.add_deed(state, army["general"], "sieges_won")
+		ChronicleRules.add_deed(state, army["general"], "battles_won")
 		if army["general"] != null:
 			var notices: Array = []
 			CharacterRules.fire_trigger(data, state, army["general"], "siege_won", {}, rng, notices)

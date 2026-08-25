@@ -120,6 +120,7 @@ static func data() -> GameData:
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
 	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+	game_data.index_grain_regions()
 
 	game_data.units["test_merc"] = {
 		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",
@@ -320,7 +321,7 @@ static func state(game_data: GameData) -> Dictionary:
 	var campaign_state := {
 		"turn": 0, "year": -270, "season": "summer", "rng_state": "0",
 		"difficulty": "medium", "campaign_mode": "long", "event_happiness": null,
-		"modifiers": [],
+		"modifiers": [], "chronicle": [], "wars": [],
 		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
 		"factions": {

@@ -24,6 +24,9 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 			continue
 		_apply_disaster(state, disaster, region_id, rng)
 		fired.append({"kind": "disaster", "id": disaster["id"], "region": region_id})
+		ChronicleRules.record(data, state, "disaster",
+			{"faction": state["settlements"][region_id]["owner"], "region": region_id},
+			5, {"disaster": String(disaster["id"])})
 	return fired
 
 

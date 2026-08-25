@@ -185,6 +185,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	## flees to the nearest city the house still holds.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var previous_owner: String = settlement["owner"]
+	ChronicleRules.record(data, state, "city_revolted",
+		{"faction": previous_owner, "region": region_id}, 5)
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
 	settlement["construction_queue"] = []

@@ -283,6 +283,10 @@ static func apply_offer(data: GameData, state: Dictionary, offer: Dictionary) ->
 		if stance == "alliance":
 			record_memory(data, state, from_id, to_id, float(rules["alliance_formed_memory"]))
 			record_memory(data, state, to_id, from_id, float(rules["alliance_formed_memory"]))
+			# Every alliance is signed here (AI and player offers alike), so
+			# the chronicle records it at the signing, not by diffing.
+			ChronicleRules.record(data, state, "alliance_made",
+				{"faction": from_id, "other_faction": to_id}, 4)
 
 
 static func region_value(data: GameData, state: Dictionary, region_id: String) -> float:

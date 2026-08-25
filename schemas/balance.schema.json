@@ -25,6 +25,7 @@
     "agents",
     "knowledge",
     "edicts",
+    "chronicle",
     "characters"
   ],
   "additionalProperties": false,
@@ -257,6 +258,20 @@
             "insolvency_repeal_treasury",
             "max_enacted",
             "reenact_cooldown_turns"
+          ]
+        }
+      ]
+    },
+    "chronicle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "compact_min_magnitude",
+            "max_entries",
+            "per_turn_cap"
           ]
         }
       ]

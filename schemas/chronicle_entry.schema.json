@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "chronicle_entry.schema.json",
+  "title": "Chronicle entry (the narrator contract)",
+  "description": "One record in state.chronicle. This is the machine-readable feed a future OPTIONAL narrator renders as prose: every subject is a stable id resolvable against game data or campaign state (dead characters persist in state, so the save alone suffices), and details carry scalars only. The narrator is flavor — it never touches game state. In-game, data/annals.json templates render these same entries.",
+  "type": "object",
+  "required": ["id", "turn", "year", "season", "kind", "subjects", "magnitude", "details"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "integer", "minimum": 1 },
+    "turn": { "type": "integer", "minimum": 0 },
+    "year": { "type": "integer" },
+    "season": { "enum": ["summer", "winter"] },
+    "kind": {
+      "enum": [
+        "war_declared", "battle", "city_taken", "city_sacked", "city_revolted",
+        "peace_made", "alliance_made", "technique_originated", "technique_adopted",
+        "edict_enacted", "edict_lapsed", "leader_died", "succession",
+        "reign_summary", "war_summary", "faction_destroyed", "disaster",
+        "epithet_earned"
+      ]
+    },
+    "subjects": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "faction": { "type": "string" },
+        "other_faction": { "type": "string" },
+        "character": { "type": "string" },
+        "region": { "type": "string" },
+        "technique": { "type": "string" },
+        "edict": { "type": "string" },
+        "epithet": { "type": "string" }
+      }
+    },
+    "magnitude": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "details": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          { "type": "number" },
+          { "type": "string" },
+          { "type": "boolean" }
+        ]
+      }
+    }
+  }
+}

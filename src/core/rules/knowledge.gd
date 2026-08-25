@@ -239,6 +239,10 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				entry["progress"] = 0
 				entry["turn"] = int(state["turn"])
 				events.append({"kind": "technique_adopted", "faction": faction_id, "technique": tid})
+				ChronicleRules.record(data, state, "technique_adopted",
+					{"faction": faction_id, "technique": tid}, 4)
+				ChronicleRules.add_deed(state,
+					ChronicleRules.leader_of(state, faction_id), "techniques_completed")
 
 	# 2. Origination: a court meeting a craft's prerequisites (and, where the
 	# table names origin cultures, born to the right tradition) may devise it —
@@ -284,6 +288,8 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 		var chosen: String = rng.pick(pick_list)
 		knowledge[chosen] = {"stage": "aware", "turn": int(state["turn"]), "progress": 0, "discount_pct": 0.0}
 		events.append({"kind": "technique_originated", "faction": faction_id, "technique": chosen})
+		ChronicleRules.record(data, state, "technique_originated",
+			{"faction": faction_id, "technique": chosen}, 4)
 
 	# 3. Diffusion: knowledge moves along contact — allies and trade partners
 	# freely, neighbors by proximity, enemies by hard lessons (Rome copied the

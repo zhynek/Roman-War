@@ -118,17 +118,19 @@ static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictiona
 static func _grain_routes(data: GameData, state: Dictionary, region_id: String) -> int:
 	## Grain flows in from trading-partner or own regions that produce grain and
 	## are reachable by land adjacency or a shared sea zone (needs a port here).
+	## Iterates the immutable grain index, not every settlement — this runs
+	## inside every growth AND order breakdown.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var owner: String = settlement["owner"]
 	var has_port := SettlementRules.effect_max(data, settlement, "port_level") > 0.0
 	var routes := 0
-	for other_id in state["settlements"]:
+	for other_id in data.grain_regions:
 		if other_id == region_id:
 			continue
-		if not data.regions[other_id].get("resources", []).has("grain"):
+		var other = state["settlements"].get(other_id)
+		if other == null:
 			continue
-		var other: Dictionary = state["settlements"][other_id]
-		if not _trades_with(state, owner, other["owner"]):
+		if not _trades_with(state, owner, (other as Dictionary)["owner"]):
 			continue
 		var land := MapRules.are_adjacent(data, region_id, other_id)
 		var sea: bool = has_port and MapRules.shared_sea_zone(data, region_id, other_id)
