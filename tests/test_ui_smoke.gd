@@ -300,3 +300,26 @@ func test_start_menu_scene_loads(t) -> void:
 		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
 			"the house that was picked is the house that is played")
 	menu.free()
+
+
+func test_campaign_screen_fills_its_window(t) -> void:
+	## Regression: `set_anchors_preset` KEEPS the control's current rect, so a
+	## freshly built (0x0) CampaignScreen stayed 0x0 and rendered at its minimum
+	## size in the top-left corner, growing only by the delta of a window
+	## resize. The whole screen must anchor full-rect AND zero its offsets.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	t.check_near(screen.anchor_left, 0.0, 0.001, "anchored to the left edge")
+	t.check_near(screen.anchor_top, 0.0, 0.001, "and the top")
+	t.check_near(screen.anchor_right, 1.0, 0.001, "stretched to the right edge")
+	t.check_near(screen.anchor_bottom, 1.0, 0.001, "and the bottom")
+	# The offsets are the actual bug: nonzero here means the screen renders
+	# smaller than its window by exactly that much, forever.
+	t.check_near(screen.offset_left, 0.0, 0.001, "no left inset")
+	t.check_near(screen.offset_top, 0.0, 0.001, "no top inset")
+	t.check_near(screen.offset_right, 0.0, 0.001, "no right inset — the screen fills the window")
+	t.check_near(screen.offset_bottom, 0.0, 0.001, "no bottom inset")
+	screen.free()
