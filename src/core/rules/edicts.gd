@@ -91,10 +91,13 @@ static func enact(data: GameData, state: Dictionary, faction_id: String, edict_i
 	return {"ok": true, "reason": "", "cost": cost}
 
 
-static func repeal(data: GameData, state: Dictionary, faction_id: String, edict_id: String) -> bool:
+static func repeal(data: GameData, state: Dictionary, faction_id: String, edict_id: String, reverse_standings: bool = true) -> bool:
 	## Repealing is free of coin and dear in mood: the repeal_unrest shock
 	## lands as a fading happiness modifier, and the cooldown bars a quick
-	## re-enactment (policy is not a lamp to flick).
+	## re-enactment (policy is not a lamp to flick). A VOLUNTARY repeal also
+	## hands back the standing the enactment bought — so enact-repeal cycling
+	## mints nothing — while an insolvency collapse keeps the deltas: the
+	## senate remembers that you proclaimed it AND that it fell apart.
 	var held := enacted(state, faction_id)
 	if not held.has(edict_id):
 		return false
@@ -104,6 +107,13 @@ static func repeal(data: GameData, state: Dictionary, faction_id: String, edict_
 	if float(shock.get("penalty", 0.0)) > 0.0 and int(shock.get("turns", 0)) > 0:
 		ModifierRules.add(state, faction_id, "", "happiness",
 			-float(shock["penalty"]), int(shock["turns"]), "repeal:" + edict_id)
+	if reverse_standings:
+		var tensions: Dictionary = edict.get("tensions", {})
+		var faction: Dictionary = state["factions"][faction_id]
+		faction["senate_standing"] = _clamped_senate(data,
+			float(faction["senate_standing"]) - float(tensions.get("senate_standing_delta", 0.0)))
+		faction["popular_standing"] = float(faction["popular_standing"]) \
+			- float(tensions.get("popular_standing_delta", 0.0))
 	cooldowns(state, faction_id)[edict_id] = int(data.balance["edicts"]["reenact_cooldown_turns"])
 	return true
 
@@ -169,9 +179,9 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 				faction["popular_standing"] = float(faction["popular_standing"]) + popular_drip
 
 			if int(faction["treasury"]) < int(data.balance["edicts"]["insolvency_repeal_treasury"]):
-				var costliest := _costliest_edict(data, held)
+				var costliest := _costliest_edict(data, state, faction_id, held)
 				if costliest != "":
-					repeal(data, state, faction_id, costliest)
+					repeal(data, state, faction_id, costliest, false)
 					events.append({"kind": "edict_lapsed", "faction": faction_id, "edict": costliest})
 					ChronicleRules.record(data, state, "edict_lapsed",
 						{"faction": faction_id, "edict": costliest}, 4)
@@ -186,15 +196,22 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 	return events
 
 
-static func _costliest_edict(data: GameData, held: Dictionary) -> String:
-	## Highest flat+per-head upkeep, sorted-id tie-break (save-determinism).
+static func _costliest_edict(data: GameData, state: Dictionary, faction_id: String, held: Dictionary) -> String:
+	## Highest REAL upkeep — flat plus the per-head clauses at the faction's
+	## actual population, so the insolvent court sheds the true drain (the
+	## dole at a great city dwarfs any flat stipend). Sorted-id tie-break.
+	var population := 0
+	for settlement in state["settlements"].values():  # pure sum
+		if settlement["owner"] == faction_id:
+			population += int(settlement["population"])
 	var best := ""
 	var best_upkeep := -1.0
 	var edict_ids: Array = held.keys()
 	edict_ids.sort()
 	for eid in edict_ids:
 		var edict: Dictionary = data.edicts.get(eid, {})
-		var cost := float(edict.get("upkeep_per_turn", 0)) + float(edict.get("upkeep_per_1000_pop", 0.0))
+		var cost := float(edict.get("upkeep_per_turn", 0)) \
+			+ float(edict.get("upkeep_per_1000_pop", 0.0)) * population / 1000.0
 		if cost > best_upkeep:
 			best_upkeep = cost
 			best = eid

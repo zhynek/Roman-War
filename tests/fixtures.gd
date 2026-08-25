@@ -376,6 +376,8 @@ static func add_character(campaign_state: Dictionary, faction: String, char_id: 
 		"ancillaries": overrides.get("ancillaries", []).duplicate(),
 		"location": overrides.get("location", ""),
 		"alive": true,
+		"deeds": {},
+		"epithet": "",
 	}
 	return char_id
 

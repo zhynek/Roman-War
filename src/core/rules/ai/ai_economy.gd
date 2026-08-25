@@ -34,7 +34,11 @@ static func run(data: GameData, state: Dictionary, faction_id: String, persona: 
 		# After garrison queueing (which draws population), exactly where the
 		# construction pass used to compute it — the dedupe changes no decision.
 		var order := PublicOrderRules.total(data, state, region_id)
-		min_order = minf(min_order, order)
+		# Freshly conquered cities are ALWAYS low — they would pin the
+		# civic-need signal on permanently for any expanding court, so the
+		# minimum tracks settled lands only.
+		if int(settlement["recently_conquered"]) == 0:
+			min_order = minf(min_order, order)
 		_manage_construction(data, state, faction_id, region_id, persona, frontier, muster_region, order)
 		_manage_taxes(data, state, region_id, order)
 		if int(state["factions"][faction_id]["treasury"]) \

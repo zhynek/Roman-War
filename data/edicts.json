@@ -7,15 +7,27 @@
       "category": "welfare",
       "kind": "standing",
       "historical_basis": "Gaius Gracchus carried a grain law in 123 BC obliging the state to sell corn to citizens at a fixed low price from public granaries; Clodius made the ration free in 58 BC, and no politician afterward dared touch it. It bound the city crowd to whoever paid for it, and its cost alarmed the treasury from the first day - Cicero groused that it drained the exchequer.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "market", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 600,
       "upkeep_per_turn": 100,
       "upkeep_per_1000_pop": 12.0,
-      "effects": { "happiness": 6, "popular_standing_per_turn": 0.2 },
+      "effects": {
+        "happiness": 6,
+        "popular_standing_per_turn": 0.2
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 8, "turns": 6 },
+        "repeal_unrest": {
+          "penalty": 8,
+          "turns": 6
+        },
         "senate_standing_delta": -1.0,
         "popular_standing_delta": 1.0
       }
@@ -26,15 +38,27 @@
       "category": "religion",
       "kind": "standing",
       "historical_basis": "The first Ptolemy raised Serapis - a god composed on purpose, Egyptian in substance and Greek in face - to give his two peoples one altar to share, and endowed the cult richly at Alexandria. Kings and republics alike learned the lesson: pay the priesthoods, stage the processions, and the gods will preach the regime.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "temple", "building_level": 1, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "temple",
+        "building_level": 1,
+        "techniques": []
+      },
       "enact_cost": 500,
       "upkeep_per_turn": 120,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "happiness": 3, "culture_penalty_reduction_pct": 25 },
+      "effects": {
+        "happiness": 3,
+        "culture_penalty_reduction_pct": 25
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 4, "turns": 4 },
+        "repeal_unrest": {
+          "penalty": 4,
+          "turns": 4
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": 0.0
       }
@@ -45,15 +69,28 @@
       "category": "land",
       "kind": "standing",
       "historical_basis": "Once armies became professional, discharged soldiers wanted farms, and generals from Marius onward fought the senate to get them allotments - Sulla planted whole legions on confiscated Italian soil, and Augustus settled some hundred and twenty thousand men in colonies. Land at the end of service filled the ranks at muster; the seizures that paid for it made enemies in every direction.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "barracks", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 800,
       "upkeep_per_turn": 180,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "recruit_cost_pct": -10, "recruit_xp": 1, "popular_standing_per_turn": 0.1 },
+      "effects": {
+        "recruit_cost_pct": -10,
+        "recruit_xp": 1,
+        "popular_standing_per_turn": 0.1
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 5, "turns": 5 },
+        "repeal_unrest": {
+          "penalty": 5,
+          "turns": 5
+        },
         "senate_standing_delta": -1.0,
         "popular_standing_delta": 0.5
       }
@@ -64,15 +101,29 @@
       "category": "taxation",
       "kind": "standing",
       "historical_basis": "Rome auctioned the right to collect provincial taxes to companies of publicani, who paid the treasury up front and squeezed the difference out of the taxpayers - the bidding for Asia after 123 BC made and broke equestrian fortunes. The state got quick certain silver without a bureaucracy; the provinces got the collectors the Gospels made a byword for extortion.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "market", "building_level": 1, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 1,
+        "techniques": []
+      },
       "enact_cost": 200,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "tax_income_pct": 15, "happiness": -3 },
+      "effects": {
+        "tax_income_pct": 15,
+        "happiness": -3
+      },
       "tensions": {
-        "exclusive_with": ["census_levy_collection"],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "exclusive_with": [
+          "census_levy_collection"
+        ],
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": -0.5
       }
@@ -83,15 +134,32 @@
       "category": "taxation",
       "kind": "standing",
       "historical_basis": "The other road to revenue was the register: Ptolemaic Egypt taxed by survey rolls kept village by village, Rome's censors ranked citizens by declared property, and Augustus sent census-takers through the provinces so tribute could be assessed rather than farmed. Salaried scribes cost money and cannot be hurried, but what they collect arrives without a middleman's teeth in it.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "government", "building_level": 3, "techniques": ["census_registration"] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 3,
+        "techniques": [
+          "census_registration"
+        ]
+      },
       "enact_cost": 700,
       "upkeep_per_turn": 150,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "tax_income_pct": 8, "corruption_reduction_pct": 10, "law": 2 },
+      "effects": {
+        "tax_income_pct": 8,
+        "corruption_reduction_pct": 10,
+        "law": 2
+      },
       "tensions": {
-        "exclusive_with": ["tax_farming_contracts"],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "exclusive_with": [
+          "tax_farming_contracts"
+        ],
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 0.5,
         "popular_standing_delta": 0.0
       }
@@ -102,16 +170,28 @@
       "category": "debt",
       "kind": "decree",
       "historical_basis": "Solon opened his reforms at Athens by shaking off the burdens - cancelling the debts that had sold farmers into bondage - and the cry for clean tablets returned in every ancient generation, from Spartan kings to Catiline's followers. A stroke of the pen buys passionate loyalty from debtors and cold fury from every creditor of standing.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "government", "building_level": 2, "techniques": [] },
-      "enact_cost": 1200,
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 2,
+        "techniques": []
+      },
+      "enact_cost": 1500,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
       "effects": {},
-      "timed_happiness": { "value": 8, "turns": 8 },
+      "timed_happiness": {
+        "value": 8,
+        "turns": 6
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": -2.0,
         "popular_standing_delta": 2.0
       }
@@ -122,15 +202,28 @@
       "category": "citizenship",
       "kind": "standing",
       "historical_basis": "Rome's strange strength was that citizenship could be given away: to freed slaves, to Latin towns, to whole allied peoples after the Social War taught the price of refusing, until Caracalla's edict of 212 made nearly every free subject a citizen. Each widening bound the newcomers to the state - and affronted the old citizens whose distinction it diluted.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "government", "building_level": 3, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 3,
+        "techniques": []
+      },
       "enact_cost": 900,
       "upkeep_per_turn": 80,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "culture_penalty_reduction_pct": 40, "growth": 0.2, "happiness": 2 },
+      "effects": {
+        "culture_penalty_reduction_pct": 40,
+        "growth": 0.2,
+        "happiness": 2
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 6, "turns": 6 },
+        "repeal_unrest": {
+          "penalty": 6,
+          "turns": 6
+        },
         "senate_standing_delta": -1.0,
         "popular_standing_delta": 0.5
       }
@@ -141,15 +234,30 @@
       "category": "military",
       "kind": "standing",
       "historical_basis": "The old Mediterranean ideal put the citizen himself in the battle line: Rome's dilectus mustered property-holders who armed themselves by class, as the Greek hoplite had, each man's panoply his own affair. Such armies cost the treasury little and fight for their own fields - and every muster takes farmers from those fields, which no one thanks the state for.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "barracks", "building_level": 1, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 1,
+        "techniques": []
+      },
       "enact_cost": 300,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "recruit_cost_pct": -20, "unit_upkeep_pct": -10, "happiness": -2 },
+      "effects": {
+        "recruit_cost_pct": -20,
+        "unit_upkeep_pct": -10,
+        "happiness": -2
+      },
       "tensions": {
-        "exclusive_with": ["hired_companies"],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "exclusive_with": [
+          "hired_companies"
+        ],
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 0.5,
         "popular_standing_delta": -0.5
       }
@@ -160,15 +268,30 @@
       "category": "military",
       "kind": "standing",
       "historical_basis": "Carthage fought her wars chiefly with hired men - Iberians, Gauls, Numidians under Punic officers - and the Hellenistic kings kept standing companies of professionals on wages. Money buys drilled spears without emptying your own fields, so long as the money never stops: Carthage's unpaid companies turned on her in 241 BC in a war crueler than the one against Rome.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "market", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 500,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "recruit_xp": 1, "unit_upkeep_pct": 15, "happiness": 1 },
+      "effects": {
+        "recruit_xp": 1,
+        "unit_upkeep_pct": 15,
+        "happiness": 1
+      },
       "tensions": {
-        "exclusive_with": ["citizen_levy"],
-        "repeal_unrest": { "penalty": 2, "turns": 3 },
+        "exclusive_with": [
+          "citizen_levy"
+        ],
+        "repeal_unrest": {
+          "penalty": 2,
+          "turns": 3
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": 0.5
       }
@@ -179,16 +302,28 @@
       "category": "welfare",
       "kind": "decree",
       "historical_basis": "Roman magistrates gave games - races, stage plays, beast hunts - at their own ruinous expense, because the ladder of office ran through the crowd's favor; Caesar as aedile borrowed himself nearly into oblivion to stage them. Greek cities likewise dated their years by festivals. A splendid show buys a season of goodwill, payable immediately.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "entertainment", "building_level": 1, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "entertainment",
+        "building_level": 1,
+        "techniques": []
+      },
       "enact_cost": 500,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
       "effects": {},
-      "timed_happiness": { "value": 6, "turns": 4 },
+      "timed_happiness": {
+        "value": 6,
+        "turns": 4
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": 1.0
       }
@@ -199,15 +334,28 @@
       "category": "religion",
       "kind": "standing",
       "historical_basis": "Great sanctuaries - Artemis at Ephesus, Apollo on Delos - held recognized asylia: within the sacred bounds no fugitive, debtor or runaway could be seized, and cities petitioned kings and later Rome to have the privilege confirmed. Pilgrims and festival fairs enriched such places; so did every man with a reason not to be found, which magistrates never ceased complaining of.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "temple", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "temple",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 400,
       "upkeep_per_turn": 60,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "happiness": 2, "law": -2, "trade_pct": 3 },
+      "effects": {
+        "happiness": 2,
+        "law": -2,
+        "trade_pct": 3
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 3, "turns": 3 },
+        "repeal_unrest": {
+          "penalty": 3,
+          "turns": 3
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": 0.0
       }
@@ -218,15 +366,28 @@
       "category": "land",
       "kind": "standing",
       "historical_basis": "Rome planted colonies at the edges of her power - Cosa watching Etruria, Placentia and Cremona holding the Po - each a walled farm-town of settlers who were garrison, granary and plow at once; the Seleucids seeded Asia with soldier-settlements on the same logic. Land grants and town charters cost silver every year, and quietly turn frontier into homeland.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "roads", "building_level": 1, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "roads",
+        "building_level": 1,
+        "techniques": []
+      },
       "enact_cost": 700,
       "upkeep_per_turn": 140,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "growth": 0.3, "farm_income_pct": 5, "popular_standing_per_turn": 0.1 },
+      "effects": {
+        "growth": 0.3,
+        "farm_income_pct": 5,
+        "popular_standing_per_turn": 0.1
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 3, "turns": 4 },
+        "repeal_unrest": {
+          "penalty": 3,
+          "turns": 4
+        },
         "senate_standing_delta": 0.5,
         "popular_standing_delta": 0.0
       }
@@ -237,15 +398,33 @@
       "category": "trade",
       "kind": "standing",
       "historical_basis": "In 166 BC Rome declared Delos a free port, exempt from harbor dues, and trade abandoned taxed Rhodes for the sacred island almost overnight - Rhodian harbor revenue collapsed by five-sixths, and Delos became the slave market of the world. Waiving the toll fills the quays; the toll itself is what the treasury no longer collects.",
-      "availability": { "cultures": ["roman", "greek", "eastern", "carthaginian", "egyptian"] },
-      "prerequisites": { "building_kind": "port", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": [
+          "roman",
+          "greek",
+          "eastern",
+          "carthaginian",
+          "egyptian"
+        ]
+      },
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 400,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "trade_pct": 12, "tax_income_pct": -5 },
+      "effects": {
+        "trade_pct": 12,
+        "tax_income_pct": -5
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 2, "turns": 3 },
+        "repeal_unrest": {
+          "penalty": 2,
+          "turns": 3
+        },
         "senate_standing_delta": 0.0,
         "popular_standing_delta": 0.0
       }
@@ -255,16 +434,36 @@
       "name": "Post Stations of the Roads",
       "category": "trade",
       "kind": "standing",
-      "historical_basis": "The Persian kings kept relays of mounted couriers stabled a day's ride apart along the royal road - Herodotus marveled that neither snow nor night stayed them - and Augustus rebuilt the idea as the cursus publicus, requisitioned way-stations carrying the state's word and watching the state's officials. Where dispatches move faster than rumor, governors steal less.",
-      "availability": { "cultures": ["roman", "greek", "eastern", "carthaginian", "egyptian"] },
-      "prerequisites": { "building_kind": "roads", "building_level": 2, "techniques": ["state_courier_relays"] },
+      "historical_basis": "The Persian kings kept relays of mounted couriers stabled a day's ride apart along the royal road, famed for letting nothing on earth delay the king's word - and Augustus rebuilt the idea as the cursus publicus, requisitioned way-stations carrying the state's dispatches and watching the state's officials. Where word moves faster than rumor, governors steal less.",
+      "availability": {
+        "cultures": [
+          "roman",
+          "greek",
+          "eastern",
+          "carthaginian",
+          "egyptian"
+        ]
+      },
+      "prerequisites": {
+        "building_kind": "roads",
+        "building_level": 2,
+        "techniques": [
+          "state_courier_relays"
+        ]
+      },
       "enact_cost": 600,
       "upkeep_per_turn": 130,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "corruption_reduction_pct": 10, "trade_pct": 5 },
+      "effects": {
+        "corruption_reduction_pct": 10,
+        "trade_pct": 5
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 0.5,
         "popular_standing_delta": 0.0
       }
@@ -275,15 +474,27 @@
       "category": "welfare",
       "kind": "standing",
       "historical_basis": "Rome legislated repeatedly against luxury - the lex Oppia of 215 BC capped women's gold and bright dress in wartime, later laws rationed banquet spending to the denarius - and censors struck notorious spenders from the senate rolls. Moralists praised the old discipline; the people who owned the silver plate resented every clause, and the laws were evaded almost as fast as passed.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "government", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 300,
       "upkeep_per_turn": 40,
       "upkeep_per_1000_pop": 0.0,
-      "effects": { "law": 3, "happiness": -3 },
+      "effects": {
+        "law": 3,
+        "happiness": -3
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 1.0,
         "popular_standing_delta": -0.5
       }
@@ -294,16 +505,28 @@
       "category": "religion",
       "kind": "decree",
       "historical_basis": "Before each Olympic festival, heralds crowned with olive carried the ekecheiria from city to city: for the god's season, pilgrims and athletes passed unharmed even through enemy country, and states that violated the truce were fined and barred from the games. A proclaimed holy peace dignifies its proclaimer and gives everyone a breath between campaigns.",
-      "availability": { "cultures": [] },
-      "prerequisites": { "building_kind": "temple", "building_level": 2, "techniques": [] },
+      "availability": {
+        "cultures": []
+      },
+      "prerequisites": {
+        "building_kind": "temple",
+        "building_level": 2,
+        "techniques": []
+      },
       "enact_cost": 400,
       "upkeep_per_turn": 0,
       "upkeep_per_1000_pop": 0.0,
       "effects": {},
-      "timed_happiness": { "value": 4, "turns": 4 },
+      "timed_happiness": {
+        "value": 4,
+        "turns": 4
+      },
       "tensions": {
         "exclusive_with": [],
-        "repeal_unrest": { "penalty": 0, "turns": 0 },
+        "repeal_unrest": {
+          "penalty": 0,
+          "turns": 0
+        },
         "senate_standing_delta": 1.0,
         "popular_standing_delta": 0.5
       }

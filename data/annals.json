@@ -45,7 +45,7 @@
     ],
     "leader_died": [
       "{character}, who led {faction}, died aged {age}.",
-      "Death came for {character} of {faction} in the {age}th year of his life."
+      "Death came for {character} of {faction}, having seen {age} years."
     ],
     "succession": [
       "{character} rose to lead {faction}.",

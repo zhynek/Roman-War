@@ -383,6 +383,30 @@ func garrison_army(army_id: String) -> bool:
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
+func raise_army(region_id: String) -> String:
+	## The player's mirror of the AI muster: the whole garrison marches out
+	## as a field army (raised this season — it moves next). Closes the
+	## re-arming loop: garrison in, retrain, raise back out. Returns the new
+	## army id, or "" when there is nothing to raise.
+	if not _owns_settlement(region_id):
+		return ""
+	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["garrison"].is_empty():
+		return ""
+	var army_id := "army_%d" % int(state["next_id"])
+	state["next_id"] = int(state["next_id"]) + 1
+	state["armies"][army_id] = {
+		"owner": settlement["owner"],
+		"region": region_id,
+		"units": settlement["garrison"],
+		"general": null,
+		"movement_left": 0.0,
+		"forced_march": false,
+	}
+	settlement["garrison"] = []
+	return army_id
+
+
 ## --- Queries (for UI scrolls) --------------------------------------------
 
 func growth_breakdown(region_id: String) -> Array:

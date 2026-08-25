@@ -301,7 +301,7 @@
           "effects": {
             "law": 10
           },
-          "description": "A citadel-crowned acropolis of archives, mints, and council chambers — the commanding height of a merchant empire."
+          "description": "A citadel-crowned acropolis of archives, mints, and council chambers \u2014 the commanding height of a merchant empire."
         }
       ]
     },
@@ -673,7 +673,7 @@
           "effects": {
             "wall_level": 3
           },
-          "description": "Stone and earth bound through with timber beams — a rampart that shrugs off rams and fire alike. Hillfort craft at its best."
+          "description": "Stone and earth bound through with timber beams \u2014 a rampart that shrugs off rams and fire alike. Hillfort craft at its best."
         }
       ]
     },
@@ -1863,7 +1863,8 @@
           "effects": {
             "health": 15
           },
-          "description": "Arches stride across the valley bringing sweet water by the river-load. Fountains run in every quarter, and fevers grow rare."
+          "description": "Arches stride across the valley bringing sweet water by the river-load. Fountains run in every quarter, and fevers grow rare.",
+          "requires_technique": "aqueduct_channels"
         }
       ]
     },

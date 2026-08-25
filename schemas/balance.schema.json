@@ -303,6 +303,7 @@
             "reform_pressure_per_battle_loss",
             "reform_pressure_per_settlement_lost",
             "steal_base_chance",
+            "steal_caught_memory",
             "steal_failure_death_chance",
             "steal_max_chance",
             "steal_min_chance",

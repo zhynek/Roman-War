@@ -15,11 +15,16 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 		if not faction["alive"] or not data.factions.get(faction_id, {}).get("is_roman_house", false):
 			continue
 
-		# Expansion pleases the people and unsettles the senate.
+		# Expansion pleases the people — but the regional baseline is a DRIFT
+		# target, never an overwrite: edict tension deltas and per-turn drips
+		# (EdictRules) move the same number and must persist. The crowd's mood
+		# settles toward what your empire earns, from wherever politics put it.
 		var region_count := _region_count(state, faction_id)
-		faction["popular_standing"] = minf(
-			float(senate_rules["max_standing"]),
+		var baseline := minf(float(senate_rules["max_standing"]),
 			float(region_count) * float(senate_rules["popular_standing_per_region"]))
+		var popular := float(faction["popular_standing"])
+		faction["popular_standing"] = popular \
+			+ (baseline - popular) * float(senate_rules["popular_drift_factor"])
 
 		var mission = faction["mission"]
 		if mission != null and _mission_target_gone(data, state, mission):
@@ -197,6 +202,7 @@ static func _grant_reward_units(state: Dictionary, faction_id: String, reward: D
 		for i in range(int(grant["count"])):
 			state["settlements"][capital]["garrison"].append({
 				"template": grant["template"], "experience": 0, "strength_pct": 100,
+				"weapons": 0, "armor": 0,
 			})
 
 

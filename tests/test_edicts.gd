@@ -83,12 +83,27 @@ func test_repeal_shock_and_cooldown(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
 	EdictRules.enact(data, state, "red", "test_dole")
+	t.check_near(float(state["factions"]["red"]["senate_standing"]), 4.0, 0.001, "enacting cost the senate's favor")
 	t.check(EdictRules.repeal(data, state, "red", "test_dole"), "the dole is struck down")
 	t.check_near(ModifierRules.sum_for(state, "red", "beta", "happiness"), -6.0, 0.001,
 		"the crowd's fury lands as a fading shock")
+	t.check_near(float(state["factions"]["red"]["senate_standing"]), 5.0, 0.001,
+		"a voluntary repeal hands the standing back — cycling mints nothing")
+	t.check_near(float(state["factions"]["red"]["popular_standing"]), 0.0, 0.001,
+		"the crowd's credit goes with it")
 	t.check_eq(String(EdictRules.enact(data, state, "red", "test_dole")["reason"]), "too_soon",
 		"policy is not a lamp to flick back on")
 	t.check(not EdictRules.repeal(data, state, "red", "test_dole"), "nothing left to repeal")
+
+
+func test_popular_standing_survives_the_senate_drift(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	EdictRules.enact(data, state, "red", "test_dole")
+	t.check_near(float(state["factions"]["red"]["popular_standing"]), 1.0, 0.001, "the crowd approves")
+	SenateRules.process_turn(data, state, CampaignRng.seeded(1))
+	t.check(float(state["factions"]["red"]["popular_standing"]) > 0.85,
+		"the senate's regional baseline DRIFTS the number — it never overwrites what politics earned")
 
 
 func test_upkeep_scales_with_the_mouths_it_feeds(t) -> void:
@@ -119,6 +134,8 @@ func test_insolvency_collapses_the_costliest_policy(t) -> void:
 	t.check(lapsed, "the collapse is reported")
 	t.check_near(ModifierRules.sum_for(state, "red", "beta", "happiness"), -6.0, 0.001,
 		"and the shock lands all the same")
+	t.check_near(float(state["factions"]["red"]["senate_standing"]), 4.0, 0.001,
+		"but a collapse refunds nothing — the senate remembers both the act and the failure")
 
 
 func test_fiscal_edicts_move_the_take(t) -> void:

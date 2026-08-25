@@ -311,6 +311,7 @@ func test_ai_adopts_the_best_priced_craft(t) -> void:
 	var state := Fixtures.state(data)
 	var persona: Dictionary = data.ai_personas["default"]
 	var red: Dictionary = state["factions"]["red"]
+	red["ai"]["last_net"] = 500.0
 	# At peace, with a school built: letters (civic, 400) out-prices smithing
 	# (military, 600) on the value-per-denarius score.
 	state["factions"]["red"]["diplomacy"]["blue"] = "neutral"
@@ -333,6 +334,7 @@ func test_ai_at_war_arms_first(t) -> void:
 	var state := Fixtures.state(data)
 	var persona: Dictionary = data.ai_personas["default"]
 	var red: Dictionary = state["factions"]["red"]
+	red["ai"]["last_net"] = 500.0
 	# Red is at war with blue (fixture default): the war boost doubles the
 	# military score, 2.0/600 beating 1.0/400.
 	state["settlements"]["beta"]["buildings"]["test_education"] = 1
@@ -348,6 +350,7 @@ func test_ai_adoption_respects_reserve_and_prerequisites(t) -> void:
 	var state := Fixtures.state(data)
 	var persona: Dictionary = data.ai_personas["default"]
 	var red: Dictionary = state["factions"]["red"]
+	red["ai"]["last_net"] = 500.0
 	red["knowledge"]["test_smithing"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["knowledge"]["test_letters"] = {"stage": "aware", "turn": 0, "progress": 0, "discount_pct": 0.0}
 	red["treasury"] = 2000
@@ -368,9 +371,14 @@ func test_ai_enacts_edicts_within_its_means(t) -> void:
 	t.check(EdictRules.enacted(state, "red").is_empty(),
 		"no measured income yet: the court holds its hand")
 	red["ai"]["last_income"] = 2000.0
+	red["ai"]["last_net"] = -50.0
+	AiPolicy.run(data, state, "red", persona, events)
+	t.check(EdictRules.enacted(state, "red").is_empty(),
+		"a measured deficit holds the court's hand — no enact-collapse spiral")
+	red["ai"]["last_net"] = 400.0
 	AiPolicy.run(data, state, "red", persona, events)
 	t.check(not EdictRules.enacted(state, "red").is_empty(),
-		"with income measured, the statecraft step enacts")
+		"with income and surplus measured, the statecraft step enacts")
 	var proclaimed := false
 	for event in events:
 		if event.get("kind", "") == "edict_enacted" and event.get("faction", "") == "red":
@@ -384,6 +392,7 @@ func test_ai_enacts_edicts_within_its_means(t) -> void:
 	var all_edicts := data.edicts
 	data.edicts = dole_only
 	lean["factions"]["red"]["ai"]["last_income"] = 100.0
+	lean["factions"]["red"]["ai"]["last_net"] = 50.0
 	AiPolicy.run(data, lean, "red", persona, [])
 	t.check(EdictRules.enacted(lean, "red").is_empty(),
 		"the dole's upkeep would outrun a lean income's share")

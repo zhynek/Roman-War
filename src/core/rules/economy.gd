@@ -104,9 +104,11 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var sea_total := 0.0
 	for i in range(mini(port_level * int(economy_rules["sea_routes_per_port_level"]), sea_routes.size())):
 		sea_total += sea_routes[i]
-	sea_total *= 1.0 + sea_trade_wonder / 100.0
 
-	return (land_total + sea_total) * (1.0 + trade_pct / 100.0)
+	# The sea-trade wonder joins the additive percentage stack for sea routes
+	# — additive on the base component, never compounding (house rule).
+	return land_total * (1.0 + trade_pct / 100.0) \
+		+ sea_total * (1.0 + (trade_pct + sea_trade_wonder) / 100.0)
 
 
 static func corruption_pct(data: GameData, state: Dictionary, region_id: String) -> float:
@@ -185,8 +187,10 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	var faction: Dictionary = state["factions"][faction_id]
 	faction["treasury"] = int(faction["treasury"]) + int(round(result["net"]))
 	# The AI's statecraft step budgets next turn's edict upkeep against a
-	# share of measured income — stash it in the ai scratch as it resolves.
+	# share of measured income, and refuses to spend from a measured deficit —
+	# stash both in the ai scratch as the treasury resolves.
 	faction["ai"]["last_income"] = float(result["income"])
+	faction["ai"]["last_net"] = float(result["net"])
 
 	# Sustained deep debt forces disbandment: one costliest field unit per turn.
 	var threshold := int(data.balance["economy"]["debt_disband_threshold"])

@@ -126,6 +126,9 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
+		_action_button("Raise the garrison into the field", func():
+			game.raise_army(region_id)
+			action_taken.emit())
 
 	# Construction. Unaffordable actions render disabled instead of silently
 	# doing nothing when clicked.

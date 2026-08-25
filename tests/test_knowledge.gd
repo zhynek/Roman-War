@@ -291,6 +291,8 @@ func test_steal_technique(t) -> void:
 	var failure := AgentRules.steal_technique(data, state, rng, doomed_id, "test_greatworks")
 	t.check(bool(failure["agent_lost"]), "a botched theft costs the spy")
 	t.check(not state["agents"].has(doomed_id), "he does not come home")
+	t.check(float(state["factions"]["blue"]["attitude_memory"].get("red", 0.0)) < 0.0,
+		"and the wronged court remembers whose coin paid him")
 
 
 func test_ensure_state_keys_seeds_legacy_saves(t) -> void:

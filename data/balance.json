@@ -208,6 +208,7 @@
     "mission_success_standing": 1,
     "mission_fail_standing": -2,
     "popular_standing_per_region": 0.3,
+    "popular_drift_factor": 0.15,
     "civil_war_popular_threshold": 6,
     "civil_war_senate_threshold": -5
   },
@@ -334,13 +335,13 @@
   "chronicle": {
     "per_turn_cap": 10,
     "max_entries": 2000,
-    "compact_min_magnitude": 1
+    "compact_min_magnitude": 4
   },
   "knowledge": {
     "origination_base_chance": 0.02,
     "origination_education_bonus_per_level": 0.01,
     "origination_scholarship_mult_per_point": 0.5,
-    "diffusion_base_chance": 0.05,
+    "diffusion_base_chance": 0.03,
     "diffusion_trade_mult": 3.0,
     "diffusion_alliance_mult": 3.5,
     "diffusion_border_mult": 1.5,
@@ -361,7 +362,8 @@
     "reform_pressure_max": 20.0,
     "reform_military_discount_pct_at_max": 50,
     "reform_origination_bonus_at_max": 0.1,
-    "max_concurrent_adoptions": 1
+    "max_concurrent_adoptions": 1,
+    "steal_caught_memory": -15
   },
   "characters": {
     "come_of_age": 16,

@@ -261,9 +261,16 @@ static func steal_technique(data: GameData, state: Dictionary, rng: CampaignRng,
 		}
 		agent["skill"] = mini(int(agent["skill"]) + 1, int(data.balance["agents"]["skill_max"]))
 		result["success"] = true
-	elif rng.chance(float(rules["steal_failure_death_chance"])):
-		state["agents"].erase(agent_id)
-		result["agent_lost"] = true
+	else:
+		# Caught red-handed: a diplomatic incident whether or not the spy
+		# escapes — the wronged court remembers whose coin paid him. A clean
+		# theft stays clean (they never learn it happened).
+		if owner != "rebels":
+			DiplomacyRules.record_memory(data, state, owner, String(agent["owner"]),
+				float(rules["steal_caught_memory"]))
+		if rng.chance(float(rules["steal_failure_death_chance"])):
+			state["agents"].erase(agent_id)
+			result["agent_lost"] = true
 	agent["movement_left"] = 0.0
 	return result
 

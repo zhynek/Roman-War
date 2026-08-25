@@ -109,3 +109,22 @@ func test_merge_keeps_the_better_arms(t) -> void:
 	t.check_eq(units.size(), 1, "the two bands merge")
 	t.check_eq(int(units[0]["weapons"]), 2, "the better blades are kept")
 	t.check_eq(int(units[0]["armor"]), 1, "and the better mail")
+
+func test_raise_army_closes_the_rearming_loop(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var game := Game.new()
+	game.data = data
+	game.state = state
+	state["settlements"]["beta"]["garrison"] = [
+		{"template": "test_spears", "experience": 1, "strength_pct": 100, "weapons": 1, "armor": 0},
+	]
+	t.check_eq(game.raise_army("alpha"), "", "another court's garrison refuses the order")
+	var army_id := game.raise_army("beta")
+	t.check(army_id != "", "the garrison marches out")
+	t.check_eq(state["armies"][army_id]["units"].size(), 1, "as a field army")
+	t.check_eq(int(state["armies"][army_id]["units"][0]["weapons"]), 1, "arms and all")
+	t.check(state["settlements"]["beta"]["garrison"].is_empty(), "leaving the walls bare")
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 0.0, 0.001,
+		"raised this season — it marches next")
+	t.check_eq(game.raise_army("beta"), "", "nothing left to raise")

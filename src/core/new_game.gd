@@ -115,6 +115,15 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	# Governorship is derived from presence, so it is simply computed, never seeded.
 	SettlementRules.refresh_governors(data, state)
 
+	# Reign ledgers open with the founding leaders (the chronicle's collect
+	# pass would seed the same values lazily; build states them outright).
+	var reign_ids: Array = state["factions"].keys()
+	reign_ids.sort()
+	for fid in reign_ids:
+		state["factions"][fid]["reign"] = {
+			"leader": ChronicleRules.leader_of(state, fid), "since_turn": 0,
+		}
+
 	# Mercenary pools start at their initial counts (fractional replenishment
 	# accumulates in the counts, so they are floats).
 	var pools := {}
@@ -162,12 +171,45 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		state["wars"] = []
 	if not state.has("event_cooldowns"):
 		state["event_cooldowns"] = {}
+	# Chronicle-era per-entity keys (reigns, deeds, epithets, unit arming) are
+	# created lazily by their writers, but the save contract wants them
+	# normalized on load too. Reign fills with the TRUE current leader — a
+	# placeholder would make the first collect() read a false succession.
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		if not faction.has("reign"):
+			faction["reign"] = {
+				"leader": ChronicleRules.leader_of(state, faction_id),
+				"since_turn": int(state.get("turn", 0)),
+			}
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character.has("deeds"):
+			character["deeds"] = {}
+		if not character.has("epithet"):
+			character["epithet"] = ""
+	for army in state["armies"].values():  # pure key-add — order-free
+		_ensure_unit_arms(army["units"])
+	for fleet in state["fleets"].values():
+		_ensure_unit_arms(fleet["ships"])
+	for settlement in state["settlements"].values():
+		_ensure_unit_arms(settlement["garrison"])
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):
 		state["pending_offers"] = []
 	if not state.has("agents"):
 		state["agents"] = {}
+
+
+static func _ensure_unit_arms(units: Array) -> void:
+	for unit in units:
+		if not unit.has("weapons"):
+			unit["weapons"] = 0
+		if not unit.has("armor"):
+			unit["armor"] = 0
 
 
 static func _starting_knowledge(data: GameData, faction_id: String) -> Dictionary:
@@ -217,6 +259,8 @@ static func _units(setups: Array) -> Array:
 			"template": setup["template"],
 			"experience": int(setup.get("experience", 0)),
 			"strength_pct": int(setup.get("strength_pct", 100)),
+			"weapons": 0,
+			"armor": 0,
 		})
 	return result
 
@@ -265,4 +309,6 @@ static func _add_character(data: GameData, state: Dictionary, setup: Dictionary,
 		"ancillaries": [],
 		"location": setup.get("location", ""),
 		"alive": true,
+		"deeds": {},
+		"epithet": "",
 	}

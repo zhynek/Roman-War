@@ -45,7 +45,8 @@ static func hire(data: GameData, state: Dictionary, army_id: String, template_id
 		faction["treasury"] = int(faction["treasury"]) - int(offer["cost"])
 		var counts: Dictionary = state["mercenary_pools"][pool["id"]]
 		counts[template_id] = float(counts[template_id]) - 1.0
-		army["units"].append({"template": template_id, "experience": 1, "strength_pct": 100})
+		army["units"].append({"template": template_id, "experience": 1, "strength_pct": 100,
+			"weapons": 0, "armor": 0})
 		return true
 	return false
 

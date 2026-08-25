@@ -168,7 +168,7 @@
         "condition": "faction_destroyed",
         "faction": "seleucia"
       },
-      "text": "The house that inherited the largest share of the conqueror's world has lost its last city. Its roads and river-ports bound Greek to Persian to Babylonian for a century and a half; its founder took the name Conqueror and earned it. The satrapies will keep the roads and forget the dynasty - that is how the East buries its kings."
+      "text": "The house that inherited the largest share of the conqueror's world has lost its last city. Its roads and river-ports bound Greek to Persian to Babylonian for generation after generation; its founder took the name Conqueror and earned it. The satrapies will keep the roads and forget the dynasty - that is how the East buries its kings."
     },
     {
       "id": "fall_of_egypt",

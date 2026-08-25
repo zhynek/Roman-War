@@ -63,7 +63,9 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 			var resource: String = trigger.get("hidden_resource", "")
 			var excluded: Array = trigger.get("exclude_regions", [])
 			var required_culture: String = trigger.get("culture", "")
-			for region_id in state["settlements"]:
+			var region_ids: Array = state["settlements"].keys()
+			region_ids.sort()  # first-match steers the context — sorted
+			for region_id in region_ids:
 				if excluded.has(region_id):
 					continue
 				var region: Dictionary = data.regions[region_id]
@@ -83,7 +85,9 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 				return {"faction": target}
 			return {}
 		"first_civil_war":
-			for faction_id in state["factions"]:
+			var faction_ids: Array = state["factions"].keys()
+			faction_ids.sort()  # first-match steers the context — sorted
+			for faction_id in faction_ids:
 				if state["factions"][faction_id]["at_civil_war"]:
 					return {"faction": faction_id}
 			return {}
