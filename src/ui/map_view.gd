@@ -35,6 +35,7 @@ var map_font: Font
 var visible_cache: Dictionary = {}
 var owner_colors: Dictionary = {}
 var army_groups: Dictionary = {}
+var fleet_groups: Dictionary = {}
 var road_levels: Dictionary = {}
 
 var _camera_offset := Vector2(-200, -200)
@@ -93,8 +94,21 @@ func refresh_state() -> void:
 	army_groups = {}
 	for army in game.state["armies"].values():
 		var groups: Dictionary = army_groups.get(army["region"], {})
-		groups[army["owner"]] = int(groups.get(army["owner"], 0)) + 1
+		var entry: Dictionary = groups.get(army["owner"],
+			{"stacks": 0, "units": 0, "has_general": false, "fatigued": false})
+		entry["stacks"] = int(entry["stacks"]) + 1
+		entry["units"] = int(entry["units"]) + army["units"].size()
+		entry["has_general"] = entry["has_general"] or army["general"] != null
+		entry["fatigued"] = entry["fatigued"] or bool(army.get("forced_march", false))
+		groups[army["owner"]] = entry
 		army_groups[army["region"]] = groups
+
+	fleet_groups = {}
+	for fleet in game.state["fleets"].values():
+		if fleet["owner"] != game.state["player_faction"]:
+			continue  # foreign fleets stay unseen: fog has no naval eye yet
+		fleet_groups[fleet["sea_zone"]] = int(
+			fleet_groups.get(fleet["sea_zone"], 0)) + fleet["ships"].size()
 
 	road_levels = {}
 	if geometry != null:

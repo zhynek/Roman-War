@@ -122,6 +122,14 @@ func test_polygon_picking_and_state_caches(t) -> void:
 			break
 	t.check(deep_hit, "territory picking reaches beyond the anchor disc")
 
+	# The settlement icon extractor reads pure campaign data.
+	var params := SettlementIcons.icon_params(game, capital)
+	t.check_eq(params.get("culture", ""), "roman", "the capital draws in Roman style")
+	t.check(int(params.get("level", 0)) >= 1 and int(params.get("level", 0)) <= 6,
+		"settlement level within the ladder")
+	t.check(params.get("is_capital", false), "the capital wears the laurel")
+	t.check(int(params.get("wall_level", -1)) >= 0, "wall tier extracted")
+
 	# Decor glyph anchors are deterministic — hashed from region ids, never
 	# drawn from the campaign RNG.
 	var rng_before: String = game.state["rng_state"]

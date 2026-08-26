@@ -164,26 +164,15 @@ class UnitsLayer:
 				continue
 			_draw_settlement(region_id, anchor)
 			_draw_armies(region_id, anchor)
+		_draw_fleets()
 
 	func _draw_settlement(region_id: String, anchor: Vector2) -> void:
 		var game: Game = view.game
-		var settlement: Dictionary = game.state["settlements"].get(region_id, {})
-		var owner: String = settlement.get("owner", "rebels")
-		var owner_color := Color.html(game.data.factions.get(owner, {}).get("color", "#808080"))
-		var tier := 1
-		if not settlement.is_empty():
-			tier = Constants.level_index(SettlementRules.settlement_level(game.data, settlement)) + 1
-		var radius := 7.0 + 1.8 * tier
-
-		draw_circle(anchor, radius, owner_color)
-		draw_arc(anchor, radius, 0, TAU, 32, Color(0, 0, 0, 0.55), 1.5)
-
-		if not settlement.is_empty() and settlement.get("siege") != null:
-			draw_arc(anchor, radius + 7.0, 0, TAU, 32, UiStyle.SIEGE_RED, 2.5)
-
-		var player: String = game.state["player_faction"]
-		if game.state["factions"].get(player, {}).get("capital", "") == region_id:
-			draw_circle(anchor + Vector2(0, -radius - 6.0), 3.0, UiStyle.CAPITAL_GOLD)
+		var params := SettlementIcons.icon_params(game, region_id)
+		if params.is_empty():
+			draw_circle(anchor, 8.0, Color(0.5, 0.5, 0.5))
+			return
+		SettlementIcons.draw_settlement(self, anchor, params)
 
 	func _draw_armies(region_id: String, anchor: Vector2) -> void:
 		var game: Game = view.game
@@ -192,12 +181,26 @@ class UnitsLayer:
 		owner_ids.sort()
 		var offset := 0
 		for army_owner in owner_ids:
+			var entry: Dictionary = owners[army_owner]
 			var badge_color := Color.html(
 				game.data.factions.get(army_owner, {}).get("color", "#808080"))
-			var badge_pos := anchor + Vector2(14.0 + offset * 11.0, -8.0)
-			draw_rect(Rect2(badge_pos, Vector2(8, 10)), badge_color)
-			draw_rect(Rect2(badge_pos, Vector2(8, 10)), Color(0, 0, 0, 0.6), false, 1.0)
+			SettlementIcons.draw_army_token(self,
+				anchor + Vector2(24.0 + offset * 18.0, -14.0), badge_color,
+				int(entry["units"]), bool(entry["has_general"]),
+				bool(entry["fatigued"]), view.map_font)
 			offset += 1
+
+	func _draw_fleets() -> void:
+		var game: Game = view.game
+		var player_color := Color.html(game.data.factions.get(
+			String(game.state["player_faction"]), {}).get("color", "#808080"))
+		for zone_id in view.fleet_groups:
+			var anchor_data: Dictionary = game.data.sea_zones.get(zone_id, {}).get("position", {})
+			if anchor_data.is_empty():
+				continue
+			var at := Vector2(float(anchor_data["x"]), float(anchor_data["y"])) * MapView.WORLD_SCALE
+			SettlementIcons.draw_fleet_token(self, at, player_color,
+				int(view.fleet_groups[zone_id]), view.map_font)
 
 
 class OverlayLayer:
@@ -248,6 +251,19 @@ class LabelLayer:
 		if game == null or view.map_font == null:
 			return
 		var zoom := view._zoom
+		# Sea names at their authored anchors, faint and wide.
+		if zoom >= 0.45:
+			for zone_id in game.data.sea_zones:
+				var anchor_data: Dictionary = game.data.sea_zones[zone_id].get("position", {})
+				if anchor_data.is_empty():
+					continue
+				var sea_name: String = game.data.sea_zones[zone_id].get("name", zone_id)
+				var at := view.to_screen(Vector2(
+					float(anchor_data["x"]), float(anchor_data["y"])) * MapView.WORLD_SCALE)
+				var sea_width := view.map_font.get_string_size(
+					sea_name, HORIZONTAL_ALIGNMENT_CENTER, -1, 13).x
+				draw_string(view.map_font, at + Vector2(-sea_width / 2.0, -14.0), sea_name,
+					HORIZONTAL_ALIGNMENT_CENTER, -1, 13, UiStyle.SEA_LABEL)
 		for region_id in view.visible_cache:
 			var region: Dictionary = game.data.regions.get(region_id, {})
 			if region.is_empty():
