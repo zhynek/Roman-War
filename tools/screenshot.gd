@@ -7,6 +7,7 @@ extends SceneTree
 ## Not a test: CI never runs this. It exists so map work can be eyeballed.
 
 var _screen: CampaignScreen
+var _holder: Control
 var _out_dir := "/tmp/shots"
 var _seed := 42
 var _zooms: Array = [0.6, 1.2, 2.2]
@@ -29,7 +30,12 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(_out_dir)
 	var game := Game.new_campaign("julii", _seed)
 	_screen = CampaignScreen.create(game)
-	root.add_child(_screen)
+	# A Control parented straight to the Window computes a zero parent area
+	# for its anchors (scene-file roots are sized specially) — so the screen
+	# goes under an explicitly sized holder, like the menu scene provides.
+	_holder = Control.new()
+	root.add_child(_holder)
+	_holder.add_child(_screen)
 	if OS.get_cmdline_user_args().has("select_army"):
 		_select_army_with_preview.call_deferred()
 
@@ -56,6 +62,8 @@ func _select_army_with_preview() -> void:
 
 
 func _process(_delta: float) -> bool:
+	# The window reaches its real size only after startup: track it.
+	_holder.size = root.size
 	_frame += 1
 	if _frame < 20:
 		return false

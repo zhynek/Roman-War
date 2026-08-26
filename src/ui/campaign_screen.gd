@@ -28,6 +28,14 @@ static func create(new_game: Game) -> CampaignScreen:
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	theme = UiStyle.build_theme()
+
+	var background := ColorRect.new()
+	background.color = UiStyle.BG_DARK
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(background)
+
 	var root := VBoxContainer.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
@@ -36,6 +44,7 @@ func _ready() -> void:
 
 	var split := HSplitContainer.new()
 	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	split.split_offset = 920  # the map takes the room; the side keeps its 360
 	root.add_child(split)
 
 	map_view = MapView.new()
@@ -85,19 +94,26 @@ func _ready() -> void:
 	refresh()
 
 
-func _build_top_bar() -> HBoxContainer:
+func _build_top_bar() -> PanelContainer:
+	var chrome := PanelContainer.new()
 	var bar := HBoxContainer.new()
-	bar.custom_minimum_size = Vector2(0, 34)
+	bar.custom_minimum_size = Vector2(0, 30)
+	bar.add_theme_constant_override("separation", 8)
+	chrome.add_child(bar)
 
 	var faction: Dictionary = game.data.factions[game.state["player_faction"]]
 	var swatch := ColorRect.new()
 	swatch.color = Color.html(faction.get("color", "#808080"))
-	swatch.custom_minimum_size = Vector2(18, 18)
+	swatch.custom_minimum_size = Vector2(6, 0)
 	bar.add_child(swatch)
 
 	for key in ["faction", "treasury", "date", "senate", "victory"]:
 		var label := Label.new()
 		label.add_theme_font_size_override("font_size", 13)
+		if key == "faction":
+			label.add_theme_color_override("font_color", UiStyle.PARCHMENT)
+		else:
+			label.add_theme_color_override("font_color", UiStyle.TEXT)
 		bar.add_child(label)
 		top_labels[key] = label
 	top_labels["faction"].text = " %s   " % faction["name"]
@@ -108,9 +124,9 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
-	end_turn.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+	end_turn.theme_type_variation = &"EndTurnButton"
 	bar.add_child(end_turn)
-	return bar
+	return chrome
 
 
 func refresh() -> void:

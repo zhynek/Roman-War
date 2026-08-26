@@ -47,6 +47,94 @@ const TERRAIN_GLYPH := {
 ## --- shared chrome ---------------------------------------------------------
 
 const PARCHMENT := Color(0.95, 0.9, 0.75)  ## the accent the panels share
+const BG_DARK := Color(0.105, 0.10, 0.115)
+const BG_PANEL := Color(0.155, 0.15, 0.17)
+const BG_RAISED := Color(0.215, 0.205, 0.23)
+const EDGE := Color(0.34, 0.32, 0.30, 0.55)
+const ACCENT := Color(0.82, 0.66, 0.30)
+const TEXT := Color(0.92, 0.90, 0.86)
+const TEXT_DIM := Color(0.66, 0.64, 0.60)
+const GOOD := Color(0.55, 0.78, 0.50)
+const BAD := Color(0.86, 0.45, 0.38)
+
+
+static func build_theme() -> Theme:
+	## The one Theme for the whole campaign UI: flat dark chrome, warm
+	## accents, rounded corners — set once on the campaign screen root, so
+	## panels stop hand-styling every widget.
+	var theme := Theme.new()
+
+	var button := _flat(BG_RAISED, 5)
+	button.set_content_margin_all(6.0)
+	button.content_margin_left = 12.0
+	button.content_margin_right = 12.0
+	var button_hover := _flat(BG_RAISED.lightened(0.12), 5)
+	button_hover.set_content_margin_all(6.0)
+	button_hover.content_margin_left = 12.0
+	button_hover.content_margin_right = 12.0
+	button_hover.border_color = Color(ACCENT, 0.7)
+	button_hover.set_border_width_all(1)
+	var button_pressed := _flat(BG_DARK, 5)
+	button_pressed.set_content_margin_all(6.0)
+	button_pressed.content_margin_left = 12.0
+	button_pressed.content_margin_right = 12.0
+	theme.set_stylebox("normal", "Button", button)
+	theme.set_stylebox("hover", "Button", button_hover)
+	theme.set_stylebox("pressed", "Button", button_pressed)
+	theme.set_stylebox("focus", "Button", StyleBoxEmpty.new())
+	theme.set_color("font_color", "Button", TEXT)
+	theme.set_color("font_hover_color", "Button", Color.WHITE)
+	theme.set_color("font_pressed_color", "Button", TEXT_DIM)
+	theme.set_font_size("font_size", "Button", 12)
+
+	var end_turn := _flat(ACCENT, 6)
+	end_turn.set_content_margin_all(7.0)
+	end_turn.content_margin_left = 18.0
+	end_turn.content_margin_right = 18.0
+	var end_turn_hover: StyleBoxFlat = end_turn.duplicate()
+	end_turn_hover.bg_color = ACCENT.lightened(0.15)
+	theme.add_type("EndTurnButton")
+	theme.set_type_variation("EndTurnButton", "Button")
+	theme.set_stylebox("normal", "EndTurnButton", end_turn)
+	theme.set_stylebox("hover", "EndTurnButton", end_turn_hover)
+	theme.set_stylebox("pressed", "EndTurnButton", _flat(ACCENT.darkened(0.25), 6))
+	theme.set_color("font_color", "EndTurnButton", Color(0.12, 0.10, 0.06))
+	theme.set_color("font_hover_color", "EndTurnButton", Color(0.10, 0.08, 0.04))
+	theme.set_color("font_pressed_color", "EndTurnButton", Color(0.2, 0.17, 0.1))
+	theme.set_font_size("font_size", "EndTurnButton", 14)
+
+	var panel := _flat(BG_PANEL, 6)
+	panel.set_content_margin_all(8.0)
+	panel.border_color = EDGE
+	panel.set_border_width_all(1)
+	theme.set_stylebox("panel", "PanelContainer", panel)
+	theme.set_stylebox("panel", "Panel", _flat(BG_PANEL, 0))
+
+	var log_panel := _flat(Color(0.09, 0.088, 0.10), 6)
+	log_panel.set_content_margin_all(8.0)
+	theme.set_stylebox("normal", "RichTextLabel", log_panel)
+	theme.set_color("default_color", "RichTextLabel", TEXT)
+
+	theme.set_color("font_color", "Label", TEXT)
+	theme.set_font_size("font_size", "Label", 12)
+
+	var option := button.duplicate()
+	theme.set_stylebox("normal", "OptionButton", option)
+	theme.set_stylebox("hover", "OptionButton", button_hover.duplicate())
+	theme.set_stylebox("pressed", "OptionButton", button_pressed.duplicate())
+	theme.set_stylebox("focus", "OptionButton", StyleBoxEmpty.new())
+	theme.set_font_size("font_size", "OptionButton", 12)
+
+	var tab := _flat(BG_DARK, 0)
+	theme.set_stylebox("panel", "ScrollContainer", tab)
+	return theme
+
+
+static func _flat(color: Color, corner: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(corner)
+	return style
 
 
 ## --- cosmetic hashing ------------------------------------------------------
