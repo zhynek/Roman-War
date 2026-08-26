@@ -439,6 +439,20 @@ def cross_checks(t: dict[str, dict]) -> None:
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
 
+    # Terrain tables must cover the terrain enum exactly: movement.gd indexes
+    # terrain_cost directly, so a missing key is a runtime crash, and an extra
+    # key in either table is dead data.
+    regions_schema = json.loads((SCHEMAS / "regions.schema.json").read_text())
+    terrain_enum = set(
+        regions_schema["properties"]["regions"]["items"]["properties"]["terrain"]["enum"])
+    for section, table_key in (("movement", "terrain_cost"),
+                               ("battle", "terrain_defense_multiplier")):
+        keys = set(balance.get(section, {}).get(table_key, {}))
+        for missing in sorted(terrain_enum - keys):
+            err(f"balance: {section}.{table_key} missing terrain '{missing}'")
+        for extra in sorted(keys - terrain_enum):
+            err(f"balance: {section}.{table_key} has unknown terrain '{extra}'")
+
 
 def main() -> int:
     tables = load_tables()

@@ -114,6 +114,31 @@ static func data() -> GameData:
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
 	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
 
+	# A mountain pass arcs over the plains line: alpha-zeta-eta-epsilon is one
+	# hop shorter than the four-step line but strictly dearer (2.0 + 1.5 + 1.0
+	# against four 1.0 steps), so pathfinding tests can price terrain. The
+	# line regions also get positions; zeta/eta sit north of it.
+	game_data.regions["zeta"] = {
+		"id": "zeta", "name": "Zeta", "settlement_name": "Zeta", "terrain": "mountains",
+		"fertility": 0.5, "adjacent": ["alpha", "eta"], "sea_zones": [], "resources": [],
+		"hidden_resources": [],
+	}
+	game_data.regions["eta"] = {
+		"id": "eta", "name": "Eta", "settlement_name": "Eta", "terrain": "forest",
+		"fertility": 1.0, "adjacent": ["epsilon", "zeta"], "sea_zones": [], "resources": [],
+		"hidden_resources": [],
+	}
+	game_data.regions["alpha"]["adjacent"].append("zeta")
+	game_data.regions["epsilon"]["adjacent"].append("eta")
+	var fixture_positions := {
+		"alpha": [10, 50], "beta": [20, 50], "gamma": [30, 50], "delta": [40, 50],
+		"epsilon": [50, 50], "zeta": [18, 42], "eta": [42, 42],
+	}
+	for region_id in fixture_positions:
+		game_data.regions[region_id]["position"] = {
+			"x": fixture_positions[region_id][0], "y": fixture_positions[region_id][1],
+		}
+
 	game_data.units["test_merc"] = {
 		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",
 		"factions": ["mercenary"], "soldiers": 60, "attack": 7, "defense": 7, "morale": 7,
