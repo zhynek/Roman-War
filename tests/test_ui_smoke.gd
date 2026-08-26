@@ -219,6 +219,37 @@ func test_movement_ux_paths(t) -> void:
 	screen.free()
 
 
+func test_fleet_orders_from_the_map(t) -> void:
+	# The Cornelii: the Roman house that actually starts with a fleet.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	var fleet_id := ""
+	var fleet_ids: Array = game.state["fleets"].keys()
+	fleet_ids.sort()
+	for candidate in fleet_ids:
+		if game.state["fleets"][candidate]["owner"] == "cornelii":
+			fleet_id = candidate
+			break
+	t.check(fleet_id != "", "the cornelii put to sea")
+	if fleet_id != "":
+		var zone: String = game.state["fleets"][fleet_id]["sea_zone"]
+		screen._on_sea_zone_clicked(zone)
+		t.check_eq(screen.selected_fleet, fleet_id, "clicking the fleet's sea takes the helm")
+		t.check(not screen.map_view.highlight_zones.is_empty(), "the open lanes light up")
+		var lanes: Array = screen.map_view.highlight_zones.keys()
+		lanes.sort()
+		screen._on_sea_zone_clicked(String(lanes[0]))
+		t.check_eq(game.state["fleets"][fleet_id]["sea_zone"], String(lanes[0]),
+			"the fleet sailed down the lane")
+		# A region click drops the helm.
+		screen._on_region_clicked(game.state["factions"]["cornelii"]["capital"])
+		t.check_eq(screen.selected_fleet, "", "selecting land stands the fleet down")
+	screen.free()
+
+
 func _sea_reachable(game: Game, from_region: String, to_region: String) -> bool:
 	## Mirrors MovementRules.sea_move_army's zone test: same or adjacent zone.
 	var from_zones: Array = game.data.regions[from_region].get("sea_zones", [])

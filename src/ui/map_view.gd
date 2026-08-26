@@ -13,6 +13,7 @@ extends Control
 
 signal region_clicked(region_id: String)
 signal region_hovered(region_id: String)
+signal sea_zone_clicked(zone_id: String)
 
 const WORLD_SCALE := 14.0
 
@@ -35,6 +36,16 @@ var path_preview: Dictionary = {}:
 var hover_region := ""
 var tooltip: PanelContainer
 var tooltip_provider: Callable
+var selected_sea_zone := "":
+	set(value):
+		selected_sea_zone = value
+		if _overlay_layer != null:
+			_overlay_layer.queue_redraw()
+var highlight_zones: Dictionary = {}:
+	set(value):
+		highlight_zones = value
+		if _overlay_layer != null:
+			_overlay_layer.queue_redraw()
 
 var geometry: MapGeometry
 var map_font: Font
@@ -219,6 +230,24 @@ func _process(_delta: float) -> void:
 		_hover_time += _delta
 		if _hover_time >= 0.35:
 			_show_tooltip()
+	_keyboard_pan(_delta)
+
+
+func _keyboard_pan(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
+	var direction := Vector2.ZERO
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		direction.x += 1
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		direction.x -= 1
+	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		direction.y += 1
+	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		direction.y -= 1
+	if direction != Vector2.ZERO:
+		_camera_offset += direction * 700.0 * delta / _zoom
+		_clamp_camera()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -234,11 +263,18 @@ func _gui_input(event: InputEvent) -> void:
 			_hide_tooltip()
 			var hit := _region_at(mouse_event.position)
 			if hit != "":
+				if mouse_event.double_click:
+					center_on(hit)
 				region_clicked.emit(hit)
+			else:
+				var zone := _sea_zone_at(mouse_event.position)
+				if zone != "":
+					sea_zone_clicked.emit(zone)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if _dragging:
 			_camera_offset += motion.relative / _zoom
+			_clamp_camera()
 			_clear_hover()
 		else:
 			_update_hover(motion.position)
@@ -248,6 +284,41 @@ func _zoom_at(screen_point: Vector2, factor: float) -> void:
 	var before := screen_point / _zoom - _camera_offset
 	_zoom = clampf(_zoom * factor, 0.35, 3.0)
 	_camera_offset = screen_point / _zoom - before
+
+
+func _clamp_camera() -> void:
+	## Keep the world on screen. Lives only in the input paths — tests that
+	## write _camera_offset directly stay unclamped, per the pinned contract.
+	var world := Rect2(Vector2.ZERO, Vector2(100, 100) * WORLD_SCALE)
+	if geometry != null and geometry.world_rect.size.x > 0:
+		world = geometry.world_rect
+	world = world.grow(220.0)
+	var view_size := size / _zoom
+	var low := -world.end + view_size * 0.5
+	var high := -world.position - view_size * 0.5
+	if low.x < high.x:
+		_camera_offset.x = clampf(_camera_offset.x, low.x, high.x)
+	if low.y < high.y:
+		_camera_offset.y = clampf(_camera_offset.y, low.y, high.y)
+
+
+func _sea_zone_at(screen_point: Vector2) -> String:
+	## Nearest sea-zone anchor within reach — clicking open water near a sea
+	## name addresses that sea (fleet orders).
+	if game == null:
+		return ""
+	var best := ""
+	var best_distance := 55.0 * _zoom
+	for zone_id in game.data.sea_zones:
+		var anchor_data: Dictionary = game.data.sea_zones[zone_id].get("position", {})
+		if anchor_data.is_empty():
+			continue
+		var at := to_screen(Vector2(
+			float(anchor_data["x"]), float(anchor_data["y"])) * WORLD_SCALE)
+		if at.distance_to(screen_point) < best_distance:
+			best_distance = at.distance_to(screen_point)
+			best = zone_id
+	return best
 
 
 func _region_at(screen_point: Vector2) -> String:

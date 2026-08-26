@@ -220,7 +220,29 @@ class OverlayLayer:
 		if view.selected_region != "":
 			_paint_region(view.selected_region,
 				Color(UiStyle.SELECTION, 0.06), UiStyle.SELECTION, 2.2)
+		_draw_sea_marks()
 		_draw_path_preview()
+
+	func _draw_sea_marks() -> void:
+		if view.selected_sea_zone != "":
+			var at := _zone_anchor(view.selected_sea_zone)
+			if at != Vector2.INF:
+				draw_arc(at, 20.0, 0, TAU, 32, UiStyle.SELECTION, 2.2)
+		for zone_id in view.highlight_zones:
+			var at := _zone_anchor(String(zone_id))
+			if at == Vector2.INF:
+				continue
+			draw_arc(at, 16.0, 0, TAU, 28, Color(0.6, 0.85, 0.95, 0.8), 1.8)
+			if view.selected_sea_zone != "":
+				var from := _zone_anchor(view.selected_sea_zone)
+				if from != Vector2.INF:
+					draw_dashed_line(from, at, Color(0.6, 0.85, 0.95, 0.5), 1.6, 10.0)
+
+	func _zone_anchor(zone_id: String) -> Vector2:
+		var anchor_data: Dictionary = view.game.data.sea_zones.get(zone_id, {}).get("position", {})
+		if anchor_data.is_empty():
+			return Vector2.INF
+		return Vector2(float(anchor_data["x"]), float(anchor_data["y"])) * MapView.WORLD_SCALE
 
 	func _draw_path_preview() -> void:
 		var preview: Dictionary = view.path_preview

@@ -16,6 +16,7 @@ var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_fleet := ""
 var _victory_shown := false
 
 
@@ -43,6 +44,7 @@ func _ready() -> void:
 	map_view.custom_minimum_size = Vector2(600, 400)
 	map_view.region_clicked.connect(_on_region_clicked)
 	map_view.region_hovered.connect(_on_region_hovered)
+	map_view.sea_zone_clicked.connect(_on_sea_zone_clicked)
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
 
@@ -143,8 +145,9 @@ func _on_region_clicked(region_id: String) -> void:
 		return
 	map_view.selected_region = region_id
 	selected_army = ""
+	_deselect_fleet()
 	region_panel.show_region(game, region_id)
-	map_view.queue_redraw()
+	_refresh_range_overlay()
 
 
 func _on_army_selected(army_id: String) -> void:
@@ -181,6 +184,55 @@ func _on_region_hovered(region_id: String) -> void:
 		"blocked": preview["blocked_destination"],
 		"target": region_id,
 	}
+
+
+func _on_sea_zone_clicked(zone_id: String) -> void:
+	## Fleets live on the map now: click a sea with one of our fleets to take
+	## the helm, click a highlighted neighboring sea to sail.
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		var fleet: Dictionary = game.state["fleets"][selected_fleet]
+		if zone_id != fleet["sea_zone"]:
+			if game.move_fleet(selected_fleet, zone_id):
+				_log("The fleet sails for %s." %
+					game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
+				_refresh_fleet_overlay()
+				refresh()
+			else:
+				_log("The fleet cannot make %s this season." %
+					game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
+			return
+	var fleet_here := ""
+	var fleet_ids: Array = game.state["fleets"].keys()
+	fleet_ids.sort()
+	for fleet_id in fleet_ids:
+		var fleet: Dictionary = game.state["fleets"][fleet_id]
+		if fleet["owner"] == game.state["player_faction"] and fleet["sea_zone"] == zone_id:
+			fleet_here = fleet_id
+			break
+	if fleet_here != "" and fleet_here != selected_fleet:
+		selected_fleet = fleet_here
+	else:
+		selected_fleet = ""
+	_refresh_fleet_overlay()
+
+
+func _refresh_fleet_overlay() -> void:
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		var fleet: Dictionary = game.state["fleets"][selected_fleet]
+		map_view.selected_sea_zone = fleet["sea_zone"]
+		var lanes := {}
+		if float(fleet["movement_left"]) >= 1.0:
+			for zone_id in game.data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
+				lanes[zone_id] = true
+		map_view.highlight_zones = lanes
+	else:
+		_deselect_fleet()
+
+
+func _deselect_fleet() -> void:
+	selected_fleet = ""
+	map_view.selected_sea_zone = ""
+	map_view.highlight_zones = {}
 
 
 func _tooltip_for(region_id: String) -> String:
