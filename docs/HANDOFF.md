@@ -48,6 +48,7 @@ The container starts with **no Godot installed**. Get it:
 cd /tmp && curl -sSL -o godot.zip \
   https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
 unzip -q godot.zip && chmod +x Godot_v4.4.1-stable_linux.x86_64
+alias godot=/tmp/Godot_v4.4.1-stable_linux.x86_64   # the commands below assume this
 ```
 
 > **Always run `--import` first — and again after adding any `class_name` file.**

@@ -147,6 +147,7 @@ func refresh() -> void:
 		region_panel.show_region(game, map_view.selected_region, selected_army)
 	map_view.refresh_state()
 	_refresh_range_overlay()
+	_refresh_fleet_overlay()
 
 	if game.state["winner"] != null and not _victory_shown:
 		_show_victory_banner(String(game.state["winner"]))
@@ -173,9 +174,11 @@ func _on_army_selected(army_id: String) -> void:
 
 
 func _refresh_range_overlay() -> void:
-	## The gold wash of regions this turn's points can reach.
+	## The gold wash of regions this turn's points can reach — stretched by
+	## Shift, the same way the click that follows would be.
 	if selected_army != "" and game.state["armies"].has(selected_army):
-		map_view.highlight_regions = game.army_reachable(selected_army)
+		map_view.highlight_regions = game.army_reachable(
+			selected_army, Input.is_key_pressed(KEY_SHIFT))
 	else:
 		map_view.highlight_regions = {}
 		map_view.path_preview = {}
@@ -183,7 +186,9 @@ func _refresh_range_overlay() -> void:
 
 func _on_region_hovered(region_id: String) -> void:
 	## With an army selected, hovering sketches the march: route, per-leg
-	## cost, turns to arrive.
+	## cost, turns to arrive. Re-fired on Shift changes, so the range wash
+	## stays in step with the forced-march toggle too.
+	_refresh_range_overlay()
 	if region_id == "" or selected_army == "" or not game.state["armies"].has(selected_army) \
 			or region_id == game.state["armies"][selected_army]["region"]:
 		map_view.path_preview = {}
@@ -237,7 +242,7 @@ func _refresh_fleet_overlay() -> void:
 		var fleet: Dictionary = game.state["fleets"][selected_fleet]
 		map_view.selected_sea_zone = fleet["sea_zone"]
 		var lanes := {}
-		if float(fleet["movement_left"]) >= 1.0:
+		if float(fleet["movement_left"]) >= float(game.data.balance["movement"]["sea_lane_cost"]):
 			for zone_id in game.data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
 				lanes[zone_id] = true
 		map_view.highlight_zones = lanes
@@ -279,10 +284,12 @@ func _tooltip_for(region_id: String) -> String:
 		lines.append("[i]%s[/i]" % region["description"])
 	if selected_army != "" and game.state["armies"].has(selected_army) \
 			and region_id != game.state["armies"][selected_army]["region"]:
-		var preview := game.army_path_preview(selected_army, region_id)
+		var forced := Input.is_key_pressed(KEY_SHIFT)
+		var preview := game.army_path_preview(selected_army, region_id, forced)
 		if not preview.is_empty() and not (preview["path"] as Array).is_empty():
 			var turns := int(preview["turns"])
-			lines.append("March: %.1f points · %s" % [float(preview["cost"]),
+			lines.append("%s: %.1f points · %s" % [
+				"Forced march" if forced else "March", float(preview["cost"]),
 				"arrives this turn" if turns <= 1 else "%d turns" % turns])
 	return "\n".join(lines)
 
@@ -291,11 +298,13 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 	var army: Dictionary = game.state["armies"][selected_army]
 	var player: String = game.state["player_faction"]
 
-	# Only an army we are ALREADY at war with is a target — marching past a
-	# neutral must never start a war by accident. Deliberate first strikes go
-	# through the explicit Attack button in the region panel.
+	# Only an ADJACENT army we are ALREADY at war with is a target — marching
+	# past a neutral must never start a war by accident, and a distant enemy
+	# is marched toward (the path halts beside him), not attacked into thin
+	# air. Deliberate first strikes go through the explicit Attack button.
 	var defender := _enemy_army_in(target_region)
-	if defender != "":
+	if defender != "" and (army["region"] == target_region
+			or MapRules.are_adjacent(game.data, army["region"], target_region)):
 		attack_army_order(defender)
 		return
 
@@ -317,16 +326,23 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
 	else:
 		var march := game.march_army(selected_army, target_region, forced_march)
+		var target_name: String = game.data.regions[target_region]["name"]
 		if march.is_empty():
-			_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
+			_log("The army cannot reach %s this season." % target_name)
+		elif march.get("halted", false) and int(march.get("moved", 0)) == 0:
+			_log("[color=#e0a060]The way to %s is barred.[/color]" % target_name)
+		elif march.get("halted", false):
+			_log("[color=#e0a060]The army marches, but the road on to %s is barred.[/color]"
+				% target_name)
+		elif march.get("arrived", false) and march.get("blocked_destination", false):
+			_log("The army halts before %s — the way in is barred." % target_name)
 		elif march.get("arrived", false):
-			_log("The army marches through to %s." % game.data.regions[target_region]["name"])
+			_log("The army marches through to %s." % target_name)
 		else:
 			var turns := int(march.get("turns", 2))
-			var warning := " The way in is barred; it will halt nearby." \
+			var warning := " It will halt before the walls." \
 				if march.get("blocked_destination", false) else ""
-			_log("The army sets out for %s — %d turns' march.%s"
-				% [game.data.regions[target_region]["name"], turns, warning])
+			_log("The army sets out for %s — %d turns' march.%s" % [target_name, turns, warning])
 	_after_order()
 
 
@@ -352,15 +368,24 @@ func attack_army_order(defender_id: String) -> void:
 	if defender.is_empty():
 		return
 	var player: String = game.state["player_faction"]
-	if not DiplomacyRules.at_war(game.state, player, defender["owner"]):
-		var faction_name: String = game.data.factions.get(defender["owner"], {}).get("name", defender["owner"])
+	var owner_at_order := String(defender["owner"])
+	if not DiplomacyRules.at_war(game.state, player, owner_at_order):
+		var faction_name: String = game.data.factions.get(owner_at_order, {}).get("name", owner_at_order)
 		_confirm("This will declare war on %s. Attack?" % faction_name,
-			func(): _resolve_attack(defender_id))
+			func(): _resolve_attack(defender_id, owner_at_order))
 		return
-	_resolve_attack(defender_id)
+	_resolve_attack(defender_id, owner_at_order)
 
 
-func _resolve_attack(defender_id: String) -> void:
+func _resolve_attack(defender_id: String, expected_owner: String) -> void:
+	# The world can move between the dialog and the OK: re-validate, so a
+	# stale confirmation can never attack a different foe than it named.
+	if not game.state["armies"].has(selected_army) \
+			or not game.state["armies"].has(defender_id) \
+			or String(game.state["armies"][defender_id]["owner"]) != expected_owner:
+		_log("The moment has passed.")
+		_after_order()
+		return
 	var result := game.attack_army(selected_army, defender_id)
 	if result.is_empty():
 		_log("The army cannot come to grips with the enemy from here.")
@@ -374,15 +399,23 @@ func besiege_order(target_region: String) -> void:
 	if settlement.is_empty():
 		return
 	var player: String = game.state["player_faction"]
-	if not DiplomacyRules.at_war(game.state, player, settlement["owner"]):
-		var faction_name: String = game.data.factions.get(settlement["owner"], {}).get("name", settlement["owner"])
+	var holder_at_order := String(settlement["owner"])
+	if not DiplomacyRules.at_war(game.state, player, holder_at_order):
+		var faction_name: String = game.data.factions.get(holder_at_order, {}).get("name", holder_at_order)
 		_confirm("This will declare war on %s. Lay siege?" % faction_name,
-			func(): _resolve_siege(target_region))
+			func(): _resolve_siege(target_region, holder_at_order))
 		return
-	_resolve_siege(target_region)
+	_resolve_siege(target_region, holder_at_order)
 
 
-func _resolve_siege(target_region: String) -> void:
+func _resolve_siege(target_region: String, expected_owner: String) -> void:
+	# Same stale-confirmation guard as _resolve_attack: never declare war on
+	# a faction the dialog did not name.
+	if not game.state["armies"].has(selected_army) \
+			or String(game.state["settlements"].get(target_region, {}).get("owner", "")) != expected_owner:
+		_log("The moment has passed.")
+		_after_order()
+		return
 	if game.besiege(selected_army, target_region):
 		_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
 	else:
@@ -505,7 +538,9 @@ func _save_game() -> void:
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
+		_deselect_fleet()
 		map_view.selected_region = ""
+		map_view.path_preview = {}
 		region_panel.clear_panel()
 		_victory_shown = false
 		_log("Game loaded.")

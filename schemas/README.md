@@ -24,4 +24,6 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):
 region ids, faction ids, culture ids, unit template ids, building level ids,
-building chain kinds, sea zone ids, trait/ancillary ids, name pools.
+building chain kinds, sea zone ids, trait/ancillary ids, name pools; map
+geometry ↔ regions (territory per region containing its position, one road per
+land adjacency); balance terrain tables pinned to the terrain enum.

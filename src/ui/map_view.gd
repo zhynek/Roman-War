@@ -75,7 +75,9 @@ var _drawn_camera := Transform2D(0.0, Vector2.ONE * NAN, 0.0, Vector2.ZERO)
 var _tooltip_label: RichTextLabel
 var _hover_time := 0.0
 var _tooltip_shown := false
+var _tooltip_suppressed := false
 var _mouse_at := Vector2.ZERO
+var _last_shift := false
 
 
 func _ready() -> void:
@@ -226,10 +228,17 @@ func _process(_delta: float) -> void:
 		_label_layer.queue_redraw()
 	if not _state_fresh and game != null:
 		refresh_state()
-	if hover_region != "" and not _tooltip_shown:
+	if hover_region != "" and not _tooltip_shown and not _tooltip_suppressed:
 		_hover_time += _delta
 		if _hover_time >= 0.35:
 			_show_tooltip()
+	# Shift toggles forced march: refresh the hover preview so the sketched
+	# route and turns always match the order a click would give.
+	var shift := Input.is_key_pressed(KEY_SHIFT)
+	if shift != _last_shift:
+		_last_shift = shift
+		if hover_region != "":
+			region_hovered.emit(hover_region)
 	_keyboard_pan(_delta)
 
 
@@ -261,11 +270,16 @@ func _gui_input(event: InputEvent) -> void:
 			_dragging = mouse_event.pressed
 		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
 			_hide_tooltip()
+			_tooltip_suppressed = true
 			var hit := _region_at(mouse_event.position)
 			if hit != "":
 				if mouse_event.double_click:
+					# The second press of a double-click only centers — the
+					# first press already delivered the click, and one camera
+					# gesture must never issue two orders.
 					center_on(hit)
-				region_clicked.emit(hit)
+				else:
+					region_clicked.emit(hit)
 			else:
 				var zone := _sea_zone_at(mouse_event.position)
 				if zone != "":
@@ -342,6 +356,7 @@ func _region_at(screen_point: Vector2) -> String:
 
 func _update_hover(screen_point: Vector2) -> void:
 	_mouse_at = screen_point
+	_tooltip_suppressed = false  # real mouse motion re-arms the tooltip
 	var hit := _region_at(screen_point)
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if hit != "" \
 		else Control.CURSOR_ARROW

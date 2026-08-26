@@ -29,6 +29,12 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   (CI downloads Godot 4.4.1; locally any 4.4+ works).
 - Both must pass before committing. New data tables need a schema and
   cross-reference checks in `tools/validate_data.py`; new rules need tests.
+- `data/map_geometry.json` is **generated** — never hand-edit it. After any
+  change to region positions/adjacency or sea-zone anchors in
+  `data/regions.json`, rerun `python3 tools/generate_map_geometry.py`
+  (fixed seed, byte-stable) and commit the result, or the validator fails.
+- Map work is invisible to headless CI: eyeball it with
+  `xvfb-run -a godot --path . --script res://tools/screenshot.gd`.
 
 ## Conventions
 

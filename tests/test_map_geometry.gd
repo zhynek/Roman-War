@@ -27,6 +27,9 @@ func test_geometry_covers_the_campaign_map(t) -> void:
 				"road exists %s - %s" % [region_id, neighbor])
 
 	t.check(geometry.landmasses.size() >= 2, "a mainland and islands")
+	for mass in geometry.landmasses:
+		t.check(not (mass["fills"] as Array).is_empty(),
+			"every coastline ring decomposes into land fills")
 	t.check(geometry.world_rect.size.x > 100.0, "world bounds cover the map")
 	t.check_eq(geometry.region_at_world(Vector2(-4000, -4000)), "", "open ocean is nobody's")
 

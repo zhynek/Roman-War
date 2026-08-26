@@ -57,6 +57,7 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
+	_cancel_march(army_id)
 	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
 
 
@@ -65,6 +66,7 @@ func move_fleet(fleet_id: String, to_zone: String) -> bool:
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	_cancel_march(attacker_id)
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
@@ -82,6 +84,7 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
+	_cancel_march(army_id)
 	return MovementRules.sea_move_army(data, state, army_id, to_region)
 
 
@@ -96,16 +99,21 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 	if army.is_empty():
 		return {}
 	var found := PathfindingRules.best_path(
-		data, state, army_id, to_region, visible_regions(String(army["owner"])))
-	if found.is_empty() or (found["path"] as Array).is_empty():
+		data, state, army_id, to_region, visible_regions(String(army["owner"])), forced_march)
+	if found.is_empty():
 		return {}
-	var turns := PathfindingRules.estimated_turns(
-		data, state, army_id, float(found["cost"]), forced_march)
+	if (found["path"] as Array).is_empty():
+		if found.get("blocked_destination", false):
+			# Already beside the target and the way in is barred: nothing to
+			# march, but the caller deserves better than "unreachable".
+			return {"moved": 0, "arrived": false, "halted": true,
+				"blocked_destination": true, "cost": 0.0, "turns": 0}
+		return {}
 	army["march_path"] = (found["path"] as Array).duplicate()
 	army["march_forced"] = forced_march
 	var outcome := PathfindingRules.advance_march(data, state, army_id)
 	outcome["cost"] = found["cost"]
-	outcome["turns"] = turns
+	outcome["turns"] = found["turns"]
 	outcome["blocked_destination"] = found["blocked_destination"]
 	return outcome
 
@@ -131,17 +139,12 @@ func army_reachable(army_id: String, forced_march: bool = false) -> Dictionary:
 
 func army_path_preview(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
 	## best_path through the owner's fog, without moving anything — the map's
-	## hover preview. Turns account for a forced march when asked.
+	## hover preview. Route and turns account for a forced march when asked.
 	var army: Dictionary = state["armies"].get(army_id, {})
 	if army.is_empty():
 		return {}
-	var found := PathfindingRules.best_path(
-		data, state, army_id, to_region, visible_regions(String(army["owner"])))
-	if found.is_empty():
-		return {}
-	found["turns"] = PathfindingRules.estimated_turns(
-		data, state, army_id, float(found["cost"]), forced_march)
-	return found
+	return PathfindingRules.best_path(
+		data, state, army_id, to_region, visible_regions(String(army["owner"])), forced_march)
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
@@ -213,10 +216,12 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
+	_cancel_march(army_id)
 	return SiegeRules.begin_siege(data, state, army_id, region_id)
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	_cancel_march(army_id)
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):
@@ -234,6 +239,7 @@ func garrison_army(army_id: String) -> bool:
 	var army: Dictionary = state["armies"].get(army_id, {})
 	if army.is_empty():
 		return false
+	_cancel_march(army_id)
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
@@ -285,3 +291,11 @@ func load_from(path: String) -> bool:
 
 func _rng() -> CampaignRng:
 	return CampaignRng.from_state_string(String(state["rng_state"]))
+
+
+func _cancel_march(army_id: String) -> void:
+	## Every explicit order supersedes a queued march — a besieger must not
+	## walk away from its own siege next turn because an old road was queued.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	army.erase("march_path")
+	army.erase("march_forced")

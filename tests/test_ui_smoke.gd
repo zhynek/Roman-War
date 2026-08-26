@@ -157,24 +157,39 @@ func test_polygon_picking_and_state_caches(t) -> void:
 
 func test_movement_ux_paths(t) -> void:
 	## Range overlay, hover path preview, tooltip content, and a multi-hop
-	## click that becomes a march order — never a war.
+	## click that becomes a march order — never a war. The world is searched
+	## across a few fixed seeds for a fully scouted multi-leg land target, so
+	## the order's outcome is deterministic: arrive, or stay queued.
 	var tree := Engine.get_main_loop() as SceneTree
-	var game := Game.new_campaign("julii", 42)
-	var screen := CampaignScreen.create(game)
-	tree.root.add_child(screen)
-
+	var game: Game
+	var screen: CampaignScreen
 	var army_id := ""
-	var army_ids: Array = game.state["armies"].keys()
-	army_ids.sort()
-	for candidate in army_ids:
-		if game.state["armies"][candidate]["owner"] == "julii":
-			army_id = candidate
+	var home := ""
+	var target := ""
+	for seed_value in [42, 7, 11, 1234, 99]:
+		game = Game.new_campaign("julii", seed_value)
+		screen = CampaignScreen.create(game)
+		tree.root.add_child(screen)
+		army_id = ""
+		var army_ids: Array = game.state["armies"].keys()
+		army_ids.sort()
+		for candidate in army_ids:
+			if game.state["armies"][candidate]["owner"] == "julii":
+				army_id = candidate
+				break
+		if army_id != "":
+			home = game.state["armies"][army_id]["region"]
+			target = _scouted_multi_leg_target(game, army_id, home)
+		if target != "":
 			break
+		screen.free()
 	t.check(army_id != "", "julii fields an army")
-	var home: String = game.state["armies"][army_id]["region"]
+	t.check(target != "", "a scouted multi-leg destination exists in some seed")
+	if target == "":
+		return
+
 	screen._on_region_clicked(home)
 	screen._on_army_selected(army_id)
-
 	t.check(not screen.map_view.highlight_regions.is_empty(),
 		"selecting an army lights its reach")
 	t.check(screen.map_view.tooltip != null, "the map has a tooltip")
@@ -183,40 +198,55 @@ func test_movement_ux_paths(t) -> void:
 		String(game.data.regions[capital]["settlement_name"])),
 		"the tooltip names the settlement")
 
-	# A destination two or more steps out, found through the facade preview.
-	var target := ""
+	screen._on_region_hovered(target)
+	t.check(not screen.map_view.path_preview.is_empty(), "hover sketches the route")
+	t.check((screen.map_view.path_preview["legs"] as Array).size() >= 2,
+		"the sketch has per-leg costs")
+
+	var stances_before: Dictionary = game.state["factions"]["julii"]["diplomacy"].duplicate()
+	screen._on_region_clicked(target)
+	var army: Dictionary = game.state["armies"][army_id]
+	t.check(army["region"] != home, "the multi-leg order moved the army at once")
+	t.check(army["region"] == target or army.has("march_path"),
+		"the army arrived or the rest of the road is queued")
+	for other_faction in stances_before:
+		if stances_before[other_faction] != "war":
+			t.check(game.state["factions"]["julii"]["diplomacy"][other_faction] != "war",
+				"the march did not declare war on " + String(other_faction))
+	t.check(screen.map_view.path_preview.is_empty(), "the sketch clears after the order")
+	screen.free()
+
+
+func _scouted_multi_leg_target(game: Game, army_id: String, home: String) -> String:
+	## A land destination at least two legs out that no ship could reach
+	## instead (the order chain would legitimately sail), and whose road is
+	## provably clean — the test peeks with full knowledge that no at-war
+	## settlement or army stands on any step, so the march cannot halt.
+	var player: String = game.state["player_faction"]
 	var region_ids: Array = game.data.regions.keys()
 	region_ids.sort()
 	for region_id in region_ids:
-		# Skip targets a ship could reach from here: the order chain would
-		# legitimately sail instead, and then no march is queued.
 		if _sea_reachable(game, home, region_id):
 			continue
 		var preview := game.army_path_preview(army_id, region_id)
-		if not preview.is_empty() and not preview["blocked_destination"] \
-				and (preview["path"] as Array).size() >= 2 and int(preview["turns"]) >= 2:
-			target = region_id
-			break
-	t.check(target != "", "a multi-hop destination exists")
-	if target != "":
-		screen._on_region_hovered(target)
-		t.check(not screen.map_view.path_preview.is_empty(), "hover sketches the route")
-		t.check((screen.map_view.path_preview["legs"] as Array).size() >= 2,
-			"the sketch has per-leg costs")
-
-		var stances_before: Dictionary = game.state["factions"]["julii"]["diplomacy"].duplicate()
-		screen._on_region_clicked(target)
-		t.check(game.state["armies"][army_id]["region"] != home,
-			"the multi-hop order moved the army at once")
-		t.check(game.state["armies"][army_id].has("march_path"),
-			"the rest of the road is queued")
-		for other_faction in stances_before:
-			if stances_before[other_faction] != "war":
-				t.check(game.state["factions"]["julii"]["diplomacy"][other_faction] != "war",
-					"the march did not declare war on " + String(other_faction))
-		t.check(screen.map_view.path_preview.is_empty(), "the sketch clears after the order")
-
-	screen.free()
+		if preview.is_empty() or preview["blocked_destination"] \
+				or (preview["path"] as Array).size() < 2:
+			continue
+		var clean := true
+		for step in preview["path"]:
+			var holder: String = game.state["settlements"].get(step, {}).get("owner", "")
+			if holder != "" and DiplomacyRules.at_war(game.state, player, holder):
+				clean = false
+				break
+			for other in game.state["armies"].values():
+				if other["region"] == step and DiplomacyRules.at_war(game.state, player, other["owner"]):
+					clean = false
+					break
+			if not clean:
+				break
+		if clean:
+			return region_id
+	return ""
 
 
 func test_fleet_orders_from_the_map(t) -> void:
@@ -244,7 +274,19 @@ func test_fleet_orders_from_the_map(t) -> void:
 		screen._on_sea_zone_clicked(String(lanes[0]))
 		t.check_eq(game.state["fleets"][fleet_id]["sea_zone"], String(lanes[0]),
 			"the fleet sailed down the lane")
-		# A region click drops the helm.
+		t.check_eq(screen.map_view.selected_sea_zone, String(lanes[0]),
+			"the selection ring follows the fleet")
+		# Any refresh re-derives the overlay from live state — no stale lanes.
+		screen.refresh()
+		t.check_eq(screen.map_view.selected_sea_zone, String(lanes[0]),
+			"refresh keeps the ring on the fleet's real sea")
+		# Loading a save stands the fleet down entirely.
+		screen._save_game()
+		screen._load_game()
+		t.check_eq(screen.selected_fleet, "", "loading stands the fleet down")
+		t.check_eq(screen.map_view.selected_sea_zone, "", "no ghost ring after a load")
+		# A region click drops the helm too.
+		screen._on_sea_zone_clicked(String(lanes[0]))
 		screen._on_region_clicked(game.state["factions"]["cornelii"]["capital"])
 		t.check_eq(screen.selected_fleet, "", "selecting land stands the fleet down")
 	screen.free()

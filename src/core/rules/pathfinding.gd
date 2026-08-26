@@ -22,27 +22,29 @@ static func reachable(data: GameData, state: Dictionary, army_id: String,
 		limit = float(army["movement_left"])
 		if forced:
 			limit *= float(data.balance["movement"]["forced_march_multiplier"])
-	var found := _search(data, state, army, limit, visible)
+	var found := _search(data, state, army, limit, visible, _step_ceiling(data, state, army, forced))
 	var costs: Dictionary = found["dist"].duplicate()
 	costs.erase(army["region"])
 	return costs
 
 
 static func best_path(data: GameData, state: Dictionary, army_id: String,
-		to_region: String, visible: Dictionary = {}) -> Dictionary:
-	## Cheapest route toward a destination, ignoring the per-turn budget:
-	## {"path": [step, ...], "legs": [{"region", "cost"}], "cost": total,
-	##  "turns": estimate, "blocked_destination": bool}. When the destination
-	## itself cannot be entered (an at-war settlement, a visible hostile
-	## army), the path halts in the cheapest region beside it and
-	## blocked_destination is true — entering combat stays an explicit order.
-	## {} when nothing leads toward the destination at all.
+		to_region: String, visible: Dictionary = {}, forced: bool = false) -> Dictionary:
+	## Cheapest route toward a destination, ignoring the per-turn budget but
+	## never through a step no full turn could pay for (mirroring
+	## advance_march's own halt rule): {"path": [step, ...], "legs":
+	## [{"region", "cost"}], "cost": total, "turns": estimate,
+	## "blocked_destination": bool}. When the destination itself cannot be
+	## entered (an at-war settlement or hostile army the owner can see), the
+	## path halts in the cheapest region beside it and blocked_destination is
+	## true — entering combat stays an explicit order. {} when nothing leads
+	## toward the destination at all.
 	var army: Dictionary = state["armies"][army_id]
 	if not data.regions.has(to_region):
 		return {}
 	if to_region == army["region"]:
 		return {"path": [], "legs": [], "cost": 0.0, "turns": 0, "blocked_destination": false}
-	var found := _search(data, state, army, INF, visible)
+	var found := _search(data, state, army, INF, visible, _step_ceiling(data, state, army, forced))
 	var dist: Dictionary = found["dist"]
 	var target := to_region
 	var blocked := false
@@ -73,21 +75,32 @@ static func best_path(data: GameData, state: Dictionary, army_id: String,
 		legs.append({"region": step, "cost": MovementRules.step_cost(data, state, String(step))})
 	var total := float(dist[target])
 	return {"path": path, "legs": legs, "cost": total,
-		"turns": estimated_turns(data, state, army_id, total), "blocked_destination": blocked}
+		"turns": estimated_turns(data, state, army_id, legs, forced),
+		"blocked_destination": blocked}
 
 
 static func estimated_turns(data: GameData, state: Dictionary, army_id: String,
-		total_cost: float, forced: bool = false) -> int:
-	## Turns until arrival: the rest of this turn's points, then full turns.
-	if total_cost <= 0.0001:
+		legs: Array, forced: bool = false) -> int:
+	## Turns until arrival, walking the legs exactly the way advance_march
+	## spends them: step by step within each turn's budget, the remainder
+	## wasted whenever the next leg does not fit. -1 for a leg no full turn
+	## could ever pay for (best_path never emits one).
+	if legs.is_empty():
 		return 0
 	var army: Dictionary = state["armies"][army_id]
 	var multiplier := float(data.balance["movement"]["forced_march_multiplier"]) if forced else 1.0
-	var first := float(army["movement_left"]) * multiplier
-	if total_cost <= first + 0.0001:
-		return 1
 	var per_turn := _full_points(data, state, army) * multiplier
-	return 1 + int(ceilf((total_cost - first - 0.0001) / per_turn))
+	var budget := float(army["movement_left"]) * multiplier
+	var turns := 1
+	for leg in legs:
+		var cost := float(leg["cost"])
+		if cost > per_turn + 0.0001:
+			return -1
+		if cost > budget + 0.0001:
+			turns += 1
+			budget = per_turn
+		budget -= cost
+	return turns
 
 
 static func advance_march(data: GameData, state: Dictionary, army_id: String) -> Dictionary:
@@ -129,7 +142,7 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 
 
 static func _search(data: GameData, state: Dictionary, army: Dictionary,
-		limit: float, visible: Dictionary) -> Dictionary:
+		limit: float, visible: Dictionary, step_limit: float) -> Dictionary:
 	## Dijkstra from the army's region over enterable regions only.
 	var origin := String(army["region"])
 	var owner := String(army["owner"])
@@ -157,7 +170,10 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 				continue
 			if _blocked(data, state, owner, String(neighbor), visible):
 				continue
-			var cost := best + MovementRules.step_cost(data, state, String(neighbor))
+			var step := MovementRules.step_cost(data, state, String(neighbor))
+			if step > step_limit + 0.0001:
+				continue
+			var cost := best + step
 			if cost > limit + 0.0001:
 				continue
 			if not dist.has(neighbor) or cost < float(dist[neighbor]) - 0.000001:
@@ -168,19 +184,31 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 
 static func _blocked(data: GameData, state: Dictionary, owner: String,
 		region_id: String, visible: Dictionary) -> bool:
-	## Mirrors MovementRules.can_enter's blocking rules (minus adjacency).
-	## An at-war settlement always blocks — taking it is a siege, an explicit
-	## order. Hostile armies block only where the owner can see them when a
-	## visibility set is supplied: a preview that swerved around an unseen
-	## army would leak its position.
+	## Mirrors MovementRules.can_enter's blocking rules (minus adjacency),
+	## but only within the supplied visibility set (empty = full knowledge):
+	## a preview that swerved around an unseen hostile army — or an unseen
+	## at-war settlement — would leak allegiances through the fog. Execution
+	## still halts against reality: advance_march replays real move_army
+	## steps, which fail against hidden hostiles once the army gets there.
+	if not visible.is_empty() and not visible.has(region_id):
+		return false
 	if state["settlements"].has(region_id):
 		if DiplomacyRules.at_war(state, owner, String(state["settlements"][region_id]["owner"])):
 			return true
-	if visible.is_empty() or visible.has(region_id):
-		for army in state["armies"].values():
-			if army["region"] == region_id and DiplomacyRules.at_war(state, owner, String(army["owner"])):
-				return true
+	for army in state["armies"].values():
+		if army["region"] == region_id and DiplomacyRules.at_war(state, owner, String(army["owner"])):
+			return true
 	return false
+
+
+static func _step_ceiling(data: GameData, state: Dictionary, army: Dictionary,
+		forced: bool) -> float:
+	## The dearest single step this army could ever afford — a route through
+	## anything dearer would stall forever, so the search never offers one.
+	var ceiling := _full_points(data, state, army)
+	if forced:
+		ceiling *= float(data.balance["movement"]["forced_march_multiplier"])
+	return ceiling
 
 
 static func _full_points(data: GameData, state: Dictionary, army: Dictionary) -> float:

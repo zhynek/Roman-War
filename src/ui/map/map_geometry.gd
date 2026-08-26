@@ -21,6 +21,8 @@ static func load_from(path: String = "res://data/map_geometry.json") -> MapGeome
 		return null
 	var geometry := MapGeometry.new()
 	geometry._build(parsed)
+	if geometry.cells.is_empty() or geometry.landmasses.is_empty():
+		return null  # structurally unusable: fall back to the anchor map
 	return geometry
 
 
@@ -50,19 +52,27 @@ func label_of(region_id: String) -> Vector2:
 
 
 func _build(parsed: Dictionary) -> void:
+	# Defensive against a truncated or hand-edited file: malformed entries
+	# are skipped, and load_from refuses a geometry with nothing usable.
 	var min_point := Vector2(INF, INF)
 	var max_point := Vector2(-INF, -INF)
 	for mass in parsed.get("landmasses", []):
+		if not (mass is Dictionary) or (mass.get("outline", []) as Array).size() < 3:
+			continue
 		var outline := _points(mass["outline"])
 		for point in outline:
 			min_point = min_point.min(point)
 			max_point = max_point.max(point)
 		landmasses.append({"outline": outline, "fills": _decompose(outline)})
 	for cell in parsed.get("cells", []):
+		if not (cell is Dictionary) or not cell.has("region"):
+			continue
 		var polys: Array = []
 		var fills: Array = []
 		var bounds := Rect2()
-		for ring in cell["polygons"]:
+		for ring in cell.get("polygons", []):
+			if not (ring is Array) or (ring as Array).size() < 3:
+				continue
 			var polygon := _points(ring)
 			polys.append(polygon)
 			fills.append_array(_decompose(polygon))
@@ -70,12 +80,19 @@ func _build(parsed: Dictionary) -> void:
 			for point in polygon:
 				ring_rect = ring_rect.expand(point)
 			bounds = ring_rect if polys.size() == 1 else bounds.merge(ring_rect)
+		if polys.is_empty():
+			continue
+		var label_data: Array = cell.get("label", [50, 50])
+		if label_data.size() < 2:
+			label_data = [50, 50]
 		cells[cell["region"]] = {
 			"polys": polys, "fills": fills, "bounds": bounds.grow(0.5),
-			"label": Vector2(cell["label"][0], cell["label"][1]) * MapView.WORLD_SCALE,
+			"label": Vector2(label_data[0], label_data[1]) * MapView.WORLD_SCALE,
 		}
 	for edge in parsed.get("edges", []):
-		edges["%s|%s" % [edge["a"], edge["b"]]] = _points(edge["path"])
+		if not (edge is Dictionary) or (edge.get("path", []) as Array).size() < 2:
+			continue
+		edges["%s|%s" % [edge.get("a", ""), edge.get("b", "")]] = _points(edge["path"])
 	if min_point.x < INF:
 		world_rect = Rect2(min_point, max_point - min_point)
 

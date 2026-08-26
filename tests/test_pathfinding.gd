@@ -118,21 +118,117 @@ func test_estimated_turns_mirrors_the_budget(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
 	var army_id := Fixtures.add_army(state, "red", "alpha", ["test_spears"])
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 2.0), 1,
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([1.0, 1.0])), 1,
 		"this turn's points cover it")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 2.5), 2,
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([1.0, 1.0, 0.5])), 2,
 		"a half step over spills into next turn")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 6.1), 4,
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([2.0, 2.0, 2.0, 0.1])), 4,
 		"long roads count full turns")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 4.0, true), 1,
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([2.0, 2.0]), true), 1,
 		"forced march doubles the first day too")
+	# The estimate walks legs the way marching spends them: on a forest chain
+	# a two-point army wastes half a point every turn, and the quote says so.
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([1.5, 1.5, 1.5, 1.5])), 4,
+		"wasted remainders count — four forest steps take four turns")
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([2.5])), -1,
+		"a leg no full turn could pay for is called out")
 
 	Fixtures.add_character(state, "red", "guide", {"trait_points": {"test_pathfinder": 1}, "location": "alpha"})
 	state["armies"][army_id]["general"] = "guide"
 	MovementRules.reset_movement(data, state)
 	t.check_eq(state["armies"][army_id]["movement_left"], 2.5, "a pathfinder general adds half a step")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 4.5), 2,
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, _legs([2.0, 2.0, 0.5])), 2,
 		"2.5 now and 2.5 next turn covers 4.5")
+
+
+func _legs(costs: Array) -> Array:
+	var legs: Array = []
+	for cost in costs:
+		legs.append({"region": "x", "cost": cost})
+	return legs
+
+
+func test_hidden_settlements_do_not_bend_the_preview(t) -> void:
+	## Settlement allegiance is hidden information too: an unexplored at-war
+	## settlement must not bend a route or mark a destination as barred —
+	## that would paint the political map through the fog.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	# Full knowledge: blue's alpha blocks and the path halts beside it.
+	var known := PathfindingRules.best_path(data, state, army_id, "alpha")
+	t.check(known["blocked_destination"], "a seen at-war settlement bars the gate")
+	# Through fog that hides alpha: the preview walks straight in.
+	var seen := {"gamma": true, "beta": true}
+	var fogged := PathfindingRules.best_path(data, state, army_id, "alpha", seen)
+	t.check(not fogged["blocked_destination"], "an unseen allegiance is not revealed")
+	t.check_eq(fogged["path"], ["beta", "alpha"], "the route is not bent around the fog")
+	# Reach shows the fogged region as enterable, for the same reason.
+	var reach := PathfindingRules.reachable(data, state, army_id, -1.0, false, seen)
+	t.check(reach.has("alpha"), "the range overlay does not leak allegiance either")
+
+
+func test_steps_no_turn_could_pay_are_never_offered(t) -> void:
+	## A slowed army must not be quoted a route through a mountain step it
+	## can never afford — the preview and the march must agree.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "alpha", ["test_spears"])
+	Fixtures.add_character(state, "red", "laggard", {"location": "alpha"})
+	state["characters"]["laggard"]["trait_points"] = {}
+	state["armies"][army_id]["general"] = "laggard"
+	# Shrink the army to 1.5 points a turn by trimming the base directly.
+	var old_base = data.balance["movement"]["base_movement_points"]
+	data.balance["movement"]["base_movement_points"] = 1.5
+	state["armies"][army_id]["movement_left"] = 1.5
+	# zeta is mountains (2.0): unreachable at 1.5 points a turn...
+	t.check_eq(PathfindingRules.best_path(data, state, army_id, "zeta"), {},
+		"no route is quoted through an unpayable step")
+	# ...but a forced march (x2) opens it, and both agree again.
+	var forced := PathfindingRules.best_path(data, state, army_id, "zeta", {}, true)
+	t.check_eq(forced.get("path", []), ["zeta"], "forced march opens the pass")
+	data.balance["movement"]["base_movement_points"] = old_base
+
+
+func test_explicit_orders_cancel_a_queued_march(t) -> void:
+	## A besieger must not walk away from its own siege because an old road
+	## was still queued — any explicit order supersedes the march.
+	var game := Game.new()
+	game.data = Fixtures.data()
+	game.state = Fixtures.state(game.data)
+	game.resolver = AutoResolver.new()
+	var army_id := Fixtures.add_army(game.state, "red", "beta", ["test_spears"])
+	game.state["armies"][army_id]["movement_left"] = 0.0
+	var outcome := game.march_army(army_id, "epsilon")
+	t.check_eq(int(outcome["moved"]), 0, "no points today — the whole road is queued")
+	t.check(game.state["armies"][army_id].has("march_path"), "the march is queued")
+	t.check(game.besiege(army_id, "alpha"), "the army can lay siege from here")
+	t.check(not game.state["armies"][army_id].has("march_path"),
+		"laying siege cancels the queued march")
+
+	# And a plain manual move does too.
+	var walker := Fixtures.add_army(game.state, "red", "beta", ["test_spears"])
+	game.state["armies"][walker]["movement_left"] = 0.0
+	game.march_army(walker, "epsilon")
+	t.check(game.state["armies"][walker].has("march_path"), "second march queued")
+	game.state["armies"][walker]["movement_left"] = 2.0
+	t.check(game.move_army(walker, "gamma"), "a manual step is taken")
+	t.check(not game.state["armies"][walker].has("march_path"),
+		"the manual order superseded the march")
+
+
+func test_marching_at_a_barred_neighbor_reports_the_bar(t) -> void:
+	## Already beside an at-war settlement: march_army has nothing to walk,
+	## and says "barred", not "unreachable".
+	var game := Game.new()
+	game.data = Fixtures.data()
+	game.state = Fixtures.state(game.data)
+	var army_id := Fixtures.add_army(game.state, "red", "beta", ["test_spears"])
+	var outcome := game.march_army(army_id, "alpha")
+	t.check(not outcome.is_empty(), "the outcome names the problem")
+	t.check(outcome.get("halted", false) and outcome.get("blocked_destination", false),
+		"barred, not unreachable")
+	t.check_eq(game.state["armies"][army_id]["region"], "beta", "no step was taken")
 
 
 func test_march_army_respects_the_owners_fog(t) -> void:

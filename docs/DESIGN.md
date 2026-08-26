@@ -299,15 +299,21 @@ between adjacent sea zones at 1 point per lane.
 
 **Pathfinding and marches** (`PathfindingRules`): a deterministic Dijkstra over
 `step_cost` prices whole routes, so the cheap plains road genuinely beats the
-short mountain pass. `reachable` bounds a turn's reach (the UI's range overlay),
-`best_path` returns legs/cost/turns (the UI's hover preview), and a destination
-beyond one step becomes a **march order** — `march_path` queued on the army,
-resumed by the turn engine after movement resets, in sorted army order, drawing
-no randomness. A march only ever replays legal `move_army` steps: a step that
-has become illegal cancels the rest, so a march can never attack, besiege, or
-declare war. Previews are blocked only by *visible* hostile armies — a route
-that swerved around an unseen ambush would leak it. At-war settlements always
-block; the path halts in the cheapest region beside such a destination.
+short mountain pass; a step no full turn's budget could ever pay for is never
+offered. `reachable` bounds a turn's reach (the UI's range overlay), `best_path`
+returns legs/cost/turns (the UI's hover preview) — turns are estimated by
+walking the legs exactly as marching spends them, wasted remainders included —
+and a destination beyond one step becomes a **march order**: `march_path`
+queued on the army, resumed by the turn engine after movement resets, in sorted
+army order, drawing no randomness, and cancelled by any other explicit order
+(a besieger never walks away from its own siege). A march only ever replays
+legal `move_army` steps: a step that has become illegal cancels the rest, so a
+march can never attack, besiege, or declare war. Previews are blocked only by
+hostile armies and at-war settlements the owner can *see* — a route that
+swerved around an unseen ambush, or an unexplored enemy town, would paint
+allegiances through the fog; execution still halts against hidden reality when
+the army gets there. A visibly barred destination halts the path in the
+cheapest region beside it.
 
 ### 5.4 Sieges
 
@@ -535,7 +541,11 @@ take the maximum across chains.
 
 `tools/validate_data.py` runs every schema, then the cross-file checks JSON Schema
 cannot express — including map-position sanity (no two region tokens closer than
-1.2 world units; a warning when land-adjacent regions sit more than 35 apart) and
+1.2 world units; a warning when land-adjacent regions sit more than 35 apart),
+map-geometry coherence (every region has territory containing its own position;
+every land adjacency has exactly one road ending at its two positions), balance
+terrain coverage (`movement.terrain_cost` and `battle.terrain_defense_multiplier`
+keys pinned to the terrain enum — a missing key was a runtime crash) and
 trigger liveness (any trait/ancillary trigger kind no engine call site fires is
 reported as dead content, except the deliberately forward-authored `office_gained`): id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
