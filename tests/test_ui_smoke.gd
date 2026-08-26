@@ -96,6 +96,57 @@ func test_map_picking(t) -> void:
 	view.free()
 
 
+func test_polygon_picking_and_state_caches(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(800, 600)
+	tree.root.add_child(view)
+	view.refresh_state()
+
+	t.check(view.geometry != null, "the real campaign has map geometry")
+	t.check(not view.visible_cache.is_empty(), "refresh_state fills the fog cache")
+	t.check(not view.army_groups.is_empty(), "refresh_state groups armies")
+
+	# Picking is by territory polygon now: a point well outside the legacy
+	# 26-px anchor disc but inside the capital's territory still picks it.
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	view.center_on(capital)
+	var anchor := view.to_screen(view.world_pos(game.data.regions[capital]))
+	var deep_hit := false
+	for direction in range(16):
+		var offset := Vector2.RIGHT.rotated(TAU * direction / 16.0) * 45.0
+		if view._region_at(anchor + offset) == capital:
+			deep_hit = true
+			break
+	t.check(deep_hit, "territory picking reaches beyond the anchor disc")
+
+	# Decor glyph anchors are deterministic — hashed from region ids, never
+	# drawn from the campaign RNG.
+	var rng_before: String = game.state["rng_state"]
+	var first := view.decor_points(capital)
+	view._decor_cache.clear()
+	t.check_eq(view.decor_points(capital), first, "decor placement is deterministic")
+	t.check_eq(game.state["rng_state"], rng_before, "the map never touches the game RNG")
+	view.free()
+
+	# A fixture world has no geometry match and no positions: the view must
+	# still build, cache, and pick by anchor distance.
+	var fixture_game := Game.new()
+	fixture_game.data = Fixtures.data()
+	fixture_game.state = Fixtures.state(fixture_game.data)
+	var fixture_view := MapView.new()
+	fixture_view.game = fixture_game
+	fixture_view.size = Vector2(800, 600)
+	tree.root.add_child(fixture_view)
+	fixture_view.refresh_state()
+	fixture_view.center_on("beta")
+	var beta_screen := fixture_view.to_screen(fixture_view.world_pos(fixture_game.data.regions["beta"]))
+	t.check_eq(fixture_view._region_at(beta_screen), "beta", "fixture worlds pick by anchor")
+	fixture_view.free()
+
+
 func test_many_turns_through_the_ui(t) -> void:
 	## Drives the real report-log formatting against live riots, revolts,
 	## events, senate notices and character news — the branches a single

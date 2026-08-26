@@ -125,7 +125,7 @@ func refresh() -> void:
 
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
-	map_view.queue_redraw()
+	map_view.refresh_state()
 
 	if game.state["winner"] != null and not _victory_shown:
 		_show_victory_banner(String(game.state["winner"]))
