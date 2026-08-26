@@ -316,6 +316,17 @@ func _log_report(report: Dictionary) -> void:
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+	for march in report.get("marches", []):
+		if march["owner"] != player:
+			continue
+		var march_target: String = game.data.regions.get(march["destination"], {}).get(
+			"settlement_name", march["destination"])
+		if march["arrived"]:
+			_log("The army arrives at %s." % march_target)
+		elif march["halted"]:
+			_log("[color=#e0a060]The march on %s is halted — the way is barred.[/color]" % march_target)
+		else:
+			_log("The army marches on toward %s." % march_target)
 
 
 func _is_player_character(char_id: String) -> bool:

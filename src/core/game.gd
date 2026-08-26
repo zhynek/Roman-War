@@ -85,6 +85,65 @@ func sea_move_army(army_id: String, to_region: String) -> bool:
 	return MovementRules.sea_move_army(data, state, army_id, to_region)
 
 
+func march_army(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
+	## Plot the cheapest route and set off at once; the remainder resumes each
+	## end_turn. The route only ever takes plain move_army steps — combat
+	## stays an explicit order — and it is plotted with the owner's own fog,
+	## so it cannot navigate around enemies the owner has not seen.
+	## -> advance_march's outcome plus cost/turns/blocked_destination; {} when
+	## nothing leads toward the destination.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	var found := PathfindingRules.best_path(
+		data, state, army_id, to_region, visible_regions(String(army["owner"])))
+	if found.is_empty() or (found["path"] as Array).is_empty():
+		return {}
+	var turns := PathfindingRules.estimated_turns(
+		data, state, army_id, float(found["cost"]), forced_march)
+	army["march_path"] = (found["path"] as Array).duplicate()
+	army["march_forced"] = forced_march
+	var outcome := PathfindingRules.advance_march(data, state, army_id)
+	outcome["cost"] = found["cost"]
+	outcome["turns"] = turns
+	outcome["blocked_destination"] = found["blocked_destination"]
+	return outcome
+
+
+func halt_march(army_id: String) -> bool:
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if not army.has("march_path"):
+		return false
+	army.erase("march_path")
+	army.erase("march_forced")
+	return true
+
+
+func army_reachable(army_id: String, forced_march: bool = false) -> Dictionary:
+	## {region_id: cost} within this turn's remaining points, through the
+	## owner's fog — the map's movement-range overlay.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	return PathfindingRules.reachable(
+		data, state, army_id, -1.0, forced_march, visible_regions(String(army["owner"])))
+
+
+func army_path_preview(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
+	## best_path through the owner's fog, without moving anything — the map's
+	## hover preview. Turns account for a forced march when asked.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	var found := PathfindingRules.best_path(
+		data, state, army_id, to_region, visible_regions(String(army["owner"])))
+	if found.is_empty():
+		return {}
+	found["turns"] = PathfindingRules.estimated_turns(
+		data, state, army_id, float(found["cost"]), forced_march)
+	return found
+
+
 func hire_mercenary(army_id: String, template_id: String) -> bool:
 	return MercenaryRules.hire(data, state, army_id, template_id)
 

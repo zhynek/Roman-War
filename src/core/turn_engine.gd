@@ -18,7 +18,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "winner": null,
+		"senate": [], "characters": [], "marches": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -90,6 +90,23 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		report["characters"].append_array(FamilyRules.process_year(data, state, rng))
 
 	MovementRules.reset_movement(data, state)
+
+	# Queued marches resume on the fresh points. No RNG is drawn here, but the
+	# report order must not depend on dictionary order either — sorted ids.
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
+		if army.get("march_path", []).is_empty():
+			continue
+		var destination := String(army["march_path"].back())
+		var outcome := PathfindingRules.advance_march(data, state, army_id)
+		report["marches"].append({
+			"army": army_id, "owner": army["owner"], "region": army["region"],
+			"destination": destination, "arrived": outcome["arrived"],
+			"halted": outcome["halted"],
+		})
+
 	report["winner"] = VictoryRules.check(data, state)
 
 	state["rng_state"] = rng.state_string()

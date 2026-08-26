@@ -135,6 +135,101 @@ func test_estimated_turns_mirrors_the_budget(t) -> void:
 		"2.5 now and 2.5 next turn covers 4.5")
 
 
+func test_march_army_respects_the_owners_fog(t) -> void:
+	var game := Game.new()
+	game.data = Fixtures.data()
+	game.state = Fixtures.state(game.data)
+	var army_id := Fixtures.add_army(game.state, "red", "beta", ["test_spears"])
+	Fixtures.add_army(game.state, "blue", "gamma", ["test_mob"])
+	# Red holds beta, so gamma is scouted: the hostile column there is seen
+	# and bars the road — nothing leads toward delta.
+	t.check_eq(game.march_army(army_id, "delta"), {}, "a seen enemy shuts the road")
+	t.check_eq(game.state["armies"][army_id]["region"], "beta", "no step was taken")
+
+
+func test_halt_march_clears_the_queue(t) -> void:
+	var game := Game.new()
+	game.data = Fixtures.data()
+	game.state = Fixtures.state(game.data)
+	var army_id := Fixtures.add_army(game.state, "red", "alpha", ["test_spears"])
+	var outcome := game.march_army(army_id, "epsilon")
+	t.check_eq(outcome["moved"], 2, "the first day covers two plains steps")
+	t.check(not outcome["arrived"], "epsilon is another day away")
+	t.check_eq(outcome["turns"], 2, "quoted as a two-turn march")
+	t.check(game.state["armies"][army_id].has("march_path"), "the rest is queued")
+	t.check(game.halt_march(army_id), "a queued march can be recalled")
+	t.check(not game.state["armies"][army_id].has("march_path"), "the queue is gone")
+	t.check(not game.halt_march(army_id), "nothing left to recall")
+
+
+func test_marches_resume_across_turns_and_saves(t) -> void:
+	var game := Game.new_campaign("julii", 42)
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		if game.state["armies"][candidate]["owner"] == "julii":
+			army_id = candidate
+			break
+	t.check(army_id != "", "julii fields an army")
+
+	# The nearest destination that takes more than one turn to reach.
+	var target := ""
+	var region_ids: Array = game.data.regions.keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var preview := game.army_path_preview(army_id, region_id)
+		if preview.is_empty() or preview["blocked_destination"]:
+			continue
+		if preview["turns"] >= 2 and float(preview["cost"]) <= 6.0:
+			target = region_id
+			break
+	t.check(target != "", "a multi-turn target exists")
+	if target == "":
+		return
+
+	var outcome := game.march_army(army_id, target)
+	t.check(int(outcome["moved"]) >= 1, "the column sets out at once")
+	t.check(not outcome["arrived"], "a multi-turn march does not arrive on day one")
+	t.check(game.state["armies"][army_id].has("march_path"), "the road ahead is queued")
+
+	# A save taken mid-march must continue in lockstep with the live game.
+	var save_path := "user://test_march_save.json"
+	t.check(game.save_to(save_path), "mid-march save written")
+	var twin := Game.new()
+	twin.data = game.data
+	twin.resolver = AutoResolver.new()
+	t.check(twin.load_from(save_path), "mid-march save loads")
+
+	var report := game.end_turn()
+	twin.end_turn()
+	var continued := false
+	for march in report["marches"]:
+		if march["army"] == army_id:
+			continued = true
+	t.check(continued, "the turn report records the resumed march")
+	# Canonical JSON, as test_campaign_integration compares states: a parsed
+	# save holds sorted keys and floats where the live game holds ints.
+	t.check_eq(_canonical(game.state["armies"]), _canonical(twin.state["armies"]),
+		"the loaded twin marches in lockstep")
+	t.check_eq(game.state["rng_state"], twin.state["rng_state"],
+		"march continuation draws no randomness")
+
+	for i in range(5):
+		if not game.state["armies"].has(army_id):
+			break
+		if not game.state["armies"][army_id].has("march_path"):
+			break
+		game.end_turn()
+	if game.state["armies"].has(army_id):
+		t.check(not game.state["armies"][army_id].has("march_path"),
+			"the march ends within its estimate")
+
+
+func _canonical(value) -> String:
+	return JSON.stringify(JSON.parse_string(JSON.stringify(value)))
+
+
 func test_paths_are_deterministic_whatever_the_dict_order(t) -> void:
 	## Two equal-cost routes around a diamond must resolve identically however
 	## the region dictionary happens to be ordered (a JSON round-trip reorders
