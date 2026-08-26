@@ -39,6 +39,7 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "map_geometry.json": "map_geometry.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -223,6 +224,67 @@ def cross_checks(t: dict[str, dict]) -> None:
             elif other["id"] in region["adjacent"] and distance > 35:
                 warn(f"regions: adjacent {region['id']} and {other['id']} are far apart "
                      f"on the map (distance {distance:.1f})")
+
+    # --- map geometry -----------------------------------------------------
+    geometry = t.get("map_geometry.json", {})
+    if geometry and regions:
+        cells = {c["region"]: c for c in geometry.get("cells", [])}
+        for region_id in cells:
+            if region_id not in regions:
+                err(f"map_geometry: cell for unknown region {region_id}")
+        for region_id in regions:
+            if region_id not in cells:
+                err(f"map_geometry: region {region_id} has no cell")
+        if len(cells) != len(geometry.get("cells", [])):
+            err("map_geometry: duplicate region cells")
+
+        def point_in_ring(x: float, y: float, ring: list) -> bool:
+            inside = False
+            for i in range(len(ring)):
+                x1, y1 = ring[i]
+                x2, y2 = ring[(i + 1) % len(ring)]
+                if (y1 > y) != (y2 > y) and x < x1 + (y - y1) * (x2 - x1) / (y2 - y1):
+                    inside = not inside
+            return inside
+
+        def ring_area(ring: list) -> float:
+            total = 0.0
+            for i in range(len(ring)):
+                x1, y1 = ring[i]
+                x2, y2 = ring[(i + 1) % len(ring)]
+                total += x1 * y2 - x2 * y1
+            return abs(total) / 2.0
+
+        for region_id, cell in cells.items():
+            if region_id not in regions:
+                continue
+            position = regions[region_id]["position"]
+            if not any(point_in_ring(position["x"], position["y"], ring)
+                       for ring in cell["polygons"]):
+                err(f"map_geometry: {region_id}'s position lies outside its own territory")
+            if sum(ring_area(ring) for ring in cell["polygons"]) < 0.5:
+                warn(f"map_geometry: {region_id}'s territory is degenerately small")
+
+        adjacent_pairs = {tuple(sorted((r["id"], n)))
+                          for r in regions.values() for n in r["adjacent"] if n in regions}
+        edge_pairs = []
+        for edge in geometry.get("edges", []):
+            pair = (edge["a"], edge["b"])
+            edge_pairs.append(pair)
+            if edge["a"] >= edge["b"]:
+                err(f"map_geometry: edge {pair} not ordered a < b")
+            if pair not in adjacent_pairs:
+                err(f"map_geometry: edge {pair} joins regions that are not adjacent")
+            else:
+                for end, region_id in ((edge["path"][0], edge["a"]), (edge["path"][-1], edge["b"])):
+                    position = regions[region_id]["position"]
+                    dx, dy = end[0] - position["x"], end[1] - position["y"]
+                    if (dx * dx + dy * dy) ** 0.5 > 1.5:
+                        err(f"map_geometry: edge {pair} does not end at {region_id}'s position")
+        if len(edge_pairs) != len(set(edge_pairs)):
+            err("map_geometry: duplicate edges")
+        for pair in sorted(adjacent_pairs - set(edge_pairs)):
+            err(f"map_geometry: adjacent pair {pair} has no road edge")
 
     # --- wonders ----------------------------------------------------------
     wonders = {w["id"]: w for w in t.get("wonders.json", {}).get("wonders", [])}
@@ -470,7 +532,8 @@ def main() -> int:
 
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
+                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
+                "cells"):
         if key in document:
             return len(document[key])
     return 0
