@@ -12,6 +12,7 @@ extends Control
 ## positions or geometry still render tokens and pick by anchor distance.
 
 signal region_clicked(region_id: String)
+signal region_hovered(region_id: String)
 
 const WORLD_SCALE := 14.0
 
@@ -26,6 +27,14 @@ var highlight_regions: Dictionary = {}:
 		highlight_regions = value
 		if _overlay_layer != null:
 			_overlay_layer.queue_redraw()
+var path_preview: Dictionary = {}:
+	set(value):
+		path_preview = value
+		if _overlay_layer != null:
+			_overlay_layer.queue_redraw()
+var hover_region := ""
+var tooltip: PanelContainer
+var tooltip_provider: Callable
 
 var geometry: MapGeometry
 var map_font: Font
@@ -52,6 +61,10 @@ var _label_layer: MapLayers.LabelLayer
 var _decor_cache := {}
 var _state_fresh := false
 var _drawn_camera := Transform2D(0.0, Vector2.ONE * NAN, 0.0, Vector2.ZERO)
+var _tooltip_label: RichTextLabel
+var _hover_time := 0.0
+var _tooltip_shown := false
+var _mouse_at := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -74,6 +87,19 @@ func _ready() -> void:
 	_label_layer = MapLayers.LabelLayer.new()
 	_label_layer.view = self
 	add_child(_label_layer)
+
+	tooltip = PanelContainer.new()
+	tooltip.visible = false
+	tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tooltip.custom_minimum_size = Vector2(240, 0)
+	_tooltip_label = RichTextLabel.new()
+	_tooltip_label.bbcode_enabled = true
+	_tooltip_label.fit_content = true
+	_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tooltip_label.custom_minimum_size = Vector2(240, 0)
+	tooltip.add_child(_tooltip_label)
+	add_child(tooltip)
+	mouse_exited.connect(_clear_hover)
 
 
 func refresh_state() -> void:
@@ -189,6 +215,10 @@ func _process(_delta: float) -> void:
 		_label_layer.queue_redraw()
 	if not _state_fresh and game != null:
 		refresh_state()
+	if hover_region != "" and not _tooltip_shown:
+		_hover_time += _delta
+		if _hover_time >= 0.35:
+			_show_tooltip()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -201,11 +231,17 @@ func _gui_input(event: InputEvent) -> void:
 		elif mouse_event.button_index in [MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE]:
 			_dragging = mouse_event.pressed
 		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_hide_tooltip()
 			var hit := _region_at(mouse_event.position)
 			if hit != "":
 				region_clicked.emit(hit)
-	elif event is InputEventMouseMotion and _dragging:
-		_camera_offset += (event as InputEventMouseMotion).relative / _zoom
+	elif event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if _dragging:
+			_camera_offset += motion.relative / _zoom
+			_clear_hover()
+		else:
+			_update_hover(motion.position)
 
 
 func _zoom_at(screen_point: Vector2, factor: float) -> void:
@@ -231,6 +267,54 @@ func _region_at(screen_point: Vector2) -> String:
 			best_distance = distance
 			best = region_id
 	return best
+
+
+func _update_hover(screen_point: Vector2) -> void:
+	_mouse_at = screen_point
+	var hit := _region_at(screen_point)
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if hit != "" \
+		else Control.CURSOR_ARROW
+	if hit == hover_region:
+		return
+	hover_region = hit
+	_hover_time = 0.0
+	_hide_tooltip()
+	if _overlay_layer != null:
+		_overlay_layer.queue_redraw()
+	region_hovered.emit(hit)
+
+
+func _clear_hover() -> void:
+	if hover_region != "":
+		hover_region = ""
+		if _overlay_layer != null:
+			_overlay_layer.queue_redraw()
+		region_hovered.emit("")
+	_hide_tooltip()
+	mouse_default_cursor_shape = Control.CURSOR_ARROW
+
+
+func _show_tooltip() -> void:
+	var text := ""
+	if tooltip_provider.is_valid():
+		text = String(tooltip_provider.call(hover_region))
+	if text == "":
+		return
+	_tooltip_shown = true
+	_tooltip_label.text = text
+	tooltip.visible = true
+	tooltip.reset_size()
+	var at := _mouse_at + Vector2(18, 20)
+	at.x = clampf(at.x, 4.0, maxf(4.0, size.x - tooltip.size.x - 4.0))
+	at.y = clampf(at.y, 4.0, maxf(4.0, size.y - tooltip.size.y - 4.0))
+	tooltip.position = at
+
+
+func _hide_tooltip() -> void:
+	_tooltip_shown = false
+	_hover_time = 0.0
+	if tooltip != null:
+		tooltip.visible = false
 
 
 func _draw() -> void:

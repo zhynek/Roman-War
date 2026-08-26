@@ -42,6 +42,8 @@ func _ready() -> void:
 	map_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map_view.custom_minimum_size = Vector2(600, 400)
 	map_view.region_clicked.connect(_on_region_clicked)
+	map_view.region_hovered.connect(_on_region_hovered)
+	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
 
 	var side := VBoxContainer.new()
@@ -126,6 +128,7 @@ func refresh() -> void:
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
 	map_view.refresh_state()
+	_refresh_range_overlay()
 
 	if game.state["winner"] != null and not _victory_shown:
 		_show_victory_banner(String(game.state["winner"]))
@@ -147,6 +150,73 @@ func _on_region_clicked(region_id: String) -> void:
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
 	region_panel.show_region(game, map_view.selected_region, selected_army)
+	_refresh_range_overlay()
+
+
+func _refresh_range_overlay() -> void:
+	## The gold wash of regions this turn's points can reach.
+	if selected_army != "" and game.state["armies"].has(selected_army):
+		map_view.highlight_regions = game.army_reachable(selected_army)
+	else:
+		map_view.highlight_regions = {}
+		map_view.path_preview = {}
+
+
+func _on_region_hovered(region_id: String) -> void:
+	## With an army selected, hovering sketches the march: route, per-leg
+	## cost, turns to arrive.
+	if region_id == "" or selected_army == "" or not game.state["armies"].has(selected_army) \
+			or region_id == game.state["armies"][selected_army]["region"]:
+		map_view.path_preview = {}
+		return
+	var preview := game.army_path_preview(
+		selected_army, region_id, Input.is_key_pressed(KEY_SHIFT))
+	if preview.is_empty() or (preview["path"] as Array).is_empty():
+		map_view.path_preview = {}
+		return
+	map_view.path_preview = {
+		"from": game.state["armies"][selected_army]["region"],
+		"legs": preview["legs"],
+		"turns": preview["turns"],
+		"blocked": preview["blocked_destination"],
+		"target": region_id,
+	}
+
+
+func _tooltip_for(region_id: String) -> String:
+	var region: Dictionary = game.data.regions.get(region_id, {})
+	if region.is_empty():
+		return ""
+	if not map_view.visible_cache.has(region_id):
+		return "[b]%s[/b]\n[i]Beyond our maps.[/i]" % region.get("name", region_id)
+	var lines: Array[String] = []
+	lines.append("[b]%s[/b] · %s" % [region.get("settlement_name", region_id), region.get("name", "")])
+	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+	if not settlement.is_empty():
+		var owner: String = settlement["owner"]
+		var faction: Dictionary = game.data.factions.get(owner, {})
+		lines.append("[color=%s]%s[/color] — %s, %s souls" % [
+			faction.get("color", "#808080"), faction.get("name", owner),
+			SettlementRules.settlement_level(game.data, settlement).capitalize().replace("_", " "),
+			str(int(settlement["population"]))])
+	var terrain: String = region.get("terrain", "plains")
+	lines.append("%s — march cost %s · fertility %.1f" % [
+		terrain.capitalize(),
+		String.num(MovementRules.step_cost(game.data, game.state, region_id), 2),
+		float(region.get("fertility", 0.0))])
+	var goods: Array = region.get("resources", [])
+	if not goods.is_empty():
+		lines.append("Goods: %s" % ", ".join(goods))
+	if region.has("description"):
+		lines.append("[i]%s[/i]" % region["description"])
+	if selected_army != "" and game.state["armies"].has(selected_army) \
+			and region_id != game.state["armies"][selected_army]["region"]:
+		var preview := game.army_path_preview(selected_army, region_id)
+		if not preview.is_empty() and not (preview["path"] as Array).is_empty():
+			var turns := int(preview["turns"])
+			lines.append("March: %.1f points · %s" % [float(preview["cost"]),
+				"arrives this turn" if turns <= 1 else "%d turns" % turns])
+	return "\n".join(lines)
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -169,14 +239,26 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		besiege_order(target_region)
 		return
 
-	# Otherwise: march (or sail).
+	# Otherwise: march (or sail). A destination beyond one step becomes a
+	# queued march that resumes each turn — still nothing but move steps, so
+	# it can never start a war.
 	if game.move_army(selected_army, target_region, forced_march):
 		var suffix := " by forced march — the men will be weary." if forced_march else "."
 		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
 	elif game.sea_move_army(selected_army, target_region):
 		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
 	else:
-		_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
+		var march := game.march_army(selected_army, target_region, forced_march)
+		if march.is_empty():
+			_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
+		elif march.get("arrived", false):
+			_log("The army marches through to %s." % game.data.regions[target_region]["name"])
+		else:
+			var turns := int(march.get("turns", 2))
+			var warning := " The way in is barred; it will halt nearby." \
+				if march.get("blocked_destination", false) else ""
+			_log("The army sets out for %s — %d turns' march.%s"
+				% [game.data.regions[target_region]["name"], turns, warning])
 	_after_order()
 
 
@@ -255,6 +337,7 @@ func _after_order() -> void:
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
 	else:
 		selected_army = ""
+	map_view.path_preview = {}
 	region_panel.show_region(game, map_view.selected_region, selected_army)
 	refresh()
 

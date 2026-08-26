@@ -215,9 +215,59 @@ class OverlayLayer:
 			return
 		for region_id in view.highlight_regions:
 			_paint_region(region_id, UiStyle.RANGE_TINT, UiStyle.RANGE_EDGE, 1.2)
+		if view.hover_region != "" and view.hover_region != view.selected_region:
+			_paint_region(view.hover_region, Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.55), 1.4)
 		if view.selected_region != "":
 			_paint_region(view.selected_region,
 				Color(UiStyle.SELECTION, 0.06), UiStyle.SELECTION, 2.2)
+		_draw_path_preview()
+
+	func _draw_path_preview() -> void:
+		var preview: Dictionary = view.path_preview
+		if preview.is_empty():
+			return
+		var game: Game = view.game
+		var previous: String = preview["from"]
+		var legs: Array = preview["legs"]
+		var ink := Color(0.98, 0.97, 0.92, 0.9)
+		for leg in legs:
+			var next: String = leg["region"]
+			var segment := PackedVector2Array()
+			if view.geometry != null:
+				segment = view.geometry.edge_path(previous, next)
+			if segment.is_empty():
+				segment = PackedVector2Array([_anchor(previous), _anchor(next)])
+			draw_polyline(segment, Color(0.08, 0.08, 0.1, 0.5), 5.0, true)
+			draw_polyline(segment, ink, 2.6, true)
+			previous = next
+		if bool(preview.get("blocked", false)) and preview.has("target"):
+			var from_anchor := _anchor(previous)
+			var to_anchor := _anchor(String(preview["target"]))
+			draw_dashed_line(from_anchor, to_anchor, UiStyle.SIEGE_RED, 2.4, 9.0)
+			draw_arc(to_anchor, 14.0, 0, TAU, 24, UiStyle.SIEGE_RED, 2.2)
+		# Per-leg cost chips, then the arrival flag.
+		if view.map_font != null:
+			for leg in legs:
+				var at := _anchor(String(leg["region"])) + Vector2(0, -20.0)
+				var cost_text := "%.1f" % float(leg["cost"])
+				var width := view.map_font.get_string_size(
+					cost_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 9).x
+				draw_circle(at, 7.5, Color(0.09, 0.09, 0.11, 0.85))
+				draw_string(view.map_font, at + Vector2(-width / 2.0, 3.2), cost_text,
+					HORIZONTAL_ALIGNMENT_CENTER, -1, 9, Color(0.95, 0.93, 0.85))
+			if not legs.is_empty():
+				var turns := int(preview.get("turns", 1))
+				var flag_text := "this turn" if turns <= 1 else "%d turns" % turns
+				var end_at := _anchor(String(legs.back()["region"])) + Vector2(0, -36.0)
+				var flag_width := view.map_font.get_string_size(
+					flag_text, HORIZONTAL_ALIGNMENT_CENTER, -1, 11).x
+				draw_string_outline(view.map_font, end_at + Vector2(-flag_width / 2.0, 0), flag_text,
+					HORIZONTAL_ALIGNMENT_CENTER, -1, 11, 4, UiStyle.LABEL_OUTLINE)
+				draw_string(view.map_font, end_at + Vector2(-flag_width / 2.0, 0), flag_text,
+					HORIZONTAL_ALIGNMENT_CENTER, -1, 11, UiStyle.CAPITAL_GOLD)
+
+	func _anchor(region_id: String) -> Vector2:
+		return view.world_pos(view.game.data.regions.get(region_id, {}))
 
 	func _paint_region(region_id: String, fill: Color, edge: Color, width: float) -> void:
 		var geometry: MapGeometry = view.geometry

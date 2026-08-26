@@ -30,6 +30,29 @@ func _init() -> void:
 	var game := Game.new_campaign("julii", _seed)
 	_screen = CampaignScreen.create(game)
 	root.add_child(_screen)
+	if OS.get_cmdline_user_args().has("select_army"):
+		_select_army_with_preview.call_deferred()
+
+
+func _select_army_with_preview() -> void:
+	## Select the first julii army and sketch a path, so range overlay and
+	## path preview appear in the shots.
+	var game := _screen.game
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		if game.state["armies"][army_id]["owner"] != "julii":
+			continue
+		_screen._on_region_clicked(game.state["armies"][army_id]["region"])
+		_screen._on_army_selected(army_id)
+		var region_ids: Array = game.data.regions.keys()
+		region_ids.sort()
+		for region_id in region_ids:
+			var preview: Dictionary = game.army_path_preview(army_id, region_id)
+			if not preview.is_empty() and (preview["path"] as Array).size() >= 2:
+				_screen._on_region_hovered(region_id)
+				return
+		return
 
 
 func _process(_delta: float) -> bool:

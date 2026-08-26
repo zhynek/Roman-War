@@ -155,6 +155,83 @@ func test_polygon_picking_and_state_caches(t) -> void:
 	fixture_view.free()
 
 
+func test_movement_ux_paths(t) -> void:
+	## Range overlay, hover path preview, tooltip content, and a multi-hop
+	## click that becomes a march order — never a war.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		if game.state["armies"][candidate]["owner"] == "julii":
+			army_id = candidate
+			break
+	t.check(army_id != "", "julii fields an army")
+	var home: String = game.state["armies"][army_id]["region"]
+	screen._on_region_clicked(home)
+	screen._on_army_selected(army_id)
+
+	t.check(not screen.map_view.highlight_regions.is_empty(),
+		"selecting an army lights its reach")
+	t.check(screen.map_view.tooltip != null, "the map has a tooltip")
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	t.check(screen._tooltip_for(capital).contains(
+		String(game.data.regions[capital]["settlement_name"])),
+		"the tooltip names the settlement")
+
+	# A destination two or more steps out, found through the facade preview.
+	var target := ""
+	var region_ids: Array = game.data.regions.keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		# Skip targets a ship could reach from here: the order chain would
+		# legitimately sail instead, and then no march is queued.
+		if _sea_reachable(game, home, region_id):
+			continue
+		var preview := game.army_path_preview(army_id, region_id)
+		if not preview.is_empty() and not preview["blocked_destination"] \
+				and (preview["path"] as Array).size() >= 2 and int(preview["turns"]) >= 2:
+			target = region_id
+			break
+	t.check(target != "", "a multi-hop destination exists")
+	if target != "":
+		screen._on_region_hovered(target)
+		t.check(not screen.map_view.path_preview.is_empty(), "hover sketches the route")
+		t.check((screen.map_view.path_preview["legs"] as Array).size() >= 2,
+			"the sketch has per-leg costs")
+
+		var stances_before: Dictionary = game.state["factions"]["julii"]["diplomacy"].duplicate()
+		screen._on_region_clicked(target)
+		t.check(game.state["armies"][army_id]["region"] != home,
+			"the multi-hop order moved the army at once")
+		t.check(game.state["armies"][army_id].has("march_path"),
+			"the rest of the road is queued")
+		for other_faction in stances_before:
+			if stances_before[other_faction] != "war":
+				t.check(game.state["factions"]["julii"]["diplomacy"][other_faction] != "war",
+					"the march did not declare war on " + String(other_faction))
+		t.check(screen.map_view.path_preview.is_empty(), "the sketch clears after the order")
+
+	screen.free()
+
+
+func _sea_reachable(game: Game, from_region: String, to_region: String) -> bool:
+	## Mirrors MovementRules.sea_move_army's zone test: same or adjacent zone.
+	var from_zones: Array = game.data.regions[from_region].get("sea_zones", [])
+	var to_zones: Array = game.data.regions[to_region].get("sea_zones", [])
+	for zone in from_zones:
+		if to_zones.has(zone):
+			return true
+		for adjacent_zone in game.data.sea_zones.get(zone, {}).get("adjacent", []):
+			if to_zones.has(adjacent_zone):
+				return true
+	return false
+
+
 func test_many_turns_through_the_ui(t) -> void:
 	## Drives the real report-log formatting against live riots, revolts,
 	## events, senate notices and character news — the branches a single

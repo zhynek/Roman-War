@@ -192,9 +192,18 @@ func _build_armies_section() -> void:
 
 func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	_label("Movement left: %.1f" % float(army["movement_left"]))
+	if army.has("march_path") and not (army["march_path"] as Array).is_empty():
+		var destination := String((army["march_path"] as Array).back())
+		var destination_name: String = game.data.regions.get(
+			destination, {}).get("settlement_name", destination)
+		_label("Marching to %s — %d steps to go" % [destination_name, army["march_path"].size()],
+			Color(0.85, 0.92, 0.75))
+		_action_button("Halt the march", func():
+			game.halt_march(army_id)
+			action_taken.emit())
 	for unit in army["units"]:
 		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
-	_label("Click an adjacent region to march, attack, or besiege.", Color(0.7, 0.8, 0.9))
+	_label("Click anywhere in reach to march (hover shows the route and cost).\nShift-click for forced march.", Color(0.7, 0.8, 0.9))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty() and settlement["owner"] == game.state["player_faction"]:
