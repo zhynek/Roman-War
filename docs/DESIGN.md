@@ -297,6 +297,18 @@ turn. An army cannot *move* into a region containing a hostile army or a hostile
 settlement: that is an attack or a siege, taken as an explicit action. Fleets move
 between adjacent sea zones at 1 point per lane.
 
+**Pathfinding and marches** (`PathfindingRules`): a deterministic Dijkstra over
+`step_cost` prices whole routes, so the cheap plains road genuinely beats the
+short mountain pass. `reachable` bounds a turn's reach (the UI's range overlay),
+`best_path` returns legs/cost/turns (the UI's hover preview), and a destination
+beyond one step becomes a **march order** — `march_path` queued on the army,
+resumed by the turn engine after movement resets, in sorted army order, drawing
+no randomness. A march only ever replays legal `move_army` steps: a step that
+has become illegal cancels the rest, so a march can never attack, besiege, or
+declare war. Previews are blocked only by *visible* hostile armies — a route
+that swerved around an unseen ambush would leak it. At-war settlements always
+block; the path halts in the cheapest region beside such a destination.
+
 ### 5.4 Sieges
 
 A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itself:
@@ -498,6 +510,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | temples.json | temple chains (one god each, archetyped), per culture | construction, effects, elite units |
 | units.json | unit templates: stats, costs, requirements, era | recruitment, battle |
 | regions.json | region graph + sea zones, terrain, fertility, resources, hidden resources | map, economy, growth |
+| map_geometry.json | generated coastlines, province polygons, road paths (`tools/generate_map_geometry.py`, seeded, byte-stable — regenerate, never hand-edit) | map rendering only |
 | campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy; rebel holdings | NewGame |
 | traits.json / ancillaries.json | trigger-driven character content | Phase 4 engine (loaded now) |
 | events.json | scripted events + disasters | EventRules |
@@ -565,7 +578,7 @@ Phases follow the research report (§17). Status as of this document:
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | Pending; symmetric stances + war declaration live (`DiplomacyRules`), hostile acts auto-declare war |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable, map modernized**: start menu (house/difficulty/seed); a geographic terrain map generated from the region graph (`data/map_geometry.json` — coastlines, province polygons, meandering roads) rendered in retained layers with terrain fills and topography glyphs, culture- and wall-tier-styled settlement icons, army roundels with counts, fleets at sea-zone anchors, fog veil, hover tooltips, movement-range overlay and terrain-priced path previews with multi-turn march orders; settlement panel with live factor breakdowns/taxes/queues; army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison); fleet orders from the map; family scroll; turn log; save/load; unified dark theme, responsive window. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy

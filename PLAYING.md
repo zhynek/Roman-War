@@ -25,14 +25,30 @@ campaign runs to AD 14.
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
   Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
-- **The map** — every region is a circle at its real geographic place, coloured
-  by who owns it and sized by how big its city is. Lines are roads between
-  neighbouring regions; dashed lines are sea routes. Small squares beside a
-  city are armies. A red ring means the city is under siege. Grey circles are
-  land you have not scouted.
-  - **Drag with the right mouse button** to move the map.
-  - **Scroll** to zoom in and out.
-  - **Left-click** a region to select it.
+- **The map** — a terrain map of the whole world: coastlines, province
+  borders, and the lie of the land (mountain ridges, forests, hills, marsh,
+  desert). Every province is tinted by its terrain and washed with its
+  owner's colour; unexplored provinces lie under a dark veil. Cities are
+  drawn as they are: they grow with their level, their walls show their
+  wall tier in their culture's style (Roman circuits, round Mediterranean
+  enceintes, tribal stockades), a banner flies the owner's colour, a gold
+  laurel marks your capital, quays mark a port, and siege ladders and red
+  ramparts mark a city under attack. Armies are shield roundels showing
+  their unit count and a star when a general leads; your fleets ride at
+  anchor in their named seas.
+  - **Drag with the right mouse button** (or **WASD/arrows**) to move the
+    map; **scroll** to zoom; **double-click** to center on a province.
+  - **Left-click** a province to select it; **hover** for its details.
+  - With an army selected, its **reach this turn glows gold**; hovering a
+    destination sketches the route with each leg's cost in movement points
+    and when the army will arrive. **Click to march** — a destination
+    beyond this turn's reach becomes a standing order the army resumes
+    each turn (halt it from the army panel). **Shift-click** forces the
+    march: double the ground, weary men. Terrain is strategy now: plains
+    and roads are fast, mountains and marsh cost double, and the shortest
+    road on the map is not always the quickest.
+  - **Click a sea** holding one of your fleets to take the helm, then click
+    a highlighted neighbouring sea to sail.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
 - **Bottom right** — the turn log: what happened while you were away.
@@ -130,7 +146,9 @@ Honest list, so you know what you are looking at:
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full
   political system (offices, elections) is later.
-- **The art is placeholder.** Coloured circles, not painted maps.
+- **The art is original vector work, still early.** The map, towns, and
+  tokens are drawn by the engine from the campaign data — expect the style
+  to keep sharpening.
 
 ## macOS blocks the app on first launch
 

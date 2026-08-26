@@ -14,18 +14,31 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 17
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
 **Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
 foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+foundation loop, and a playable Phase 8 campaign UI with a modernized map:
+generated terrain geometry (`data/map_geometry.json` + `tools/
+generate_map_geometry.py`), a retained-layer renderer with settlement/army
+iconography, terrain-priced pathfinding with multi-turn march orders
+(`src/core/rules/pathfinding.gd`), hover tooltips, range overlay and path
+previews, fleets on the map, and a unified dark theme.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of this branch:** 85 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. Branch `claude/modernize-map-world-view-03orjy`.
+A Mac build of the older circle-map build was delivered earlier; rebuild
+before the next playtest.
+
+**Visual QA:** `xvfb-run -a godot --path . --script res://tools/screenshot.gd
+-- out_dir=/tmp/shots zooms=0.5,1.1,2.2 select_army` boots a campaign under a
+real renderer and saves map screenshots — use it after any map change; CI
+never renders. Regenerate geometry with `python3
+tools/generate_map_geometry.py` (fixed seed, byte-stable — a re-run must
+leave `git diff` empty).
 
 ## 2. Get productive in five minutes
 
@@ -52,7 +65,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 85 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -131,21 +144,25 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   **no spouses, no children, no `gender` field set** in `campaign.json`. The
   marriage path only opens once in-game births produce daughters, so the family
   tree bootstraps slowly. Seeding real households would fix it.
-- **Sea-zone anchor positions** in `regions.json` are unused — `map_view.gd`
-  draws sea lanes from shared-zone membership and never renders zone labels.
+- **Coastal multi-hop targets sail instead of marching**: the order chain
+  tries `sea_move_army` before `march_army`, so a coastal destination in
+  ship's reach is sailed to (one whole turn) even when the hover preview
+  sketched a land route. Usually what the player wants; occasionally not.
 - **`office_gained` triggers are dead** until Phase 7 offices exist. The
   validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
   them, and warns about any *other* trigger kind no engine call site fires.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
   watchtowers, ambush.
-- **Art is placeholder** — coloured circles on a geographic map.
+- **Art is original procedural vector work** — terrain map, walled towns,
+  army roundels, all drawn from campaign data. No binary assets yet; a
+  bundled licensed font and richer texture work are open polish items.
 
 ## 7. Process notes
 
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
+  Develop on the branch the session names (currently `claude/modernize-map-world-view-03orjy`).
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
   issues** the 60-strong test suite had missed — including armies declaring war
