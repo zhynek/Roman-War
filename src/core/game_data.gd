@@ -20,6 +20,7 @@ var missions: Dictionary = {}          # id -> mission template dict
 var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
+var glossary: Dictionary = {}          # section -> {id -> {id, name, blurb}}
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -60,6 +61,13 @@ func _load_all(dir: String) -> void:
 
 	for unit in _read_json(dir + "/units.json").get("units", []):
 		units[unit["id"]] = unit
+
+	var glossary_doc := _read_json(dir + "/glossary.json")
+	for section in ["unit_classes", "attributes", "effects", "building_kinds"]:
+		var entries := {}
+		for entry in glossary_doc.get(section, []):
+			entries[entry["id"]] = entry
+		glossary[section] = entries
 
 	var map_data := _read_json(dir + "/regions.json")
 	for region in map_data.get("regions", []):

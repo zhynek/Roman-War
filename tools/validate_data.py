@@ -40,6 +40,7 @@ TABLES = {
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
     "map_geometry.json": "map_geometry.schema.json",
+    "glossary.json": "glossary.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -495,6 +496,25 @@ def cross_checks(t: dict[str, dict]) -> None:
             for trait_id in character.get("traits", []):
                 if trait_id not in trait_defs:
                     err(f"campaign: character {character['id']}: unknown trait {trait_id}")
+
+    # --- glossary ---------------------------------------------------------
+    # The UI's vocabulary must cover exactly what the data uses: a missing
+    # entry shows the player a raw id; an unused entry is dead content.
+    glossary = t.get("glossary.json", {})
+    used_by_section = {
+        "unit_classes": {u["class"] for u in units.values()},
+        "attributes": {a for u in units.values() for a in u.get("attributes", [])},
+        "effects": {k for c in chains.values() for lv in c["levels"] for k in lv.get("effects", {})},
+        "building_kinds": {c["kind"] for c in chains.values()},
+    }
+    for section, used in used_by_section.items():
+        entries = [e["id"] for e in glossary.get(section, [])]
+        for duplicate in sorted({e for e in entries if entries.count(e) > 1}):
+            err(f"glossary: {section}: duplicate entry '{duplicate}'")
+        for missing in sorted(used - set(entries)):
+            err(f"glossary: {section}: '{missing}' is used in the data but has no entry")
+        for dead in sorted(set(entries) - used):
+            warn(f"glossary: {section}: entry '{dead}' matches nothing in the data (dead content)")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]

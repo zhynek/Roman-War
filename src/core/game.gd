@@ -265,6 +265,124 @@ func available_units(region_id: String) -> Array:
 	return RecruitmentRules.available_units(data, state, region_id)
 
 
+## --- Info-card queries (the visual layer: R1-R3) --------------------------
+
+func unit_profile(template_id: String) -> Dictionary:
+	## Everything the unit card shows, with classes, skills and training
+	## buildings explained through the glossary. {} for unknown templates.
+	var template: Dictionary = data.units.get(template_id, {})
+	if template.is_empty():
+		return {}
+	var skills: Array = []
+	for attribute_id in template.get("attributes", []):
+		skills.append(_glossary_entry("attributes", String(attribute_id)))
+	var need: Dictionary = template["requirements"]
+	return {
+		"id": template_id,
+		"name": String(template["name"]),
+		"class_id": String(template["class"]),
+		"class_entry": _glossary_entry("unit_classes", String(template["class"])),
+		"culture": String(template["culture"]),
+		"soldiers": int(template["soldiers"]),
+		"attack": int(template["attack"]),
+		"charge": int(template.get("charge", 0)),
+		"missile_attack": int(template.get("missile_attack", 0)),
+		"defense": int(template["defense"]),
+		"morale": int(template["morale"]),
+		"speed": int(template.get("speed", 0)),
+		"cost": int(template["cost"]),
+		"upkeep": int(template["upkeep"]),
+		"era": String(template.get("era", "any")),
+		"attributes": skills,
+		"trained_at": {
+			"kind": String(need["building_kind"]),
+			"kind_entry": _glossary_entry("building_kinds", String(need["building_kind"])),
+			"level": int(need["building_level"]),
+			"temple_god": String(need.get("temple_god", "")),
+		},
+		"description": String(template.get("description", "")),
+	}
+
+
+func building_profile(chain_id: String) -> Dictionary:
+	## The building card: the chain, its kind explained, every level's effects
+	## as named breakdowns, and the units each level unlocks — the class-to-
+	## building correspondence computed from the data, never authored twice.
+	var chain: Dictionary = data.chains.get(chain_id, {})
+	if chain.is_empty():
+		return {}
+	var levels: Array = []
+	for i in range(chain["levels"].size()):
+		var level: Dictionary = chain["levels"][i]
+		var effects: Array = []
+		var effect_ids: Array = level.get("effects", {}).keys()
+		effect_ids.sort()
+		for effect_id in effect_ids:
+			var entry := _glossary_entry("effects", String(effect_id))
+			entry["value"] = level["effects"][effect_id]
+			effects.append(entry)
+		levels.append({
+			"id": String(level["id"]),
+			"name": String(level["name"]),
+			"index": i + 1,
+			"cost": int(level["cost"]),
+			"build_turns": int(level["build_turns"]),
+			"min_settlement_level": String(level["min_settlement_level"]),
+			"effects": effects,
+			"unlocks": _units_unlocked_at(chain, i + 1),
+			"description": String(level.get("description", "")),
+		})
+	return {
+		"id": chain_id,
+		"name": String(chain["name"]),
+		"kind": String(chain["kind"]),
+		"kind_entry": _glossary_entry("building_kinds", String(chain["kind"])),
+		"cultures": chain.get("cultures", []),
+		"god": String(chain.get("god", "")),
+		"levels": levels,
+	}
+
+
+func _units_unlocked_at(chain: Dictionary, tier: int) -> Array:
+	## Templates this exact chain begins to satisfy at `tier`: kind and level
+	## match, the chain serves the unit's culture, and a demanded temple god
+	## matches. Mercenary-only templates never appear — they are hired, not
+	## trained.
+	var unlocked: Array = []
+	var unit_ids: Array = data.units.keys()
+	unit_ids.sort()
+	for unit_id in unit_ids:
+		var template: Dictionary = data.units[unit_id]
+		var need: Dictionary = template["requirements"]
+		if String(need["building_kind"]) != String(chain["kind"]):
+			continue
+		if int(need["building_level"]) != tier:
+			continue
+		if template["factions"] == ["mercenary"]:
+			continue
+		if not chain.get("cultures", []).has(template["culture"]):
+			continue
+		var god_needed := String(need.get("temple_god", ""))
+		if god_needed != "" and god_needed != String(chain.get("god", "")):
+			continue
+		unlocked.append({
+			"id": unit_id,
+			"name": String(template["name"]),
+			"class_id": String(template["class"]),
+			"class_entry": _glossary_entry("unit_classes", String(template["class"])),
+		})
+	return unlocked
+
+
+func _glossary_entry(section: String, entry_id: String) -> Dictionary:
+	## Glossary text with a graceful fallback for worlds without a glossary
+	## (the synthetic fixtures): the id prettified, an empty blurb.
+	var entry: Dictionary = data.glossary.get(section, {}).get(entry_id, {})
+	if entry.is_empty():
+		return {"id": entry_id, "name": entry_id.capitalize(), "blurb": ""}
+	return {"id": entry_id, "name": String(entry["name"]), "blurb": String(entry["blurb"])}
+
+
 func visible_regions(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VisibilityRules.visible_regions(data, state, fid)
