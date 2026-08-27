@@ -235,7 +235,11 @@ func refresh_state() -> void:
 			params.get("siege", false), params.get("port", false), params.get("capital", false)])
 	_mark_if_changed("political", ";".join(political))
 
+	# The fog set is part of the units picture: a region falling back under
+	# fog must erase the tokens last drawn there, not leave them standing.
 	var units := PackedStringArray()
+	for region_id in visible_ids:
+		units.append(String(region_id))
 	var army_ids: Array = game.state["armies"].keys()
 	army_ids.sort()
 	for army_id in army_ids:
@@ -249,9 +253,11 @@ func refresh_state() -> void:
 		units.append("%s@%s/%d" % [fleet_id, fleet["sea_zone"], fleet["ships"].size()])
 	_mark_if_changed("units", ";".join(units))
 
+	# Road tiers feed the terrain layer only where visible (fog discipline).
 	var roads := PackedStringArray()
 	for region_id in settled_ids:
-		roads.append("%s:%d" % [region_id, road_level(region_id)])
+		if _visible_cache.has(region_id):
+			roads.append("%s:%d" % [region_id, road_level(region_id)])
 	_mark_if_changed("roads", ";".join(roads))
 
 	var overlay_bits := PackedStringArray([selected_region, hover_region])
@@ -346,8 +352,15 @@ func _rebuild_preview(hover_target: String) -> void:
 					"text": "%.1f" % float(leg_info["cost"]),
 				})
 			if route.get("blocked_destination", false):
-				blocked = _leg_points(String(walk[walk.size() - 1]), hover_target)
-				_hover_summary = "The way in is barred — the army can only approach."
+				var last_region := String(walk[walk.size() - 1])
+				# Draw the barred final leg only when the army can actually
+				# stand next to the destination — never a phantom straight
+				# line across open water toward somewhere unreachable.
+				if route.get("reachable", false) or MapRules.are_adjacent(game.data, last_region, hover_target):
+					blocked = _leg_points(last_region, hover_target)
+					_hover_summary = "The way in is barred — the army can only approach."
+				else:
+					_hover_summary = "No road leads there."
 			elif route.get("reachable", false):
 				var turns := int(route["turns"])
 				_hover_summary = "Arrives this turn." if turns <= 1 else "%d turns' march." % turns
@@ -360,16 +373,13 @@ func _rebuild_preview(hover_target: String) -> void:
 
 
 func _leg_points(from_region: String, to_region: String) -> PackedVector2Array:
-	## The generated road between two adjacent regions, oriented from -> to;
-	## a straight line when no geometry covers this world.
+	## The generated road between two adjacent regions, oriented from -> to
+	## (MapGeometry handles the orientation); a straight line when no
+	## geometry covers this world.
 	if _geometry != null:
 		var stored := _geometry.edge_path(from_region, to_region)
 		if stored.size() >= 2:
-			if from_region < to_region:
-				return stored
-			var reversed := stored.duplicate()
-			reversed.reverse()
-			return reversed
+			return stored
 	return PackedVector2Array([
 		world_pos(game.data.regions[from_region]), world_pos(game.data.regions[to_region]),
 	])
@@ -392,8 +402,12 @@ func _update_tooltip(region_id: String, screen_point: Vector2) -> void:
 		lines.append("[b]%s[/b]" % region["name"])
 		if not _visible_cache.has(region_id):
 			lines.append("[color=#8a8f98]Unscouted — no reports come from this land.[/color]")
-	lines.append("%s — march cost %.1f" % [String(region["terrain"]).capitalize(),
-		MovementRules.step_cost(game.data, game.state, region_id)])
+	# Fog discipline: the live step cost folds in the settlement's built road
+	# tier, so unscouted regions show only the terrain's base price.
+	var shown_cost := MovementRules.step_cost(game.data, game.state, region_id) \
+		if _visible_cache.has(region_id) \
+		else float(game.data.balance["movement"]["terrain_cost"][region["terrain"]])
+	lines.append("%s — march cost %.1f" % [String(region["terrain"]).capitalize(), shown_cost])
 	if _visible_cache.has(region_id):
 		lines.append("Fertility %.1f" % float(region.get("fertility", 0.0)))
 		var resources: Array = region.get("resources", [])
@@ -483,6 +497,13 @@ func road_level(region_id: String) -> int:
 	if settlement.is_empty():
 		return 0
 	return int(SettlementRules.effect_max(game.data, settlement, "road_level"))
+
+
+func road_level_shown(region_id: String) -> int:
+	## As drawn: built road tiers are state, so fog hides them.
+	if not _visible_cache.has(region_id):
+		return 0
+	return road_level(region_id)
 
 
 func zone_anchor(zone_id: String) -> Vector2:

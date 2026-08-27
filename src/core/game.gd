@@ -125,6 +125,7 @@ func _clear_march(army_id: String) -> void:
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	_clear_march(attacker_id)  # a battle order supersedes any standing march
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
@@ -217,10 +218,16 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
-	return SiegeRules.begin_siege(data, state, army_id, region_id)
+	var begun := SiegeRules.begin_siege(data, state, army_id, region_id)
+	if begun:
+		# Without this, a stale march order would walk the besieger off his
+		# own siege at end of turn and the siege would dissolve unreported.
+		_clear_march(army_id)
+	return begun
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	_clear_march(army_id)  # storming walls supersedes any standing march
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):

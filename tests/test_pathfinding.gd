@@ -11,17 +11,33 @@ func test_reachable_costs_and_budget(t) -> void:
 	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
 	MovementRules.reset_movement(data, state)
 
-	var in_range := PathfindingRules.reachable(data, state, army_id, 2.0, false, {})
+	var seen := {"alpha": true}
+	var in_range := PathfindingRules.reachable(data, state, army_id, 2.0, false, seen)
 	t.check_near(float(in_range.get("beta", -1.0)), 1.0, 0.001, "one plains step costs 1")
 	t.check_near(float(in_range.get("delta", -1.0)), 1.0, 0.001, "other direction too")
 	t.check_near(float(in_range.get("epsilon", -1.0)), 2.0, 0.001, "two steps exactly spend the budget")
 	t.check(not in_range.has("gamma"), "the region the army stands in is not listed")
-	t.check(not in_range.has("alpha"), "a settlement we are at war with cannot be entered")
+	t.check(not in_range.has("alpha"), "a settlement we can SEE we are at war with cannot be entered")
 	t.check(not in_range.has("zeta"), "the mountain pass costs 3, beyond one turn")
 
-	var forced := PathfindingRules.reachable(data, state, army_id, 2.0, true, {})
+	var forced := PathfindingRules.reachable(data, state, army_id, 2.0, true, seen)
 	t.check_near(float(forced.get("zeta", -1.0)), 3.0, 0.001, "forced march doubles the budget")
 	t.check(not forced.has("eta"), "the forest behind the pass is beyond even a forced march")
+
+
+func test_fogged_hostile_settlements_do_not_bend_previews(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	MovementRules.reset_movement(data, state)
+
+	# alpha is blue's and red is at war — but when fog hides alpha, the
+	# preview must treat it as open ground or the route leaks its ownership.
+	var blind := PathfindingRules.reachable(data, state, army_id, 2.0, false, {})
+	t.check_near(float(blind.get("alpha", -1.0)), 2.0, 0.001,
+		"an unseen hostile settlement does not block the preview")
+	t.check(not PathfindingRules.reachable(data, state, army_id, 2.0, false, {"alpha": true}).has("alpha"),
+		"scouting it closes the door")
 
 
 func test_path_prefers_cheap_terrain(t) -> void:
@@ -56,14 +72,14 @@ func test_blocked_destination_routes_to_approach(t) -> void:
 	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
 	MovementRules.reset_movement(data, state)
 
-	var route := PathfindingRules.best_path(data, state, army_id, "alpha", false, {})
+	var route := PathfindingRules.best_path(data, state, army_id, "alpha", false, {"alpha": true})
 	t.check(route["blocked_destination"], "a hostile settlement is a blocked destination")
 	t.check(route["reachable"], "but the army can march up to it")
 	t.check_eq(route["path"], ["beta"], "the path stops on the approach region")
 
 	var at_gates := Fixtures.add_army(state, "red", "beta", ["test_spears"])
 	MovementRules.reset_movement(data, state)
-	var standing := PathfindingRules.best_path(data, state, at_gates, "alpha", false, {})
+	var standing := PathfindingRules.best_path(data, state, at_gates, "alpha", false, {"alpha": true})
 	t.check(standing["blocked_destination"], "still blocked from its own doorstep")
 	t.check(not standing["reachable"], "and there is nothing left to march")
 	t.check_eq(standing["path"], [], "no legs when already on the approach")
@@ -116,7 +132,7 @@ func test_tie_breaks_and_save_round_trip_agree(t) -> void:
 	t.check_near(float(replay["cost"]), float(live["cost"]), 0.001, "and the same cost")
 
 
-func test_estimated_turns_mirror_movement_math(t) -> void:
+func test_estimated_turns_walk_the_legs_like_the_march_does(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
 	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
@@ -125,10 +141,22 @@ func test_estimated_turns_mirror_movement_math(t) -> void:
 	MovementRules.reset_movement(data, state)
 	t.check_near(float(state["armies"][army_id]["movement_left"]), 2.5, 0.001, "pathfinder general adds movement")
 
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 2.5, false), 1, "fits current movement")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 2.6, false), 2, "a hair over rolls to next turn")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 7.6, false), 4, "long hauls add whole turns")
-	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, 5.0, true), 1, "forced march doubles what fits now")
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, [2.5], false), 1, "fits current movement")
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, [1.5, 1.1], false), 2, "a hair over rolls to next turn")
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, [5.0], true), 1, "forced march doubles what fits now")
+
+	# The trap the naive total/budget formula falls into: movement left over
+	# at a leg boundary is LOST at end of turn, never banked. Four forest
+	# legs on a 2.5 budget strand a point every single turn.
+	t.check_eq(PathfindingRules.estimated_turns(data, state, army_id, [1.5, 1.5, 1.5, 1.5], false), 4,
+		"stranded remainders push arrival back a turn per leg")
+
+	var plain := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	MovementRules.reset_movement(data, state)
+	t.check_eq(PathfindingRules.estimated_turns(data, state, plain, [1.5, 1.5, 1.5, 1.5], false), 4,
+		"the base 2.0 budget strands half a point per forest leg")
+	t.check_eq(PathfindingRules.estimated_turns(data, state, plain, [1.0, 1.0, 1.0, 1.0], false), 2,
+		"legs that pack cleanly lose nothing")
 
 
 func test_advance_march_walks_and_resumes(t) -> void:
@@ -156,6 +184,22 @@ func test_advance_march_walks_and_resumes(t) -> void:
 	t.check(not state["armies"][army_id].has("march_path"), "order cleared on arrival")
 
 	t.check(PathfindingRules.advance_march(data, state, army_id).is_empty(), "no order, no report")
+
+
+func test_advance_march_never_walks_a_besieger_off_his_siege(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "alpha", ["test_spears"])
+	state["settlements"]["alpha"]["siege"] = {"besieger": army_id, "turns": 1, "equipment_ready": false}
+	state["armies"][army_id]["march_path"] = ["beta", "gamma"]
+	state["armies"][army_id]["march_forced"] = false
+	MovementRules.reset_movement(data, state)
+
+	var report := PathfindingRules.advance_march(data, state, army_id)
+	t.check_eq(state["armies"][army_id]["region"], "alpha", "the besieger holds his lines")
+	t.check(report["halted"], "the stale order is reported halted")
+	t.check(not state["armies"][army_id].has("march_path"), "and discarded")
+	t.check(state["settlements"]["alpha"]["siege"] != null, "the siege stands")
 
 
 func test_advance_march_halts_when_blocked(t) -> void:

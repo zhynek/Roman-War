@@ -134,8 +134,10 @@ class TerrainLayer:
 		keys.sort()
 		for key in keys:
 			var ends: PackedStringArray = String(key).split("|")
-			var level: int = maxi(view.road_level(ends[0]), view.road_level(ends[1]))
-			var path: PackedVector2Array = geometry.edges[key]
+			# Paving shows only where fog has lifted — road tiers are built
+			# state, not geography, and must not leak from unscouted lands.
+			var level: int = maxi(view.road_level_shown(ends[0]), view.road_level_shown(ends[1]))
+			var path: PackedVector2Array = geometry.edges[key]["path"]
 			if level <= 0:
 				for i in range(path.size() - 1):
 					draw_dashed_line(path[i], path[i + 1], MapLayers.ROAD_DIRT, 1.1, 6.0)

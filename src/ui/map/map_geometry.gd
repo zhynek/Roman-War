@@ -8,7 +8,7 @@ extends RefCounted
 
 var landmasses: Array = []  # [{outline, tris, holes: [PackedVector2Array]}]
 var cells := {}             # region_id -> {polygons, tris, label, bounds}
-var edges := {}             # "a|b" (sorted) -> PackedVector2Array
+var edges := {}             # "a|b" (sorted key) -> {a: String, path: PackedVector2Array}
 
 
 static func load_for(data: GameData, scale: float, path: String = "res://data/map_geometry.json") -> MapGeometry:
@@ -52,7 +52,12 @@ static func load_for(data: GameData, scale: float, path: String = "res://data/ma
 		}
 
 	for edge in parsed.get("edges", []):
-		geometry.edges[edge_key(String(edge["a"]), String(edge["b"]))] = _scaled(edge["path"], scale)
+		# The generator orients the stored path from its own "a" to "b" (an
+		# array-index order, NOT the sorted key) — keep "a" so edge_path can
+		# hand back the direction the caller asked for.
+		geometry.edges[edge_key(String(edge["a"]), String(edge["b"]))] = {
+			"a": String(edge["a"]), "path": _scaled(edge["path"], scale),
+		}
 
 	for region_id in data.regions:
 		if not geometry.cells.has(region_id):
@@ -75,7 +80,16 @@ func region_at_world(world: Vector2) -> String:
 
 
 func edge_path(a: String, b: String) -> PackedVector2Array:
-	return edges.get(edge_key(a, b), PackedVector2Array())
+	## The road between two adjacent regions, oriented from `a` to `b`.
+	var entry: Dictionary = edges.get(edge_key(a, b), {})
+	if entry.is_empty():
+		return PackedVector2Array()
+	var path: PackedVector2Array = entry["path"]
+	if String(entry["a"]) == a:
+		return path
+	var reversed_path := path.duplicate()
+	reversed_path.reverse()
+	return reversed_path
 
 
 func label_of(region_id: String) -> Vector2:

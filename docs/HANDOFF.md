@@ -14,8 +14,9 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
-JSON tables under `data/` validated by `schemas/`, with a thin deterministic
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 17
+JSON tables under `data/` validated by `schemas/` (the 17th, map_geometry, is
+generated — see below), with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
@@ -30,7 +31,7 @@ map-geometry pipeline (`tools/generate_map_geometry.py` →
 iconography, hover/route/range interaction, on-map fleet orders, and a shared
 `UiStyle` theme.
 
-**Green as of the map-modernization work:** 94 tests / 0 failures, validator
+**Green as of the map-modernization work:** 99 tests / 0 failures, validator
 0 errors / 0 warnings (now covering map-geometry consistency), clean boot. A
 Mac build of the pre-map-work state was delivered to the user, who is
 playtesting.
@@ -60,7 +61,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 94 tests, 0 failures (~15s)
+godot --headless --path . --script res://tests/run_tests.gd      # 99 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 

@@ -83,6 +83,23 @@ func test_icon_params_come_from_the_rules(t) -> void:
 	t.check(SettlementIcons.icon_params(game, "gamma").is_empty(), "unsettled regions draw nothing")
 
 
+func test_fog_changes_mark_the_units_layer_dirty(t) -> void:
+	## A region slipping back under fog must redraw the token layer, or the
+	## armies last seen there would linger as stale intelligence.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(800, 600)
+	tree.root.add_child(view)
+	view.refresh_state()
+	var signature_before: String = view._units_sig
+	game.state["settlements"]["aegyptus"]["owner"] = "julii"  # sight expands, armies unchanged
+	view.refresh_state()
+	t.check(view._units_sig != signature_before, "a visibility change alone re-signs the units layer")
+	view.free()
+
+
 func test_fixture_world_falls_back_and_still_picks(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new()

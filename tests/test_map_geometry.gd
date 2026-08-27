@@ -34,13 +34,23 @@ func test_every_adjacency_has_a_road(t) -> void:
 		t.check(false, "geometry must load")
 		return
 	var missing: Array = []
+	var misoriented: Array = []
 	var region_ids: Array = data.regions.keys()
 	region_ids.sort()
 	for region_id in region_ids:
+		var from_position: Dictionary = data.regions[region_id]["position"]
+		var from_world := Vector2(float(from_position["x"]), float(from_position["y"])) * SCALE
 		for neighbor in data.regions[region_id].get("adjacent", []):
-			if geometry.edge_path(region_id, neighbor).size() < 2:
+			var path := geometry.edge_path(region_id, neighbor)
+			if path.size() < 2:
 				missing.append(region_id + "-" + String(neighbor))
+				continue
+			# Orientation matters: a route preview walks these from -> to, and
+			# the generator stores them in ITS OWN order, not the sorted key's.
+			if path[0].distance_to(from_world) > path[path.size() - 1].distance_to(from_world):
+				misoriented.append(region_id + "-" + String(neighbor))
 	t.check_eq(missing, [], "every land adjacency carries a road path")
+	t.check_eq(misoriented, [], "every road hands back the direction it was asked for")
 
 
 func test_landmasses_triangulate_for_drawing(t) -> void:

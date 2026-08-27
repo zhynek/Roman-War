@@ -119,4 +119,11 @@ func test_fleet_selects_and_sails_from_open_water(t) -> void:
 
 	screen._on_sea_zone_clicked(String(game.state["fleets"][fleet_id]["sea_zone"]))
 	t.check_eq(screen.selected_fleet, "", "clicking the fleet's zone again deselects it")
+
+	# Loading a save must drop the fleet selection like every other selection.
+	screen._save_game()
+	screen._on_sea_zone_clicked(String(game.state["fleets"][fleet_id]["sea_zone"]))
+	t.check_eq(screen.selected_fleet, fleet_id, "reselected before the load")
+	screen._load_game()
+	t.check_eq(screen.selected_fleet, "", "loading clears the fleet selection")
 	screen.free()

@@ -35,7 +35,7 @@ campaign runs to AD 14.
   Your fleets ride at anchor on their sea's name. A dark veil covers land you
   have not scouted; the geography shows, its owners and armies do not.
   - **Drag with the right mouse button**, or use **WASD / arrow keys**, to
-    move the map. **Double-click** centers where you clicked.
+    move the map. **Double-click a province** to center it.
   - **Scroll** to zoom — closer in, more detail appears.
   - **Left-click** anywhere in a province to select it.
   - **Hover** any region for its name, terrain, march cost, goods, and a line

@@ -93,6 +93,49 @@ func test_manual_orders_supersede_a_march(t) -> void:
 	t.check(not game.halt_march(army_id), "halting a marchless army is a no-op")
 
 
+func test_hostile_orders_supersede_a_march(t) -> void:
+	var game := _fixture_game()
+	var army_id := Fixtures.add_army(game.state, "red", "beta",
+		["test_spears", "test_spears", "test_spears"])
+	MovementRules.reset_movement(game.data, game.state)
+	game.state["armies"][army_id]["movement_left"] = 0.0
+	game.march_army(army_id, "eta")
+	t.check(game.state["armies"][army_id].has("march_path"), "order stored")
+
+	t.check(game.besiege(army_id, "alpha"), "the army invests alpha instead")
+	t.check(not game.state["armies"][army_id].has("march_path"),
+		"laying siege discards the standing march")
+
+	var report := game.end_turn()
+	t.check_eq(game.state["armies"][army_id]["region"], "alpha", "the besieger stays at the walls")
+	t.check(game.state["settlements"]["alpha"]["siege"] != null
+		or game.state["settlements"]["alpha"]["owner"] == "red",
+		"the siege holds (or the city fell) — it never dissolves to a stale march")
+	t.check(report["marches"].is_empty(), "no ghost march reported")
+
+
+func test_immediate_march_halt_leaves_honest_state(t) -> void:
+	## A hidden hostile army may bar a leg the fogged preview could not see.
+	## march_army still returns true (the order was valid when given), but the
+	## army must stand halted with the order discarded — the state the UI
+	## reads so it can say so honestly instead of logging an arrival.
+	var game := _fixture_game()
+	game.state["settlements"]["epsilon"]["owner"] = "blue"  # red now sees only beta's ring
+	var army_id := Fixtures.add_army(game.state, "red", "beta", ["test_spears"])
+	Fixtures.add_army(game.state, "blue", "delta", ["test_mob"])
+	MovementRules.reset_movement(game.data, game.state)
+
+	t.check(not game.visible_regions("red").has("delta"), "the enemy in delta is hidden")
+	var stances_before: Dictionary = game.state["factions"]["red"]["diplomacy"].duplicate()
+	t.check(game.march_army(army_id, "epsilon"), "the fogged order is accepted")
+	var army: Dictionary = game.state["armies"][army_id]
+	t.check_eq(army["region"], "gamma", "the column halts one step short of the hidden enemy")
+	t.check(not army.has("march_path"), "the dead order is discarded, not left to lie")
+	for other_faction in stances_before:
+		t.check_eq(game.state["factions"]["red"]["diplomacy"][other_faction], stances_before[other_faction],
+			"the hidden ambush changed no stance with " + String(other_faction))
+
+
 func test_old_save_shape_still_plays(t) -> void:
 	var game := _fixture_game()
 	var army_id := Fixtures.add_army(game.state, "red", "gamma", ["test_spears"])

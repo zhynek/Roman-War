@@ -177,7 +177,8 @@ func _on_sea_zone_clicked(zone_id: String) -> void:
 	## Open-water clicks drive fleets: select an own fleet in the zone, or
 	## send the selected fleet to an adjacent zone.
 	var player: String = game.state["player_faction"]
-	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet) \
+			and game.state["fleets"][selected_fleet]["owner"] == player:
 		var fleet: Dictionary = game.state["fleets"][selected_fleet]
 		if zone_id == fleet["sea_zone"]:
 			selected_fleet = ""
@@ -235,14 +236,22 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 	else:
 		var route := game.army_path_preview(selected_army, target_region, forced_march)
 		if game.march_army(selected_army, target_region, forced_march):
-			if not game.state["armies"][selected_army].has("march_path"):
+			var army_after: Dictionary = game.state["armies"][selected_army]
+			if army_after["region"] == target_region:
 				_log("The army marches to %s." % target_name)
+			elif army_after.has("march_path"):
+				if route.get("blocked_destination", false):
+					_log("The army marches on %s — it can go no further than the approaches." % target_name)
+				else:
+					_log("The army sets out for %s — %d turns' march%s" % [target_name,
+						int(route.get("turns", 2)),
+						", at a forced pace." if forced_march else "."])
 			elif route.get("blocked_destination", false):
-				_log("The army marches on %s — it can go no further than the approaches." % target_name)
+				_log("The army stands before %s — the way in is barred." % target_name)
 			else:
-				_log("The army sets out for %s — %d turns' march%s" % [target_name,
-					int(route.get("turns", 2)),
-					", at a forced pace." if forced_march else "."])
+				# The immediate advance already halted mid-route (something
+				# unseen barred a leg) and the order was discarded.
+				_log("[color=#e0a060]The march toward %s is halted — the way is barred.[/color]" % target_name)
 		else:
 			_log("The army cannot reach %s this season." % target_name)
 	_after_order()
@@ -426,6 +435,7 @@ func _save_game() -> void:
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
+		selected_fleet = ""
 		map_view.selected_region = ""
 		region_panel.clear_panel()
 		_victory_shown = false

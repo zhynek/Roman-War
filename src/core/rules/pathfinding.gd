@@ -5,10 +5,11 @@ class_name PathfindingRules
 ## sorted region id — so a loaded save previews and marches exactly like the
 ## live game.
 ##
-## Fog rule: a hostile army blocks a route only when the region it stands in
-## is inside the caller's visible set. A path preview that routed AROUND an
-## army the player cannot see would leak its position; the actual march still
-## halts on it, because every executed leg goes through MovementRules.
+## Fog rule: hostility blocks a route only inside the caller's visible set —
+## a hidden army, or the unseen owner of a fogged settlement, must never bend
+## a preview, or the route itself would leak what fog hides. The actual march
+## still halts on the real world, because every executed leg goes through
+## MovementRules.
 
 
 static func reachable(data: GameData, state: Dictionary, army_id: String, budget: float, forced: bool, visible: Dictionary) -> Dictionary:
@@ -37,7 +38,7 @@ static func best_path(data: GameData, state: Dictionary, army_id: String, to_reg
 	##   cost                 total cost of path
 	##   turns                estimate to walk it (1 = arrives this turn)
 	##   blocked_destination  the destination itself cannot be entered — a
-	##                        hostile settlement, or a visible hostile army
+	##                        visibly hostile settlement or army
 	var result := {
 		"reachable": false, "path": [], "legs": [], "cost": 0.0, "turns": 0,
 		"blocked_destination": false,
@@ -67,32 +68,46 @@ static func best_path(data: GameData, state: Dictionary, army_id: String, to_reg
 	for region_id in path:
 		legs.append({"region": region_id, "cost": float(costs[region_id]) - previous_cost})
 		previous_cost = float(costs[region_id])
+	var leg_costs: Array = []
+	for leg in legs:
+		leg_costs.append(leg["cost"])
 	result["reachable"] = true
 	result["path"] = path
 	result["legs"] = legs
 	result["cost"] = float(costs[target])
-	result["turns"] = estimated_turns(data, state, army_id, float(costs[target]), forced)
+	result["turns"] = estimated_turns(data, state, army_id, leg_costs, forced)
 	return result
 
 
-static func estimated_turns(data: GameData, state: Dictionary, army_id: String, total_cost: float, forced: bool) -> int:
-	## Turns to spend `total_cost` movement: 1 means it fits the movement the
-	## army has right now; each further turn adds one full fresh budget,
-	## mirroring MovementRules.reset_movement (general bonus, 0.5 floor) and
+static func estimated_turns(data: GameData, state: Dictionary, army_id: String, leg_costs: Array, forced: bool) -> int:
+	## Turns to walk the legs in order: 1 means the whole route fits the
+	## movement the army has right now. Movement is spent leg by leg, exactly
+	## as advance_march spends it — points left over when the next leg does
+	## not fit are LOST at the turn boundary (reset_movement overwrites them),
+	## so this walks the legs rather than dividing a continuous total. The
+	## per-turn budget mirrors reset_movement (general bonus, 0.5 floor) and
 	## the forced-march multiplier.
 	var army: Dictionary = state["armies"][army_id]
 	var per_turn := float(data.balance["movement"]["base_movement_points"])
 	if army["general"] != null and state["characters"].has(army["general"]):
 		per_turn += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
 	per_turn = maxf(per_turn, 0.5)
-	var now := float(army["movement_left"])
+	var budget := float(army["movement_left"])
 	if forced:
 		var multiplier := float(data.balance["movement"]["forced_march_multiplier"])
 		per_turn *= multiplier
-		now *= multiplier
-	if total_cost <= now + 0.0001:
-		return 1
-	return 1 + int(ceil((total_cost - now) / per_turn - 0.0001))
+		budget *= multiplier
+	var turns := 1
+	for leg_cost_value in leg_costs:
+		var leg_cost := float(leg_cost_value)
+		if leg_cost <= budget + 0.0001:
+			budget -= leg_cost
+			continue
+		if leg_cost > per_turn + 0.0001:
+			return 999  # no fresh turn could ever pay this leg; the march would cancel
+		turns += 1
+		budget = per_turn - leg_cost
+	return turns
 
 
 static func advance_march(data: GameData, state: Dictionary, army_id: String) -> Dictionary:
@@ -107,6 +122,11 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 	var path: Array = army.get("march_path", [])
 	if path.is_empty():
 		return {}
+	var siege = state["settlements"].get(army["region"], {}).get("siege")
+	if siege != null and siege.get("besieger", "") == army_id:
+		# A stale order must never walk a besieger away from his own siege
+		# (the facade clears orders on hostile actions; this is the backstop).
+		return _finish_march(army, army_id, 0, false, true)
 	var forced := bool(army.get("march_forced", false))
 	var steps := 0
 	while not path.is_empty():
@@ -186,16 +206,19 @@ static func _dijkstra(data: GameData, state: Dictionary, army_id: String, visibl
 
 
 static func _enterable(data: GameData, state: Dictionary, army: Dictionary, region_id: String, visible: Dictionary) -> bool:
-	## Mirrors MovementRules.can_enter, except hostile armies only count when
-	## the caller can see the region they stand in (see the fog rule above).
+	## Mirrors MovementRules.can_enter, except NOTHING outside the caller's
+	## visible set may block: routing around a fogged at-war settlement or a
+	## hidden army would leak what fog hides. The executed march still halts
+	## on the real state, because every leg goes through MovementRules.
+	if not visible.has(region_id):
+		return true
 	var owner: String = army["owner"]
 	if state["settlements"].has(region_id):
 		if DiplomacyRules.at_war(state, owner, state["settlements"][region_id]["owner"]):
 			return false
-	if visible.has(region_id):
-		for other in state["armies"].values():
-			if other["region"] == region_id and DiplomacyRules.at_war(state, owner, other["owner"]):
-				return false
+	for other in state["armies"].values():
+		if other["region"] == region_id and DiplomacyRules.at_war(state, owner, other["owner"]):
+			return false
 	return true
 
 
