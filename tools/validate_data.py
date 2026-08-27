@@ -592,6 +592,10 @@ def main() -> int:
 
 
 def _entity_count(document: dict) -> int:
+    # The glossary is four parallel sections; every other table has one list.
+    if "unit_classes" in document:
+        return sum(len(document.get(key, [])) for key in
+                   ("unit_classes", "attributes", "effects", "building_kinds"))
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
                 "cells"):

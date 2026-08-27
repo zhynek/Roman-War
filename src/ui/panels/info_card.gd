@@ -2,11 +2,10 @@ class_name InfoCard
 extends PanelContainer
 ## The R1/R2/R3 payoff: one card that shows what a thing IS. A unit card
 ## carries its portrait, class, stats, speed, its skills explained, and the
-## building that trains it; a building card carries its portrait, each
-## level's named effects, and the troops each tier unlocks — the class-to-
-## building correspondence, clickable in both directions (an unlock row
-## opens that unit's card; a unit's trained-at line opens the building
-## browser side). Everything it says comes from Game.unit_profile /
+## building that trains it (named, as text); a building card carries its
+## portrait, each level's named effects, and the troops each tier unlocks —
+## the class-to-building correspondence, with each unlock row a Button that
+## opens that unit's card. Everything it says comes from Game.unit_profile /
 ## Game.building_profile; everything it draws comes from Illustrations.
 
 signal closed

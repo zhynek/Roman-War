@@ -525,6 +525,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | win_conditions.json | per-faction long/short goals | VictoryRules |
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
+| glossary.json | UI vocabulary: unit classes, attributes, effects, building kinds (id, name, blurb each) | info cards, map dossier (`Game.unit_profile` / `building_profile`) |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,

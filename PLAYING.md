@@ -43,7 +43,8 @@ campaign runs to AD 14.
     mouse does not travel, so dragging never mis-clicks; **hover** for its
     details.
   - **Right-click** a province for its dossier: your garrison and buildings
-    there, and the armies present with each troop's skills at a glance.
+    there, and the armies present — your own troops with their skills at a
+    glance, while a foreign stack shows only its size.
     Click any row for its full illustrated card — the unit's stats, skills
     explained, and the building that trains it; a building's card lists
     each level's effects and the troops it unlocks. The same right-click
@@ -98,10 +99,12 @@ panel to select it. Now:
   turn).
 - **Click an enemy region** to attack the army there or lay siege to the city.
   If you are not already at war, the game asks first — it will never start a
-  war by accident. Every battle you fight then plays back as an animated
-  field: the lines close, grind, and one side breaks and is ridden down,
-  with morale bars draining above. It is a replay of the decided outcome,
-  and you can skip it at any moment.
+  war by accident. Every battle you order — an attack or an assault — then
+  plays back as an animated field: the lines close, grind, and one side
+  breaks and is ridden down, with morale bars draining above. It is a
+  replay of the decided outcome, and you can skip it at any moment. (A
+  siege you let starve resolves during END TURN and reports in the log
+  instead.)
 - Standing at a besieged city, you can **assault the walls** once your siege
   equipment is ready (two turns), or wait and starve them out. When you take a
   city you choose to **occupy** (keeps the people, worst unrest), **enslave**

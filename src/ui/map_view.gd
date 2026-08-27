@@ -396,8 +396,7 @@ func _update_hover(screen_point: Vector2) -> void:
 	_mouse_at = screen_point
 	_tooltip_suppressed = false  # real mouse motion re-arms the tooltip
 	var hit := _region_at(screen_point)
-	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if hit != "" \
-		else Control.CURSOR_ARROW
+	_set_cursor(Control.CURSOR_POINTING_HAND if hit != "" else Control.CURSOR_ARROW)
 	if hit == hover_region:
 		return
 	hover_region = hit
@@ -415,7 +414,15 @@ func _clear_hover() -> void:
 			_overlay_layer.queue_redraw()
 		region_hovered.emit("")
 	_hide_tooltip()
-	mouse_default_cursor_shape = Control.CURSOR_ARROW
+	_set_cursor(Control.CURSOR_ARROW)
+
+
+func _set_cursor(shape: Control.CursorShape) -> void:
+	## Godot 4.4.1's headless DisplayServer faults at teardown once a cursor
+	## shape has been set, and the gesture tests drive real motion events
+	## through the hover path — so headless runs never touch the cursor.
+	if DisplayServer.get_name() != "headless":
+		mouse_default_cursor_shape = shape
 
 
 func _show_tooltip() -> void:

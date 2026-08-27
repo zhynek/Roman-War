@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 17
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -31,7 +31,7 @@ previews, fleets on the map, and a unified dark theme.
 The map modernization landed in 10 commits, each gated, ending with a
 three-reviewer adversarial pass whose 15 findings are all fixed (§7).
 
-**Green:** 91 tests / 0 failures, validator 0 errors /
+**Green:** 112 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. Branch `claude/modernize-map-world-view-03orjy`,
 pushed. An **Apple Silicon build of this branch was delivered** to the user,
 who is playtesting it; the requested follow-up work is §5. Rebuild per §3
@@ -71,7 +71,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 89 tests, 0 failures (~15s)
+godot --headless --path . --script res://tests/run_tests.gd      # 112 tests, 0 failures (~20s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -138,9 +138,10 @@ What landed where:
   answers on the panel's build, demolish, recruit, hire and unit rows.
 - **Map dossier** (`src/ui/panels/map_context_menu.gd`): right-click a
   province for its garrison (skills named inline), its buildings by built
-  level, and the armies present — every row a door into a card. Fog
-  discipline matches the tooltip and panel exactly: a fogged province gives
-  up only its region name; rival cities keep their rosters and works.
+  level, and the armies present — your own troops as rows that open their
+  cards; a foreign stack shows only its size. Fog discipline matches the
+  tooltip and panel exactly: a fogged province gives up only its region
+  name; rival cities keep their rosters and works.
 - **Battle round log** (`AutoResolver`): additive `rounds[]` — skirmish,
   charge, melee, break, pursuit; per-round casualty splits that sum exactly
   to the single-shot totals; a morale track; the break naming the side that
