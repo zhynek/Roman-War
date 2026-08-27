@@ -148,12 +148,16 @@ func test_map_gestures(t) -> void:
 	t.check(view._camera_offset != camera_before, "left-drag pans the map")
 	t.check_eq(clicks.size(), 1, "a drag is never a click")
 
-	# A hand's wobble under the threshold still clicks.
+	# A hand's wobble under the threshold still clicks — and the click stays
+	# aimed at the PRESSED region: the tolerance forgives the wobble, it must
+	# never let the wobble re-aim an order across a border.
 	at = view.to_screen(view.world_pos(game.data.regions[capital]))
 	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
 	view._gui_input(_motion_event(at + Vector2(3, 2), Vector2(3, 2)))
 	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at + Vector2(3, 2)))
 	t.check_eq(clicks.size(), 2, "a wobble under the threshold does not eat the click")
+	if clicks.size() == 2:
+		t.check_eq(String(clicks[1]), capital, "and the click names the pressed region")
 
 	# Middle-drag pans as it always has. The drag runs down the world's long
 	# axis — a pure-x drag can die against the camera clamp when the view
@@ -185,6 +189,49 @@ func test_map_gestures(t) -> void:
 	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at))
 	t.check_eq(clicks.size(), 3, "the double-click's second press issues no second order")
 	t.check(view._camera_offset != camera_before, "it centers the camera instead")
+
+	# The right button stays silent mid-chord: no dossier while a left press
+	# or a drag is live, so no click can fire underneath an opening menu.
+	at = view.to_screen(view.world_pos(game.data.regions[capital]))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_button_event(MOUSE_BUTTON_RIGHT, true, at))
+	t.check_eq(menus.size(), 1, "no dossier during a live left press")
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at))
+	t.check_eq(clicks.size(), 4, "the left release still clicks once the chord is over")
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_motion_event(at + Vector2(30, -30), Vector2(30, -30)))
+	view._gui_input(_button_event(MOUSE_BUTTON_RIGHT, true, at + Vector2(30, -30)))
+	t.check_eq(menus.size(), 1, "no dossier mid-drag either")
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at + Vector2(30, -30)))
+	t.check_eq(clicks.size(), 4, "and the drag still swallows the click")
+
+	# A sea gesture obeys the same grammar: a still release addresses the
+	# sea; a drag over water is a pan, never a sail order.
+	var seas: Array = []
+	view.sea_zone_clicked.connect(func(zone_id: String): seas.append(zone_id))
+	var sea_at := Vector2.ZERO
+	var found_sea := false
+	var zone_ids: Array = game.data.sea_zones.keys()
+	zone_ids.sort()
+	for zone_id in zone_ids:
+		var anchor: Dictionary = game.data.sea_zones[zone_id].get("position", {})
+		if anchor.is_empty():
+			continue
+		var candidate := view.to_screen(Vector2(
+			float(anchor["x"]), float(anchor["y"])) * MapView.WORLD_SCALE)
+		if view._region_at(candidate) == "" and view._sea_zone_at(candidate) == zone_id:
+			sea_at = candidate
+			found_sea = true
+			break
+	t.check(found_sea, "an open-water anchor exists to click")
+	if found_sea:
+		view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, sea_at))
+		view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, sea_at))
+		t.check_eq(seas.size(), 1, "a still release over open water addresses the sea")
+		view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, sea_at))
+		view._gui_input(_motion_event(sea_at + Vector2(0, -40), Vector2(0, -40)))
+		view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, sea_at + Vector2(0, -40)))
+		t.check_eq(seas.size(), 1, "a drag over water is a pan, not a sail order")
 	view.free()
 
 

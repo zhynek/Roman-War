@@ -52,7 +52,14 @@ func _run_suite() -> void:
 				print("ok    %s" % context.current)
 
 	print("\n%d tests, %d failures" % [total, failures])
-	quit(1 if (failures > 0 or total == 0) else 0)
+	var exit_code := 1 if (failures > 0 or total == 0) else 0
+	# The whole suite runs inside one frame, so every queue_free the tests
+	# issued is still pending here. Let two frames flush them before quitting:
+	# tearing the engine down over orphaned nodes is exactly the kind of exit
+	# 4.4.1 mishandles (see MapView._set_cursor for the one it already hit).
+	await process_frame
+	await process_frame
+	quit(exit_code)
 
 
 func _find_test_scripts() -> Array:

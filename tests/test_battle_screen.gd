@@ -150,7 +150,16 @@ func test_campaign_screen_hosts_the_theatre(t) -> void:
 	screen._show_battle(staged["result"], "Red", "Blue")
 	t.check(screen.battle_screen != null and screen.battle_screen.get_parent() == screen,
 		"a fought battle raises the curtain")
-	screen.battle_screen.skip()
-	screen.battle_screen._on_button()  # finished: the button is Close
+	var theatre: BattleScreen = screen.battle_screen
+	theatre.skip()
+	theatre._on_button()  # finished: the button is Close
 	t.check(screen.battle_screen == null, "closing strikes the set")
+	# The node lives until its queue_free flushes; a Close double-fired in
+	# that window must be idempotent and must not touch a replacement.
+	theatre._on_button()
+	t.check(screen.battle_screen == null, "a double Close changes nothing")
+	screen._show_battle(staged["result"], "Red", "Blue")
+	var replacement: BattleScreen = screen.battle_screen
+	theatre._on_button()  # the OLD theatre closing again
+	t.check(screen.battle_screen == replacement, "an old curtain cannot strike the new set")
 	screen.free()

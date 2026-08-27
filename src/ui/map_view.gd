@@ -285,11 +285,16 @@ func _gui_input(event: InputEvent) -> void:
 		elif mouse_event.button_index == MOUSE_BUTTON_RIGHT and mouse_event.pressed:
 			# The right button is a question now, not a camera handle: what
 			# stands here? The campaign screen answers with the dossier menu.
-			_hide_tooltip()
-			_tooltip_suppressed = true
-			var hit := _region_at(mouse_event.position)
-			if hit != "":
-				region_context_requested.emit(hit)
+			# Never mid-chord: while a left press or a drag is live it stays
+			# silent — the pending click would otherwise fire underneath the
+			# opening dossier (mouse focus keeps routing the release here,
+			# past the menu's click-away catcher).
+			if not _left_down and not _dragging:
+				_hide_tooltip()
+				_tooltip_suppressed = true
+				var hit := _region_at(mouse_event.position)
+				if hit != "":
+					region_context_requested.emit(hit)
 		elif mouse_event.button_index == MOUSE_BUTTON_LEFT:
 			if mouse_event.pressed:
 				_hide_tooltip()
@@ -307,16 +312,20 @@ func _gui_input(event: InputEvent) -> void:
 					_press_at = mouse_event.position
 			else:
 				# The click rides on the release: a press that travelled was
-				# a pan, and must not order anything when it lets go.
+				# a pan, and must not order anything when it lets go. The hit
+				# is taken at the PRESS point — the sub-threshold tolerance
+				# forgives a wobbling hand, so the wobble must never re-aim
+				# the click across a border (with an army selected, a click
+				# is an order).
 				var was_click := _left_down and not _left_dragged
 				_left_down = false
 				_left_dragged = false
 				if was_click:
-					var hit := _region_at(mouse_event.position)
+					var hit := _region_at(_press_at)
 					if hit != "":
 						region_clicked.emit(hit)
 					else:
-						var zone := _sea_zone_at(mouse_event.position)
+						var zone := _sea_zone_at(_press_at)
 						if zone != "":
 							sea_zone_clicked.emit(zone)
 	elif event is InputEventMouseMotion:

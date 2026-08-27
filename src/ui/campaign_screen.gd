@@ -537,11 +537,16 @@ func _show_battle(result: Dictionary, attacker_label: String, defender_label: St
 		return
 	if battle_screen != null and is_instance_valid(battle_screen):
 		battle_screen.queue_free()
-	battle_screen = BattleScreen.create(game, result, attacker_label, defender_label)
-	battle_screen.closed.connect(func():
-		battle_screen.queue_free()
-		battle_screen = null)
-	add_child(battle_screen)
+	# The lambda captures THIS screen instance, never the member: a Close
+	# double-fired in one frame stays idempotent, and if a new battle has
+	# already replaced this one, closing the old must not touch the new.
+	var screen := BattleScreen.create(game, result, attacker_label, defender_label)
+	battle_screen = screen
+	screen.closed.connect(func():
+		screen.queue_free()
+		if battle_screen == screen:
+			battle_screen = null)
+	add_child(screen)
 
 
 func _on_battle_fought(result: Dictionary, defender_label: String) -> void:
