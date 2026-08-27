@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "map_geometry.schema.json",
+  "title": "Generated map geometry: landmass outlines, region cells, road paths",
+  "description": "Written by tools/generate_map_geometry.py from regions.json; never edited by hand. CI validates the committed file but does not regenerate it.",
+  "type": "object",
+  "required": ["meta", "landmasses", "cells", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "meta": {
+      "type": "object",
+      "required": ["seed", "grid", "bounds", "generator"],
+      "additionalProperties": false,
+      "properties": {
+        "seed": { "type": "integer" },
+        "grid": { "type": "integer", "minimum": 50 },
+        "bounds": {
+          "type": "object",
+          "required": ["min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" }
+          }
+        },
+        "generator": { "type": "string" }
+      }
+    },
+    "landmasses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["outline", "holes"],
+        "additionalProperties": false,
+        "properties": {
+          "outline": { "$ref": "#/$defs/ring" },
+          "holes": { "type": "array", "items": { "$ref": "#/$defs/ring" } }
+        }
+      }
+    },
+    "cells": {
+      "type": "array",
+      "minItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["region", "label", "polygons"],
+        "additionalProperties": false,
+        "properties": {
+          "region": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "label": { "$ref": "#/$defs/point" },
+          "polygons": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/ring" } }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["a", "b", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "a": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "b": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "path": { "type": "array", "minItems": 2, "items": { "$ref": "#/$defs/point" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "number", "minimum": -2, "maximum": 102 }
+    },
+    "ring": {
+      "type": "array",
+      "minItems": 3,
+      "items": { "$ref": "#/$defs/point" }
+    }
+  }
+}

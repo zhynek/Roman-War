@@ -39,6 +39,7 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "map_geometry.json": "map_geometry.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -223,6 +224,80 @@ def cross_checks(t: dict[str, dict]) -> None:
             elif other["id"] in region["adjacent"] and distance > 35:
                 warn(f"regions: adjacent {region['id']} and {other['id']} are far apart "
                      f"on the map (distance {distance:.1f})")
+
+    # --- map geometry (generated from regions; must stay in step) ---------
+    geometry = t.get("map_geometry.json", {})
+
+    def inside_ring(x: float, y: float, ring: list) -> bool:
+        hit = False
+        for i in range(len(ring)):
+            x0, y0 = ring[i]
+            x1, y1 = ring[(i + 1) % len(ring)]
+            if (y0 > y) != (y1 > y) and x < (x1 - x0) * (y - y0) / (y1 - y0) + x0:
+                hit = not hit
+        return hit
+
+    def ring_area(ring: list) -> float:
+        total = 0.0
+        for i in range(len(ring)):
+            x0, y0 = ring[i]
+            x1, y1 = ring[(i + 1) % len(ring)]
+            total += x0 * y1 - x1 * y0
+        return abs(total) / 2.0
+
+    if geometry:
+        cell_by_region: dict[str, dict] = {}
+        for cell in geometry.get("cells", []):
+            if cell["region"] in cell_by_region:
+                err(f"map_geometry: duplicate cell for region {cell['region']}")
+            cell_by_region[cell["region"]] = cell
+            if cell["region"] not in regions:
+                err(f"map_geometry: cell for unknown region {cell['region']}")
+            for ring in cell["polygons"]:
+                if ring_area(ring) < 0.05:
+                    err(f"map_geometry: {cell['region']}: degenerate cell polygon")
+        stale = "(rerun tools/generate_map_geometry.py)"
+        for region_id, region in regions.items():
+            cell = cell_by_region.get(region_id)
+            if cell is None:
+                err(f"map_geometry: region {region_id} has no cell {stale}")
+                continue
+            position = region.get("position")
+            if position and not any(inside_ring(position["x"], position["y"], ring)
+                                    for ring in cell["polygons"]):
+                err(f"map_geometry: {region_id}: position lies outside its own cell "
+                    f"— map picking would disagree with the token {stale}")
+
+        for landmass in geometry.get("landmasses", []):
+            if ring_area(landmass["outline"]) < 0.5:
+                err("map_geometry: degenerate landmass outline")
+
+        edge_by_pair: dict[tuple, dict] = {}
+        for edge in geometry.get("edges", []):
+            key = tuple(sorted((edge["a"], edge["b"])))
+            if key in edge_by_pair:
+                err(f"map_geometry: duplicate edge {key}")
+            edge_by_pair[key] = edge
+            for rid in key:
+                if rid not in regions:
+                    err(f"map_geometry: edge {key} names unknown region {rid}")
+            if edge["a"] in regions and edge["b"] not in regions.get(edge["a"], {}).get("adjacent", []) \
+                    and edge["b"] in regions:
+                err(f"map_geometry: edge {key} joins regions that are not adjacent {stale}")
+            if edge["a"] in regions and edge["b"] in regions:
+                pa = regions[edge["a"]].get("position")
+                pb = regions[edge["b"]].get("position")
+                path = edge["path"]
+                if pa and pb:
+                    da = ((path[0][0] - pa["x"]) ** 2 + (path[0][1] - pa["y"]) ** 2) ** 0.5
+                    db = ((path[-1][0] - pb["x"]) ** 2 + (path[-1][1] - pb["y"]) ** 2) ** 0.5
+                    if da > 3.0 or db > 3.0:
+                        err(f"map_geometry: edge {key} does not run position to position {stale}")
+        for region_id, region in regions.items():
+            for neighbor in region["adjacent"]:
+                key = tuple(sorted((region_id, neighbor)))
+                if regions and neighbor in regions and key not in edge_by_pair:
+                    err(f"map_geometry: adjacency {key} has no road path {stale}")
 
     # --- wonders ----------------------------------------------------------
     wonders = {w["id"]: w for w in t.get("wonders.json", {}).get("wonders", [])}
@@ -470,7 +545,8 @@ def main() -> int:
 
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
+                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
+                "cells"):
         if key in document:
             return len(document[key])
     return 0
