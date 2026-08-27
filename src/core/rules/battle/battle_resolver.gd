@@ -26,6 +26,13 @@ extends RefCounted
 ##     attacker_casualty_pct: float, defender_casualty_pct: float,
 ##     attacker_general_died: bool, defender_general_died: bool,
 ##     experience_gained: int,
+##     # Optional playback keys — consumers read them with .get and must
+##     # cope with their absence (a resolver may not narrate):
+##     rounds: [{phase: String, attacker_casualty_pct: float,
+##       defender_casualty_pct: float, attacker_morale: float,
+##       defender_morale: float, breaking: ""|"attacker"|"defender"}, ...],
+##     attacker_report / defender_report: per-unit fates in pre-battle
+##       order: [{template, strength_before, strength_after, destroyed}, ...]
 ##   }
 
 

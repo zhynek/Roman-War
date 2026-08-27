@@ -185,7 +185,13 @@
     "casualty_min_pct": 2,
     "casualty_max_pct": 95,
     "unit_casualty_scatter_pct": 30,
-    "general_command_bonus_pct": 5
+    "general_command_bonus_pct": 5,
+    "round_winner_casualty_shares": [0.15, 0.3, 0.4, 0.1, 0.05],
+    "round_loser_casualty_shares": [0.1, 0.2, 0.3, 0.15, 0.25],
+    "round_loser_morale_track": [85, 65, 35, 0, 0],
+    "round_winner_morale_progress": [0.1, 0.35, 0.7, 0.9, 1.0],
+    "round_winner_morale_min": 35,
+    "round_winner_morale_max": 90
   },
   "siege": {
     "equipment_turns": 2,

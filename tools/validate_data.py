@@ -535,6 +535,23 @@ def cross_checks(t: dict[str, dict]) -> None:
         for extra in sorted(keys - terrain_enum):
             err(f"balance: {section}.{table_key} has unknown terrain '{extra}'")
 
+    # The round-log tables are indexed per phase by AutoResolver.ROUND_PHASES
+    # (skirmish/charge/melee/break/pursuit — 5 entries): a short array is a
+    # runtime crash, a long one dead data. Casualty shares must sum to ~1 so
+    # every phase's split stays a sane slice of the single-shot total.
+    round_phase_count = 5
+    battle = balance.get("battle", {})
+    for table_key in ("round_winner_casualty_shares", "round_loser_casualty_shares",
+                      "round_loser_morale_track", "round_winner_morale_progress"):
+        entries = battle.get(table_key, [])
+        if len(entries) != round_phase_count:
+            err(f"balance: battle.{table_key} needs exactly {round_phase_count} "
+                f"entries (one per battle round phase), has {len(entries)}")
+    for table_key in ("round_winner_casualty_shares", "round_loser_casualty_shares"):
+        total = sum(battle.get(table_key, []))
+        if abs(total - 1.0) > 0.001:
+            err(f"balance: battle.{table_key} must sum to 1.0, sums to {total}")
+
 
 def main() -> int:
     tables = load_tables()
