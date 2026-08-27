@@ -28,6 +28,7 @@ static func create(new_game: Game) -> CampaignScreen:
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	theme = UiStyle.build_theme()
 	var root := VBoxContainer.new()
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
@@ -83,22 +84,27 @@ func _ready() -> void:
 	refresh()
 
 
-func _build_top_bar() -> HBoxContainer:
+func _build_top_bar() -> PanelContainer:
+	var frame := PanelContainer.new()
+	frame.custom_minimum_size = Vector2(0, 40)
 	var bar := HBoxContainer.new()
-	bar.custom_minimum_size = Vector2(0, 34)
+	bar.add_theme_constant_override("separation", 6)
+	frame.add_child(bar)
 
 	var faction: Dictionary = game.data.factions[game.state["player_faction"]]
 	var swatch := ColorRect.new()
 	swatch.color = Color.html(faction.get("color", "#808080"))
-	swatch.custom_minimum_size = Vector2(18, 18)
+	swatch.custom_minimum_size = Vector2(20, 20)
+	swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.add_child(swatch)
 
 	for key in ["faction", "treasury", "date", "senate", "victory"]:
 		var label := Label.new()
-		label.add_theme_font_size_override("font_size", 13)
+		label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		bar.add_child(label)
 		top_labels[key] = label
 	top_labels["faction"].text = " %s   " % faction["name"]
+	top_labels["faction"].add_theme_color_override("font_color", UiStyle.PARCHMENT)
 
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
@@ -106,23 +112,24 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
-	end_turn.add_theme_color_override("font_color", Color(1, 0.85, 0.4))
+	end_turn.theme_type_variation = &"EndTurnButton"
 	bar.add_child(end_turn)
-	return bar
+	return frame
 
 
 func refresh() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
-	top_labels["treasury"].text = "Treasury: %d   " % int(faction["treasury"])
+	top_labels["treasury"].text = "◆ Treasury: %d   " % int(faction["treasury"])
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
-	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
+	var season_mark := "☀" if String(game.state["season"]) == "summer" else "❄"
+	top_labels["date"].text = "%s %s, %s   " % [season_mark, year_text, String(game.state["season"]).capitalize()]
 	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
-		top_labels["senate"].text = "Senate %.0f · People %.0f   " \
+		top_labels["senate"].text = "⚖ Senate %.0f · People %.0f   " \
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
 	var progress := game.victory_progress()
 	if not progress.is_empty():
-		top_labels["victory"].text = "Regions %d/%d" \
+		top_labels["victory"].text = "⚑ Regions %d/%d" \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
 	# The map's live overlays: reachability for the selected army, zone

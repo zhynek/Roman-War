@@ -17,15 +17,6 @@ const OWNER_TINT_ALPHA := 0.28
 const FOG_VEIL := Color(0.10, 0.11, 0.14, 0.62)
 const FOG_TOKEN := Color(0.16, 0.16, 0.18)
 
-const TERRAIN_TINTS := {
-	"plains": Color(0.62, 0.68, 0.42, 0.5),
-	"forest": Color(0.38, 0.52, 0.33, 0.5),
-	"hills": Color(0.68, 0.62, 0.40, 0.5),
-	"mountains": Color(0.58, 0.54, 0.50, 0.55),
-	"desert": Color(0.80, 0.72, 0.48, 0.55),
-	"steppe": Color(0.70, 0.68, 0.45, 0.5),
-	"marsh": Color(0.46, 0.58, 0.47, 0.5),
-}
 const DECOR_DENSITY := {  # glyph count per cell by terrain, scaled by zoom bucket
 	"mountains": 5, "hills": 4, "forest": 5, "marsh": 3, "desert": 4, "steppe": 2, "plains": 2,
 }
@@ -59,7 +50,7 @@ class TerrainLayer:
 		if cell.is_empty():
 			return
 		var terrain: String = view.game.data.regions[region_id].get("terrain", "plains")
-		var tint: Color = MapLayers.TERRAIN_TINTS.get(terrain, MapLayers.TERRAIN_TINTS["plains"])
+		var tint: Color = UiStyle.TERRAIN_TINTS.get(terrain, UiStyle.TERRAIN_TINTS["plains"])
 		for tri in cell["tris"]:
 			draw_colored_polygon(tri, tint)
 		_draw_decor(cell, region_id, terrain)
@@ -72,12 +63,12 @@ class TerrainLayer:
 		if bucket >= 2:
 			budget += budget / 2 + 1
 		var bounds: Rect2 = cell["bounds"]
-		var seed_hash := SettlementIcons._fnv(region_id)
+		var seed_hash := UiStyle.fnv(region_id)
 		var placed := 0
 		var attempt := 0
 		while placed < budget and attempt < budget * 4:
-			var fx := float(SettlementIcons._fnv_step(seed_hash, attempt * 2) % 1000) / 1000.0
-			var fy := float(SettlementIcons._fnv_step(seed_hash, attempt * 2 + 1) % 1000) / 1000.0
+			var fx := float(UiStyle.fnv_step(seed_hash, attempt * 2) % 1000) / 1000.0
+			var fy := float(UiStyle.fnv_step(seed_hash, attempt * 2 + 1) % 1000) / 1000.0
 			attempt += 1
 			var spot := bounds.position + Vector2(bounds.size.x * fx, bounds.size.y * fy)
 			var inside := false
@@ -87,7 +78,7 @@ class TerrainLayer:
 					break
 			if not inside:
 				continue
-			_draw_glyph(terrain, spot, SettlementIcons._fnv_step(seed_hash, attempt))
+			_draw_glyph(terrain, spot, UiStyle.fnv_step(seed_hash, attempt))
 			placed += 1
 
 	func _draw_glyph(terrain: String, spot: Vector2, jitter: int) -> void:

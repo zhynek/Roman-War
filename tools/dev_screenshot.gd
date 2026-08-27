@@ -31,7 +31,9 @@ func _tick() -> void:
 		_screen = CampaignScreen.create(_game)
 		root.add_child(_screen)
 	elif _frames == 4:
-		_screen.size = Vector2(root.size)
+		# In canvas_items stretch mode the canvas space differs from window
+		# pixels; the viewport rect is the truth.
+		_screen.size = _screen.get_viewport_rect().size
 	elif _frames == 14:
 		_arrange()
 	elif _frames >= 20 and _frames <= 38:

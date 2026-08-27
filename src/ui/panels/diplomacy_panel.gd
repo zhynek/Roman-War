@@ -129,7 +129,7 @@ func _header(text: String) -> void:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", Color(0.95, 0.9, 0.75))
+	label.add_theme_color_override("font_color", UiStyle.PARCHMENT)
 	_content.add_child(label)
 
 

@@ -244,7 +244,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 
 ## --- Small builders -------------------------------------------------------
 
-func _header(text: String, font_size: int, color: Color = Color(0.95, 0.9, 0.75)) -> void:
+func _header(text: String, font_size: int, color: Color = UiStyle.PARCHMENT) -> void:
 	var label := Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", font_size)
@@ -263,10 +263,10 @@ func _label(text: String, color: Color = Color(0.85, 0.85, 0.85)) -> void:
 
 
 func _breakdown(title: String, factors: Array) -> void:
-	_label(title, Color(0.95, 0.9, 0.75))
+	_label(title, UiStyle.PARCHMENT)
 	for factor in factors:
 		var value := float(factor["value"])
-		var color := Color(0.55, 0.85, 0.55) if value >= 0 else Color(0.9, 0.55, 0.5)
+		var color := UiStyle.GOOD if value >= 0 else UiStyle.BAD
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 

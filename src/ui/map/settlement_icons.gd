@@ -46,7 +46,7 @@ static func draw_settlement(canvas: CanvasItem, center: Vector2, params: Diction
 		owner_color: Color) -> void:
 	var level := int(params["level"])
 	var radius := footprint_radius(level)
-	var seed_hash := _fnv(String(params["region"]))
+	var seed_hash := UiStyle.fnv(String(params["region"]))
 	var culture := String(params["culture"])
 
 	# Ground pad under the buildings, in the owner's color family.
@@ -92,7 +92,7 @@ static func _draw_buildings(canvas: CanvasItem, center: Vector2, radius: float,
 	var count := 2 + level
 	for i in range(count):
 		var angle := TAU * float(i) / float(count) + float(seed_hash % 628) / 100.0
-		var distance := radius * (0.28 + 0.34 * float(_fnv_step(seed_hash, i) % 100) / 100.0)
+		var distance := radius * (0.28 + 0.34 * float(UiStyle.fnv_step(seed_hash, i) % 100) / 100.0)
 		var spot := center + Vector2.from_angle(angle) * distance
 		var half := 1.7 + 0.45 * level
 		canvas.draw_rect(Rect2(spot - Vector2(half, half), Vector2(half, half) * 2.0), wall_tint)
@@ -180,7 +180,7 @@ static func _wall_ring(center: Vector2, radius: float, culture: String, seed_has
 	# Tribal: an irregular polygon, jittered by the region hash.
 	var segments := 9
 	for i in range(segments):
-		var wobble := 0.8 + 0.34 * float(_fnv_step(seed_hash, i) % 100) / 100.0
+		var wobble := 0.8 + 0.34 * float(UiStyle.fnv_step(seed_hash, i) % 100) / 100.0
 		ring.append(center + Vector2.from_angle(TAU * float(i) / float(segments)) * radius * wobble)
 	return ring
 
@@ -253,15 +253,3 @@ static func _draw_star(canvas: CanvasItem, center: Vector2, radius: float, color
 
 static func _contrast_ink(background: Color) -> Color:
 	return Color(0.08, 0.08, 0.1) if background.get_luminance() > 0.5 else Color(0.95, 0.94, 0.9)
-
-
-static func _fnv(text: String) -> int:
-	## FNV-1a over the id's bytes: the one sanctioned source of UI jitter.
-	var hash_value := 2166136261
-	for byte in text.to_utf8_buffer():
-		hash_value = ((hash_value ^ byte) * 16777619) & 0xFFFFFFFF
-	return hash_value
-
-
-static func _fnv_step(seed_hash: int, step: int) -> int:
-	return ((seed_hash ^ (step * 2654435761)) * 16777619) & 0xFFFFFFFF
