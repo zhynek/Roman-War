@@ -25,10 +25,14 @@ static func load_for(data: GameData, scale: float, path: String = "res://data/ma
 	for entry in parsed.get("landmasses", []):
 		var outline := _scaled(entry["outline"], scale)
 		var holes: Array = []
+		var hole_tris: Array = []
 		for hole in entry.get("holes", []):
-			holes.append(_scaled(hole, scale))
+			var ring := _scaled(hole, scale)
+			holes.append(ring)
+			hole_tris.append_array(_triangulate(ring))
 		geometry.landmasses.append({
-			"outline": outline, "tris": _triangulate(outline), "holes": holes,
+			"outline": outline, "tris": _triangulate(outline),
+			"holes": holes, "hole_tris": hole_tris,
 		})
 
 	for cell in parsed.get("cells", []):
@@ -92,7 +96,8 @@ static func _scaled(points: Array, scale: float) -> PackedVector2Array:
 
 static func _triangulate(polygon: PackedVector2Array) -> Array:
 	## Concave-safe fill: ear-clipped triangles as 3-point polygons, ready
-	## for draw_colored_polygon. Empty when the ring is degenerate.
+	## for draw_colored_polygon. Zero-area slivers (from collinear vertices)
+	## are dropped — the renderer rejects them loudly and draws nothing.
 	var tris: Array = []
 	var indices := Geometry2D.triangulate_polygon(polygon)
 	for i in range(0, indices.size(), 3):
@@ -101,7 +106,8 @@ static func _triangulate(polygon: PackedVector2Array) -> Array:
 		tri[0] = polygon[indices[i]]
 		tri[1] = polygon[indices[i + 1]]
 		tri[2] = polygon[indices[i + 2]]
-		tris.append(tri)
+		if absf((tri[1] - tri[0]).cross(tri[2] - tri[0])) > 0.01:
+			tris.append(tri)
 	return tris
 
 
