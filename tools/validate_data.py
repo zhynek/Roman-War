@@ -439,6 +439,20 @@ def cross_checks(t: dict[str, dict]) -> None:
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
 
+    # Every terrain the schema admits needs a movement cost: MovementRules
+    # indexes terrain_cost[terrain] unguarded, so a region of a costless
+    # terrain would crash the engine the first time an army steps into it.
+    regions_schema = json.loads((SCHEMAS / "regions.schema.json").read_text())
+    terrain_enum = regions_schema["properties"]["regions"]["items"]["properties"]["terrain"]["enum"]
+    terrain_costs = balance.get("movement", {}).get("terrain_cost", {})
+    for terrain in terrain_enum:
+        if terrain not in terrain_costs:
+            err(f"balance: movement.terrain_cost missing '{terrain}' "
+                "(an army entering that terrain would crash movement)")
+    for terrain in sorted(terrain_costs):
+        if terrain not in terrain_enum:
+            warn(f"balance: movement.terrain_cost names unknown terrain '{terrain}'")
+
 
 def main() -> int:
     tables = load_tables()

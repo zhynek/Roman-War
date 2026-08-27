@@ -66,6 +66,12 @@ static func data() -> GameData:
 				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {}, "description": ""},
 			],
 		},
+		{
+			"id": "test_roads", "kind": "roads", "cultures": ["roman", "barbarian"], "name": "Roads",
+			"levels": [
+				{"id": "road_1", "name": "Dirt Road", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"road_level": 1}, "description": ""},
+			],
+		},
 	]
 	for chain in chains:
 		game_data.chains[chain["id"]] = chain
@@ -113,6 +119,30 @@ static func data() -> GameData:
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
 	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+
+	# Map positions (for picking tests), and a rough-terrain branch north of
+	# the line: zeta's mountain pass parallels the beta-gamma-delta plains, so
+	# pathfinding has a costly shortcut to refuse, and eta's forest hides
+	# behind it, beyond one plain turn's marching.
+	var region_positions := {
+		"alpha": {"x": 10, "y": 50}, "beta": {"x": 20, "y": 50}, "gamma": {"x": 30, "y": 50},
+		"delta": {"x": 40, "y": 50}, "epsilon": {"x": 50, "y": 50},
+	}
+	for region_id in region_positions:
+		game_data.regions[region_id]["position"] = region_positions[region_id]
+	game_data.regions["zeta"] = {
+		"id": "zeta", "name": "Zeta", "settlement_name": "Zeta", "terrain": "mountains",
+		"fertility": 0.5, "adjacent": ["beta", "delta"], "sea_zones": [], "resources": [],
+		"hidden_resources": [], "position": {"x": 30, "y": 40},
+	}
+	game_data.regions["beta"]["adjacent"].append("zeta")
+	game_data.regions["delta"]["adjacent"].append("zeta")
+	game_data.regions["eta"] = {
+		"id": "eta", "name": "Eta", "settlement_name": "Eta", "terrain": "forest",
+		"fertility": 1.0, "adjacent": ["zeta"], "sea_zones": [], "resources": [],
+		"hidden_resources": [], "position": {"x": 30, "y": 30},
+	}
+	game_data.regions["zeta"]["adjacent"].append("eta")
 
 	game_data.units["test_merc"] = {
 		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",
