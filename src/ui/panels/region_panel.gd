@@ -8,6 +8,8 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal unit_info_requested(template_id: String)
+signal building_info_requested(chain_id: String)
 
 var game: Game
 var region_id := ""
@@ -113,7 +115,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	if not garrison.is_empty():
 		_header("Garrison (%d)" % garrison.size(), 12)
 		for unit in garrison:
-			_label("  %s  %d%%" % [_unit_name(unit), int(unit["strength_pct"])])
+			_info_label("  %s  %d%%" % [_unit_name(unit), int(unit["strength_pct"])], String(unit["template"]))
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
@@ -123,10 +125,12 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	for job in settlement["construction_queue"]:
 		_label("  building %s — %d turns left" % [_chain_name(job["chain"]), int(job["turns_left"])])
 	for project in game.available_buildings(region_id):
+		var build_chain: String = project["chain"]
 		_action_button("Build %s (%d, %dt)" % [project["name"], int(project["cost"]), int(project["build_turns"])],
 			func():
-				game.queue_building(region_id, project["chain"])
-				action_taken.emit())
+				game.queue_building(region_id, build_chain)
+				action_taken.emit(),
+			func(): building_info_requested.emit(build_chain))
 
 	# Demolition — the way a conqueror works off a foreign culture penalty.
 	var demolishable: Array = []
@@ -140,17 +144,20 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Demolish %s" % _chain_name(chain_id),
 			func():
 				game.demolish_building(region_id, chain_id)
-				action_taken.emit())
+				action_taken.emit(),
+			func(): building_info_requested.emit(chain_id))
 
 	# Recruitment
 	_header("Recruitment", 12)
 	for job in settlement["recruitment_queue"]:
 		_label("  mustering %s" % _template_name(job["template"]))
 	for unit in game.available_units(region_id):
+		var recruit_id: String = unit["id"]
 		_action_button("Recruit %s (%d)" % [unit["name"], int(unit["cost"])],
 			func():
-				game.queue_unit(region_id, unit["id"])
-				action_taken.emit())
+				game.queue_unit(region_id, recruit_id)
+				action_taken.emit(),
+			func(): unit_info_requested.emit(recruit_id))
 
 
 func _build_armies_section() -> void:
@@ -202,7 +209,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 			game.halt_march(army_id)
 			action_taken.emit())
 	for unit in army["units"]:
-		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
+		_info_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])], String(unit["template"]))
 	_label("Click anywhere in reach to march (hover shows the route and cost).\nShift-click for forced march.", Color(0.7, 0.8, 0.9))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
@@ -231,10 +238,12 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	if not offers.is_empty():
 		_header("Mercenaries for hire", 12)
 		for offer in offers:
-			_action_button("Hire %s (%d)" % [_template_name(offer["template"]), int(offer["cost"])],
+			var offer_template: String = offer["template"]
+			_action_button("Hire %s (%d)" % [_template_name(offer_template), int(offer["cost"])],
 				func():
-					game.hire_mercenary(army_id, offer["template"])
-					action_taken.emit())
+					game.hire_mercenary(army_id, offer_template)
+					action_taken.emit(),
+				func(): unit_info_requested.emit(offer_template))
 
 
 ## --- Small builders -------------------------------------------------------
@@ -265,12 +274,35 @@ func _breakdown(title: String, factors: Array) -> void:
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 
-func _action_button(text: String, handler: Callable) -> void:
+func _action_button(text: String, handler: Callable, info: Callable = Callable()) -> void:
 	var button := Button.new()
 	button.text = text
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
+	if info.is_valid():
+		_info_on_rightclick(button, info)
 	add_child(button)
+
+
+func _info_on_rightclick(control: Control, info: Callable) -> void:
+	## R2's gesture on panel rows: right-click asks "what is this?".
+	control.mouse_filter = Control.MOUSE_FILTER_STOP
+	control.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton \
+				and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_RIGHT \
+				and (event as InputEventMouseButton).pressed:
+			info.call())
+
+
+func _info_label(text: String, template_id: String, color: Color = Color(0.85, 0.85, 0.85)) -> void:
+	## A unit row that answers a right-click with its card.
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_color_override("font_color", color)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_info_on_rightclick(label, func(): unit_info_requested.emit(template_id))
+	add_child(label)
 
 
 func _separator() -> void:

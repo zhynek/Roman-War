@@ -17,6 +17,8 @@ var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
 var selected_fleet := ""
+var info_card: InfoCard
+var _card_catcher: Control
 var _victory_shown := false
 
 
@@ -70,6 +72,8 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.unit_info_requested.connect(open_unit_card)
+	region_panel.building_info_requested.connect(open_building_card)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -515,6 +519,60 @@ func _log_report(report: Dictionary) -> void:
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]
+
+
+## --- info cards (R1-R3) ----------------------------------------------------
+
+func open_unit_card(template_id: String) -> void:
+	_ensure_card_host()
+	info_card.show_unit(game, template_id)
+	_place_card()
+
+
+func open_building_card(chain_id: String) -> void:
+	_ensure_card_host()
+	info_card.show_building(game, chain_id, _selected_owner_culture())
+	_place_card()
+
+
+func close_info_card() -> void:
+	if _card_catcher != null:
+		_card_catcher.visible = false
+
+
+func _selected_owner_culture() -> String:
+	## Building art tints to whoever's town the card was opened from.
+	var region_id := map_view.selected_region
+	if region_id != "" and game.state["settlements"].has(region_id):
+		var owner: String = game.state["settlements"][region_id]["owner"]
+		return String(game.data.factions.get(owner, {}).get("culture", ""))
+	return ""
+
+
+func _ensure_card_host() -> void:
+	if _card_catcher == null:
+		# A full-screen catcher behind the card: any click outside dismisses.
+		_card_catcher = Control.new()
+		_card_catcher.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_card_catcher.mouse_filter = Control.MOUSE_FILTER_STOP
+		_card_catcher.gui_input.connect(func(event: InputEvent):
+			if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
+				close_info_card())
+		add_child(_card_catcher)
+		info_card = InfoCard.new()
+		info_card.closed.connect(close_info_card)
+		_card_catcher.add_child(info_card)
+	_card_catcher.visible = true
+	_card_catcher.move_to_front()
+
+
+func _place_card() -> void:
+	info_card.sized_for(size.y)
+	info_card.reset_size()
+	var at := get_local_mouse_position() + Vector2(16, -24)
+	info_card.position = Vector2(
+		clampf(at.x, 8.0, maxf(8.0, size.x - InfoCard.CARD_WIDTH - 16.0)),
+		clampf(at.y, 8.0, maxf(8.0, size.y - 580.0)))
 
 
 func _show_victory_banner(winner: String) -> void:

@@ -98,7 +98,7 @@ static func draw_building(canvas: CanvasItem, rect: Rect2, kind: String, culture
 
 static func draw_unit(canvas: CanvasItem, rect: Rect2, unit_class: String, culture: String) -> void:
 	var palette := culture_palette(culture)
-	canvas.draw_set_transform_matrix(_fit(rect, 1.0, Vector2(50, 60)))
+	canvas.draw_set_transform_matrix(_fit(rect, 1.42, Vector2(50, 68)))
 	_ellipse(canvas, Vector2(50, 84), 26, 7, SHADOW)
 	match unit_class:
 		"infantry": _u_infantry(canvas, palette)
