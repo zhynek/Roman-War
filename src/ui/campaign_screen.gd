@@ -18,6 +18,7 @@ var top_labels := {}
 var selected_army := ""
 var selected_fleet := ""
 var info_card: InfoCard
+var map_menu: MapContextMenu
 var _card_catcher: Control
 var _victory_shown := false
 
@@ -56,6 +57,7 @@ func _ready() -> void:
 	map_view.region_clicked.connect(_on_region_clicked)
 	map_view.region_hovered.connect(_on_region_hovered)
 	map_view.sea_zone_clicked.connect(_on_sea_zone_clicked)
+	map_view.region_context_requested.connect(open_map_menu)
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
 
@@ -521,18 +523,32 @@ func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]
 
 
-## --- info cards (R1-R3) ----------------------------------------------------
+## --- info cards & the map dossier (R1-R3) ----------------------------------
 
 func open_unit_card(template_id: String) -> void:
 	_ensure_card_host()
+	map_menu.visible = false
+	info_card.visible = true
 	info_card.show_unit(game, template_id)
 	_place_card()
 
 
 func open_building_card(chain_id: String) -> void:
 	_ensure_card_host()
+	map_menu.visible = false
+	info_card.visible = true
 	info_card.show_building(game, chain_id, _selected_owner_culture())
 	_place_card()
+
+
+func open_map_menu(region_id: String) -> void:
+	## The right-click gesture on the map: a province's dossier, its rows
+	## opening the same cards the panel's right-clicks do.
+	_ensure_card_host()
+	info_card.visible = false
+	map_menu.visible = true
+	map_menu.open_for(game, region_id)
+	_pop_at_mouse(map_menu)
 
 
 func close_info_card() -> void:
@@ -562,17 +578,25 @@ func _ensure_card_host() -> void:
 		info_card = InfoCard.new()
 		info_card.closed.connect(close_info_card)
 		_card_catcher.add_child(info_card)
+		map_menu = MapContextMenu.new()
+		map_menu.unit_info_requested.connect(open_unit_card)
+		map_menu.building_info_requested.connect(open_building_card)
+		_card_catcher.add_child(map_menu)
 	_card_catcher.visible = true
 	_card_catcher.move_to_front()
 
 
 func _place_card() -> void:
 	info_card.sized_for(size.y)
-	info_card.reset_size()
+	_pop_at_mouse(info_card)
+
+
+func _pop_at_mouse(control: Control) -> void:
+	control.reset_size()
 	var at := get_local_mouse_position() + Vector2(16, -24)
-	info_card.position = Vector2(
-		clampf(at.x, 8.0, maxf(8.0, size.x - InfoCard.CARD_WIDTH - 16.0)),
-		clampf(at.y, 8.0, maxf(8.0, size.y - 580.0)))
+	control.position = Vector2(
+		clampf(at.x, 8.0, maxf(8.0, size.x - control.size.x - 16.0)),
+		clampf(at.y, 8.0, maxf(8.0, size.y - control.size.y - 16.0)))
 
 
 func _show_victory_banner(winner: String) -> void:

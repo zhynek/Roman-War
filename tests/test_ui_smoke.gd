@@ -96,6 +96,98 @@ func test_map_picking(t) -> void:
 	view.free()
 
 
+func _button_event(button: int, is_pressed: bool, at: Vector2, double: bool = false) -> InputEventMouseButton:
+	var event := InputEventMouseButton.new()
+	event.button_index = button
+	event.pressed = is_pressed
+	event.position = at
+	event.double_click = double
+	return event
+
+
+func _motion_event(at: Vector2, relative: Vector2) -> InputEventMouseMotion:
+	var event := InputEventMouseMotion.new()
+	event.position = at
+	event.relative = relative
+	return event
+
+
+func test_map_gestures(t) -> void:
+	## The command grammar of the map: a left press is only a click if the
+	## mouse never travels — travel pans instead. Middle-drag pans as ever.
+	## The right button no longer pans at all: it asks for the dossier.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(800, 600)
+	tree.root.add_child(view)
+
+	var clicks: Array = []
+	var menus: Array = []
+	view.region_clicked.connect(func(region_id: String): clicks.append(region_id))
+	view.region_context_requested.connect(func(region_id: String): menus.append(region_id))
+
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	view.center_on(capital)
+	var at := view.to_screen(view.world_pos(game.data.regions[capital]))
+
+	# A press and a still release: that is the click.
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at))
+	t.check_eq(clicks.size(), 1, "a still release delivers the click")
+	if clicks.size() == 1:
+		t.check_eq(String(clicks[0]), capital, "on the region under the cursor")
+
+	# Travel turns the press into a pan and swallows the click.
+	var camera_before := view._camera_offset
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_motion_event(at + Vector2(40, 25), Vector2(40, 25)))
+	view._gui_input(_motion_event(at + Vector2(80, 50), Vector2(40, 25)))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at + Vector2(80, 50)))
+	t.check(view._camera_offset != camera_before, "left-drag pans the map")
+	t.check_eq(clicks.size(), 1, "a drag is never a click")
+
+	# A hand's wobble under the threshold still clicks.
+	at = view.to_screen(view.world_pos(game.data.regions[capital]))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_motion_event(at + Vector2(3, 2), Vector2(3, 2)))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at + Vector2(3, 2)))
+	t.check_eq(clicks.size(), 2, "a wobble under the threshold does not eat the click")
+
+	# Middle-drag pans as it always has. The drag runs down the world's long
+	# axis — a pure-x drag can die against the camera clamp when the view
+	# already rests on that boundary.
+	camera_before = view._camera_offset
+	view._gui_input(_button_event(MOUSE_BUTTON_MIDDLE, true, at))
+	view._gui_input(_motion_event(at + Vector2(0, -60), Vector2(0, -60)))
+	view._gui_input(_button_event(MOUSE_BUTTON_MIDDLE, false, at + Vector2(0, -60)))
+	t.check(view._camera_offset != camera_before, "middle-drag still pans")
+
+	# The right button asks for the dossier — and never moves the camera.
+	at = view.to_screen(view.world_pos(game.data.regions[capital]))
+	camera_before = view._camera_offset
+	view._gui_input(_button_event(MOUSE_BUTTON_RIGHT, true, at))
+	view._gui_input(_motion_event(at + Vector2(50, 30), Vector2(50, 30)))
+	view._gui_input(_button_event(MOUSE_BUTTON_RIGHT, false, at + Vector2(50, 30)))
+	t.check_eq(menus.size(), 1, "right-click requests the region dossier")
+	if menus.size() == 1:
+		t.check_eq(String(menus[0]), capital, "for the region under the cursor")
+	t.check(view._camera_offset == camera_before, "the right button no longer pans")
+	t.check_eq(clicks.size(), 2, "and it is never a left-click")
+
+	# A double-click's second press centers the camera and orders nothing.
+	at = view.to_screen(view.world_pos(game.data.regions[capital]))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at))
+	camera_before = view._camera_offset
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, true, at, true))
+	view._gui_input(_button_event(MOUSE_BUTTON_LEFT, false, at))
+	t.check_eq(clicks.size(), 3, "the double-click's second press issues no second order")
+	t.check(view._camera_offset != camera_before, "it centers the camera instead")
+	view.free()
+
+
 func test_polygon_picking_and_state_caches(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 7)

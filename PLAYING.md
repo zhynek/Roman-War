@@ -36,9 +36,18 @@ campaign runs to AD 14.
   ramparts mark a city under attack. Armies are shield roundels showing
   their unit count and a star when a general leads; your fleets ride at
   anchor in their named seas.
-  - **Drag with the right mouse button** (or **WASD/arrows**) to move the
-    map; **scroll** to zoom; **double-click** to center on a province.
-  - **Left-click** a province to select it; **hover** for its details.
+  - **Drag with the left or middle mouse button** (or **WASD/arrows**) to
+    move the map; **scroll** to zoom; **double-click** to center on a
+    province.
+  - **Left-click** a province to select it — a click only counts if the
+    mouse does not travel, so dragging never mis-clicks; **hover** for its
+    details.
+  - **Right-click** a province for its dossier: your garrison and buildings
+    there, and the armies present with each troop's skills at a glance.
+    Click any row for its full illustrated card — the unit's stats, skills
+    explained, and the building that trains it; a building's card lists
+    each level's effects and the troops it unlocks. The same right-click
+    answers on the right panel's build, recruit, hire, and unit rows.
   - With an army selected, its **reach this turn glows gold**; hovering a
     destination sketches the route with each leg's cost in movement points
     and when the army will arrive. **Click to march** — a destination

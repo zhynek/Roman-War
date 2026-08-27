@@ -4,7 +4,9 @@ extends Control
 ## in retained Node2D layers (terrain, political tint, fog, units, overlays)
 ## under one world-root transform, so panning and zooming move a transform
 ## instead of re-recording draw commands. Screen-space labels sit on top.
-## Emits region_clicked for the campaign screen to interpret.
+## Emits region_clicked (a left release that never travelled) and
+## region_context_requested (a right press) for the campaign screen to
+## interpret; left- and middle-drag pan the camera.
 ##
 ## Contracts the test suite pins: world_pos/to_screen/_region_at/center_on/
 ## _zoom_at share one transform (_camera_offset, _zoom); selected_region and
@@ -14,8 +16,13 @@ extends Control
 signal region_clicked(region_id: String)
 signal region_hovered(region_id: String)
 signal sea_zone_clicked(zone_id: String)
+signal region_context_requested(region_id: String)
 
 const WORLD_SCALE := 14.0
+## A left press only becomes a pan once the mouse has travelled this far —
+## under it, the release still counts as the click. A hand's wobble is not
+## an order to move the camera.
+const DRAG_START_DISTANCE := 6.0
 
 var game: Game
 var selected_region := "":
@@ -61,6 +68,9 @@ var road_levels: Dictionary = {}
 var _camera_offset := Vector2(-200, -200)
 var _zoom := 1.0
 var _dragging := false
+var _left_down := false
+var _left_dragged := false
+var _press_at := Vector2.ZERO
 var _font: Font
 var _world_root: Node2D
 var _terrain_layer: MapLayers.TerrainLayer
@@ -270,27 +280,51 @@ func _gui_input(event: InputEvent) -> void:
 			_zoom_at(mouse_event.position, 1.15)
 		elif mouse_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_event.pressed:
 			_zoom_at(mouse_event.position, 1.0 / 1.15)
-		elif mouse_event.button_index in [MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE]:
+		elif mouse_event.button_index == MOUSE_BUTTON_MIDDLE:
 			_dragging = mouse_event.pressed
-		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+		elif mouse_event.button_index == MOUSE_BUTTON_RIGHT and mouse_event.pressed:
+			# The right button is a question now, not a camera handle: what
+			# stands here? The campaign screen answers with the dossier menu.
 			_hide_tooltip()
 			_tooltip_suppressed = true
 			var hit := _region_at(mouse_event.position)
 			if hit != "":
+				region_context_requested.emit(hit)
+		elif mouse_event.button_index == MOUSE_BUTTON_LEFT:
+			if mouse_event.pressed:
+				_hide_tooltip()
+				_tooltip_suppressed = true
 				if mouse_event.double_click:
-					# The second press of a double-click only centers — the
-					# first press already delivered the click, and one camera
-					# gesture must never issue two orders.
-					center_on(hit)
+					# The second press of a double-click only centers — its
+					# own first press's release already delivered the click,
+					# and one camera gesture must never issue two orders.
+					var hit := _region_at(mouse_event.position)
+					if hit != "":
+						center_on(hit)
 				else:
-					region_clicked.emit(hit)
+					_left_down = true
+					_left_dragged = false
+					_press_at = mouse_event.position
 			else:
-				var zone := _sea_zone_at(mouse_event.position)
-				if zone != "":
-					sea_zone_clicked.emit(zone)
+				# The click rides on the release: a press that travelled was
+				# a pan, and must not order anything when it lets go.
+				var was_click := _left_down and not _left_dragged
+				_left_down = false
+				_left_dragged = false
+				if was_click:
+					var hit := _region_at(mouse_event.position)
+					if hit != "":
+						region_clicked.emit(hit)
+					else:
+						var zone := _sea_zone_at(mouse_event.position)
+						if zone != "":
+							sea_zone_clicked.emit(zone)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
-		if _dragging:
+		if _left_down and not _left_dragged \
+				and motion.position.distance_to(_press_at) > DRAG_START_DISTANCE:
+			_left_dragged = true
+		if _dragging or _left_dragged:
 			_camera_offset += motion.relative / _zoom
 			_clamp_camera()
 			_clear_hover()

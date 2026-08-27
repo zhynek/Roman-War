@@ -1,6 +1,7 @@
 extends SceneTree
-## Throwaway QA: boot the campaign, open an info card, capture, quit.
-## SHOT=unit|building SCREENSHOT_DIR=... xvfb-run godot --path . --script res://tools/dev_card_shot.gd
+## Throwaway QA: boot the campaign, open an info card or the map dossier,
+## capture, quit.
+## SHOT=unit|building|menu SCREENSHOT_DIR=... xvfb-run godot --path . --script res://tools/dev_card_shot.gd
 
 var _frame := 0
 var _screen: CampaignScreen
@@ -25,7 +26,14 @@ func _process(_delta: float) -> bool:
 			if _screen.game.state["settlements"][region_id]["owner"] == "julii":
 				_screen._on_region_clicked(region_id)
 				break
-		if OS.get_environment("SHOT") == "building":
+		if OS.get_environment("SHOT") == "menu":
+			var capital: String = _screen.game.state["factions"]["julii"]["capital"]
+			var settlement: Dictionary = _screen.game.state["settlements"][capital]
+			if (settlement["garrison"] as Array).is_empty():
+				settlement["garrison"].append(
+					{"template": "rural_levies", "strength_pct": 100, "experience": 0})
+			_screen.open_map_menu(capital)
+		elif OS.get_environment("SHOT") == "building":
 			var chain_ids: Array = _screen.game.data.chains.keys()
 			chain_ids.sort()
 			for chain_id in chain_ids:
@@ -39,8 +47,10 @@ func _process(_delta: float) -> bool:
 		var out := OS.get_environment("SCREENSHOT_DIR")
 		if out == "":
 			out = "/tmp"
-		root.get_viewport().get_texture().get_image().save_png(
-			out + "/card_" + ("building" if OS.get_environment("SHOT") == "building" else "unit") + ".png")
+		var shot := OS.get_environment("SHOT")
+		if shot != "building" and shot != "menu":
+			shot = "unit"
+		root.get_viewport().get_texture().get_image().save_png(out + "/card_" + shot + ".png")
 		print("saved card shot")
 		quit(0)
 		return true
