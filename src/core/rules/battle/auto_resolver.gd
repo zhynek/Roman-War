@@ -114,8 +114,9 @@ func _round_log(battle_rules: Dictionary, attacker_won: bool, ratio: float,
 	## The battle retold as ROUND_PHASES, synthesized after the fact from the
 	## quantities already computed — never an extra die. Each side's phase
 	## casualties sum exactly to its single-shot total (the last phase takes
-	## the remainder, absorbing float drift); the loser's morale walks its
-	## balance-data track to zero and the round it zeroes carries the break.
+	## the remainder, absorbing float drift). The break is pinned to the
+	## phase named "break"; the loser's morale walks its balance-data track,
+	## which the validator holds at exactly zero on that phase.
 	var winner_shares: Array = battle_rules["round_winner_casualty_shares"]
 	var loser_shares: Array = battle_rules["round_loser_casualty_shares"]
 	var loser_track: Array = battle_rules["round_loser_morale_track"]

@@ -337,7 +337,8 @@ func building_profile(chain_id: String) -> Dictionary:
 		"name": String(chain["name"]),
 		"kind": String(chain["kind"]),
 		"kind_entry": _glossary_entry("building_kinds", String(chain["kind"])),
-		"cultures": chain.get("cultures", []),
+		# duplicated: profiles are consumer-owned, the content table is not
+		"cultures": (chain.get("cultures", []) as Array).duplicate(),
 		"god": String(chain.get("god", "")),
 		"levels": levels,
 	}

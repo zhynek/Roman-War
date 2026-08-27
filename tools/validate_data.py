@@ -537,9 +537,12 @@ def cross_checks(t: dict[str, dict]) -> None:
 
     # The round-log tables are indexed per phase by AutoResolver.ROUND_PHASES
     # (skirmish/charge/melee/break/pursuit — 5 entries): a short array is a
-    # runtime crash, a long one dead data. Casualty shares must sum to ~1 so
-    # every phase's split stays a sane slice of the single-shot total.
+    # runtime crash, a long one dead data. Casualty shares must be sane
+    # slices summing to 1, the loser's morale must fall monotonically and
+    # zero exactly at the break (index 3 — the phase the log pins the break
+    # to), and the two winner-morale scalars are hard-indexed by the engine.
     round_phase_count = 5
+    break_phase_index = 3
     battle = balance.get("battle", {})
     for table_key in ("round_winner_casualty_shares", "round_loser_casualty_shares",
                       "round_loser_morale_track", "round_winner_morale_progress"):
@@ -548,9 +551,30 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"balance: battle.{table_key} needs exactly {round_phase_count} "
                 f"entries (one per battle round phase), has {len(entries)}")
     for table_key in ("round_winner_casualty_shares", "round_loser_casualty_shares"):
-        total = sum(battle.get(table_key, []))
+        entries = battle.get(table_key, [])
+        total = sum(entries)
         if abs(total - 1.0) > 0.001:
             err(f"balance: battle.{table_key} must sum to 1.0, sums to {total}")
+        if any(not 0.0 <= float(v) <= 1.0 for v in entries):
+            err(f"balance: battle.{table_key} entries must sit in [0, 1] — "
+                "a phase can neither heal men nor spend more than the whole battle")
+    track = battle.get("round_loser_morale_track", [])
+    if any(not 0.0 <= float(v) <= 100.0 for v in track):
+        err("balance: battle.round_loser_morale_track entries must sit in [0, 100]")
+    if any(track[i] < track[i + 1] for i in range(len(track) - 1)):
+        err("balance: battle.round_loser_morale_track must never rise — the loser is losing")
+    if len(track) == round_phase_count and track[break_phase_index] != 0:
+        err("balance: battle.round_loser_morale_track must hit exactly 0 at the "
+            f"break phase (index {break_phase_index}) — the log names the break there")
+    progress = battle.get("round_winner_morale_progress", [])
+    if any(not 0.0 <= float(v) <= 1.0 for v in progress):
+        err("balance: battle.round_winner_morale_progress entries must sit in [0, 1]")
+    for scalar_key in ("round_winner_morale_min", "round_winner_morale_max"):
+        if scalar_key not in battle:
+            err(f"balance: battle.{scalar_key} is missing — the first battle of "
+                "any campaign would crash on it")
+    if battle.get("round_winner_morale_min", 0) > battle.get("round_winner_morale_max", 100):
+        err("balance: battle.round_winner_morale_min must not exceed round_winner_morale_max")
 
 
 def main() -> int:

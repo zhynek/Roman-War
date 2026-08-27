@@ -64,13 +64,16 @@ func test_building_profile_explains_effects_and_unlocks(t) -> void:
 			t.check(String(unlock["class_entry"]["name"]) != "", "unlock class is named")
 	t.check(total_unlocks > 0, "the barracks unlocks units")
 
-	# Effects arrive as named, explained breakdowns.
-	var explained := 0
+	# Effects arrive as named, explained breakdowns — every entry, no free
+	# passes, and at least one exists to prove the walk saw anything at all.
+	var effect_entries := 0
 	for level in barracks["levels"]:
 		for effect in level["effects"]:
-			if String(effect["name"]) != "" and String(effect["blurb"]) != "" and effect.has("value"):
-				explained += 1
-	t.check(explained >= 0, "effect entries carry name, blurb and value")
+			effect_entries += 1
+			t.check(String(effect["name"]) != "" and String(effect["blurb"]) != ""
+				and effect.has("value"),
+				"effect entry carries name, blurb and value: " + String(effect["id"]))
+	t.check(effect_entries > 0, "the barracks chain has effects to explain")
 
 	# A temple with god-gated units only unlocks them under the right god.
 	for chain_id in chain_ids:
@@ -125,5 +128,8 @@ func test_profiles_fall_back_without_a_glossary(t) -> void:
 	var government := game.building_profile("test_government")
 	t.check_eq(government["kind_entry"]["name"], "Government", "fixture kinds prettify too")
 	t.check_eq(government["levels"].size(), 4, "levels enumerate")
-	t.check(not (government["levels"][0]["unlocks"] as Array).is_empty()
-		or true, "unlocks computed without crashing on fixtures")
+	# test_mob demands government tier 1 but is neutral-culture, and the
+	# fixture government is roman: the unlock walk must come back EMPTY —
+	# the culture gate holds even in fixture worlds.
+	t.check((government["levels"][0]["unlocks"] as Array).is_empty(),
+		"the culture gate holds on fixture unlocks")
