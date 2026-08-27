@@ -297,12 +297,13 @@ class OverlayLayer:
 		var geometry = view.geometry()
 		for region_id in view.sorted_highlight_ids():
 			var kind: String = str(view.highlight_regions[region_id])
-			var glow := Color(1.0, 0.95, 0.6, 0.16) if kind != "forced" else Color(1.0, 0.62, 0.35, 0.13)
+			var glow := Color(1.0, 0.95, 0.6, 0.24) if kind != "forced" else Color(1.0, 0.62, 0.35, 0.18)
 			_fill_region(geometry, region_id, glow)
 		var path: PackedVector2Array = view.path_preview_points()
 		if path.size() >= 2:
-			draw_polyline(path, Color(0.98, 0.92, 0.65, 0.9), 2.4)
-			draw_circle(path[path.size() - 1], 3.4, Color(0.98, 0.92, 0.65))
+			draw_polyline(path, Color(0.12, 0.09, 0.04, 0.8), 4.4)
+			draw_polyline(path, Color(0.97, 0.84, 0.38, 0.95), 2.2)
+			draw_circle(path[path.size() - 1], 3.4, Color(0.97, 0.84, 0.38))
 		if view.path_preview_blocked().size() >= 2:
 			var blocked: PackedVector2Array = view.path_preview_blocked()
 			for i in range(blocked.size() - 1):
@@ -311,6 +312,12 @@ class OverlayLayer:
 			_stroke_region(geometry, view.hover_region, Color(1, 1, 1, 0.45), 1.6)
 		if view.selected_region != "":
 			_stroke_region(geometry, view.selected_region, Color.WHITE, 2.4)
+		for zone_id in view.sorted_zone_highlight_ids():
+			var anchor: Vector2 = view.zone_anchor(zone_id)
+			if str(view.highlight_zones[zone_id]) == "selected":
+				draw_arc(anchor, 16.0, 0, TAU, 28, Color(1, 1, 1, 0.95), 2.4)
+			else:
+				draw_arc(anchor, 18.0, 0, TAU, 28, Color(0.95, 0.9, 0.55, 0.75), 2.0)
 
 	func _fill_region(geometry, region_id: String, color: Color) -> void:
 		if geometry != null:
@@ -370,3 +377,11 @@ class LabelLayer:
 			if params.get("capital", false):
 				draw_string(font, at + Vector2(width / 2.0 + 3.0, 0), "★",
 					HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.95, 0.85, 0.4))
+		for chip in view.path_chips():
+			var chip_text: String = chip["text"]
+			var chip_at: Vector2 = view.to_screen(chip["at"]) + Vector2(7, -7)
+			var chip_width := font.get_string_size(chip_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			draw_rect(Rect2(chip_at + Vector2(-3, -10), Vector2(chip_width + 6, 14)),
+				Color(0.04, 0.07, 0.1, 0.7))
+			draw_string(font, chip_at, chip_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
+				Color(0.98, 0.94, 0.7))

@@ -16,6 +16,7 @@ var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_fleet := ""
 var _victory_shown := false
 
 
@@ -42,6 +43,7 @@ func _ready() -> void:
 	map_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map_view.custom_minimum_size = Vector2(600, 400)
 	map_view.region_clicked.connect(_on_region_clicked)
+	map_view.sea_zone_clicked.connect(_on_sea_zone_clicked)
 	split.add_child(map_view)
 
 	var side := VBoxContainer.new()
@@ -123,6 +125,25 @@ func refresh() -> void:
 		top_labels["victory"].text = "Regions %d/%d" \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
+	# The map's live overlays: reachability for the selected army, zone
+	# rings for the selected fleet.
+	if selected_army != "" and game.state["armies"].has(selected_army):
+		map_view.preview_army = selected_army
+		map_view.highlight_regions = game.army_reachable(selected_army)
+	else:
+		selected_army = ""
+		map_view.preview_army = ""
+		map_view.highlight_regions = {}
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		var zone := String(game.state["fleets"][selected_fleet]["sea_zone"])
+		var zones := {zone: "selected"}
+		for adjacent_zone in game.data.sea_zones.get(zone, {}).get("adjacent", []):
+			zones[adjacent_zone] = "reachable"
+		map_view.highlight_zones = zones
+	else:
+		selected_fleet = ""
+		map_view.highlight_zones = {}
+
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
 	map_view.refresh_state()
@@ -140,13 +161,41 @@ func _on_region_clicked(region_id: String) -> void:
 		return
 	map_view.selected_region = region_id
 	selected_army = ""
+	selected_fleet = ""
 	region_panel.show_region(game, region_id)
-	map_view.refresh_state()
+	refresh()
+
+
+func _on_sea_zone_clicked(zone_id: String) -> void:
+	## Open-water clicks drive fleets: select an own fleet in the zone, or
+	## send the selected fleet to an adjacent zone.
+	var player: String = game.state["player_faction"]
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		var fleet: Dictionary = game.state["fleets"][selected_fleet]
+		if zone_id == fleet["sea_zone"]:
+			selected_fleet = ""
+			refresh()
+			return
+		if game.move_fleet(selected_fleet, zone_id):
+			_log("The fleet stands out for %s." % game.data.sea_zones[zone_id]["name"])
+			refresh()
+			return
+	var fleet_ids: Array = game.state["fleets"].keys()
+	fleet_ids.sort()
+	for fleet_id in fleet_ids:
+		var fleet: Dictionary = game.state["fleets"][fleet_id]
+		if fleet["owner"] == player and fleet["sea_zone"] == zone_id:
+			selected_fleet = fleet_id
+			selected_army = ""
+			refresh()
+			return
 
 
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
+	selected_fleet = ""
 	region_panel.show_region(game, map_view.selected_region, selected_army)
+	refresh()
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -169,14 +218,26 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		besiege_order(target_region)
 		return
 
-	# Otherwise: march (or sail).
+	# Otherwise: march (or sail) — and beyond one step, a standing march order.
+	var target_name: String = game.data.regions[target_region]["name"]
 	if game.move_army(selected_army, target_region, forced_march):
 		var suffix := " by forced march — the men will be weary." if forced_march else "."
-		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
+		_log("The army marches to %s%s" % [target_name, suffix])
 	elif game.sea_move_army(selected_army, target_region):
-		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
+		_log("The army takes ship for %s." % target_name)
 	else:
-		_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
+		var route := game.army_path_preview(selected_army, target_region, forced_march)
+		if game.march_army(selected_army, target_region, forced_march):
+			if not game.state["armies"][selected_army].has("march_path"):
+				_log("The army marches to %s." % target_name)
+			elif route.get("blocked_destination", false):
+				_log("The army marches on %s — it can go no further than the approaches." % target_name)
+			else:
+				_log("The army sets out for %s — %d turns' march%s" % [target_name,
+					int(route.get("turns", 2)),
+					", at a forced pace." if forced_march else "."])
+		else:
+			_log("The army cannot reach %s this season." % target_name)
 	_after_order()
 
 

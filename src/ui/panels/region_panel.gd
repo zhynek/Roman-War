@@ -194,7 +194,21 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	_label("Movement left: %.1f" % float(army["movement_left"]))
 	for unit in army["units"]:
 		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
-	_label("Click an adjacent region to march, attack, or besiege.", Color(0.7, 0.8, 0.9))
+	_label("Click anywhere in reach to march (Shift forces the pace); enemies and sieges still take a click on the spot.",
+		Color(0.7, 0.8, 0.9))
+
+	var march_path: Array = army.get("march_path", [])
+	if not march_path.is_empty():
+		var goal := String(march_path[march_path.size() - 1])
+		var route := game.army_path_preview(army_id, goal, bool(army.get("march_forced", false)))
+		var eta := ""
+		if route.get("reachable", false):
+			var turns := int(route["turns"])
+			eta = " — arrives this turn" if turns <= 1 else " — %d turns" % turns
+		_label("Marching to %s%s" % [game.data.regions[goal]["name"], eta], Color(0.8, 0.9, 0.7))
+		_action_button("Halt the march", func():
+			game.halt_march(army_id)
+			action_taken.emit())
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty() and settlement["owner"] == game.state["player_faction"]:

@@ -506,14 +506,34 @@ def main() -> int:
                 for cx, cy in patch:
                     land[cy][cx] = True
                     field[cy][cx] = 0.25
-                    if nearest[cy][cx] < 0:
-                        x, y = node_xy(cx, cy)
-                        best, best_i = 1e18, -1
-                        for i in range(len(regions)):
-                            d = (x - px[i]) ** 2 + (y - py[i]) ** 2
-                            if d < best:
-                                best, best_i = d, i
-                        nearest[cy][cx] = best_i
+
+    # Cell ownership is geodesic, not Euclidean: a multi-source Dijkstra over
+    # land nodes from every region position. Water blocks the flood, so a
+    # region can never own a scrap of the far shore of a strait the way a
+    # straight-line Voronoi does.
+    owner_grid = [[-1] * nodes for _ in range(nodes)]
+    flood: list[tuple[float, int, int, int]] = []
+    for i in range(len(regions)):
+        ix = round((px[i] - WORLD_MIN) / STEP)
+        iy = round((py[i] - WORLD_MIN) / STEP)
+        heapq.heappush(flood, (0.0, i, ix, iy))
+    flood_cost = {}
+    diagonal = math.sqrt(2.0)
+    while flood:
+        cost, i, ix, iy = heapq.heappop(flood)
+        if flood_cost.get((ix, iy), 1e18) < cost:
+            continue
+        owner_grid[iy][ix] = i
+        for dx, dy in ((-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)):
+            mx, my = ix + dx, iy + dy
+            if not (0 <= mx <= GRID and 0 <= my <= GRID) or not land[my][mx]:
+                continue
+            step = diagonal if dx and dy else 1.0
+            candidate = cost + step
+            if candidate < flood_cost.get((mx, my), 1e18) - 1e-9:
+                flood_cost[(mx, my)] = candidate
+                heapq.heappush(flood, (candidate, i, mx, my))
+    nearest = owner_grid
 
     # Every region's own node must be land and owned by itself.
     for i, rid in enumerate(ids):
