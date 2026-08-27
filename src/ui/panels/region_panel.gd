@@ -10,6 +10,7 @@ signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
 signal unit_info_requested(template_id: String)
 signal building_info_requested(chain_id: String)
+signal battle_fought(result: Dictionary, defender_name: String)
 
 var game: Game
 var region_id := ""
@@ -231,7 +232,12 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 		var can_assault: bool = settlement["siege"].get("equipment_ready", false)
 		_action_button("Assault the walls!" if can_assault else "Assault (equipment not ready)", func():
 			var choice: String = ["occupy", "enslave", "exterminate"][occupation_options.selected]
-			game.assault_settlement(army_id, region_id, choice)
+			# The holder's name, read before the assault — a captured city
+			# already flies the attacker's colors by the time it returns.
+			var holder_name: String = game.data.factions.get(
+				game.state["settlements"][region_id]["owner"], {}).get("name", "Defenders")
+			var assault_result := game.assault_settlement(army_id, region_id, choice)
+			battle_fought.emit(assault_result, holder_name)
 			action_taken.emit())
 
 	var offers := game.mercenaries_available(region_id)

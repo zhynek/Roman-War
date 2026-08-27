@@ -98,7 +98,10 @@ panel to select it. Now:
   turn).
 - **Click an enemy region** to attack the army there or lay siege to the city.
   If you are not already at war, the game asks first — it will never start a
-  war by accident.
+  war by accident. Every battle you fight then plays back as an animated
+  field: the lines close, grind, and one side breaks and is ridden down,
+  with morale bars draining above. It is a replay of the decided outcome,
+  and you can skip it at any moment.
 - Standing at a besieged city, you can **assault the walls** once your siege
   equipment is ready (two turns), or wait and starve them out. When you take a
   city you choose to **occupy** (keeps the people, worst unrest), **enslave**
@@ -150,7 +153,10 @@ Honest list, so you know what you are looking at:
 - **The computer players are deliberately passive.** They manage their cities
   and build, but they do not scheme, invade, or negotiate. Real opponents are
   the next phase. Expect a quiet world.
-- **Battles resolve on paper.** You see the outcome, not the fight.
+- **Battles play back, but are not fought.** The auto-resolver decides every
+  battle on paper; the animated field you watch is a faithful replay of that
+  verdict, not an interactive fight. Commanding troops in real time is a
+  later phase.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full

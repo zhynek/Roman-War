@@ -19,6 +19,7 @@ var selected_army := ""
 var selected_fleet := ""
 var info_card: InfoCard
 var map_menu: MapContextMenu
+var battle_screen: BattleScreen
 var _card_catcher: Control
 var _victory_shown := false
 
@@ -76,6 +77,7 @@ func _ready() -> void:
 	region_panel.siege_requested.connect(besiege_order)
 	region_panel.unit_info_requested.connect(open_unit_card)
 	region_panel.building_info_requested.connect(open_building_card)
+	region_panel.battle_fought.connect(_on_battle_fought)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -397,6 +399,8 @@ func _resolve_attack(defender_id: String, expected_owner: String) -> void:
 		_log("The army cannot come to grips with the enemy from here.")
 	else:
 		_log("[b]Battle![/b] The %s prevail." % ("attackers" if result["winner"] == "attacker" else "defenders"))
+		_show_battle(result, _faction_display_name(game.state["player_faction"]),
+			_faction_display_name(expected_owner))
 	_after_order()
 
 
@@ -521,6 +525,31 @@ func _log_report(report: Dictionary) -> void:
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]
+
+
+## --- battle playback (R4) ---------------------------------------------------
+
+func _show_battle(result: Dictionary, attacker_label: String, defender_label: String) -> void:
+	## The fight replayed after the fact. Opens only when the result carries
+	## a round log; it never touches the war-confirmation path — by the time
+	## the curtain rises the battle is already resolved and logged.
+	if result.is_empty() or (result.get("rounds", []) as Array).is_empty():
+		return
+	if battle_screen != null and is_instance_valid(battle_screen):
+		battle_screen.queue_free()
+	battle_screen = BattleScreen.create(game, result, attacker_label, defender_label)
+	battle_screen.closed.connect(func():
+		battle_screen.queue_free()
+		battle_screen = null)
+	add_child(battle_screen)
+
+
+func _on_battle_fought(result: Dictionary, defender_label: String) -> void:
+	_show_battle(result, _faction_display_name(game.state["player_faction"]), defender_label)
+
+
+func _faction_display_name(faction_id: String) -> String:
+	return String(game.data.factions.get(faction_id, {}).get("name", faction_id))
 
 
 ## --- info cards & the map dossier (R1-R3) ----------------------------------
