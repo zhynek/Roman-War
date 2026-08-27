@@ -316,6 +316,21 @@ func _log_report(report: Dictionary) -> void:
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+	for march in report.get("marches", []):
+		if march["owner"] != player:
+			continue
+		var here: String = game.data.regions[march["region"]]["name"]
+		if march["arrived"]:
+			_log("The army completes its march at %s." % here)
+		elif march["halted"]:
+			_log("[color=#e0a060]The march halts at %s — the way is barred.[/color]" % here)
+		elif int(march["steps"]) > 0:
+			var remaining: Array = game.state["armies"].get(march["army"], {}).get("march_path", [])
+			if remaining.is_empty():
+				_log("The army marches on from %s." % here)
+			else:
+				var goal: String = String(remaining[remaining.size() - 1])
+				_log("The army presses on toward %s." % game.data.regions[goal]["name"])
 
 
 func _is_player_character(char_id: String) -> bool:

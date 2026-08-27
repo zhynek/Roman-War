@@ -57,11 +57,71 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
-	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	if moved:
+		_clear_march(army_id)  # a fresh manual order supersedes a standing march
+	return moved
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
+
+
+func march_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
+	## A multi-turn movement order: store the cheapest land route (previewed
+	## with only what this faction can see) and walk as much of it as this
+	## turn's movement allows. The rest resumes at each end of turn. Toward a
+	## blocked destination (a war-held settlement) the order stops on the
+	## nearest approach — a march can never open hostilities.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return false
+	var route := PathfindingRules.best_path(
+		data, state, army_id, to_region, forced_march, visible_regions(String(army["owner"])))
+	if not route["reachable"]:
+		return false
+	army["march_path"] = (route["path"] as Array).duplicate()
+	army["march_forced"] = forced_march
+	PathfindingRules.advance_march(data, state, army_id)
+	return true
+
+
+func halt_march(army_id: String) -> bool:
+	if not state["armies"].get(army_id, {}).has("march_path"):
+		return false
+	_clear_march(army_id)
+	return true
+
+
+func army_reachable(army_id: String) -> Dictionary:
+	## {region_id: "normal" | "forced"} — everywhere this army could stand by
+	## the end of this turn, and how hard it would have to push to get there.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	var visible := visible_regions(String(army["owner"]))
+	var in_range := {}
+	for region_id in PathfindingRules.reachable(data, state, army_id, float(army["movement_left"]), true, visible):
+		in_range[region_id] = "forced"
+	for region_id in PathfindingRules.reachable(data, state, army_id, float(army["movement_left"]), false, visible):
+		in_range[region_id] = "normal"
+	return in_range
+
+
+func army_path_preview(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
+	## PathfindingRules.best_path through this faction's fog, for the UI's
+	## route overlay and cost chips.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	return PathfindingRules.best_path(
+		data, state, army_id, to_region, forced_march, visible_regions(String(army["owner"])))
+
+
+func _clear_march(army_id: String) -> void:
+	var army: Dictionary = state["armies"].get(army_id, {})
+	army.erase("march_path")
+	army.erase("march_forced")
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
@@ -82,7 +142,10 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
-	return MovementRules.sea_move_army(data, state, army_id, to_region)
+	var sailed := MovementRules.sea_move_army(data, state, army_id, to_region)
+	if sailed:
+		_clear_march(army_id)  # taking ship abandons any standing land route
+	return sailed
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:

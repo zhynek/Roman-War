@@ -7,7 +7,8 @@ class_name TurnEngine
 ##   5. Population growth, slaves, plague
 ##   6. Public order: riots and revolts
 ##   7. Events, disasters, senate politics
-##   8. Date advances (2 turns/year), movement points reset, victory check
+##   8. Date advances (2 turns/year), movement points reset, standing march
+##      orders walk on, victory check
 ##
 ## Returns a report dict of everything notable that happened, for the UI's
 ## event scrolls.
@@ -18,7 +19,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "winner": null,
+		"senate": [], "characters": [], "marches": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -90,6 +91,17 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		report["characters"].append_array(FamilyRules.process_year(data, state, rng))
 
 	MovementRules.reset_movement(data, state)
+
+	# Standing march orders walk on with the fresh movement, in sorted id
+	# order (armies without one report {} and cost nothing). RNG-free, so the
+	# stream below is untouched.
+	var marching_ids: Array = state["armies"].keys()
+	marching_ids.sort()
+	for army_id in marching_ids:
+		var march := PathfindingRules.advance_march(data, state, army_id)
+		if not march.is_empty():
+			report["marches"].append(march)
+
 	report["winner"] = VictoryRules.check(data, state)
 
 	state["rng_state"] = rng.state_string()
