@@ -109,12 +109,53 @@ slice before shipping**, or the app will not launch.
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
 
-## 5. Next direction: the visual and command layer (requested 2026-08-26)
+## 5. The visual and command layer (requested 2026-08-26 — DELIVERED 2026-08-27)
 
-The user set this direction after playtesting the modernized map. **Plan it
-before writing code** — §5.4 lists three decisions that must be made first.
-Requirements are the user's, condensed; the wording after each is the
-engineering reading of it.
+The user set this direction after playtesting the modernized map, and every
+requirement below has since shipped on this branch. The three decisions §5.4
+demanded were put to the user and taken as follows:
+
+1. **Art (R1)** — procedural vector at kind/class granularity: 29 near-3D
+   compositions in `src/ui/art/illustrations.gd` (17 building kinds, 12 unit
+   classes, culture palettes, tier growth), zero binary assets; the cards
+   consume art through one swappable slot, so richer raster art can replace
+   pieces later without touching layout.
+2. **Pan rebind (R2's precondition)** — left-drag and middle-drag pan; a left
+   press only counts as a click if the mouse never travels past 6px, so
+   selection is untouched; the freed right button asks instead of panning.
+3. **Battle depth (R4)** — the full animated field, driven by an additive
+   round log; interactive battles stay out of scope, as designed.
+
+What landed where:
+
+- **Glossary + readers**: `data/glossary.json` (unit classes, attributes,
+  effects, building kinds — each id/name/blurb, schema-validated and
+  cross-checked) read through `Game.unit_profile` / `Game.building_profile`.
+- **Info cards** (`src/ui/panels/info_card.gd`): the unit card (portrait,
+  stats incl. the previously unread `speed`, skills explained, the building
+  that trains it) and the building card (per-level named effects, the troops
+  each tier unlocks, click-through navigation into unit cards). Right-click
+  answers on the panel's build, demolish, recruit, hire and unit rows.
+- **Map dossier** (`src/ui/panels/map_context_menu.gd`): right-click a
+  province for its garrison (skills named inline), its buildings by built
+  level, and the armies present — every row a door into a card. Fog
+  discipline matches the tooltip and panel exactly: a fogged province gives
+  up only its region name; rival cities keep their rosters and works.
+- **Battle round log** (`AutoResolver`): additive `rounds[]` — skirmish,
+  charge, melee, break, pursuit; per-round casualty splits that sum exactly
+  to the single-shot totals; a morale track; the break naming the side that
+  shatters — plus per-unit `attacker_report`/`defender_report`. ZERO
+  additional RNG draws (a twin-RNG test replays the documented draw count
+  and compares end states). Tunables in `balance.json → battle.round_*`,
+  validator-checked; the `BattleResolver` contract documents the keys as
+  optional.
+- **Battle playback** (`src/ui/battle_screen.gd`): the log as an animated
+  field — class-shaped blocks advance, grind, shrink, break and rout, morale
+  bars drain, each phase captioned; skippable at any moment. Wired after
+  `_resolve_attack` and through the region panel's `battle_fought` signal —
+  the war-confirmation guards are untouched.
+
+The original requirements and pre-work analysis stay below as the record.
 
 ### 5.1 The four requirements
 
@@ -172,27 +213,26 @@ Also already built, and the natural spine for R4:
 - `tools/screenshot.gd` renders the real game under `xvfb` — the only way to
   QA any of this, since CI never draws a pixel.
 
-### 5.3 Gaps that R1–R4 actually open
+### 5.3 Gaps that R1–R4 opened (all closed by the delivery above)
 
-- **No round-by-round battle data.** `resolve()` returns one dict:
+- **No round-by-round battle data.** `resolve()` returned one dict:
   `winner`, `attacker_casualty_pct`, `defender_casualty_pct`,
-  `attacker_general_died`, `defender_general_died`, `experience_gained`.
-  `AutoResolver` computes strengths, a ratio, and casualties in one pass —
-  there is no sequence to animate. R4 needs the resolver to *also* emit an
-  optional ordered round log (phases, per-round casualties, morale breaks,
-  the moment the line broke). Additive keys keep the interface contract and
-  every existing caller intact.
-- **Right-click is the pan gesture** (`src/ui/map_view.gd`, with middle-drag).
-  R2 cannot have it until panning is rebound — see §5.4.
+  `attacker_general_died`, `defender_general_died`, `experience_gained` —
+  no sequence to animate. Closed exactly as prescribed here: the optional
+  ordered round log and unit reports landed as additive keys, every
+  existing caller intact.
+- **Right-click was the pan gesture** (`src/ui/map_view.gd`, with
+  middle-drag). Rebound per decision 2 — left/middle-drag pan now, and the
+  camera-gesture pins in `tests/test_ui_smoke.gd` moved in the same commit.
 - **No binary assets exist in the repo at all**, and no asset pipeline. R1 is
   the first. See §5.4.
 - **No unit-info card, no building browser, no garrison popup** — the
   research report (§12) lists all three as information architecture worth
-  reusing; none is built.
+  reusing. All three now exist: the two cards and the right-click dossier.
 - Foreign fleets are hidden from the map by design today (no naval fog rule);
   if R4 grows to naval assaults, that needs a decision too.
 
-### 5.4 Three decisions to make before any code
+### 5.4 Three decisions that had to precede the code (all taken — see above)
 
 **1. The art pipeline for R1 — the big one.** "Photos / almost-3D renderings"
 has three honest implementations, and the clean-room policy (`DESIGN.md` §11:
@@ -249,7 +289,7 @@ the current gesture — both must be updated in the same commit.
   headlessly), then the replay card, then animate the same data.** The log is
   the contract everything else reads, and it keeps `src/core/` scene-free.
 
-### 5.5 Suggested sequencing (to be turned into a real plan)
+### 5.5 Suggested sequencing (followed as written)
 
 1. **Data readers, no UI**: expose unit `attributes`/`speed` and building
    `effects` as *named, explained* breakdowns through the `Game` facade, the
