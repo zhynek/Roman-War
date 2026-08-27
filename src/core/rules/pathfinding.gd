@@ -110,6 +110,14 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 	## rest of the path; a step that is merely unaffordable this turn waits.
 	## -> {"moved": steps taken, "arrived": bool, "halted": bool}
 	var army: Dictionary = state["armies"][army_id]
+	var siege = state["settlements"].get(String(army["region"]), {}).get("siege")
+	if siege != null and String(siege.get("besieger", "")) == army_id:
+		# The facade cancels queued marches on every hostile order; this is
+		# the backstop so no future caller (AI turns included) can ever walk
+		# a besieger off his own siege and dissolve it unreported.
+		army.erase("march_path")
+		army.erase("march_forced")
+		return {"moved": 0, "arrived": false, "halted": true}
 	var path: Array = army.get("march_path", [])
 	var forced := bool(army.get("march_forced", false))
 	var moved := 0

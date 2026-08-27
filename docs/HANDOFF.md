@@ -31,7 +31,7 @@ previews, fleets on the map, and a unified dark theme.
 The map modernization landed in 10 commits, each gated, ending with a
 three-reviewer adversarial pass whose 15 findings are all fixed (§7).
 
-**Green as of `74d06a0`:** 89 tests / 0 failures, validator 0 errors /
+**Green:** 91 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. Branch `claude/modernize-map-world-view-03orjy`,
 pushed. An **Apple Silicon build of this branch was delivered** to the user,
 who is playtesting it; the requested follow-up work is §5. Rebuild per §3

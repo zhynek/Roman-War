@@ -33,6 +33,22 @@ func test_geometry_covers_the_campaign_map(t) -> void:
 	t.check(geometry.world_rect.size.x > 100.0, "world bounds cover the map")
 	t.check_eq(geometry.region_at_world(Vector2(-4000, -4000)), "", "open ocean is nobody's")
 
+	# Absolute orientation, every adjacency: the polyline must START at the
+	# asked-for origin. The symmetry check below would pass even if every
+	# road were stored backwards; this one cannot.
+	var misoriented: Array = []
+	var all_ids: Array = data.regions.keys()
+	all_ids.sort()
+	for region_id in all_ids:
+		var origin_data: Dictionary = data.regions[region_id]["position"]
+		var origin := Vector2(float(origin_data["x"]), float(origin_data["y"])) * MapView.WORLD_SCALE
+		for neighbor in data.regions[region_id].get("adjacent", []):
+			var road := geometry.edge_path(region_id, String(neighbor))
+			if road.size() >= 2 \
+					and road[0].distance_to(origin) > road[road.size() - 1].distance_to(origin):
+				misoriented.append(region_id + "-" + String(neighbor))
+	t.check_eq(misoriented, [], "every road starts at the region it was asked from")
+
 	# edge_path is direction-aware: b->a returns the reversed polyline.
 	var sample_region := ""
 	var sample_neighbor := ""

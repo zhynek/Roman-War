@@ -155,6 +155,10 @@ func refresh_state() -> void:
 			var ends: PackedStringArray = String(key).split("|")
 			var level := 0
 			for end in ends:
+				# Built road tiers are state, not geography: an unscouted
+				# settlement's paving must not render through the fog.
+				if not visible_cache.has(end):
+					continue
 				if game.state["settlements"].has(end):
 					level = maxi(level, int(SettlementRules.effect_max(
 						game.data, game.state["settlements"][end], "road_level")))

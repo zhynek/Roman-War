@@ -356,3 +356,32 @@ func test_start_menu_scene_loads(t) -> void:
 		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
 			"the house that was picked is the house that is played")
 	menu.free()
+
+
+func test_fog_hides_built_road_tiers(t) -> void:
+	## Seleucia starts with a road at assyria — deep inside julii's fog. The
+	## paving is built state, not geography: it must not render for julii,
+	## and must render for the faction that can see it.
+	var tree := Engine.get_main_loop() as SceneTree
+	var blind := CampaignScreen.create(Game.new_campaign("julii", 7))
+	tree.root.add_child(blind)
+	t.check(not blind.map_view.visible_cache.has("assyria"), "assyria starts unscouted for julii")
+	var leaked := false
+	for key in blind.map_view.road_levels:
+		var ends: PackedStringArray = String(key).split("|")
+		if (String(ends[0]) == "assyria" or String(ends[1]) == "assyria") \
+				and int(blind.map_view.road_levels[key]) > 0:
+			leaked = true
+	t.check(not leaked, "no paved road renders out of unscouted assyria")
+	blind.free()
+
+	var owner := CampaignScreen.create(Game.new_campaign("seleucia", 7))
+	tree.root.add_child(owner)
+	var shown := false
+	for key in owner.map_view.road_levels:
+		var ends: PackedStringArray = String(key).split("|")
+		if (String(ends[0]) == "assyria" or String(ends[1]) == "assyria") \
+				and int(owner.map_view.road_levels[key]) > 0:
+			shown = true
+	t.check(shown, "the road's own builder sees it paved")
+	owner.free()

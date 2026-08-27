@@ -243,6 +243,25 @@ func test_march_army_respects_the_owners_fog(t) -> void:
 	t.check_eq(game.state["armies"][army_id]["region"], "beta", "no step was taken")
 
 
+func test_a_besieger_never_marches_off_his_siege(t) -> void:
+	## Game cancels queued marches on every hostile order; advance_march is
+	## the backstop, so even a caller that forgets can never walk a besieger
+	## away and silently dissolve the siege.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "alpha", ["test_spears"])
+	state["settlements"]["alpha"]["siege"] = {"besieger": army_id, "turns": 1, "equipment_ready": false}
+	state["armies"][army_id]["march_path"] = ["beta"]
+	state["armies"][army_id]["march_forced"] = false
+	MovementRules.reset_movement(data, state)
+
+	var outcome := PathfindingRules.advance_march(data, state, army_id)
+	t.check(outcome["halted"], "the stale order is reported halted")
+	t.check_eq(state["armies"][army_id]["region"], "alpha", "the army holds the siege lines")
+	t.check(not state["armies"][army_id].has("march_path"), "the dead order is discarded")
+	t.check(state["settlements"]["alpha"]["siege"] != null, "the siege stands")
+
+
 func test_halt_march_clears_the_queue(t) -> void:
 	var game := Game.new()
 	game.data = Fixtures.data()
