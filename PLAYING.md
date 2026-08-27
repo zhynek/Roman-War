@@ -25,14 +25,21 @@ campaign runs to AD 14.
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
   Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
-- **The map** — every region is a circle at its real geographic place, coloured
-  by who owns it and sized by how big its city is. Lines are roads between
-  neighbouring regions; dashed lines are sea routes. Small squares beside a
-  city are armies. A red ring means the city is under siege. Grey circles are
-  land you have not scouted.
-  - **Drag with the right mouse button** to move the map.
-  - **Scroll** to zoom in and out.
-  - **Left-click** a region to select it.
+- **The map** — a drawn Mediterranean: coastlines, terrain (mountain ridges,
+  forests, marshes), roads that follow the land, and province borders tinted
+  by their owner. Cities are drawn to their size, with their walls (each
+  culture builds its own shape of circuit), a banner in their owner's colors,
+  a laurel ring on your capital, a quay if they work a port, and ladders and
+  a red ring under siege. Round shield tokens beside a city are armies — the
+  number is how many units stand there, a star means a general leads them.
+  Your fleets ride at anchor on their sea's name. A dark veil covers land you
+  have not scouted; the geography shows, its owners and armies do not.
+  - **Drag with the right mouse button**, or use **WASD / arrow keys**, to
+    move the map. **Double-click** centers where you clicked.
+  - **Scroll** to zoom — closer in, more detail appears.
+  - **Left-click** anywhere in a province to select it.
+  - **Hover** any region for its name, terrain, march cost, goods, and a line
+    of its story.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
 - **Bottom right** — the turn log: what happened while you were away.
@@ -65,12 +72,21 @@ tiers at all — that is deliberate.
 Click a region holding one of your armies, then click the army in the right
 panel to select it. Now:
 
-- **Click another region** to march there. Roads make it cheaper; rough terrain
-  costs more.
+- Every province the army can reach this season **lights up**, with a dimmer
+  fringe for what only a forced march reaches. **Hover** a destination and the
+  route draws itself along the roads, with the cost of each leg and how many
+  turns the march will take; a red dashed leg means the destination itself is
+  barred (a city you would first have to besiege).
+- **Click any lit region** to march there. **Click beyond the light** and the
+  army sets out on a standing order — it keeps marching every turn until it
+  arrives, and halts (without ever starting a fight) if an enemy blocks the
+  road. The panel shows the order and a **Halt** button.
 - **Shift-click** to force march — roughly double the range, but the men arrive
   tired and fight worse.
 - **Click a coastal region across a sea** to sail there (it takes the whole
   turn).
+- **Click a sea's name** to select your fleet there; its reachable seas ring
+  up, and a second click sails it.
 - **Click an enemy region** to attack the army there or lay siege to the city.
   If you are not already at war, the game asks first — it will never start a
   war by accident.
@@ -108,8 +124,8 @@ Open **Diplomacy**. You can see where every house stands with you and set a
 stance directly — declare war, offer peace, trade rights, or an alliance. The
 proper negotiation system (offers, tribute, bribery, an AI that has opinions
 about you) is the next phase of development; today the other side simply
-accepts. Your fleets are in this window too, because they live on the sea
-rather than in a region.
+accepts. Your fleets are listed in this window too, and can also be ordered
+directly on the map by clicking their sea.
 
 ## Winning
 
@@ -130,7 +146,10 @@ Honest list, so you know what you are looking at:
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full
   political system (offices, elections) is later.
-- **The art is placeholder.** Coloured circles, not painted maps.
+- **The art is procedural.** The coastlines, terrain, and city icons are all
+  drawn by the engine from the map data — there is not one imported image. A
+  hand-painted pass is future polish; the geography you see is the real
+  playing field.
 
 ## macOS blocks the app on first launch
 

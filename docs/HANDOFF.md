@@ -23,9 +23,17 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 foundation depth, the full character/family layer), the Phase 7 senate
 foundation loop, and a playable Phase 8 campaign UI.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Also built since:** the map-and-movement modernization — terrain-weighted
+pathfinding with multi-turn march orders (`PathfindingRules`), a generated
+map-geometry pipeline (`tools/generate_map_geometry.py` →
+`data/map_geometry.json`), a layered map renderer with procedural settlement
+iconography, hover/route/range interaction, on-map fleet orders, and a shared
+`UiStyle` theme.
+
+**Green as of the map-modernization work:** 94 tests / 0 failures, validator
+0 errors / 0 warnings (now covering map-geometry consistency), clean boot. A
+Mac build of the pre-map-work state was delivered to the user, who is
+playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -52,11 +60,20 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 94 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
 `pip install jsonschema` if the validator complains about the import.
+
+Two map-specific tools: `data/map_geometry.json` is **generated** — after any
+edit to region positions or adjacency, rerun
+`python3 tools/generate_map_geometry.py` (deterministic and byte-stable, so an
+unchanged rerun is an empty diff) and commit the result; the validator fails
+loudly when the geometry is stale. `tools/dev_screenshot.gd` renders real
+visual-QA PNGs under xvfb, one capture per run (its header has the recipe) —
+reading the root texture under the compatibility renderer stalls later
+presents, so never take two captures in one run.
 
 ## 3. Building a playable app
 
@@ -131,21 +148,23 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   **no spouses, no children, no `gender` field set** in `campaign.json`. The
   marriage path only opens once in-game births produce daughters, so the family
   tree bootstraps slowly. Seeding real households would fix it.
-- **Sea-zone anchor positions** in `regions.json` are unused — `map_view.gd`
-  draws sea lanes from shared-zone membership and never renders zone labels.
+- **Sea-zone anchors are now live** — they place sea-name labels, lane hints,
+  and the player's fleet tokens; zones without an authored position fall back
+  to the mean of their coastal members.
 - **`office_gained` triggers are dead** until Phase 7 offices exist. The
   validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
   them, and warns about any *other* trigger kind no engine call site fires.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
   watchtowers, ambush.
-- **Art is placeholder** — coloured circles on a geographic map.
+- **Art is procedural** — generated coastlines and engine-drawn icons, no
+  imported assets; a hand-painted pass remains future polish.
 
 ## 7. Process notes
 
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
+  Develop on the branch your session designates.
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
   issues** the 60-strong test suite had missed — including armies declaring war

@@ -70,10 +70,13 @@ Phases 0–4 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
 sieges, mercenaries, events, victory checks, and the full character layer
 (traits, retinues, family tree, succession). A playable campaign-map UI sits
-on top: geographic map with fog of war, settlement/army panels driven by the
-engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
-passive stub today), agents & diplomacy negotiation, and senate depth are the
-next phases; their data tables and state hooks already exist.
+on top: a generated geographic map (coastlines, terrain, land-hugging roads,
+procedural settlement icons, fog of war) with hover tooltips, terrain-priced
+route previews, multi-turn march orders, and on-map fleet orders; settlement
+and army panels driven by the engine's factor breakdowns; family scroll; and
+save/load. Campaign AI (a passive stub today), agents & diplomacy
+negotiation, and senate depth are the next phases; their data tables and
+state hooks already exist.
 
 ## Clean-room policy
 

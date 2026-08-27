@@ -506,6 +506,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | win_conditions.json | per-faction long/short goals | VictoryRules |
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
+| map_geometry.json | generated coastlines, one polygon cell per region, land-hugging road paths — written by `tools/generate_map_geometry.py`, never by hand | map rendering & picking (`src/ui/map/`); the core never reads it |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
@@ -522,7 +523,11 @@ take the maximum across chains.
 
 `tools/validate_data.py` runs every schema, then the cross-file checks JSON Schema
 cannot express — including map-position sanity (no two region tokens closer than
-1.2 world units; a warning when land-adjacent regions sit more than 35 apart) and
+1.2 world units; a warning when land-adjacent regions sit more than 35 apart),
+map-geometry consistency (exactly one generated cell per region, every region's
+position inside its own cell so polygon picking agrees with the token, a road
+path per land adjacency running position to position, no degenerate rings, and
+every schema terrain priced in `balance.movement.terrain_cost`) and
 trigger liveness (any trait/ancillary trigger kind no engine call site fires is
 reported as dead content, except the deliberately forward-authored `office_gained`): id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
@@ -565,7 +570,7 @@ Phases follow the research report (§17). Status as of this document:
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | Pending; symmetric stances + war declaration live (`DiplomacyRules`), hostile acts auto-declare war |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable; map modernized**: start menu (house/difficulty/seed); a generated geographic map (coastlines and terrain from `data/map_geometry.json`, procedural decor and culture-styled settlement icons, roads along the land, army tokens with unit counts, fog veil over unscouted cells) with polygon picking, hover tooltips, a reachability overlay, route previews with per-leg costs, multi-turn march orders (`PathfindingRules`), and on-map fleet orders; settlement panel with live factor breakdowns/taxes/queues; army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison); family scroll (heir, retinue transfer); turn log; save/load; one shared `UiStyle` theme. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy
