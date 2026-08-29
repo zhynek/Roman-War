@@ -19,7 +19,9 @@ class_name NewGame
 ##  characters: {char_id: {faction, name, age, role, command, management,
 ##                         influence, traits, ancillaries, location, alive}}
 ##  events_fired: [event_id], winner: null|String, next_id: int
-##  ai: {war_turns: {"a|b": int}} — the AI's war-staleness ledger (FactionAi)
+##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
+##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
+##      war staleness, campaign goals, and when pairs last made peace
 ##
 ## A "unit" is {template, experience, strength_pct}.
 
@@ -45,7 +47,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,
-		"ai": {"war_turns": {}},
+		"ai": {"war_turns": {}, "targets": {}, "peace_turn": {}},
 	}
 
 	for faction_setup in data.campaign["factions"]:

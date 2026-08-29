@@ -28,9 +28,11 @@ static func ai_memory(state: Dictionary) -> Dictionary:
 
 static func tick_wars(data: GameData, state: Dictionary) -> void:
 	## Once per world turn, before any faction acts: age the ledger of every
-	## AI-vs-AI war, resetting pairs that saw prosecution — a siege between the
-	## pair, an army standing on the other's ground, or a campaign target aimed
-	## at the other (mustering for an invasion is intent, not quiet).
+	## AI-vs-AI war, resetting pairs that saw physical prosecution — a siege
+	## between the pair, or an army standing on the other's ground. (A war
+	## merely being mustered for does not reset the clock; it instead holds
+	## out for the longer peace_stale_war_turns in consider_peace, so cold
+	## wars still end while preparation is protected from a premature peace.)
 	var memory := ai_memory(state)
 	var war_turns: Dictionary = memory["war_turns"]
 
@@ -51,18 +53,14 @@ static func tick_wars(data: GameData, state: Dictionary) -> void:
 		var holder: String = state["settlements"][army["region"]]["owner"]
 		if DiplomacyRules.at_war(state, army["owner"], holder):
 			active[war_key(army["owner"], holder)] = true
+
 	var targets: Dictionary = memory["targets"]
 	var aiming_ids: Array = targets.keys()
 	aiming_ids.sort()
 	for faction_id in aiming_ids:
-		var goal: String = targets[faction_id]
 		if not state["factions"].has(faction_id) or not state["factions"][faction_id]["alive"] \
-				or not state["settlements"].has(goal):
+				or not state["settlements"].has(targets[faction_id]):
 			targets.erase(faction_id)
-			continue
-		var holder: String = state["settlements"][goal]["owner"]
-		if DiplomacyRules.at_war(state, faction_id, holder):
-			active[war_key(faction_id, holder)] = true
 
 	var peace_turn: Dictionary = memory["peace_turn"]
 	var cooldown := int(data.balance["ai"]["peace_cooldown_turns"])
@@ -105,9 +103,16 @@ static func _peace_capable(data: GameData, state: Dictionary, faction_id: String
 
 
 static func consider_peace(data: GameData, state: Dictionary, faction_id: String, ai_notices: Array) -> void:
+	## Quiet turns end wars in three bands: peace_min_war_turns for a war
+	## nobody even aims at any more, the longer peace_stale_war_turns while a
+	## side still holds a campaign target against the other (preparation is
+	## intent, but even intent goes stale), and the short
+	## peace_exhausted_war_turns when either treasury is too empty to make the
+	## intent credible.
 	var ai_rules: Dictionary = data.balance["ai"]
 	var memory := ai_memory(state)
 	var war_turns: Dictionary = memory["war_turns"]
+	var targets: Dictionary = memory["targets"]
 	var exhausted_line := int(ai_rules["peace_exhausted_treasury"])
 	for other_id in AiAssess.enemies_of(state, faction_id):
 		if not _peace_capable(data, state, other_id):
@@ -115,14 +120,23 @@ static func consider_peace(data: GameData, state: Dictionary, faction_id: String
 		var key := war_key(faction_id, other_id)
 		var quiet := int(war_turns.get(key, 0))
 		var threshold := int(ai_rules["peace_min_war_turns"])
+		if _aims_at(state, targets, faction_id, other_id) \
+				or _aims_at(state, targets, other_id, faction_id):
+			threshold = int(ai_rules["peace_stale_war_turns"])
 		if int(state["factions"][faction_id]["treasury"]) < exhausted_line \
 				or int(state["factions"][other_id]["treasury"]) < exhausted_line:
-			threshold = int(ceil(threshold / 2.0))
+			threshold = mini(threshold, int(ai_rules["peace_exhausted_war_turns"]))
 		if quiet >= threshold:
 			DiplomacyRules.set_stance(state, faction_id, other_id, "neutral")
 			war_turns.erase(key)
 			memory["peace_turn"][key] = int(state["turn"])
 			ai_notices.append({"kind": "peace", "faction": faction_id, "target": other_id})
+
+
+static func _aims_at(state: Dictionary, targets: Dictionary, faction_id: String, other_id: String) -> bool:
+	var goal: String = targets.get(faction_id, "")
+	return goal != "" and state["settlements"].has(goal) \
+		and state["settlements"][goal]["owner"] == other_id
 
 
 static func consider_war(data: GameData, state: Dictionary, faction_id: String, ai_notices: Array) -> bool:
@@ -140,7 +154,10 @@ static func consider_war(data: GameData, state: Dictionary, faction_id: String, 
 	if open_wars >= int(ai_rules["max_active_wars"]):
 		return false
 
-	var we_are_roman: bool = data.factions.get(faction_id, {}).get("is_roman_house", false)
+	# The senate stands under the same restraint as the houses: Roman-on-Roman
+	# war is the civil-war rules' business, never an opportunistic declaration.
+	var our_data: Dictionary = data.factions.get(faction_id, {})
+	var we_are_roman: bool = our_data.get("is_roman_house", false) or our_data.get("is_senate", false)
 	var peace_turn: Dictionary = ai_memory(state)["peace_turn"]
 	var cooldown := int(ai_rules["peace_cooldown_turns"])
 	var candidates := {}

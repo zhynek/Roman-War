@@ -1,13 +1,10 @@
 class_name AiEconomy
 ## Settlement stewardship for one AI faction's turn: keep the capital somewhere
 ## it still rules, tax as high as public order safely bears, retrain mauled
-## garrisons, recruit toward threat-based garrison floors, and build by
-## data-tuned priorities. Deterministic throughout: sorted iteration, no
-## randomness, and every threshold from data/balance.json.
-
-const MILITARY_KINDS: Array[String] = [
-	"walls", "barracks", "stables", "archery_range", "siege_workshop"
-]
+## garrisons, recruit toward threat-based garrison floors (raised for rioting
+## cities and for the very rich), and build by data-tuned priorities.
+## Deterministic throughout: sorted iteration, no randomness, and every
+## threshold from data/balance.json.
 
 
 static func fix_capital(data: GameData, state: Dictionary, faction_id: String) -> void:
@@ -60,20 +57,28 @@ static func _set_tax(data: GameData, state: Dictionary, region_id: String) -> vo
 	## The highest tax level projected to keep order clear of the riot line by
 	## the configured margin. Projection swaps only the tax factor — the other
 	## factors don't move with taxes (growth coupling is second-order and the
-	## margin absorbs it).
+	## margin absorbs it). Raising taxes demands extra clearance
+	## (tax_raise_hysteresis) so border-line settlements don't flap between
+	## levels every season.
 	var order_rules: Dictionary = data.balance["public_order"]
 	var settlement: Dictionary = state["settlements"][region_id]
 	var floor_needed := float(order_rules["riot_threshold"]) \
 		+ float(data.balance["ai"]["order_safety_margin"])
+	var hysteresis := float(data.balance["ai"]["tax_raise_hysteresis"])
 
 	var current_total := PublicOrderRules.total(data, state, region_id)
 	var tax_table: Dictionary = order_rules["tax_happiness"]
-	var current_bonus := float(tax_table[settlement["tax_level"]])
+	var current_level: String = settlement["tax_level"]
+	var current_rank := Constants.TAX_LEVELS.find(current_level)
+	var current_bonus := float(tax_table[current_level])
 
 	var levels := Constants.TAX_LEVELS.duplicate()
 	levels.reverse()  # very_high first
 	for level in levels:
-		if float(current_total) - current_bonus + float(tax_table[level]) >= floor_needed:
+		var clearance := floor_needed
+		if Constants.TAX_LEVELS.find(level) > current_rank:
+			clearance += hysteresis
+		if float(current_total) - current_bonus + float(tax_table[level]) >= clearance:
 			settlement["tax_level"] = level
 			return
 	settlement["tax_level"] = "very_low"
@@ -133,29 +138,41 @@ static func _shed_debt(data: GameData, state: Dictionary, faction_id: String, ow
 ## --- Recruitment ----------------------------------------------------------
 
 static func _recruit(data: GameData, state: Dictionary, faction_id: String, region_id: String, context: Dictionary, projected_net: float) -> float:
-	## Fill the garrison toward its threat floor. Returns the upkeep of any
-	## unit queued (the caller keeps the faction-wide net-income projection).
+	## Fill the garrison toward its threat floor — raised while a rioting city
+	## needs the garrison order bonus, and for very rich factions, whose
+	## surplus should stand on walls rather than pile in the treasury. Returns
+	## the upkeep of any unit queued (the caller keeps the faction-wide
+	## net-income projection).
 	var ai_rules: Dictionary = data.balance["ai"]
 	var settlement: Dictionary = state["settlements"][region_id]
 	if not settlement["recruitment_queue"].is_empty():
 		return 0.0
 
+	var faction: Dictionary = state["factions"][faction_id]
+	var rich := int(faction["treasury"]) > int(ai_rules["rich_treasury"])
 	var threat := AiAssess.threat_level(data, state, region_id)
+	var unrest := PublicOrderRules.total(data, state, region_id) \
+		< float(data.balance["public_order"]["riot_threshold"])
 	var floor_units := AiMilitary.garrison_floor(data, state, region_id)
+	if unrest:
+		floor_units = maxi(floor_units, int(ai_rules["garrison_units_unrest"]))
+	if rich:
+		floor_units += int(ai_rules["rich_garrison_bonus_units"])
 	if region_id == context["staging"] and context["wants_muster"]:
 		floor_units += int(ai_rules["muster_min_units"])
 	if settlement["garrison"].size() >= floor_units:
 		return 0.0
 
-	var faction: Dictionary = state["factions"][faction_id]
 	var budget := int(faction["treasury"]) - int(ai_rules["treasury_reserve"])
 	var best := {}
 	var best_power := 0.0
 	for unit in RecruitmentRules.available_units(data, state, region_id):
 		if int(unit["cost"]) > budget:
 			continue
-		# Recruiting into the red is only for settlements under the gun.
-		if threat != "threatened" and projected_net - float(unit["upkeep"]) < 0.0:
+		# Recruiting into the red is for settlements under the gun, cities on
+		# the edge of riot, and treasuries deep enough to bleed a while.
+		if threat != "threatened" and not unrest and not rich \
+				and projected_net - float(unit["upkeep"]) < 0.0:
 			continue
 		var power := AiAssess.unit_power(data,
 			[{"template": unit["id"], "experience": 0, "strength_pct": 100}])
@@ -187,6 +204,7 @@ static func _build(data: GameData, state: Dictionary, faction_id: String, region
 		< float(order_rules["riot_threshold"]) + float(ai_rules["order_safety_margin"])
 	var threat := AiAssess.threat_level(data, state, region_id)
 	var priorities: Dictionary = ai_rules["build_priority"]
+	var frontier_bonus: Dictionary = ai_rules["frontier_build_bonus"]
 
 	var best := {}
 	var best_score := -1.0
@@ -197,8 +215,8 @@ static func _build(data: GameData, state: Dictionary, faction_id: String, region
 		var effects: Dictionary = data.building_levels[project["level_id"]]["level"].get("effects", {})
 		if order_low and (float(effects.get("happiness", 0)) > 0.0 or float(effects.get("law", 0)) > 0.0):
 			score += float(ai_rules["order_need_build_bonus"])
-		if threat != "interior" and MILITARY_KINDS.has(project["kind"]):
-			score += float(ai_rules["frontier_military_build_bonus"])
+		if threat != "interior":
+			score += float(frontier_bonus.get(project["kind"], 0.0))
 		if best.is_empty() or score > best_score \
 				or (score == best_score and int(project["cost"]) < int(best["cost"])) \
 				or (score == best_score and int(project["cost"]) == int(best["cost"])

@@ -13,8 +13,10 @@ class_name FactionAi
 ## upkeep only: they never expand, declare war, or make peace.
 ##
 ## Determinism contract: every loop iterates in sorted order, no randomness is
-## drawn outside battle resolution, and the only persistent memory is the
-## war-staleness ledger in state.ai (a plain JSON dict, so saves round-trip).
+## drawn outside battle resolution, and all persistent memory lives in the
+## state.ai ledger — war_turns (war staleness), targets (each faction's
+## campaign goal), peace_turn (when pairs last made peace, for the
+## re-declaration cooldown) — a plain JSON dict, so saves round-trip.
 
 
 static func begin_round(data: GameData, state: Dictionary) -> void:

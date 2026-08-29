@@ -32,8 +32,10 @@ func test_raise_army_from_garrison(t) -> void:
 	t.check_eq(state["armies"][army_id]["owner"], "red", "army belongs to the settlement's house")
 	t.check_eq(float(state["armies"][army_id]["movement_left"]), 0.0, "raised armies march next turn")
 
-	var second := CombatRules.raise_army(data, state, "beta", [0], "red_general")
+	var second := CombatRules.raise_army(data, state, "beta", [0, 0], "red_general")
 	t.check(second != "", "second army raised")
+	t.check_eq(state["armies"][second]["units"].size(), 1,
+		"a duplicated index takes one unit, not a neighbor's")
 	t.check_eq(state["armies"][second]["general"], null,
 		"a general already leading an army is not drafted twice")
 
@@ -155,6 +157,64 @@ func test_ai_white_peace_ends_stalled_war_but_never_with_player(t) -> void:
 		"wars against the player are not even tracked for peace")
 
 
+func test_ai_fights_through_blocking_army(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	# Green's road to blue's alpha runs through gamma, where a token blue force
+	# stands in the way. The column must fight the road open, not stall forever.
+	Fixtures.add_faction(state, "green", "delta")
+	Fixtures.add_settlement(state, "delta", "green", 1000, {"tribal_government": 1})
+	state["settlements"]["delta"]["garrison"].append(
+		{"template": "test_spears", "experience": 0, "strength_pct": 100})
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	DiplomacyRules.set_stance(state, "green", "blue", "war")
+	DiplomacyRules.set_stance(state, "green", "red", "neutral")
+	DiplomacyRules.set_stance(state, "green", "rebels", "war")
+	Fixtures.add_army(state, "green", "delta",
+		["test_spears", "test_spears", "test_spears", "test_spears", "test_spears", "test_spears"])
+	Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
+	var game := _game(data, state)
+
+	var road_battle := false
+	for i in range(8):
+		for notice in game.end_turn()["ai"]:
+			if notice["kind"] == "battle" and notice["faction"] == "green" and notice["region"] == "gamma":
+				road_battle = true
+	t.check(road_battle, "the blocking army was brought to battle")
+	t.check_eq(state["settlements"]["alpha"]["owner"], "green",
+		"the campaign continued past the cleared road")
+
+
+func test_ai_stale_war_peace_waits_for_intent(t) -> void:
+	## Ledger semantics, driven directly (a full campaign resolves such wars by
+	## conquest long before staleness matters): a war both sides still aim at
+	## outlives the quick-peace window but even intent goes stale in the end.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.add_faction(state, "green", "delta")
+	Fixtures.add_settlement(state, "delta", "green", 1000, {"tribal_government": 1})
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	DiplomacyRules.set_stance(state, "green", "blue", "war")
+	DiplomacyRules.set_stance(state, "green", "red", "neutral")
+	DiplomacyRules.set_stance(state, "green", "rebels", "war")
+
+	var quick := int(data.balance["ai"]["peace_min_war_turns"])
+	var stale := int(data.balance["ai"]["peace_stale_war_turns"])
+	var notices: Array = []
+	for i in range(stale + 1):
+		state["turn"] = i
+		FactionAi.begin_round(data, state)
+		# Both houses keep aiming at each other; nobody marches.
+		AiDiplomacy.ai_memory(state)["targets"] = {"blue": "delta", "green": "alpha"}
+		AiDiplomacy.consider_peace(data, state, "blue", notices)
+		if i == quick + 1:
+			t.check_eq(DiplomacyRules.stance_between(state, "blue", "green"), "war",
+				"a war still being aimed at outlives the quick-peace window")
+	t.check_eq(DiplomacyRules.stance_between(state, "blue", "green"), "neutral",
+		"even an aimed-at war goes stale when nobody can march")
+	t.check(not notices.is_empty() and notices[0]["kind"] == "peace", "the peace was reported")
+
+
 ## --- Settlement stewardship ------------------------------------------------
 
 func test_ai_builds_recruits_and_taxes(t) -> void:
@@ -174,6 +234,25 @@ func test_ai_builds_recruits_and_taxes(t) -> void:
 	for region_id in ["beta", "epsilon"]:
 		t.check_eq(state["settlements"][region_id]["tax_level"], "normal",
 			"the AI never touches the player's settlements (%s)" % region_id)
+
+
+func test_ai_garrisons_rioting_settlement(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	# Alpha seethes (fresh conquest, a foreign building) and taxes alone can't
+	# calm it — a rich blue must put soldiers on the walls instead of banking.
+	var alpha: Dictionary = state["settlements"]["alpha"]
+	alpha["recently_conquered"] = 6
+	alpha["population"] = 6000
+	alpha["buildings"]["test_health"] = 1
+	state["factions"]["blue"]["treasury"] = 30000
+	var game := _game(data, state)
+
+	for i in range(4):
+		game.end_turn()
+	t.check_eq(alpha["tax_level"], "very_low", "taxes were dropped to the floor first")
+	t.check(alpha["garrison"].size() >= 3,
+		"the garrison grew to quell the unrest (%d units)" % alpha["garrison"].size())
 
 
 func test_ai_relocates_lost_capital(t) -> void:

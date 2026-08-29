@@ -342,8 +342,12 @@ The single seam between campaign and battle, quoted from
 ```
 
 Campaign modules (`CombatRules`, `SiegeRules`, `TurnEngine`) consume only this
-contract. A future real-time battle scene implements the same method; the campaign
-never learns which ran.
+contract. The interface additionally carries one static helper, deliberately
+part of the seam: `BattleResolver.force_strength(data, units, general,
+experience_pct)` — the shared, resolver-agnostic strength estimate the faction
+AI (§9) plans with, so its expectations track whatever resolver actually
+fights the battle. A future real-time battle scene implements the same
+`resolve` method; the campaign never learns which ran.
 
 ### 5.6 Auto-resolve model
 
@@ -487,35 +491,46 @@ The campaign ends in `time_up` past AD 14 if no one has won. The mode lives in
 Phase 6 replaced the passive settlement stub with a modular faction AI
 (`src/core/rules/ai/`), run for every non-player faction at the top of each
 end-turn. It is **deliberately mechanical**: every decision is a deterministic
-threshold or priority read from `balance.json → ai`, evaluated in sorted order,
-with no randomness outside the shared battle resolution. Difficulty stays
-economic (§4.3) — the AI never gets smarter, only richer.
+threshold or priority read from balance data (the `ai` section, plus
+`movement.sea_move_cost` for sea routing), evaluated in sorted order, with no
+randomness outside the shared battle resolution. Difficulty stays economic
+(§4.3) — the AI never gets smarter, only richer.
 
 | Module | Owns |
 |---|---|
-| `FactionAi` | Orchestration: peace → target choice → war declaration → military → economy; `begin_round` ages the war ledger once per world turn |
-| `AiAssess` | Pure queries: force power (via `BattleResolver.force_strength`), threat levels (`interior/frontier/threatened`), traversal maps (land hops + sea crossings), expansion target scoring |
-| `AiDiplomacy` | Deliberate war (full war chest, favorable odds, neutral neighbors only, capped simultaneous wars; Roman houses never open on houses or the senate) and white peace for AI-to-AI wars nobody has prosecuted for `peace_min_war_turns` |
-| `AiMilitary` | Pressing sieges (assault at `assault_odds`, else starve), relieving besieged settlements, field battles by odds, retreats, marching on the target (sea crossing when no land route), merging co-located waves, raising armies from garrison surpluses with the best free general |
-| `AiEconomy` | Capital relocation when lost, taxes as high as order safely bears, retraining, debt-shedding (fleets first), threat-floor recruiting, priority-scored construction |
+| `FactionAi` | Orchestration: capital housekeeping → peace → target choice → war declaration → military → economy; `begin_round` ages the war ledger once per world turn |
+| `AiAssess` | Pure queries: force power (via `BattleResolver.force_strength`, part of the resolver interface), threat levels (`interior/frontier/threatened`), traversal maps (land hops + sea crossings), expansion target scoring |
+| `AiDiplomacy` | Deliberate war (full war chest, favorable odds, neutral neighbors only, capped simultaneous wars, a cooldown after a peace; neither the Roman houses nor the senate open on each other — the civil-war rules own that) and white peace for stalled AI-to-AI wars |
+| `AiMilitary` | Laying sieges only with the strength to survive the eventual sally, assaulting at `assault_odds` (else starving them out), lifting hopeless sieges, relieving besieged settlements, field battles by odds, fighting open a road blocked by a hostile army, retreats, marching on the target (crossing by sea when that is the cheaper or only open road), merging co-located waves, raising armies from garrison surpluses with the best free general |
+| `AiEconomy` | Capital relocation when lost, taxes as high as order safely bears (with hysteresis against flapping), retraining, debt-shedding (fleets first), garrison floors by threat — raised for rioting cities and for very rich factions — and priority-scored construction |
 
 Behavioral notes:
 
 - **Targets are recomputed, not remembered**: the nearest reachable enemy
-  settlement (weakest garrison breaks ties), preferring the senate mission
-  target. Distance is measured from the faction's own territory, so a marching
-  expedition never flip-flops its goal.
-- **Intent counts as prosecution.** The war-staleness ledger
-  (`state.ai.war_turns`) resets while either side besieges, stands on the
-  other's ground, *or is mustering against a target of theirs* — so white
-  peace ends only genuinely dead wars, and a fresh peace is protected by a
-  re-declaration cooldown.
+  settlement (the least defended — garrison scaled by terrain and walls —
+  breaks ties), preferring the senate mission target. Distance is measured
+  from the faction's own territory, so a marching expedition never
+  flip-flops its goal.
+- **Wars end in three bands.** The staleness ledger (`state.ai.war_turns`)
+  resets on physical prosecution — a siege between the pair, or an army on
+  the other's ground. A quiet war nobody aims at any more ends after
+  `peace_min_war_turns`; one still being mustered against holds out for
+  `peace_stale_war_turns`; when either treasury is too empty to make the
+  intent credible, `peace_exhausted_war_turns` suffices. A fresh peace is
+  protected by a re-declaration cooldown (`peace_cooldown_turns`).
 - **Wars against the player never end by themselves** — ending them is Phase
   5's negotiation table, and the player's own business.
 - **Rebels are a garrison, not a power**: they defend, retrain and recruit at
-  home, and never expand, declare, or make peace.
+  home, abandon sieges inherited from dead factions' defecting armies, and
+  never expand, declare, or make peace.
 - **AI captures always occupy** — enslavement and extermination stay player
   decisions.
+- **Single-region islands sit outside the AI's war planning** (Sardinia,
+  Britannia, Crete, Rhodes, Cyprus): with no land adjacency there is no legal
+  way for *anyone*, player included, to invade them once at war — landing in
+  hostile territory needs the amphibious operations of the Phase 3 naval
+  remainder. Until then the AI neither targets them nor counts them
+  reachable, and island factions expand only if war finds them.
 
 ## 10. Data Architecture
 
@@ -573,7 +588,8 @@ father/general/trait references resolving; long and short win conditions present
 for every playable and unlockable faction. CI runs the validator and the headless
 test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover
 growth, order, economy, construction, recruitment, movement/visibility, battle,
-and a multi-turn campaign integration run) on every push.
+characters, diplomacy/war, the faction AI, UI smoke, and a multi-turn campaign
+integration run) on every push.
 
 ### 10.3 Determinism & save model
 
@@ -600,7 +616,7 @@ Phases follow the research report (§17). Status as of this document:
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers await Phase 7 offices |
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | Pending; symmetric stances + war declaration live (`DiplomacyRules`), hostile acts auto-declare war |
-| 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done at foundation depth** (§9): `FactionAi` + assess/diplomacy/military/economy modules — deliberate wars, white peace, sieges & assaults, defence, sea invasions, mustering with generals, threat-based garrisons, priority construction, debt-shedding; all thresholds in `balance.json → ai`. Remaining: per-faction personalities, AI mercenary hiring, fleet operations |
+| 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done at foundation depth** (§9): `FactionAi` + assess/diplomacy/military/economy modules — deliberate wars, white peace, sieges & assaults, defence, sea invasions, mustering with generals, threat-based garrisons, priority construction, debt-shedding; all thresholds in balance data. Remaining: per-faction personalities, AI mercenary hiring, fleet operations, and hostile-island invasions once amphibious landings exist (§9) |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |

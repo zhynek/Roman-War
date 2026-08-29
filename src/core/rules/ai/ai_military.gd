@@ -1,11 +1,11 @@
 class_name AiMilitary
 ## Field operations for one AI faction's turn: press ongoing sieges, relieve
 ## threatened settlements, fight or avoid field battles by odds, march on the
-## chosen expansion target (over land, or by sea when no land route exists),
-## and raise new field armies from garrison surpluses. All fighting resolves
-## through the injected BattleResolver with the campaign RNG; every decision
-## is a deterministic odds threshold from data/balance.json, evaluated in
-## sorted order.
+## chosen expansion target (over land, or by a sea crossing whenever that is
+## the cheaper or only open road), and raise new field armies from garrison
+## surpluses. All fighting resolves through the injected BattleResolver with
+## the campaign RNG; every decision is a deterministic odds threshold from
+## data/balance.json, evaluated in sorted order.
 
 
 static func take_turn(data: GameData, state: Dictionary, faction_id: String, context: Dictionary, rng: CampaignRng, resolver: BattleResolver, ai_notices: Array, character_notices: Array) -> void:
@@ -15,6 +15,10 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, con
 		RecruitmentRules.merge_units(state["armies"][army_id]["units"])
 	_merge_colocated(data, state, faction_id)
 
+	if context["is_rebel"]:
+		# Rebels never expand — a siege inherited from a dead faction's
+		# defecting army is lifted, not pressed.
+		_abandon_rebel_sieges(state, faction_id)
 	_press_sieges(data, state, faction_id, rng, resolver, handled, ai_notices, character_notices)
 	_defend(data, state, faction_id, rng, resolver, handled, ai_notices, character_notices)
 	if not context["is_rebel"]:
@@ -36,8 +40,9 @@ static func _own_armies(state: Dictionary, faction_id: String) -> Array:
 static func _merge_colocated(data: GameData, state: Dictionary, faction_id: String) -> void:
 	## Waves arriving at the same front combine into one striking force. The
 	## besieging army (else the largest) receives; donors without generals fold
-	## in entirely, and a lone generalled donor hands its general to a
-	## general-less receiver. Two generalled armies stay separate commands.
+	## in up to the receiver's unit cap, and a generalled donor that fits whole
+	## hands its general to a general-less receiver. Two generalled armies stay
+	## separate commands.
 	var cap := int(data.balance["ai"]["army_max_units"])
 	var by_region := {}
 	for army_id in _own_armies(state, faction_id):
@@ -86,8 +91,20 @@ static func _merge_colocated(data: GameData, state: Dictionary, faction_id: Stri
 
 ## --- Sieges ---------------------------------------------------------------
 
+static func _abandon_rebel_sieges(state: Dictionary, faction_id: String) -> void:
+	for army_id in _own_armies(state, faction_id):
+		var region_id: String = state["armies"][army_id]["region"]
+		if not state["settlements"].has(region_id):
+			continue
+		var siege = state["settlements"][region_id]["siege"]
+		if siege != null and siege["besieger"] == army_id:
+			state["settlements"][region_id]["siege"] = null
+
+
 static func _press_sieges(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng, resolver: BattleResolver, handled: Dictionary, ai_notices: Array, character_notices: Array) -> void:
-	var assault_odds := float(data.balance["ai"]["assault_odds"])
+	var ai_rules: Dictionary = data.balance["ai"]
+	var assault_odds := float(ai_rules["assault_odds"])
+	var siege_odds := float(ai_rules["siege_odds"])
 	for army_id in _own_armies(state, faction_id):
 		var army: Dictionary = state["armies"][army_id]
 		var region_id: String = army["region"]
@@ -96,14 +113,19 @@ static func _press_sieges(data: GameData, state: Dictionary, faction_id: String,
 		var siege = state["settlements"][region_id]["siege"]
 		if siege == null or siege["besieger"] != army_id:
 			continue
+		var attack_power := AiAssess.army_power(data, state, army)
+		# A siege that would end in a slaughter at the walls when the garrison
+		# finally sallies is lifted now — the army falls back through the
+		# normal flow this turn instead of feeding the grinder.
+		if attack_power < AiAssess.sally_defense_power(data, state, region_id) * siege_odds:
+			state["settlements"][region_id]["siege"] = null
+			continue
 		# Holding the lines is always an action: the army neither marches nor
 		# joins another task while its siege stands.
 		handled[army_id] = true
 		if not siege["equipment_ready"]:
 			continue
-		var attack_power := AiAssess.army_power(data, state, army)
-		var defense_power := AiAssess.assault_defense_power(data, state, region_id)
-		if attack_power >= defense_power * assault_odds:
+		if attack_power >= AiAssess.assault_defense_power(data, state, region_id) * assault_odds:
 			_assault(data, state, faction_id, army_id, region_id, rng, resolver, ai_notices, character_notices)
 
 
@@ -166,12 +188,16 @@ static func _defend(data: GameData, state: Dictionary, faction_id: String, rng: 
 		if defender == "":
 			continue
 		handled[defender] = true
-		_march(data, state, defender,
+		var blocked := _march(data, state, defender,
 			AiAssess.distance_map(data, state, faction_id, [region_id]))
 		var army: Dictionary = state["armies"][defender]
 		if army["region"] == region_id or MapRules.are_adjacent(data, army["region"], region_id):
 			_attack_strongest(data, state, faction_id, defender, region_id, rng, resolver,
 				ai_notices, character_notices, 0.0)  # committed: the relief odds were checked from home
+		elif blocked != "":
+			# The road to the besieged city is fought open at field odds.
+			_attack_strongest(data, state, faction_id, defender, blocked, rng, resolver,
+				ai_notices, character_notices, float(data.balance["ai"]["attack_odds"]))
 
 
 static func _nearest_able_army(data: GameData, state: Dictionary, faction_id: String, region_id: String, handled: Dictionary, needed_power: float) -> String:
@@ -198,6 +224,7 @@ static func _campaign_on_target(data: GameData, state: Dictionary, faction_id: S
 	if goal == "":
 		return
 	var attack_odds := float(data.balance["ai"]["attack_odds"])
+	var siege_odds := float(data.balance["ai"]["siege_odds"])
 	for army_id in _own_armies(state, faction_id):
 		if handled.has(army_id):
 			continue
@@ -212,25 +239,51 @@ static func _campaign_on_target(data: GameData, state: Dictionary, faction_id: S
 				AiAssess.distance_map(data, state, faction_id,
 					AiAssess.owned_regions(state, faction_id)))
 			continue
-		_march(data, state, army_id, context["goal_costs"])
+		# An army the goal map cannot even see is stranded — the passable road
+		# net to this target does not touch it. Walking at the goal is
+		# hopeless; fold back toward home and let the garrison absorb it.
+		if not context["goal_costs"].has(army["region"]):
+			_march(data, state, army_id,
+				AiAssess.distance_map(data, state, faction_id,
+					AiAssess.owned_regions(state, faction_id)))
+			army = state["armies"][army_id]
+			if state["settlements"].has(army["region"]) \
+					and state["settlements"][army["region"]]["owner"] == faction_id:
+				CombatRules.garrison_army(data, state, army_id, army["region"])
+			continue
+		var blocked := _march(data, state, army_id, context["goal_costs"])
 		if not state["armies"].has(army_id):
 			continue
 		army = state["armies"][army_id]
-		# Fight for the approaches: clear hostile field armies out of the goal
-		# region (or wherever the march stalled) when the odds justify it.
+		# Fight for the approaches: clear hostile field armies off the army's
+		# own ground, the goal, or the road that blocked the march.
 		var fought := _attack_strongest(data, state, faction_id, army_id, army["region"],
 			rng, resolver, ai_notices, character_notices, attack_odds)
 		if not fought and MapRules.are_adjacent(data, army["region"], goal):
-			_attack_strongest(data, state, faction_id, army_id, goal,
+			fought = _attack_strongest(data, state, faction_id, army_id, goal,
+				rng, resolver, ai_notices, character_notices, attack_odds)
+		if not fought and blocked != "" and blocked != goal:
+			_attack_strongest(data, state, faction_id, army_id, blocked,
 				rng, resolver, ai_notices, character_notices, attack_odds)
 		if not state["armies"].has(army_id):
 			continue
 		army = state["armies"][army_id]
-		if army["region"] == goal or MapRules.are_adjacent(data, army["region"], goal):
-			if AiAssess.hostile_armies_in(state, faction_id, goal).is_empty() \
-					and state["settlements"].has(goal) and state["settlements"][goal]["siege"] == null \
+		if (army["region"] == goal or MapRules.are_adjacent(data, army["region"], goal)) \
+				and state["settlements"].has(goal):
+			# Invest only with the strength to survive the eventual sally —
+			# anything less feeds the garrison a victory at the walls.
+			var strong_enough := AiAssess.army_power(data, state, army) \
+				>= AiAssess.sally_defense_power(data, state, goal) * siege_odds
+			if strong_enough and AiAssess.hostile_armies_in(state, faction_id, goal).is_empty() \
+					and state["settlements"][goal]["siege"] == null \
 					and SiegeRules.begin_siege(data, state, army_id, goal):
 				ai_notices.append({"kind": "siege_laid", "faction": faction_id, "region": goal})
+			elif not strong_enough and army["region"] == goal:
+				# A mauled remnant standing in the hostile region falls back
+				# to friendly ground to meet the next wave.
+				_march(data, state, army_id,
+					AiAssess.distance_map(data, state, faction_id,
+						AiAssess.owned_regions(state, faction_id)))
 
 
 static func _should_retreat(data: GameData, state: Dictionary, faction_id: String, army: Dictionary) -> bool:
@@ -275,16 +328,18 @@ static func _attack_strongest(data: GameData, state: Dictionary, faction_id: Str
 
 ## --- Marching -------------------------------------------------------------
 
-static func _march(data: GameData, state: Dictionary, army_id: String, goal_costs: Dictionary) -> void:
+static func _march(data: GameData, state: Dictionary, army_id: String, goal_costs: Dictionary) -> String:
 	## Walk down the cost-to-goal map while movement lasts. When the land route
 	## is blocked or absent, try one sea crossing toward the goal. Armies never
 	## force-march (the fatigue malus is not worth arriving a season early).
+	## Returns the region whose hostile occupiers stopped the march ("" when
+	## the march simply ended) so the caller can decide to fight for the road.
 	var army: Dictionary = state["armies"][army_id]
 	for i in range(16):  # hard cap; each step spends movement so this terminates
 		var here: String = army["region"]
 		var here_cost := int(goal_costs.get(here, 1 << 30))
 		if here_cost == 0:
-			return
+			return ""
 		var next_step := ""
 		var next_cost := here_cost
 		for neighbor in data.regions[here].get("adjacent", []):
@@ -298,28 +353,31 @@ static func _march(data: GameData, state: Dictionary, army_id: String, goal_cost
 			continue
 		# Blocked on land (hostile army, no budget, no route): try the sea once.
 		if _sea_step(data, state, army_id, goal_costs, here_cost):
-			return  # a crossing spends the whole turn's movement
-		return
+			return ""  # a crossing spends the whole turn's movement
+		if next_step != "" and not AiAssess.hostile_armies_in(state, army["owner"], next_step).is_empty():
+			return next_step
+		return ""
+	return ""
 
 
 static func _sea_step(data: GameData, state: Dictionary, army_id: String, goal_costs: Dictionary, here_cost: int) -> bool:
+	## Cross to the cheapest reachable shore that genuinely shortens the road,
+	## trying candidates in cost order — the nearest berth can be blocked (a
+	## hostile army, an unconnected zone) while the next one is open.
 	var army: Dictionary = state["armies"][army_id]
 	if data.regions[army["region"]].get("sea_zones", []).is_empty():
 		return false
-	var best := ""
-	var best_cost := here_cost - AiAssess.SEA_HOP_COST + 1  # must genuinely shorten the road
-	var region_ids: Array = data.regions.keys()
-	region_ids.sort()
-	for region_id in region_ids:
-		if not goal_costs.has(region_id) or int(goal_costs[region_id]) >= best_cost:
-			continue
-		if data.regions[region_id].get("sea_zones", []).is_empty():
-			continue
-		best = region_id
-		best_cost = int(goal_costs[region_id])
-	if best == "":
-		return false
-	return MovementRules.sea_move_army(data, state, army_id, best)
+	var ceiling := here_cost - AiAssess.sea_hop_cost(data) + 1
+	var candidates: Array = []
+	for region_id in AiAssess.sea_neighbors(data, army["region"]):
+		if goal_costs.has(region_id) and int(goal_costs[region_id]) < ceiling:
+			candidates.append({"cost": int(goal_costs[region_id]), "region": region_id})
+	candidates.sort_custom(func(a, b):
+		return a["cost"] < b["cost"] if a["cost"] != b["cost"] else String(a["region"]) < String(b["region"]))
+	for candidate in candidates:
+		if MovementRules.sea_move_army(data, state, army_id, candidate["region"]):
+			return true
+	return false
 
 
 ## --- Homecoming and mustering ---------------------------------------------
@@ -351,9 +409,12 @@ static func _muster(data: GameData, state: Dictionary, faction_id: String, conte
 		return
 	var ai_rules: Dictionary = data.balance["ai"]
 
+	# The assault is carried by ONE army, so the muster stops only when the
+	# strongest single force suffices — split waves don't add up at the walls.
 	var offensive_power := 0.0
 	for army_id in _own_armies(state, faction_id):
-		offensive_power += AiAssess.army_power(data, state, state["armies"][army_id])
+		offensive_power = maxf(offensive_power,
+			AiAssess.army_power(data, state, state["armies"][army_id]))
 	var needed := AiAssess.assault_defense_power(data, state, goal) * float(ai_rules["assault_odds"])
 	if offensive_power > 0.0 and offensive_power >= needed:
 		return  # a standing field force already suffices — even for an open gate

@@ -25,7 +25,7 @@ foundation depth, the full character/family layer), Phase 6 AI opponents
 invasions, mustering, threat-based garrisons, priority construction; DESIGN.md
 §9), the Phase 7 senate foundation loop, and a playable Phase 8 campaign UI.
 
-**Green as of this branch:** 78 tests / 0 failures, validator 0 errors /
+**Green as of this branch:** 82 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. Branch `claude/ai-opponents-5y68t6`. A Mac build from
 the pre-AI foundation was delivered to the user, who is playtesting.
 
@@ -54,7 +54,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 78 tests, 0 failures (~45s)
+godot --headless --path . --script res://tests/run_tests.gd      # 82 tests, 0 failures (~20s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -117,12 +117,18 @@ If the user reports a problem, **ask for the world seed** — the same seed
 reproduces their exact campaign, which makes any bug directly debuggable.
 
 ### Phase 6 follow-ups — deepening the AI
-The AI plays the whole game but uniformly. Self-contained extensions:
-per-faction personalities (an `ai` block in `factions.json` + schema),
-AI mercenary hiring when a muster stalls, fleet operations once Phase 3's
-naval remainder lands, and smarter target scoring (economic value, walls).
-All thresholds live in `balance.json → ai`; behaviours in
-`src/core/rules/ai/`.
+The AI plays the whole game but uniformly; the thresholds live in balance
+data and the behaviours in `src/core/rules/ai/` (DESIGN.md §9).
+
+> Deepen the Phase 6 AI: per-faction personalities (an `ai` block in
+> `factions.json` plus schema and validator coverage), AI mercenary hiring
+> when a muster stalls, and smarter target scoring (economic value, wall
+> discounting). Keep every knob in data, keep it deterministic, and verify
+> with long headless campaigns across several seeds and difficulties.
+
+Hostile single-region islands (Sardinia, Britannia, Crete, Rhodes, Cyprus)
+are untouchable for everyone once at war — that unlock belongs to Phase 3's
+amphibious landings, not to AI work.
 
 ## 6. Known gaps (verified, not guesses)
 
@@ -137,7 +143,8 @@ All thresholds live in `balance.json → ai`; behaviours in
   them, and warns about any *other* trigger kind no engine call site fires.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
-  watchtowers, ambush.
+  watchtowers, ambush. Until landings exist, a hostile single-region island
+  cannot be invaded by anyone — the AI knows and does not try (DESIGN.md §9).
 - **Art is placeholder** — coloured circles on a geographic map.
 
 ## 7. Process notes

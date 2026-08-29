@@ -123,7 +123,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	var taken := displace_characters(data, state, region_id, previous_owner)
 
 	# Losing your last settlement destroys the faction.
-	_check_faction_destroyed(state)
+	check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)
 	return {"loot": loot, "slaves": slaves, "occupation": occupation, "characters_taken": taken}
 
@@ -198,8 +198,7 @@ static func raise_army(data: GameData, state: Dictionary, region_id: String, uni
 	var settlement: Dictionary = state["settlements"][region_id]
 	var garrison: Array = settlement["garrison"]
 	var picked: Array = []
-	var sorted_indices := unit_indices.duplicate()
-	sorted_indices.sort()
+	var sorted_indices := _unique_sorted(unit_indices)
 	for i in range(sorted_indices.size() - 1, -1, -1):
 		var index := int(sorted_indices[i])
 		if index >= 0 and index < garrison.size():
@@ -247,8 +246,7 @@ static func detach_to_garrison(data: GameData, state: Dictionary, army_id: Strin
 	if settlement["owner"] != army["owner"]:
 		return false
 	var units: Array = army["units"]
-	var sorted_indices := unit_indices.duplicate()
-	sorted_indices.sort()
+	var sorted_indices := _unique_sorted(unit_indices)
 	var moved := false
 	for i in range(sorted_indices.size() - 1, -1, -1):
 		var index := int(sorted_indices[i])
@@ -261,6 +259,17 @@ static func detach_to_garrison(data: GameData, state: Dictionary, army_id: Strin
 	if moved:
 		SettlementRules.refresh_governors(data, state)
 	return moved
+
+
+static func _unique_sorted(indices: Array) -> Array:
+	## Sorted, de-duplicated copy — a repeated index must not remove whichever
+	## unit slid into the position after the first removal.
+	var seen := {}
+	for index in indices:
+		seen[int(index)] = true
+	var unique: Array = seen.keys()
+	unique.sort()
+	return unique
 
 
 static func garrison_army(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
@@ -304,7 +313,7 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 		state["armies"].erase(army_id)
 
 
-static func _check_faction_destroyed(state: Dictionary) -> void:
+static func check_faction_destroyed(state: Dictionary) -> void:
 	for faction_id in state["factions"]:
 		var faction: Dictionary = state["factions"][faction_id]
 		if not faction["alive"] or faction_id == "rebels":

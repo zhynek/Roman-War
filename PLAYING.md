@@ -128,6 +128,11 @@ Honest list, so you know what you are looking at:
   the map to change without you. What they cannot do yet is negotiate: no
   offers, tribute, or peace terms with *you* until the diplomacy phase lands.
 - **Battles resolve on paper.** You see the outcome, not the fight.
+- **Hostile islands cannot be invaded.** A single-region island (Sardinia,
+  Britain, Crete, Rhodes, Cyprus) can only be entered by sea while its owner
+  is not at war with you — land first, then lay siege. Once war is declared
+  there is no way ashore, for you or the computer, until naval landings
+  arrive with the fleet phase.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full

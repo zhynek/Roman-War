@@ -19,8 +19,9 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   plain Dictionary so save/load is JSON round-tripping.
 - **Growth and public order are summed factor lists** returning named
   breakdowns, not opaque numbers — the UI will render the breakdowns.
-- **Campaign code may only call `BattleResolver.resolve(...)`** — never assume
-  auto-resolve specifics.
+- **Campaign code may only call `BattleResolver.resolve(...)`** — plus the
+  interface's shared `BattleResolver.force_strength(...)` estimate — and never
+  assume auto-resolve specifics.
 
 ## Workflow
 
