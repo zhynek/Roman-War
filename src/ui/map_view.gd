@@ -146,6 +146,16 @@ func _draw_region(region_id: String, is_visible: bool) -> void:
 	if game.state["factions"].get(String(game.state["player_faction"]), {}).get("capital", "") == region_id:
 		draw_circle(screen + Vector2(0, -radius - 6.0 * _zoom), 3.0 * _zoom, Color(1, 0.9, 0.4))
 
+	# An unexplored point of interest: a small gold diamond beside the token.
+	var site: Dictionary = game.data.sites_by_region.get(region_id, {})
+	if not site.is_empty() and not game.state.get("sites_explored", []).has(site["id"]):
+		var pip := screen + Vector2(-radius - 6.0 * _zoom, -radius * 0.4)
+		var arm := 3.2 * _zoom
+		draw_colored_polygon(PackedVector2Array([
+			pip + Vector2(0, -arm), pip + Vector2(arm, 0),
+			pip + Vector2(0, arm), pip + Vector2(-arm, 0),
+		]), Color(0.95, 0.8, 0.35))
+
 	# Army badges: one square per owner present, stacked to the right.
 	var badge_offset := 0
 	var army_owners := {}

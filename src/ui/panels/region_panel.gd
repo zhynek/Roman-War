@@ -8,6 +8,7 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal explore_requested(army_id: String)
 
 var game: Game
 var region_id := ""
@@ -53,6 +54,9 @@ func _rebuild() -> void:
 	var resources: Array = region.get("resources", [])
 	if not resources.is_empty():
 		_label("Goods: " + ", ".join(resources))
+	var site := _unexplored_site()
+	if not site.is_empty():
+		_label("A place worth searching: %s" % site["name"], Color(0.9, 0.8, 0.5))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty():
@@ -116,6 +120,9 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 			_label("  %s  %d%%" % [_unit_name(unit), int(unit["strength_pct"])])
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
+			action_taken.emit())
+		_action_button("Raise a field army (the garrison marches out)", func():
+			game.raise_army(region_id)
 			action_taken.emit())
 
 	# Construction
@@ -218,6 +225,14 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 			game.assault_settlement(army_id, region_id, choice)
 			action_taken.emit())
 
+	var site := _unexplored_site()
+	if not site.is_empty():
+		_header("Point of interest", 12)
+		var can_search: bool = float(army["movement_left"]) > 0.0
+		_action_button("Search the %s" % site["name"] if can_search
+				else "Search the %s (no movement left)" % site["name"],
+			func(): explore_requested.emit(army_id))
+
 	var offers := game.mercenaries_available(region_id)
 	if not offers.is_empty():
 		_header("Mercenaries for hire", 12)
@@ -226,6 +241,13 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 				func():
 					game.hire_mercenary(army_id, offer["template"])
 					action_taken.emit())
+
+
+func _unexplored_site() -> Dictionary:
+	var site: Dictionary = game.data.sites_by_region.get(region_id, {})
+	if site.is_empty() or game.state.get("sites_explored", []).has(site["id"]):
+		return {}
+	return site
 
 
 ## --- Small builders -------------------------------------------------------

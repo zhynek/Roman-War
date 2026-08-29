@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "guided_campaign.schema.json",
+  "title": "Guided campaign trail stages",
+  "type": "object",
+  "required": ["stages"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "text", "trigger", "objectives", "reward"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "trigger": {
+            "type": "object",
+            "required": ["kind"],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "start", "after", "war_declared_on_player",
+                  "player_settlement_besieged", "intruders_in_player_lands",
+                  "player_in_debt"
+                ]
+              },
+              "stages": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                "description": "Stages that must be done or expired (kind == after)"
+              },
+              "requires": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                "description": "Extra done-or-expired gate usable on any trigger kind"
+              },
+              "min_turn": { "type": "integer", "minimum": 0 },
+              "roman_only": { "type": "boolean" }
+            }
+          },
+          "objectives": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["kind"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "set_taxes", "queue_building", "recruit_units",
+                    "raise_army", "move_army", "hire_mercenaries",
+                    "explore_sites", "win_battles", "capture_regions",
+                    "senate_missions", "hold_regions", "treasury_at_least",
+                    "governor_in_capital", "no_siege_on_target", "no_intruders"
+                  ]
+                },
+                "count": { "type": "integer", "minimum": 1 },
+                "amount": { "type": "integer", "minimum": 1 },
+                "building_kind": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+              }
+            }
+          },
+          "complete": { "enum": ["all", "any"] },
+          "expires_turns": { "type": "integer", "minimum": 1 },
+          "repeatable": { "type": "boolean" },
+          "cooldown_turns": { "type": "integer", "minimum": 1 },
+          "reward": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "treasury": { "type": "integer", "minimum": 1 },
+              "units": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["template", "count"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "template": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+                    "count": { "type": "integer", "minimum": 1, "maximum": 8 }
+                  }
+                }
+              },
+              "experience": { "type": "integer", "minimum": 1, "maximum": 3 },
+              "boon": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": false,
+                "properties": {
+                  "recruit_xp": { "type": "integer", "minimum": 1, "maximum": 3 },
+                  "income_pct": { "type": "number", "exclusiveMinimum": 0, "maximum": 10 },
+                  "movement": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

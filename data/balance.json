@@ -154,7 +154,8 @@
   },
   "recruitment": {
     "experience_max": 9,
-    "retrain_cost_factor": 0.5
+    "retrain_cost_factor": 0.5,
+    "army_unit_cap": 20
   },
   "battle": {
     "experience_strength_pct_per_chevron": 10,

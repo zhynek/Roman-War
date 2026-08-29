@@ -154,6 +154,8 @@ static func faction_turn_breakdown(data: GameData, state: Dictionary, faction_id
 		difficulty_multiplier = float(ai_rules["difficulty_income_multiplier"].get(
 			state.get("difficulty", "medium"), 1.0))
 	income *= difficulty_multiplier
+	# Guided-trail boons: a small permanent income edge, granted by rewards.
+	income *= 1.0 + float(state["factions"][faction_id].get("boons", {}).get("income_pct", 0.0)) / 100.0
 
 	var upkeep := faction_upkeep(data, state, faction_id)
 	return {"income": income, "upkeep": upkeep, "net": income - float(upkeep)}

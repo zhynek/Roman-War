@@ -72,6 +72,20 @@ size_flags_horizontal = 3
 max_value = 999999.0
 value = 42.0
 
+[node name="GuidedRow" type="HBoxContainer" parent="Center/Menu"]
+layout_mode = 2
+
+[node name="GuidedLabel" type="Label" parent="Center/Menu/GuidedRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 0)
+text = "Guided trail"
+
+[node name="Guided" type="CheckButton" parent="Center/Menu/GuidedRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+button_pressed = true
+text = "objectives, rewards, and a helping hand"
+
 [node name="Spacer2" type="Control" parent="Center/Menu"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 16)

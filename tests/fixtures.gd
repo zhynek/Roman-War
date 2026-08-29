@@ -227,6 +227,13 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
+static func enable_guided(campaign_state: Dictionary) -> void:
+	## The fixture state ships without the trail (like a pre-trail save);
+	## guided tests opt in explicitly.
+	campaign_state["guided"] = {"enabled": true, "counters": {}, "stages": {}}
+	campaign_state["sites_explored"] = []
+
+
 static func add_faction(campaign_state: Dictionary, faction_id: String, capital: String) -> void:
 	campaign_state["factions"][faction_id] = _faction(capital)
 

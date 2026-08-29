@@ -6,8 +6,9 @@ class_name TurnEngine
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
 ##   5. Population growth, slaves, plague
 ##   6. Public order: riots and revolts
-##   7. Events, disasters, senate politics
-##   8. Date advances (2 turns/year), movement points reset, victory check
+##   7. Events, disasters, senate politics, character triggers
+##   8. Guided campaign trail judges the turn (stages complete/expire/open)
+##   9. Date advances (2 turns/year), movement points reset, victory check
 ##
 ## Returns a report dict of everything notable that happened, for the UI's
 ## event scrolls.
@@ -18,7 +19,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "ai": [], "winner": null,
+		"senate": [], "characters": [], "ai": [], "guided": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -76,6 +77,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["events"] = EventRules.process_turn(data, state, rng)
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
+	report["guided"] = GuidedRules.process_turn(data, state)
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
 

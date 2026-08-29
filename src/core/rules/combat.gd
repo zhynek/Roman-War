@@ -60,6 +60,11 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			winner_soldiers, loser_soldiers, notices)
 	result["character_notices"] = notices
 
+	# The trail counts the player's field victories here — the one choke point
+	# every battle passes, so defending against an AI attack counts too.
+	if winner_army["owner"] == state.get("player_faction", ""):
+		GuidedRules.bump(state, "battles_won")
+
 	_cleanup_destroyed_army(data, state, attacker_id)
 	_cleanup_destroyed_army(data, state, defender_id)
 	return result
@@ -121,6 +126,11 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 
 	var taken := displace_characters(data, state, region_id, previous_owner)
+
+	# Every capture path funnels through here — assault, starve-out, AI or
+	# player — so the trail's capture counter lives here (revolts don't).
+	if new_owner == state.get("player_faction", ""):
+		GuidedRules.bump(state, "regions_captured")
 
 	# Losing your last settlement destroys the faction.
 	check_faction_destroyed(state)

@@ -54,13 +54,18 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 	var settlement: Dictionary = state["settlements"][region_id]
 	var completed: Array = []
 	var remaining: Array = []
+	# Guided-trail boons can sharpen a faction's recruits beyond its buildings.
+	var boon_xp := int(state["factions"][settlement["owner"]].get("boons", {}).get("recruit_xp", 0))
+	var experience_max := int(data.balance["recruitment"]["experience_max"])
 	var first := true
 	for job in settlement["recruitment_queue"]:
 		if first:
 			job["turns_left"] = int(job["turns_left"]) - 1
 			first = false
 		if int(job["turns_left"]) <= 0:
-			var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
+			var experience := mini(
+				int(SettlementRules.effect_max(data, settlement, "recruit_xp")) + boon_xp,
+				experience_max)
 			settlement["garrison"].append({
 				"template": job["template"],
 				"experience": experience,

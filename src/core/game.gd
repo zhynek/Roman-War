@@ -9,11 +9,11 @@ var state: Dictionary = {}
 var resolver: BattleResolver
 
 
-static func new_campaign(player_faction: String, seed_value: int = 1, difficulty: String = "medium", campaign_mode: String = "long", data_dir: String = "res://data") -> Game:
+static func new_campaign(player_faction: String, seed_value: int = 1, difficulty: String = "medium", campaign_mode: String = "long", guided: bool = true, data_dir: String = "res://data") -> Game:
 	var game := Game.new()
 	game.data = GameData.load_from(data_dir)
 	game.resolver = AutoResolver.new()
-	game.state = NewGame.build(game.data, player_faction, seed_value, difficulty, campaign_mode)
+	game.state = NewGame.build(game.data, player_faction, seed_value, difficulty, campaign_mode, guided)
 	return game
 
 
@@ -27,11 +27,19 @@ func set_tax_level(region_id: String, tax_level: String) -> bool:
 	if not Constants.TAX_LEVELS.has(tax_level):
 		return false
 	state["settlements"][region_id]["tax_level"] = tax_level
+	if state["settlements"][region_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "taxes_set")
 	return true
 
 
 func queue_building(region_id: String, chain_id: String) -> bool:
-	return ConstructionRules.queue_project(data, state, region_id, chain_id)
+	var queued := ConstructionRules.queue_project(data, state, region_id, chain_id)
+	if queued and state["settlements"][region_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "buildings_queued")
+		var kind: String = data.chains.get(chain_id, {}).get("kind", "")
+		if kind != "":
+			GuidedRules.bump(state, "buildings_queued:%s" % kind)
+	return queued
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
@@ -39,7 +47,10 @@ func demolish_building(region_id: String, chain_id: String) -> bool:
 
 
 func queue_unit(region_id: String, template_id: String) -> bool:
-	return RecruitmentRules.queue_unit(data, state, region_id, template_id)
+	var queued := RecruitmentRules.queue_unit(data, state, region_id, template_id)
+	if queued and state["settlements"][region_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "units_recruited")
+	return queued
 
 
 func retrain_garrison(region_id: String) -> int:
@@ -57,7 +68,10 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
-	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "army_moves")
+	return moved
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
@@ -82,11 +96,17 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
-	return MovementRules.sea_move_army(data, state, army_id, to_region)
+	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
+	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "army_moves")
+	return moved
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
-	return MercenaryRules.hire(data, state, army_id, template_id)
+	var hired := MercenaryRules.hire(data, state, army_id, template_id)
+	if hired and state["armies"][army_id]["owner"] == state["player_faction"]:
+		GuidedRules.bump(state, "mercs_hired")
+	return hired
 
 
 func mercenaries_available(region_id: String) -> Array:
@@ -176,6 +196,83 @@ func garrison_army(army_id: String) -> bool:
 	if army.is_empty():
 		return false
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
+
+
+func raise_army(region_id: String) -> String:
+	## The whole garrison marches out as a field army under the best of the
+	## house present (the AI musters through its own path). Returns the new
+	## army id, or "" — the army moves next turn.
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return ""
+	if settlement["garrison"].is_empty():
+		return ""
+	var general = CharacterRules.best_free_general(data, state, state["player_faction"], region_id)
+	var army_id := CombatRules.raise_army(data, state, region_id,
+		range(settlement["garrison"].size()), general)
+	if army_id != "":
+		GuidedRules.bump(state, "armies_raised")
+	return army_id
+
+
+func explore_site(army_id: String) -> Dictionary:
+	## Search the point of interest in the army's region. Player armies only —
+	## the map's finds are the player's reward for ranging out. Searching
+	## spends the rest of the season's movement, and each site yields once,
+	## ever. Returns {site, outcome} for the UI, or {} if nothing could be
+	## searched.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty() or army["owner"] != state["player_faction"]:
+		return {}
+	var site: Dictionary = data.sites_by_region.get(army["region"], {})
+	if site.is_empty():
+		return {}
+	if not state.has("sites_explored"):
+		state["sites_explored"] = []
+	if state["sites_explored"].has(site["id"]):
+		return {}
+	if float(army["movement_left"]) <= 0.0:
+		return {}
+
+	var rng := _rng()
+	var total_weight := 0
+	for outcome in site["outcomes"]:
+		total_weight += int(outcome["weight"])
+	var roll := rng.randi_range(1, total_weight)
+	var picked: Dictionary = site["outcomes"][0]
+	for outcome in site["outcomes"]:
+		roll -= int(outcome["weight"])
+		if roll <= 0:
+			picked = outcome
+			break
+
+	var reward: Dictionary = picked.get("reward", {})
+	var faction: Dictionary = state["factions"][army["owner"]]
+	faction["treasury"] = int(faction["treasury"]) + int(reward.get("treasury", 0))
+	# Found soldiers join the column; past the army cap they muster at home.
+	var cap := int(data.balance["recruitment"]["army_unit_cap"])
+	var overflow: Array = []
+	for grant in reward.get("units", []):
+		for i in range(int(grant["count"])):
+			if army["units"].size() < cap:
+				army["units"].append({
+					"template": grant["template"], "experience": 0, "strength_pct": 100,
+				})
+			else:
+				overflow.append({"template": grant["template"], "count": 1})
+	if not overflow.is_empty():
+		GuidedRules.grant_units_to_capital(state, army["owner"], overflow)
+	var experience := int(reward.get("experience", 0))
+	if experience > 0:
+		var experience_max := int(data.balance["recruitment"]["experience_max"])
+		for unit in army["units"]:
+			unit["experience"] = mini(int(unit["experience"]) + experience, experience_max)
+
+	state["sites_explored"].append(site["id"])
+	army["movement_left"] = 0.0
+	GuidedRules.bump(state, "sites_explored")
+	state["rng_state"] = rng.state_string()
+	return {"site": site, "outcome": picked}
 
 
 ## --- Queries (for UI scrolls) --------------------------------------------

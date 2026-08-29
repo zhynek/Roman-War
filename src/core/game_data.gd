@@ -20,6 +20,10 @@ var missions: Dictionary = {}          # id -> mission template dict
 var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
+var sites: Dictionary = {}             # id -> point-of-interest dict
+var sites_by_region: Dictionary = {}   # region id -> point-of-interest dict
+var guided_stages: Array = []          # guided-campaign stages, authored order
+var guided_stage_index: Dictionary = {}  # stage id -> stage dict
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -84,6 +88,15 @@ func _load_all(dir: String) -> void:
 	win_conditions = _read_json(dir + "/win_conditions.json").get("conditions", [])
 	names = _read_json(dir + "/names.json").get("pools", {})
 	mercenary_pools = _read_json(dir + "/mercenaries.json").get("pools", [])
+
+	for site in _read_json(dir + "/sites.json").get("sites", []):
+		if sites.has(site["id"]):
+			load_errors.append("duplicate site id: %s" % site["id"])
+		sites[site["id"]] = site
+		sites_by_region[site["region"]] = site
+	guided_stages = _read_json(dir + "/guided_campaign.json").get("stages", [])
+	for stage in guided_stages:
+		guided_stage_index[stage["id"]] = stage
 
 
 func _read_json(path: String) -> Dictionary:

@@ -39,6 +39,8 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "sites.json": "sites.schema.json",
+    "guided_campaign.json": "guided_campaign.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -434,11 +436,94 @@ def cross_checks(t: dict[str, dict]) -> None:
                 if trait_id not in trait_defs:
                     err(f"campaign: character {character['id']}: unknown trait {trait_id}")
 
+    # --- sites ------------------------------------------------------------
+    built_kinds = {c["kind"] for c in chains.values()}
+    all_faction_templates = {u["id"] for u in t.get("units.json", {}).get("units", [])
+                             if "all" in u.get("factions", [])}
+
+    def check_reward_units(reward: dict, label: str) -> None:
+        for grant in reward.get("units", []):
+            if grant["template"] not in units:
+                err(f"{label}: unknown unit {grant['template']}")
+            elif grant["template"] not in all_faction_templates:
+                err(f"{label}: unit {grant['template']} is not an all-faction template "
+                    f"(the player can be any faction)")
+
+    site_ids: set[str] = set()
+    site_regions: set[str] = set()
+    for site in t.get("sites.json", {}).get("sites", []):
+        if site["id"] in site_ids:
+            err(f"sites: duplicate id {site['id']}")
+        site_ids.add(site["id"])
+        if site["region"] not in regions:
+            err(f"sites: {site['id']}: unknown region {site['region']}")
+        if site["region"] in site_regions:
+            err(f"sites: {site['id']}: region {site['region']} already has a site")
+        site_regions.add(site["region"])
+        for outcome in site["outcomes"]:
+            check_reward_units(outcome.get("reward", {}), f"sites: {site['id']}")
+
+    # --- guided campaign ----------------------------------------------------
+    stages = t.get("guided_campaign.json", {}).get("stages", [])
+    stage_ids: set[str] = set()
+    for stage in stages:
+        if stage["id"] in stage_ids:
+            err(f"guided_campaign: duplicate stage id {stage['id']}")
+        stage_ids.add(stage["id"])
+    starts: list[str] = []
+    reachable: set[str] = set()
+    for stage in stages:
+        sid = stage["id"]
+        trigger = stage["trigger"]
+        if trigger["kind"] == "after":
+            if not trigger.get("stages"):
+                err(f"guided_campaign: {sid}: 'after' trigger needs a stages list")
+        elif "stages" in trigger:
+            err(f"guided_campaign: {sid}: trigger.stages only belongs on kind 'after'")
+        if trigger["kind"] == "start":
+            starts.append(sid)
+            reachable.add(sid)
+        for ref in trigger.get("stages", []) + trigger.get("requires", []):
+            if ref not in stage_ids:
+                err(f"guided_campaign: {sid}: unknown stage reference {ref}")
+        if stage.get("repeatable"):
+            if "cooldown_turns" not in stage:
+                err(f"guided_campaign: {sid}: repeatable stages need cooldown_turns")
+            if stage.get("reward", {}).get("boon"):
+                err(f"guided_campaign: {sid}: repeatable stages must not grant boons "
+                    f"(permanent bonuses would stack forever)")
+        for objective in stage["objectives"]:
+            if objective["kind"] == "treasury_at_least" and "amount" not in objective:
+                err(f"guided_campaign: {sid}: treasury_at_least needs an amount")
+            if objective["kind"] == "no_siege_on_target" \
+                    and trigger["kind"] != "player_settlement_besieged":
+                err(f"guided_campaign: {sid}: no_siege_on_target only works on "
+                    f"player_settlement_besieged stages (it needs the recorded target)")
+            kind_ref = objective.get("building_kind")
+            if kind_ref is not None and kind_ref not in built_kinds:
+                err(f"guided_campaign: {sid}: unknown building kind {kind_ref}")
+        check_reward_units(stage.get("reward", {}), f"guided_campaign: {sid}")
+    if stages and not starts:
+        err("guided_campaign: no stage with a 'start' trigger — the trail can never begin")
+    # Every 'after' stage must be reachable from a start stage.
+    grew = True
+    while grew:
+        grew = False
+        for stage in stages:
+            sid = stage["id"]
+            if sid in reachable or stage["trigger"]["kind"] != "after":
+                continue
+            if all(parent in reachable for parent in stage["trigger"]["stages"]):
+                reachable.add(sid)
+                grew = True
+    for stage in stages:
+        if stage["trigger"]["kind"] == "after" and stage["id"] not in reachable:
+            err(f"guided_campaign: {stage['id']}: unreachable from any start stage")
+
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
-    built_kinds = {c["kind"] for c in chains.values()}
     for table_name in ("build_priority", "frontier_build_bonus"):
         for kind in balance.get("ai", {}).get(table_name, {}):
             if kind not in built_kinds:
@@ -461,7 +546,8 @@ def main() -> int:
 
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
+                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
+                "sites", "stages"):
         if key in document:
             return len(document[key])
     return 0

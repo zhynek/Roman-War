@@ -11,6 +11,7 @@ var game: Game
 
 var map_view: MapView
 var region_panel: RegionPanel
+var quest_panel: QuestPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
@@ -57,7 +58,11 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.explore_requested.connect(_explore_order)
 	scroll.add_child(region_panel)
+
+	quest_panel = QuestPanel.new()
+	side.add_child(quest_panel)
 
 	report_log = RichTextLabel.new()
 	report_log.custom_minimum_size = Vector2(0, 160)
@@ -125,6 +130,16 @@ func refresh() -> void:
 
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
+
+	# The trail's checklist and its map guidance travel together: every
+	# active stage with a target lights that region up.
+	var overview := GuidedRules.overview(game.data, game.state)
+	quest_panel.render(game, overview)
+	var highlights := {}
+	for stage in overview["active"]:
+		if stage["target_region"] != "":
+			highlights[stage["target_region"]] = true
+	map_view.highlight_regions = highlights
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:
@@ -240,6 +255,24 @@ func _resolve_siege(target_region: String) -> void:
 	_after_order()
 
 
+func _explore_order(army_id: String) -> void:
+	var result := game.explore_site(army_id)
+	if result.is_empty():
+		_log("There is nothing here the army can search this season.")
+		return
+	var site: Dictionary = result["site"]
+	var outcome: Dictionary = result["outcome"]
+	_log("[color=#d8b878][b]%s searched.[/b] %s[/color]" % [site["name"], outcome["text"]])
+	var dialog := AcceptDialog.new()
+	dialog.title = site["name"]
+	dialog.dialog_text = "%s\n\n%s" % [site["text"], outcome["text"]]
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
+	_after_order()
+
+
 func _confirm(text: String, on_accept: Callable) -> void:
 	var dialog := ConfirmationDialog.new()
 	dialog.dialog_text = text
@@ -348,6 +381,17 @@ func _log_report(report: Dictionary) -> void:
 						loser = "your army" if notice["winner"] == "attacker" else loser
 						victor = "your army" if notice["winner"] != "attacker" else victor
 					_log("Battle near %s: %s defeats %s." % [place, victor, loser])
+
+	for notice in report.get("guided", []):
+		var stage: Dictionary = game.data.guided_stage_index.get(notice["stage"], {})
+		var stage_name: String = stage.get("name", notice["stage"])
+		match notice["kind"]:
+			"stage_started":
+				_log("[color=#d8b878]Trail: %s — %s[/color]" % [stage_name, stage.get("text", "")])
+			"stage_complete":
+				_log("[color=#d8b878][b]Trail complete: %s.[/b] The reward is claimed.[/color]" % stage_name)
+			"stage_expired":
+				_log("[color=#a09070]Trail lapsed: %s.[/color]" % stage_name)
 
 
 func _faction_name(faction_id: String) -> String:

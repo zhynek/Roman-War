@@ -1,0 +1,204 @@
+{
+  "$schema": "../schemas/guided_campaign.schema.json",
+  "stages": [
+    {
+      "id": "first_steps",
+      "name": "First Steps",
+      "text": "Rule begins with the ledger. Open your capital's scroll and set its tax level — squeeze too hard and the streets will remember.",
+      "trigger": { "kind": "start" },
+      "objectives": [{ "kind": "set_taxes" }],
+      "complete": "all",
+      "reward": { "treasury": 250 }
+    },
+    {
+      "id": "foundations",
+      "name": "Foundations",
+      "text": "A settlement is what you build in it. Queue a construction project anywhere you rule.",
+      "trigger": { "kind": "after", "stages": ["first_steps"] },
+      "objectives": [{ "kind": "queue_building" }],
+      "complete": "all",
+      "reward": { "treasury": 300 }
+    },
+    {
+      "id": "muster",
+      "name": "The Muster",
+      "text": "Coin does not hold a wall. Recruit a unit — soldiers are drawn from the settlement's own people, so watch the population.",
+      "trigger": { "kind": "after", "stages": ["foundations"] },
+      "objectives": [{ "kind": "recruit_units" }],
+      "complete": "all",
+      "reward": { "treasury": 300 }
+    },
+    {
+      "id": "eyes_of_the_house",
+      "name": "Eyes of the House",
+      "text": "A city without a governor drifts. Keep a grown man of your line standing in your capital and the seat is his.",
+      "trigger": { "kind": "after", "stages": ["first_steps"] },
+      "objectives": [{ "kind": "governor_in_capital" }],
+      "complete": "all",
+      "reward": { "treasury": 250 }
+    },
+    {
+      "id": "legion_in_the_field",
+      "name": "A Banner in the Field",
+      "text": "Garrisons guard; armies decide. Raise a field army from a garrison — it marches out under your best commander present.",
+      "trigger": { "kind": "after", "stages": ["muster"] },
+      "objectives": [{ "kind": "raise_army" }],
+      "complete": "all",
+      "reward": { "units": [{ "template": "rural_levies", "count": 2 }] }
+    },
+    {
+      "id": "on_the_march",
+      "name": "On the March",
+      "text": "March an army into a neighboring region. Roads and terrain set the pace; a season's movement is spent step by step.",
+      "trigger": { "kind": "after", "stages": ["legion_in_the_field"] },
+      "objectives": [{ "kind": "move_army" }],
+      "complete": "all",
+      "reward": { "treasury": 200, "boon": { "movement": 0.25 } }
+    },
+    {
+      "id": "old_roads",
+      "name": "The Old Roads",
+      "text": "The map keeps its secrets close. Somewhere near your lands a marked site waits — march an army onto it and order a search.",
+      "trigger": { "kind": "after", "stages": ["on_the_march"] },
+      "objectives": [{ "kind": "explore_sites" }],
+      "complete": "all",
+      "reward": { "treasury": 400 }
+    },
+    {
+      "id": "wayfarers",
+      "name": "Wayfarers",
+      "text": "One find is luck; three are a habit. Search out two more of the map's marked places, wherever your banners can reach.",
+      "trigger": { "kind": "after", "stages": ["old_roads"] },
+      "objectives": [{ "kind": "explore_sites", "count": 3 }],
+      "complete": "all",
+      "reward": { "treasury": 800 }
+    },
+    {
+      "id": "iron_discipline",
+      "name": "Iron Discipline",
+      "text": "Better yards breed better soldiers. Queue a barracks-line building and your recruits will carry the drill with them forever.",
+      "trigger": { "kind": "after", "stages": ["muster"] },
+      "objectives": [{ "kind": "queue_building", "building_kind": "barracks" }],
+      "complete": "all",
+      "reward": { "boon": { "recruit_xp": 1 } }
+    },
+    {
+      "id": "hired_blades",
+      "name": "Hired Blades",
+      "text": "Wars are won with the soldiers you can get. Hire a mercenary band into a field army — or raise three units of your own instead.",
+      "trigger": { "kind": "after", "stages": ["on_the_march"] },
+      "objectives": [
+        { "kind": "hire_mercenaries" },
+        { "kind": "recruit_units", "count": 3 }
+      ],
+      "complete": "any",
+      "reward": { "treasury": 300 }
+    },
+    {
+      "id": "war_chest",
+      "name": "The War Chest",
+      "text": "Campaigns run on grain and silver. Bring the treasury to nine thousand denarii and your quartermasters will find the rest.",
+      "trigger": { "kind": "after", "stages": ["foundations"] },
+      "objectives": [{ "kind": "treasury_at_least", "amount": 9000 }],
+      "complete": "all",
+      "reward": { "boon": { "income_pct": 2.0 } }
+    },
+    {
+      "id": "senate_counsel",
+      "name": "The Senate's Counsel",
+      "text": "The conscript fathers reward houses that serve. Complete a senate mission before their patience thins.",
+      "trigger": { "kind": "after", "stages": ["first_steps"], "roman_only": true },
+      "objectives": [{ "kind": "senate_missions" }],
+      "complete": "all",
+      "expires_turns": 30,
+      "reward": { "treasury": 500 }
+    },
+    {
+      "id": "first_blood",
+      "name": "First Blood",
+      "text": "Sooner or later the field decides. Win a pitched battle — attack at good odds, or make an attacker regret the ground.",
+      "trigger": { "kind": "after", "stages": ["legion_in_the_field"] },
+      "objectives": [{ "kind": "win_battles" }],
+      "complete": "all",
+      "reward": { "treasury": 500 }
+    },
+    {
+      "id": "break_their_walls",
+      "name": "Break Their Walls",
+      "text": "Take a settlement that is not yours: lay siege, build equipment or starve them out, then decide the city's fate.",
+      "trigger": { "kind": "after", "stages": ["first_blood"] },
+      "objectives": [{ "kind": "capture_regions" }],
+      "complete": "all",
+      "reward": { "treasury": 1000 }
+    },
+    {
+      "id": "grow_the_house",
+      "name": "Grow the House",
+      "text": "Four regions under one banner make a power the map must reckon with. Hold four.",
+      "trigger": { "kind": "after", "stages": ["break_their_walls"] },
+      "objectives": [{ "kind": "hold_regions", "count": 4 }],
+      "complete": "all",
+      "reward": { "treasury": 1000 }
+    },
+    {
+      "id": "the_long_road",
+      "name": "The Long Road",
+      "text": "Six regions, one will. From here the trail ends and the age itself is the prize — the victory scroll shows what remains.",
+      "trigger": { "kind": "after", "stages": ["grow_the_house"] },
+      "objectives": [{ "kind": "hold_regions", "count": 6 }],
+      "complete": "all",
+      "reward": { "treasury": 1500, "units": [{ "template": "rural_levies", "count": 2 }] }
+    },
+    {
+      "id": "alarum_of_war",
+      "name": "Alarum of War",
+      "text": "A rival has drawn the blade against you. Answer in kind: win a battle against anyone at war with you, or take one of their settlements.",
+      "trigger": { "kind": "war_declared_on_player", "requires": ["first_steps"] },
+      "objectives": [
+        { "kind": "win_battles" },
+        { "kind": "capture_regions" }
+      ],
+      "complete": "any",
+      "expires_turns": 10,
+      "repeatable": true,
+      "cooldown_turns": 10,
+      "reward": { "treasury": 400 }
+    },
+    {
+      "id": "break_the_siege",
+      "name": "Break the Siege",
+      "text": "An enemy sits before one of your cities. Drive the besiegers off before the granaries empty — a relief army, a sally, whatever it takes.",
+      "trigger": { "kind": "player_settlement_besieged" },
+      "objectives": [{ "kind": "no_siege_on_target" }],
+      "complete": "all",
+      "expires_turns": 8,
+      "repeatable": true,
+      "cooldown_turns": 8,
+      "reward": { "treasury": 500 }
+    },
+    {
+      "id": "drive_them_out",
+      "name": "Drive Them Out",
+      "text": "Enemy soldiers stand in or beside your lands. Clear the borders — destroy them, or make them think better of it.",
+      "trigger": { "kind": "intruders_in_player_lands", "requires": ["first_blood"] },
+      "objectives": [{ "kind": "no_intruders" }],
+      "complete": "all",
+      "expires_turns": 10,
+      "repeatable": true,
+      "cooldown_turns": 8,
+      "reward": { "treasury": 350 }
+    },
+    {
+      "id": "steady_the_ledgers",
+      "name": "Steady the Ledgers",
+      "text": "The treasury has run dry and the moneylenders are circling. Climb back to a thousand denarii — raise taxes, trim the payroll, sell your sword.",
+      "trigger": { "kind": "player_in_debt" },
+      "objectives": [{ "kind": "treasury_at_least", "amount": 1000 }],
+      "complete": "all",
+      "expires_turns": 12,
+      "repeatable": true,
+      "cooldown_turns": 12,
+      "reward": { "treasury": 300 }
+    }
+  ]
+}

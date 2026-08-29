@@ -1,0 +1,269 @@
+{
+  "$schema": "../schemas/sites.schema.json",
+  "sites": [
+    {
+      "id": "tombs_of_the_old_kings",
+      "region": "umbria",
+      "name": "Tombs of the Old Kings",
+      "kind": "ruin",
+      "text": "Weathered vaults cut into the Apennine foothills, older than any road that passes them.",
+      "outcomes": [
+        { "weight": 3, "text": "The vaults are long since picked over, but a sealed niche yields a pouch of worn coin.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "Your soldiers spend a wary night among the dead and come out steadier for it.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "Behind a fallen slab: grave-gold the robbers never found.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "spring_of_the_twins",
+      "region": "latium",
+      "name": "Spring of the Twins",
+      "kind": "shrine",
+      "text": "A cold spring under a fig tree, where herdsmen leave offerings to two nameless brothers.",
+      "outcomes": [
+        { "weight": 3, "text": "The men drink, make their offerings, and march away believing themselves favored.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "Among the offerings lies more silver than piety strictly requires.", "reward": { "treasury": 250 } },
+        { "weight": 1, "text": "The keeper of the spring blesses the column and presses the shrine's tithe-box on its commander.", "reward": { "experience": 1, "treasury": 250 } }
+      ]
+    },
+    {
+      "id": "smugglers_cove",
+      "region": "campania",
+      "name": "Smugglers' Cove",
+      "kind": "cache",
+      "text": "A sea-cave below the cliffs that the fishermen swear they have never once entered.",
+      "outcomes": [
+        { "weight": 3, "text": "Oil, wine, and a strongbox of coin, abandoned in haste.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "The smugglers' whole season's takings, still crated for shipment.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "Behind a false wall, the cove's true hoard — years of untaxed profit.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "hillside_deserters",
+      "region": "bruttium",
+      "name": "Hillside Deserters",
+      "kind": "deserters",
+      "text": "Campfires in the high country: soldiers of some beaten army, living lean and unclaimed.",
+      "outcomes": [
+        { "weight": 3, "text": "A band of them takes your salt and your standard.", "reward": { "units": [{ "template": "rural_levies", "count": 1 }] } },
+        { "weight": 2, "text": "Two full companies march down from the hills to join you.", "reward": { "units": [{ "template": "rural_levies", "count": 2 }] } },
+        { "weight": 1, "text": "The camp is abandoned — but they left their loot behind.", "reward": { "treasury": 150 } }
+      ]
+    },
+    {
+      "id": "sanctuary_of_the_sea_god",
+      "region": "sicilia_punica",
+      "name": "Sanctuary of the Sea God",
+      "kind": "ruin",
+      "text": "Salt-eaten columns above the western strand, half-buried in dune.",
+      "outcomes": [
+        { "weight": 3, "text": "Votive silver glints in the sand between the fallen stones.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "The men clear the old altar and sacrifice before it; the sea wind feels kinder after.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "A temple cellar, dry and sealed, stacked with dedicated treasure.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "abandoned_river_fort",
+      "region": "cisalpina",
+      "name": "Abandoned River Fort",
+      "kind": "watchpost",
+      "text": "A palisaded post above the Po crossings, its gate swinging open to the wind.",
+      "outcomes": [
+        { "weight": 2, "text": "The paymaster's chest was too heavy to carry off in whatever hurry emptied this place.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "Your soldiers drill in the old yard and study how the walls were laid.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "Under the granary floor, the garrison's buried savings.", "reward": { "treasury": 400 } }
+      ]
+    },
+    {
+      "id": "wreckers_hoard",
+      "region": "sardinia",
+      "name": "Wreckers' Hoard",
+      "kind": "cache",
+      "text": "Coastal folk here light false beacons on stormy nights. Somewhere they keep what the sea delivers.",
+      "outcomes": [
+        { "weight": 3, "text": "A cave stacked with salvage: amphorae, bronze fittings, and coin.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "The wreckers' shares, counted and bagged for a division that never came.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "A drowned merchantman's strongroom, hauled ashore whole.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "oracle_of_the_salt_pans",
+      "region": "africa",
+      "name": "Oracle of the Salt Pans",
+      "kind": "shrine",
+      "text": "A lone priestess keeps a smoking altar where the salt flats shimmer like water.",
+      "outcomes": [
+        { "weight": 3, "text": "She reads the smoke and names your soldiers fortunate; they choose to believe her.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "Pilgrims' offerings have piled up faster than one priestess can spend them.", "reward": { "treasury": 250 } },
+        { "weight": 1, "text": "The priestess anoints the column's standard and opens the shrine's coffer in tribute.", "reward": { "experience": 1, "treasury": 250 } }
+      ]
+    },
+    {
+      "id": "painted_colonnade",
+      "region": "attica",
+      "name": "The Painted Colonnade",
+      "kind": "ruin",
+      "text": "A hillside portico burned in some old war, its frescoes fading under the soot.",
+      "outcomes": [
+        { "weight": 3, "text": "Beneath a collapsed wall, a householder's strongbox nobody came back for.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "An old soldier squatting in the ruin drills your officers in the deeds painted on the walls.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "A bronze horde buried at the colonnade's foot, green with age and heavy with worth.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "warriors_cenotaph",
+      "region": "laconia",
+      "name": "The Warrior's Cenotaph",
+      "kind": "shrine",
+      "text": "An empty tomb raised for a champion whose body was never brought home.",
+      "outcomes": [
+        { "weight": 3, "text": "Your soldiers stand a silent watch at the stone and carry its weight away with them.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "Grave-offerings of silver lie untouched — until now.", "reward": { "treasury": 250 } },
+        { "weight": 1, "text": "The dead man's kin still keep the tomb; they arm your officers and fill their purses in his name.", "reward": { "experience": 1, "treasury": 250 } }
+      ]
+    },
+    {
+      "id": "royal_hunting_lodge",
+      "region": "macedonia",
+      "name": "Royal Hunting Lodge",
+      "kind": "ruin",
+      "text": "A king's lodge gone to bramble, its trophy hall open to the sky.",
+      "outcomes": [
+        { "weight": 3, "text": "Silver plate, tarnished but whole, still on the feasting boards.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "The old huntsmen's paths make a hard day's exercise for the column.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "The king's private strongroom, its lock long rusted to nothing.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "pirate_kings_cache",
+      "region": "illyria",
+      "name": "The Pirate King's Cache",
+      "kind": "cache",
+      "text": "Every sailor on this coast tells of a raider-lord who buried his takings and died before spending them.",
+      "outcomes": [
+        { "weight": 3, "text": "A tar-sealed chest under a lightning-split pine — part of the legend is true.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "Two chests, and the second heavier than the first.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "The whole hoard, ship's ransom upon ship's ransom.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "sunken_delta_temple",
+      "region": "aegyptus",
+      "name": "Sunken Delta Temple",
+      "kind": "ruin",
+      "text": "Pylons leaning out of the marsh where a branch of the river changed its mind a century ago.",
+      "outcomes": [
+        { "weight": 3, "text": "Waterlogged offering-chests, their contents better preserved than their carriers hoped.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "Wading the flooded halls in battle order is a drill the men never forget.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "A priest's treasury above the waterline, untouched behind a jackal-headed seal.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "quarry_masters_vault",
+      "region": "thebais",
+      "name": "Quarry Masters' Vault",
+      "kind": "cache",
+      "text": "The old quarry offices above the cataracts, sealed when the granite ran out.",
+      "outcomes": [
+        { "weight": 3, "text": "Wage-silver for a workforce that was never paid off.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "The masters' ledger and the strongbox it accounts for.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "A vault of temple commissions, paid in advance and never delivered.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "caravan_beacon_tower",
+      "region": "syria",
+      "name": "Caravan Beacon Tower",
+      "kind": "watchpost",
+      "text": "A signal tower on the desert road, dark since its keepers stopped being paid.",
+      "outcomes": [
+        { "weight": 2, "text": "Toll-money still in the counting room, in a dozen currencies.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "From the tower top your scouts learn to read the desert roads like a ledger.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "A merchant prince's deposit, left for safekeeping with keepers who kept nothing else.", "reward": { "treasury": 400 } }
+      ]
+    },
+    {
+      "id": "ziggurat_of_the_moon",
+      "region": "babylonia",
+      "name": "Ziggurat of the Moon",
+      "kind": "ruin",
+      "text": "A stepped mountain of brick outside the irrigated land, its stairs worn to ramps.",
+      "outcomes": [
+        { "weight": 3, "text": "Foundation deposits of silver, laid down when the bricks were new.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "The climb in full kit, twice, at noon. The men curse you and grow harder.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "A star-priests' cache in the summit shrine, meant to outlast an eclipse of the world.", "reward": { "treasury": 600 } }
+      ]
+    },
+    {
+      "id": "mountain_deserters",
+      "region": "media",
+      "name": "Mountain Deserters",
+      "kind": "deserters",
+      "text": "Smoke in the high passes: hired spears who walked away from someone's war.",
+      "outcomes": [
+        { "weight": 3, "text": "A company of them prefers your wages to the winter.", "reward": { "units": [{ "template": "rural_levies", "count": 1 }] } },
+        { "weight": 2, "text": "Their whole camp musters under your banner by nightfall.", "reward": { "units": [{ "template": "rural_levies", "count": 2 }] } },
+        { "weight": 1, "text": "Gone — over the pass ahead of the snow. Their cache was too heavy to take.", "reward": { "treasury": 150 } }
+      ]
+    },
+    {
+      "id": "silk_road_waystation",
+      "region": "parthia",
+      "name": "Silk Road Waystation",
+      "kind": "cache",
+      "text": "A caravanserai on the eastern road, shuttered mid-season with the stables still full of straw.",
+      "outcomes": [
+        { "weight": 3, "text": "A merchant's deposit-chest behind the well.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "Bales of silk bricked into a dry cistern, worth more than their weight in argument.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "The stationmaster's secret: a season of skimmed tolls in gold.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "grove_of_the_speaking_oak",
+      "region": "arvernia",
+      "name": "Grove of the Speaking Oak",
+      "kind": "shrine",
+      "text": "An oak older than the tribes, hung with offerings, where the wind is said to answer questions.",
+      "outcomes": [
+        { "weight": 3, "text": "Whatever the wind said, the men march out of the grove certain of themselves.", "reward": { "experience": 1 } },
+        { "weight": 2, "text": "Among the hung offerings: torcs and coin enough to fill a pay-chest.", "reward": { "treasury": 250 } },
+        { "weight": 1, "text": "The grove-keeper reads the leaves for your commander and gifts the column the shrine's portion.", "reward": { "experience": 1, "treasury": 250 } }
+      ]
+    },
+    {
+      "id": "tin_traders_hideaway",
+      "region": "armorica",
+      "name": "Tin Traders' Hideaway",
+      "kind": "cache",
+      "text": "A fortified beach-house where the tin fleets once paid their harbor-silver.",
+      "outcomes": [
+        { "weight": 3, "text": "A season's harbor-dues in a barnacled chest.", "reward": { "treasury": 300 } },
+        { "weight": 2, "text": "Ingots of tin stacked like firewood, ready coin to any smith.", "reward": { "treasury": 500 } },
+        { "weight": 1, "text": "The syndicate's reserve, hidden against a raid that came from the wrong direction.", "reward": { "treasury": 800 } }
+      ]
+    },
+    {
+      "id": "oath_breakers_camp",
+      "region": "suebia",
+      "name": "Oath-Breakers' Camp",
+      "kind": "deserters",
+      "text": "Warriors cast out for breaking a chieftain's oath, camped sullen at the forest's edge.",
+      "outcomes": [
+        { "weight": 3, "text": "A band of the outcasts swears a new oath — to you.", "reward": { "units": [{ "template": "rural_levies", "count": 1 }] } },
+        { "weight": 2, "text": "The whole camp kneels; shamed men fight hard for a second chance.", "reward": { "units": [{ "template": "rural_levies", "count": 2 }] } },
+        { "weight": 1, "text": "The camp lies empty, but their war-takings were left where they buried them.", "reward": { "treasury": 150 } }
+      ]
+    },
+    {
+      "id": "circle_of_standing_stones",
+      "region": "britannia",
+      "name": "Circle of Standing Stones",
+      "kind": "ruin",
+      "text": "Grey stones raised by no people anyone remembers, on a plain that hums with wind.",
+      "outcomes": [
+        { "weight": 3, "text": "Offerings lie in the turf at every stone's foot — old bronze, old silver.", "reward": { "treasury": 200 } },
+        { "weight": 2, "text": "A night inside the circle leaves the soldiers quiet, and strangely sure of their footing.", "reward": { "experience": 1 } },
+        { "weight": 1, "text": "Under the altar stone, a king's burial hoard.", "reward": { "treasury": 600 } }
+      ]
+    }
+  ]
+}
