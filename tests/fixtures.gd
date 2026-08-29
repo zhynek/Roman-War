@@ -227,6 +227,14 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
+static func add_faction(campaign_state: Dictionary, faction_id: String, capital: String) -> void:
+	campaign_state["factions"][faction_id] = _faction(capital)
+
+
+static func add_settlement(campaign_state: Dictionary, region: String, owner: String, population: int, buildings: Dictionary) -> void:
+	campaign_state["settlements"][region] = _settlement(owner, population, buildings)
+
+
 static func _faction(capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",

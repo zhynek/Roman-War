@@ -438,6 +438,10 @@ def cross_checks(t: dict[str, dict]) -> None:
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+    built_kinds = {c["kind"] for c in chains.values()}
+    for kind in balance.get("ai", {}).get("build_priority", {}):
+        if kind not in built_kinds:
+            err(f"balance: ai.build_priority names unknown building kind '{kind}'")
 
 
 def main() -> int:

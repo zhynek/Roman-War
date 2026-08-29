@@ -6,7 +6,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 | For | Read |
 |---|---|
 | Architecture rules, conventions, clean-room policy | [`CLAUDE.md`](../CLAUDE.md) (auto-loaded by Claude Code) |
-| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §10 is authoritative |
+| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §11 is authoritative |
 | What the game is like to play | [`PLAYING.md`](../PLAYING.md) |
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
@@ -20,12 +20,14 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
 **Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
-foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+foundation depth, the full character/family layer), Phase 6 AI opponents
+(modular `FactionAi` — deliberate wars, white peace, sieges, defence, sea
+invasions, mustering, threat-based garrisons, priority construction; DESIGN.md
+§9), the Phase 7 senate foundation loop, and a playable Phase 8 campaign UI.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of this branch:** 78 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. Branch `claude/ai-opponents-5y68t6`. A Mac build from
+the pre-AI foundation was delivered to the user, who is playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -52,7 +54,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 78 tests, 0 failures (~45s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -95,17 +97,6 @@ slice before shipping**, or the app will not launch.
 The user has not committed to a direction. Each is self-contained; pick one and
 paste its prompt.
 
-### Phase 6 — AI opponents
-The world currently feels empty: `src/core/rules/ai_stub.gd` is **33 lines** of
-passive settlement management. Nothing expands, declares war, or defends. The
-difficulty multipliers already exist and are already read
-(`balance.json → ai.difficulty_income_multiplier`, `ai.difficulty_order_bonus`).
-
-> Build Phase 6: replace the passive `AiStub` with real modular AI behaviours —
-> economy, expansion, war, and defence — so factions actually play the game.
-> Keep it deterministic and data-tunable, wire the existing difficulty
-> constants, and verify with a long headless campaign that the map changes hands.
-
 ### Phase 5 — Agents & diplomacy
 `DiplomacyRules` currently offers only symmetric stances and war declaration;
 the UI sets a stance directly and the other side simply accepts. The
@@ -124,6 +115,14 @@ Driven by whatever the playtest surfaced.
 
 If the user reports a problem, **ask for the world seed** — the same seed
 reproduces their exact campaign, which makes any bug directly debuggable.
+
+### Phase 6 follow-ups — deepening the AI
+The AI plays the whole game but uniformly. Self-contained extensions:
+per-faction personalities (an `ai` block in `factions.json` + schema),
+AI mercenary hiring when a muster stalls, fleet operations once Phase 3's
+naval remainder lands, and smarter target scoring (economic value, walls).
+All thresholds live in `balance.json → ai`; behaviours in
+`src/core/rules/ai/`.
 
 ## 6. Known gaps (verified, not guesses)
 
@@ -145,7 +144,8 @@ reproduces their exact campaign, which makes any bug directly debuggable.
 
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
+  Develop on the branch the session assigns (this phase used
+  `claude/ai-opponents-5y68t6`).
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
   issues** the 60-strong test suite had missed — including armies declaring war

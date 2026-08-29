@@ -122,9 +122,11 @@ it by AD 14, the age simply closes.
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, but they do not scheme, invade, or negotiate. Real opponents are
-  the next phase. Expect a quiet world.
+- **The computer players fight, but they do not talk.** They develop their
+  cities, raise led armies, take rebel towns, declare wars when strong, defend
+  what is theirs, and let hopeless wars gutter out between themselves — expect
+  the map to change without you. What they cannot do yet is negotiate: no
+  offers, tribute, or peace terms with *you* until the diplomacy phase lands.
 - **Battles resolve on paper.** You see the outcome, not the fight.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.

@@ -19,6 +19,7 @@ class_name NewGame
 ##  characters: {char_id: {faction, name, age, role, command, management,
 ##                         influence, traits, ancillaries, location, alive}}
 ##  events_fired: [event_id], winner: null|String, next_id: int
+##  ai: {war_turns: {"a|b": int}} — the AI's war-staleness ledger (FactionAi)
 ##
 ## A "unit" is {template, experience, strength_pct}.
 
@@ -44,6 +45,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,
+		"ai": {"war_turns": {}},
 	}
 
 	for faction_setup in data.campaign["factions"]:

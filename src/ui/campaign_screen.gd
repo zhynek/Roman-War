@@ -317,6 +317,42 @@ func _log_report(report: Dictionary) -> void:
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
 
+	# World news from the AI factions: wars, peaces and conquests travel
+	# everywhere; skirmishes and sieges only reach the player's ears when they
+	# happen within sight or to the player's own forces.
+	var visible := game.visible_regions()
+	for notice in report.get("ai", []):
+		var actor: String = _faction_name(notice.get("faction", ""))
+		var region: String = str(notice.get("region", ""))
+		var place: String = game.data.regions.get(region, {}).get("settlement_name", region)
+		match notice["kind"]:
+			"war_declared":
+				var upon := "your house" if notice["target"] == player else _faction_name(notice["target"])
+				_log("[color=#e06050][b]%s declares war upon %s![/b][/color]" % [actor, upon])
+			"peace":
+				_log("[color=#80b080]%s and %s have made peace.[/color]"
+					% [actor, _faction_name(notice["target"])])
+			"captured":
+				_log("[color=#e0a060]%s has fallen to %s.[/color]" % [place, actor])
+			"siege_laid":
+				if visible.has(region):
+					_log("%s lays siege to %s." % [actor, place])
+			"assault_repelled":
+				if visible.has(region):
+					_log("The walls of %s throw back %s." % [place, actor])
+			"battle":
+				if visible.has(region) or notice.get("against", "") == player:
+					var loser: String = _faction_name(notice["against"]) if notice["winner"] == "attacker" else actor
+					var victor: String = actor if notice["winner"] == "attacker" else _faction_name(notice["against"])
+					if notice.get("against", "") == player:
+						loser = "your army" if notice["winner"] == "attacker" else loser
+						victor = "your army" if notice["winner"] != "attacker" else victor
+					_log("Battle near %s: %s defeats %s." % [place, victor, loser])
+
+
+func _faction_name(faction_id: String) -> String:
+	return game.data.factions.get(faction_id, {}).get("name", faction_id)
+
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]

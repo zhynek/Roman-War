@@ -186,6 +186,83 @@ static func _nearest_owned_settlement(data: GameData, state: Dictionary, from_re
 	return best
 
 
+static func raise_army(data: GameData, state: Dictionary, region_id: String, unit_indices: Array, general_id: Variant = null) -> String:
+	## Split garrison units out into a new field army standing in the settlement's
+	## region — the inverse of garrison_army. unit_indices index into the garrison
+	## array. An optional general must be a living adult male of the owning house
+	## present in the settlement and not already leading an army. Returns the new
+	## army id, or "" if nothing could be raised. The army marches next turn
+	## (movement_left starts at 0).
+	if not state["settlements"].has(region_id):
+		return ""
+	var settlement: Dictionary = state["settlements"][region_id]
+	var garrison: Array = settlement["garrison"]
+	var picked: Array = []
+	var sorted_indices := unit_indices.duplicate()
+	sorted_indices.sort()
+	for i in range(sorted_indices.size() - 1, -1, -1):
+		var index := int(sorted_indices[i])
+		if index >= 0 and index < garrison.size():
+			picked.push_front(garrison[index])
+			garrison.remove_at(index)
+	if picked.is_empty():
+		return ""
+
+	var general = null
+	if general_id != null and state["characters"].has(general_id):
+		var character: Dictionary = state["characters"][general_id]
+		var leads_army := false
+		for army in state["armies"].values():
+			if army["general"] == general_id:
+				leads_army = true
+				break
+		if character["alive"] and character["faction"] == settlement["owner"] \
+				and character.get("gender", "male") == "male" \
+				and not character["role"] in ["spouse", "child"] \
+				and int(character["age"]) >= int(data.balance["characters"]["come_of_age"]) \
+				and character.get("location", "") == region_id and not leads_army:
+			general = general_id
+
+	var army_id := "army_%d" % state["next_id"]
+	state["next_id"] = int(state["next_id"]) + 1
+	state["armies"][army_id] = {
+		"owner": settlement["owner"],
+		"region": region_id,
+		"units": picked,
+		"general": general,
+		"movement_left": 0.0,
+		"forced_march": false,
+	}
+	SettlementRules.refresh_governors(data, state)
+	return army_id
+
+
+static func detach_to_garrison(data: GameData, state: Dictionary, army_id: String, unit_indices: Array) -> bool:
+	## Move some of a field army's units into the friendly settlement it stands
+	## in. Detaching every unit dissolves the army; its general stays in the city.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty() or not state["settlements"].has(army["region"]):
+		return false
+	var settlement: Dictionary = state["settlements"][army["region"]]
+	if settlement["owner"] != army["owner"]:
+		return false
+	var units: Array = army["units"]
+	var sorted_indices := unit_indices.duplicate()
+	sorted_indices.sort()
+	var moved := false
+	for i in range(sorted_indices.size() - 1, -1, -1):
+		var index := int(sorted_indices[i])
+		if index >= 0 and index < units.size():
+			settlement["garrison"].append(units[index])
+			units.remove_at(index)
+			moved = true
+	if units.is_empty():
+		state["armies"].erase(army_id)
+	if moved:
+		SettlementRules.refresh_governors(data, state)
+	return moved
+
+
 static func garrison_army(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
 	## Merge a friendly army standing in its own settlement's region into the garrison.
 	var army: Dictionary = state["armies"][army_id]
