@@ -85,7 +85,11 @@ static func overview(data: GameData, state: Dictionary) -> Dictionary:
 		return result
 	result["enabled"] = true
 	var stage_states: Dictionary = guided["stages"]
+	var player_is_roman: bool = data.factions.get(state["player_faction"], {}).get("is_roman_house", false)
 	for stage in data.guided_stages:
+		# Stages the player's faction can never open stay out of the tally.
+		if stage["trigger"].get("roman_only", false) and not player_is_roman:
+			continue
 		if not stage.get("repeatable", false):
 			result["total"] += 1
 		var inst = stage_states.get(stage["id"])
@@ -98,7 +102,7 @@ static func overview(data: GameData, state: Dictionary) -> Dictionary:
 		var objectives: Array = []
 		var wants_capture_hint := false
 		for objective in stage["objectives"]:
-			var status := _objective_status(data, state, objective, inst)
+			var status := _objective_status(data, state, stage, objective, inst)
 			status["kind"] = objective["kind"]
 			objectives.append(status)
 			if objective["kind"] == "capture_regions" and not status["met"]:
@@ -125,7 +129,7 @@ static func overview(data: GameData, state: Dictionary) -> Dictionary:
 static func _stage_met(data: GameData, state: Dictionary, stage: Dictionary, inst: Dictionary) -> bool:
 	var mode: String = stage.get("complete", "all")
 	for objective in stage["objectives"]:
-		var met: bool = _objective_status(data, state, objective, inst)["met"]
+		var met: bool = _objective_status(data, state, stage, objective, inst)["met"]
 		if mode == "any" and met:
 			return true
 		if mode == "all" and not met:
@@ -133,7 +137,7 @@ static func _stage_met(data: GameData, state: Dictionary, stage: Dictionary, ins
 	return mode == "all"
 
 
-static func _objective_status(data: GameData, state: Dictionary, objective: Dictionary, inst: Dictionary) -> Dictionary:
+static func _objective_status(data: GameData, state: Dictionary, stage: Dictionary, objective: Dictionary, inst: Dictionary) -> Dictionary:
 	var kind: String = objective["kind"]
 	var player: String = state["player_faction"]
 	if COUNTER_KEYS.has(kind):
@@ -141,8 +145,13 @@ static func _objective_status(data: GameData, state: Dictionary, objective: Dict
 		if kind == "queue_building" and objective.has("building_kind"):
 			key = "%s:%s" % [key, objective["building_kind"]]
 		var counters: Dictionary = state["guided"]["counters"]
-		var base: Dictionary = inst["base"]
-		var have := int(counters.get(key, 0)) - int(base.get(key, 0))
+		var have := int(counters.get(key, 0))
+		# Recurring challenges demand fresh deeds — only repeatable stages
+		# measure from their opening snapshot. The tutorial arc credits the
+		# whole campaign's history, so a battle won or a site searched before
+		# its stage opens still counts.
+		if stage.get("repeatable", false):
+			have -= int(inst["base"].get(key, 0))
 		var need := int(objective.get("count", 1))
 		return {"met": have >= need, "have": maxi(have, 0), "need": need}
 	match kind:
@@ -195,7 +204,10 @@ static func _trigger_ready(data: GameData, state: Dictionary, stage: Dictionary,
 				if not _closed(state, ref):
 					return false
 			return true
-		"war_declared_on_player":
+		"player_at_war":
+			# Stances are symmetric and record no declarer, so this honestly
+			# means "a war with a living non-rebel faction is under way" —
+			# the player's own declarations open it too.
 			return not _non_rebel_enemies(data, state).is_empty()
 		"player_settlement_besieged":
 			return _besieged_player_region(state) != ""
@@ -222,14 +234,14 @@ static func _close(state: Dictionary, stage: Dictionary, inst: Dictionary, outco
 
 
 static func _instance_target(data: GameData, state: Dictionary, stage: Dictionary) -> Variant:
+	## Only REGION ids belong here — the UI feeds the target straight into the
+	## map's highlight ring. A war stage carries no region of its own; leaving
+	## its target empty lets the capture-hint fallback suggest one.
 	match stage["trigger"]["kind"]:
 		"player_settlement_besieged":
 			return _besieged_player_region(state)
 		"intruders_in_player_lands":
 			return _first_intruded_region(data, state)
-		"war_declared_on_player":
-			var enemies := _non_rebel_enemies(data, state)
-			return enemies[0] if not enemies.is_empty() else null
 	return null
 
 

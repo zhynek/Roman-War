@@ -25,7 +25,7 @@
             "properties": {
               "kind": {
                 "enum": [
-                  "start", "after", "war_declared_on_player",
+                  "start", "after", "player_at_war",
                   "player_settlement_besieged", "intruders_in_player_lands",
                   "player_in_debt"
                 ]

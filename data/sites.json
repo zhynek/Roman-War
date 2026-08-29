@@ -106,7 +106,7 @@
       "outcomes": [
         { "weight": 3, "text": "Beneath a collapsed wall, a householder's strongbox nobody came back for.", "reward": { "treasury": 200 } },
         { "weight": 2, "text": "An old soldier squatting in the ruin drills your officers in the deeds painted on the walls.", "reward": { "experience": 1 } },
-        { "weight": 1, "text": "A bronze horde buried at the colonnade's foot, green with age and heavy with worth.", "reward": { "treasury": 600 } }
+        { "weight": 1, "text": "A bronze hoard buried at the colonnade's foot, green with age and heavy with worth.", "reward": { "treasury": 600 } }
       ]
     },
     {

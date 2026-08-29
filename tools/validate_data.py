@@ -463,7 +463,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         for outcome in site["outcomes"]:
             check_reward_units(outcome.get("reward", {}), f"sites: {site['id']}")
 
-    # --- guided campaign ----------------------------------------------------
+    # --- guided campaign --------------------------------------------------
     stages = t.get("guided_campaign.json", {}).get("stages", [])
     stage_ids: set[str] = set()
     for stage in stages:
@@ -472,6 +472,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         stage_ids.add(stage["id"])
     starts: list[str] = []
     reachable: set[str] = set()
+    roman_only_ids = {s["id"] for s in stages if s["trigger"].get("roman_only")}
     for stage in stages:
         sid = stage["id"]
         trigger = stage["trigger"]
@@ -486,22 +487,36 @@ def cross_checks(t: dict[str, dict]) -> None:
         for ref in trigger.get("stages", []) + trigger.get("requires", []):
             if ref not in stage_ids:
                 err(f"guided_campaign: {sid}: unknown stage reference {ref}")
+            elif ref == sid:
+                err(f"guided_campaign: {sid}: references itself — it can never open")
+            elif ref in roman_only_ids and not trigger.get("roman_only"):
+                warn(f"guided_campaign: {sid}: gated behind roman-only stage {ref} "
+                     f"but is not roman_only itself — dead for every other faction")
         if stage.get("repeatable"):
             if "cooldown_turns" not in stage:
                 err(f"guided_campaign: {sid}: repeatable stages need cooldown_turns")
             if stage.get("reward", {}).get("boon"):
                 err(f"guided_campaign: {sid}: repeatable stages must not grant boons "
                     f"(permanent bonuses would stack forever)")
+        elif "cooldown_turns" in stage:
+            err(f"guided_campaign: {sid}: cooldown_turns without repeatable is dead data")
         for objective in stage["objectives"]:
-            if objective["kind"] == "treasury_at_least" and "amount" not in objective:
-                err(f"guided_campaign: {sid}: treasury_at_least needs an amount")
+            if objective["kind"] == "treasury_at_least":
+                if "amount" not in objective:
+                    err(f"guided_campaign: {sid}: treasury_at_least needs an amount")
+            elif "amount" in objective:
+                err(f"guided_campaign: {sid}: 'amount' only belongs on treasury_at_least "
+                    f"(counted objectives use 'count')")
             if objective["kind"] == "no_siege_on_target" \
                     and trigger["kind"] != "player_settlement_besieged":
                 err(f"guided_campaign: {sid}: no_siege_on_target only works on "
                     f"player_settlement_besieged stages (it needs the recorded target)")
             kind_ref = objective.get("building_kind")
-            if kind_ref is not None and kind_ref not in built_kinds:
-                err(f"guided_campaign: {sid}: unknown building kind {kind_ref}")
+            if kind_ref is not None:
+                if objective["kind"] != "queue_building":
+                    err(f"guided_campaign: {sid}: building_kind only belongs on queue_building")
+                elif kind_ref not in built_kinds:
+                    err(f"guided_campaign: {sid}: unknown building kind {kind_ref}")
         check_reward_units(stage.get("reward", {}), f"guided_campaign: {sid}")
     if stages and not starts:
         err("guided_campaign: no stage with a 'start' trigger — the trail can never begin")
@@ -513,7 +528,7 @@ def cross_checks(t: dict[str, dict]) -> None:
             sid = stage["id"]
             if sid in reachable or stage["trigger"]["kind"] != "after":
                 continue
-            if all(parent in reachable for parent in stage["trigger"]["stages"]):
+            if all(parent in reachable for parent in stage["trigger"].get("stages", [])):
                 reachable.add(sid)
                 grew = True
     for stage in stages:

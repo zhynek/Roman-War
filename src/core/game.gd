@@ -208,8 +208,9 @@ func raise_army(region_id: String) -> String:
 	if settlement["garrison"].is_empty():
 		return ""
 	var general = CharacterRules.best_free_general(data, state, state["player_faction"], region_id)
+	var cap := int(data.balance["recruitment"]["army_unit_cap"])
 	var army_id := CombatRules.raise_army(data, state, region_id,
-		range(settlement["garrison"].size()), general)
+		range(mini(settlement["garrison"].size(), cap)), general)
 	if army_id != "":
 		GuidedRules.bump(state, "armies_raised")
 	return army_id

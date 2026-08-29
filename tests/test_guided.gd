@@ -89,19 +89,38 @@ func test_start_and_after_chain(t) -> void:
 	notices = GuidedRules.process_turn(data, state)
 	t.check_eq(state["guided"]["stages"]["s_one"]["status"], "done", "objective met, stage done")
 	t.check_eq(state["guided"]["stages"]["s_two"]["status"], "active",
-		"the follower opens the same pass, after judgement")
+		"the follower opens the same pass, after judgement — never open-and-pay together")
 	var kinds: Array = []
 	for notice in notices:
 		kinds.append(notice["kind"])
 	t.check(kinds.has("stage_complete") and kinds.has("stage_started"), "both notices reported")
-	# The follower judged only NEXT turn even though its counter baseline
-	# predates it — the baseline snapshot excludes the earlier tax change.
-	notices = GuidedRules.process_turn(data, state)
-	t.check_eq(state["guided"]["stages"]["s_two"]["status"], "active",
-		"the follower does not inherit the parent's deed")
+	# Tutorial stages credit the whole campaign's history: the deed that
+	# completed the parent also satisfies the follower on the next judgement.
+	GuidedRules.process_turn(data, state)
+	t.check_eq(state["guided"]["stages"]["s_two"]["status"], "done",
+		"a one-shot stage credits deeds done before it opened")
+
+
+func test_repeatable_stages_demand_fresh_deeds(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.enable_guided(state)
+	_install_stages(data, [
+		_stage("fresh", {"kind": "player_in_debt"}, [{"kind": "set_taxes"}],
+			{"repeatable": true, "cooldown_turns": 4}),
+	])
+	var game := _game(data, state)
+	game.set_tax_level("beta", "high")  # history, before the stage ever opens
+	state["factions"]["red"]["treasury"] = -100
+	GuidedRules.process_turn(data, state)
+	t.check_eq(state["guided"]["stages"]["fresh"]["status"], "active", "the alarm opens")
+	GuidedRules.process_turn(data, state)
+	t.check_eq(state["guided"]["stages"]["fresh"]["status"], "active",
+		"a repeatable stage does not credit deeds from before it opened")
 	game.set_tax_level("beta", "low")
 	GuidedRules.process_turn(data, state)
-	t.check_eq(state["guided"]["stages"]["s_two"]["status"], "done", "its own deed completes it")
+	t.check_eq(state["guided"]["stages"]["fresh"]["status"], "cooldown",
+		"a fresh deed completes it")
 
 
 func test_any_vs_all_completion(t) -> void:
@@ -332,6 +351,55 @@ func test_battles_and_captures_count_at_the_choke_points(t) -> void:
 		"AI capture does not")
 
 
+func test_siege_battles_count_for_the_player(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	Fixtures.enable_guided(state)
+	var resolver := AutoResolver.new()
+	var rng := CampaignRng.seeded(4)
+
+	# The player storms a weak wall: the assault victory is a battle won.
+	var red_army := Fixtures.add_army(state, "red", "beta",
+		["test_spears", "test_spears", "test_spears", "test_spears"])
+	MovementRules.reset_movement(data, state)
+	SiegeRules.begin_siege(data, state, red_army, "alpha")
+	state["settlements"]["alpha"]["siege"]["equipment_ready"] = true
+	var result := SiegeRules.assault(data, state, rng, resolver, red_army, "alpha")
+	t.check_eq(result["winner"], "attacker", "the wall falls")
+	t.check_eq(int(state["guided"]["counters"].get("battles_won", 0)), 1,
+		"a stormed wall is a battle won")
+
+	# The player throws an AI assault back: also a battle won.
+	state["settlements"]["epsilon"]["garrison"] = [
+		{"template": "test_spears", "experience": 0, "strength_pct": 100},
+		{"template": "test_spears", "experience": 0, "strength_pct": 100},
+	]
+	var blue_mob := Fixtures.add_army(state, "blue", "delta", ["test_mob"])
+	MovementRules.reset_movement(data, state)
+	SiegeRules.begin_siege(data, state, blue_mob, "epsilon")
+	state["settlements"]["epsilon"]["siege"]["equipment_ready"] = true
+	var repel := SiegeRules.assault(data, state, rng, resolver, blue_mob, "epsilon")
+	t.check_eq(repel["winner"], "defender", "the assault is thrown back")
+	t.check_eq(int(state["guided"]["counters"].get("battles_won", 0)), 2,
+		"repelling an assault on your walls is a battle won")
+
+
+func test_raise_army_blocked_under_siege(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["settlements"]["beta"]["garrison"] = [
+		{"template": "test_spears", "experience": 0, "strength_pct": 100},
+	]
+	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	MovementRules.reset_movement(data, state)
+	SiegeRules.begin_siege(data, state, blue_army, "beta")
+	var game := _game(data, state)
+	t.check_eq(game.raise_army("beta"), "",
+		"a besieged garrison cannot walk out from under the siege")
+	state["settlements"]["beta"]["siege"] = null
+	t.check(game.raise_army("beta") != "", "with the siege gone it marches freely")
+
+
 ## --- Exploration -----------------------------------------------------------
 
 func test_explore_site_semantics(t) -> void:
@@ -412,16 +480,28 @@ func test_overview_shapes_and_capture_hint(t) -> void:
 	Fixtures.enable_guided(state)
 	_install_stages(data, [
 		_stage("conquer", {"kind": "start"}, [{"kind": "capture_regions"}]),
+		_stage("at_war", {"kind": "player_at_war"}, [{"kind": "capture_regions"}],
+			{"repeatable": true, "cooldown_turns": 5}),
+		_stage("rome_only", {"kind": "start", "roman_only": true}, [{"kind": "set_taxes"}]),
 	])
 	GuidedRules.process_turn(data, state)
 	var overview := GuidedRules.overview(data, state)
 	t.check(overview["enabled"], "the trail reports itself on")
-	t.check_eq(overview["active"].size(), 1, "one stage underway")
+	t.check_eq(overview["active"].size(), 3, "all three stages underway (red is Roman, at war)")
+	t.check_eq(int(overview["total"]), 2, "repeatable stages stay out of the step count")
 	var stage: Dictionary = overview["active"][0]
-	t.check_eq(stage["id"], "conquer", "the right stage")
+	t.check_eq(stage["id"], "conquer", "authored order preserved")
 	t.check(not bool(stage["objectives"][0]["met"]), "objective honestly unmet")
 	t.check_eq(stage["target_region"], "alpha",
 		"an unmet capture objective suggests the nearest enemy settlement")
+	t.check_eq(overview["active"][1]["target_region"], "alpha",
+		"a war stage carries no target of its own and falls back to the capture hint")
+
+	# A non-Roman player neither sees nor is scored against Roman-only stages.
+	state["player_faction"] = "blue"
+	var blue_view := GuidedRules.overview(data, state)
+	t.check_eq(int(blue_view["total"]), 1, "roman-only stages leave the tally for others")
+	state["player_faction"] = "red"
 
 	state["guided"]["enabled"] = false
 	t.check(not GuidedRules.overview(data, state)["enabled"], "a disabled trail reports off")

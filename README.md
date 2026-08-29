@@ -73,7 +73,9 @@ battles, sieges, mercenaries, events, victory checks, the full character layer
 expand, declare wars, defend, and manage their realms deterministically. A
 playable campaign-map UI sits on top: geographic map with fog of war,
 settlement/army panels driven by the engine's factor breakdowns, family
-scroll, and save/load. Agents & diplomacy negotiation and senate depth are the
+scroll, save/load, and a guided campaign trail — objectives that teach the
+game, react to the world, and pay rewards — with 22 explorable points of
+interest on the map. Agents & diplomacy negotiation and senate depth are the
 next phases; their data tables and state hooks already exist.
 
 ## Clean-room policy

@@ -60,8 +60,9 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			winner_soldiers, loser_soldiers, notices)
 	result["character_notices"] = notices
 
-	# The trail counts the player's field victories here — the one choke point
-	# every battle passes, so defending against an AI attack counts too.
+	# The trail counts the player's field victories here — every field battle
+	# passes through, so defending against an AI attack counts too. (Siege
+	# battles count in SiegeRules.assault.)
 	if winner_army["owner"] == state.get("player_faction", ""):
 		GuidedRules.bump(state, "battles_won")
 
@@ -206,6 +207,10 @@ static func raise_army(data: GameData, state: Dictionary, region_id: String, uni
 	if not state["settlements"].has(region_id):
 		return ""
 	var settlement: Dictionary = state["settlements"][region_id]
+	# A besieged garrison cannot slip out of the gates as a field army — its
+	# way out is the walls' battle (sally or assault), with the walls' odds.
+	if settlement["siege"] != null:
+		return ""
 	var garrison: Array = settlement["garrison"]
 	var picked: Array = []
 	var sorted_indices := _unique_sorted(unit_indices)

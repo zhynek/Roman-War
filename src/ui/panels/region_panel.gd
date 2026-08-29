@@ -121,9 +121,10 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
-		_action_button("Raise a field army (the garrison marches out)", func():
-			game.raise_army(region_id)
-			action_taken.emit())
+		if settlement["siege"] == null:
+			_action_button("Raise a field army (the garrison marches out)", func():
+				game.raise_army(region_id)
+				action_taken.emit())
 
 	# Construction
 	_header("Construction", 12)

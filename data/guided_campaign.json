@@ -97,9 +97,9 @@
     {
       "id": "war_chest",
       "name": "The War Chest",
-      "text": "Campaigns run on grain and silver. Bring the treasury to nine thousand denarii and your quartermasters will find the rest.",
+      "text": "Campaigns run on grain and silver. Bring the treasury to twenty thousand denarii and your quartermasters will find the rest.",
       "trigger": { "kind": "after", "stages": ["foundations"] },
-      "objectives": [{ "kind": "treasury_at_least", "amount": 9000 }],
+      "objectives": [{ "kind": "treasury_at_least", "amount": 20000 }],
       "complete": "all",
       "reward": { "boon": { "income_pct": 2.0 } }
     },
@@ -126,7 +126,7 @@
       "id": "break_their_walls",
       "name": "Break Their Walls",
       "text": "Take a settlement that is not yours: lay siege, build equipment or starve them out, then decide the city's fate.",
-      "trigger": { "kind": "after", "stages": ["first_blood"] },
+      "trigger": { "kind": "after", "stages": ["legion_in_the_field"] },
       "objectives": [{ "kind": "capture_regions" }],
       "complete": "all",
       "reward": { "treasury": 1000 }
@@ -152,8 +152,8 @@
     {
       "id": "alarum_of_war",
       "name": "Alarum of War",
-      "text": "A rival has drawn the blade against you. Answer in kind: win a battle against anyone at war with you, or take one of their settlements.",
-      "trigger": { "kind": "war_declared_on_player", "requires": ["first_steps"] },
+      "text": "War is upon you \u2014 by your hand or a rival's. Answer in steel: win a battle, or take a settlement.",
+      "trigger": { "kind": "player_at_war", "requires": ["first_steps"] },
       "objectives": [
         { "kind": "win_battles" },
         { "kind": "capture_regions" }

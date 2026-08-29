@@ -85,6 +85,14 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	if result.get("defender_general_died", false) and governor != null:
 		CharacterRules.kill(state, governor, data)
 
+	# Siege battles count for the player's trail too: storming a wall or
+	# throwing an assault back is as much a victory as any field battle.
+	var player: String = state.get("player_faction", "")
+	if result["winner"] == "attacker" and army["owner"] == player:
+		GuidedRules.bump(state, "battles_won")
+	elif result["winner"] == "defender" and settlement["owner"] == player:
+		GuidedRules.bump(state, "battles_won")
+
 	# Settle the attacker's fate BEFORE any laurels: an assault that leaves no
 	# man standing takes nothing, and its dead general wins no honours.
 	if army["units"].is_empty():

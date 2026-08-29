@@ -7,7 +7,7 @@ game is built so it can drop in without changing anything else).
 
 ## Starting a campaign
 
-You pick three things and press **BEGIN THE CAMPAIGN**:
+You pick a few things and press **BEGIN THE CAMPAIGN**:
 
 - **House** — who you play. The three Roman houses (Julii, Junii, Cornelii) are
   the intended starting choices; the others are listed as unlockable and are
@@ -16,6 +16,11 @@ You pick three things and press **BEGIN THE CAMPAIGN**:
   order in their cities). It does not make them cleverer.
 - **World seed** — the same number replays exactly the same world. Change it for
   a different run of luck; keep it to compare two attempts fairly.
+- **Guided trail** — on by default. A running list of objectives that walks you
+  through the game and reacts to what happens to you, paying rewards along the
+  way. Veterans can switch it off. It changes no rule of the world — but its
+  rewards are real gold and troops, so a guided run of a seed plays out
+  differently from an unguided one.
 
 The year is 270 BC. Each turn is half a year (summer, then winter), and the
 campaign runs to AD 14.
@@ -82,6 +87,14 @@ panel to select it. Now:
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
+- **Raise a field army** from any of your garrisons (button on the city panel):
+  the whole garrison marches out under the best commander standing in the city.
+  Mind the empty walls you leave behind — garrisons also keep order.
+- **Search points of interest.** Gold diamonds on the map mark places worth a
+  look — ruins, caches, deserters' camps. March an army onto one and press
+  **Search** in its panel: you might find treasure, veterans' wisdom, or
+  soldiers who join your cause. Each place gives up its secret once, only to
+  you, and the search takes the rest of the season.
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.
@@ -110,6 +123,22 @@ proper negotiation system (offers, tribute, bribery, an AI that has opinions
 about you) is the next phase of development; today the other side simply
 accepts. Your fleets are in this window too, because they live on the sea
 rather than in a region.
+
+## The guided trail
+
+With the trail on, the **Objectives** box on the right shows what the game
+suggests doing next — from setting your first tax level through raising
+armies, exploring, and taking your first city. Objectives are flexible:
+some offer alternative paths (hire mercenaries *or* raise levies), timed
+ones simply lapse without punishing you, and targets light up on the map
+with a yellow ring. Completing steps pays denarii, troops, experience — and
+occasionally a permanent edge for your whole realm, like sharper recruits or
+a small income bonus.
+
+The trail also answers the world: war comes — declared by you or on you —
+someone besieges your city, or crosses your border, and a rewarded objective
+appears to see it through. These return throughout the whole campaign (after
+a cooldown), so fighting well always pays.
 
 ## Winning
 

@@ -6,7 +6,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 | For | Read |
 |---|---|
 | Architecture rules, conventions, clean-room policy | [`CLAUDE.md`](../CLAUDE.md) (auto-loaded by Claude Code) |
-| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §11 is authoritative |
+| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §12 is authoritative |
 | What the game is like to play | [`PLAYING.md`](../PLAYING.md) |
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -23,9 +23,13 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 foundation depth, the full character/family layer), Phase 6 AI opponents
 (modular `FactionAi` — deliberate wars, white peace, sieges, defence, sea
 invasions, mustering, threat-based garrisons, priority construction; DESIGN.md
-§9), the Phase 7 senate foundation loop, and a playable Phase 8 campaign UI.
+§9), the Phase 7 senate foundation loop, a playable Phase 8 campaign UI, and
+the **guided campaign trail + points of interest** (DESIGN.md §10): 20
+data-driven stages (16 tutorial-arc + 4 reactive with cooldowns), rewards
+including permanent faction boons, 22 explorable sites, a quest panel, map
+markers/highlights, and the player's raise-army action.
 
-**Green as of this branch:** 82 tests / 0 failures, validator 0 errors /
+**Green as of this branch:** 100 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. Branch `claude/ai-opponents-5y68t6`. A Mac build from
 the pre-AI foundation was delivered to the user, who is playtesting.
 
@@ -54,7 +58,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 82 tests, 0 failures (~20s)
+godot --headless --path . --script res://tests/run_tests.gd      # 100 tests, 0 failures (~35s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
