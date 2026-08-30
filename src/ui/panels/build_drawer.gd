@@ -113,6 +113,9 @@ func render(new_game: Game, region_id: String, tab: String, chain_id: String, ti
 	_title.text = "  %s · %s" % [region.get("settlement_name", region["name"]),
 		String(SettlementRules.settlement_level(game.data, settlement)).replace("_", " ").capitalize()]
 
+	if tab == "units":
+		_render_units(region_id, chain_id)
+		return
 	var rows := game.building_chains(region_id)
 	if chain_id == "":
 		chain_id = _default_chain(rows)
@@ -125,6 +128,157 @@ func render(new_game: Game, region_id: String, tab: String, chain_id: String, ti
 	var shown := _shown_tier(sheet, tier)
 	_build_detail(region_id, sheet, shown)
 	_build_ladder(region_id, sheet, shown)
+
+
+## --- the muster hall -------------------------------------------------------
+
+func _render_units(region_id: String, template_id: String) -> void:
+	var rows := game.recruitable_units(region_id)
+	if rows.is_empty():
+		_line(_detail, "  No troops can be raised here.", BODY, 12)
+		return
+	if template_id == "":
+		template_id = _default_unit(rows)
+	_build_unit_list(rows, template_id)
+	var sheet := game.unit_dossier(region_id, template_id)
+	if sheet.is_empty():
+		return
+	_build_unit_detail(region_id, sheet)
+	_build_unit_ladder(region_id, sheet)
+
+
+func _default_unit(rows: Array) -> String:
+	for row in rows:
+		if bool(row["action"]["can_queue"]):
+			return String(row["id"])
+	return String(rows[0]["id"])
+
+
+func _build_unit_list(rows: Array, selected: String) -> void:
+	var by_class := {}
+	for row in rows:
+		by_class.get_or_add(String(row["class"]), []).append(row)
+	var names: Array = by_class.keys()
+	names.sort()
+	for cls in names:
+		_line(_list, String(cls).replace("_", " ").capitalize(), GOLD, 11)
+		for row in by_class[cls]:
+			var ready: bool = bool(row["action"]["can_queue"])
+			var reason := String(row["action"]["reason"])
+			var colour := BODY if ready else (DIM if reason == "building" or reason == "era" else WARN)
+			var button := Button.new()
+			button.text = "%s %s %s" % ["▶" if row["id"] == selected else " ",
+				"○" if ready else "·", row["name"]]
+			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			button.focus_mode = Control.FOCUS_NONE
+			button.add_theme_font_size_override("font_size", 11)
+			button.add_theme_color_override("font_color", colour)
+			var id := String(row["id"])
+			button.pressed.connect(func(): chain_selected.emit(id))
+			_list.add_child(button)
+
+
+func _build_unit_detail(region_id: String, sheet: Dictionary) -> void:
+	var head := HBoxContainer.new()
+	head.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_detail.add_child(head)
+	var plate_h := 92.0 if _compact else 150.0
+	var plate := ArtPlate.new()
+	plate.custom_minimum_size = Vector2(plate_h * 1.63, plate_h)
+	var ctx := ArtContext.for_settlement(game, region_id, 2)
+	ctx["experience"] = int(sheet["starts_with_experience"])
+	plate.set_plate(UnitArt.for_data(game.data).unit_plate(game.data, String(sheet["id"]), ctx))
+	head.add_child(plate)
+
+	var prose := VBoxContainer.new()
+	prose.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(prose)
+	_line(prose, "  " + String(sheet["name"]), GOLD, 15)
+	_line(prose, "  %s  ·  %d men  ·  %d denarii, %d upkeep"
+		% [String(sheet["class"]).replace("_", " "), int(sheet["soldiers"]),
+		   int(sheet["cost"]), int(sheet["upkeep"])], DIM, 10)
+	_wrap(prose, String(sheet["description"]), BODY, 11)
+	_build_unit_action(prose, region_id, sheet)
+
+	var columns := HBoxContainer.new()
+	columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	prose.add_child(columns)
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(left)
+	var right := VBoxContainer.new()
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(right)
+
+	_fit(left, "  IN THE LINE", GOLD, 10)
+	for pair in [["attack", "Attack"], ["missile_attack", "Missiles"], ["charge", "Charge"],
+			["defense", "Defence"], ["morale", "Morale"], ["speed", "Speed"]]:
+		if int(sheet[pair[0]]) > 0:
+			_fit(left, "     %s  %d" % [pair[1], int(sheet[pair[0]])], BODY, 11)
+	if int(sheet["starts_with_experience"]) > 0:
+		_fit(left, "     Musters with %d experience" % int(sheet["starts_with_experience"]), GOOD, 11)
+
+	_fit(right, "  WHAT THEY NEED", GOLD, 10)
+	var requires: Dictionary = sheet["requires"]
+	for candidate in requires["chains"]:
+		var mark := "▪" if bool(candidate["met"]) else "○"
+		_fit(right, "     %s %s at tier %d" % [mark, candidate["name"], int(candidate["needs_tier"])],
+			GOOD if bool(candidate["met"]) else DIM, 11)
+		if not bool(candidate["met"]):
+			_fit(right, "        (%s stands at %d)" % [candidate["name"], int(candidate["built_tier"])],
+				DIM, 10)
+	if String(sheet["action"]["reason"]) == "era":
+		# Only when the age is actually wrong: a pre-Marian unit in 270 BC is
+		# not "locked", it is simply the unit of the day.
+		_fit(right, "     " + BuildingInfo.caption(game.data, "era_locked"), DIM, 10)
+
+
+func _build_unit_action(box: Control, region_id: String, sheet: Dictionary) -> void:
+	var action: Dictionary = sheet["action"]
+	var button := Button.new()
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_size_override("font_size", 12)
+	if bool(action["can_queue"]):
+		button.text = "Muster — %d denarii, %d men" % [int(sheet["cost"]), int(sheet["soldiers"])]
+		button.add_theme_color_override("font_color", GOLD)
+		var id := String(sheet["id"])
+		button.pressed.connect(func():
+			game.queue_unit(region_id, id)
+			queued.emit())
+	else:
+		button.disabled = true
+		button.add_theme_color_override("font_color_disabled", BAD)
+		# queue_unit refuses on population as well as on coin, so both gates get
+		# a sentence rather than a button that quietly does nothing.
+		match String(action["reason"]):
+			"unaffordable":
+				button.text = "Muster — %d denarii (you have %d)" % [int(sheet["cost"]),
+					int(action["treasury"])]
+			"manpower":
+				button.text = "Not enough men — %d live here, %d would leave fewer than %d" \
+					% [int(action["population"]), int(sheet["soldiers"]), int(action["min_population"])]
+			"era":
+				button.text = "Not until the legions are reformed"
+			_:
+				button.text = "The training ground is not built"
+	box.add_child(button)
+
+
+func _build_unit_ladder(region_id: String, sheet: Dictionary) -> void:
+	## The reverse link: which rung of which chain opens this unit, drawn as the
+	## same ladder so the two tabs read as one idea.
+	var requires: Dictionary = sheet["requires"]
+	if (requires["chains"] as Array).is_empty():
+		return
+	var chain_id := String(requires["chains"][0]["chain"])
+	for candidate in requires["chains"]:
+		if bool(candidate["met"]):
+			chain_id = String(candidate["chain"])
+			break
+	var dossier := game.building_dossier(region_id, chain_id)
+	if dossier.is_empty():
+		return
+	_build_ladder(region_id, dossier, int(requires["level"]))
 
 
 func _default_chain(rows: Array) -> String:

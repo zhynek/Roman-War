@@ -66,6 +66,16 @@ doing well or badly:
   city to the next tier, and also what recruits cost you.
 - **Income** — taxes, farming, trade, mines, minus corruption.
 
+**Open the building yard** (or the muster hall) and a drawer slides up over the
+map. On the left is everything this city can hold; in the middle a drawing of
+the building with what it is and what it will do for your money, your soldiers,
+your public order; along the bottom the whole ladder of that building's life,
+every rung drawn, marked as built, rising, next, or locked with the reason said
+plainly — *Needs a Large Town. This is a Town.* Click a rung to see it. For
+barracks, stables and shipyards each rung also names the troops it opens, so you
+can see what an upgrade is actually worth before you pay for it. The **Soldiers**
+tab does the same for troops, and shows which building tier each one waits on.
+
 From the same panel you can set **taxes**, **build**, **recruit**, **retrain**
 a battered garrison, **demolish** a building (the way you work off the unrest a
 conquered city's foreign temples cause), and **make this city your capital**

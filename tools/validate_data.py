@@ -43,6 +43,7 @@ TABLES = {
     "guided_campaign.json": "guided_campaign.schema.json",
     "effects_glossary.json": "effects_glossary.schema.json",
     "building_art.json": "building_art.schema.json",
+    "unit_art.json": "unit_art.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -668,6 +669,30 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"building_art: emblem for unknown chain '{chain_id}'")
         elif chains[chain_id]["kind"] != "temple":
             err(f"building_art: emblem on non-temple chain '{chain_id}'")
+
+    # --- unit art ---------------------------------------------------------
+    # Class and culture are orthogonal, so the roster is covered by two small
+    # tables. Anything they miss would draw nothing at all.
+    unit_art = t.get("unit_art.json", {})
+    class_ids = {c["id"] for c in unit_art.get("classes", [])}
+    kit_ids = {k["id"] for k in unit_art.get("kits", [])}
+    cue_ids = set(unit_art.get("attributes", {}))
+    for unit in units.values():
+        if unit["class"] not in class_ids:
+            err(f"unit_art: no template for the {unit['class']} class "
+                f"(needed by {unit['id']})")
+        if unit["culture"] not in kit_ids:
+            err(f"unit_art: no kit for {unit['culture']} troops (needed by {unit['id']})")
+        for attribute in unit.get("attributes", []):
+            if attribute not in cue_ids:
+                err(f"unit_art: the '{attribute}' attribute has no visual cue "
+                    f"(needed by {unit['id']})")
+    for override in unit_art.get("units", []):
+        if override["id"] not in units:
+            err(f"unit_art: signature for unknown unit '{override['id']}'")
+    for cue in cue_ids:
+        if not any(cue in unit.get("attributes", []) for unit in units.values()):
+            warn(f"unit_art: the '{cue}' cue is authored but no unit carries it")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]

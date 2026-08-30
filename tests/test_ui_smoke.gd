@@ -433,3 +433,47 @@ func test_the_yard_fits_the_map_at_its_minimum_size(t) -> void:
 	screen.build_drawer.fit_to(Vector2(1600, 1000))
 	t.check(not screen.build_drawer._compact, "and back to full on a big window")
 	screen.queue_free()
+
+
+func test_the_muster_hall_shows_a_unit_and_what_it_needs(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 17)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+	screen.open_drawer("units", "")
+	t.check(screen.build_drawer._list.get_child_count() > 0, "the roster fills")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "a unit is shown")
+	# The reverse link: a unit's panel draws the ladder of the chain that opens it.
+	t.check(screen.build_drawer._ladder.get_child_count() > 0,
+		"and the training ground's ladder with it")
+
+	screen.open_drawer("units", "roman_principes")
+	var sheet := game.unit_dossier(capital, "roman_principes")
+	t.check_eq(String(sheet["requires"]["kind"]), "barracks", "principes want a barracks")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "and the panel renders for them")
+	screen.queue_free()
+
+
+func test_both_tabs_render_for_every_owned_city(t) -> void:
+	## The drawer must survive whatever the map selection is: a village with
+	## almost nothing built, a captured foreign city, a city under siege.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 18)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	for i in 6:
+		game.end_turn()
+	var owned: Array = []
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "cornelii":
+			owned.append(region_id)
+	owned.sort()
+	for region_id in owned:
+		screen._on_region_clicked(String(region_id))
+		for tab in ["construction", "units"]:
+			screen.open_drawer(tab, "")
+			t.check(screen.build_drawer._detail.get_child_count() > 0,
+				"%s renders in %s" % [tab, region_id])
+	screen.queue_free()

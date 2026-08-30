@@ -1,0 +1,321 @@
+{
+  "$schema": "../schemas/unit_art.schema.json",
+  "classes": [
+    {
+      "id": "peasant",
+      "stance": "guard",
+      "ranks": 3,
+      "files": 5,
+      "formation": "loose",
+      "weapon": "spear",
+      "mount": "none",
+      "scene": {
+        "sky": "dust",
+        "flora": "olive"
+      }
+    },
+    {
+      "id": "spear",
+      "stance": "brace",
+      "ranks": 3,
+      "files": 5,
+      "formation": "line",
+      "weapon": "spear",
+      "mount": "none",
+      "scene": {
+        "sky": "clear",
+        "flora": "olive"
+      }
+    },
+    {
+      "id": "infantry",
+      "stance": "guard",
+      "ranks": 3,
+      "files": 5,
+      "formation": "line",
+      "weapon": "sword",
+      "mount": "none",
+      "scene": {
+        "sky": "clear",
+        "flora": "olive"
+      }
+    },
+    {
+      "id": "pike",
+      "stance": "brace",
+      "ranks": 4,
+      "files": 5,
+      "formation": "hedge",
+      "weapon": "pike",
+      "mount": "none",
+      "scene": {
+        "sky": "dust",
+        "flora": "none"
+      }
+    },
+    {
+      "id": "missile",
+      "stance": "shoot",
+      "ranks": 2,
+      "files": 5,
+      "formation": "loose",
+      "weapon": "bow",
+      "mount": "none",
+      "scene": {
+        "sky": "clear",
+        "flora": "pine"
+      }
+    },
+    {
+      "id": "cavalry",
+      "stance": "ride",
+      "ranks": 1,
+      "files": 3,
+      "formation": "mounted",
+      "weapon": "spear",
+      "mount": "horse",
+      "scene": {
+        "sky": "dust",
+        "flora": "none"
+      }
+    },
+    {
+      "id": "horse_archer",
+      "stance": "ride",
+      "ranks": 1,
+      "files": 3,
+      "formation": "mounted",
+      "weapon": "bow",
+      "mount": "horse",
+      "scene": {
+        "sky": "dust",
+        "flora": "none"
+      }
+    },
+    {
+      "id": "general_bodyguard",
+      "stance": "ride",
+      "ranks": 1,
+      "files": 3,
+      "formation": "mounted",
+      "weapon": "spear",
+      "mount": "horse",
+      "standard": true,
+      "scene": {
+        "sky": "clear",
+        "flora": "cypress"
+      }
+    },
+    {
+      "id": "chariot",
+      "stance": "drive",
+      "ranks": 1,
+      "files": 2,
+      "formation": "mounted",
+      "weapon": "bow",
+      "mount": "chariot",
+      "scene": {
+        "sky": "dust",
+        "flora": "none"
+      }
+    },
+    {
+      "id": "elephant",
+      "stance": "mahout",
+      "ranks": 1,
+      "files": 1,
+      "formation": "beast",
+      "weapon": "none",
+      "mount": "elephant",
+      "scene": {
+        "sky": "dust",
+        "flora": "palm"
+      }
+    },
+    {
+      "id": "siege",
+      "stance": "guard",
+      "ranks": 1,
+      "files": 3,
+      "formation": "crewed",
+      "weapon": "none",
+      "mount": "none",
+      "scene": {
+        "sky": "dust",
+        "flora": "none"
+      }
+    },
+    {
+      "id": "ship",
+      "stance": "guard",
+      "ranks": 1,
+      "files": 1,
+      "formation": "single",
+      "weapon": "none",
+      "mount": "ship",
+      "scene": {
+        "sky": "clear",
+        "water": 0.6,
+        "ground": 0.94,
+        "flora": "none"
+      }
+    }
+  ],
+  "kits": [
+    {
+      "id": "roman",
+      "shield": "scutum",
+      "helmet": "crest",
+      "armour": "mail",
+      "tunic": "#9b3b30",
+      "standard": "eagle"
+    },
+    {
+      "id": "greek",
+      "shield": "round",
+      "helmet": "plume",
+      "armour": "linen",
+      "tunic": "#b8493a",
+      "standard": "disc"
+    },
+    {
+      "id": "eastern",
+      "shield": "round",
+      "helmet": "conical",
+      "armour": "scale",
+      "tunic": "#7a4a86",
+      "standard": "sun"
+    },
+    {
+      "id": "carthaginian",
+      "shield": "oval",
+      "helmet": "cap",
+      "armour": "linen",
+      "tunic": "#3f5f86",
+      "standard": "moon"
+    },
+    {
+      "id": "egyptian",
+      "shield": "tower",
+      "helmet": "cap",
+      "armour": "linen",
+      "tunic": "#d8cba4",
+      "standard": "sun"
+    },
+    {
+      "id": "barbarian",
+      "shield": "oval",
+      "helmet": "horned",
+      "armour": "tunic",
+      "tunic": "#4f6b3a",
+      "standard": "boar"
+    },
+    {
+      "id": "neutral",
+      "shield": "round",
+      "helmet": "none",
+      "armour": "tunic",
+      "tunic": "#8a7550",
+      "standard": "disc"
+    }
+  ],
+  "units": [
+    {
+      "id": "cataphracts",
+      "armour": "scale",
+      "weapon": "pike"
+    },
+    {
+      "id": "chosen_hoplites",
+      "shield": "round",
+      "armour": "scale",
+      "helmet": "plume"
+    },
+    {
+      "id": "cohort_legionaries",
+      "armour": "segmented",
+      "weapon": "sword"
+    },
+    {
+      "id": "eagle_cohort",
+      "armour": "segmented",
+      "weapon": "sword",
+      "helmet": "crest"
+    },
+    {
+      "id": "eastern_lancers",
+      "armour": "scale",
+      "weapon": "spear"
+    },
+    {
+      "id": "germanic_berserkers",
+      "shield": "none",
+      "armour": "naked",
+      "helmet": "horned"
+    },
+    {
+      "id": "roman_triarii",
+      "weapon": "spear",
+      "armour": "mail"
+    },
+    {
+      "id": "roman_velites",
+      "shield": "round",
+      "armour": "tunic",
+      "helmet": "none"
+    },
+    {
+      "id": "silver_pikes",
+      "armour": "scale",
+      "weapon": "pike"
+    },
+    {
+      "id": "woad_raiders",
+      "shield": "oval",
+      "helmet": "none",
+      "armour": "naked"
+    }
+  ],
+  "attributes": {
+    "phalanx": {
+      "formation": "hedge",
+      "note": "a hedge of levelled pikes"
+    },
+    "testudo": {
+      "formation": "roof",
+      "note": "shields locked overhead"
+    },
+    "shield_wall": {
+      "formation": "wall",
+      "note": "shields locked edge to edge"
+    },
+    "warcry": {
+      "stance": "thrust",
+      "note": "a howling charge"
+    },
+    "can_hide_forest": {
+      "flora": "pine",
+      "note": "at home among the trees"
+    },
+    "can_sap": {
+      "spoil": true,
+      "note": "diggers and their spoil heap"
+    },
+    "frighten_infantry": {
+      "standard": "skull",
+      "note": "a sight that breaks foot"
+    },
+    "frighten_cavalry": {
+      "standard": "skull",
+      "note": "a sight that breaks horse"
+    },
+    "hardy": {
+      "sky": "overcast",
+      "note": "weather is nothing to them"
+    },
+    "fast_moving": {
+      "dust": 0.8,
+      "note": "quick over the ground"
+    }
+  }
+}

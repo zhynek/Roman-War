@@ -125,6 +125,7 @@ static func _dispatch(ci: CanvasItem, name: String, b: Rect2, s: Dictionary,
 		"stele": _stele(ci, b, s, p, u, seed)
 		"rubble": _rubble(ci, b, s, p, u, seed)
 		"scaffold": _scaffold(ci, b, s, p, u, seed)
+		"chevrons": _chevrons(ci, b, s, p, u, seed)
 		# An unknown name draws a plausible block rather than a hole. The schema
 		# and the validator make it unreachable from authored data.
 		_: _box(ci, b, s, p, u, seed)
@@ -967,7 +968,7 @@ static func _figure(ci: CanvasItem, b: Rect2, s: Dictionary, p: Dictionary,
 	if stance == "march":
 		foot_l.x -= b.size.x * 0.16
 		foot_r.x += b.size.x * 0.14
-	var width := maxf(b.size.x * 0.34, 1.0)
+	var width := maxf(b.size.x * 0.56, 1.0)
 	ci.draw_line(hip, foot_l, s["mid"], width * 0.55)
 	ci.draw_line(hip, foot_r, s["shadow"], width * 0.55)
 	ci.draw_colored_polygon(PackedVector2Array([
@@ -1040,8 +1041,9 @@ static func _crowd(ci: CanvasItem, b: Rect2, s: Dictionary, p: Dictionary,
 			# People are sized from the STAGE, not from the strip they stand on:
 			# an authored crowd rect is a short band, and sizing off it turned a
 			# forum full of citizens into a row of tally marks.
-			var h := u * 0.086 * scale
-			var w := maxf(u * 0.030 * scale, 1.0)
+			var grow := float(p.get("scale", 1.0))
+			var h := u * 0.086 * scale * grow
+			var w := maxf(u * 0.030 * scale * grow, 1.0)
 			ci.draw_colored_polygon(PackedVector2Array([
 				Vector2(x - w * 0.5, y), Vector2(x + w * 0.5, y),
 				Vector2(x + w * 0.34, y - h * 0.72), Vector2(x - w * 0.34, y - h * 0.72)]), body)
@@ -1056,18 +1058,34 @@ static func _beasts(ci: CanvasItem, b: Rect2, s: Dictionary, p: Dictionary,
 		var x := b.position.x + w * (float(k) + 0.5)
 		var body_h := b.size.y * 0.52
 		var top := b.end.y - body_h - b.size.y * 0.24
+		# A deep chest, a dipped back and a rising croup, so it reads as an
+		# animal rather than a slab on four legs.
 		ci.draw_colored_polygon(PackedVector2Array([
-			Vector2(x - w * 0.34, top + body_h * 0.30), Vector2(x - w * 0.26, top),
-			Vector2(x + w * 0.26, top), Vector2(x + w * 0.34, top + body_h * 0.34),
-			Vector2(x + w * 0.20, top + body_h), Vector2(x - w * 0.22, top + body_h)]), s["mid"])
-		for f in [-0.24, -0.08, 0.10, 0.24]:
-			ci.draw_line(Vector2(x + w * f, top + body_h),
-				Vector2(x + w * f, b.end.y), s["shadow"], maxf(1.0, u * 0.005))
-		var head := Vector2(x + w * 0.40, top + body_h * 0.16)
+			Vector2(x - w * 0.36, top + body_h * 0.36),
+			Vector2(x - w * 0.24, top + body_h * 0.06),
+			Vector2(x + w * 0.04, top + body_h * 0.16),
+			Vector2(x + w * 0.26, top),
+			Vector2(x + w * 0.36, top + body_h * 0.30),
+			Vector2(x + w * 0.24, top + body_h * 0.98),
+			Vector2(x - w * 0.24, top + body_h)]), s["mid"])
 		ci.draw_colored_polygon(PackedVector2Array([
-			head + Vector2(-w * 0.10, -body_h * 0.16), head + Vector2(w * 0.16, -body_h * 0.06),
-			head + Vector2(w * 0.14, body_h * 0.18), head + Vector2(-w * 0.10, body_h * 0.10)]),
+			Vector2(x - w * 0.24, top + body_h * 0.62), Vector2(x + w * 0.30, top + body_h * 0.56),
+			Vector2(x + w * 0.24, top + body_h * 0.98), Vector2(x - w * 0.24, top + body_h)]),
 			s["shadow"])
+		for f in [-0.26, -0.14, 0.12, 0.24]:
+			var stride := body_h * (0.06 if absf(f) > 0.2 else 0.0)
+			ci.draw_line(Vector2(x + w * f, top + body_h * 0.92),
+				Vector2(x + w * f + stride, b.end.y), s["shadow"], maxf(1.5, u * 0.006))
+		# neck and head, forward and down
+		var withers := Vector2(x - w * 0.30, top + body_h * 0.18)
+		var muzzle := Vector2(x - w * 0.56, top - body_h * 0.30)
+		ci.draw_colored_polygon(PackedVector2Array([
+			withers + Vector2(w * 0.10, -body_h * 0.04), muzzle + Vector2(w * 0.10, 0.0),
+			muzzle + Vector2(-w * 0.04, body_h * 0.14),
+			withers + Vector2(-w * 0.06, body_h * 0.24)]), s["mid"])
+		ci.draw_line(withers, muzzle, s["shadow"], maxf(1.0, u * 0.004))
+		ci.draw_line(Vector2(x + w * 0.34, top + body_h * 0.30),
+			Vector2(x + w * 0.52, top + body_h * 0.86), s["shadow"], maxf(1.0, u * 0.005))
 		if bool(p.get("yoke", false)) and k == 0:
 			ci.draw_line(Vector2(x - w * 0.34, top), Vector2(x - w * 0.9, top + body_h * 0.30),
 				s["shadow"], maxf(1.0, u * 0.005))
@@ -1363,3 +1381,22 @@ static func _scaffold(ci: CanvasItem, b: Rect2, s: Dictionary, p: Dictionary,
 	for k in 4:
 		var y := lerpf(b.position.y, b.end.y, float(k) / 3.0)
 		ci.draw_line(Vector2(b.position.x, y), Vector2(b.end.x, y), s["mid"], maxf(1.0, u * 0.004))
+
+
+static func _chevrons(ci: CanvasItem, b: Rect2, s: Dictionary, p: Dictionary,
+		u: float, seed: String) -> void:
+	## Experience, 0 to 9, in three bands. Each mark sits on a dark backing so
+	## it reads over any ground.
+	var count := clampi(int(p.get("count", 0)), 0, 9)
+	if count == 0:
+		return
+	var bands := [Color(0.67, 0.52, 0.27), Color(0.76, 0.78, 0.80), Color(0.94, 0.80, 0.43)]
+	var colour: Color = bands[clampi(int((count - 1) / 3), 0, 2)]
+	var pitch := b.size.x / 9.0
+	for k in count:
+		var x := b.position.x + pitch * (float(k) + 0.5)
+		var w := pitch * 0.34
+		var v := PackedVector2Array([
+			Vector2(x - w, b.position.y), Vector2(x, b.end.y), Vector2(x + w, b.position.y)])
+		ci.draw_polyline(v, Color(0.02, 0.03, 0.05, 0.55), maxf(2.0, u * 0.010))
+		ci.draw_polyline(v, colour, maxf(1.0, u * 0.006))

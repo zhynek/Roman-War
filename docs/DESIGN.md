@@ -630,6 +630,9 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
 | sites.json | 22 explorable points of interest with weighted outcomes | Active — `Game.explore_site`, quest UI, map markers (§10.2) |
 | guided_campaign.json | the guided trail's 20 stages: triggers, objectives, rewards | Active — `GuidedRules` (§10.1) |
+| effects_glossary.json | player-facing wording for the 13 effect keys, the blockers, and the standing captions | `BuildingInfo` → the building yard |
+| building_art.json | 20 procedural recipes, 18 materials, 7 culture tracks: the drawn buildings | `BuildingArt` → `ArtPainter` |
+| unit_art.json | 12 class templates, 7 culture kits, per-unit signatures, attribute cues | `UnitArt` → `ArtPainter` |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
