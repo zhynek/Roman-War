@@ -12,11 +12,19 @@ var game: Game
 var map_view: MapView
 var region_panel: RegionPanel
 var quest_panel: QuestPanel
+var build_drawer: BuildDrawer
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+# The drawer's selection is hoisted here, exactly like selected_army: RegionPanel
+# destroys and rebuilds all its children on every refresh, so nothing stateful
+# can live inside it.
+var drawer_open := false
+var drawer_tab := "construction"
+var drawer_chain := ""
+var drawer_tier := 0
 var _victory_shown := false
 
 
@@ -48,6 +56,19 @@ func _ready() -> void:
 	map_view.region_clicked.connect(_on_region_clicked)
 	split.add_child(map_view)
 
+	# The drawer is a child of MapView so it stops exactly at the right column's
+	# edge however the user drags the splitter. An overlay on this screen with a
+	# fixed right offset would be wrong the moment the divider moved, and an
+	# HSplitContainer takes only two children.
+	build_drawer = BuildDrawer.new()
+	build_drawer.closed.connect(close_drawer)
+	build_drawer.queued.connect(refresh)
+	build_drawer.chain_selected.connect(_on_drawer_chain)
+	build_drawer.tier_selected.connect(_on_drawer_tier)
+	build_drawer.tab_selected.connect(_on_drawer_tab)
+	map_view.add_child(build_drawer)
+	map_view.resized.connect(func(): build_drawer.fit_to(map_view.size))
+
 	var side := VBoxContainer.new()
 	side.custom_minimum_size = Vector2(360, 0)
 	split.add_child(side)
@@ -62,6 +83,7 @@ func _ready() -> void:
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
 	region_panel.explore_requested.connect(_explore_order)
+	region_panel.drawer_requested.connect(open_drawer)
 	scroll.add_child(region_panel)
 
 	quest_panel = QuestPanel.new()
@@ -133,6 +155,7 @@ func refresh() -> void:
 
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
+	_render_drawer()
 
 	# The trail's checklist and its map guidance travel together: every
 	# active stage with a target lights that region up.
@@ -160,6 +183,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if not key.pressed:
 		return
+	# Escape closes the drawer before anything else looks at the key. Only this
+	# one binding, so the existing arrow/WASD camera contract is untouched.
+	if key.keycode == KEY_ESCAPE and drawer_open:
+		close_drawer()
+		get_viewport().set_input_as_handled()
+		return
 	var handled := true
 	match key.keycode:
 		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
@@ -182,6 +211,46 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+func open_drawer(tab: String = "construction", chain_id: String = "") -> void:
+	drawer_open = true
+	drawer_tab = tab
+	drawer_chain = chain_id
+	drawer_tier = 0
+	build_drawer.visible = true
+	build_drawer.fit_to(map_view.size)
+	_render_drawer()
+
+
+func close_drawer() -> void:
+	drawer_open = false
+	build_drawer.visible = false
+
+
+func _render_drawer() -> void:
+	if not drawer_open:
+		return
+	build_drawer.visible = true
+	build_drawer.fit_to(map_view.size)
+	build_drawer.render(game, map_view.selected_region, drawer_tab, drawer_chain, drawer_tier)
+
+
+func _on_drawer_chain(chain_id: String) -> void:
+	drawer_chain = chain_id
+	drawer_tier = 0
+	_render_drawer()
+
+
+func _on_drawer_tier(index: int) -> void:
+	drawer_tier = index
+	_render_drawer()
+
+
+func _on_drawer_tab(tab: String) -> void:
+	drawer_tab = tab
+	drawer_tier = 0
+	_render_drawer()
+
+
 func _on_region_clicked(region_id: String) -> void:
 	# With one of our armies selected, a click on another region is an order.
 	# Shift makes it a forced march: double range, weary men.
@@ -192,6 +261,12 @@ func _on_region_clicked(region_id: String) -> void:
 	map_view.selected_region = region_id
 	selected_army = ""
 	region_panel.show_region(game, region_id)
+	# This path does not go through refresh(), so without this the drawer would
+	# keep showing the previous city's ladder after a click on the map.
+	if drawer_open:
+		drawer_chain = ""
+		drawer_tier = 0
+		_render_drawer()
 	map_view.queue_redraw()
 
 

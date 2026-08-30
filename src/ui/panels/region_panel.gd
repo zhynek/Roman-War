@@ -9,6 +9,7 @@ signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
 signal explore_requested(army_id: String)
+signal drawer_requested(tab: String, chain_id: String)
 
 var game: Game
 var region_id := ""
@@ -127,12 +128,26 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 				game.raise_army(region_id)
 				action_taken.emit())
 
-	# Construction
+	# Construction. The wall of unexplained "Build X (5000, 4t)" buttons is now
+	# one door into the building yard, plus a short cheap-and-ready list so the
+	# one-click route (and the trail's "queue a building" step) still works.
 	_header("Construction", 12)
 	for job in settlement["construction_queue"]:
 		_label("  building %s — %d turns left" % [_chain_name(job["chain"]), int(job["turns_left"])])
-	for project in game.available_buildings(region_id):
-		_action_button("Build %s (%d, %dt)" % [project["name"], int(project["cost"]), int(project["build_turns"])],
+	var projects: Array = game.available_buildings(region_id)
+	_action_button("Open the building yard — %d project%s"
+		% [projects.size(), "" if projects.size() == 1 else "s"],
+		func(): drawer_requested.emit("construction", ""))
+	var purse := int(game.state["factions"][game.state["player_faction"]]["treasury"])
+	var affordable: Array = []
+	for project in projects:
+		if int(project["cost"]) <= purse:
+			affordable.append(project)
+	affordable.sort_custom(func(a, b): return int(a["cost"]) < int(b["cost"]))
+	for i in mini(affordable.size(), 3):
+		var project: Dictionary = affordable[i]
+		_action_button("Build %s (%d, %dt)"
+			% [project["name"], int(project["cost"]), int(project["build_turns"])],
 			func():
 				game.queue_building(region_id, project["chain"])
 				action_taken.emit())
@@ -155,6 +170,8 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_header("Recruitment", 12)
 	for job in settlement["recruitment_queue"]:
 		_label("  mustering %s" % _template_name(job["template"]))
+	_action_button("Open the muster hall",
+		func(): drawer_requested.emit("units", ""))
 	for unit in game.available_units(region_id):
 		_action_button("Recruit %s (%d)" % [unit["name"], int(unit["cost"])],
 			func():

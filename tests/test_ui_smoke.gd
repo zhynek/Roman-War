@@ -315,3 +315,121 @@ func test_clicking_inside_a_province_selects_it(t) -> void:
 	t.check_eq(view._region_at(view.to_screen(far_inside)), capital,
 		"a click inside the province selects it")
 	view.free()
+
+
+func test_building_yard_opens_and_shows_a_chain(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+
+	t.check(not screen.build_drawer.visible, "the yard starts shut")
+	screen.open_drawer("construction", "")
+	t.check(screen.build_drawer.visible, "and opens on request")
+	# Opening with nothing chosen must never land on a blank pane.
+	t.check(screen.build_drawer._list.get_child_count() > 0, "the chain list fills")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "the detail pane fills")
+	t.check(screen.build_drawer._ladder.get_child_count() > 0, "the tier ladder fills")
+
+	screen.open_drawer("construction", "roman_walls")
+	var ladder: int = screen.build_drawer._ladder.get_child_count()
+	t.check(ladder >= 5, "the walls ladder shows every rung and its chevrons (%d)" % ladder)
+	screen.queue_free()
+
+
+func test_the_yard_follows_the_map_selection(t) -> void:
+	## _on_region_clicked does not go through refresh(), so without an explicit
+	## re-render the drawer keeps showing the previous city's ladder.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 12)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var owned: Array = []
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "cornelii":
+			owned.append(region_id)
+	owned.sort()
+	t.check(owned.size() >= 2, "the house holds more than one city to compare")
+	screen._on_region_clicked(String(owned[0]))
+	screen.open_drawer("construction", "")
+	var first := screen.build_drawer._title.text
+	screen._on_region_clicked(String(owned[1]))
+	t.check(screen.build_drawer._title.text != first,
+		"clicking another city redraws the yard for it")
+	screen.queue_free()
+
+
+func test_the_yard_survives_a_refresh_and_a_turn(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 13)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "roman_walls")
+	screen.refresh()
+	t.check(screen.build_drawer.visible, "a refresh does not shut the yard")
+	t.check(screen.build_drawer._ladder.get_child_count() > 0, "nor empty it")
+	t.check_eq(screen.drawer_chain, "roman_walls", "the chosen chain is remembered")
+	game.end_turn()
+	screen.refresh()
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "and it survives a turn")
+	screen.queue_free()
+
+
+func test_escape_shuts_the_yard_and_leaves_the_camera_alone(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 14)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "")
+	screen._unhandled_key_input(_key(KEY_ESCAPE))
+	t.check(not screen.build_drawer.visible, "escape shuts it")
+	# The arrow keys must still drive the map: that contract predates the drawer.
+	var before: Vector2 = screen.map_view._camera_offset
+	screen._unhandled_key_input(_key(KEY_RIGHT))
+	t.check(screen.map_view._camera_offset != before, "and the camera still answers")
+	screen.queue_free()
+
+
+func test_the_yard_queues_through_the_facade(t) -> void:
+	## Queueing must go through Game so the guided trail's counters still fire.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 15)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+	var before := int(game.state["guided"]["counters"].get("buildings_queued", 0))
+	var projects: Array = game.available_buildings(capital)
+	t.check(not projects.is_empty(), "the capital has something to raise")
+	projects.sort_custom(func(a, b): return int(a["cost"]) < int(b["cost"]))
+	var purse := int(game.state["factions"]["cornelii"]["treasury"])
+	t.check(int(projects[0]["cost"]) <= purse, "and can afford the cheapest of them")
+	t.check(game.queue_building(capital, String(projects[0]["chain"])), "the order takes")
+	t.check_eq(int(game.state["guided"]["counters"].get("buildings_queued", 0)), before + 1,
+		"the trail still counts a queued building")
+	screen.queue_free()
+
+
+func test_the_yard_fits_the_map_at_its_minimum_size(t) -> void:
+	## MapView's own minimum is 600x400. A fixed plate height cannot coexist
+	## with that, so the drawer measures itself against the map it sits in.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 16)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "roman_walls")
+	screen.build_drawer.fit_to(Vector2(600, 400))
+	t.check(absf(screen.build_drawer.offset_top) < 400.0,
+		"the drawer never taller than the map that holds it")
+	t.check(screen.build_drawer._compact, "and it goes compact when the map is short")
+	screen.build_drawer.render(game, screen.map_view.selected_region,
+		"construction", "roman_walls", 0)
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "still rendering when compact")
+	screen.build_drawer.fit_to(Vector2(1600, 1000))
+	t.check(not screen.build_drawer._compact, "and back to full on a big window")
+	screen.queue_free()

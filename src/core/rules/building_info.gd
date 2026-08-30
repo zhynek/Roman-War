@@ -170,6 +170,12 @@ static func effect_lines(data: GameData, state: Dictionary, region_id: String,
 		var key: String = row["key"]
 		var old_value := float(old_effects.get(key, 0.0))
 		var new_value := float(new_effects.get(key, 0.0))
+		# A chain that never grants this key has nothing to say about it. Without
+		# this, every max-aggregated effect the town already has from elsewhere
+		# turned up on every building — a wall upgrade announcing the barracks'
+		# recruit experience.
+		if not (old_effects.has(key) or new_effects.has(key)):
+			continue
 		var rival := 0.0
 		if row["aggregation"] == "max":
 			# Only the town's best counts, so the honest delta is measured

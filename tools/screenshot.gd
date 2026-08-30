@@ -2,7 +2,8 @@ extends SceneTree
 ## Dev harness: boot the campaign screen, let it lay out, save a PNG.
 ## Run under a virtual display:
 ##   xvfb-run -a -s "-screen 0 1920x1200x24" godot --path . --script res://tools/screenshot.gd
-## Env: SHOT_OUT (path), SHOT_TURNS (end turns first), SHOT_ZOOM (zoom steps)
+## Env: SHOT_OUT (path), SHOT_TURNS (end turns first), SHOT_ZOOM (zoom steps),
+##      SHOT_DRAWER (construction|units) and SHOT_CHAIN to open the building yard
 ##
 ## SHOT_MODE=contact renders every tier of every chain as one sheet instead —
 ## the only way to eyeball 312 procedural buildings at once. A SubViewport can
@@ -39,6 +40,15 @@ func _tick() -> void:
 		root.add_child(host)
 		_screen = CampaignScreen.create(game)
 		host.add_child(_screen)
+	if _frames == 8 and _screen != null and OS.get_environment("SHOT_DRAWER") != "":
+		var region := OS.get_environment("SHOT_REGION")
+		if region == "":
+			region = String(_screen.game.state["factions"][
+				_screen.game.state["player_faction"]]["capital"])
+		_screen.map_view.selected_region = region
+		_screen.region_panel.show_region(_screen.game, region)
+		_screen.open_drawer(OS.get_environment("SHOT_DRAWER"),
+			OS.get_environment("SHOT_CHAIN"))
 	if _frames == 8 and _screen != null:
 		var zoom_steps := int(OS.get_environment("SHOT_ZOOM"))
 		for i in range(abs(zoom_steps)):
