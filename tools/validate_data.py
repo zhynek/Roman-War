@@ -42,6 +42,7 @@ TABLES = {
     "sites.json": "sites.schema.json",
     "guided_campaign.json": "guided_campaign.schema.json",
     "effects_glossary.json": "effects_glossary.schema.json",
+    "building_art.json": "building_art.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -581,6 +582,93 @@ def cross_checks(t: dict[str, dict]) -> None:
         if note["kind"] not in built_kinds:
             err(f"effects_glossary: kind_note names unknown building kind '{note['kind']}'")
 
+    # --- building art -----------------------------------------------------
+    # The game ships no images, so every level must reach a recipe or it draws
+    # nothing. The schema closes the part vocabulary; these checks close the
+    # cross-file references the schema cannot see.
+    art = t.get("building_art.json", {})
+    art_materials = set(art.get("materials", {}))
+    art_fragments = set(art.get("fragments", {}))
+
+    def walk_parts(container):
+        for part in container.get("base", []):
+            yield part
+        for tier in container.get("tiers", []):
+            for part in tier.get("add", []):
+                yield part
+        for part in container.get("add", []):
+            yield part
+
+    def check_material(name, where):
+        if name and name not in ("$track",) and name not in art_materials:
+            err(f"building_art: {where}: unknown material '{name}'")
+
+    recipe_ids: set[str] = set()
+    generic = 0
+    for recipe in art.get("recipes", []):
+        rid = recipe["id"]
+        if rid in recipe_ids:
+            err(f"building_art: duplicate recipe id '{rid}'")
+        recipe_ids.add(rid)
+        if rid == "generic":
+            generic += 1
+        for chain_id in recipe.get("chains", []):
+            if chain_id not in chains:
+                err(f"building_art: {rid}: unknown chain '{chain_id}'")
+        for kind in recipe.get("kinds", []):
+            if kind not in built_kinds:
+                err(f"building_art: {rid}: unknown building kind '{kind}'")
+        for culture in recipe.get("cultures", []):
+            if culture not in cultures:
+                err(f"building_art: {rid}: unknown culture '{culture}'")
+        check_material(recipe.get("scene", {}).get("ground_mat"), f"{rid}: scene")
+        for tier in recipe.get("tiers", []):
+            check_material(tier.get("material"), f"{rid}: tier material")
+            for name in tier.get("set", {}):
+                check_material(tier["set"][name].get("mat"), f"{rid}: set {name}")
+        for part in walk_parts(recipe):
+            check_material(part.get("mat"), f"{rid}: part {part.get('part', part.get('use'))}")
+            if "use" in part and part["use"] not in art_fragments:
+                err(f"building_art: {rid}: unknown fragment '{part['use']}'")
+    if generic != 1:
+        err("building_art: exactly one recipe with id 'generic' is required, "
+            "or an unrecipe'd level draws nothing")
+    for archetype, cult in art.get("cults", {}).items():
+        for part in walk_parts(cult):
+            check_material(part.get("mat"), f"building_art: cult {archetype}")
+    for culture in sorted(cultures):
+        lane = art.get("tracks", {}).get(culture, [])
+        if len(lane) != 6:
+            err(f"building_art: tracks.{culture} needs one material per tier (6)")
+        for material in lane:
+            check_material(material, f"tracks.{culture}")
+
+    # Coverage: resolve every chain the way BuildingArt.recipe_for does.
+    by_chain = {c: r for r in art.get("recipes", []) for c in r.get("chains", [])}
+    by_kind_culture, by_kind = {}, {}
+    for recipe in art.get("recipes", []):
+        for kind in recipe.get("kinds", []):
+            if recipe.get("cultures"):
+                for culture in recipe["cultures"]:
+                    by_kind_culture[(kind, culture)] = recipe
+            else:
+                by_kind[kind] = recipe
+    for chain in chains.values():
+        for culture in chain["cultures"]:
+            picked = (by_chain.get(chain["id"])
+                      or by_kind_culture.get((chain["kind"], culture))
+                      or by_kind.get(chain["kind"]))
+            if picked is None:
+                err(f"building_art: no recipe reaches {chain['id']} as {culture}")
+            elif len(picked.get("tiers", [])) < len(chain["levels"]):
+                warn(f"building_art: {picked['id']} gives {len(picked.get('tiers', []))} tiers "
+                     f"for {chain['id']}'s {len(chain['levels'])} levels — the top ones repeat")
+    for chain_id in art.get("emblems", {}):
+        if chain_id not in chains:
+            err(f"building_art: emblem for unknown chain '{chain_id}'")
+        elif chains[chain_id]["kind"] != "temple":
+            err(f"building_art: emblem on non-temple chain '{chain_id}'")
+
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
@@ -608,7 +696,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "sites", "stages", "effects"):
+                "sites", "stages", "effects", "recipes"):
         if key in document:
             return len(document[key])
     return 0

@@ -49,18 +49,15 @@ static func for_data(data) -> MapGeometry:
 
 
 static func _hash01(key: String, salt: int) -> float:
-	var h: int = 2166136261 ^ ((salt * 2654435761) & 0xffffffff)
-	for i in key.length():
-		h = ((h ^ key.unicode_at(i)) * 16777619) & 0xffffffff
-	return float(h) / 4294967296.0
+	# One hash for the whole project: ArtNoise owns it, the building plates use
+	# the same one, and test_map_geometry asserts the two never drift apart.
+	return ArtNoise.hash01(key, salt)
+
 
 
 static func _noise(key: String, t: float) -> float:
-	var cell := int(floor(t))
-	var f := t - float(cell)
-	var a := _hash01(key, cell & 0xffff) * 2.0 - 1.0
-	var b := _hash01(key, (cell + 1) & 0xffff) * 2.0 - 1.0
-	return a + (b - a) * f * f * (3.0 - 2.0 * f)
+	return ArtNoise.noise(key, t)
+
 
 
 func _build(data) -> void:
