@@ -298,6 +298,22 @@ func available_units(region_id: String) -> Array:
 	return RecruitmentRules.available_units(data, state, region_id)
 
 
+func building_chains(region_id: String) -> Array:
+	return BuildingInfo.chain_list(data, state, region_id)
+
+
+func building_dossier(region_id: String, chain_id: String) -> Dictionary:
+	return BuildingInfo.dossier(data, state, region_id, chain_id)
+
+
+func recruitable_units(region_id: String) -> Array:
+	return BuildingInfo.unit_list(data, state, region_id)
+
+
+func unit_dossier(region_id: String, template_id: String) -> Dictionary:
+	return BuildingInfo.unit_dossier(data, state, region_id, template_id)
+
+
 func visible_regions(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VisibilityRules.visible_regions(data, state, fid)

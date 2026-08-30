@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "effects_glossary.schema.json",
+  "title": "Player-facing wording for building effects, blockers and captions",
+  "description": "Wording is content, so it lives here. The NUMBERS stay in balance.json and are computed by BuildingInfo; a line only ever carries {tokens} the engine fills in.",
+  "type": "object",
+  "required": ["headings", "effects", "blockers", "captions"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "headings": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Display order is authored order.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["money", "soldiers", "order", "learning", "defence", "movement", "growth"] },
+          "name": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["key", "heading", "aggregation", "status", "line"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "enum": ["law", "happiness", "growth", "health", "trade_pct", "farm_income", "mine_income", "recruit_xp", "weapon_upgrade", "armor_upgrade", "wall_level", "road_level", "port_level"]
+          },
+          "heading": { "enum": ["money", "soldiers", "order", "learning", "defence", "movement", "growth"] },
+          "aggregation": {
+            "enum": ["sum", "max"],
+            "description": "Must mirror the engine: SettlementRules.effect_total (sum) or effect_max (max)."
+          },
+          "status": {
+            "enum": ["live", "inert"],
+            "description": "inert = authored in the data but read by no engine call site. Must carry a note saying so."
+          },
+          "precision": { "type": "integer", "minimum": 0, "maximum": 2 },
+          "signed": { "type": "boolean" },
+          "line": { "type": "string", "minLength": 1 },
+          "note": { "type": "string", "minLength": 1 },
+          "derived": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "heading", "line"],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "enum": ["corruption_relief_pct", "recruit_xp_cap", "wall_defence_multiplier", "sea_routes"],
+                  "description": "Closed vocabulary: every id needs a branch in BuildingInfo._derived_line, asserted by tests/test_building_info.gd."
+                },
+                "heading": { "enum": ["money", "soldiers", "order", "learning", "defence", "movement", "growth"] },
+                "precision": { "type": "integer", "minimum": 0, "maximum": 2 },
+                "signed": { "type": "boolean" },
+                "line": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "inert" } }, "required": ["status"] },
+            "then": {
+              "required": ["note"],
+              "description": "An effect the engine never reads may not be rendered as a plain benefit."
+            }
+          }
+        ]
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["kind", "line"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": ["culture", "settlement", "population", "coastal", "resource", "temple", "queued", "predecessor", "culture_cap", "already_built", "no_such_tier"]
+          },
+          "line": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "kind_notes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "heading", "line"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
+          },
+          "heading": { "enum": ["money", "soldiers", "order", "learning", "defence", "movement", "growth"] },
+          "line": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "captions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "line"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": ["income_approximate", "growth_at_cap", "already_matched", "cumulative_delta", "foreign_chain", "no_new_troops", "era_locked", "rebuild_full_price"]
+          },
+          "line": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

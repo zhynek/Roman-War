@@ -25,6 +25,7 @@ var sites_by_region: Dictionary = {}   # region id -> point-of-interest dict
 var guided_stages: Array = []          # guided-campaign stages, authored order
 var guided_stage_index: Dictionary = {}  # stage id -> stage dict
 var campaign: Dictionary = {}
+var effects_glossary: Dictionary = {}  # the player-facing wording for building effects
 
 var load_errors: PackedStringArray = []
 
@@ -64,6 +65,8 @@ func _load_all(dir: String) -> void:
 
 	for unit in _read_json(dir + "/units.json").get("units", []):
 		units[unit["id"]] = unit
+
+	effects_glossary = _read_json(dir + "/effects_glossary.json")
 
 	var map_data := _read_json(dir + "/regions.json")
 	for region in map_data.get("regions", []):

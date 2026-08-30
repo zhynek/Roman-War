@@ -41,6 +41,7 @@ TABLES = {
     "mercenaries.json": "mercenaries.schema.json",
     "sites.json": "sites.schema.json",
     "guided_campaign.json": "guided_campaign.schema.json",
+    "effects_glossary.json": "effects_glossary.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -535,6 +536,51 @@ def cross_checks(t: dict[str, dict]) -> None:
         if stage["trigger"]["kind"] == "after" and stage["id"] not in reachable:
             err(f"guided_campaign: {stage['id']}: unreachable from any start stage")
 
+    # --- effects glossary -------------------------------------------------
+    # The drawer may only describe effects the data actually uses, and may only
+    # claim an effect works if some engine call site reads it. Both halves are
+    # checked here; the runtime twin lives in tests/test_building_info.gd.
+    glossary = t.get("effects_glossary.json", {})
+    described = {row["key"]: row for row in glossary.get("effects", [])}
+    used_effects: set[str] = set()
+    for chain in chains.values():
+        for level in chain["levels"]:
+            used_effects.update(level.get("effects", {}))
+    for key in sorted(used_effects):
+        if key not in described:
+            err(f"effects_glossary: no wording for effect '{key}', which the data uses")
+    for key, row in described.items():
+        if key not in used_effects:
+            warn(f"effects_glossary: '{key}' is described but no building grants it")
+        if row["status"] == "inert" and not row.get("note"):
+            err(f"effects_glossary: inert effect '{key}' must carry a note")
+    # Aggregation has to mirror the engine, or the drawer sums what the engine maxes.
+    max_aggregated = {"recruit_xp", "weapon_upgrade", "armor_upgrade",
+                      "wall_level", "road_level", "port_level"}
+    for key, row in described.items():
+        expected = "max" if key in max_aggregated else "sum"
+        if row["aggregation"] != expected:
+            err(f"effects_glossary: '{key}' is aggregated as {row['aggregation']}, "
+                f"but SettlementRules treats it as {expected}")
+    heading_ids = {h["id"] for h in glossary.get("headings", [])}
+    for key, row in described.items():
+        if row["heading"] not in heading_ids:
+            err(f"effects_glossary: '{key}' files under unknown heading '{row['heading']}'")
+        for derived in row.get("derived", []):
+            if derived["heading"] not in heading_ids:
+                err(f"effects_glossary: derived '{derived['id']}' files under "
+                    f"unknown heading '{derived['heading']}'")
+    # Every blocker ConstructionRules can emit needs a sentence.
+    blocker_kinds = {b["kind"] for b in glossary.get("blockers", [])}
+    for kind in ("culture", "settlement", "population", "coastal", "resource",
+                 "temple", "queued", "predecessor", "culture_cap",
+                 "already_built", "no_such_tier"):
+        if kind not in blocker_kinds:
+            err(f"effects_glossary: no sentence for the '{kind}' blocker")
+    for note in glossary.get("kind_notes", []):
+        if note["kind"] not in built_kinds:
+            err(f"effects_glossary: kind_note names unknown building kind '{note['kind']}'")
+
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
@@ -562,7 +608,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "sites", "stages"):
+                "sites", "stages", "effects"):
         if key in document:
             return len(document[key])
     return 0
