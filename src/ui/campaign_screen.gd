@@ -146,6 +146,36 @@ func refresh() -> void:
 		_show_victory_banner(String(game.state["winner"]))
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	## Keyboard camera: the whole map is reachable without a mouse. Arrows or
+	## WASD walk the view, +/- zoom, Home returns to the capital.
+	if map_view == null or not (event is InputEventKey):
+		return
+	var key := event as InputEventKey
+	if not key.pressed:
+		return
+	var handled := true
+	match key.keycode:
+		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
+			map_view.zoom_by(MapView.ZOOM_STEP)
+		KEY_MINUS, KEY_KP_SUBTRACT:
+			map_view.zoom_by(1.0 / MapView.ZOOM_STEP)
+		KEY_LEFT, KEY_A:
+			map_view.pan_by(Vector2(-MapView.KEY_PAN_STEP, 0))
+		KEY_RIGHT, KEY_D:
+			map_view.pan_by(Vector2(MapView.KEY_PAN_STEP, 0))
+		KEY_UP, KEY_W:
+			map_view.pan_by(Vector2(0, -MapView.KEY_PAN_STEP))
+		KEY_DOWN, KEY_S:
+			map_view.pan_by(Vector2(0, MapView.KEY_PAN_STEP))
+		KEY_HOME, KEY_0, KEY_KP_0:
+			map_view.reset_view()
+		_:
+			handled = false
+	if handled:
+		get_viewport().set_input_as_handled()
+
+
 func _on_region_clicked(region_id: String) -> void:
 	# With one of our armies selected, a click on another region is an order.
 	# Shift makes it a forced march: double range, weary men.
@@ -445,5 +475,6 @@ func _spacer() -> Control:
 func _bar_button(text: String, handler: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(handler)
 	return button

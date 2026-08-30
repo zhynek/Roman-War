@@ -91,6 +91,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	tax_label.text = "Taxes:"
 	tax_row.add_child(tax_label)
 	var tax_options := OptionButton.new()
+	tax_options.focus_mode = Control.FOCUS_NONE
 	for tax_level in Constants.TAX_LEVELS:
 		tax_options.add_item(tax_level.capitalize().replace("_", " "))
 	tax_options.selected = Constants.TAX_LEVELS.find(String(settlement["tax_level"]))
@@ -184,6 +185,7 @@ func _build_armies_section() -> void:
 		if army["owner"] == player:
 			var button := Button.new()
 			button.text = ("▶ " if army_id == selected_army else "") + title
+			button.focus_mode = Control.FOCUS_NONE
 			button.pressed.connect(func(): army_selected.emit(army_id))
 			add_child(button)
 			if army_id == selected_army:
@@ -217,6 +219,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	if not settlement.is_empty() and settlement.get("siege") != null \
 			and settlement["siege"]["besieger"] == army_id:
 		var occupation_options := OptionButton.new()
+		occupation_options.focus_mode = Control.FOCUS_NONE
 		for choice in ["occupy", "enslave", "exterminate"]:
 			occupation_options.add_item(choice.capitalize())
 		add_child(occupation_options)
@@ -282,6 +285,8 @@ func _breakdown(title: String, factors: Array) -> void:
 func _action_button(text: String, handler: Callable) -> void:
 	var button := Button.new()
 	button.text = text
+	# Focus stays off the panel so the arrow keys always drive the map.
+	button.focus_mode = Control.FOCUS_NONE
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
 	add_child(button)

@@ -35,9 +35,14 @@ campaign runs to AD 14.
   neighbouring regions; dashed lines are sea routes. Small squares beside a
   city are armies. A red ring means the city is under siege. Grey circles are
   land you have not scouted.
-  - **Drag with the right mouse button** to move the map.
-  - **Scroll** to zoom in and out.
-  - **Left-click** a region to select it.
+  - **Move the map**: drag it with any mouse button, use the **arrow keys**
+    (or WASD), or two-finger scroll on a trackpad.
+  - **Zoom**: the **+ and −** buttons in the map's bottom-right corner, the
+    **+ / −** keys, a trackpad pinch, or the mouse wheel.
+  - **Lost?** The **Home** button (or the Home key) returns you to your
+    capital at the default zoom.
+  - **Left-click** a region to select it. City names appear once you are
+    zoomed in a little.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
 - **Bottom right** — the turn log: what happened while you were away.

@@ -2,12 +2,23 @@ class_name MapView
 extends Control
 ## The campaign map: regions drawn at their geographic positions as
 ## owner-colored settlement tokens joined by adjacency roads, with army
-## badges, siege rings, and fog of war. Pans (right/middle drag) and zooms
-## (wheel). Emits region_clicked for the campaign screen to interpret.
+## badges, siege rings, and fog of war. Emits region_clicked for the campaign
+## screen to interpret.
+##
+## Camera controls are deliberately redundant, because plenty of players have
+## no mouse: drag with any button, trackpad pinch and two-finger scroll,
+## on-map buttons, and the keyboard (wired in CampaignScreen) all reach the
+## same zoom_by / pan_by / center_on_capital API.
 
 signal region_clicked(region_id: String)
 
 const WORLD_SCALE := 14.0
+const ZOOM_STEP := 1.15
+const ZOOM_MIN := 0.35
+const ZOOM_MAX := 3.0
+const KEY_PAN_STEP := 90.0        # screen pixels per arrow-key press
+const PAN_GESTURE_SPEED := 24.0   # trackpad two-finger scroll to pixels
+const DRAG_THRESHOLD := 5.0       # a left drag beyond this pans instead of selecting
 const SEA_COLOR := Color(0.10, 0.17, 0.24)
 const LAND_EDGE_COLOR := Color(0.45, 0.38, 0.28, 0.5)
 const SEA_EDGE_COLOR := Color(0.25, 0.42, 0.55, 0.35)
@@ -21,6 +32,9 @@ var highlight_regions: Dictionary = {}
 var _camera_offset := Vector2(-200, -200)
 var _zoom := 1.0
 var _dragging := false
+var _left_press_at := Vector2.ZERO
+var _left_dragging := false
+var _left_moved := false
 var _font: Font
 
 
@@ -28,6 +42,7 @@ func _ready() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_font = get_theme_default_font()
+	_build_camera_controls()
 
 
 func world_pos(region: Dictionary) -> Vector2:
@@ -46,29 +61,117 @@ func center_on(region_id: String) -> void:
 	queue_redraw()
 
 
+func center_on_capital() -> void:
+	if game == null:
+		return
+	var capital: String = game.state["factions"].get(
+		String(game.state["player_faction"]), {}).get("capital", "")
+	if capital != "":
+		center_on(capital)
+
+
+func zoom_by(factor: float) -> void:
+	## Zoom about the middle of the view — what the buttons and keys want.
+	_zoom_at(size / 2.0, factor)
+
+
+func pan_by(look_delta: Vector2) -> void:
+	## Move the view in the given screen direction: pan_by(RIGHT) looks further
+	## east. Distances are screen pixels, so panning feels the same at any zoom.
+	_camera_offset -= look_delta / _zoom
+	queue_redraw()
+
+
+func reset_view() -> void:
+	_zoom = 1.0
+	center_on_capital()
+	queue_redraw()
+
+
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_event := event as InputEventMouseButton
 		if mouse_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_event.pressed:
-			_zoom_at(mouse_event.position, 1.15)
+			_zoom_at(mouse_event.position, ZOOM_STEP)
 		elif mouse_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_event.pressed:
-			_zoom_at(mouse_event.position, 1.0 / 1.15)
+			_zoom_at(mouse_event.position, 1.0 / ZOOM_STEP)
 		elif mouse_event.button_index in [MOUSE_BUTTON_RIGHT, MOUSE_BUTTON_MIDDLE]:
 			_dragging = mouse_event.pressed
-		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
-			var hit := _region_at(mouse_event.position)
-			if hit != "":
-				region_clicked.emit(hit)
-	elif event is InputEventMouseMotion and _dragging:
-		_camera_offset += (event as InputEventMouseMotion).relative / _zoom
-		queue_redraw()
+		elif mouse_event.button_index == MOUSE_BUTTON_LEFT:
+			# Left-drag pans too (a trackpad has no comfortable right-drag), so
+			# the region is picked on RELEASE — only if the press never became
+			# a drag.
+			if mouse_event.pressed:
+				_left_dragging = true
+				_left_moved = false
+				_left_press_at = mouse_event.position
+			else:
+				_left_dragging = false
+				if not _left_moved:
+					var hit := _region_at(_left_press_at)
+					if hit != "":
+						region_clicked.emit(hit)
+	elif event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if _dragging:
+			_camera_offset += motion.relative / _zoom
+			queue_redraw()
+		elif _left_dragging:
+			if not _left_moved \
+					and motion.position.distance_to(_left_press_at) > DRAG_THRESHOLD:
+				_left_moved = true
+			if _left_moved:
+				_camera_offset += motion.relative / _zoom
+				queue_redraw()
+	elif event is InputEventMagnifyGesture:
+		# Trackpad pinch: the natural zoom on a laptop with no wheel.
+		var magnify := event as InputEventMagnifyGesture
+		_zoom_at(magnify.position, magnify.factor)
+	elif event is InputEventPanGesture:
+		# Trackpad two-finger scroll walks the map.
+		var gesture := event as InputEventPanGesture
+		pan_by(gesture.delta * PAN_GESTURE_SPEED)
 
 
 func _zoom_at(screen_point: Vector2, factor: float) -> void:
 	var before := screen_point / _zoom - _camera_offset
-	_zoom = clampf(_zoom * factor, 0.35, 3.0)
+	_zoom = clampf(_zoom * factor, ZOOM_MIN, ZOOM_MAX)
 	_camera_offset = screen_point / _zoom - before
 	queue_redraw()
+
+
+func _build_camera_controls() -> void:
+	## Zoom and recenter buttons in the map's bottom-right corner: the visible
+	## affordance for players who never discover the wheel or the keys.
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	column.offset_left = -44.0
+	column.offset_top = -112.0
+	column.offset_right = -10.0
+	column.offset_bottom = -10.0
+	column.add_theme_constant_override("separation", 4)
+	# Only the buttons swallow clicks; the gaps between them stay map.
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+	column.add_child(_camera_button("+", "Zoom in   (+ key)", 18,
+		func(): zoom_by(ZOOM_STEP)))
+	column.add_child(_camera_button("-", "Zoom out   (- key)", 18,
+		func(): zoom_by(1.0 / ZOOM_STEP)))
+	column.add_child(_camera_button("Home", "Back to your capital   (Home key)", 10,
+		func(): reset_view()))
+
+
+func _camera_button(text: String, tooltip: String, font_size: int, handler: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.tooltip_text = tooltip
+	button.custom_minimum_size = Vector2(34, 30)
+	button.add_theme_font_size_override("font_size", font_size)
+	# Never take keyboard focus, or the arrow keys would drive the buttons
+	# instead of the map.
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(handler)
+	return button
 
 
 func _region_at(screen_point: Vector2) -> String:

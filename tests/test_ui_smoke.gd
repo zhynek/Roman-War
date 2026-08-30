@@ -96,6 +96,113 @@ func test_map_picking(t) -> void:
 	view.free()
 
 
+func test_map_camera_controls(t) -> void:
+	## Every camera route a mouseless player has: buttons, keys, gestures.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(800, 600)
+	tree.root.add_child(view)
+
+	var start_zoom: float = view._zoom
+	view.zoom_by(MapView.ZOOM_STEP)
+	t.check(view._zoom > start_zoom, "zoom in reaches a closer view")
+	view.zoom_by(1.0 / MapView.ZOOM_STEP)
+	t.check_near(view._zoom, start_zoom, 0.0001, "zoom out returns to where it began")
+
+	# Zooming about the middle keeps the middle of the map where it was.
+	var middle := view.size / 2.0
+	var before := view._region_at(middle)
+	view.zoom_by(MapView.ZOOM_STEP)
+	t.check_eq(view._region_at(middle), before, "the view zooms about its own centre")
+
+	for i in range(40):
+		view.zoom_by(MapView.ZOOM_STEP)
+	t.check_near(view._zoom, MapView.ZOOM_MAX, 0.0001, "zoom stops at the near limit")
+	for i in range(80):
+		view.zoom_by(1.0 / MapView.ZOOM_STEP)
+	t.check_near(view._zoom, MapView.ZOOM_MIN, 0.0001, "zoom stops at the far limit")
+
+	# Panning right must move the view east: a region's screen x drops.
+	view.reset_view()
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	var anchor := view.to_screen(view.world_pos(game.data.regions[capital]))
+	view.pan_by(Vector2(MapView.KEY_PAN_STEP, 0))
+	var after_right := view.to_screen(view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.x - after_right.x, MapView.KEY_PAN_STEP, 0.001, "panning right looks east")
+	view.pan_by(Vector2(-MapView.KEY_PAN_STEP, MapView.KEY_PAN_STEP))
+	var after_down := view.to_screen(view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.y - after_down.y, MapView.KEY_PAN_STEP, 0.001, "panning down looks south")
+	t.check_near(after_down.x, anchor.x, 0.001, "and the sideways pan undoes itself")
+
+	# Home returns to the capital at the default zoom, however lost you are.
+	view.pan_by(Vector2(4000, -2500))
+	view.zoom_by(MapView.ZOOM_STEP)
+	view.reset_view()
+	t.check_near(view._zoom, 1.0, 0.0001, "Home restores the default zoom")
+	t.check_eq(view._region_at(view.size / 2.0), capital, "Home recentres on the capital")
+
+	# The on-map buttons exist, and none of them can steal the arrow keys.
+	var buttons: Array = []
+	for child in view.get_children():
+		if child is VBoxContainer:
+			for grandchild in child.get_children():
+				if grandchild is Button:
+					buttons.append(grandchild)
+	t.check_eq(buttons.size(), 3, "zoom in, zoom out and Home sit on the map")
+	for button in buttons:
+		t.check_eq(button.focus_mode, Control.FOCUS_NONE, "camera buttons never take focus")
+	(buttons[0] as Button).pressed.emit()
+	t.check(view._zoom > 1.0, "the + button zooms in")
+	(buttons[1] as Button).pressed.emit()
+	t.check_near(view._zoom, 1.0, 0.0001, "the - button zooms back out")
+
+	view.free()
+
+
+func test_keyboard_camera_through_the_screen(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen.size = Vector2(1200, 800)
+
+	var zoom_before: float = screen.map_view._zoom
+	screen._unhandled_key_input(_key(KEY_EQUAL))
+	t.check(screen.map_view._zoom > zoom_before, "+ zooms in")
+	screen._unhandled_key_input(_key(KEY_MINUS))
+	t.check_near(screen.map_view._zoom, zoom_before, 0.0001, "- zooms out")
+
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	screen.map_view.reset_view()
+	var anchor := screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital]))
+	screen._unhandled_key_input(_key(KEY_RIGHT))
+	var panned := screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.x - panned.x, MapView.KEY_PAN_STEP, 0.001, "the right arrow looks east")
+	screen._unhandled_key_input(_key(KEY_D))
+	t.check(screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital])).x < panned.x,
+		"D pans like the right arrow")
+
+	screen._unhandled_key_input(_key(KEY_HOME))
+	t.check_eq(screen.map_view._region_at(screen.map_view.size / 2.0), capital,
+		"Home brings the capital back to the middle")
+
+	# A key the map does not use is left alone for everything else.
+	var untouched: float = screen.map_view._zoom
+	screen._unhandled_key_input(_key(KEY_F5))
+	t.check_near(screen.map_view._zoom, untouched, 0.0001, "unrelated keys move nothing")
+
+	screen.free()
+
+
+func _key(keycode: Key) -> InputEventKey:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.pressed = true
+	return event
+
+
 func test_many_turns_through_the_ui(t) -> void:
 	## Drives the real report-log formatting against live riots, revolts,
 	## events, senate notices and character news — the branches a single
