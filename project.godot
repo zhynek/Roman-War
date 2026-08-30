@@ -14,6 +14,13 @@ config/features=PackedStringArray("4.4")
 
 window/size/viewport_width=1280
 window/size/viewport_height=800
+window/size/mode=2
+window/size/window_width_override=1600
+window/size/window_height_override=1000
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/dpi/allow_hidpi=true
 
 [rendering]
 

@@ -140,8 +140,6 @@ amphibious landings, not to AI work.
   **no spouses, no children, no `gender` field set** in `campaign.json`. The
   marriage path only opens once in-game births produce daughters, so the family
   tree bootstraps slowly. Seeding real households would fix it.
-- **Sea-zone anchor positions** in `regions.json` are unused — `map_view.gd`
-  draws sea lanes from shared-zone membership and never renders zone labels.
 - **`office_gained` triggers are dead** until Phase 7 offices exist. The
   validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
   them, and warns about any *other* trigger kind no engine call site fires.
@@ -149,7 +147,18 @@ amphibious landings, not to AI work.
   abstracted crossing today), naval battles, port blockades, forts and
   watchtowers, ambush. Until landings exist, a hostile single-region island
   cannot be invaded by anyone — the AI knows and does not try (DESIGN.md §9).
-- **Art is placeholder** — coloured circles on a geographic map.
+- **The map is a procedural painting** — `src/ui/map_geometry.gd` carves the 70
+  region points into province polygons (wobbled coast discs cut by half-plane
+  bisectors; straits kept open between sea-sharing non-adjacent regions), and
+  `map_view.gd` paints them on two cached `Node2D` layers (sea, land) that a
+  pan just moves — only ownership/fog changes (`repaint_land()` from
+  `refresh()`) or a zoom LOD-band change rebake the land. Tokens, labels and
+  badges stay in `MapView._draw` (screen space, every frame). Determinism is
+  FNV-1a hashes of region ids — no RNG. Screenshot QA:
+  `SHOT_OUT=x.png SHOT_ZOOM=-8 SHOT_TURNS=30 xvfb-run -a -s "-screen 0 1600x1000x24"
+  godot --rendering-driver opengl3 --path . --script res://tools/screenshot.gd`
+  (SHOT_ZOOM is in 1.15× steps; shoot turn 30 as well as 0 — fog hides most
+  of the world at turn 0). No portraits or battle art yet.
 
 ## 7. Process notes
 

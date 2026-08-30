@@ -27,9 +27,12 @@ static func create(new_game: Game) -> CampaignScreen:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Anchors alone leave the offsets untouched, which left this screen at size
+	# (0, 0): every child then fell back to its minimum size and the whole game
+	# huddled in the top-left corner of the window. Offsets must be set too.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
 	root.add_child(_build_top_bar())
@@ -140,6 +143,9 @@ func refresh() -> void:
 		if stage["target_region"] != "":
 			highlights[stage["target_region"]] = true
 	map_view.highlight_regions = highlights
+	# Ownership or fog may have moved: rebake the cached land layer. Selection
+	# clicks deliberately skip this — they change nothing the land shows.
+	map_view.repaint_land()
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:

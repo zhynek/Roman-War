@@ -96,6 +96,43 @@ func test_map_picking(t) -> void:
 	view.free()
 
 
+func test_screen_fills_its_window(t) -> void:
+	## The campaign screen once set anchors without offsets, leaving it at size
+	## (0, 0) so every child fell back to its minimum and the game huddled in
+	## the top-left corner of the window.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 7)
+	var host := Control.new()
+	tree.root.add_child(host)
+	host.size = Vector2(1440, 900)
+	var screen := CampaignScreen.create(game)
+	host.add_child(screen)
+
+	t.check_eq(screen.size, host.size, "the screen fills its host, not its minimum size")
+	t.check(screen.size.x > 0.0 and screen.size.y > 0.0, "the screen has a real rect")
+	host.free()
+
+
+func test_map_centres_once_it_knows_its_size(t) -> void:
+	## center_on before the first layout has no size to centre against, so the
+	## request is held until the map is laid out.
+	var game := Game.new_campaign("cornelii", 7)
+	var view := MapView.new()
+	view.game = game
+	var before := view._camera_offset
+	view.center_on("latium")
+	t.check_eq(view._camera_offset, before, "an unsized map does not centre on nothing")
+	t.check_eq(view._pending_center, "latium", "the request is remembered")
+
+	view.size = Vector2(900, 600)
+	view._on_resized()
+	t.check_eq(view._pending_center, "", "the pending request is spent")
+	var centre := view.to_screen(view.world_pos(game.data.regions["latium"]))
+	t.check_near(centre.x, 450.0, 0.5, "centred horizontally once sized")
+	t.check_near(centre.y, 300.0, 0.5, "centred vertically once sized")
+	view.free()
+
+
 func test_map_camera_controls(t) -> void:
 	## Every camera route a mouseless player has: buttons, keys, gestures.
 	var tree := Engine.get_main_loop() as SceneTree
@@ -254,3 +291,27 @@ func test_start_menu_scene_loads(t) -> void:
 		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
 			"the house that was picked is the house that is played")
 	menu.free()
+
+
+func test_clicking_inside_a_province_selects_it(t) -> void:
+	## The map paints whole territories now, so a click well away from the
+	## token — but inside the province — must still select that region.
+	var game := Game.new_campaign("cornelii", 42)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(900, 700)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	var geo := MapGeometry.for_data(game.data)
+	var seat := view.world_pos(game.data.regions[capital])
+	# A point inside the capital's polygon but far outside its token.
+	var far_inside := Vector2.ZERO
+	for point in geo.cells[capital]:
+		var candidate: Vector2 = seat.lerp(point, 0.85)
+		if Geometry2D.is_point_in_polygon(candidate, geo.cells[capital]) \
+				and candidate.distance_to(seat) > 30.0:
+			far_inside = candidate
+			break
+	t.check(far_inside != Vector2.ZERO, "the capital's province has room beyond its token")
+	t.check_eq(view._region_at(view.to_screen(far_inside)), capital,
+		"a click inside the province selects it")
+	view.free()

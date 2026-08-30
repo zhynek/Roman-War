@@ -30,11 +30,16 @@ campaign runs to AD 14.
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
   Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
-- **The map** — every region is a circle at its real geographic place, coloured
-  by who owns it and sized by how big its city is. Lines are roads between
-  neighbouring regions; dashed lines are sea routes. Small squares beside a
-  city are armies. A red ring means the city is under siege. Grey circles are
-  land you have not scouted.
+- **The map** — a painted Mediterranean, drawn entirely by code from the game
+  data: terrain-coloured provinces (olive plains, ochre hills, grey peaks,
+  dark forest, pale desert) with mountains, trees and hills sketched on them,
+  a shallow-water shelf along every coast, and named seas. Each province's
+  settlement is a circle coloured by its owner and sized by its city tier;
+  the cased tan lines between settlements are roads, dashed lines are sea
+  routes. Small squares beside a city are armies. A red ring means the city
+  is under siege. Land you have not scouted shows its geography — muted, with
+  a dark marker where its settlement lies — but hides its owner, roads, names
+  and armies until you get someone close enough to look.
   - **Move the map**: drag it with any mouse button, use the **arrow keys**
     (or WASD), or two-finger scroll on a trackpad.
   - **Zoom**: the **+ and −** buttons in the map's bottom-right corner, the
@@ -171,7 +176,8 @@ Honest list, so you know what you are looking at:
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full
   political system (offices, elections) is later.
-- **The art is placeholder.** Coloured circles, not painted maps.
+- **All art is drawn by code.** The map is a procedural painting rebuilt from
+  the data every launch; there are no character portraits or battle scenes yet.
 
 ## macOS blocks the app on first launch
 
