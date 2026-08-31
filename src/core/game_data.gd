@@ -25,6 +25,8 @@ var advances: Dictionary = {}          # id -> advance dict
 var edicts: Dictionary = {}            # id -> edict dict (one standing order per province)
 var society: Dictionary = {}           # axes, unrest states, historical patterns
 var campaign: Dictionary = {}
+var dispatch_beats: Dictionary = {}    # beat kind -> presentation entry
+var dispatch_chapters: Array = []      # the day's acts, in playing order
 
 var load_errors: PackedStringArray = []
 
@@ -105,6 +107,10 @@ func _load_all(dir: String) -> void:
 			load_errors.append("duplicate edict id: %s" % edict["id"])
 		edicts[edict["id"]] = edict
 	society = _read_json(dir + "/society.json")
+	var dispatch_data := _read_json(dir + "/dispatch.json")
+	dispatch_chapters = dispatch_data.get("chapters", [])
+	for beat in dispatch_data.get("beats", []):
+		dispatch_beats[beat["id"]] = beat
 
 
 func _read_json(path: String) -> Dictionary:
@@ -120,6 +126,13 @@ func _read_json(path: String) -> Dictionary:
 
 
 ## --- Lookups -------------------------------------------------------------
+
+func dispatch_chapter(chapter_id: String) -> Dictionary:
+	for chapter in dispatch_chapters:
+		if chapter["id"] == chapter_id:
+			return chapter
+	return {}
+
 
 func culture_of_faction(faction_id: String) -> String:
 	return factions.get(faction_id, {}).get("culture", "neutral")

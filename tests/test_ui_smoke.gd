@@ -3,6 +3,11 @@ extends RefCounted
 ## campaign, click regions, select and order an army, end a turn, save/load,
 ## open the family scroll. No rendering happens headless — this guards the
 ## UI's logic paths, not its looks.
+##
+## Most tests set playback_enabled = false: the day's sequence is an animation
+## driven by frame time, and a headless loop has no frames. The turn itself is
+## unaffected — the engine resolves it in full either way — and
+## test_the_day_plays_and_skips covers the playback path deliberately.
 
 
 func test_campaign_screen_boots_and_plays(t) -> void:
@@ -10,6 +15,7 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	var game := Game.new_campaign("julii", 42)
 	var screen := CampaignScreen.create(game)
 	tree.root.add_child(screen)
+	screen.playback_enabled = false
 
 	t.check(screen.map_view != null and screen.region_panel != null, "screen assembled")
 	t.check(screen.top_labels["treasury"].text.contains("Treasury"), "treasury shown")
@@ -452,6 +458,7 @@ func test_many_turns_through_the_ui(t) -> void:
 	var game := Game.new_campaign("julii", 11)
 	var screen := CampaignScreen.create(game)
 	tree.root.add_child(screen)
+	screen.playback_enabled = false
 
 	for i in range(25):
 		screen._end_turn()
@@ -524,3 +531,104 @@ func test_fog_hides_built_road_tiers(t) -> void:
 			shown = true
 	t.check(shown, "the road's own builder sees it paved")
 	owner.free()
+func test_the_day_plays_and_skips(t) -> void:
+	## The playback path: end a turn with the sequence on, skip it, and check
+	## the day closes on a populated Dispatch that dismisses cleanly.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	# Turn 1 is quiet for a house nobody is playing; run a few so the journal
+	# has something in it worth playing.
+	screen.playback_enabled = false
+	for i in range(12):
+		screen._end_turn()
+	screen.playback_enabled = true
+
+	var turn_before := int(game.state["turn"])
+	screen._end_turn()
+	t.check_eq(int(game.state["turn"]), turn_before + 1,
+		"the turn resolves in full before a single frame of the day is played")
+	t.check(screen.dispatch_panel != null, "the dispatch exists")
+
+	if screen.turn_sequence.is_playing():
+		# A second end turn must not run a second day underneath the first.
+		screen._end_turn()
+		t.check_eq(int(game.state["turn"]), turn_before + 1,
+			"ending the turn again while the day plays does nothing")
+		screen.turn_sequence.skip_to_end()
+	t.check(not screen.turn_sequence.is_playing(), "skip ends the day at once")
+	t.check(screen.map_view.highlight_regions.is_empty(), "skip clears the map highlight")
+
+	t.check(screen.dispatch_panel.visible, "the day closes on the dispatch")
+	t.check(screen.dispatch_panel._content.get_child_count() > 0, "the dispatch has something to say")
+	screen.dispatch_panel._on_dismiss()
+	t.check(not screen.dispatch_panel.visible, "the dispatch dismisses")
+
+	# And the next day can begin.
+	screen._end_turn()
+	t.check_eq(int(game.state["turn"]), turn_before + 2, "the next day begins")
+	screen.turn_sequence.skip_to_end()
+
+	screen.free()
+
+
+func test_dispatch_reopens_from_the_top_bar(t) -> void:
+	## The journal lives in the game state, so the day just closed can be read
+	## again — including after a save and load.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen.playback_enabled = false
+	for i in range(10):
+		screen._end_turn()
+
+	screen._show_dispatch()
+	t.check(screen.dispatch_panel.visible, "the dispatch reopens on demand")
+	screen.dispatch_panel._on_dismiss()
+
+	screen._save_game()
+	screen._load_game()
+	t.check_eq(int(game.state["journal"]["turn"]), int(game.state["turn"]),
+		"the journal came back with the save")
+	screen._show_dispatch()
+	t.check(screen.dispatch_panel.visible, "and still opens after a load")
+	screen.dispatch_panel._on_dismiss()
+
+	screen.free()
+
+
+func test_campaign_screen_fills_its_window(t) -> void:
+	## Regression: `set_anchors_preset` KEEPS the control's current rect, so a
+	## freshly built (0x0) CampaignScreen stayed 0x0 and rendered at its minimum
+	## size in the top-left corner, growing only by the delta of a window
+	## resize — Godot's grey clear colour over the rest of the window. The
+	## screen, and every full-rect overlay on it, must anchor AND zero offsets.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	t.check_near(screen.anchor_left, 0.0, 0.001, "anchored to the left edge")
+	t.check_near(screen.anchor_top, 0.0, 0.001, "anchored to the top edge")
+	t.check_near(screen.anchor_right, 1.0, 0.001, "anchored to the right edge")
+	t.check_near(screen.anchor_bottom, 1.0, 0.001, "anchored to the bottom edge")
+	for offset in [screen.offset_left, screen.offset_top,
+			screen.offset_right, screen.offset_bottom]:
+		t.check_near(offset, 0.0, 0.001, "offsets are zeroed, not left at -size")
+
+	var window := tree.root.get_visible_rect().size
+	t.check_near(screen.size.x, window.x, 1.0, "the screen is as wide as its window")
+	t.check_near(screen.size.y, window.y, 1.0, "the screen is as tall as its window")
+
+	# The day's overlays are full-rect too: a 0x0 TurnSequence would play the
+	# whole day inside a single corner pixel.
+	for overlay in [screen.turn_sequence, screen.dispatch_panel]:
+		t.check_near(overlay.size.x, window.x, 1.0,
+			"%s spans the window" % overlay.get_class())
+		t.check_near(overlay.size.y, window.y, 1.0,
+			"%s fills the window height" % overlay.get_class())
+
+	screen.free()

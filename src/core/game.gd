@@ -471,6 +471,10 @@ func _glossary_entry(section: String, entry_id: String) -> Dictionary:
 	if entry.is_empty():
 		return {"id": entry_id, "name": entry_id.capitalize(), "blurb": ""}
 	return {"id": entry_id, "name": String(entry["name"]), "blurb": String(entry["blurb"])}
+func day_beats(faction_id: String = "") -> Array:
+	## The turn just resolved, as this faction is entitled to know it.
+	var viewer := faction_id if faction_id != "" else String(state["player_faction"])
+	return DispatchRules.visible_beats(data, state, TurnJournal.of(state), viewer)
 
 
 func visible_regions(faction_id: String = "") -> Dictionary:

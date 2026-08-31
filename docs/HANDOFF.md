@@ -55,6 +55,12 @@ lever, and crises that name the historical mechanism they illustrate. Read
 0 warnings, clean boot. Branch `claude/game-decision-tradeoffs-pnixzs`, working
 tree clean, everything pushed. A Mac build of an earlier state was delivered to
 the user, who is playtesting.
+foundation loop, a playable Phase 8 campaign UI, and **the day at court** — the
+turn journal, the fog-filtered end-turn sequence and the Daily Dispatch, with a
+bounded AI so the day has something to show (`docs/DESIGN.md` §2.3.1–2.3.2).
+
+**Green:** 93 tests / 0 failures, validator 0 errors / 0 warnings, clean boot.
+Branch `claude/daily-campaign-turn-sequence-8mq71d`.
 
 ## 2. Get productive in five minutes
 
@@ -83,6 +89,7 @@ Then the three commands that must stay green:
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
 godot --headless --path . --script res://tests/run_tests.gd      # 112 tests, 0 failures (~20s)
+godot --headless --path . --script res://tests/run_tests.gd      # 93 tests, 0 failures (~40s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -147,6 +154,19 @@ demanded were put to the user and taken as follows:
    round log; interactive battles stay out of scope, as designed.
 
 What landed where:
+### Phase 6 — AI opponents, properly
+`src/core/rules/ai.gd` now marches, besieges, storms and declares war, and the
+map does change hands (`tests/test_ai.gd` proves it over forty turns). What it
+still does not do is listed in its own docstring: economic planning beyond
+cheapest-first, negotiation, naval and fleet behaviour, agents, coordinated
+multi-army operations, defensive stacking, and any plan longer than one turn.
+The difficulty multipliers are read but only for income and order
+(`balance.json → ai.difficulty_income_multiplier`, `ai.difficulty_order_bonus`).
+
+> Take `AiRules` from bounded to real: split it into economy / expansion / war /
+> defence behaviours that hold a plan across turns, wire the difficulty
+> constants into aggression as well as income, and verify with a long headless
+> campaign that a strong faction actually snowballs.
 
 - **Glossary + readers**: `data/glossary.json` (unit classes, attributes,
   effects, building kinds — each id/name/blurb, schema-validated and
@@ -354,6 +374,22 @@ the current gesture — both must be updated in the same commit.
 - **Phase 8 — Balance.** Driven by playtest notes. If the user reports a
   problem, **ask for the world seed** — it reproduces their exact campaign.
 
+## 5b. Three traps the Dispatch work added
+
+1. **`data/dispatch.json` and `TurnJournal.KINDS` are checked against each other
+   in both directions** by `tools/validate_data.py`. Add a beat kind without its
+   prose (or leave prose behind after removing a kind) and the validator fails.
+   That is deliberate — it is what keeps content out of GDScript.
+2. **The interface font is Open Sans and has no Miscellaneous Symbols block.**
+   The obvious icon characters (⚔ ★ ✦ ▲) render as empty boxes. Every mark in
+   `DispatchFormat.ICON_MARKS` is checked against the real font by
+   `test_dispatch.gd :: test_every_icon_actually_renders` — run it before
+   trusting a new icon.
+3. **`CampaignScreen.playback_enabled` is the seam** that keeps `_end_turn()`
+   synchronously completable. The headless suite drives twenty-five turns in a
+   loop with no frames; leave playback on there and the second call is refused
+   because the first day is still on screen.
+
 ## 6. Known gaps (verified, not guesses)
 
 - **Starting families are adult men only**: 20 leaders, 19 heirs, 32 family, and
@@ -367,6 +403,11 @@ the current gesture — both must be updated in the same commit.
 - **`office_gained` triggers are dead** until Phase 7 offices exist. The
   validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
   them, and warns about any *other* trigger kind no engine call site fires.
+- **Three mission kinds are still forward content**: `blockade_port` needs port
+  blockades (Phase 3 remainder), `assassinate_leader` and `leader_suicide` need
+  agents (Phase 5). `SenateRules.LIVE_KINDS` names what is actually judged, and
+  `FORWARD_MISSION_KINDS` in the validator allowlists the rest — anything in
+  neither list is an error.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
   watchtowers, ambush.
@@ -393,6 +434,14 @@ the current gesture — both must be updated in the same commit.
   themselves, let them write throwaway probe scripts in `/tmp`, and require
   findings-only output. **Budget a fix commit after every review — assume it
   will find something.**
+  Develop on `claude/daily-campaign-turn-sequence-8mq71d`.
+- **Run adversarial review agents after building anything substantial.** Three
+  reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
+  issues** the 60-strong test suite had missed — including armies declaring war
+  by accident on the first turn, a save-determinism break, movement traits that
+  silently did nothing, and generals still governing cities they had marched away
+  from. Give each reviewer the research report plus a specific lens, tell them to
+  run the suite themselves, and require findings-only output.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.

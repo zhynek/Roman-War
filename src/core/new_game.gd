@@ -47,6 +47,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"fleets": {},
 		"characters": {},
 		"events_fired": [],
+		"journal": {"turn": 0, "beats": []},
 		"winner": null,
 		"next_id": 1,
 	}
@@ -66,6 +67,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"at_civil_war": false,
 			"society": SocietyRules.new_faction_society(data),
 			"advances": [],
+			"war_cooldown": 0,
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -83,7 +85,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false,
+		"mission": null, "at_civil_war": false, "war_cooldown": 0,
 		"society": SocietyRules.new_faction_society(data),
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):

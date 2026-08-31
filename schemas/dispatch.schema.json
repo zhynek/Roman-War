@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "dispatch.schema.json",
+  "title": "Daily Dispatch presentation table",
+  "description": "Every word the end-turn sequence and the Daily Dispatch put on screen. The engine emits content-free beat records (ids and numbers); this table turns a beat kind into prose, a chapter, a tone and a severity. Beat ids must match TurnJournal.KINDS exactly in both directions.",
+  "type": "object",
+  "required": ["chapters", "beats"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The day's acts, in the order they are played and printed.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "chapter", "visibility", "severity", "tone", "icon",
+          "in_sequence", "in_dispatch", "headline", "body"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "A beat kind from TurnJournal.KINDS"
+          },
+          "chapter": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "visibility": {
+            "enum": ["own", "region", "own_or_region", "public"],
+            "description": "own: only the faction it happened to. region: only if the region is in the viewer's fog-of-war set. own_or_region: either. public: heralds carry it everywhere."
+          },
+          "severity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1 is a ledger line, 5 stops the room. Drives headline picking and which beats survive the sequence cap."
+          },
+          "tone": { "enum": ["good", "bad", "warning", "neutral"] },
+          "icon": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "in_sequence": { "type": "boolean", "description": "Played as a beat during the day's sequence" },
+          "in_dispatch": { "type": "boolean", "description": "Printed in the Daily Dispatch recap" },
+          "headline": { "type": "string", "minLength": 1 },
+          "body": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

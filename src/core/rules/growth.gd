@@ -74,9 +74,14 @@ static func squalor_pct(data: GameData, settlement: Dictionary) -> float:
 	return minf(squalor, float(squalor_rules["max_growth_penalty_pct"]))
 
 
-static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng: CampaignRng) -> void:
+static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng: CampaignRng) -> Dictionary:
+	## Returns what changed, so the turn journal can report a city outgrowing
+	## its walls or a plague taking hold without recomputing any of it.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var population := int(settlement["population"])
+	var population_before := population
+	var level_before := SettlementRules.settlement_level(data, settlement)
+	var plague_before := int(settlement["plague_turns"])
 	population = int(round(population * (1.0 + total_pct(data, state, region_id) / 100.0)))
 
 	_plague_turn(data, state, settlement, rng)
@@ -89,6 +94,15 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	for counter in ["slave_bonus_turns", "recently_conquered"]:
 		if int(settlement[counter]) > 0:
 			settlement[counter] = int(settlement[counter]) - 1
+
+	return {
+		"population_before": population_before,
+		"population_after": int(settlement["population"]),
+		"delta": int(settlement["population"]) - population_before,
+		"level_before": level_before,
+		"level_after": SettlementRules.settlement_level(data, settlement),
+		"plague_started": plague_before == 0 and int(settlement["plague_turns"]) > 0,
+	}
 
 
 static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictionary, rng: CampaignRng) -> void:

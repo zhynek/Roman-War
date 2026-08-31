@@ -8,6 +8,7 @@ coherence). Exits nonzero on any error. Run from anywhere:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -44,13 +45,28 @@ TABLES = {
     "advances.json": "advances.schema.json",
     "society.json": "society.schema.json",
     "edicts.json": "edicts.schema.json",
+    "dispatch.json": "dispatch.schema.json",
 }
+
+LIVE_MISSION_KINDS: set[str] = set()  # filled from SenateRules at startup
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
 
 # Trigger kinds authored ahead of the system that will fire them. Everything
 # else the engine never fires is flagged as dead content.
 FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
+
+# Mission kinds authored ahead of the systems that resolve them. SenateRules
+# judges only LIVE_KINDS; these need port blockades (Phase 3 remainder) and
+# campaign agents (Phase 5), so they are forward content, not dead content.
+FORWARD_MISSION_KINDS = {"blockade_port", "assassinate_leader", "leader_suicide"}
+
+# The only substitutions src/ui/dispatch_format.gd knows how to make. A token
+# outside this set would print as a literal brace on the player's screen.
+DISPATCH_TOKENS = {
+    "faction", "other_faction", "region", "settlement", "subject",
+    "value", "value_abs", "turn", "year", "season", "detail",
+}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -615,6 +631,39 @@ def cross_checks(t: dict[str, dict]) -> None:
                          for e in edict.get("effects", {})):
         if f'"{effect}"' not in engine_text:
             err(f"edicts: effect key '{effect}' is authored but no engine code reads it")
+    # --- dispatch: prose and engine must name the same beats ---------------
+    dispatch = t.get("dispatch.json", {})
+    chapter_ids = {c["id"] for c in dispatch.get("chapters", [])}
+    beats = {b["id"]: b for b in dispatch.get("beats", [])}
+    if len(beats) != len(dispatch.get("beats", [])):
+        err("dispatch: duplicate beat id")
+
+    engine_kinds = _journal_kinds()
+    if engine_kinds is None:
+        err("dispatch: could not read KINDS from src/core/turn_journal.gd")
+    else:
+        for kind in sorted(engine_kinds - set(beats)):
+            err(f"dispatch: the engine emits {kind} but no beat template says what to print")
+        for kind in sorted(set(beats) - engine_kinds):
+            err(f"dispatch: {kind} has prose but no engine call site emits it (dead content)")
+
+    for beat_id, beat in sorted(beats.items()):
+        if beat["chapter"] not in chapter_ids:
+            err(f"dispatch: {beat_id}: unknown chapter {beat['chapter']}")
+        if not beat["in_sequence"] and not beat["in_dispatch"]:
+            err(f"dispatch: {beat_id}: shown in neither the sequence nor the dispatch")
+        for field in ("headline", "body"):
+            for token in re.findall(r"\{([a-z_]*)\}", beat[field]):
+                if token not in DISPATCH_TOKENS:
+                    err(f"dispatch: {beat_id}: {field} uses unknown token {{{token}}}")
+
+    # --- missions: every kind is either judged or knowingly deferred -------
+    for mission in t.get("missions.json", {}).get("missions", []):
+        kind = mission["kind"]
+        if kind not in LIVE_MISSION_KINDS and kind not in FORWARD_MISSION_KINDS:
+            err(f"missions: {mission['id']}: kind {kind} is neither judged by "
+                f"SenateRules nor listed in FORWARD_MISSION_KINDS as content "
+                f"authored ahead of the system that will resolve it")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
@@ -695,6 +744,8 @@ def cross_checks(t: dict[str, dict]) -> None:
 
 
 def main() -> int:
+    global LIVE_MISSION_KINDS
+    LIVE_MISSION_KINDS = _live_mission_kinds()
     tables = load_tables()
     if not errors:
         cross_checks(tables)
@@ -708,6 +759,25 @@ def main() -> int:
     return 1 if errors else 0
 
 
+def _journal_kinds() -> set[str] | None:
+    """The beat kinds the engine can emit, read straight out of TurnJournal so
+    the prose table can never drift from the code that fills it."""
+    source = ROOT / "src" / "core" / "turn_journal.gd"
+    if not source.exists():
+        return None
+    match = re.search(r"const KINDS[^=]*=\s*\[(.*?)\]", source.read_text(), re.S)
+    if not match:
+        return None
+    return set(re.findall(r'"([a-z_]+)"', match.group(1)))
+
+
+def _live_mission_kinds() -> set[str]:
+    """LIVE_KINDS from SenateRules — the kinds it actually judges."""
+    source = ROOT / "src" / "core" / "rules" / "senate.gd"
+    match = re.search(r"const LIVE_KINDS[^=]*=\s*\[(.*?)\]", source.read_text(), re.S)
+    return set(re.findall(r'"([a-z_]+)"', match.group(1))) if match else set()
+
+
 def _entity_count(document: dict) -> int:
     # The glossary is four parallel sections; every other table has one list.
     if "unit_classes" in document:
@@ -718,7 +788,7 @@ def _entity_count(document: dict) -> int:
                 "cells", "advances", "axes", "edicts"):
         if key in document:
             return len(document[key])
-    return 0
+    return len(document.get("beats", []))
 
 
 if __name__ == "__main__":

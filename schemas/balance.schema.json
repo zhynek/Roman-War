@@ -22,7 +22,8 @@
     "senate",
     "ai",
     "characters",
-    "society"
+    "society",
+    "dispatch"
   ],
   "additionalProperties": false,
   "properties": {
@@ -127,6 +128,9 @@
       "$ref": "#/$defs/numeric_section"
     },
     "society": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "dispatch": {
       "$ref": "#/$defs/numeric_section"
     }
   },

@@ -4,6 +4,12 @@ extends Control
 ## map in the middle, the region context panel and turn log on the right.
 ## All rules go through the Game facade — this screen never touches state
 ## except to read it for display.
+##
+## Ending a turn is a DAY: the engine resolves the whole turn in one call, then
+## TurnSequence replays the journal over the map from dawn to dusk and the
+## Daily Dispatch closes it. Playback is presentation only — set
+## playback_enabled = false and the same turn resolves synchronously, which is
+## what the headless suite does when it drives twenty-five turns in a loop.
 
 const SAVE_PATH := "user://roman_war_save.json"
 
@@ -14,6 +20,8 @@ var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
+var turn_sequence: TurnSequence
+var dispatch_panel: DispatchPanel
 var top_labels := {}
 var selected_army := ""
 var selected_fleet := ""
@@ -21,7 +29,12 @@ var info_card: InfoCard
 var map_menu: MapContextMenu
 var battle_screen: BattleScreen
 var _card_catcher: Control
+var playback_enabled := true
 var _victory_shown := false
+var _day_beats: Array = []
+var _treasury_shown := 0.0
+var _treasury_delta := 0
+var _treasury_ticking := false
 
 
 static func create(new_game: Game) -> CampaignScreen:
@@ -31,17 +44,22 @@ static func create(new_game: Game) -> CampaignScreen:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# set_anchors_AND_OFFSETS_preset, not set_anchors_preset: the latter KEEPS
+	# the control's current rect, and a freshly built Control is 0x0. The screen
+	# then rendered at its minimum size in the top-left corner of the window and
+	# grew only by the DELTA of a resize, leaving Godot's grey clear colour over
+	# the rest. Pinned by test_campaign_screen_fills_its_window.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = UiStyle.build_theme()
 
 	var background := ColorRect.new()
 	background.color = UiStyle.BG_DARK
-	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
 	root.add_child(_build_top_bar())
@@ -94,6 +112,17 @@ func _ready() -> void:
 	diplomacy_panel.stance_changed.connect(refresh)
 	add_child(diplomacy_panel)
 
+	turn_sequence = TurnSequence.new()
+	turn_sequence.finished.connect(_on_day_played)
+	add_child(turn_sequence)
+
+	dispatch_panel = DispatchPanel.new()
+	dispatch_panel.dismissed.connect(_on_dispatch_dismissed)
+	add_child(dispatch_panel)
+
+	_treasury_shown = float(game.state["factions"][game.state["player_faction"]]["treasury"])
+	set_process(true)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -115,7 +144,7 @@ func _build_top_bar() -> PanelContainer:
 	swatch.custom_minimum_size = Vector2(6, 0)
 	bar.add_child(swatch)
 
-	for key in ["faction", "treasury", "date", "society", "senate", "victory"]:
+	for key in ["faction", "treasury", "date", "society", "senate", "victory", "mission"]:
 		var label := Label.new()
 		label.add_theme_font_size_override("font_size", 13)
 		if key == "faction":
@@ -127,6 +156,7 @@ func _build_top_bar() -> PanelContainer:
 	top_labels["faction"].text = " %s   " % faction["name"]
 
 	bar.add_child(_spacer())
+	bar.add_child(_bar_button("Dispatch", _show_dispatch))
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
@@ -137,9 +167,42 @@ func _build_top_bar() -> PanelContainer:
 	return chrome
 
 
+func _process(delta: float) -> void:
+	## The coffers count up (or down) to the day's new figure, so the player
+	## watches the money move instead of reading a number that has changed.
+	if not _treasury_ticking:
+		return
+	var target := float(game.state["factions"][game.state["player_faction"]]["treasury"])
+	if is_equal_approx(_treasury_shown, target):
+		_treasury_ticking = false
+		return
+	var seconds := float(game.data.balance["dispatch"]["treasury_ticker_seconds"])
+	_treasury_shown = lerpf(_treasury_shown, target, clampf(delta / maxf(seconds, 0.01), 0.0, 1.0))
+	if absf(target - _treasury_shown) < 1.0:
+		_treasury_shown = target
+		_treasury_ticking = false
+	_draw_treasury()
+
+
+func _draw_treasury() -> void:
+	var text := "Treasury: %d" % int(round(_treasury_shown))
+	if _treasury_delta != 0:
+		var color := "#8ccb80" if _treasury_delta > 0 else "#e06050"
+		text += "  (%s%d)" % ["+" if _treasury_delta > 0 else "", _treasury_delta]
+		top_labels["treasury"].add_theme_color_override("font_color", Color.html(color))
+	else:
+		top_labels["treasury"].remove_theme_color_override("font_color")
+	top_labels["treasury"].text = text + "   "
+
+
 func refresh() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
-	top_labels["treasury"].text = "Treasury: %d   " % int(faction["treasury"])
+	# Only the day's own swing is animated. Spending money on a building should
+	# show immediately, and a loaded game should never tick up from a stale
+	# figure belonging to a campaign the player has left behind.
+	if not _treasury_ticking:
+		_treasury_shown = float(faction["treasury"])
+	_draw_treasury()
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
 	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
@@ -156,8 +219,15 @@ func refresh() -> void:
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
 	var progress := game.victory_progress()
 	if not progress.is_empty():
-		top_labels["victory"].text = "Regions %d/%d" \
+		top_labels["victory"].text = "Regions %d/%d   " \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
+	var mission = faction["mission"]
+	if mission == null:
+		top_labels["mission"].text = ""
+	else:
+		top_labels["mission"].text = "Charge: %s (%d)   " % [
+			game.data.missions.get(String(mission["template"]), {}).get("name", mission["template"]),
+			int(mission["turns_left"])]
 
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
@@ -165,7 +235,10 @@ func refresh() -> void:
 	_refresh_range_overlay()
 	_refresh_fleet_overlay()
 
-	if game.state["winner"] != null and not _victory_shown:
+	# The banner waits for the day to finish: an age that ends mid-sequence
+	# should still get its dawn-to-dusk telling before the campaign is called.
+	if game.state["winner"] != null and not _victory_shown \
+			and not turn_sequence.is_playing() and not dispatch_panel.visible:
 		_show_victory_banner(String(game.state["winner"]))
 
 
@@ -462,105 +535,56 @@ func _after_order() -> void:
 
 
 func _end_turn() -> void:
-	var report := game.end_turn()
-	_log_report(report)
+	## The engine resolves the entire turn here and now — everything after this
+	## line is replay. Guarding on the sequence keeps a double-click from
+	## running two days at once.
+	if turn_sequence.is_playing() or dispatch_panel.visible:
+		return
+	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
+	var treasury_before := int(faction["treasury"])
+
+	game.end_turn()
+
+	_day_beats = game.day_beats()
+	_treasury_delta = int(faction["treasury"]) - treasury_before
+	_treasury_shown = float(treasury_before)
+	_treasury_ticking = _treasury_delta != 0
 	selected_army = ""
+	_log_day()
 	refresh()
 
-
-func _log_report(report: Dictionary) -> void:
-	var year := int(game.state["year"])
-	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
-	_log("[b]— %s, %s —[/b]" % [year_text, String(game.state["season"]).capitalize()])
-
-	var player: String = game.state["player_faction"]
-	for region_id in report["completed_buildings"]:
-		if game.state["settlements"].has(region_id) and game.state["settlements"][region_id]["owner"] == player:
-			for level_id in report["completed_buildings"][region_id]:
-				_log("Completed in %s: %s" % [game.data.regions[region_id]["settlement_name"],
-					game.data.building_levels.get(level_id, {}).get("level", {}).get("name", level_id)])
-	for region_id in report["completed_units"]:
-		if game.state["settlements"].has(region_id) and game.state["settlements"][region_id]["owner"] == player:
-			for template_id in report["completed_units"][region_id]:
-				_log("Mustered in %s: %s" % [game.data.regions[region_id]["settlement_name"],
-					game.data.units.get(template_id, {}).get("name", template_id)])
-	for region_id in report["rioted"]:
-		if game.state["settlements"][region_id]["owner"] == player:
-			_log("[color=#e0a060]Riots in %s![/color]" % game.data.regions[region_id]["settlement_name"])
-	for region_id in report["revolted"]:
-		_log("[color=#e06050]%s has risen in revolt![/color]" % game.data.regions[region_id]["settlement_name"])
-	for notice in report.get("society", []):
-		if notice.get("owner", "") != player:
-			continue
-		var place: String = game.data.regions[notice["region"]]["settlement_name"]
-		var to_state := String(notice["to"])
-		var named := LegibilityRules.unrest_name(game.data, to_state)
-		if to_state == SocietyRules.UNREST_CALM:
-			_log("[color=#80c080]%s has settled again.[/color]" % place)
-		elif to_state == SocietyRules.UNREST_RESTIVE:
-			_log("[color=#e0a060]%s has turned %s.[/color]" % [place, named.to_lower()])
-		else:
-			_log("[color=#e06050]%s is %s — it is no longer governed, only held.[/color]"
-				% [place, named.to_lower()])
-	for notice in report.get("advances", []):
-		if notice.get("faction", "") != player:
-			continue
-		var advance: Dictionary = game.data.advances.get(notice["advance"], {})
-		if notice["kind"] == "advance_gained":
-			_log("[color=#80b0d0][b]%s[/b][/color] %s"
-				% [advance.get("name", notice["advance"]), advance.get("description", "")])
-		else:
-			_log("[color=#c08060]%s has been lost — no one now living was taught it.[/color]"
-				% advance.get("name", notice["advance"]))
-	for event in report["events"]:
-		if event["kind"] == "event":
-			var event_def := {}
-			for candidate in game.data.events:
-				if candidate["id"] == event["id"]:
-					event_def = candidate
-			_log("[color=#c0b060][b]%s[/b][/color] %s" % [event_def.get("name", event["id"]), event_def.get("text", "")])
-			# Name the mechanism. This is the moment the game gets to teach.
-			var pattern: Dictionary = game.society_pattern(String(event.get("pattern", "")))
-			if not pattern.is_empty():
-				_log("[color=#9090a0][i]%s — %s[/i][/color]"
-					% [pattern["name"], pattern["historical_note"]])
-		else:
-			var struck: String = event.get("region", "")
-			_log("[color=#e06050]Disaster strikes %s![/color]"
-				% game.data.regions.get(struck, {}).get("settlement_name", struck))
-	for notice in report["senate"]:
-		if notice["faction"] == player:
-			var mission_id: String = str(notice.get("mission", ""))
-			var mission_name: String = game.data.missions.get(mission_id, {}).get("name", mission_id)
-			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
-				"" if mission_name == "" else " — " + mission_name])
-	for notice in report["characters"]:
-		if notice.get("faction", "") != player and not _is_player_character(notice.get("character", "")):
-			continue
-		var who: String = game.state["characters"].get(notice.get("character", ""), {}).get("name", "")
-		var detail := ""
-		if notice.has("name"):
-			detail = " — " + String(notice["name"])
-		elif notice.has("ancillary"):
-			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
-		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
-	for siege_event in report["sieges"]:
-		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
-	for march in report.get("marches", []):
-		if march["owner"] != player:
-			continue
-		var march_target: String = game.data.regions.get(march["destination"], {}).get(
-			"settlement_name", march["destination"])
-		if march["arrived"]:
-			_log("The army arrives at %s." % march_target)
-		elif march["halted"]:
-			_log("[color=#e0a060]The march on %s is halted — the way is barred.[/color]" % march_target)
-		else:
-			_log("The army marches on toward %s." % march_target)
+	if not playback_enabled or _day_beats.is_empty():
+		_on_day_played()
+		return
+	turn_sequence.play(game, DispatchRules.sequence_beats(game.data, _day_beats), map_view)
 
 
-func _is_player_character(char_id: String) -> bool:
-	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]
+func _on_day_played() -> void:
+	if playback_enabled:
+		_show_dispatch()
+	map_view.center_on_selected()
+
+
+func _on_dispatch_dismissed() -> void:
+	refresh()  # picks up the victory banner if the age closed today
+
+
+func _show_dispatch() -> void:
+	## Also reachable from the top bar: the journal lives in the game state, so
+	## the day just closed can be re-read until the next one begins.
+	dispatch_panel.open_for(game, _day_beats)
+
+
+func _log_day() -> void:
+	## The side log, the day's sequence and the Dispatch all read the same
+	## filtered journal, so there is one account of the day rather than three
+	## hand-written ones that can disagree.
+	_log("[b]— %s —[/b]" % DispatchFormat.date_line(game.state))
+	if _day_beats.is_empty():
+		_log("[color=#707070]Nothing worth the ink.[/color]")
+		return
+	for beat in _day_beats:
+		_log(DispatchFormat.bbcode_line(game.data, game.state, beat))
 
 
 ## --- battle playback (R4) ---------------------------------------------------
@@ -695,6 +719,12 @@ func _load_game() -> void:
 		map_view.path_preview = {}
 		region_panel.clear_panel()
 		_victory_shown = false
+		# The loaded campaign brings its own day with it: the journal travels in
+		# the save, so the Dispatch reopens on the turn that was actually last
+		# resolved rather than on whatever this session happened to play.
+		_day_beats = game.day_beats()
+		_treasury_ticking = false
+		_treasury_delta = 0
 		_log("Game loaded.")
 		refresh()
 	else:
