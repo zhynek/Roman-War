@@ -71,7 +71,7 @@ the world in a **fixed order** so campaigns are reproducible:
 | 1 | AI turns | Every non-player faction acts (currently `AiStub`: passive settlement management) |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
 | 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
-| 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
+| 4 | Edicts & treasuries | Standing orders tick (a new one starts taking hold and is billed the same turn), then per faction: income − upkeep − edict upkeep; deep debt forces unit disbandment |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Society | The eight stocks integrate (§4); surveys are taken where due; advances are gained or forgotten. Faction stocks resolve before provincial ones, because militarisation and ambition are inputs to every province's load |
 | 7 | Public order | Riots damage settlements; sustained collapse — or a province in open revolt — triggers secession to the rebels |
@@ -378,6 +378,50 @@ underneath it: elite overproduction, the placation trap, rule by fear, the Malth
 ceiling, asabiyya at the frontier, the slow dividend of public works, forgotten craft,
 conquest indigestion, and ruling in the dark.
 
+### 4.10 Edicts — the fast lever
+
+Every stock above moves on a 17-to-90 turn constant, which is the point, and it leaves the
+player with nothing to do in the year they notice a problem: building is slow, demolishing
+is slower, and retaxing nudges one term. Edicts are the answer — one standing order per
+province, chosen from `data/edicts.json`, each trading one thing for another.
+
+An edict is deliberately shaped like **a building you can raise and pull down in a few
+turns**. Its effects use the same closed vocabulary the building chains use, and
+`SettlementRules.effect_total` folds them in, so an edict reaches public order, growth,
+income, corruption, the load, the legitimacy target, provision, belonging, martial spirit
+and craft without any of those readers knowing edicts exist. Only five keys need their own
+reader, because they are not additive settlement effects: `grievance_relief`,
+`elite_pressure`, `income_pct`, `clarity_bonus` and `build_cost_pct`.
+
+**Taking hold is gradual; letting go is instant.** Effects scale by
+`turns_held / settle_turns`, so an order bites over two to six turns. Revoking stops it the
+same turn, while whatever it moved decays at the stock's own pace, and `cooldown_turns`
+stops the player flip-flopping to farm the ramp. That asymmetry is what makes the Corn Dole
+a promise rather than a purchase: the provision vanishes at once and the `expectation` it
+created does not, so the shortfall lands in the load as `broken_promises` (§4.3).
+
+| Edict | Buys | Costs |
+|---|---|---|
+| The Corn Dole | `happiness`, `civic` | denarii per 1,000 people — and it becomes expected |
+| Public Works | `civic`, `growth` | denarii per 1,000 people, `burden` |
+| A Grant of Citizenship | `assimilation_pull`, `civic` | `elite_pressure`, `income_pct` down |
+| The Census | `clarity_bonus`, `law` | `burden`: being counted is being taxed properly |
+| The Amnesty | `grievance_relief` | `elite_pressure`, `law` down |
+| Martial Law | `coercion`, `law` | `civic` heavily, `burden`, `trade_pct` down |
+| The Labour Levy | `build_cost_pct` down, here only | `burden` heavily, `civic` down |
+| The Tax Farmers | `income_pct` up sharply | `civic` down, `law` down, `burden` |
+| The Legion Levy | `martial` | `burden`, `growth` down, `civic` down |
+
+Two of them carry the layer's lessons directly. **Martial Law** is the coercion trap in one
+click and is meant to be tempting: it raises order immediately and visibly while the
+legitimacy target collapses, and the settlement panel shows both in the same breath.
+**The Amnesty** is the way out of a crisis — the one direct hand the player has on a stock —
+and it is a decision rather than an undo: it empties the ledger of grievances in about
+fourteen turns and leaves you with the men you pardoned.
+
+The validator enforces the premise: an edict that costs nothing, in denarii or in a
+societal stock, fails the build.
+
 ## 5. Economy
 
 ### 5.1 Income streams
@@ -677,6 +721,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
 | advances.json | what a society works out, and can forget | Active — `AdvanceRules`, unlocked and lost from the Craft stock |
 | society.json | axis names, unrest states, historical patterns, clarity levels | Active — the pedagogy surface: `pattern` on a crisis event resolves here |
+| edicts.json | one standing provincial order — the player's fast lever | Active — `EdictRules`, folded into `SettlementRules.effect_total` |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
@@ -744,7 +789,7 @@ Phases follow the research report (§17). Status as of this document:
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
-| 9 — Society & consequence | Eight societal stocks, the coercion asymmetry, the euergetism ratchet, elite overproduction, plunder's share, belonging as diffusion, craft and advances, legibility, authored crises naming their historical pattern, and a real trade-off on all 81 building chains | **Done.** Remaining: a fast player lever (provincial edicts) so the player is not purely a spectator to stocks that move on 20-to-90-turn constants; AI that understands any of it (Phase 6) |
+| 9 — Society & consequence | Eight societal stocks, the coercion asymmetry, the euergetism ratchet, elite overproduction, plunder's share, belonging as diffusion, craft and advances, legibility, authored crises naming their historical pattern, and a real trade-off on all 81 building chains | **Done**, including provincial edicts (§4.10) as the player's fast lever. Remaining: AI that understands any of it (Phase 6), and an empire-wide policy slot alongside the provincial one |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 12. Clean-Room Policy

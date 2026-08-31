@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 19
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -23,10 +23,11 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 foundation depth, the full character/family layer), the Phase 7 senate
 foundation loop, a playable Phase 8 campaign UI, and **Phase 9 — the societal
 layer**, which is now the core of the game: eight slow stocks with memory, a
-real trade-off on all 81 building chains, and crises that name the historical
-mechanism they illustrate. Read `docs/DESIGN.md` §4 before touching any of it.
+real trade-off on all 81 building chains, provincial edicts as the player's fast
+lever, and crises that name the historical mechanism they illustrate. Read
+`docs/DESIGN.md` §4 before touching any of it.
 
-**Green as of commit `1b088d3`:** 108 tests / 0 failures, validator 0 errors /
+**Green as of commit `b88a1e3`:** 123 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. Branch `claude/game-decision-tradeoffs-pnixzs`, working
 tree clean, everything pushed. A Mac build of an earlier state was delivered to
 the user, who is playtesting.
@@ -129,16 +130,17 @@ and have **no engine reader** — they exist for this phase.
 > negotiation model (offers, tribute, region deals, bribery) and an AI attitude
 > model, replacing the direct set-a-stance panel.
 
-### Phase 9 depth — a fast lever for the player
+### Phase 9 depth — an empire-wide policy slot
 
-The societal stocks move on 20-to-90-turn constants, which is the point, but it leaves the
-player with no way to *act* on a province in the year they notice the problem. Everything
-they can do (build, demolish, retax) is itself slow.
+Provincial edicts are built (`docs/DESIGN.md` §4.10): one standing order per settlement,
+folded into `SettlementRules.effect_total` so it reaches every existing reader. What is
+still missing is the faction-scoped counterpart — the stocks an edict cannot touch from a
+single province are Ambition, Martial Spirit, Craft and Plunder's Share.
 
-> Add provincial edicts: a small `data/edicts.json` table, one standing order per
-> settlement (a grain dole, a census, martial law, a labour levy, manumission), each
-> trading one societal stock against another on a timescale of a few turns. Keep the
-> engine thin — the edict supplies effect values the existing flows already read.
+> Add a single realm-wide policy alongside the provincial edict: a standing army law, a
+> policy of enfranchisement, a settlement of the veterans. Same shape as `data/edicts.json`
+> but faction-scoped, reaching `SocietyRules.apply_faction_turn` rather than
+> `effect_total`. Keep it to one slot so it stays a decision.
 
 ### Phase 8 — Balance & polish
 Driven by whatever the playtest surfaced. The societal constants in

@@ -26,6 +26,11 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   free good. **`civic` is the only key that may be negative** — an amphitheatre
   buys order now and erodes standing slowly. Every one of these keys must have
   an engine reader; the validator fails the build if one goes dead.
+- Edict `effects` keys: the settlement keys above, which reach every reader
+  through `SettlementRules.effect_total`, plus five that need their own reader —
+  `grievance_relief, elite_pressure, income_pct, clarity_bonus, build_cost_pct`.
+  Every edict must cost something, in denarii or in a societal stock; the
+  validator fails the build on a free one.
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):

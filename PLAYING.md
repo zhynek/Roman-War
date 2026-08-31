@@ -69,6 +69,21 @@ them as generosity and starts expecting them. Take them away and it is angrier
 than if you had never built them at all. Public generosity is a promise, not a
 purchase.
 
+Each province can hold **one standing order** — an edict — and it is the only
+thing you can do that acts in years rather than decades. The **Corn Dole** quiets
+a city at once and sends a bill every turn, and after a decade the city has
+stopped experiencing it as generosity: stop it then and you are taking something
+away. **Martial Law** will improve the order number tonight and ruin everything
+else about the province; you can watch both happen in the same panel, which is
+the point. **The Amnesty** is the only thing that empties a province's ledger of
+grievances quickly, and you will meet some of the men you pardoned again. There
+are also a census, a labour levy, tax farmers, public works, a grant of
+citizenship, and a levy for the legions.
+
+An order takes a few turns to take hold, and stops the moment you revoke it —
+but whatever it moved stays moved. After revoking, that province cannot take
+another order for a while, so switching is a decision too.
+
 A distant province you have built no road to, with no one of yours standing in
 it, will not report exact figures — you will get a rounded survey several turns
 old, or nothing but "the province is said to be restive". Roads, a bigger

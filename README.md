@@ -72,6 +72,10 @@ python3 tools/validate_data.py
   withdrawing a bath house leaves a city worse off than never having built one.
   Nothing in the layer is random — the difficulty is delay, hysteresis, coupled
   feedback, and not being able to see a province you have built no road to.
+- Because those stocks move over decades, each province can hold one **standing
+  edict** — a corn dole, a census, martial law, an amnesty — that acts within a
+  few turns and trades one thing for another. It is the player's fast lever, and
+  it is shaped like a building you can raise and pull down in a season.
 - The whole `GameState` is a plain dictionary: saving is `JSON.stringify`, and
   every random draw goes through one seeded RNG, so campaigns replay
   deterministically.
