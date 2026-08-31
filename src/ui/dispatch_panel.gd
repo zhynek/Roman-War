@@ -19,16 +19,16 @@ var _dismiss_button: Button
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	visible = false
 
 	var backdrop := ColorRect.new()
-	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	backdrop.color = BACKDROP
 	add_child(backdrop)
 
 	var frame := VBoxContainer.new()
-	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	frame.offset_left = 60
 	frame.offset_right = -60
 	frame.offset_top = 34

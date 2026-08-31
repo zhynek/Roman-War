@@ -41,7 +41,10 @@ var _speed_button: Button
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# set_anchors_AND_OFFSETS_preset, not set_anchors_preset: the latter keeps
+	# the control's current rect, which for a freshly built Control is 0x0, so
+	# the overlay would sit in the top-left corner at nothing by nothing.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = false
 	set_process(false)
@@ -52,21 +55,22 @@ func _build() -> void:
 	# A wash of colour over the map is the whole "dawn to dusk" effect: the art
 	# is placeholder circles, so the day is told with light, not with assets.
 	_tint = ColorRect.new()
-	_tint.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_tint.color = DAWN_TINT
 	_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_tint)
 
 	_meter = Control.new()
-	_meter.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_meter.custom_minimum_size = Vector2(0, 10)
+	_meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	_meter.offset_bottom = 10
 	_meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_meter.draw.connect(_draw_meter)
 	add_child(_meter)
 
 	_chapter_label = Label.new()
-	_chapter_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_chapter_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_chapter_label.offset_top = 26
+	_chapter_label.offset_bottom = 56
 	_chapter_label.offset_left = -300
 	_chapter_label.offset_right = 300
 	_chapter_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -77,10 +81,11 @@ func _build() -> void:
 
 	# Controls, top right: the player can always go faster or leave.
 	var controls := HBoxContainer.new()
-	controls.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	controls.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	controls.offset_left = -190
 	controls.offset_top = 14
 	controls.offset_right = -12
+	controls.offset_bottom = 46
 	add_child(controls)
 	_counter_label = Label.new()
 	_counter_label.add_theme_font_size_override("font_size", 12)
@@ -95,7 +100,7 @@ func _build() -> void:
 	controls.add_child(skip)
 
 	_card = PanelContainer.new()
-	_card.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_card.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	_card.offset_left = -330
 	_card.offset_right = 330
 	_card.offset_top = -132

@@ -223,3 +223,37 @@ func test_dispatch_reopens_from_the_top_bar(t) -> void:
 	screen.dispatch_panel._on_dismiss()
 
 	screen.free()
+
+
+func test_campaign_screen_fills_its_window(t) -> void:
+	## Regression: `set_anchors_preset` KEEPS the control's current rect, so a
+	## freshly built (0x0) CampaignScreen stayed 0x0 and rendered at its minimum
+	## size in the top-left corner, growing only by the delta of a window
+	## resize — Godot's grey clear colour over the rest of the window. The
+	## screen, and every full-rect overlay on it, must anchor AND zero offsets.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	t.check_near(screen.anchor_left, 0.0, 0.001, "anchored to the left edge")
+	t.check_near(screen.anchor_top, 0.0, 0.001, "anchored to the top edge")
+	t.check_near(screen.anchor_right, 1.0, 0.001, "anchored to the right edge")
+	t.check_near(screen.anchor_bottom, 1.0, 0.001, "anchored to the bottom edge")
+	for offset in [screen.offset_left, screen.offset_top,
+			screen.offset_right, screen.offset_bottom]:
+		t.check_near(offset, 0.0, 0.001, "offsets are zeroed, not left at -size")
+
+	var window := tree.root.get_visible_rect().size
+	t.check_near(screen.size.x, window.x, 1.0, "the screen is as wide as its window")
+	t.check_near(screen.size.y, window.y, 1.0, "the screen is as tall as its window")
+
+	# The day's overlays are full-rect too: a 0x0 TurnSequence would play the
+	# whole day inside a single corner pixel.
+	for overlay in [screen.turn_sequence, screen.dispatch_panel]:
+		t.check_near(overlay.size.x, window.x, 1.0,
+			"%s spans the window" % overlay.get_class())
+		t.check_near(overlay.size.y, window.y, 1.0,
+			"%s fills the window height" % overlay.get_class())
+
+	screen.free()
