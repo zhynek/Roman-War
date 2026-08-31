@@ -39,7 +39,7 @@ campaign runs to AD 14.
 
 ## Running a city
 
-Click one of your cities. You will see three lists that add up to a number,
+Click one of your cities. You will see several lists that add up to a number,
 which is the whole point of the design — you can always see *why* a city is
 doing well or badly:
 
@@ -50,6 +50,30 @@ doing well or badly:
 - **Growth** — how fast the population rises. Population is what upgrades a
   city to the next tier, and also what recruits cost you.
 - **Income** — taxes, farming, trade, mines, minus corruption.
+- **Society** — the slow part, and the part that decides how your reign is
+  remembered. **Standing** is how far the province obeys you because it accepts
+  you rather than because it must. **Grievance** is what it has been made to
+  bear against its will, added up over years. **Belonging** is how far it counts
+  itself among your people.
+
+Underneath those you will see three numbers that are the heart of the whole
+game: what is **asked of it**, what it **grants willingly**, and what therefore
+has to be **compelled**. Read them together. Public order can sit at 130% while
+most of what you are asking is being compelled — because a garrison holds the
+lid down without lowering the pressure, and the grievance underneath goes on
+climbing. When it finally boils over, no garrison prevents the province going.
+
+That is the central trap, and it has a mirror. Games and baths raise order the
+moment you build them, and within a decade or so the city stops experiencing
+them as generosity and starts expecting them. Take them away and it is angrier
+than if you had never built them at all. Public generosity is a promise, not a
+purchase.
+
+A distant province you have built no road to, with no one of yours standing in
+it, will not report exact figures — you will get a rounded survey several turns
+old, or nothing but "the province is said to be restive". Roads, a bigger
+government building and a resident governor buy you the truth. Not knowing is a
+real cost, and it is one you can spend money to fix.
 
 From the same panel you can set **taxes**, **build**, **recruit**, **retrain**
 a battered garrison, **demolish** a building (the way you work off the unrest a

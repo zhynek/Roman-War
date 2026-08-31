@@ -17,8 +17,20 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   and any loop whose iteration order can steer an RNG draw must sort its keys
   first, so a loaded save replays exactly like the live game. GameState is a
   plain Dictionary so save/load is JSON round-tripping.
-- **Growth and public order are summed factor lists** returning named
-  breakdowns, not opaque numbers — the UI will render the breakdowns.
+- **Growth, public order and every societal flow are summed factor lists**
+  returning named breakdowns, not opaque numbers — the UI renders them directly.
+- **The societal layer is the core of the game** (`docs/DESIGN.md` §4;
+  `src/core/rules/society.gd`). Eight slow stocks are the only part of the engine
+  with memory, and they are what makes a decision weigh something. Two rules
+  govern changes to it: it must consume **no randomness** (its uncertainty is
+  delay, hysteresis, coupled feedback and partial observability — never dice),
+  and any continuous float stored in the state must go through
+  `SocietyRules.quantize()`, because Godot's JSON writer does not round-trip an
+  arbitrary double and a loaded save would drift from the live game.
+- **Every building must buy something and cost something.** The six societal
+  effect keys (`civic, coercion, burden, assimilation_pull, knowledge, martial`)
+  carry the cost; `civic` is the only one that may be negative. A new effect key
+  with no engine reader fails the validator.
 - **Campaign code may only call `BattleResolver.resolve(...)`** — never assume
   auto-resolve specifics.
 

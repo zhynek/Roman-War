@@ -6,7 +6,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 | For | Read |
 |---|---|
 | Architecture rules, conventions, clean-room policy | [`CLAUDE.md`](../CLAUDE.md) (auto-loaded by Claude Code) |
-| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §10 is authoritative |
+| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §11 is authoritative |
 | What the game is like to play | [`PLAYING.md`](../PLAYING.md) |
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
@@ -14,18 +14,22 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
 **Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
 foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+foundation loop, a playable Phase 8 campaign UI, and **Phase 9 — the societal
+layer**, which is now the core of the game: eight slow stocks with memory, a
+real trade-off on all 81 building chains, and crises that name the historical
+mechanism they illustrate. Read `docs/DESIGN.md` §4 before touching any of it.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of commit `1b088d3`:** 108 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. Branch `claude/game-decision-tradeoffs-pnixzs`, working
+tree clean, everything pushed. A Mac build of an earlier state was delivered to
+the user, who is playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -89,6 +93,15 @@ slice before shipping**, or the app will not launch.
 2. **`state.rng_state` is a decimal *string*, not an int.** JSON numbers are
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
+3. **Quantize any continuous float you put in the state.** Godot's `JSON.stringify` does
+   not round-trip an arbitrary double, so a loaded save drifts from the live game in the
+   last digits and then diverges. `SocietyRules.quantize()` rounds onto a four-decimal grid
+   — verified against 200k random values. `snappedf()` is **not** equivalent: it can land
+   on a double adjacent to the grid point, which prints and re-parses as a different
+   number. Symptom: `test_save_round_trip` fails after ~40 turns but passes after 4.
+4. **Nothing in `SocietyRules` or `LegibilityRules` may draw from the RNG.** The UI calls
+   those queries arbitrarily often; one draw would make a save replay differently. There is
+   a test that asserts `state.rng_state` is untouched by every query.
 
 ## 5. Three ways forward
 
@@ -116,8 +129,20 @@ and have **no engine reader** — they exist for this phase.
 > negotiation model (offers, tribute, region deals, bribery) and an AI attitude
 > model, replacing the direct set-a-stance panel.
 
+### Phase 9 depth — a fast lever for the player
+
+The societal stocks move on 20-to-90-turn constants, which is the point, but it leaves the
+player with no way to *act* on a province in the year they notice the problem. Everything
+they can do (build, demolish, retax) is itself slow.
+
+> Add provincial edicts: a small `data/edicts.json` table, one standing order per
+> settlement (a grain dole, a census, martial law, a labour levy, manumission), each
+> trading one societal stock against another on a timescale of a few turns. Keep the
+> engine thin — the edict supplies effect values the existing flows already read.
+
 ### Phase 8 — Balance & polish
-Driven by whatever the playtest surfaced.
+Driven by whatever the playtest surfaced. The societal constants in
+`data/balance.json → society` are the newest and least playtested numbers in the file.
 
 > Here is what felt wrong when I played: <notes>. Tune the balance constants and
 > UI accordingly.
