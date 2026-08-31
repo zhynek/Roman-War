@@ -103,6 +103,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 
 	_breakdown("Public order: %d%%" % int(PublicOrderRules.total(game.data, game.state, region_id)),
 		game.order_breakdown(region_id))
+	_society_section()
 	_breakdown("Growth: %+.1f%%" % GrowthRules.total_pct(game.data, game.state, region_id),
 		game.growth_breakdown(region_id))
 	_breakdown("Income: %d" % int(EconomyRules.settlement_income(game.data, game.state, region_id)),
@@ -246,6 +247,29 @@ func _label(text: String, color: Color = Color(0.85, 0.85, 0.85)) -> void:
 	label.add_theme_color_override("font_color", color)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(label)
+
+
+func _society_section() -> void:
+	## The three provincial stocks — and, just as importantly, how well you can
+	## actually see them. A province with roads, records and a resident governor
+	## reports exact figures; a distant one reports a rounded survey some turns
+	## old; one you barely govern reports only what is said about it.
+	var report: Dictionary = game.society_report(region_id)
+	var level := String(report["level"])
+	var unrest := LegibilityRules.unrest_name(game.data, String(report["unrest_state"]))
+	var title := "Society — %s" % unrest
+	if level != LegibilityRules.LEVEL_EXACT:
+		var stale := int(report["stale_turns"])
+		title += "  (%s" % LegibilityRules.clarity_name(game.data, level)
+		title += ", %d turns old)" % stale if stale > 0 else ")"
+
+	var factors: Array = game.society_breakdown(region_id)
+	if factors.is_empty():
+		_label(title, Color(0.95, 0.9, 0.75))
+		_label("    no road, no records, no one of yours standing there —", Color(0.7, 0.7, 0.7))
+		_label("    you have opinions about this province, not information.", Color(0.7, 0.7, 0.7))
+		return
+	_breakdown(title, factors)
 
 
 func _breakdown(title: String, factors: Array) -> void:

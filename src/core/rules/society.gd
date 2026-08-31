@@ -368,8 +368,13 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	if owned > 0:
 		martial_target += martial_buildings / float(owned) * float(rules["martial_building_scale"])
 	martial_target = clampf(martial_target, 0.0, float(rules["martial_max"]))
+	# Asymmetric on purpose: a people can be turned to war in a few seasons and
+	# takes a generation to be turned back. What you become is easier to reach
+	# than to leave.
 	var martial := float(stocks["martial_ethos"])
-	martial += (martial_target - martial) * float(rules["martial_relax_rate"])
+	var martial_rate := float(rules["martial_rise_rate"]) if martial_target > martial \
+		else float(rules["martial_fall_rate"])
+	martial += (martial_target - martial) * martial_rate
 	martial = clampf(martial, 0.0, float(rules["martial_max"]))
 
 	# Knowledge accrues from institutions and decays proportionally, so craft

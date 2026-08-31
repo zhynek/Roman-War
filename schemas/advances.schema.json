@@ -18,10 +18,7 @@
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
           "name": { "type": "string" },
           "knowledge_threshold": { "type": "number", "minimum": 0, "maximum": 100 },
-          "culture": {
-            "type": "string",
-            "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"]
-          },
+          "culture": { "type": "string", "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
           "description": { "type": "string" },
           "effects": {
             "type": "object",

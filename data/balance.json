@@ -248,7 +248,7 @@
     "max_family_size": 12
   },
   "society": {
-    "legitimacy_start": 55.0,
+    "legitimacy_start": 42.0,
     "legitimacy_relax_rate": 0.06,
     "legitimacy_base_target": 25.0,
     "legitimacy_civic_scale": 1.0,
@@ -318,9 +318,10 @@
     "elite_crisis_threshold": 70.0,
     "elite_civil_war_threshold": 78.0,
     "martial_start": 22.0,
-    "martial_relax_rate": 0.04,
+    "martial_rise_rate": 0.1,
+    "martial_fall_rate": 0.025,
     "martial_under_arms_scale": 350.0,
-    "martial_building_scale": 1.6,
+    "martial_building_scale": 4.0,
     "martial_extermination_shock": 8.0,
     "martial_max": 100.0,
     "knowledge_start": 10.0,

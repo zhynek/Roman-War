@@ -122,3 +122,33 @@ static func reported(data: GameData, state: Dictionary, region_id: String) -> Di
 		for key in ["legitimacy", "grievance", "assimilation"]:
 			result[key] = null
 	return result
+
+
+static func reported_breakdown(data: GameData, state: Dictionary, region_id: String) -> Array:
+	## The societal stocks in the {label, value} shape the settlement panel
+	## renders. Where clarity is too low for figures at all, the list is empty and
+	## the caller shows the qualitative line from society_report instead.
+	var report := reported(data, state, region_id)
+	if report.get("legitimacy") == null:
+		return []
+	# Standing and Belonging are states and always shown; Grievance is omitted
+	# when there is none, matching how growth and order drop their zero factors.
+	var factors: Array = [{"label": "standing", "value": float(report["legitimacy"])}]
+	if float(report["grievance"]) > 0.0:
+		factors.append({"label": "grievance", "value": -float(report["grievance"])})
+	factors.append({"label": "belonging", "value": float(report["assimilation"])})
+	return factors
+
+
+static func unrest_name(data: GameData, unrest_state: String) -> String:
+	for entry in data.society.get("unrest_states", []):
+		if entry["id"] == unrest_state:
+			return entry["name"]
+	return unrest_state
+
+
+static func clarity_name(data: GameData, level: String) -> String:
+	for entry in data.society.get("clarity_levels", []):
+		if entry["id"] == level:
+			return entry["name"]
+	return level

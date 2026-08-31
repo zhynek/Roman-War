@@ -142,6 +142,111 @@
       },
       "once": true,
       "text": "Word runs through every forum: a great house has raised its standards against the Senate itself. Brother watches brother, and the markets are afraid."
+    },
+    {
+      "id": "too_many_claimants",
+      "name": "Too Many Claimants",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "elite_pressure",
+        "min": 70
+      },
+      "effects": {
+        "treasury": -4000,
+        "civic_shock": -3
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "elite_overproduction",
+      "text": "There are more great houses expecting a command than there are commands. Offices are bought outright now, clients are armed rather than merely fed, and the men who did not get what they were promised have begun to make their case in other ways. The treasury is lighter by what it took to keep the peace one more season."
+    },
+    {
+      "id": "bread_without_standing",
+      "name": "Bread Without Standing",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "legitimacy",
+        "max": 22,
+        "min_regions": 2
+      },
+      "effects": {
+        "grievance_all_settlements": 4
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "placation_trap",
+      "text": "The games are full and the streets are quiet, and yet nothing is given to your officials that is not paid for first. A crowd that is entertained is not a crowd that is persuaded, and the difference has begun to show in every transaction that requires goodwill rather than coin."
+    },
+    {
+      "id": "the_garrisons_shadow",
+      "name": "The Garrison's Shadow",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "grievance",
+        "min": 45,
+        "min_regions": 2
+      },
+      "effects": {
+        "civic_shock": -4
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "coercion_spiral",
+      "text": "Reports from the provinces are uniformly calm, which is itself the thing to worry about. Order here rests on the soldiers standing in the square; underneath them the accounting of grievances has not stopped, and it is being kept carefully."
+    },
+    {
+      "id": "the_slow_dividend",
+      "name": "The Slow Dividend",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "legitimacy",
+        "min": 70,
+        "min_regions": 3
+      },
+      "effects": {
+        "treasury": 6000,
+        "happiness_all_settlements": 4,
+        "happiness_turns": 6
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "civic_dividend",
+      "text": "Work begun a generation ago is paying now. Taxes are brought in without an escort, disputes reach your courts instead of the knife, and men who could have gone elsewhere are staying. None of the people who built this lived to govern it."
+    },
+    {
+      "id": "a_people_who_forget",
+      "name": "A People Who Forget",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "knowledge",
+        "max": 3,
+        "min_regions": 3
+      },
+      "effects": {
+        "civic_shock": -2
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "knowledge_loss",
+      "text": "The aqueduct needs a repair no one now living knows how to make. The men who could have taught it were not replaced, because replacing them was never urgent in any particular year. Nothing was destroyed; it simply stopped being passed on."
+    },
+    {
+      "id": "swallowed_whole",
+      "name": "Swallowed Whole",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "martial_ethos",
+        "min": 80,
+        "min_regions": 4
+      },
+      "effects": {
+        "elite_pressure": 6,
+        "grievance_all_settlements": 3
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "conquest_indigestion",
+      "text": "You have taken more than you can govern. The plunder arrived at once and the administration has not arrived at all; the provinces are held by whichever general is nearest, and the men who took them have begun to regard them as theirs."
     }
   ],
   "disasters": [

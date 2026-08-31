@@ -192,6 +192,59 @@ func income_breakdown(region_id: String) -> Array:
 	return EconomyRules.settlement_income_breakdown(data, state, region_id)
 
 
+func society_breakdown(region_id: String) -> Array:
+	## The three provincial stocks, as the player is entitled to see them: exact
+	## where the province is well administered, a stale rounded survey where it is
+	## not, and nothing but the word "restive" where it is barely governed at all.
+	return LegibilityRules.reported_breakdown(data, state, region_id)
+
+
+func society_report(region_id: String) -> Dictionary:
+	## The full reading behind society_breakdown, including how stale it is.
+	return LegibilityRules.reported(data, state, region_id)
+
+
+func load_breakdown(region_id: String) -> Array:
+	## What the province is being asked to bear. Whatever this exceeds its
+	## Standing by has to be coerced, and the coerced share charges Grievance.
+	return SocietyRules.load_breakdown(data, state, region_id)
+
+
+func legitimacy_target_breakdown(region_id: String) -> Array:
+	## Where Standing is heading, which is not where it is — a province takes a
+	## generation to become what you have built it to be.
+	return SocietyRules.legitimacy_target_breakdown(data, state, region_id)
+
+
+func clarity(region_id: String) -> float:
+	return LegibilityRules.clarity(data, state, region_id)
+
+
+func faction_society(faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return SocietyRules.faction_breakdown(data, state, fid)
+
+
+func advances(faction_id: String = "") -> Array:
+	## Advances currently held. Craft that stops being taught is lost again, so
+	## this can shrink.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var held: Array = []
+	for advance_id in AdvanceRules.held(state, fid):
+		var advance: Dictionary = data.advances.get(advance_id, {})
+		held.append({"id": advance_id, "name": advance.get("name", advance_id),
+			"description": advance.get("description", "")})
+	return held
+
+
+func society_pattern(pattern_id: String) -> Dictionary:
+	## The historical mechanism a crisis illustrates, for the turn log and codex.
+	for pattern in data.society.get("patterns", []):
+		if pattern["id"] == pattern_id:
+			return pattern
+	return {}
+
+
 func available_buildings(region_id: String) -> Array:
 	return ConstructionRules.available_projects(data, state, region_id)
 

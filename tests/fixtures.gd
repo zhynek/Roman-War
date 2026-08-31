@@ -8,6 +8,14 @@ static func data() -> GameData:
 	var game_data := GameData.new()
 	var balance_text := FileAccess.get_file_as_string("res://data/balance.json")
 	game_data.balance = JSON.parse_string(balance_text)
+	# Balance, advances and society all come from the real tables — they are the
+	# single source of truth the tests guard, not fixtures to invent.
+	var advance_doc: Dictionary = JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/advances.json"))
+	for advance in advance_doc.get("advances", []):
+		game_data.advances[advance["id"]] = advance
+	game_data.society = JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/society.json"))
 
 	game_data.cultures = {
 		"roman": {"id": "roman", "name": "Roman", "max_settlement_level": "huge_city"},
@@ -24,8 +32,8 @@ static func data() -> GameData:
 		{
 			"id": "test_government", "kind": "government", "cultures": ["roman"], "name": "Government",
 			"levels": [
-				{"id": "gov_1", "name": "Meeting Hall", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"law": 5}, "description": ""},
-				{"id": "gov_2", "name": "Town Hall", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"law": 10}, "description": ""},
+				{"id": "gov_1", "name": "Meeting Hall", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"law": 5, "civic": 1, "burden": 0.5}, "description": ""},
+				{"id": "gov_2", "name": "Town Hall", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"law": 10, "civic": 2, "burden": 1}, "description": ""},
 				{"id": "gov_3", "name": "City Hall", "min_settlement_level": "large_town", "cost": 1600, "build_turns": 3, "effects": {"law": 15}, "description": ""},
 				{"id": "gov_4", "name": "Great Hall", "min_settlement_level": "minor_city", "cost": 3200, "build_turns": 4, "effects": {"law": 20}, "description": ""},
 			],
@@ -49,21 +57,39 @@ static func data() -> GameData:
 		{
 			"id": "test_health", "kind": "health", "cultures": ["roman"], "name": "Drains",
 			"levels": [
-				{"id": "drain_1", "name": "Drains", "min_settlement_level": "town", "cost": 400, "build_turns": 1, "effects": {"health": 10}, "description": ""},
+				{"id": "drain_1", "name": "Drains", "min_settlement_level": "town", "cost": 400, "build_turns": 1, "effects": {"health": 10, "civic": 8, "burden": 2}, "description": ""},
 			],
 		},
 		{
 			"id": "test_walls", "kind": "walls", "cultures": ["roman", "barbarian"], "name": "Walls",
 			"levels": [
-				{"id": "wall_1", "name": "Palisade", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"wall_level": 1}, "description": ""},
-				{"id": "wall_2", "name": "Stone Wall", "min_settlement_level": "large_town", "cost": 900, "build_turns": 2, "effects": {"wall_level": 2}, "description": ""},
+				{"id": "wall_1", "name": "Palisade", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"wall_level": 1, "coercion": 2, "burden": 1, "martial": 1}, "description": ""},
+				{"id": "wall_2", "name": "Stone Wall", "min_settlement_level": "large_town", "cost": 900, "build_turns": 2, "effects": {"wall_level": 2, "coercion": 4, "burden": 2, "martial": 2}, "description": ""},
+			],
+		},
+		{
+			"id": "test_school", "kind": "education", "cultures": ["roman"], "name": "School",
+			"levels": [
+				{"id": "school_1", "name": "School", "min_settlement_level": "town", "cost": 500, "build_turns": 2, "effects": {"knowledge": 6, "civic": 3, "burden": 1}, "description": ""},
+			],
+		},
+		{
+			"id": "test_temple", "kind": "temple", "cultures": ["roman"], "god": "Jupiter", "archetype": "law", "name": "Temple",
+			"levels": [
+				{"id": "temple_1", "name": "Shrine", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"law": 4, "civic": 3, "assimilation_pull": 4, "burden": 0.5}, "description": ""},
+			],
+		},
+		{
+			"id": "test_foreign_temple", "kind": "temple", "cultures": ["barbarian"], "god": "Taranis", "archetype": "battle", "name": "Grove",
+			"levels": [
+				{"id": "grove_1", "name": "Grove", "min_settlement_level": "village", "cost": 250, "build_turns": 1, "effects": {"happiness": 4, "martial": 2, "assimilation_pull": 4, "burden": 0.5}, "description": ""},
 			],
 		},
 		{
 			"id": "test_barracks", "kind": "barracks", "cultures": ["roman"], "name": "Barracks",
 			"levels": [
-				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {}, "description": ""},
-				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {}, "description": ""},
+				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"martial": 2, "civic": -1, "burden": 0.5}, "description": ""},
+				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"martial": 4, "civic": -2, "burden": 1}, "description": ""},
 			],
 		},
 	]
@@ -95,7 +121,8 @@ static func data() -> GameData:
 		},
 	}
 
-	# A five-region line: alpha - beta - gamma - delta - epsilon, alpha coastal.
+	# A five-region line: alpha - beta - gamma - delta - epsilon, alpha coastal,
+	# plus "island", which no land route reaches at all.
 	var region_ids := ["alpha", "beta", "gamma", "delta", "epsilon"]
 	for i in range(region_ids.size()):
 		var adjacent: Array = []
@@ -109,6 +136,11 @@ static func data() -> GameData:
 			"fertility": 1.0, "adjacent": adjacent, "sea_zones": [], "resources": [],
 			"hidden_resources": [],
 		}
+	game_data.regions["island"] = {
+		"id": "island", "name": "Island", "settlement_name": "Island", "terrain": "plains",
+		"fertility": 1.0, "adjacent": [], "sea_zones": ["test_sea"], "resources": [],
+		"hidden_resources": [],
+	}
 	game_data.regions["alpha"]["sea_zones"] = ["test_sea"]
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
