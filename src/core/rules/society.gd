@@ -8,17 +8,25 @@ class_name SocietyRules
 ##   legitimacy   "Standing"       consent — rule accepted without force
 ##   grievance    "Grievance"      accumulated coerced obligation, hysteretic
 ##   assimilation "Belonging"      cultural convergence with the owner
+##   expectation  "What the City Expects"  what it has come to believe it is owed
 ##   unrest_state calm|restive|rebellious, with unrest_turns
 ##
 ## Per faction (state.factions[id].society):
 ##   elite_pressure "Ambition"       claimants vs. finite offices and commands
 ##   martial_ethos  "Martial Spirit" the society's orientation toward war
 ##   knowledge      "Craft"          accumulated practice; decays without institutions
+##   spoils         "Plunder's Share" how much of the income comes from taking
 ##   civic_shock                     a decaying empire-wide reputation penalty
 ##
 ## The load-bearing asymmetry: coercion raises public order but does not lower
 ## the load. Whatever consent does not cover must be coerced, and the coerced
 ## share charges grievance. A garrison therefore hides the problem while it grows.
+##
+## Its civic counterpart is the euergetism ratchet. Provision — games, baths,
+## clean water — raises order at once, and a city slowly comes to expect it.
+## Expectation rises in about twelve years and is forgotten in forty-five, so
+## withdrawing a bath house leaves the city worse off than never having built
+## one. Public generosity is a standing commitment, not a purchase.
 ##
 ## This module consumes NO randomness. All uncertainty in the societal layer is
 ## structural — delay, hysteresis, coupled feedback and partial observability —
@@ -54,6 +62,7 @@ static func stocks_of(data: GameData, settlement: Dictionary) -> Dictionary:
 		"legitimacy": float(society.get("legitimacy", rules["legitimacy_start"])),
 		"grievance": float(society.get("grievance", rules["grievance_start"])),
 		"assimilation": float(society.get("assimilation", rules["assimilation_start_native"])),
+		"expectation": float(society.get("expectation", 0.0)),
 		"unrest_state": String(society.get("unrest_state", UNREST_CALM)),
 		"unrest_turns": int(society.get("unrest_turns", 0)),
 	}
@@ -66,6 +75,8 @@ static func faction_stocks(data: GameData, faction: Dictionary) -> Dictionary:
 		"elite_pressure": float(society.get("elite_pressure", rules["elite_start"])),
 		"martial_ethos": float(society.get("martial_ethos", rules["martial_start"])),
 		"knowledge": float(society.get("knowledge", rules["knowledge_start"])),
+		"spoils": float(society.get("spoils", 0.0)),
+		"plunder_pending": float(society.get("plunder_pending", 0.0)),
 		"civic_shock": float(society.get("civic_shock", 0.0)),
 	}
 
@@ -78,13 +89,24 @@ static func faction_stocks_for(data: GameData, state: Dictionary, faction_id: St
 	return faction_stocks(data, state["factions"].get(faction_id, {}))
 
 
-static func new_settlement_society(data: GameData, native_culture: bool) -> Dictionary:
+static func provision(data: GameData, settlement: Dictionary) -> float:
+	## What the state visibly provides here: spectacle, and the far less glamorous
+	## business of clean water and drains.
+	var rules: Dictionary = data.balance["society"]
+	return SettlementRules.effect_total(data, settlement, "happiness") \
+		+ SettlementRules.effect_total(data, settlement, "health") * float(rules["provision_health_scale"])
+
+
+static func new_settlement_society(data: GameData, native_culture: bool, current_provision: float = 0.0) -> Dictionary:
+	## Expectation is seeded AT what the city already receives, so nothing is
+	## retroactively owed: a province only resents what it is given and then loses.
 	var rules: Dictionary = data.balance["society"]
 	var start_key := "assimilation_start_native" if native_culture else "assimilation_start_foreign"
 	return {
 		"legitimacy": quantize(float(rules["legitimacy_start"])),
 		"grievance": quantize(float(rules["grievance_start"])),
 		"assimilation": quantize(float(rules[start_key])),
+		"expectation": quantize(clampf(current_provision, 0.0, float(rules["expectation_max"]))),
 		"unrest_state": UNREST_CALM,
 		"unrest_turns": 0,
 		"survey": {},
@@ -97,6 +119,8 @@ static func new_faction_society(data: GameData) -> Dictionary:
 		"elite_pressure": quantize(float(rules["elite_start"])),
 		"martial_ethos": quantize(float(rules["martial_start"])),
 		"knowledge": quantize(float(rules["knowledge_start"])),
+		"spoils": 0.0,
+		"plunder_pending": 0.0,
 		"civic_shock": 0.0,
 	}
 
@@ -157,6 +181,13 @@ static func load_breakdown(data: GameData, state: Dictionary, region_id: String)
 	var elite := float(faction["elite_pressure"]) / 100.0 * float(rules["load_elite_scale"])
 	if elite > 0.0:
 		factors.append({"label": "elite_exactions", "value": elite})
+
+	# What was given and then withdrawn. A city that never had baths does not
+	# resent their absence; one that had them and lost them does.
+	var shortfall := maxf(0.0, float(stocks["expectation"]) - provision(data, settlement))
+	if shortfall > 0.0:
+		factors.append({"label": "broken_promises",
+			"value": shortfall * float(rules["load_broken_promises_scale"])})
 
 	if int(settlement["recently_conquered"]) > 0:
 		factors.append({"label": "recently_conquered", "value": float(rules["load_recently_conquered"])})
@@ -224,6 +255,12 @@ static func legitimacy_target_breakdown(data: GameData, state: Dictionary, regio
 	if resentment > 0.0:
 		factors.append({"label": "resentment", "value": -resentment})
 
+	# A polity living off what it takes rather than what it makes is felt
+	# everywhere it rules, including in provinces that never saw the war.
+	var plunder := float(faction["spoils"]) / 100.0 * float(rules["legitimacy_spoils_drag"])
+	if plunder > 0.0:
+		factors.append({"label": "plunder", "value": -plunder})
+
 	if float(faction["civic_shock"]) != 0.0:
 		factors.append({"label": "reputation", "value": float(faction["civic_shock"])})
 
@@ -285,6 +322,8 @@ static func faction_breakdown(data: GameData, state: Dictionary, faction_id: Str
 		{"label": "martial_spirit", "value": float(stocks["martial_ethos"])},
 		{"label": "craft", "value": float(stocks["knowledge"])},
 	]
+	if float(stocks["spoils"]) > 0.0:
+		factors.append({"label": "plunders_share", "value": -float(stocks["spoils"])})
 	if float(stocks["civic_shock"]) != 0.0:
 		factors.append({"label": "reputation", "value": float(stocks["civic_shock"])})
 	return factors
@@ -390,6 +429,18 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	knowledge += accrual - knowledge * decay
 	knowledge = clampf(knowledge, 0.0, float(rules["knowledge_max"]))
 
+	# Plunder's share: how much of what came in this turn was taken rather than
+	# made. An exponential moving average, so it outlives the conquest that
+	# raised it by a generation — which is why the reckoning arrives in peacetime.
+	var plunder := maxf(float(stocks["plunder_pending"]), 0.0)
+	var produced := maxf(income, 0.0)
+	var share := 0.0
+	if plunder + produced > 0.0:
+		share = plunder / (plunder + produced) * 100.0
+	var spoils := float(stocks["spoils"])
+	spoils += (share - spoils) * float(rules["spoils_rate"])
+	spoils = clampf(spoils, 0.0, float(rules["spoils_max"]))
+
 	# A reputation for atrocity is remembered everywhere, and fades slowly.
 	var shock := float(stocks["civic_shock"])
 	if shock < 0.0:
@@ -399,6 +450,8 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 		"elite_pressure": quantize(elite),
 		"martial_ethos": quantize(martial),
 		"knowledge": quantize(knowledge),
+		"spoils": quantize(spoils),
+		"plunder_pending": 0.0,
 		"civic_shock": quantize(shock),
 	}
 
@@ -443,7 +496,17 @@ static func apply_settlement_turn(data: GameData, state: Dictionary, region_id: 
 		- float(rules["assimilation_friction_scale"]) * grievance / 100.0 * assimilation / 100.0
 	new_assimilation = clampf(new_assimilation, 0.0, float(rules["assimilation_max"]))
 
-	# 4. Unrest ignites high and extinguishes low. Fixing the cause does not
+	# 4. The city learns what to expect far faster than it forgets it. This is
+	#    the civic counterpart of the coercion trap: generosity, once given,
+	#    becomes the baseline it is measured against.
+	var current := provision(data, settlement)
+	var expectation := float(stocks["expectation"])
+	var expectation_rate := float(rules["expectation_rise_rate"]) if current > expectation \
+		else float(rules["expectation_fall_rate"])
+	var new_expectation := expectation + (current - expectation) * expectation_rate
+	new_expectation = clampf(new_expectation, 0.0, float(rules["expectation_max"]))
+
+	# 5. Unrest ignites high and extinguishes low. Fixing the cause does not
 	#    undo the crisis; that gap is what makes a decision irreversible.
 	var new_state := unrest_state
 	match unrest_state:
@@ -468,6 +531,7 @@ static func apply_settlement_turn(data: GameData, state: Dictionary, region_id: 
 		"legitimacy": quantize(new_legitimacy),
 		"grievance": quantize(new_grievance),
 		"assimilation": quantize(new_assimilation),
+		"expectation": quantize(new_expectation),
 		"unrest_state": new_state,
 		"unrest_turns": unrest_turns,
 		"survey": survey,
@@ -503,7 +567,7 @@ static func record_conquest(data: GameData, state: Dictionary, region_id: String
 	var settlement: Dictionary = state["settlements"][region_id]
 	var dominant := dominant_culture(data, settlement)
 	var native := dominant == "" or data.culture_of_faction(new_owner) == dominant
-	var society := new_settlement_society(data, native)
+	var society := new_settlement_society(data, native, provision(data, settlement))
 	society["grievance"] = quantize(clampf(float(rules["grievance_conquest_shock"]), 0.0, float(rules["grievance_max"])))
 	settlement["society"] = society
 
@@ -523,8 +587,25 @@ static func record_conquest(data: GameData, state: Dictionary, region_id: String
 		"elite_pressure": quantize(clampf(elite, 0.0, float(rules["elite_max"]))),
 		"martial_ethos": quantize(martial),
 		"knowledge": quantize(float(stocks["knowledge"])),
+		"spoils": quantize(float(stocks["spoils"])),
+		"plunder_pending": quantize(float(stocks["plunder_pending"])),
 		"civic_shock": quantize(shock),
 	}
+
+
+static func record_plunder(data: GameData, state: Dictionary, faction_id: String, loot: float) -> void:
+	## Loot is buffered rather than applied directly, because the player storms
+	## cities through Game.assault_settlement, which resolves OUTSIDE end_turn.
+	## Without the buffer, Plunder's Share would only ever see the AI's sieges.
+	var faction: Dictionary = state["factions"].get(faction_id, {})
+	if faction.is_empty() or loot <= 0.0:
+		return
+	var stocks := faction_stocks(data, faction)
+	var society: Dictionary = faction.get("society", {})
+	if society.is_empty():
+		society = new_faction_society(data)
+	society["plunder_pending"] = quantize(float(stocks["plunder_pending"]) + loot)
+	faction["society"] = society
 
 
 static func record_recruitment(data: GameData, state: Dictionary, region_id: String, soldiers: int) -> void:

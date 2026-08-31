@@ -204,6 +204,21 @@ func society_report(region_id: String) -> Dictionary:
 	return LegibilityRules.reported(data, state, region_id)
 
 
+func strain_reading(region_id: String) -> Dictionary:
+	## The comparison the whole model turns on, put in front of the player:
+	## what the province is asked to bear, what it grants willingly, and the
+	## remainder that has to be coerced — which is what charges Grievance.
+	## `coerced` is null where you cannot see the province well enough to know.
+	var report := LegibilityRules.reported(data, state, region_id)
+	var asked := SocietyRules.load_total(data, state, region_id)
+	var granted = report.get("legitimacy")
+	return {
+		"asked": asked,
+		"granted": granted,
+		"coerced": null if granted == null else maxf(0.0, asked - float(granted)),
+	}
+
+
 func load_breakdown(region_id: String) -> Array:
 	## What the province is being asked to bear. Whatever this exceeds its
 	## Standing by has to be coerced, and the coerced share charges Grievance.

@@ -216,6 +216,7 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	settlement["tax_level"] = "normal"
 	# The province is governing itself now: the grievance was against the masters
 	# it just threw off, and it belongs to nobody but itself.
-	settlement["society"] = SocietyRules.new_settlement_society(data, true)
+	settlement["society"] = SocietyRules.new_settlement_society(
+		data, true, SocietyRules.provision(data, settlement))
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
 	SettlementRules.refresh_governors(data, state)

@@ -158,7 +158,8 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 	# what makes a province a stranger to its masters (see record_conquest).
 	var dominant := SocietyRules.dominant_culture(data, settlement)
 	var native: bool = dominant == "" or data.culture_of_faction(owner) == dominant
-	settlement["society"] = SocietyRules.new_settlement_society(data, native)
+	settlement["society"] = SocietyRules.new_settlement_society(
+		data, native, SocietyRules.provision(data, settlement))
 	return settlement
 
 

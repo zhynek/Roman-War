@@ -441,8 +441,8 @@ def cross_checks(t: dict[str, dict]) -> None:
     patterns = {p["id"] for p in society.get("patterns", [])}
     axis_ids = {a["id"] for a in society.get("axes", [])}
     # The axes table is what the UI names; it must describe the stocks that exist.
-    ENGINE_STOCKS = {"legitimacy", "grievance", "assimilation",
-                     "elite_pressure", "martial_ethos", "knowledge"}
+    ENGINE_STOCKS = {"legitimacy", "grievance", "assimilation", "expectation",
+                     "elite_pressure", "martial_ethos", "knowledge", "spoils"}
     for missing in sorted(ENGINE_STOCKS - axis_ids):
         err(f"society: no axis entry for the engine stock '{missing}'")
     for extra in sorted(axis_ids - ENGINE_STOCKS):

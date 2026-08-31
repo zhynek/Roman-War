@@ -132,6 +132,10 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 		float(corruption_rules["max_pct"]))
 	var law := PublicOrderRules.law_total(data, state, region_id)
 	corruption *= maxf(0.0, 1.0 - law * float(corruption_rules["law_reduction_factor"]))
+	# An administration living off plunder stops bothering to account for anything.
+	var spoils := float(SocietyRules.faction_stocks_for(
+		data, state, String(settlement["owner"]))["spoils"]) / 100.0
+	corruption *= 1.0 + spoils * float(data.balance["society"]["corruption_spoils_pct"]) / 100.0
 	# Audited accounts and salaried officials are worth more than a stricter law.
 	corruption *= maxf(0.0, 1.0 - AdvanceRules.effect_total(
 		data, state, String(settlement["owner"]), "corruption_reduction_pct") / 100.0)

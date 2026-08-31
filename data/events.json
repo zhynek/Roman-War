@@ -247,6 +247,24 @@
       "per_faction": true,
       "pattern": "conquest_indigestion",
       "text": "You have taken more than you can govern. The plunder arrived at once and the administration has not arrived at all; the provinces are held by whichever general is nearest, and the men who took them have begun to regard them as theirs."
+    },
+    {
+      "id": "plunder_and_its_price",
+      "name": "Plunder and Its Price",
+      "trigger": {
+        "condition": "society_stat",
+        "stat": "spoils",
+        "min": 35,
+        "min_regions": 3
+      },
+      "effects": {
+        "grievance_all_settlements": 4,
+        "civic_shock": -3
+      },
+      "once": true,
+      "per_faction": true,
+      "pattern": "conquest_indigestion",
+      "text": "More of what reaches your treasury this year was taken than was made. Officials who can be paid out of a captured city stop troubling to account for a province, and the provinces have worked out what it is that pays for them. The reckoning for this will not arrive until the taking stops."
     }
   ],
   "disasters": [

@@ -275,5 +275,5 @@ static func _settlement(game_data: GameData, owner: String, population: int, bui
 		"recruitment_queue": [], "governor": null, "slave_bonus_turns": 0,
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
 		"siege": null,
-		"society": SocietyRules.new_settlement_society(game_data, true),
+		"society": SocietyRules.new_settlement_society(game_data, true, 0.0),
 	}

@@ -30,7 +30,7 @@
               "culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
               "faction": { "type": "string" },
               "stat": {
-                "enum": ["legitimacy", "grievance", "assimilation", "elite_pressure", "martial_ethos", "knowledge"],
+                "enum": ["legitimacy", "grievance", "assimilation", "elite_pressure", "martial_ethos", "knowledge", "expectation", "spoils"],
                 "description": "Which societal stock to test. Settlement-scoped stocks are averaged over the faction's provinces."
               },
               "min": { "type": "number", "description": "Fires when the stat is at or above this" },

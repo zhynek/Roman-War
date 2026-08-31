@@ -126,6 +126,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	SocietyRules.record_conquest(data, state, region_id, new_owner, occupation)
 
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
+	SocietyRules.record_plunder(data, state, new_owner, float(loot))
 
 	var taken := displace_characters(data, state, region_id, previous_owner)
 

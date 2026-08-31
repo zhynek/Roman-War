@@ -398,3 +398,116 @@ func test_stocks_survive_a_json_round_trip_exactly(t) -> void:
 		t.check_eq(float(restored["factions"]["red"]["society"][key]),
 			float(state["factions"]["red"]["society"][key]),
 			"%s survives the round trip exactly" % key)
+
+
+func test_provision_becomes_expectation_and_withdrawal_is_a_load(t) -> void:
+	## The euergetism ratchet, and the civic counterpart of the coercion trap: a
+	## city that never had baths does not resent their absence; one that had them
+	## and lost them does.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rules := _rules(data)
+	var settlement: Dictionary = state["settlements"]["beta"]
+
+	# A city given nothing expects nothing, so there is no shortfall to bear.
+	var by_label := {}
+	for factor in SocietyRules.load_breakdown(data, state, "beta"):
+		by_label[factor["label"]] = float(factor["value"])
+	t.check(not by_label.has("broken_promises"), "a city given nothing is owed nothing")
+
+	# Build the drains and let the city grow used to them.
+	settlement["buildings"]["test_health"] = 1
+	var given := SocietyRules.provision(data, settlement)
+	t.check(given > 0.0, "clean water is something the state visibly provides")
+	for i in range(40):
+		SocietyRules.apply_settlement_turn(data, state, "beta")
+	var expectation: float = SocietyRules.stocks_of(data, settlement)["expectation"]
+	t.check(expectation > 0.0, "the city comes to expect what it is given")
+
+	# While it still has them, there is nothing owed.
+	by_label = {}
+	for factor in SocietyRules.load_breakdown(data, state, "beta"):
+		by_label[factor["label"]] = float(factor["value"])
+	t.check(not by_label.has("broken_promises"), "provision that continues costs nothing")
+
+	# Take them away, and the city is now worse off than before they were built.
+	var before_withdrawal := SocietyRules.load_total(data, state, "beta")
+	settlement["buildings"].erase("test_health")
+	var after := SocietyRules.load_total(data, state, "beta")
+	t.check(after > before_withdrawal, "withdrawing provision is itself a load")
+	by_label = {}
+	for factor in SocietyRules.load_breakdown(data, state, "beta"):
+		by_label[factor["label"]] = float(factor["value"])
+	t.check(by_label.get("broken_promises", 0.0) > 0.0, "and it is named as such")
+
+	# The memory fades far more slowly than it formed.
+	t.check(float(rules["expectation_fall_rate"]) < float(rules["expectation_rise_rate"]),
+		"a city learns what to expect faster than it forgets it")
+
+
+func test_expectation_starts_at_what_is_already_provided(t) -> void:
+	## Nothing is retroactively owed: a province resents only what it is given
+	## and then loses.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var settlement: Dictionary = state["settlements"]["beta"]
+	settlement["buildings"]["test_health"] = 1
+	settlement["society"] = SocietyRules.new_settlement_society(
+		data, true, SocietyRules.provision(data, settlement))
+	var by_label := {}
+	for factor in SocietyRules.load_breakdown(data, state, "beta"):
+		by_label[factor["label"]] = float(factor["value"])
+	t.check(not by_label.has("broken_promises"),
+		"a province seeded at its own provision owes nothing on turn one")
+
+
+func test_plunder_is_felt_in_provinces_that_never_saw_the_war(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var faction: Dictionary = state["factions"]["red"]
+
+	var before := SocietyRules.legitimacy_target(data, state, "beta")
+	SocietyRules.record_plunder(data, state, "red", 40000.0)
+	t.check(float(SocietyRules.faction_stocks(data, faction)["plunder_pending"]) > 0.0,
+		"loot is buffered until the turn resolves")
+	SocietyRules.apply_faction_turn(data, state, "red")
+	var spoils: float = SocietyRules.faction_stocks(data, faction)["spoils"]
+	t.check(spoils > 0.0, "and becomes a share of what the polity lives on")
+	t.check_eq(float(SocietyRules.faction_stocks(data, faction)["plunder_pending"]), 0.0,
+		"the buffer is cleared each turn")
+
+	var after := SocietyRules.legitimacy_target(data, state, "beta")
+	t.check(after < before, "beta never saw the war and is governed on less consent for it")
+	var by_label := {}
+	for factor in SocietyRules.legitimacy_target_breakdown(data, state, "beta"):
+		by_label[factor["label"]] = float(factor["value"])
+	t.check(by_label.get("plunder", 0.0) < 0.0, "and the reason is named")
+
+	# It also rots the administration.
+	var clean_data := Fixtures.data()
+	var clean := Fixtures.state(clean_data)
+	clean["factions"]["red"]["capital"] = "alpha"
+	clean["settlements"]["alpha"]["owner"] = "red"
+	state["factions"]["red"]["capital"] = "alpha"
+	state["settlements"]["alpha"]["owner"] = "red"
+	t.check(EconomyRules.corruption_pct(data, state, "epsilon")
+		> EconomyRules.corruption_pct(clean_data, clean, "epsilon"),
+		"an administration living off plunder stops accounting for anything")
+
+
+func test_plunders_share_outlives_the_conquest(t) -> void:
+	## An average with a long memory, so the reckoning arrives in peacetime.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var faction: Dictionary = state["factions"]["red"]
+	for i in range(20):
+		SocietyRules.record_plunder(data, state, "red", 40000.0)
+		SocietyRules.apply_faction_turn(data, state, "red")
+	var at_war: float = SocietyRules.faction_stocks(data, faction)["spoils"]
+	t.check(at_war > 0.0, "a conquering polity lives off what it takes")
+
+	# The taking stops. It does not clear at once.
+	SocietyRules.apply_faction_turn(data, state, "red")
+	var one_turn_later: float = SocietyRules.faction_stocks(data, faction)["spoils"]
+	t.check(one_turn_later < at_war, "it does start to fall")
+	t.check(one_turn_later > at_war * 0.5, "but a single peaceful year does not undo it")

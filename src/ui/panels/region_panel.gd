@@ -270,6 +270,24 @@ func _society_section() -> void:
 		_label("    you have opinions about this province, not information.", Color(0.7, 0.7, 0.7))
 		return
 	_breakdown(title, factors)
+	_strain_line()
+
+
+func _strain_line() -> void:
+	## The comparison the model turns on, shown UNNETTED. A garrison keeps public
+	## order high while the coerced remainder goes on charging grievance, and the
+	## only way the player can see that happening is to see both numbers at once.
+	var strain: Dictionary = game.strain_reading(region_id)
+	_label("    asked of it  %.1f" % float(strain["asked"]), Color(0.85, 0.8, 0.7))
+	if strain["granted"] == null:
+		return
+	_label("    granted willingly  %.1f" % float(strain["granted"]), Color(0.55, 0.85, 0.55))
+	var coerced := float(strain["coerced"])
+	if coerced <= 0.0:
+		_label("    nothing has to be compelled here", Color(0.55, 0.85, 0.55))
+	else:
+		_label("    compelled  %.1f  — this is what grievance is charging on" % coerced,
+			Color(0.9, 0.55, 0.5))
 
 
 func _breakdown(title: String, factors: Array) -> void:
