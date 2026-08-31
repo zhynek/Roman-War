@@ -15,6 +15,13 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 	var defender_strength := BattleResolver.force_strength(
 		data, defender_units, context.get("defender_general"), experience_pct)
 
+	# What a martial society actually buys: men who have drilled since boyhood
+	# because that is what their people are for. Everything it costs is paid in
+	# SocietyRules — legitimacy, conscription load, and generals with armies.
+	var martial_pct := float(battle_rules["martial_ethos_strength_pct_at_full"]) / 100.0
+	attacker_strength *= 1.0 + float(context.get("attacker_martial", 0.0)) / 100.0 * martial_pct
+	defender_strength *= 1.0 + float(context.get("defender_martial", 0.0)) / 100.0 * martial_pct
+
 	var terrain: String = context.get("terrain", "plains")
 	defender_strength *= float(battle_rules["terrain_defense_multiplier"].get(terrain, 1.0))
 

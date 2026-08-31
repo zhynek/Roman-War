@@ -78,6 +78,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		"defender_general": governor_profile,
 		"attacker_fatigued": false,
 		"sally": starving,
+		"attacker_martial": SocietyRules.faction_stocks_for(data, state, String(army["owner"]))["martial_ethos"],
+		"defender_martial": SocietyRules.faction_stocks_for(data, state, String(settlement["owner"]))["martial_ethos"],
 	})
 
 	if result.get("attacker_general_died", false) and army["general"] != null:

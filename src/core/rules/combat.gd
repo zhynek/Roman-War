@@ -28,6 +28,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 		"defender_general": general_profile(data, state, defender),
 		"attacker_fatigued": attacker.get("forced_march", false),
 		"sally": false,
+		"attacker_martial": SocietyRules.faction_stocks_for(data, state, String(attacker["owner"]))["martial_ethos"],
+		"defender_martial": SocietyRules.faction_stocks_for(data, state, String(defender["owner"]))["martial_ethos"],
 	})
 
 	_process_general_deaths(data, state, attacker, defender, result)

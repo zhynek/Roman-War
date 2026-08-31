@@ -23,6 +23,10 @@ extends RefCounted
 ##     defender_general: Dictionary|null,
 ##     attacker_fatigued: bool,    # forced march
 ##     sally: bool,                # defenders sallying out of a siege
+##     attacker_martial: float,    # owner's martial ethos 0-100 (SocietyRules)
+##     defender_martial: float,    # a society oriented toward war fields better
+##                                 # soldiers — this is what militarisation BUYS,
+##                                 # against everything it costs elsewhere
 ##   }
 ##
 ##   BattleResult: {

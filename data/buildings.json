@@ -16,7 +16,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "A packed-earth square where the village elders hear disputes beneath an open sky. Rome's order begins with a bench and a bell."
         },
@@ -27,7 +29,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "A modest hall of brick and tile where an elected magistrate keeps the census rolls and the tax tablets. Litigants queue at dawn."
         },
@@ -38,7 +42,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "A colonnaded hall for courts, contracts, and the public treasury. Under its long roof, Roman law becomes a daily habit."
         },
@@ -49,7 +55,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "The fortified residence of a governing praetor, with clerks, lictors, and a strongroom for the province's silver."
         },
@@ -60,7 +68,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "Marble steps, bronze doors, and a proconsul's staff large enough to govern a small kingdom. Petitioners come from a hundred miles away."
         },
@@ -71,7 +81,9 @@
           "cost": 13500,
           "build_turns": 6,
           "effects": {
-            "law": 10
+            "law": 10,
+            "civic": 4,
+            "burden": 3
           },
           "description": "A vast complex of courts, archives, and audience chambers fit to rule the world. From here, one man's word can reach every shore of the sea."
         }
@@ -92,7 +104,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "Freeholders gather at the threshing floor to vote by show of hands. Even the smallest kome insists on having its say."
         },
@@ -103,7 +117,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "A stepped council chamber where the boule debates grain prices and city walls. Argument is the Hellene's favorite public work."
         },
@@ -114,7 +130,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "The city's ceremonial hearth, where presiding officers dine honored guests and the sacred fire never goes out."
         },
@@ -125,7 +143,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "Chief magistrates administer courts, festivals, and the fleet levy from a stoa-fronted hall in the agora's best corner."
         },
@@ -136,7 +156,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "The seat of the generals-in-office, joining civic government to military command. Maps, muster rolls, and ambition fill its rooms."
         },
@@ -147,7 +169,9 @@
           "cost": 13500,
           "build_turns": 6,
           "effects": {
-            "law": 10
+            "law": 10,
+            "civic": 4,
+            "burden": 3
           },
           "description": "A royal palace in the grand successor style: audience courts, treasuries, and gardens meant to overawe ambassadors before they speak."
         }
@@ -168,7 +192,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "The village headman judges quarrels over water rights from a carpeted platform. His word carries because his memory is long."
         },
@@ -179,7 +205,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "A walled court below the town's citadel where scribes tally tribute in grain, horses, and silver."
         },
@@ -190,7 +218,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "The house of the king's appointed governor, half fortress and half archive, keeping the royal road's messengers supplied."
         },
@@ -201,7 +231,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "Glazed brick and cedar beams announce that the king's eye rests here. Provincial nobles attend its court or answer for their absence."
         },
@@ -212,7 +244,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "A pillared audience hall in the old Persian manner, where a hundred delegations can wait upon the throne at once."
         },
@@ -223,7 +257,9 @@
           "cost": 13500,
           "build_turns": 6,
           "effects": {
-            "law": 10
+            "law": 10,
+            "civic": 4,
+            "burden": 3
           },
           "description": "Terraced gardens, fire altars, and treasuries deep enough to buy an army outright. Lesser kings kneel in its forecourt."
         }
@@ -244,7 +280,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "Landowners and shipmasters meet under an awning to settle debts and harbor dues. Everything is written down twice."
         },
@@ -255,7 +293,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "An elected suffet dispenses judgment beside the weighing stones. Punic justice is brisk, commercial, and final."
         },
@@ -266,7 +306,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "The town's wealthiest families sit in permanent council, balancing the fleet's needs against the countinghouse's caution."
         },
@@ -277,7 +319,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "A standing court of a hundred judges audits generals and governors alike. No commander sails home without an accounting."
         },
@@ -288,7 +332,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "Twin magistrates govern from a purple-hung hall above the harbor, where trade treaties are sealed with silver and salt."
         },
@@ -299,7 +345,9 @@
           "cost": 13500,
           "build_turns": 6,
           "effects": {
-            "law": 10
+            "law": 10,
+            "civic": 4,
+            "burden": 3
           },
           "description": "A citadel-crowned acropolis of archives, mints, and council chambers — the commanding height of a merchant empire."
         }
@@ -320,7 +368,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "The overseer of fields keeps flood records and settles boundary quarrels once the waters recede. The measuring rope decides all."
         },
@@ -331,7 +381,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "The district governor's court, where scribes reckon the harvest tax to the last basket of emmer."
         },
@@ -342,7 +394,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "A whitewashed compound of offices, granaries, and shaded courts. The nome is governed by ink, not iron."
         },
@@ -353,7 +407,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "The royal finance minister's provincial seat, running the most thorough tax machine in the known world."
         },
@@ -364,7 +420,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "A walled precinct of palaces and chancelleries where Greek ministers and Egyptian priests uneasily share power."
         },
@@ -375,7 +433,9 @@
           "cost": 13500,
           "build_turns": 6,
           "effects": {
-            "law": 10
+            "law": 10,
+            "civic": 4,
+            "burden": 3
           },
           "description": "Colossal gateways and gilded halls proclaim the living god's rule. The Nile itself seems to flow at the palace's pleasure."
         }
@@ -396,7 +456,9 @@
           "cost": 300,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "The chief holds court by his hearth, flanked by sworn companions. Judgment comes with mead, and sometimes with a spear."
         },
@@ -407,7 +469,9 @@
           "cost": 700,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "A long timber hall where clan heads gather to swear oaths, divide plunder, and choose who leads the summer's raiding."
         },
@@ -418,7 +482,9 @@
           "cost": 1600,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "Carved pillars and captured standards line the hall of a king who commands many clans. His household warriors keep a rough peace."
         },
@@ -429,7 +495,9 @@
           "cost": 3400,
           "build_turns": 4,
           "effects": {
-            "law": 7
+            "law": 7,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "The high seat of a fortified tribal capital, minting its own coin and treating with foreign envoys. The tribes bow to no marble."
         }
@@ -450,7 +518,9 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "law": 2
+            "law": 2,
+            "civic": 1,
+            "burden": 0.5
           },
           "description": "A shared hall for markets, weddings, and rough justice. The village governs itself because no one else has bothered to."
         },
@@ -461,7 +531,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 1.6,
+            "burden": 1
           },
           "description": "Local notables keep the peace and the granary keys, beholden to no distant crown."
         },
@@ -472,7 +544,9 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 2.2,
+            "burden": 1.5
           },
           "description": "A council of merchants and landholders runs the town's affairs, hiring guards when it must and paying tribute when it cannot."
         },
@@ -483,7 +557,9 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "law": 6
+            "law": 6,
+            "civic": 2.8,
+            "burden": 2
           },
           "description": "An independent city's assembly, proud of its liberty and nervously watching the great powers circle."
         },
@@ -494,7 +570,9 @@
           "cost": 8500,
           "build_turns": 5,
           "effects": {
-            "law": 8
+            "law": 8,
+            "civic": 3.4,
+            "burden": 2.5
           },
           "description": "The polished seat of a wealthy free city that has outlasted three empires by paying two of them."
         }
@@ -515,7 +593,10 @@
           "cost": 500,
           "build_turns": 2,
           "effects": {
-            "wall_level": 1
+            "wall_level": 1,
+            "coercion": 1,
+            "burden": 0.5,
+            "martial": 0.5
           },
           "description": "A ditch, a bank, and sharpened stakes in the legionary manner. Enough to make raiders think twice."
         },
@@ -526,7 +607,10 @@
           "cost": 1100,
           "build_turns": 2,
           "effects": {
-            "wall_level": 2
+            "wall_level": 2,
+            "coercion": 2,
+            "burden": 1,
+            "martial": 1
           },
           "description": "A proper timber curtain with a fighting platform and gate towers. Sentries pace it through the night watches."
         },
@@ -537,7 +621,10 @@
           "cost": 2400,
           "build_turns": 3,
           "effects": {
-            "wall_level": 3
+            "wall_level": 3,
+            "coercion": 3,
+            "burden": 1.5,
+            "martial": 1.5
           },
           "description": "Cut stone laid without mortar, gates hung with iron-shod oak. The town now expects a siege rather than fears one."
         },
@@ -548,7 +635,10 @@
           "cost": 5000,
           "build_turns": 4,
           "effects": {
-            "wall_level": 4
+            "wall_level": 4,
+            "coercion": 4,
+            "burden": 2,
+            "martial": 2
           },
           "description": "High double-faced walls with artillery platforms at each tower. Attackers must bring engines, patience, and luck."
         },
@@ -559,7 +649,10 @@
           "cost": 10000,
           "build_turns": 6,
           "effects": {
-            "wall_level": 5
+            "wall_level": 5,
+            "coercion": 5,
+            "burden": 2.5,
+            "martial": 2.5
           },
           "description": "Bastioned walls the height of five men, ringed with towers and sally ports. Armies have starved outside such stone."
         }
@@ -583,7 +676,10 @@
           "cost": 500,
           "build_turns": 2,
           "effects": {
-            "wall_level": 1
+            "wall_level": 1,
+            "coercion": 1,
+            "burden": 0.5,
+            "martial": 0.5
           },
           "description": "Fieldstone heaped on an earthen bank, patched every spring. It keeps out wolves, bandits, and impatient captains."
         },
@@ -594,7 +690,10 @@
           "cost": 1100,
           "build_turns": 2,
           "effects": {
-            "wall_level": 2
+            "wall_level": 2,
+            "coercion": 2,
+            "burden": 1,
+            "martial": 1
           },
           "description": "Thick sun-dried brick on stone footings, cool in summer and stubborn under rams. The gatehouse doubles as a toll station."
         },
@@ -605,7 +704,10 @@
           "cost": 2400,
           "build_turns": 3,
           "effects": {
-            "wall_level": 3
+            "wall_level": 3,
+            "coercion": 3,
+            "burden": 1.5,
+            "martial": 1.5
           },
           "description": "Dressed masonry raised by hired engineers, with square towers commanding every approach."
         },
@@ -616,7 +718,10 @@
           "cost": 5000,
           "build_turns": 4,
           "effects": {
-            "wall_level": 4
+            "wall_level": 4,
+            "coercion": 4,
+            "burden": 2,
+            "martial": 2
           },
           "description": "A full circuit of high walls and artillery towers built to the best Hellenistic theory. Siege masters lecture from its parapets."
         },
@@ -627,7 +732,10 @@
           "cost": 10000,
           "build_turns": 6,
           "effects": {
-            "wall_level": 5
+            "wall_level": 5,
+            "coercion": 5,
+            "burden": 2.5,
+            "martial": 2.5
           },
           "description": "Three concentric lines of defense with stables and barracks built into the walls themselves. Taking it costs a generation."
         }
@@ -649,7 +757,10 @@
           "cost": 300,
           "build_turns": 1,
           "effects": {
-            "wall_level": 1
+            "wall_level": 1,
+            "coercion": 1,
+            "burden": 0.5,
+            "martial": 0.5
           },
           "description": "A deep ditch and thorn-topped bank thrown up by the whole village in a season. Simple, and surprisingly effective."
         },
@@ -660,7 +771,10 @@
           "cost": 800,
           "build_turns": 2,
           "effects": {
-            "wall_level": 2
+            "wall_level": 2,
+            "coercion": 2,
+            "burden": 1,
+            "martial": 1
           },
           "description": "Whole trunks set upright and lashed with iron, with a fighting walk behind. The gate gods get their offerings here."
         },
@@ -671,7 +785,10 @@
           "cost": 1800,
           "build_turns": 3,
           "effects": {
-            "wall_level": 3
+            "wall_level": 3,
+            "coercion": 3,
+            "burden": 1.5,
+            "martial": 1.5
           },
           "description": "Stone and earth bound through with timber beams — a rampart that shrugs off rams and fire alike. Hillfort craft at its best."
         }
@@ -691,7 +808,13 @@
           "min_settlement_level": "village",
           "cost": 400,
           "build_turns": 1,
-          "description": "A leveled field with a speaking mound where citizens present themselves with spear and shield when the levy is called."
+          "description": "A leveled field with a speaking mound where citizens present themselves with spear and shield when the levy is called.",
+          "effects": {
+            "civic": -1,
+            "coercion": 0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "roman_brk_2",
@@ -699,7 +822,13 @@
           "min_settlement_level": "town",
           "cost": 800,
           "build_turns": 2,
-          "description": "Practice posts, wooden swords, and a bawling drillmaster. Farm boys leave with straight backs and blistered hands."
+          "description": "Practice posts, wooden swords, and a bawling drillmaster. Farm boys leave with straight backs and blistered hands.",
+          "effects": {
+            "civic": -1.5,
+            "coercion": 1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "roman_brk_3",
@@ -708,7 +837,11 @@
           "cost": 1700,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -2,
+            "coercion": 1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "Permanent quarters where maniples learn to open, close, and relieve one another in line. The checkerboard becomes instinct."
         },
@@ -720,7 +853,11 @@
           "build_turns": 3,
           "effects": {
             "recruit_xp": 1,
-            "weapon_upgrade": 1
+            "weapon_upgrade": 1,
+            "civic": -2.5,
+            "coercion": 2,
+            "burden": 2,
+            "martial": 4
           },
           "description": "A standing camp with armories, smiths, and veteran instructors. Its arsenals send men out better armed than they arrived."
         },
@@ -733,7 +870,11 @@
           "effects": {
             "recruit_xp": 2,
             "weapon_upgrade": 1,
-            "armor_upgrade": 1
+            "armor_upgrade": 1,
+            "civic": -3,
+            "coercion": 2.5,
+            "burden": 2.5,
+            "martial": 5
           },
           "description": "A great training ground consecrated to the war god, where whole legions exercise under the eyes of old triarii. Discipline here is a religion."
         }
@@ -756,7 +897,13 @@
           "min_settlement_level": "village",
           "cost": 400,
           "build_turns": 1,
-          "description": "A cleared ground and a rack of spears for the citizen levy. Every able man knows his place in the line, roughly."
+          "description": "A cleared ground and a rack of spears for the citizen levy. Every able man knows his place in the line, roughly.",
+          "effects": {
+            "civic": -1,
+            "coercion": 0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "civic_brk_2",
@@ -764,7 +911,13 @@
           "min_settlement_level": "town",
           "cost": 800,
           "build_turns": 2,
-          "description": "Quarters for a paid town guard who drill in the cool hours and police the market the rest of the day."
+          "description": "Quarters for a paid town guard who drill in the cool hours and police the market the rest of the day.",
+          "effects": {
+            "civic": -1.5,
+            "coercion": 1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "civic_brk_3",
@@ -773,7 +926,11 @@
           "cost": 1700,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -2,
+            "coercion": 1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "Barracks, storerooms, and a drill court for professional infantry. Pike and shield drills raise dust from dawn onward."
         },
@@ -785,7 +942,11 @@
           "build_turns": 3,
           "effects": {
             "recruit_xp": 1,
-            "weapon_upgrade": 1
+            "weapon_upgrade": 1,
+            "civic": -2.5,
+            "coercion": 2,
+            "burden": 2,
+            "martial": 4
           },
           "description": "A crown-funded garrison complex with its own armories and pay office. Service here is a career, not a season."
         },
@@ -798,7 +959,11 @@
           "effects": {
             "recruit_xp": 2,
             "weapon_upgrade": 1,
-            "armor_upgrade": 1
+            "armor_upgrade": 1,
+            "civic": -3,
+            "coercion": 2.5,
+            "burden": 2.5,
+            "martial": 5
           },
           "description": "The training halls of the household regiments, where the kingdom's best arms and hardest instructors are spent freely."
         }
@@ -819,7 +984,13 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "description": "The field where the war horn summons every able body. Courage is assumed; formation is negotiable."
+          "description": "The field where the war horn summons every able body. Courage is assumed; formation is negotiable.",
+          "effects": {
+            "civic": -1,
+            "coercion": 0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "tribal_brk_2",
@@ -827,7 +998,13 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "description": "A lodge for sworn warriors who winter together, feast together, and fight shoulder to shoulder come spring."
+          "description": "A lodge for sworn warriors who winter together, feast together, and fight shoulder to shoulder come spring.",
+          "effects": {
+            "civic": -1.5,
+            "coercion": 1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "tribal_brk_3",
@@ -836,7 +1013,11 @@
           "cost": 1500,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -2,
+            "coercion": 1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "The best of every clan train here under scarred champions. Their oaths bind them to the death of the last man."
         }
@@ -874,7 +1055,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.0,
-            "farm_income": 60
+            "farm_income": 60,
+            "civic": -0.8,
+            "burden": 0.5
           },
           "description": "Raised granaries keep the harvest dry and the rats hungry. A village that stores grain survives a bad year."
         },
@@ -886,7 +1069,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.5,
-            "farm_income": 90
+            "farm_income": 90,
+            "civic": -1.5,
+            "burden": 1
           },
           "description": "Heavy ploughs and ox teams break soil the old scratch-ploughs never touched. Yields climb, and so do rents."
         },
@@ -898,7 +1083,9 @@
           "build_turns": 3,
           "effects": {
             "growth": 2.0,
-            "farm_income": 120
+            "farm_income": 120,
+            "civic": -2.2,
+            "burden": 1.5
           },
           "description": "Ditches and sluices carry water to fields that once gambled on rain. Two crops a year where there was one."
         },
@@ -910,7 +1097,9 @@
           "build_turns": 4,
           "effects": {
             "growth": 2.5,
-            "farm_income": 150
+            "farm_income": 150,
+            "civic": -3,
+            "burden": 2
           },
           "description": "Vast consolidated estates worked by gangs of laborers, feeding the city and enriching a very few. The countryside empties into the streets."
         }
@@ -945,7 +1134,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.0,
-            "farm_income": 80
+            "farm_income": 80,
+            "civic": -0.8,
+            "burden": 0.5
           },
           "description": "Counterweighted sweeps lift river water to gardens above the flood line. Onions, flax, and fodder all year round."
         },
@@ -957,7 +1148,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.5,
-            "farm_income": 120
+            "farm_income": 120,
+            "civic": -1.5,
+            "burden": 1
           },
           "description": "Whitewashed granary courts tally the god-given surplus. Egypt's wealth is counted in baskets, not coins."
         },
@@ -969,7 +1162,9 @@
           "build_turns": 3,
           "effects": {
             "growth": 2.0,
-            "farm_income": 160
+            "farm_income": 160,
+            "civic": -2.2,
+            "burden": 1.5
           },
           "description": "Dredged canals and regulated sluices push the black land outward year by year. Surveyors re-measure it all after every flood."
         },
@@ -981,7 +1176,9 @@
           "build_turns": 4,
           "effects": {
             "growth": 2.5,
-            "farm_income": 210
+            "farm_income": 210,
+            "civic": -3,
+            "burden": 2
           },
           "description": "Crown estates run by ministries of grain, feeding cities and fleets from the richest farmland under the sun."
         }
@@ -1017,7 +1214,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.0,
-            "farm_income": 50
+            "farm_income": 50,
+            "civic": -0.8,
+            "burden": 0.5
           },
           "description": "Permanent strip fields divided among the clans, with barley for bread and beer in careful proportion."
         },
@@ -1029,7 +1228,9 @@
           "build_turns": 2,
           "effects": {
             "growth": 1.5,
-            "farm_income": 75
+            "farm_income": 75,
+            "civic": -1.5,
+            "burden": 1
           },
           "description": "Fenced pasture and droving paths for the herds that are a tribe's true treasury. Wealth here has legs."
         }
@@ -1049,7 +1250,12 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "description": "Fenced pasture and a farrier's shed supplying horses to those citizens rich enough to ride to war."
+          "description": "Fenced pasture and a farrier's shed supplying horses to those citizens rich enough to ride to war.",
+          "effects": {
+            "civic": -0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "roman_stb_2",
@@ -1057,7 +1263,12 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 2,
-          "description": "Proper stables and a riding ring for the equestrian class. The horses are better bred than some of the riders."
+          "description": "Proper stables and a riding ring for the equestrian class. The horses are better bred than some of the riders.",
+          "effects": {
+            "civic": -1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "roman_stb_3",
@@ -1066,7 +1277,10 @@
           "cost": 3600,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "Riding masters, many of them hired Greeks and Gauls, drill squadrons in wheeling and pursuit. Rome buys the skills it lacks."
         }
@@ -1086,7 +1300,12 @@
           "min_settlement_level": "village",
           "cost": 400,
           "build_turns": 1,
-          "description": "Every family keeps horses; the corral just keeps them in one place. Children ride before they walk well."
+          "description": "Every family keeps horses; the corral just keeps them in one place. Children ride before they walk well.",
+          "effects": {
+            "civic": -0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "eastern_stb_2",
@@ -1094,7 +1313,12 @@
           "min_settlement_level": "town",
           "cost": 900,
           "build_turns": 2,
-          "description": "Bloodlines are tracked as carefully as genealogies. A good stallion is worth a village's yearly tribute."
+          "description": "Bloodlines are tracked as carefully as genealogies. A good stallion is worth a village's yearly tribute.",
+          "effects": {
+            "civic": -1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "eastern_stb_3",
@@ -1103,7 +1327,10 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "Tall Nisean horses, bred to carry an armored man all day, graze under armed guard. Kings send gifts to the stablemaster."
         },
@@ -1114,7 +1341,10 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "recruit_xp": 2
+            "recruit_xp": 2,
+            "civic": -2,
+            "burden": 2,
+            "martial": 4
           },
           "description": "Armories of scale barding beside the stalls, and a training ground where horse and rider learn to become one iron beast."
         }
@@ -1136,7 +1366,12 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "description": "A modest paddock supplying mounts for scouts and dispatch riders. Cavalry is an expensive afterthought here."
+          "description": "A modest paddock supplying mounts for scouts and dispatch riders. Cavalry is an expensive afterthought here.",
+          "effects": {
+            "civic": -0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "civic_stb_2",
@@ -1144,7 +1379,12 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 2,
-          "description": "Stables maintained at public expense for the wealthy young men who form the city's mounted arm."
+          "description": "Stables maintained at public expense for the wealthy young men who form the city's mounted arm.",
+          "effects": {
+            "civic": -1,
+            "burden": 1,
+            "martial": 2
+          }
         },
         {
           "id": "civic_stb_3",
@@ -1153,7 +1393,10 @@
           "cost": 3600,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -1.5,
+            "burden": 1.5,
+            "martial": 3
           },
           "description": "Crown stables of imported bloodstock with grooms, veterinarians, and drillmasters to match. Squadrons here ride knee to knee."
         }
@@ -1173,7 +1416,12 @@
           "min_settlement_level": "town",
           "cost": 500,
           "build_turns": 1,
-          "description": "Hardy ponies penned by wattle fencing, sure-footed on hills that would lame a parade horse."
+          "description": "Hardy ponies penned by wattle fencing, sure-footed on hills that would lame a parade horse.",
+          "effects": {
+            "civic": -0.5,
+            "burden": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "tribal_stb_2",
@@ -1182,7 +1430,10 @@
           "cost": 1400,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "civic": -1,
+            "burden": 1,
+            "martial": 2
           },
           "description": "The chief's picked riders train and stable their mounts together, ready to strike wherever the war horn calls."
         }
@@ -1203,7 +1454,11 @@
           "min_settlement_level": "town",
           "cost": 400,
           "build_turns": 1,
-          "description": "Straw targets at ever-greater ranges. Here the bow is not a skill but an inheritance."
+          "description": "Straw targets at ever-greater ranges. Here the bow is not a skill but an inheritance.",
+          "effects": {
+            "burden": 0.5,
+            "martial": 0.5
+          }
         },
         {
           "id": "eastern_arc_2",
@@ -1211,7 +1466,11 @@
           "min_settlement_level": "large_town",
           "cost": 1000,
           "build_turns": 2,
-          "description": "Master bowyers season horn and sinew beside the range, matching each archer to a bow that fits like a glove."
+          "description": "Master bowyers season horn and sinew beside the range, matching each archer to a bow that fits like a glove.",
+          "effects": {
+            "burden": 1,
+            "martial": 1.2
+          }
         },
         {
           "id": "eastern_arc_3",
@@ -1220,7 +1479,9 @@
           "cost": 2200,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "burden": 1.5,
+            "martial": 2
           },
           "description": "Champions shoot at gallop-speed marks for silver rings while boys watch and burn to match them."
         }
@@ -1242,7 +1503,11 @@
           "min_settlement_level": "town",
           "cost": 400,
           "build_turns": 1,
-          "description": "Javelins and slings for the young and the poor, who learn to sting and scatter before the lines close."
+          "description": "Javelins and slings for the young and the poor, who learn to sting and scatter before the lines close.",
+          "effects": {
+            "burden": 0.5,
+            "martial": 0.5
+          }
         },
         {
           "id": "civic_arc_2",
@@ -1250,7 +1515,11 @@
           "min_settlement_level": "minor_city",
           "cost": 1000,
           "build_turns": 2,
-          "description": "A walled range with paid instructors, many of them Cretan. Massed volleys are drilled by trumpet call."
+          "description": "A walled range with paid instructors, many of them Cretan. Massed volleys are drilled by trumpet call.",
+          "effects": {
+            "burden": 1,
+            "martial": 1.2
+          }
         }
       ]
     },
@@ -1268,7 +1537,11 @@
           "min_settlement_level": "town",
           "cost": 350,
           "build_turns": 1,
-          "description": "Marksmen who feed their families with bow and sling need little teaching to aim at men instead."
+          "description": "Marksmen who feed their families with bow and sling need little teaching to aim at men instead.",
+          "effects": {
+            "burden": 0.5,
+            "martial": 0.5
+          }
         },
         {
           "id": "tribal_arc_2",
@@ -1276,7 +1549,11 @@
           "min_settlement_level": "large_town",
           "cost": 900,
           "build_turns": 2,
-          "description": "The best hunters winter together, trading tricks of wind, range, and ambush that no drillmaster teaches."
+          "description": "The best hunters winter together, trading tricks of wind, range, and ambush that no drillmaster teaches.",
+          "effects": {
+            "burden": 1,
+            "martial": 1.2
+          }
         }
       ]
     },
@@ -1298,7 +1575,12 @@
           "min_settlement_level": "large_town",
           "cost": 800,
           "build_turns": 2,
-          "description": "Sawpits, seasoned timber, and men who think in angles. Rams and mantlets take shape between contracts for bridges."
+          "description": "Sawpits, seasoned timber, and men who think in angles. Rams and mantlets take shape between contracts for bridges.",
+          "effects": {
+            "burden": 0.5,
+            "knowledge": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "siege_wk_2",
@@ -1306,7 +1588,12 @@
           "min_settlement_level": "minor_city",
           "cost": 2000,
           "build_turns": 3,
-          "description": "Torsion springs of hair and sinew are wound and tested here. A well-tuned ballista threads a bolt through a window at two hundred paces."
+          "description": "Torsion springs of hair and sinew are wound and tested here. A well-tuned ballista threads a bolt through a window at two hundred paces.",
+          "effects": {
+            "burden": 1,
+            "knowledge": 1,
+            "martial": 2
+          }
         },
         {
           "id": "siege_wk_3",
@@ -1315,7 +1602,10 @@
           "cost": 4500,
           "build_turns": 4,
           "effects": {
-            "weapon_upgrade": 1
+            "weapon_upgrade": 1,
+            "burden": 1.5,
+            "knowledge": 1.5,
+            "martial": 3
           },
           "description": "Halls where master engineers build wall-breakers on geometric principle, and their smiths turn out finer edges for the army besides."
         }
@@ -1339,7 +1629,10 @@
           "cost": 400,
           "build_turns": 1,
           "effects": {
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "Stalls, awnings, and shouted prices on fixed market days. Coin begins to displace barter."
         },
@@ -1351,7 +1644,10 @@
           "build_turns": 2,
           "effects": {
             "trade_pct": 20,
-            "growth": 0.5
+            "growth": 0.5,
+            "burden": 0.8,
+            "assimilation_pull": 1,
+            "knowledge": 2
           },
           "description": "A roofed exchange where merchants store goods, settle debts, and hire caravans. Strangers' coin is weighed, not trusted."
         },
@@ -1363,7 +1659,10 @@
           "build_turns": 2,
           "effects": {
             "trade_pct": 30,
-            "growth": 0.5
+            "growth": 0.5,
+            "burden": 1,
+            "assimilation_pull": 1.5,
+            "knowledge": 3
           },
           "description": "Whole streets of warehouses, moneychangers, and foreign factors. Three languages are spoken before breakfast."
         },
@@ -1375,7 +1674,10 @@
           "build_turns": 3,
           "effects": {
             "trade_pct": 40,
-            "growth": 1.0
+            "growth": 1.0,
+            "burden": 1.2,
+            "assimilation_pull": 2,
+            "knowledge": 4
           },
           "description": "A colonnaded hall where bulk grain, metal, and cloth change hands by contract. The city's pulse is counted here in cartloads."
         },
@@ -1388,7 +1690,10 @@
           "effects": {
             "trade_pct": 50,
             "growth": 1.0,
-            "happiness": 5
+            "happiness": 5,
+            "burden": 1.5,
+            "assimilation_pull": 2.5,
+            "knowledge": 5
           },
           "description": "An emporium famous across the sea, drawing goods from lands most citizens cannot name. Fortunes are made and lost by the tide table."
         }
@@ -1409,7 +1714,10 @@
           "cost": 500,
           "build_turns": 1,
           "effects": {
-            "trade_pct": 15
+            "trade_pct": 15,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "Tin, dye, ivory, and salt fish under one clamorous roof. The Punic trader's scales are honest; his prices are not."
         },
@@ -1421,7 +1729,10 @@
           "build_turns": 2,
           "effects": {
             "trade_pct": 30,
-            "growth": 0.5
+            "growth": 0.5,
+            "burden": 0.8,
+            "assimilation_pull": 1,
+            "knowledge": 2
           },
           "description": "A walled yard where desert caravans meet the coastal trade, and goods from beyond the maps change hands at dawn."
         },
@@ -1433,7 +1744,10 @@
           "build_turns": 2,
           "effects": {
             "trade_pct": 45,
-            "growth": 0.5
+            "growth": 0.5,
+            "burden": 1,
+            "assimilation_pull": 1.5,
+            "knowledge": 3
           },
           "description": "The great families pool cargoes and split risks in marble offices. A sealed tablet here can move a fleet."
         },
@@ -1445,7 +1759,10 @@
           "build_turns": 3,
           "effects": {
             "trade_pct": 60,
-            "growth": 1.0
+            "growth": 1.0,
+            "burden": 1.2,
+            "assimilation_pull": 2,
+            "knowledge": 4
           },
           "description": "Rows of clerks track debts from Gades to Tyre. It is said no cargo sails the western sea unrecorded here."
         },
@@ -1458,7 +1775,10 @@
           "effects": {
             "trade_pct": 75,
             "growth": 1.0,
-            "happiness": 5
+            "happiness": 5,
+            "burden": 1.5,
+            "assimilation_pull": 2.5,
+            "knowledge": 5
           },
           "description": "The clearinghouse of half the world's silver, where every trade wind ends and every price begins."
         }
@@ -1480,7 +1800,10 @@
           "cost": 300,
           "build_turns": 1,
           "effects": {
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "Hides for salt, iron for amber, on ground held sacred against feuds. Trade is truce made profitable."
         },
@@ -1491,7 +1814,10 @@
           "cost": 700,
           "build_turns": 2,
           "effects": {
-            "trade_pct": 18
+            "trade_pct": 18,
+            "burden": 0.8,
+            "assimilation_pull": 1,
+            "knowledge": 2
           },
           "description": "A permanent post where southern merchants pay in wine and silver coin. The chief takes his tithe at the gate."
         },
@@ -1503,7 +1829,10 @@
           "build_turns": 2,
           "effects": {
             "trade_pct": 25,
-            "happiness": 5
+            "happiness": 5,
+            "burden": 1,
+            "assimilation_pull": 1.5,
+            "knowledge": 3
           },
           "description": "A true market town within the ramparts, striking its own coinage and drawing traders from a month's ride away."
         }
@@ -1525,7 +1854,10 @@
           "build_turns": 1,
           "effects": {
             "road_level": 1,
-            "trade_pct": 5
+            "trade_pct": 5,
+            "burden": 1,
+            "assimilation_pull": 1,
+            "martial": 0.5
           },
           "description": "Surveyed, ditched, and cambered so carts roll in any weather. The straight line is a Roman argument."
         },
@@ -1537,7 +1869,10 @@
           "build_turns": 2,
           "effects": {
             "road_level": 2,
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 1.5,
+            "assimilation_pull": 2,
+            "martial": 1
           },
           "description": "Fitted paving over deep foundations, with milestones counting the distance to the forum. Legions march twenty miles and complain about the food, not the road."
         },
@@ -1549,7 +1884,10 @@
           "build_turns": 3,
           "effects": {
             "road_level": 3,
-            "trade_pct": 15
+            "trade_pct": 15,
+            "burden": 2,
+            "assimilation_pull": 3,
+            "martial": 1.5
           },
           "description": "A monumental highway with bridges, cuttings, and posting stations. Empires are held together by exactly this."
         }
@@ -1575,7 +1913,10 @@
           "build_turns": 1,
           "effects": {
             "road_level": 1,
-            "trade_pct": 5
+            "trade_pct": 5,
+            "burden": 1,
+            "assimilation_pull": 1,
+            "martial": 0.5
           },
           "description": "Worn ruts improved with gravel and fords marked with posts. Not glorious, but the mules approve."
         },
@@ -1587,7 +1928,10 @@
           "build_turns": 2,
           "effects": {
             "road_level": 2,
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 1.5,
+            "assimilation_pull": 2,
+            "martial": 1
           },
           "description": "Paved causeways over the wet ground and cut ramps through the passes, with waystations a day's travel apart."
         }
@@ -1609,7 +1953,10 @@
           "build_turns": 1,
           "effects": {
             "road_level": 1,
-            "trade_pct": 5
+            "trade_pct": 5,
+            "burden": 1,
+            "assimilation_pull": 1,
+            "martial": 0.5
           },
           "description": "High, dry paths along the ridgelines, cleared and marked by the tribes. Invaders prefer the valleys; that is the point."
         }
@@ -1635,7 +1982,10 @@
           "build_turns": 2,
           "effects": {
             "port_level": 1,
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "A timber jetty, drying racks, and the first customs officer, universally despised. Coastal traders begin to call."
         },
@@ -1647,7 +1997,10 @@
           "build_turns": 3,
           "effects": {
             "port_level": 2,
-            "trade_pct": 20
+            "trade_pct": 20,
+            "burden": 1,
+            "assimilation_pull": 1,
+            "knowledge": 2
           },
           "description": "Stone moles shelter deep-hulled merchantmen, and cranes swing amphorae ashore by the hundred."
         },
@@ -1659,7 +2012,10 @@
           "build_turns": 4,
           "effects": {
             "port_level": 3,
-            "trade_pct": 30
+            "trade_pct": 30,
+            "burden": 1.5,
+            "assimilation_pull": 1.5,
+            "knowledge": 3
           },
           "description": "Breakwaters, a lighthouse, and berths for a hundred ships. Sailors say you can smell the money from the roadstead."
         }
@@ -1682,7 +2038,10 @@
           "build_turns": 2,
           "effects": {
             "port_level": 1,
-            "trade_pct": 15
+            "trade_pct": 15,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "Punic shipmasters make port pay from the first plank. Even the fishing boats carry a little cargo on the side."
         },
@@ -1694,7 +2053,10 @@
           "build_turns": 3,
           "effects": {
             "port_level": 2,
-            "trade_pct": 30
+            "trade_pct": 30,
+            "burden": 1,
+            "assimilation_pull": 1,
+            "knowledge": 2
           },
           "description": "Paired quays work loading and unloading at once, turning ships around before rival ports have finished the paperwork."
         },
@@ -1706,7 +2068,10 @@
           "build_turns": 4,
           "effects": {
             "port_level": 3,
-            "trade_pct": 45
+            "trade_pct": 45,
+            "burden": 1.5,
+            "assimilation_pull": 1.5,
+            "knowledge": 3
           },
           "description": "An engineered ring-harbor in the famous Punic style, its sheltered basin ranked with berths. The city's true crown is made of water."
         }
@@ -1730,7 +2095,10 @@
           "build_turns": 1,
           "effects": {
             "port_level": 1,
-            "trade_pct": 10
+            "trade_pct": 10,
+            "burden": 0.5,
+            "assimilation_pull": 0.5,
+            "knowledge": 1
           },
           "description": "Hulls drawn up on the shingle and a stone slip for heavy loads. Traders beach at dawn and are gone by dusk."
         }
@@ -1754,7 +2122,12 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "description": "Sheds where hulls dry out of the sun and shipwrights lay keels for coastal galleys."
+          "description": "Sheds where hulls dry out of the sun and shipwrights lay keels for coastal galleys.",
+          "effects": {
+            "burden": 0.5,
+            "knowledge": 0.5,
+            "martial": 1
+          }
         },
         {
           "id": "civic_nvy_2",
@@ -1763,7 +2136,10 @@
           "cost": 1800,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "burden": 1,
+            "knowledge": 1,
+            "martial": 2
           },
           "description": "Ramped slipways and seasoned timber stores turn out war galleys to a proven pattern. Crews drill on rowing frames ashore."
         },
@@ -1774,7 +2150,10 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "recruit_xp": 2
+            "recruit_xp": 2,
+            "burden": 1.5,
+            "knowledge": 1.5,
+            "martial": 3
           },
           "description": "A state arsenal of covered slips, rope walks, and bronze foundries that can lay down a squadron in a season."
         }
@@ -1796,7 +2175,10 @@
           "cost": 700,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "burden": 0.5,
+            "knowledge": 0.5,
+            "martial": 1
           },
           "description": "Even a small Punic yard builds to templates refined over centuries. The sea is the one craft Carthage will not hire out."
         },
@@ -1807,7 +2189,10 @@
           "cost": 1800,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 2
+            "recruit_xp": 2,
+            "burden": 1,
+            "knowledge": 1,
+            "martial": 2
           },
           "description": "Numbered, prefabricated timbers let these slipways replace a lost hull faster than an enemy can celebrate sinking it."
         },
@@ -1818,7 +2203,10 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "recruit_xp": 3
+            "recruit_xp": 3,
+            "burden": 1.5,
+            "knowledge": 1.5,
+            "martial": 3
           },
           "description": "The covered war-harbor's inner ring: admiral's island, drydocks, and shipwrights whose fathers' fathers did this work. Fleets are born here fully drilled."
         }
@@ -1839,7 +2227,9 @@
           "cost": 600,
           "build_turns": 2,
           "effects": {
-            "health": 5
+            "health": 5,
+            "civic": 4,
+            "burden": 1
           },
           "description": "Stone-lined drains carry filth away beneath the streets. Unlovely, unseen, and worth more than a temple in a wet year."
         },
@@ -1850,7 +2240,9 @@
           "cost": 1600,
           "build_turns": 3,
           "effects": {
-            "health": 10
+            "health": 10,
+            "civic": 8,
+            "burden": 2
           },
           "description": "Hot rooms, cold plunges, and gossip for the price of a small coin. The city scrubs itself clean daily."
         },
@@ -1861,7 +2253,9 @@
           "cost": 4000,
           "build_turns": 4,
           "effects": {
-            "health": 15
+            "health": 15,
+            "civic": 12,
+            "burden": 3
           },
           "description": "Arches stride across the valley bringing sweet water by the river-load. Fountains run in every quarter, and fevers grow rare."
         }
@@ -1885,7 +2279,9 @@
           "cost": 600,
           "build_turns": 2,
           "effects": {
-            "health": 5
+            "health": 5,
+            "civic": 4,
+            "burden": 1
           },
           "description": "Clean water piped to fountain houses in each quarter, ending the long walk to the river and half the summer's fluxes."
         },
@@ -1896,7 +2292,9 @@
           "cost": 1600,
           "build_turns": 3,
           "effects": {
-            "health": 10
+            "health": 10,
+            "civic": 8,
+            "burden": 2
           },
           "description": "Public washing courts and covered drains, kept by civic endowment. Physicians take students in the shade of the porticoes."
         },
@@ -1907,7 +2305,9 @@
           "cost": 4000,
           "build_turns": 4,
           "effects": {
-            "health": 15
+            "health": 15,
+            "civic": 12,
+            "burden": 3
           },
           "description": "Vast covered cisterns and settling tanks secure the water supply against drought, siege, and the diseases of crowds."
         }
@@ -1928,7 +2328,9 @@
           "cost": 300,
           "build_turns": 1,
           "effects": {
-            "health": 5
+            "health": 5,
+            "civic": 4,
+            "burden": 1
           },
           "description": "A stone-lined well over a guarded spring, ringed with offerings. Clean water is holy, and holiness keeps it clean."
         }
@@ -1949,7 +2351,9 @@
           "cost": 600,
           "build_turns": 2,
           "effects": {
-            "happiness": 5
+            "happiness": 5,
+            "civic": -2,
+            "burden": 0.5
           },
           "description": "A timber-fenced pit where paired fighters settle wagers in blood. The crowd forgets the grain price for an afternoon."
         },
@@ -1960,7 +2364,9 @@
           "cost": 1600,
           "build_turns": 3,
           "effects": {
-            "happiness": 10
+            "happiness": 10,
+            "civic": -4,
+            "burden": 1
           },
           "description": "Banked wooden seating around a proper sand floor, with beast hunts on festival days. Magistrates buy popularity by the bout."
         },
@@ -1971,7 +2377,9 @@
           "cost": 4000,
           "build_turns": 4,
           "effects": {
-            "happiness": 15
+            "happiness": 15,
+            "civic": -6,
+            "burden": 1.5
           },
           "description": "A monumental racing circuit seating tens of thousands. Chariot factions command loyalties that generals envy."
         }
@@ -1995,7 +2403,9 @@
           "cost": 600,
           "build_turns": 2,
           "effects": {
-            "happiness": 5
+            "happiness": 5,
+            "civic": -2,
+            "burden": 0.5
           },
           "description": "A small roofed hall for music, recitation, and civic prize-givings. The town discovers it has opinions about poets."
         },
@@ -2006,7 +2416,9 @@
           "cost": 1600,
           "build_turns": 3,
           "effects": {
-            "happiness": 10
+            "happiness": 10,
+            "civic": -4,
+            "burden": 1
           },
           "description": "Stone tiers set into the hillside, where the whole city weeps at tragedies and howls at comedies about its own councilmen."
         },
@@ -2017,7 +2429,9 @@
           "cost": 4000,
           "build_turns": 4,
           "effects": {
-            "happiness": 15
+            "happiness": 15,
+            "civic": -6,
+            "burden": 1.5
           },
           "description": "Theatre, processional way, and games-ground in one precinct, filling the calendar with festivals the poor attend free."
         }
@@ -2038,7 +2452,9 @@
           "cost": 300,
           "build_turns": 1,
           "effects": {
-            "happiness": 5
+            "happiness": 5,
+            "civic": -2,
+            "burden": 0.5
           },
           "description": "Roast meat, strong beer, and boasting contests under one smoky roof. Grudges are settled or at least postponed."
         },
@@ -2049,7 +2465,9 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "happiness": 10
+            "happiness": 10,
+            "civic": -4,
+            "burden": 1
           },
           "description": "A great ground for horse races, wrestling, and the seasonal gatherings where the whole people remembers it is one people."
         }
@@ -2074,7 +2492,10 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "law": 3
+            "law": 3,
+            "civic": 2,
+            "burden": 0.5,
+            "knowledge": 3
           },
           "description": "Boys copy contracts and maxims until their letters are fit for court. A literate city argues on paper instead of in the street."
         },
@@ -2085,7 +2506,10 @@
           "cost": 2400,
           "build_turns": 3,
           "effects": {
-            "law": 5
+            "law": 5,
+            "civic": 3.5,
+            "burden": 1,
+            "knowledge": 5.5
           },
           "description": "Hired lecturers teach rhetoric, geometry, and the art of governing men. Future magistrates make useful friends here."
         },
@@ -2097,7 +2521,10 @@
           "build_turns": 5,
           "effects": {
             "law": 8,
-            "happiness": 5
+            "happiness": 5,
+            "civic": 5,
+            "burden": 1.5,
+            "knowledge": 8
           },
           "description": "Tens of thousands of scrolls, resident scholars, and copyists working by lamplight. Kings compete to be its patron."
         }
@@ -2121,7 +2548,10 @@
           "build_turns": 1,
           "effects": {
             "law": 4,
-            "happiness": -2
+            "happiness": -2,
+            "civic": -6,
+            "coercion": 5,
+            "burden": 1
           },
           "description": "A stark public ground where sentences are carried out before witnesses. The lesson is brutal, and it is learned."
         }
@@ -2148,7 +2578,10 @@
           "cost": 1200,
           "build_turns": 2,
           "effects": {
-            "mine_income": 100
+            "mine_income": 100,
+            "civic": -4,
+            "coercion": 2,
+            "burden": 3
           },
           "description": "Open trenches follow the bright veins into the hillside, and the assayer's furnace never cools."
         },
@@ -2159,7 +2592,10 @@
           "cost": 2600,
           "build_turns": 3,
           "effects": {
-            "mine_income": 220
+            "mine_income": 220,
+            "civic": -7,
+            "coercion": 3,
+            "burden": 5
           },
           "description": "Timbered shafts, drainage wheels, and gangs working by lamplight far underground. The mint upstairs sets the pace."
         }
@@ -2187,7 +2623,10 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "mine_income": 80
+            "mine_income": 80,
+            "civic": -4,
+            "coercion": 2,
+            "burden": 3
           },
           "description": "Ore pits and charcoal-hungry bloomeries smoking on the hillside. Every smith in the region buys from these fires."
         },
@@ -2198,7 +2637,10 @@
           "cost": 2000,
           "build_turns": 3,
           "effects": {
-            "mine_income": 170
+            "mine_income": 170,
+            "civic": -7,
+            "coercion": 3,
+            "burden": 5
           },
           "description": "Driven galleries and ranks of furnaces feed a trade in blooms and billets that armies quietly depend upon."
         }
@@ -2226,7 +2668,10 @@
           "cost": 900,
           "build_turns": 2,
           "effects": {
-            "mine_income": 180
+            "mine_income": 180,
+            "civic": -4,
+            "coercion": 2,
+            "burden": 3
           },
           "description": "Panners and pit gangs chase the bright seams; what they raise goes straight to the treasury."
         },
@@ -2237,7 +2682,10 @@
           "cost": 2200,
           "build_turns": 3,
           "effects": {
-            "mine_income": 360
+            "mine_income": 360,
+            "civic": -7,
+            "coercion": 3,
+            "burden": 5
           },
           "description": "Timbered shafts follow the vein into the hill. Torches gutter, ore baskets rise, and the mint never sleeps."
         }

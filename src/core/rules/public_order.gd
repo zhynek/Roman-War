@@ -153,7 +153,16 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	var order := total(data, state, region_id)
 	var result := {"rioted": false, "revolted": false}
 
-	if order >= float(order_rules["riot_threshold"]):
+	# A province that has withdrawn its consent entirely is past the point where
+	# the garrison decides the question. Coercion buys time here, not immunity:
+	# it keeps the ORDER number high while grievance climbs, and then this check
+	# fires anyway. That is the whole shape of the trap.
+	var society_rules: Dictionary = data.balance["society"]
+	var stocks := SocietyRules.stocks_of(data, settlement)
+	var in_open_revolt: bool = String(stocks["unrest_state"]) == SocietyRules.UNREST_REBELLIOUS \
+		and int(stocks["unrest_turns"]) >= int(society_rules["rebellious_turns_to_revolt"])
+
+	if order >= float(order_rules["riot_threshold"]) and not in_open_revolt:
 		settlement["low_order_streak"] = 0
 		return result
 
@@ -168,13 +177,9 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	else:
 		settlement["low_order_streak"] = 0
 
-	# Two roads to secession: an order collapse (as before), or a province that
-	# has been in open revolt long enough to choose its own masters — the second
-	# is the one accumulated grievance drives.
-	var society_rules: Dictionary = data.balance["society"]
-	var stocks := SocietyRules.stocks_of(data, settlement)
-	var in_open_revolt: bool = String(stocks["unrest_state"]) == SocietyRules.UNREST_REBELLIOUS \
-		and int(stocks["unrest_turns"]) >= int(society_rules["rebellious_turns_to_revolt"])
+	# Two roads to secession: an order collapse (as before), or a province that has
+	# been in open revolt long enough to choose its own masters — the second is
+	# the one accumulated grievance drives, and no garrison prevents it.
 	if in_open_revolt or settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
 		_revolt(data, state, region_id)
 		result["revolted"] = true

@@ -341,7 +341,18 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	var income := float(EconomyRules.faction_turn_breakdown(data, state, faction_id)["income"])
 	var elite := float(stocks["elite_pressure"])
 	var martial_share := float(stocks["martial_ethos"]) / 100.0
-	elite += maxf(income, 0.0) / 1000.0 * float(rules["elite_gain_per_1000_income"])
+	# A state its own elite believes in channels ambition into service; one they
+	# do not turns the same men into factions.
+	var legitimacy_share := 0.0
+	if owned > 0:
+		legitimacy_share = legitimacy_total / float(owned) / 100.0
+	var damping := maxf(0.0, 1.0 - legitimacy_share * float(rules["elite_legitimacy_damping"]))
+	var claimants := maxf(income, 0.0) / 1000.0 * float(rules["elite_gain_per_1000_income"])
+	# Craft is double-edged. Schools and libraries do not only preserve technique,
+	# they produce educated sons who expect a career — the credentialed aspirants
+	# a state must find somewhere to put.
+	claimants += float(stocks["knowledge"]) * float(rules["elite_gain_per_knowledge"])
+	elite += claimants * damping
 	elite -= float(offices) * float(rules["elite_office_absorption_per_tier"])
 	elite -= float(commands) * float(rules["elite_command_absorption_per_army"]) \
 		* (float(rules["elite_command_martial_floor"]) + martial_share)
@@ -366,7 +377,6 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	var knowledge := float(stocks["knowledge"])
 	var accrual := 0.0
 	if owned > 0:
-		var legitimacy_share := legitimacy_total / float(owned) / 100.0
 		var floor_share := float(rules["knowledge_legitimacy_floor"])
 		accrual = knowledge_buildings / float(owned) * float(rules["knowledge_accrual_scale"]) \
 			* (floor_share + (1.0 - floor_share) * legitimacy_share)
@@ -420,9 +430,12 @@ static func apply_settlement_turn(data: GameData, state: Dictionary, region_id: 
 	new_grievance = clampf(new_grievance, 0.0, float(rules["grievance_max"]))
 
 	# 3. Belonging diffuses on contact. A resentful province never assimilates.
+	# Diffusion toward full belonging, with resentment as a proportional drag: a
+	# province that resents you stops becoming yours and slips back, but a home
+	# province does not turn foreign merely because it is unhappy.
 	var new_assimilation := assimilation \
 		+ float(rules["assimilation_rate"]) * contact * (100.0 - assimilation) / 100.0 \
-		- float(rules["assimilation_friction_scale"]) * grievance / 100.0
+		- float(rules["assimilation_friction_scale"]) * grievance / 100.0 * assimilation / 100.0
 	new_assimilation = clampf(new_assimilation, 0.0, float(rules["assimilation_max"]))
 
 	# 4. Unrest ignites high and extinguishes low. Fixing the cause does not
