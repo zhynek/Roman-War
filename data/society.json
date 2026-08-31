@@ -1,0 +1,143 @@
+{
+  "$schema": "../schemas/society.schema.json",
+  "axes": [
+    {
+      "id": "legitimacy",
+      "name": "Standing",
+      "scope": "settlement",
+      "description": "How far this province obeys you because it accepts you, rather than because it must. Standing is not bought once; it drifts toward whatever you have actually built and keeps drifting when you stop.",
+      "raised_by": "Public works, justice, temples of the people's own gods, and a province that has come to think of itself as yours.",
+      "lowered_by": "Rule by fear, a grasping elite, a militarised state, and resentment already accumulated."
+    },
+    {
+      "id": "grievance",
+      "name": "Grievance",
+      "scope": "settlement",
+      "description": "What a province has been made to bear against its will, added up over years. Whatever your demands exceed your standing must be coerced, and the coerced share is what collects here. A garrison holds the lid down; it does not lower the pressure.",
+      "raised_by": "Taxes, conscription, quartered troops, squalor, corruption, occupation, and being ruled by strangers.",
+      "lowered_by": "Standing in excess of what you ask — and nothing else. It drains far more slowly than it fills."
+    },
+    {
+      "id": "assimilation",
+      "name": "Belonging",
+      "scope": "settlement",
+      "description": "How far this people has come to count itself among yours. It spreads by contact — roads, markets, your own gods given local names — and it will not spread at all into a province that resents you.",
+      "raised_by": "Buildings of your own culture, roads, and the long habit of being governed by you.",
+      "lowered_by": "Grievance. A resentful province never becomes yours, however long you hold it."
+    },
+    {
+      "id": "elite_pressure",
+      "name": "Ambition",
+      "scope": "faction",
+      "description": "The number of great men who expect a command, a governorship or a name in the histories, measured against the number of such places that exist. Wealth and conquest breed claimants faster than any state creates posts for them.",
+      "raised_by": "Income, and every province taken.",
+      "lowered_by": "Offices to fill and armies to lead. A state with neither has nowhere to put its ambitious sons but into each other."
+    },
+    {
+      "id": "martial_ethos",
+      "name": "Martial Spirit",
+      "scope": "faction",
+      "description": "What your people have come to believe they are for. It follows the share of them under arms and the halls you build to keep them so — and, being a disposition rather than a policy, it outlives the war that raised it.",
+      "raised_by": "Men under arms, barracks, ranges, stables and the temples of war.",
+      "lowered_by": "Disbanding, and time. Slowly."
+    },
+    {
+      "id": "knowledge",
+      "name": "Craft",
+      "scope": "faction",
+      "description": "What your people have worked out and can still do. Craft is a practice, not a possession: it decays every year it is not taught, and a society in collapse learns nothing.",
+      "raised_by": "Schools, libraries, markets, harbours and forges — weighted by how well the society they sit in is functioning.",
+      "lowered_by": "Simply the passage of time, unless institutions carry it forward."
+    }
+  ],
+  "unrest_states": [
+    {
+      "id": "calm",
+      "name": "Settled",
+      "description": "The province goes about its business. Whatever it is asked, it can bear."
+    },
+    {
+      "id": "restive",
+      "name": "Restive",
+      "description": "Grievance has crossed the point where it organises itself: sullen markets, refused levies, tax farmers who need an escort. It will not settle again until the resentment falls far below where it started — that gap is why this is worth avoiding rather than fixing."
+    },
+    {
+      "id": "rebellious",
+      "name": "In Revolt",
+      "description": "The province is no longer governed, only occupied. A few more turns of this and it will choose its own masters."
+    }
+  ],
+  "patterns": [
+    {
+      "id": "elite_overproduction",
+      "name": "Too Many Claimants",
+      "description": "There are more great houses expecting a command than there are commands. They have begun to compete for them by other means.",
+      "historical_note": "Structural-demographic theory calls this elite overproduction: prosperity multiplies the elite faster than the state multiplies positions, and the surplus turns to factional violence. It is the standard reading of the late Roman Republic's collapse — and, on the same model, of the crises of Song China, the Fronde, and the antebellum United States."
+    },
+    {
+      "id": "placation_trap",
+      "name": "Bread Without Standing",
+      "description": "The games are full and the province is quiet, and yet it grants you nothing it is not paid for.",
+      "historical_note": "Spectacle placates without legitimating. Juvenal's panem et circenses was a complaint that the Roman people had exchanged the things that made their consent meaningful for the things that made their acquiescence cheap. Order bought this way has to be bought again every year."
+    },
+    {
+      "id": "coercion_spiral",
+      "name": "The Garrison's Shadow",
+      "description": "Order here rests on the soldiers standing in the square. Beneath them, the grievance has not stopped rising.",
+      "historical_note": "Weber distinguished domination that is obeyed from domination that is merely enforced. Coercion suppresses the symptom while the cause accumulates — so the province looks governable right up until the legion is needed elsewhere."
+    },
+    {
+      "id": "malthusian_squeeze",
+      "name": "More Mouths Than Fields",
+      "description": "The city has grown past what its land, its water and its drains can carry.",
+      "historical_note": "The Malthusian ceiling: population rises toward the limit its infrastructure sets, and immiseration at that limit converts directly into political pressure. Raising the ceiling is engineering; ignoring it is a famine with a date on it."
+    },
+    {
+      "id": "frontier_cohesion",
+      "name": "Cohesion at the Edge",
+      "description": "The hard provinces at your border hold together better than the rich ones at your heart.",
+      "historical_note": "Ibn Khaldun's asabiyya: group solidarity is forged by shared hardship at the frontier and dissolves in the comfort of the metropolis, which is why dynasties are founded by the periphery and lost by the centre."
+    },
+    {
+      "id": "civic_dividend",
+      "name": "The Slow Dividend",
+      "description": "Work begun a generation ago is paying now, in a province that no longer needs watching.",
+      "historical_note": "Public investment compounds on a timescale longer than any single reign, which is precisely why it is so often deferred. The aqueducts, roads and courts that made Roman provinces governable were built by men who did not live to govern them."
+    },
+    {
+      "id": "knowledge_loss",
+      "name": "What Was Once Known",
+      "description": "A thing your people could do is now a thing they remember being able to do.",
+      "historical_note": "Technique is carried by living practitioners and standing institutions, not by the fact of having once discovered it. Hydraulic concrete, Greek fire and the water-lifting gear of the Nile were all lost this way — not destroyed, simply not taught to anyone."
+    },
+    {
+      "id": "conquest_indigestion",
+      "name": "Swallowed Whole",
+      "description": "You have taken more than you can govern. The wealth arrived at once; the administration has not.",
+      "historical_note": "Rapid conquest delivers plunder immediately and legitimacy never. Rome's second-century acquisitions made a handful of families enormously rich, flooded Italy with slaves and displaced peasants, and produced the century of civil war that followed."
+    },
+    {
+      "id": "legibility_gap",
+      "name": "Ruling in the Dark",
+      "description": "What you are told about your far provinces is old, rounded, and shaped by the man who told you.",
+      "historical_note": "A state can only act on what it can see, and seeing is infrastructure: surveys, censuses, roads, salaried officials. Where those are absent the centre governs by rumour — which is why every serious empire builds the apparatus of legibility before it builds anything else."
+    }
+  ],
+  "clarity_levels": [
+    {
+      "id": "exact",
+      "name": "Well administered",
+      "description": "Roads, records and a resident governor: the figures reaching you are this turn's and they are exact."
+    },
+    {
+      "id": "banded",
+      "name": "Reported",
+      "description": "Word arrives, but late and rounded. You are reading a survey, not the province."
+    },
+    {
+      "id": "rumour",
+      "name": "Barely governed",
+      "description": "No road, no records, no one of yours standing there. You have opinions about this province, not information."
+    }
+  ]
+}

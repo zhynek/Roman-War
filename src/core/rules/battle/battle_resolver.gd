@@ -8,7 +8,11 @@ extends RefCounted
 ##   resolve(data, rng, attacker_units, defender_units, context) -> BattleResult
 ##
 ##   attacker_units / defender_units: Arrays of unit dicts
-##     {template: String, experience: int 0-9, strength_pct: int 1-100}
+##     {template: String, experience: int 0-9, strength_pct: int 1-100,
+##      weapon: int 0-2, armor: int 0-2}
+##     weapon/armor are stamped at recruitment from the raising settlement's
+##     forges and armouries and travel with the unit; older units and mercenaries
+##     may omit them, so read them with .get(..., 0).
 ##     Mutated IN PLACE: casualties reduce strength_pct, destroyed units are
 ##     removed, survivors may gain experience.
 ##
@@ -38,20 +42,23 @@ static func force_strength(data: GameData, units: Array, general: Variant, exper
 	## Shared strength estimate: soldiers x quality x experience, led by a
 	## general profile {command, troop_morale} of EFFECTIVE values (base
 	## attributes plus trait and retinue modifiers — see CharacterRules).
+	var battle_rules: Dictionary = data.balance["battle"]
 	var strength := 0.0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if template.is_empty():
 			continue
 		var soldiers := float(template["soldiers"]) * float(unit["strength_pct"]) / 100.0
-		var quality := float(template["attack"]) + float(template.get("missile_attack", 0)) * 0.5 \
-			+ float(template["defense"]) + float(template["morale"]) * 0.5 \
+		var weapon := float(unit.get("weapon", 0)) * float(battle_rules["weapon_upgrade_attack_pct"]) / 100.0
+		var armor := float(unit.get("armor", 0)) * float(battle_rules["armor_upgrade_defense_pct"]) / 100.0
+		var quality := (float(template["attack"]) + float(template.get("missile_attack", 0)) * 0.5) \
+				* (1.0 + weapon) \
+			+ (float(template["defense"]) + float(template["morale"]) * 0.5) * (1.0 + armor) \
 			+ float(template.get("charge", 0)) * 0.25
 		var experience_bonus := 1.0 + float(unit["experience"]) * experience_pct_per_chevron / 100.0
 		strength += soldiers * quality * experience_bonus
 	if general is Dictionary and not (general as Dictionary).is_empty():
 		var profile := general as Dictionary
-		var battle_rules: Dictionary = data.balance["battle"]
 		var character_rules: Dictionary = data.balance["characters"]
 		strength *= 1.0 + float(profile.get("command", 0)) \
 			* float(battle_rules["general_command_bonus_pct"]) / 100.0

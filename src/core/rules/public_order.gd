@@ -1,6 +1,12 @@
 class_name PublicOrderRules
 ## Public order = base 100 + a summed list of named factors (Law and Happiness
 ## both feed it; Law additionally suppresses corruption in EconomyRules).
+##
+## Order is now a READOUT of the societal stocks as much as a thing in itself:
+## Standing and Grievance enter as named factors, and coercion buys order
+## without buying consent. That asymmetry is deliberate — a garrisoned province
+## reads calm while its grievance climbs, and riots when the accumulated
+## resentment finally outweighs the force holding it down.
 
 
 static func breakdown(data: GameData, state: Dictionary, region_id: String) -> Array:
@@ -72,6 +78,31 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if event_happiness != null and float(event_happiness["value"]) != 0.0:
 		factors.append({"label": "events", "value": float(event_happiness["value"])})
 
+	var society_rules: Dictionary = data.balance["society"]
+	var stocks := SocietyRules.stocks_of(data, settlement)
+
+	var standing := (float(stocks["legitimacy"]) - float(society_rules["order_legitimacy_neutral"])) \
+		* float(society_rules["order_legitimacy_scale"])
+	if standing != 0.0:
+		factors.append({"label": "standing", "value": standing})
+
+	var grievance := float(stocks["grievance"]) * float(society_rules["order_grievance_scale"])
+	if grievance > 0.0:
+		factors.append({"label": "grievance", "value": -grievance})
+
+	# Force keeps order without earning it. Nothing here reduces the load, so
+	# the grievance it is suppressing goes on rising underneath.
+	var coercion := SocietyRules.coercion_total(data, state, region_id) \
+		* float(society_rules["order_coercion_scale"])
+	if coercion > 0.0:
+		factors.append({"label": "coercion", "value": coercion})
+
+	var unrest_state := String(stocks["unrest_state"])
+	if unrest_state == SocietyRules.UNREST_RESTIVE:
+		factors.append({"label": "restive", "value": -float(society_rules["restive_order_penalty"])})
+	elif unrest_state == SocietyRules.UNREST_REBELLIOUS:
+		factors.append({"label": "in_revolt", "value": -float(society_rules["rebellious_order_penalty"])})
+
 	if settlement["owner"] != state.get("player_faction", ""):
 		var ai_bonus := float(data.balance["ai"]["difficulty_order_bonus"].get(
 			state.get("difficulty", "medium"), 0.0))
@@ -134,11 +165,19 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 
 	if order < float(order_rules["revolt_threshold"]):
 		settlement["low_order_streak"] = int(settlement["low_order_streak"]) + 1
-		if settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
-			_revolt(data, state, region_id)
-			result["revolted"] = true
 	else:
 		settlement["low_order_streak"] = 0
+
+	# Two roads to secession: an order collapse (as before), or a province that
+	# has been in open revolt long enough to choose its own masters — the second
+	# is the one accumulated grievance drives.
+	var society_rules: Dictionary = data.balance["society"]
+	var stocks := SocietyRules.stocks_of(data, settlement)
+	var in_open_revolt: bool = String(stocks["unrest_state"]) == SocietyRules.UNREST_REBELLIOUS \
+		and int(stocks["unrest_turns"]) >= int(society_rules["rebellious_turns_to_revolt"])
+	if in_open_revolt or settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
+		_revolt(data, state, region_id)
+		result["revolted"] = true
 	return result
 
 
@@ -170,5 +209,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	settlement["recently_conquered"] = 0
 	settlement["siege"] = null
 	settlement["tax_level"] = "normal"
+	# The province is governing itself now: the grievance was against the masters
+	# it just threw off, and it belongs to nobody but itself.
+	settlement["society"] = SocietyRules.new_settlement_society(data, true)
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
 	SettlementRules.refresh_governors(data, state)

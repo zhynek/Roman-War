@@ -3,70 +3,226 @@
   "$id": "buildings.schema.json",
   "title": "Building chains (also used by temples.json)",
   "type": "object",
-  "required": ["chains"],
+  "required": [
+    "chains"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "chains": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "kind", "cultures", "name", "levels"],
+        "required": [
+          "id",
+          "kind",
+          "cultures",
+          "name",
+          "levels"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
           "kind": {
-            "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
+            "enum": [
+              "government",
+              "walls",
+              "barracks",
+              "stables",
+              "archery_range",
+              "siege_workshop",
+              "naval",
+              "market",
+              "farms",
+              "roads",
+              "port",
+              "mines",
+              "health",
+              "entertainment",
+              "execution",
+              "education",
+              "temple"
+            ]
           },
           "cultures": {
             "type": "array",
             "minItems": 1,
-            "items": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+            "items": {
+              "enum": [
+                "roman",
+                "greek",
+                "eastern",
+                "carthaginian",
+                "egyptian",
+                "barbarian",
+                "neutral"
+              ]
+            },
             "uniqueItems": true
           },
-          "name": { "type": "string", "minLength": 1 },
-          "god": { "type": "string", "description": "Temple chains only: deity name" },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "god": {
+            "type": "string",
+            "description": "Temple chains only: deity name"
+          },
           "archetype": {
-            "enum": ["fertility", "law", "fun", "trade", "battle", "naval", "healing", "forge"],
+            "enum": [
+              "fertility",
+              "law",
+              "fun",
+              "trade",
+              "battle",
+              "naval",
+              "healing",
+              "forge"
+            ],
             "description": "Temple chains only: bonus archetype"
           },
-          "requires_resource": { "type": "string", "description": "Region resource required to build (e.g. mines need an ore resource)" },
-          "requires_coastal": { "type": "boolean", "description": "Only buildable in coastal regions (ports, naval)" },
-          "indestructible": { "type": "boolean", "description": "Cannot be demolished (farms)" },
+          "requires_resource": {
+            "type": "string",
+            "description": "Region resource required to build (e.g. mines need an ore resource)"
+          },
+          "requires_coastal": {
+            "type": "boolean",
+            "description": "Only buildable in coastal regions (ports, naval)"
+          },
+          "indestructible": {
+            "type": "boolean",
+            "description": "Cannot be demolished (farms)"
+          },
           "levels": {
             "type": "array",
             "minItems": 1,
             "items": {
               "type": "object",
-              "required": ["id", "name", "min_settlement_level", "cost", "build_turns", "description"],
+              "required": [
+                "id",
+                "name",
+                "min_settlement_level",
+                "cost",
+                "build_turns",
+                "description"
+              ],
               "additionalProperties": false,
               "properties": {
-                "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-                "name": { "type": "string", "minLength": 1 },
-                "min_settlement_level": { "enum": ["village", "town", "large_town", "minor_city", "large_city", "huge_city"] },
-                "cost": { "type": "integer", "minimum": 0 },
-                "build_turns": { "type": "integer", "minimum": 1 },
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "min_settlement_level": {
+                  "enum": [
+                    "village",
+                    "town",
+                    "large_town",
+                    "minor_city",
+                    "large_city",
+                    "huge_city"
+                  ]
+                },
+                "cost": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "build_turns": {
+                  "type": "integer",
+                  "minimum": 1
+                },
                 "effects": {
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
-                    "law": { "type": "number" },
-                    "happiness": { "type": "number" },
-                    "growth": { "type": "number" },
-                    "health": { "type": "number" },
-                    "trade_pct": { "type": "number" },
-                    "farm_income": { "type": "number" },
-                    "mine_income": { "type": "number" },
-                    "recruit_xp": { "type": "integer", "minimum": 0, "maximum": 3 },
-                    "weapon_upgrade": { "type": "integer", "minimum": 0, "maximum": 2 },
-                    "armor_upgrade": { "type": "integer", "minimum": 0, "maximum": 2 },
-                    "wall_level": { "type": "integer", "minimum": 1, "maximum": 5 },
-                    "road_level": { "type": "integer", "minimum": 1, "maximum": 3 },
-                    "port_level": { "type": "integer", "minimum": 1, "maximum": 3 }
+                    "law": {
+                      "type": "number"
+                    },
+                    "happiness": {
+                      "type": "number"
+                    },
+                    "growth": {
+                      "type": "number"
+                    },
+                    "health": {
+                      "type": "number"
+                    },
+                    "trade_pct": {
+                      "type": "number"
+                    },
+                    "farm_income": {
+                      "type": "number"
+                    },
+                    "mine_income": {
+                      "type": "number"
+                    },
+                    "recruit_xp": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 3
+                    },
+                    "weapon_upgrade": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2
+                    },
+                    "armor_upgrade": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 2
+                    },
+                    "wall_level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    },
+                    "road_level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3
+                    },
+                    "port_level": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 3
+                    },
+                    "civic": {
+                      "type": "number"
+                    },
+                    "coercion": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "burden": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "assimilation_pull": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "knowledge": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "martial": {
+                      "type": "number",
+                      "minimum": 0
+                    }
                   }
                 },
-                "description": { "type": "string" }
+                "description": {
+                  "type": "string"
+                }
               }
             }
           }

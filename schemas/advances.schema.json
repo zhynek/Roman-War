@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "advances.schema.json",
+  "title": "Advances — what a society works out, and can forget again",
+  "type": "object",
+  "required": ["advances"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "advances": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "knowledge_threshold", "effects", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string" },
+          "knowledge_threshold": { "type": "number", "minimum": 0, "maximum": 100 },
+          "culture": {
+            "type": "string",
+            "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"]
+          },
+          "description": { "type": "string" },
+          "effects": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "build_cost_pct": { "type": "number" },
+              "build_turns_reduction": { "type": "integer", "minimum": 0, "maximum": 3 },
+              "health_capacity_pct": { "type": "number" },
+              "clarity_bonus": { "type": "number" },
+              "corruption_reduction_pct": { "type": "number" },
+              "farm_income_pct": { "type": "number" },
+              "trade_pct_bonus": { "type": "number" },
+              "civic_target_bonus": { "type": "number" },
+              "knowledge_decay_reduction_pct": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -134,13 +134,16 @@ static func _discounted_cost(data: GameData, state: Dictionary, faction_id: Stri
 		var discount := SettlementRules.faction_owns_wonder_effect(
 			data, state, faction_id, "religious_building_discount_pct")
 		cost *= 1.0 - discount / 100.0
-	return int(round(cost))
+	# Craft that has been worked out makes everything cheaper to raise.
+	cost *= 1.0 + AdvanceRules.effect_total(data, state, faction_id, "build_cost_pct") / 100.0
+	return maxi(0, int(round(cost)))
 
 
 static func _discounted_turns(data: GameData, state: Dictionary, faction_id: String, level: Dictionary) -> int:
 	var turns := int(level["build_turns"])
 	var reduction := int(SettlementRules.faction_owns_wonder_effect(
-		data, state, faction_id, "build_time_reduction_turns"))
+		data, state, faction_id, "build_time_reduction_turns")) \
+		+ int(AdvanceRules.effect_total(data, state, faction_id, "build_turns_reduction"))
 	if reduction > 0:
 		var min_for_reduction := int(SettlementRules.faction_owns_wonder_effect(
 			data, state, faction_id, "build_time_reduction_min_turns"))

@@ -84,7 +84,20 @@ static func garrison_soldiers(data: GameData, settlement: Dictionary) -> int:
 
 
 static func culture_penalty_pct(data: GameData, state: Dictionary, region_id: String) -> float:
-	## Penalty proportional to the share of buildings belonging to foreign cultures.
+	## Foreign rule is a drifting quantity, not a building census: the penalty
+	## falls as the province comes to count itself among your people. Demolishing
+	## foreign buildings still helps, but it now works by clearing the way for
+	## your own culture to spread (see SocietyRules.assimilation_contact) rather
+	## than by deleting a penalty outright.
+	var stocks := SocietyRules.stocks_of(data, state["settlements"][region_id])
+	var scale := float(data.balance["public_order"]["culture_penalty_scale"])
+	return (100.0 - float(stocks["assimilation"])) / 100.0 * scale
+
+
+static func foreign_building_share(data: GameData, state: Dictionary, region_id: String) -> float:
+	## Share (0..1) of standing chains belonging to a culture that is not the
+	## owner's. Foreign stonework crowds out your own, so this is friction on
+	## assimilation. A wonder can excuse one culture's buildings faction-wide.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var owner_culture := data.culture_of_faction(settlement["owner"])
 	var cancelled_cultures := _cancelled_cultures(data, state, settlement["owner"])
@@ -105,7 +118,7 @@ static func culture_penalty_pct(data: GameData, state: Dictionary, region_id: St
 				foreign += 1
 	if total == 0:
 		return 0.0
-	return float(foreign) / float(total) * float(data.balance["public_order"]["culture_penalty_scale"])
+	return float(foreign) / float(total)
 
 
 static func _cancelled_cultures(data: GameData, state: Dictionary, faction_id: String) -> Array:

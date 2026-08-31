@@ -21,6 +21,8 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 		+ SettlementRules.effect_total(data, settlement, "farm_income")
 	farm_income *= 1.0 + SettlementRules.faction_owns_wonder_effect(
 		data, state, settlement["owner"], "farm_income_pct") / 100.0
+	farm_income *= 1.0 + AdvanceRules.effect_total(
+		data, state, String(settlement["owner"]), "farm_income_pct") / 100.0
 	if rng != null:
 		farm_income *= rng.randf_pct(float(economy_rules["harvest_variance_pct"]))
 	factors.append({"label": "farming", "value": farm_income})
@@ -48,6 +50,18 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 	var corruption := corruption_pct(data, state, region_id) / 100.0 * gross
 	if corruption > 0.0:
 		factors.append({"label": "corruption", "value": -corruption})
+
+	# A province that has stopped cooperating stops paying. Tax farmers need an
+	# escort; markets that do open, open quietly.
+	var society_rules: Dictionary = data.balance["society"]
+	var unrest_state := String(SocietyRules.stocks_of(data, settlement)["unrest_state"])
+	var unrest_pct := 0.0
+	if unrest_state == SocietyRules.UNREST_RESTIVE:
+		unrest_pct = float(society_rules["restive_income_penalty_pct"])
+	elif unrest_state == SocietyRules.UNREST_REBELLIOUS:
+		unrest_pct = float(society_rules["rebellious_income_penalty_pct"])
+	if unrest_pct > 0.0:
+		factors.append({"label": "unrest", "value": -gross * unrest_pct / 100.0})
 
 	return factors
 
@@ -98,7 +112,9 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 		sea_total += sea_routes[i]
 	sea_total *= 1.0 + sea_trade_wonder / 100.0
 
-	return (land_total + sea_total) * (1.0 + trade_pct / 100.0)
+	var advance_trade := AdvanceRules.effect_total(
+		data, state, String(state["settlements"][region_id]["owner"]), "trade_pct_bonus")
+	return (land_total + sea_total) * (1.0 + (trade_pct + advance_trade) / 100.0)
 
 
 static func corruption_pct(data: GameData, state: Dictionary, region_id: String) -> float:
@@ -116,6 +132,9 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 		float(corruption_rules["max_pct"]))
 	var law := PublicOrderRules.law_total(data, state, region_id)
 	corruption *= maxf(0.0, 1.0 - law * float(corruption_rules["law_reduction_factor"]))
+	# Audited accounts and salaried officials are worth more than a stricter law.
+	corruption *= maxf(0.0, 1.0 - AdvanceRules.effect_total(
+		data, state, String(settlement["owner"]), "corruption_reduction_pct") / 100.0)
 	return corruption
 
 

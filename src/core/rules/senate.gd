@@ -48,13 +48,22 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				faction["mission"] = null
 				notices.append({"kind": "mission_failed", "faction": faction_id, "mission": mission["template"]})
 
-		# Civil war becomes available (or is forced by outlawing) at the thresholds.
-		if not faction["at_civil_war"] \
-				and float(faction["popular_standing"]) >= float(senate_rules["civil_war_popular_threshold"]) \
-				and float(faction["senate_standing"]) <= float(senate_rules["civil_war_senate_threshold"]):
+		# Civil war becomes available (or is forced by outlawing) at the thresholds
+		# — or arrives on its own when there are simply more great houses
+		# expecting a command than there are commands to give. A house can win
+		# its way into this: conquest is what breeds the claimants.
+		var elite := float(SocietyRules.faction_stocks(data, faction)["elite_pressure"])
+		var elite_forced: bool = elite >= float(data.balance["society"]["elite_civil_war_threshold"])
+		var standings_met: bool = \
+			float(faction["popular_standing"]) >= float(senate_rules["civil_war_popular_threshold"]) \
+			and float(faction["senate_standing"]) <= float(senate_rules["civil_war_senate_threshold"])
+		if not faction["at_civil_war"] and (standings_met or elite_forced):
 			faction["at_civil_war"] = true
 			_declare_civil_war(data, state, faction_id)
-			notices.append({"kind": "civil_war", "faction": faction_id})
+			notices.append({
+				"kind": "civil_war", "faction": faction_id,
+				"pattern": "elite_overproduction" if elite_forced else "",
+			})
 	return notices
 
 

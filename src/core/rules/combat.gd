@@ -118,6 +118,11 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	settlement["tax_level"] = "normal"
 	settlement["recently_conquered"] = int(ceil(float(order_penalty) / float(maxi(decay, 1))))
 
+	# A captured province starts resentful and a stranger to its new masters; the
+	# conqueror gains one more victorious house expecting to be rewarded, and an
+	# atrocity is remembered in every province he holds, not only this one.
+	SocietyRules.record_conquest(data, state, region_id, new_owner, occupation)
+
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 
 	var taken := displace_characters(data, state, region_id, previous_owner)

@@ -41,6 +41,7 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 
 	faction["treasury"] = int(faction["treasury"]) - int(template["cost"])
 	settlement["population"] = int(settlement["population"]) - soldiers
+	SocietyRules.record_recruitment(data, state, region_id, soldiers)
 	settlement["recruitment_queue"].append({
 		"template": template_id,
 		"turns_left": 1,
@@ -60,10 +61,14 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			job["turns_left"] = int(job["turns_left"]) - 1
 			first = false
 		if int(job["turns_left"]) <= 0:
-			var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
+			# Quality is stamped on the unit at the moment it is raised, and
+			# travels with it: a legion equipped in a city with good forges stays
+			# well equipped wherever it marches.
 			settlement["garrison"].append({
 				"template": job["template"],
-				"experience": experience,
+				"experience": int(SettlementRules.effect_max(data, settlement, "recruit_xp")),
+				"weapon": int(SettlementRules.effect_max(data, settlement, "weapon_upgrade")),
+				"armor": int(SettlementRules.effect_max(data, settlement, "armor_upgrade")),
 				"strength_pct": 100,
 			})
 			completed.append(job["template"])
@@ -94,6 +99,7 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 			continue
 		faction["treasury"] = int(faction["treasury"]) - cost
 		settlement["population"] = int(settlement["population"]) - men
+		SocietyRules.record_recruitment(data, state, region_id, men)
 		unit["strength_pct"] = 100
 		healed += 1
 	return healed

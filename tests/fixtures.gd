@@ -177,14 +177,14 @@ static func state(game_data: GameData) -> Dictionary:
 		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
 		"factions": {
-			"red": _faction("beta"),
-			"blue": _faction("alpha"),
-			"rebels": _faction(""),
+			"red": _faction(game_data, "beta"),
+			"blue": _faction(game_data, "alpha"),
+			"rebels": _faction(game_data, ""),
 		},
 		"settlements": {
-			"beta": _settlement("red", 2000, {"test_government": 2, "test_farms": 1, "test_barracks": 1}),
-			"epsilon": _settlement("red", 6000, {"test_government": 2}),
-			"alpha": _settlement("blue", 1200, {"tribal_government": 1}),
+			"beta": _settlement(game_data, "red", 2000, {"test_government": 2, "test_farms": 1, "test_barracks": 1}),
+			"epsilon": _settlement(game_data, "red", 6000, {"test_government": 2}),
+			"alpha": _settlement(game_data, "blue", 1200, {"tribal_government": 1}),
 		},
 		"armies": {}, "fleets": {}, "characters": {},
 		"events_fired": [], "winner": null, "next_id": 1,
@@ -227,19 +227,21 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
-static func _faction(capital: String) -> Dictionary:
+static func _faction(game_data: GameData, capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
+		"society": SocietyRules.new_faction_society(game_data), "advances": [],
 	}
 
 
-static func _settlement(owner: String, population: int, buildings: Dictionary) -> Dictionary:
+static func _settlement(game_data: GameData, owner: String, population: int, buildings: Dictionary) -> Dictionary:
 	return {
 		"owner": owner, "population": population, "buildings": buildings,
 		"tax_level": "normal", "garrison": [], "construction_queue": [],
 		"recruitment_queue": [], "governor": null, "slave_bonus_turns": 0,
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
 		"siege": null,
+		"society": SocietyRules.new_settlement_society(game_data, true),
 	}

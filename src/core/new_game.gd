@@ -3,16 +3,20 @@ class_name NewGame
 ## GameState is a plain Dictionary (JSON-serializable, deep-comparable):
 ##
 ##  turn: int (0-based), year: int, season: "summer"|"winter"
-##  rng_state: int
+##  rng_state: String (decimal — a 64-bit int loses precision through JSON)
 ##  player_faction: String
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
 ##                   popular_standing, diplomacy: {other_fid: stance},
-##                   mission: null|{...}, at_civil_war: bool}}
+##                   mission: null|{...}, at_civil_war: bool,
+##                   society: {elite_pressure, martial_ethos, knowledge,
+##                             civic_shock}, advances: [advance_id]}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
 ##                tax_level, garrison: [unit], construction_queue: [...],
 ##                recruitment_queue: [...], governor: char_id|null,
 ##                slave_bonus_turns, plague_turns, recently_conquered,
-##                low_order_streak, siege: null|{besieger, turns, equipment_ready}}}
+##                low_order_streak, siege: null|{besieger, turns, equipment_ready},
+##                society: {legitimacy, grievance, assimilation, unrest_state,
+##                          unrest_turns, survey: {}}}}
 ##  armies: {army_id: {owner, region, units: [unit], general: char_id|null,
 ##                     movement_left: float}}
 ##  fleets: {fleet_id: {owner, sea_zone, ships: [unit], movement_left}}
@@ -59,6 +63,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
+			"society": SocietyRules.new_faction_society(data),
+			"advances": [],
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -77,6 +83,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
+		"society": SocietyRules.new_faction_society(data),
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -125,7 +132,7 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 			continue
 		var chain_id: String = info["chain"]
 		buildings[chain_id] = maxi(int(buildings.get(chain_id, 0)), int(info["index"]))
-	return {
+	var settlement := {
 		"owner": owner,
 		"population": int(setup["population"]),
 		"buildings": buildings,
@@ -140,6 +147,19 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 		"low_order_streak": 0,
 		"siege": null,
 	}
+	# Starting garrisons were raised by the city they stand in, so they carry its
+	# forges and armouries just as newly recruited units do.
+	var weapon := int(SettlementRules.effect_max(data, settlement, "weapon_upgrade"))
+	var armor := int(SettlementRules.effect_max(data, settlement, "armor_upgrade"))
+	for unit in settlement["garrison"]:
+		unit["weapon"] = weapon
+		unit["armor"] = armor
+	# At the campaign start every people is ruled by its own kind; conquest is
+	# what makes a province a stranger to its masters (see record_conquest).
+	var dominant := SocietyRules.dominant_culture(data, settlement)
+	var native: bool = dominant == "" or data.culture_of_faction(owner) == dominant
+	settlement["society"] = SocietyRules.new_settlement_society(data, native)
+	return settlement
 
 
 static func _units(setups: Array) -> Array:

@@ -72,11 +72,26 @@ func test_revolt_after_streak(t) -> void:
 
 
 func test_culture_penalty(t) -> void:
+	## Foreign rule is no longer a building census read off instantly — it is a
+	## stock that drifts. The census survives as the friction term on
+	## assimilation; the ORDER penalty now reads the drifting stock.
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
-	# Red (roman) captures alpha, which has only a tribal government building.
+	# Red (roman) takes alpha, which has only a tribal government building.
 	var settlement: Dictionary = state["settlements"]["alpha"]
 	settlement["owner"] = "red"
-	var penalty := SettlementRules.culture_penalty_pct(data, state, "alpha")
+	t.check_near(SettlementRules.foreign_building_share(data, state, "alpha"), 1.0, 0.001,
+		"every standing building belongs to another culture")
+
+	# A settlement that has always been theirs feels no foreign rule...
 	var scale := float(data.balance["public_order"]["culture_penalty_scale"])
-	t.check_near(penalty, scale, 0.001, "all-foreign buildings = full culture penalty")
+	var settled := SettlementRules.culture_penalty_pct(data, state, "alpha")
+	t.check(settled < scale * 0.2, "a long-held province carries almost no culture penalty")
+
+	# ...but one just taken by force does, and it does not clear by demolition alone.
+	SocietyRules.record_conquest(data, state, "alpha", "red", "occupy")
+	var conquered := SettlementRules.culture_penalty_pct(data, state, "alpha")
+	var foreign_start := float(data.balance["society"]["assimilation_start_foreign"])
+	t.check_near(conquered, (100.0 - foreign_start) / 100.0 * scale, 0.001,
+		"a freshly conquered province carries the full weight of foreign rule")
+	t.check(conquered > settled * 3.0, "conquest is what makes a province a stranger")
