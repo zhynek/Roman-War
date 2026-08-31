@@ -200,6 +200,12 @@ func available_units(region_id: String) -> Array:
 	return RecruitmentRules.available_units(data, state, region_id)
 
 
+func day_beats(faction_id: String = "") -> Array:
+	## The turn just resolved, as this faction is entitled to know it.
+	var viewer := faction_id if faction_id != "" else String(state["player_faction"])
+	return DispatchRules.visible_beats(data, state, TurnJournal.of(state), viewer)
+
+
 func visible_regions(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VisibilityRules.visible_regions(data, state, fid)

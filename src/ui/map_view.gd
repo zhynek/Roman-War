@@ -19,6 +19,9 @@ var selected_region := ""
 var highlight_regions: Dictionary = {}
 
 var _camera_offset := Vector2(-200, -200)
+var _pan_target: Vector2 = Vector2.ZERO
+var _pan_seconds := 0.0
+var _panning := false
 var _zoom := 1.0
 var _dragging := false
 var _font: Font
@@ -42,7 +45,46 @@ func to_screen(world: Vector2) -> Vector2:
 func center_on(region_id: String) -> void:
 	if game == null or not game.data.regions.has(region_id):
 		return
-	_camera_offset = -world_pos(game.data.regions[region_id]) + size / (2.0 * _zoom)
+	_panning = false
+	_camera_offset = _offset_centering(region_id)
+	queue_redraw()
+
+
+func center_on_selected() -> void:
+	## Returns the camera to what the player was looking at, so a day that
+	## wandered off across the map does not leave them lost when it ends.
+	if selected_region != "":
+		pan_to(selected_region, 0.35)
+
+
+func pan_to(region_id: String, seconds: float) -> void:
+	## Glide rather than snap: during the day's sequence the map is the stage,
+	## and a cut between beats loses the player's place on it.
+	if game == null or not game.data.regions.has(region_id):
+		return
+	if seconds <= 0.0:
+		center_on(region_id)
+		return
+	_pan_target = _offset_centering(region_id)
+	_pan_seconds = seconds
+	_panning = true
+	set_process(true)
+
+
+func _offset_centering(region_id: String) -> Vector2:
+	return -world_pos(game.data.regions[region_id]) + size / (2.0 * _zoom)
+
+
+func _process(delta: float) -> void:
+	if not _panning:
+		set_process(false)
+		return
+	# Exponential ease: fast at first, settling rather than stopping dead.
+	var step := clampf(delta / maxf(_pan_seconds, 0.01), 0.0, 1.0)
+	_camera_offset = _camera_offset.lerp(_pan_target, step)
+	if _camera_offset.distance_to(_pan_target) < 1.0:
+		_camera_offset = _pan_target
+		_panning = false
 	queue_redraw()
 
 
@@ -65,6 +107,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _zoom_at(screen_point: Vector2, factor: float) -> void:
+	_panning = false
 	var before := screen_point / _zoom - _camera_offset
 	_zoom = clampf(_zoom * factor, 0.35, 3.0)
 	_camera_offset = screen_point / _zoom - before

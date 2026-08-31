@@ -35,7 +35,38 @@ campaign runs to AD 14.
   - **Left-click** a region to select it.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
-- **Bottom right** — the turn log: what happened while you were away.
+- **Bottom right** — the turn log: every report of the day just closed, in one
+  list, coloured by whether it was good news.
+
+## Ending a turn: the day
+
+**END TURN** does not just jump the world forward. It plays out **a day at
+court**, and you watch it happen:
+
+- The screen opens on **dawn** with the date, and the light over the map warms
+  through midday and reddens into evening as the day runs.
+- Then the day's reports, one at a time, with the map panning to wherever each
+  one happened — a building your masons finished, men taking the oath in your
+  drill yard, a neighbour's army on a road your scouts can see, a city changing
+  hands, the Senate's opinion of you.
+- **1x / 2x / 4x** speeds it up. **SKIP** ends it immediately. Neither changes
+  anything: the turn is already fully resolved before the first frame plays, so
+  skipping costs you nothing but the show.
+- Your **treasury counts up or down** in the top bar to the day's new figure,
+  with the swing shown beside it in green or red.
+
+The day closes on the **Daily Dispatch**: the whole thing written out, under
+headings — the wider world, our works, our coffers and people, our cause — with
+the two or three things anyone would actually repeat pulled out at the top.
+Dismiss it with **BEGIN THE NEXT DAY**.
+
+You only ever see what you could plausibly know. Your own affairs in full; your
+neighbours' only where you have eyes on the ground. Wars and alliances are the
+exception — those are proclaimed, so you hear about them wherever they happen,
+including wars that have nothing to do with you.
+
+The **Dispatch** button in the top bar reopens the last day's recap at any time,
+and it survives a save: load a campaign and the dispatch you left is still there.
 
 ## Running a city
 
@@ -122,14 +153,19 @@ it by AD 14, the age simply closes.
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, but they do not scheme, invade, or negotiate. Real opponents are
-  the next phase. Expect a quiet world.
+- **The computer players are bounded, not clever.** They manage their cities,
+  storm a city they have surrounded once the rams are ready and the odds are
+  good, march on a weaker neighbour they are already at war with, and now and
+  then declare war on someone they are not bound to. They do **not** negotiate,
+  plan an economy, use fleets, or coordinate two armies toward one goal. Expect
+  a world that moves — borders do change hands — but not a cunning one.
 - **Battles resolve on paper.** You see the outcome, not the fight.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.
-- **The Senate** issues missions and the civil war can trigger, but the full
-  political system (offices, elections) is later.
+- **The Senate** issues one charge at a time — take a province, win an alliance,
+  open a market — and the civil war can trigger, but the full political system
+  (offices, elections) is later. Your standing charge and its deadline sit in the
+  top bar; blockade and assassination charges are written but not yet playable.
 - **The art is placeholder.** Coloured circles, not painted maps.
 
 ## macOS blocks the app on first launch

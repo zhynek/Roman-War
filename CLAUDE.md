@@ -19,6 +19,10 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   plain Dictionary so save/load is JSON round-tripping.
 - **Growth and public order are summed factor lists** returning named
   breakdowns, not opaque numbers — the UI will render the breakdowns.
+- **Turn beats carry ids and numbers, never prose.** Everything the end-turn
+  sequence and the Daily Dispatch put on screen comes from `data/dispatch.json`,
+  keyed by beat kind. `TurnJournal.KINDS` and that file are checked against each
+  other in both directions by the validator.
 - **Campaign code may only call `BattleResolver.resolve(...)`** — never assume
   auto-resolve specifics.
 

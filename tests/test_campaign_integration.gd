@@ -57,8 +57,10 @@ func test_same_seed_same_world(t) -> void:
 
 
 func test_save_round_trip(t) -> void:
+	# Long enough that the AI has marched, besieged and declared war before the
+	# save is taken — a passive world would not exercise the paths that desync.
 	var game := Game.new_campaign("julii", 7)
-	for i in range(4):
+	for i in range(16):
 		game.end_turn()
 	var json_before := SaveGame.to_json(game.state)
 	var restored := SaveGame.from_json(json_before)

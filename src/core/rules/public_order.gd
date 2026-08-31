@@ -116,11 +116,11 @@ static func distance_penalty(data: GameData, state: Dictionary, region_id: Strin
 
 
 static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng: CampaignRng) -> Dictionary:
-	## Riots and revolts. Returns {rioted: bool, revolted: bool}.
+	## Riots and revolts. Returns {order: float, rioted: bool, revolted: bool}.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var order_rules: Dictionary = data.balance["public_order"]
 	var order := total(data, state, region_id)
-	var result := {"rioted": false, "revolted": false}
+	var result := {"order": order, "rioted": false, "revolted": false}
 
 	if order >= float(order_rules["riot_threshold"]):
 		settlement["low_order_streak"] = 0

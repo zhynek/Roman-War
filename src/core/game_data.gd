@@ -21,6 +21,8 @@ var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
 var campaign: Dictionary = {}
+var dispatch_beats: Dictionary = {}    # beat kind -> presentation entry
+var dispatch_chapters: Array = []      # the day's acts, in playing order
 
 var load_errors: PackedStringArray = []
 
@@ -85,6 +87,11 @@ func _load_all(dir: String) -> void:
 	names = _read_json(dir + "/names.json").get("pools", {})
 	mercenary_pools = _read_json(dir + "/mercenaries.json").get("pools", [])
 
+	var dispatch_data := _read_json(dir + "/dispatch.json")
+	dispatch_chapters = dispatch_data.get("chapters", [])
+	for beat in dispatch_data.get("beats", []):
+		dispatch_beats[beat["id"]] = beat
+
 
 func _read_json(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
@@ -99,6 +106,13 @@ func _read_json(path: String) -> Dictionary:
 
 
 ## --- Lookups -------------------------------------------------------------
+
+func dispatch_chapter(chapter_id: String) -> Dictionary:
+	for chapter in dispatch_chapters:
+		if chapter["id"] == chapter_id:
+			return chapter
+	return {}
+
 
 func culture_of_faction(faction_id: String) -> String:
 	return factions.get(faction_id, {}).get("culture", "neutral")
