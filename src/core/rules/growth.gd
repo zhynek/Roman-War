@@ -48,6 +48,15 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if int(settlement["recently_conquered"]) > 0:
 		factors.append({"label": "recently_conquered", "value": float(growth_rules["recently_conquered_growth_pct"])})
 
+	# A province that has stopped cooperating stops growing: fields go unworked,
+	# markets stay shut, and those who can leave do.
+	var society_rules: Dictionary = data.balance["society"]
+	var unrest_state := String(SocietyRules.stocks_of(data, settlement)["unrest_state"])
+	if unrest_state == SocietyRules.UNREST_RESTIVE:
+		factors.append({"label": "unrest", "value": -float(society_rules["restive_growth_penalty_pct"])})
+	elif unrest_state == SocietyRules.UNREST_REBELLIOUS:
+		factors.append({"label": "unrest", "value": -float(society_rules["rebellious_growth_penalty_pct"])})
+
 	return factors
 
 
@@ -70,7 +79,7 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	var population := int(settlement["population"])
 	population = int(round(population * (1.0 + total_pct(data, state, region_id) / 100.0)))
 
-	_plague_turn(data, settlement, rng)
+	_plague_turn(data, state, settlement, rng)
 	if int(settlement["plague_turns"]) > 0:
 		var loss_pct := float(data.balance["plague"]["population_loss_pct_per_turn"])
 		population = int(round(population * (1.0 - loss_pct / 100.0)))
@@ -82,7 +91,7 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 			settlement[counter] = int(settlement[counter]) - 1
 
 
-static func _plague_turn(data: GameData, settlement: Dictionary, rng: CampaignRng) -> void:
+static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictionary, rng: CampaignRng) -> void:
 	var plague_rules: Dictionary = data.balance["plague"]
 	if int(settlement["plague_turns"]) > 0:
 		settlement["plague_turns"] = int(settlement["plague_turns"]) - 1
@@ -90,6 +99,10 @@ static func _plague_turn(data: GameData, settlement: Dictionary, rng: CampaignRn
 	# Plague risk grows with population beyond what health infrastructure supports.
 	var health := SettlementRules.effect_total(data, settlement, "health")
 	var capacity := float(plague_rules["base_capacity"]) + health * float(plague_rules["health_capacity_per_health_pct"])
+	# Engineering raises the ceiling a city can live under: drains, clean water,
+	# and the measured fall of an aqueduct.
+	capacity *= 1.0 + AdvanceRules.effect_total(
+		data, state, String(settlement["owner"]), "health_capacity_pct") / 100.0
 	var excess := float(settlement["population"]) - capacity
 	if excess <= 0.0:
 		return

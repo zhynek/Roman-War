@@ -2,19 +2,34 @@ class_name EventRules
 ## Date-triggered and condition-triggered events (including the marius-style
 ## army reform), plus regional disasters. Fired events are recorded in
 ## state.events_fired so once-only events never repeat.
+##
+## The `society_stat` condition lets a crisis be AUTHORED rather than hardcoded:
+## it compares one of the six societal stocks against a min/max, so the events
+## that name what is happening to you — elite overproduction, the placation trap,
+## rule by fear — live in data/events.json and not in this file. Such an event
+## carries a `pattern` naming the historical mechanism in data/society.json, and
+## with `per_faction` it fires once for each house that reaches the condition
+## rather than once for the whole campaign.
 
 
 static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) -> Array:
 	var fired: Array = []
 	for event in data.events:
-		if event.get("once", true) and state["events_fired"].has(event["id"]):
-			continue
+		# The fired check runs AFTER the trigger, because a per-faction condition
+		# has to be able to match a house that has not fired it yet even when
+		# another already has.
 		var hit := _trigger_matches(data, state, event)
 		if hit.is_empty():
 			continue
+		var fired_key := _fired_key(event, hit)
+		if event.get("once", true) and state["events_fired"].has(fired_key):
+			continue
 		_apply_event(data, state, event, hit)
-		state["events_fired"].append(event["id"])
-		fired.append({"kind": "event", "id": event["id"], "faction": hit.get("faction", "")})
+		state["events_fired"].append(fired_key)
+		fired.append({
+			"kind": "event", "id": event["id"], "faction": hit.get("faction", ""),
+			"pattern": event.get("pattern", ""),
+		})
 
 	for disaster in data.disasters:
 		if not rng.chance(float(disaster["chance_per_turn"])):
@@ -65,7 +80,68 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 				if state["factions"][faction_id]["at_civil_war"]:
 					return {"faction": faction_id}
 			return {}
+		"society_stat":
+			return _society_match(data, state, event, trigger)
 	return {}
+
+
+static func _fired_key(event: Dictionary, context: Dictionary) -> String:
+	var faction: String = context.get("faction", "")
+	if event.get("per_faction", false) and faction != "":
+		return "%s:%s" % [event["id"], faction]
+	return String(event["id"])
+
+
+static func _society_match(data: GameData, state: Dictionary, event: Dictionary, trigger: Dictionary) -> Dictionary:
+	## First house (in canonical id order) whose societal stock sits inside the
+	## authored band and which has not already seen this event.
+	var stat: String = trigger.get("stat", "")
+	if stat == "":
+		return {}
+	var once: bool = event.get("once", true)
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		if not faction["alive"] or data.factions.get(faction_id, {}).get("is_rebel", false):
+			continue
+		if trigger.has("faction") and String(trigger["faction"]) != faction_id:
+			continue
+		if trigger.has("culture") and data.culture_of_faction(faction_id) != String(trigger["culture"]):
+			continue
+		var reading := _society_reading(data, state, faction_id, stat)
+		if int(reading["regions"]) < int(trigger.get("min_regions", 1)):
+			continue
+		var value := float(reading["value"])
+		if trigger.has("min") and value < float(trigger["min"]):
+			continue
+		if trigger.has("max") and value > float(trigger["max"]):
+			continue
+		if once and state["events_fired"].has(_fired_key(event, {"faction": faction_id})):
+			continue
+		return {"faction": faction_id}
+	return {}
+
+
+static func _society_reading(data: GameData, state: Dictionary, faction_id: String, stat: String) -> Dictionary:
+	## Faction-scoped stocks read directly; settlement-scoped ones are averaged
+	## over the provinces the faction actually holds.
+	var faction_stocks := SocietyRules.faction_stocks(data, state["factions"][faction_id])
+	var faction_scoped: bool = faction_stocks.has(stat)
+	var regions := 0
+	var total := 0.0
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = state["settlements"][region_id]
+		if settlement["owner"] != faction_id:
+			continue
+		regions += 1
+		if not faction_scoped:
+			total += float(SocietyRules.stocks_of(data, settlement).get(stat, 0.0))
+	if faction_scoped:
+		return {"value": float(faction_stocks[stat]), "regions": regions}
+	return {"value": total / float(maxi(regions, 1)), "regions": regions}
 
 
 static func _apply_event(data: GameData, state: Dictionary, event: Dictionary, context: Dictionary) -> void:
@@ -84,6 +160,36 @@ static func _apply_event(data: GameData, state: Dictionary, event: Dictionary, c
 			var faction: Dictionary = state["factions"][faction_id]
 			if faction["alive"] and not data.factions.get(faction_id, {}).get("is_rebel", false):
 				faction["treasury"] = int(faction["treasury"]) + int(effects["treasury"])
+	if effects.has("civic_shock") or effects.has("elite_pressure") or effects.has("knowledge"):
+		var society_faction: Dictionary = state["factions"].get(target, {})
+		if not society_faction.is_empty():
+			var stocks := SocietyRules.faction_stocks(data, society_faction)
+			var society_rules: Dictionary = data.balance["society"]
+			society_faction["society"] = {
+				"elite_pressure": SocietyRules.quantize(clampf(
+					float(stocks["elite_pressure"]) + float(effects.get("elite_pressure", 0.0)),
+					0.0, float(society_rules["elite_max"]))),
+				"martial_ethos": float(stocks["martial_ethos"]),
+				"knowledge": SocietyRules.quantize(clampf(
+					float(stocks["knowledge"]) + float(effects.get("knowledge", 0.0)),
+					0.0, float(society_rules["knowledge_max"]))),
+				"civic_shock": SocietyRules.quantize(
+					float(stocks["civic_shock"]) + float(effects.get("civic_shock", 0.0))),
+			}
+	if effects.has("grievance_all_settlements"):
+		var grievance_rules: Dictionary = data.balance["society"]
+		var affected: Array = state["settlements"].keys()
+		affected.sort()
+		for region_id in affected:
+			var settlement: Dictionary = state["settlements"][region_id]
+			if target != "" and settlement["owner"] != target:
+				continue
+			var block: Dictionary = settlement.get("society", {})
+			if block.is_empty():
+				continue
+			block["grievance"] = SocietyRules.quantize(clampf(
+				float(block["grievance"]) + float(effects["grievance_all_settlements"]),
+				0.0, float(grievance_rules["grievance_max"])))
 	if effects.has("happiness_all_settlements"):
 		state["event_happiness"] = {
 			"value": float(effects["happiness_all_settlements"]),

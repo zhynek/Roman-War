@@ -115,7 +115,7 @@ func _build_top_bar() -> PanelContainer:
 	swatch.custom_minimum_size = Vector2(6, 0)
 	bar.add_child(swatch)
 
-	for key in ["faction", "treasury", "date", "senate", "victory"]:
+	for key in ["faction", "treasury", "date", "society", "senate", "victory"]:
 		var label := Label.new()
 		label.add_theme_font_size_override("font_size", 13)
 		if key == "faction":
@@ -143,6 +143,14 @@ func refresh() -> void:
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
 	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
+	# The three things about your own people you can always see, whatever the
+	# state of your provincial administration.
+	var society: Array = game.faction_society()
+	var readings: Array = []
+	for factor in society:
+		readings.append("%s %.0f" % [String(factor["label"]).replace("_", " ").capitalize(),
+			absf(float(factor["value"]))])
+	top_labels["society"].text = "%s   " % "  ·  ".join(PackedStringArray(readings))
 	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
 		top_labels["senate"].text = "Senate %.0f · People %.0f   " \
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
@@ -481,6 +489,29 @@ func _log_report(report: Dictionary) -> void:
 			_log("[color=#e0a060]Riots in %s![/color]" % game.data.regions[region_id]["settlement_name"])
 	for region_id in report["revolted"]:
 		_log("[color=#e06050]%s has risen in revolt![/color]" % game.data.regions[region_id]["settlement_name"])
+	for notice in report.get("society", []):
+		if notice.get("owner", "") != player:
+			continue
+		var place: String = game.data.regions[notice["region"]]["settlement_name"]
+		var to_state := String(notice["to"])
+		var named := LegibilityRules.unrest_name(game.data, to_state)
+		if to_state == SocietyRules.UNREST_CALM:
+			_log("[color=#80c080]%s has settled again.[/color]" % place)
+		elif to_state == SocietyRules.UNREST_RESTIVE:
+			_log("[color=#e0a060]%s has turned %s.[/color]" % [place, named.to_lower()])
+		else:
+			_log("[color=#e06050]%s is %s — it is no longer governed, only held.[/color]"
+				% [place, named.to_lower()])
+	for notice in report.get("advances", []):
+		if notice.get("faction", "") != player:
+			continue
+		var advance: Dictionary = game.data.advances.get(notice["advance"], {})
+		if notice["kind"] == "advance_gained":
+			_log("[color=#80b0d0][b]%s[/b][/color] %s"
+				% [advance.get("name", notice["advance"]), advance.get("description", "")])
+		else:
+			_log("[color=#c08060]%s has been lost — no one now living was taught it.[/color]"
+				% advance.get("name", notice["advance"]))
 	for event in report["events"]:
 		if event["kind"] == "event":
 			var event_def := {}
@@ -488,6 +519,11 @@ func _log_report(report: Dictionary) -> void:
 				if candidate["id"] == event["id"]:
 					event_def = candidate
 			_log("[color=#c0b060][b]%s[/b][/color] %s" % [event_def.get("name", event["id"]), event_def.get("text", "")])
+			# Name the mechanism. This is the moment the game gets to teach.
+			var pattern: Dictionary = game.society_pattern(String(event.get("pattern", "")))
+			if not pattern.is_empty():
+				_log("[color=#9090a0][i]%s — %s[/i][/color]"
+					% [pattern["name"], pattern["historical_note"]])
 		else:
 			var struck: String = event.get("region", "")
 			_log("[color=#e06050]Disaster strikes %s![/color]"

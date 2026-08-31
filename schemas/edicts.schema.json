@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edicts.schema.json",
+  "title": "Edicts — one standing provincial order, the player's fast lever",
+  "type": "object",
+  "required": ["edicts"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "edicts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "min_settlement_level", "settle_turns", "cooldown_turns", "effects", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "min_settlement_level": { "enum": ["village", "town", "large_town", "minor_city", "large_city", "huge_city"] },
+          "requires_building_kind": { "type": "string" },
+          "cultures": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] }
+          },
+          "upkeep_per_1000_pop": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Denarii per turn, scaled by the settlement's population"
+          },
+          "settle_turns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Turns before the edict reaches full strength; effects scale linearly up to it"
+          },
+          "cooldown_turns": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 24,
+            "description": "Turns after revoking before this settlement may take another edict"
+          },
+          "pattern": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "id of the historical pattern in society.json this edict illustrates"
+          },
+          "description": { "type": "string" },
+          "effects": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "law": { "type": "number" },
+              "happiness": { "type": "number" },
+              "growth": { "type": "number" },
+              "health": { "type": "number" },
+              "trade_pct": { "type": "number" },
+              "civic": { "type": "number" },
+              "coercion": { "type": "number", "minimum": 0 },
+              "burden": { "type": "number", "minimum": 0 },
+              "assimilation_pull": { "type": "number", "minimum": 0 },
+              "knowledge": { "type": "number", "minimum": 0 },
+              "martial": { "type": "number", "minimum": 0 },
+              "grievance_relief": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Grievance removed per turn — the one direct hand on a stock"
+              },
+              "elite_pressure": {
+                "type": "number",
+                "description": "Added to the faction's Ambition per turn, summed over provinces"
+              },
+              "income_pct": { "type": "number", "description": "Multiplier on this settlement's gross income" },
+              "clarity_bonus": { "type": "number", "description": "Raises how well this province can be seen" },
+              "build_cost_pct": { "type": "number", "description": "Discount on construction in this settlement" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

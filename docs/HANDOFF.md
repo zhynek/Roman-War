@@ -6,7 +6,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 | For | Read |
 |---|---|
 | Architecture rules, conventions, clean-room policy | [`CLAUDE.md`](../CLAUDE.md) (auto-loaded by Claude Code) |
-| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §10 is authoritative |
+| What every system does and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §11 is authoritative |
 | What the game is like to play | [`PLAYING.md`](../PLAYING.md) |
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
@@ -15,6 +15,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 
 An original clean-room turn-based grand-strategy game of the 270 BC
 Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 19
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -44,6 +45,16 @@ real renderer and saves map screenshots — use it after any map change; CI
 never renders. Regenerate geometry with `python3
 tools/generate_map_geometry.py` (fixed seed, byte-stable — a re-run must
 leave `git diff` empty).
+foundation loop, a playable Phase 8 campaign UI, and **Phase 9 — the societal
+layer**, which is now the core of the game: eight slow stocks with memory, a
+real trade-off on all 81 building chains, provincial edicts as the player's fast
+lever, and crises that name the historical mechanism they illustrate. Read
+`docs/DESIGN.md` §4 before touching any of it.
+
+**Green as of commit `b88a1e3`:** 123 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. Branch `claude/game-decision-tradeoffs-pnixzs`, working
+tree clean, everything pushed. A Mac build of an earlier state was delivered to
+the user, who is playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -108,6 +119,15 @@ slice before shipping**, or the app will not launch.
 2. **`state.rng_state` is a decimal *string*, not an int.** JSON numbers are
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
+3. **Quantize any continuous float you put in the state.** Godot's `JSON.stringify` does
+   not round-trip an arbitrary double, so a loaded save drifts from the live game in the
+   last digits and then diverges. `SocietyRules.quantize()` rounds onto a four-decimal grid
+   — verified against 200k random values. `snappedf()` is **not** equivalent: it can land
+   on a double adjacent to the grid point, which prints and re-parses as a different
+   number. Symptom: `test_save_round_trip` fails after ~40 turns but passes after 4.
+4. **Nothing in `SocietyRules` or `LegibilityRules` may draw from the RNG.** The UI calls
+   those queries arbitrarily often; one draw would make a save replay differently. There is
+   a test that asserts `state.rng_state` is untouched by every query.
 
 ## 5. The visual and command layer (requested 2026-08-26 — DELIVERED 2026-08-27)
 
@@ -159,6 +179,21 @@ What landed where:
 The original requirements and pre-work analysis stay below as the record.
 
 ### 5.1 The four requirements
+### Phase 9 depth — an empire-wide policy slot
+
+Provincial edicts are built (`docs/DESIGN.md` §4.10): one standing order per settlement,
+folded into `SettlementRules.effect_total` so it reaches every existing reader. What is
+still missing is the faction-scoped counterpart — the stocks an edict cannot touch from a
+single province are Ambition, Martial Spirit, Craft and Plunder's Share.
+
+> Add a single realm-wide policy alongside the provincial edict: a standing army law, a
+> policy of enfranchisement, a settlement of the veterans. Same shape as `data/edicts.json`
+> but faction-scoped, reaching `SocietyRules.apply_faction_turn` rather than
+> `effect_total`. Keep it to one slot so it stays a decision.
+
+### Phase 8 — Balance & polish
+Driven by whatever the playtest surfaced. The societal constants in
+`data/balance.json → society` are the newest and least playtested numbers in the file.
 
 **R1 — Show me what I am building and training.** Visual, near-3D renderings
 of the actual architectural buildings and of the troops being trained. Today

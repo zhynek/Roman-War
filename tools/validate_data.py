@@ -41,6 +41,9 @@ TABLES = {
     "mercenaries.json": "mercenaries.schema.json",
     "map_geometry.json": "map_geometry.schema.json",
     "glossary.json": "glossary.schema.json",
+    "advances.json": "advances.schema.json",
+    "society.json": "society.schema.json",
+    "edicts.json": "edicts.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -515,6 +518,103 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"glossary: {section}: '{missing}' is used in the data but has no entry")
         for dead in sorted(set(entries) - used):
             warn(f"glossary: {section}: entry '{dead}' matches nothing in the data (dead content)")
+    # --- society, advances, and effect-key liveness -------------------------
+    KINDS = {chain["kind"] for chain in chains.values()}
+    society = t.get("society.json", {})
+    patterns = {p["id"] for p in society.get("patterns", [])}
+    axis_ids = {a["id"] for a in society.get("axes", [])}
+    # The axes table is what the UI names; it must describe the stocks that exist.
+    ENGINE_STOCKS = {"legitimacy", "grievance", "assimilation", "expectation",
+                     "elite_pressure", "martial_ethos", "knowledge", "spoils"}
+    for missing in sorted(ENGINE_STOCKS - axis_ids):
+        err(f"society: no axis entry for the engine stock '{missing}'")
+    for extra in sorted(axis_ids - ENGINE_STOCKS):
+        err(f"society: axis '{extra}' does not correspond to any engine stock")
+
+    advance_ids: set[str] = set()
+    for advance in t.get("advances.json", {}).get("advances", []):
+        if advance["id"] in advance_ids:
+            err(f"advances: duplicate id {advance['id']}")
+        advance_ids.add(advance["id"])
+        culture = advance.get("culture")
+        if culture and culture not in cultures:
+            err(f"advances: {advance['id']}: unknown culture {culture}")
+    # Every culture must be able to reach a first advance, or Craft is inert for it.
+    for culture in sorted(cultures):
+        reachable = [a for a in t.get("advances.json", {}).get("advances", [])
+                     if a.get("culture", culture) == culture]
+        if not reachable:
+            err(f"advances: culture {culture} can reach no advance at all")
+
+    edict_ids: set[str] = set()
+    for edict in t.get("edicts.json", {}).get("edicts", []):
+        if edict["id"] in edict_ids:
+            err(f"edicts: duplicate id {edict['id']}")
+        edict_ids.add(edict["id"])
+        if edict["min_settlement_level"] not in LEVELS:
+            err(f"edicts: {edict['id']}: unknown settlement level {edict['min_settlement_level']}")
+        kind = edict.get("requires_building_kind")
+        if kind and kind not in KINDS:
+            err(f"edicts: {edict['id']}: unknown building kind {kind}")
+        for culture in edict.get("cultures", []):
+            if culture not in cultures:
+                err(f"edicts: {edict['id']}: unknown culture {culture}")
+        pattern = edict.get("pattern")
+        if pattern and pattern not in patterns:
+            err(f"edicts: {edict['id']}: unknown society pattern {pattern}")
+        # The whole premise of this layer is that everything trades. An edict
+        # with no cost at all is a free good and does not belong here.
+        effects = edict.get("effects", {})
+        costly_when_negative = ("civic", "law", "growth", "health", "trade_pct", "income_pct")
+        costly_when_positive = ("burden", "coercion", "elite_pressure")
+        pays = (edict.get("upkeep_per_1000_pop", 0) > 0
+                or any(effects.get(k, 0) < 0 for k in costly_when_negative)
+                or any(effects.get(k, 0) > 0 for k in costly_when_positive))
+        if not pays:
+            err(f"edicts: {edict['id']} costs nothing — every edict must trade "
+                f"something, in denarii or in one of the societal stocks")
+    # A village must have at least one order available to it, or the lever does
+    # not exist for a player who has just lost everything but one province.
+    if not any(e["min_settlement_level"] == "village"
+               for e in t.get("edicts.json", {}).get("edicts", [])):
+        err("edicts: no edict is available at village level — the fast lever "
+            "disappears exactly when a player most needs one")
+
+    for event in t.get("events.json", {}).get("events", []):
+        pattern = event.get("pattern")
+        if pattern and pattern not in patterns:
+            err(f"events: {event['id']}: unknown society pattern {pattern}")
+        trigger = event.get("trigger", {})
+        if trigger.get("condition") == "society_stat":
+            if not trigger.get("stat"):
+                err(f"events: {event['id']}: society_stat trigger needs a 'stat'")
+            if "min" not in trigger and "max" not in trigger:
+                err(f"events: {event['id']}: society_stat trigger needs a 'min' or a 'max'")
+            if not event.get("pattern"):
+                warn(f"events: {event['id']}: a society-driven event with no 'pattern' "
+                     f"teaches the player nothing about what just happened")
+
+    # Every effect key the data authors must have an engine reader. This is the
+    # check that would have caught weapon_upgrade and armor_upgrade sitting dead
+    # in 34 building levels across two phases.
+    authored_effects = set()
+    for source in ("buildings.json", "temples.json"):
+        for chain in t.get(source, {}).get("chains", []):
+            for level in chain.get("levels", []):
+                authored_effects.update(level.get("effects", {}))
+    engine_text = "\n".join(source.read_text() for source in (ROOT / "src").rglob("*.gd"))
+    for effect in sorted(authored_effects):
+        if f'"{effect}"' not in engine_text:
+            err(f"buildings: effect key '{effect}' is authored in the data but no "
+                f"engine code reads it (dead content)")
+    for effect in sorted(a for adv in t.get("advances.json", {}).get("advances", [])
+                         for a in adv.get("effects", {})):
+        if f'"{effect}"' not in engine_text:
+            err(f"advances: effect key '{effect}' is authored but no engine code reads it")
+    for effect in sorted(e for edict in t.get("edicts.json", {}).get("edicts", [])
+                         for e in edict.get("effects", {})):
+        if f'"{effect}"' not in engine_text:
+            err(f"edicts: effect key '{effect}' is authored but no engine code reads it")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
@@ -575,6 +675,23 @@ def cross_checks(t: dict[str, dict]) -> None:
                 "any campaign would crash on it")
     if battle.get("round_winner_morale_min", 0) > battle.get("round_winner_morale_max", 100):
         err("balance: battle.round_winner_morale_min must not exceed round_winner_morale_max")
+    society_rules = balance.get("society", {})
+    # Hysteresis is the point: a province must not settle the moment it ignites.
+    for ignite, extinguish in (("restive_ignite", "restive_extinguish"),
+                               ("revolt_ignite", "revolt_extinguish")):
+        if society_rules.get(ignite, 0) <= society_rules.get(extinguish, 0):
+            err(f"balance: society.{ignite} must be above society.{extinguish} — "
+                f"without the gap there is no hysteresis and a crisis simply "
+                f"reverses when its cause does")
+    if society_rules.get("restive_ignite", 0) >= society_rules.get("revolt_ignite", 0):
+        err("balance: society.restive_ignite must be below society.revolt_ignite")
+    if society_rules.get("grievance_relief_rate", 0) >= society_rules.get("grievance_charge_rate", 0):
+        warn("balance: grievance relieves at least as fast as it charges, so "
+             "accumulated resentment costs the player nothing to undo")
+    for advance in t.get("advances.json", {}).get("advances", []):
+        if advance["knowledge_threshold"] > society_rules.get("knowledge_max", 100):
+            err(f"advances: {advance['id']} threshold is above society.knowledge_max "
+                f"and can never be reached")
 
 
 def main() -> int:
@@ -598,7 +715,7 @@ def _entity_count(document: dict) -> int:
                    ("unit_classes", "attributes", "effects", "building_kinds"))
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "cells"):
+                "cells", "advances", "axes", "edicts"):
         if key in document:
             return len(document[key])
     return 0

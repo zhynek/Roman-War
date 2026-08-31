@@ -15,7 +15,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A roadside altar to the Best and Greatest, where oaths are sworn under the open sky. Even a village thinks twice before breaking a promise made here."
         },
         {
@@ -24,7 +24,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "A proper temple with a painted terracotta roof, seat of the town's most binding contracts. The thunderer watches the magistrates as closely as the criminals."
         },
         {
@@ -33,7 +33,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Stone columns and a gilded eagle proclaim that this city answers to law before all else. Court days draw crowds from the whole countryside."
         },
         {
@@ -42,7 +42,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "A walled sanctuary on the city's highest point, with priests, archives, and festival games in the god's honor. Perjurers are said to feel the sky darken as they approach."
         },
         {
@@ -51,7 +51,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "law": 16, "happiness": 7 },
+          "effects": { "law": 16, "happiness": 7, "civic": 8, "coercion": 2.5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A colossal sanctuary crowning the city, where Jupiter presides over all the gods of the state. Its authority makes the whole province orderly, and its festivals make it proud."
         }
       ]
@@ -70,7 +70,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "A field altar hung with captured spears, tended by veterans. Farm boys linger here and dream of the eagle standards."
         },
         {
@@ -79,7 +79,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Recruits take their first oath before the war god's statue, and it steadies them. Men mustered here march like they have already seen a battle."
         },
         {
@@ -88,7 +88,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "Priests bless the arsenals, and the smiths that serve the temple hold blades to a soldier's standard. The parade ground outside is never quiet for long."
         },
         {
@@ -97,7 +97,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "A martial sanctuary of trophies, drill yards, and votive shields going back generations. Units raised in its shadow fight as if their ancestors were watching, because they believe they are."
         },
         {
@@ -106,7 +106,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2, "civic": -4, "burden": 2.5, "assimilation_pull": 5, "martial": 5 },
           "description": "The greatest war-sanctuary of the state, where triumphs end and campaigns begin. Soldiers consecrated here carry the god's favor in their arms and their iron."
         }
       ]
@@ -125,7 +125,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 4, "growth": 0.4 },
+          "effects": { "happiness": 4, "growth": 0.4, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A humble altar of the grain mother, wreathed in wheat at every harvest. Families pray here for full granaries and full cradles alike."
         },
         {
@@ -134,7 +134,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 6, "growth": 0.6 },
+          "effects": { "happiness": 6, "growth": 0.6, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "The town's plebs hold their spring festival here, and the goddess repays them with easy years. Bread is cheaper in her shadow."
         },
         {
@@ -143,7 +143,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 9, "growth": 0.9 },
+          "effects": { "happiness": 9, "growth": 0.9, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A stone temple ringed by grain doles and marriage feasts. The city swells with newcomers who trust the goddess to feed them."
         },
         {
@@ -152,7 +152,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 12, "growth": 1.2 },
+          "effects": { "happiness": 12, "growth": 1.2, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "Granaries, gardens, and processional ways surround the sanctuary of plenty. Famine feels like a story told about other cities."
         },
         {
@@ -161,7 +161,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 15, "growth": 1.5 },
+          "effects": { "happiness": 15, "growth": 1.5, "civic": 10, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A vast sanctuary of the harvest whose festivals feed the poor of an entire metropolis. The city grows the way a field grows: quietly, and every year."
         }
       ]
@@ -180,7 +180,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "trade_pct": 5, "happiness": 2 },
+          "effects": { "trade_pct": 5, "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1 },
           "description": "A crossroads altar where peddlers leave a coin for luck on the road. Somehow the carts from this village always arrive first to market."
         },
         {
@@ -189,7 +189,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "trade_pct": 10, "happiness": 4 },
+          "effects": { "trade_pct": 10, "happiness": 4, "burden": 1, "assimilation_pull": 2, "knowledge": 2 },
           "description": "Merchants seal bargains on the temple steps under the god of exchange. Honest scales and quick deals bring the caravans back."
         },
         {
@@ -198,7 +198,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "trade_pct": 15, "happiness": 6 },
+          "effects": { "trade_pct": 15, "happiness": 6, "burden": 1.5, "assimilation_pull": 3, "knowledge": 3 },
           "description": "The trading guilds keep their common chest in the god's vaults. A city under Mercury's wing haggles in six languages and profits in all of them."
         },
         {
@@ -207,7 +207,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "trade_pct": 20, "happiness": 8 },
+          "effects": { "trade_pct": 20, "happiness": 8, "burden": 2, "assimilation_pull": 4, "knowledge": 4 },
           "description": "Warehouses, counting rooms, and shrines share the same colonnades. Fortunes are made here between the morning sacrifice and the evening one."
         },
         {
@@ -216,7 +216,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 5 },
           "description": "The great sanctuary of the swift god commands every road and quay in the region. Even the levies march faster, for Mercury teaches everyone in this city to move with purpose."
         }
       ]
@@ -235,7 +235,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 7 },
+          "effects": { "happiness": 7, "civic": -1, "burden": 0.5, "assimilation_pull": 1 },
           "description": "An ivy-hung altar beside the wine press, loud on festival nights. The village forgives a great deal after the vintage feast."
         },
         {
@@ -244,7 +244,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 11 },
+          "effects": { "happiness": 11, "civic": -2.3, "burden": 1.2, "assimilation_pull": 2.3 },
           "description": "Processions, masks, and free-flowing wine mark the god's days. Magistrates grumble about the noise and quietly fund it anyway."
         },
         {
@@ -253,7 +253,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 15 },
+          "effects": { "happiness": 15, "civic": -3.7, "burden": 1.8, "assimilation_pull": 3.7 },
           "description": "The revels now fill whole streets, and the city's troubles drown in song. Visitors come for one festival and stay for a season."
         },
         {
@@ -262,7 +262,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 19 },
+          "effects": { "happiness": 19, "civic": -5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A sprawling pleasure-sanctuary of theaters, wine halls, and torchlit gardens. No city that keeps Bacchus this well has ever found the energy to riot."
         }
       ]
@@ -281,7 +281,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 2 },
+          "effects": { "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1, "martial": 1 },
           "description": "A soot-blackened altar kept outside the walls, as the fire god prefers. The smiths feed it charcoal and it keeps their sparks from spreading."
         },
         {
@@ -290,7 +290,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "effects": { "happiness": 3, "weapon_upgrade": 1, "burden": 1.2, "assimilation_pull": 2.3, "knowledge": 2, "martial": 1.7 },
           "description": "Forges cluster around the temple, and blades quenched under the god's eye hold a crueler edge. Apprentices swear their craft-oaths at the anvil-altar."
         },
         {
@@ -299,7 +299,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1, "burden": 1.8, "assimilation_pull": 3.7, "knowledge": 3, "martial": 2.3 },
           "description": "The temple workshops turn out mail and helms fit for parade and slaughter both. The night sky above this quarter glows like a banked hearth."
         },
         {
@@ -308,7 +308,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 4, "martial": 3 },
           "description": "A city within the city of furnaces, foundries, and master armorers under sacred charter. Armies equipped here gleam like something hammered out by the god himself."
         }
       ]
@@ -327,7 +327,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "An open-air altar to the father of gods, guardian of guests and oaths. Disputes end here more often than they end in blood."
         },
         {
@@ -336,7 +336,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "A columned temple where the assembly swears in its magistrates. The thunderer's presence makes civic office feel heavier, and civic crime feel riskier."
         },
         {
@@ -345,7 +345,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Marble, bronze, and a seated god who seems to watch the agora directly. The laws inscribed on the temple wall are read aloud each festival."
         },
         {
@@ -354,7 +354,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "A great walled sanctuary with treasuries, courts, and games held in the god's honor. Exiles petition here, and tyrants sleep badly nearby."
         },
         {
@@ -363,7 +363,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "law": 16, "happiness": 7 },
+          "effects": { "law": 16, "happiness": 7, "civic": 8, "coercion": 2.5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A sanctuary famous across the Greek world, drawing pilgrims, athletes, and envoys. Under its truce even feuding cities keep the peace, and this one keeps it best of all."
         }
       ]
@@ -382,7 +382,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "A grim little altar of spears and dark stone, honored more than loved. The village keeps it fed so the war god looks elsewhere for prey."
         },
         {
@@ -391,7 +391,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Ephebes take their shield-oath here before joining the phalanx. The god cares nothing for their names, only that they hold the line."
         },
         {
@@ -400,7 +400,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "Captured panoplies line the walls, and the temple smiths grind spearheads to a wicked point. Drill instructors quote the priests, and the priests quote no one."
         },
         {
@@ -409,7 +409,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "A sanctuary of war where the city's regiments are consecrated banner by banner. Its festivals are mock battles that leave real bruises."
         },
         {
@@ -418,7 +418,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2, "civic": -4, "burden": 2.5, "assimilation_pull": 5, "martial": 5 },
           "description": "The most feared war-sanctuary in the Greek world, its precinct paved with dedicated shields. Soldiers blessed here advance in silence that unnerves veterans."
         }
       ]
@@ -437,7 +437,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "trade_pct": 5, "happiness": 2 },
+          "effects": { "trade_pct": 5, "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1 },
           "description": "A herm at the crossroads, garlanded by travelers and traders. Goods seem to find their way here, and profits find their way home."
         },
         {
@@ -446,7 +446,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "trade_pct": 10, "happiness": 4 },
+          "effects": { "trade_pct": 10, "happiness": 4, "burden": 1, "assimilation_pull": 2, "knowledge": 2 },
           "description": "The market square grows around the messenger god's temple as if planted there. His priests keep the standard weights, and everyone pretends to trust them."
         },
         {
@@ -455,7 +455,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "trade_pct": 15, "happiness": 6 },
+          "effects": { "trade_pct": 15, "happiness": 6, "burden": 1.5, "assimilation_pull": 3, "knowledge": 3 },
           "description": "Caravans and coasting ships time their runs by the temple's festivals. A city of quick tongues, quick feet, and quicker arithmetic."
         },
         {
@@ -464,7 +464,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "trade_pct": 20, "happiness": 8 },
+          "effects": { "trade_pct": 20, "happiness": 8, "burden": 2, "assimilation_pull": 4, "knowledge": 4 },
           "description": "Banking stoas and merchant treasuries crowd the sanctuary of the god of exchange. Deals struck here bind from Massalia to Antioch."
         },
         {
@@ -473,7 +473,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 5 },
           "description": "The great emporium-sanctuary where half the sea's trade is sworn, weighed, and blessed. Even the city's soldiers learn the traveler-god's pace on the march."
         }
       ]
@@ -492,7 +492,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 7 },
+          "effects": { "happiness": 7, "civic": -1, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A vine-wrapped altar where the village dances off the year's grievances. The wine god asks only enthusiasm, and receives plenty."
         },
         {
@@ -501,7 +501,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 11 },
+          "effects": { "happiness": 11, "civic": -2.3, "burden": 1.2, "assimilation_pull": 2.3 },
           "description": "The temple sponsors choruses, comedies, and a festival that empties every cellar. Feuds started in winter rarely survive it."
         },
         {
@@ -510,7 +510,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 15 },
+          "effects": { "happiness": 15, "civic": -3.7, "burden": 1.8, "assimilation_pull": 3.7 },
           "description": "A theater grows beside the temple, and the whole city becomes its audience. Under the masks, rich and poor laugh at the same jokes."
         },
         {
@@ -519,7 +519,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 19 },
+          "effects": { "happiness": 19, "civic": -5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A famous sanctuary of drama and revel whose festivals last for days and are argued about for years. Discontent cannot get a word in."
         }
       ]
@@ -538,7 +538,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A spring-side altar where the sick sleep in hope of healing dreams. Some wake cured; all wake comforted."
         },
         {
@@ -547,7 +547,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "health": 7, "growth": 0.5, "happiness": 2 },
+          "effects": { "health": 7, "growth": 0.5, "happiness": 2, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "Priest-physicians set bones, mix draughts, and keep the sacred serpents fat. Fewer children are buried in this town than in its neighbors."
         },
         {
@@ -556,7 +556,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "health": 10, "growth": 0.8, "happiness": 3 },
+          "effects": { "health": 10, "growth": 0.8, "happiness": 3, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Dormitories, baths, and herb gardens surround the healing god's house. The sick arrive by cartload and most walk home."
         },
         {
@@ -565,7 +565,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "health": 13, "growth": 1.0, "happiness": 4 },
+          "effects": { "health": 13, "growth": 1.0, "happiness": 4, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "A renowned healing sanctuary where physicians train and pilgrims leave votive limbs in gratitude. Plague finds this city a discouraging host."
         }
       ]
@@ -584,7 +584,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "burden": 0.5, "assimilation_pull": 1, "knowledge": 0.5, "martial": 1 },
           "description": "A salt-stained altar on the headland where sailors pour wine to the deep. The sea takes fewer of them than it used to."
         },
         {
@@ -593,7 +593,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 5 },
+          "effects": { "happiness": 5, "burden": 1.2, "assimilation_pull": 2.3, "knowledge": 1, "martial": 2 },
           "description": "Shipwrights and fishermen share the earth-shaker's temple, and his trident marks every new keel. Storm season is met with sacrifice instead of dread."
         },
         {
@@ -602,7 +602,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 7, "armor_upgrade": 1 },
+          "effects": { "happiness": 7, "armor_upgrade": 1, "burden": 1.8, "assimilation_pull": 3.7, "knowledge": 1.5, "martial": 3 },
           "description": "The temple yards bless rams, hulls, and the bronze that marines wear. Crews consecrated here board with the confidence of men the sea has already spared once."
         },
         {
@@ -611,7 +611,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 9, "armor_upgrade": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 9, "armor_upgrade": 1, "weapon_upgrade": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 2, "martial": 4 },
           "description": "A great maritime sanctuary of trophies, drowned bells, and dedicated prows. Its armories fit out soldiers and sailors alike in god-blessed bronze."
         }
       ]
@@ -630,7 +630,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A small stone altar where the sacred flame is never allowed to die. Truth is spoken before it, for the Wise Lord abhors the lie."
         },
         {
@@ -639,7 +639,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "Magi tend the flame and hear disputes in its light. A contract sworn by the fire is worth more than one sealed in wax."
         },
         {
@@ -648,7 +648,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A domed sanctuary whose flame has burned for generations without failing. The magi's judgments carry to every bazaar and caravanserai in the city."
         },
         {
@@ -657,7 +657,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "Kings light their reigns from this fire and fear its extinction more than rebellion. Order flows outward from the sanctuary like heat from the hearth."
         },
         {
@@ -666,7 +666,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "law": 16, "happiness": 7 },
+          "effects": { "law": 16, "happiness": 7, "civic": 8, "coercion": 2.5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "One of the great fires of the world, guarded day and night by an unbroken line of magi. Under its glow the lie withers, and with it most of the city's crimes."
         }
       ]
@@ -685,7 +685,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "A hillside shrine to victory's many forms: the boar, the stallion, the storm-wind. Herdsmen leave arrowheads and take home courage."
         },
         {
@@ -694,7 +694,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Young riders are consecrated here before their first campaign. The god of victory does not promise survival, only that they will be worth killing."
         },
         {
@@ -703,7 +703,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "Trophy standards of beaten enemies hang in the smoke of the victory god's fires. The temple's fletchers and swordsmiths serve soldiers at half their pride and twice their skill."
         },
         {
@@ -712,7 +712,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "Kings ride from this sanctuary to war and return to hang their enemies' banners in it. Regiments blessed here believe retreat is a foreign word."
         },
         {
@@ -721,7 +721,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2, "civic": -4, "burden": 2.5, "assimilation_pull": 5, "martial": 5 },
           "description": "The greatest victory-sanctuary of the east, where the god is honored in all ten of his incarnations. Armies consecrated in its shadow strike like the storm-wind that is his first."
         }
       ]
@@ -740,7 +740,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 4, "growth": 0.4 },
+          "effects": { "happiness": 4, "growth": 0.4, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A shrine over a clear spring, sacred to the lady of the waters. Fields drink, herds calve, and the village gives her the credit."
         },
         {
@@ -749,7 +749,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 6, "growth": 0.6 },
+          "effects": { "happiness": 6, "growth": 0.6, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "Canals and cisterns are dug under the goddess's protection, and brides are blessed at her doors. The town outgrows its walls politely but steadily."
         },
         {
@@ -758,7 +758,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 9, "growth": 0.9 },
+          "effects": { "happiness": 9, "growth": 0.9, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A pillared temple beside gardens that stay green through the worst summers. Pilgrims come for children, harvests, and rain, and complain of none of the three."
         },
         {
@@ -767,7 +767,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 12, "growth": 1.2 },
+          "effects": { "happiness": 12, "growth": 1.2, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "A royal sanctuary of fountains and orchards fed by sacred waterworks. The city drinks sweet water and multiplies."
         },
         {
@@ -776,7 +776,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 15, "growth": 1.5 },
+          "effects": { "happiness": 15, "growth": 1.5, "civic": 10, "burden": 2.5, "assimilation_pull": 5 },
           "description": "One of the wonders of the east: a vast water-sanctuary of pools, gold, and green shade. Around the strong lady of the waters, a metropolis blooms in the dust."
         }
       ]
@@ -795,7 +795,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "trade_pct": 5, "happiness": 2 },
+          "effects": { "trade_pct": 5, "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1 },
           "description": "A sunrise-facing shrine to the lord of covenants. Caravans strike their bargains here, for Mithra sees every hand that cheats."
         },
         {
@@ -804,7 +804,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "trade_pct": 10, "happiness": 4 },
+          "effects": { "trade_pct": 10, "happiness": 4, "burden": 1, "assimilation_pull": 2, "knowledge": 2 },
           "description": "The caravanserai and the temple share a courtyard, and contracts are sworn over the morning fire. Traders detour days to deal under his witness."
         },
         {
@@ -813,7 +813,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "trade_pct": 15, "happiness": 6 },
+          "effects": { "trade_pct": 15, "happiness": 6, "burden": 1.5, "assimilation_pull": 3, "knowledge": 3 },
           "description": "The god of the unbroken word presides over a bazaar famous for honest scales. Silk, silver, and horses change hands beneath his thousand-eyed gaze."
         },
         {
@@ -822,7 +822,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "trade_pct": 20, "happiness": 8 },
+          "effects": { "trade_pct": 20, "happiness": 8, "burden": 2, "assimilation_pull": 4, "knowledge": 4 },
           "description": "Treaty-fires burn in the sanctuary where kings and caravan lords alike bind their promises. Trade follows trust, and trust lives here."
         }
       ]
@@ -841,7 +841,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 2 },
+          "effects": { "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1, "martial": 1 },
           "description": "A shrine of the holy fire kept by the village smith, who feeds it before his own forge. Iron worked beside it is said to remember the flame."
         },
         {
@@ -850,7 +850,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "effects": { "happiness": 3, "weapon_upgrade": 1, "burden": 1.2, "assimilation_pull": 2.3, "knowledge": 2, "martial": 1.7 },
           "description": "Forge and sanctuary stand wall to wall, and blades are drawn through the sacred flame at their finishing. Edges blessed by Atar bite deep and stay sharp."
         },
         {
@@ -859,7 +859,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1, "burden": 1.8, "assimilation_pull": 3.7, "knowledge": 3, "martial": 2.3 },
           "description": "The fire-son's temple oversees a quarter of master armorers hammering scale and lamellar. Cataphract harness from these shops turns spearpoints like rain."
         },
         {
@@ -868,7 +868,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 4, "martial": 3 },
           "description": "A royal fire-sanctuary whose consecrated furnaces never cool. The panoplies it produces are heirlooms the day they are made."
         }
       ]
@@ -887,7 +887,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A stern altar of the lord of the burning sky, first among the city's gods. His name alone keeps small men honest."
         },
         {
@@ -896,7 +896,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "The suffets take their oaths of office before the great Baal. His priests audit the town's affairs with a rigor tax collectors envy."
         },
         {
@@ -905,7 +905,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A high sanctuary of bronze doors and smoke, dread and splendid at once. Council, court, and counting house all bend beneath his authority."
         },
         {
@@ -914,7 +914,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "The lord of the city rules from a precinct of towers and sacred flame. Sedition dies in the throat within sight of it."
         },
         {
@@ -923,7 +923,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "law": 16, "happiness": 7 },
+          "effects": { "law": 16, "happiness": 7, "civic": 8, "coercion": 2.5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A precinct vast as a citadel, heart of the state's religion and its discipline. What Baal Hammon commands, the greatest city of the west performs."
         }
       ]
@@ -942,7 +942,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 4, "growth": 0.4 },
+          "effects": { "happiness": 4, "growth": 0.4, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A white-washed shrine bearing the sign of the goddess: circle, line, and open arms. Mothers and farmers trust her with everything that grows."
         },
         {
@@ -951,7 +951,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 6, "growth": 0.6 },
+          "effects": { "happiness": 6, "growth": 0.6, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "The lady of the town watches over its orchards, cradles, and quiet streets. Her festivals fill the lanes with lamplight and singing."
         },
         {
@@ -960,7 +960,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 9, "growth": 0.9 },
+          "effects": { "happiness": 9, "growth": 0.9, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A serene marble house for the face of Baal, ringed by gardens and votive stelae. The city under her sign is fruitful and strangely calm."
         },
         {
@@ -969,7 +969,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 12, "growth": 1.2 },
+          "effects": { "happiness": 12, "growth": 1.2, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "Thousands of stelae crowd the great mother's precinct, one for every answered prayer. Her city wants for neither children nor bread."
         },
         {
@@ -978,7 +978,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 15, "growth": 1.5 },
+          "effects": { "happiness": 15, "growth": 1.5, "civic": 10, "burden": 2.5, "assimilation_pull": 5 },
           "description": "The queen of the city reigns from a precinct of silver crescents and endless gardens. Under her open arms the metropolis grows like a tide coming in."
         }
       ]
@@ -997,7 +997,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "trade_pct": 5, "happiness": 2 },
+          "effects": { "trade_pct": 5, "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1 },
           "description": "A harbor-side shrine to the king of the city of Tyre, patron of every Punic venture. Sailors touch its pillar before weighing anchor."
         },
         {
@@ -1006,7 +1006,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "trade_pct": 10, "happiness": 4 },
+          "effects": { "trade_pct": 10, "happiness": 4, "burden": 1, "assimilation_pull": 2, "knowledge": 2 },
           "description": "Merchant houses register their ships and their oaths at the god's twin pillars. Cargo blessed by Melqart is said to outrun both storm and creditor."
         },
         {
@@ -1015,7 +1015,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "trade_pct": 15, "happiness": 6 },
+          "effects": { "trade_pct": 15, "happiness": 6, "burden": 1.5, "assimilation_pull": 3, "knowledge": 3 },
           "description": "Tithes from a hundred trade routes gild the wanderer-god's house. Its priests know the price of tin in every port from Gades to Sidon."
         },
         {
@@ -1024,7 +1024,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "trade_pct": 20, "happiness": 8 },
+          "effects": { "trade_pct": 20, "happiness": 8, "burden": 2, "assimilation_pull": 4, "knowledge": 4 },
           "description": "A treasury-sanctuary where trading companies are chartered and sea lanes divided. Half the western sea's silver passes its threshold in a year."
         },
         {
@@ -1033,7 +1033,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1 },
+          "effects": { "trade_pct": 25, "happiness": 10, "recruit_xp": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 5 },
           "description": "The mother-sanctuary of Punic commerce, its pillars sheathed in gold and its ledgers longer than epics. Even its levies drill hard, for Melqart's people protect what they own."
         }
       ]
@@ -1052,7 +1052,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A hillside shrine of the healer god, hung with small silver hands and feet. The sick climb up slowly and walk down faster."
         },
         {
@@ -1061,7 +1061,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "health": 7, "growth": 0.5, "happiness": 2 },
+          "effects": { "health": 7, "growth": 0.5, "happiness": 2, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "Sacred pools and clean-handed priests make this temple the town's true physician. Fevers that ravage the coast pass this place by."
         },
         {
@@ -1070,7 +1070,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "health": 10, "growth": 0.8, "happiness": 3 },
+          "effects": { "health": 10, "growth": 0.8, "happiness": 3, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Terraced courts of baths and herb stores rise around the healer's sanctuary. Ship crews put in here just to have their wounds seen."
         },
         {
@@ -1079,7 +1079,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "health": 13, "growth": 1.0, "happiness": 4 },
+          "effects": { "health": 13, "growth": 1.0, "happiness": 4, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "A famed healing sanctuary whose spring-fed basins never run dry. The city buries its people old, which is the only boast that matters."
         }
       ]
@@ -1098,7 +1098,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "An altar to the lord of the arrow and the plague-wind, placated more than adored. Better his fire aimed outward than in."
         },
         {
@@ -1107,7 +1107,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Hired spears and citizen levies alike take the war god's mark before muster. His temple pays well for courage and nothing for excuses."
         },
         {
@@ -1116,7 +1116,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "The lightning god's armory-temple issues blades tempered under his own storm-sign. Officers pray here for aim; enemies pray he is not listening."
         },
         {
@@ -1125,7 +1125,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "War-tithes from every campaign gild the god of the burning arrow. The regiments consecrated here are the ones other cities hire nightmares about."
         },
         {
@@ -1134,7 +1134,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2, "civic": -4, "burden": 2.5, "assimilation_pull": 5, "martial": 5 },
           "description": "The great war-precinct of the Punic state, where its most sacred bands are sworn to conquer or be carried home on their shields. Reshef's fire goes with them."
         }
       ]
@@ -1153,7 +1153,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 7 },
+          "effects": { "happiness": 7, "civic": -1, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A shrine of the evening star, bright with lamps and flute music after dark. The village keeps her feasts eagerly and her fasts loosely."
         },
         {
@@ -1162,7 +1162,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 11 },
+          "effects": { "happiness": 11, "civic": -2.3, "burden": 1.2, "assimilation_pull": 2.3 },
           "description": "Music, incense, and festival nights spill from the goddess's doors into the streets. Sailors time their shore leave to her calendar."
         },
         {
@@ -1171,7 +1171,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 15 },
+          "effects": { "happiness": 15, "civic": -3.7, "burden": 1.8, "assimilation_pull": 3.7 },
           "description": "The lady of joy holds court in a temple of mirrors, doves, and drums. Her festivals are the one appointment the whole city keeps."
         },
         {
@@ -1180,7 +1180,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 19 },
+          "effects": { "happiness": 19, "civic": -5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A glittering pleasure-sanctuary famous from Iberia to the Levant. Grievances brought into this city rarely survive their first festival."
         }
       ]
@@ -1199,7 +1199,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A sun-shrine where the village greets the god at his rising. Under the eye that sees everything, little goes missing."
         },
         {
@@ -1208,7 +1208,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "Priests of the sun keep the town's records, measures, and calendar. Order here is not enforced so much as risen with, daily."
         },
         {
@@ -1217,7 +1217,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "An obelisk-crowned temple whose priesthood administers oaths, courts, and granary seals. Ma'at is not an ideal here; it is a procedure."
         },
         {
@@ -1226,7 +1226,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "Pylon gates, sacred lakes, and colleges of scribes serve the lord of the horizon. The city's business runs as reliably as his barque crosses the sky."
         },
         {
@@ -1235,7 +1235,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "law": 16, "happiness": 7 },
+          "effects": { "law": 16, "happiness": 7, "civic": 8, "coercion": 2.5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A precinct of gold-tipped obelisks visible from a day's sail away. Beneath the sun god's gaze, a metropolis of hundreds of thousands keeps time, keeps accounts, and keeps the peace."
         }
       ]
@@ -1254,7 +1254,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "A falcon-shrine at the village edge, wings spread against every enemy. Boys salute it with reed spears, practicing."
         },
         {
@@ -1263,7 +1263,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Recruits are presented to the avenger-falcon before their first posting. His priests teach that the strong arm and the just cause are the same limb."
         },
         {
@@ -1272,7 +1272,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 1, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "Reliefs of the falcon spearing chaos cover the walls, and the temple armories mean it. Companies blessed at its pylon fight like the god is perched on their standard."
         },
         {
@@ -1281,7 +1281,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "A great compound where regiments receive their names, standards, and consecrated bronze. The falcon's shadow crossing the parade ground is taken as a promotion."
         },
         {
@@ -1290,7 +1290,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2 },
+          "effects": { "happiness": 8, "recruit_xp": 3, "weapon_upgrade": 2, "civic": -4, "burden": 2.5, "assimilation_pull": 5, "martial": 5 },
           "description": "The war-falcon's grandest house, where kings are crowned as his living image. Armies sworn here carry the sky's own vengeance in close formation."
         }
       ]
@@ -1309,7 +1309,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 4, "growth": 0.4 },
+          "effects": { "happiness": 4, "growth": 0.4, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A green-painted shrine of the lord who dies and returns with the flood. The village plants by his festivals and rarely plants in vain."
         },
         {
@@ -1318,7 +1318,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 6, "growth": 0.6 },
+          "effects": { "happiness": 6, "growth": 0.6, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "Grain-beds of sprouting barley are raised in the god's image each year. Where Osiris is well kept, the black land gives double."
         },
         {
@@ -1327,7 +1327,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 9, "growth": 0.9 },
+          "effects": { "happiness": 9, "growth": 0.9, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Pilgrims and mourners alike bring offerings to the lord of the faithful dead. His promise of return makes life on the riverbank fearless and full."
         },
         {
@@ -1336,7 +1336,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 12, "growth": 1.2 },
+          "effects": { "happiness": 12, "growth": 1.2, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "Festival barges, granary courts, and mystery halls fill the risen lord's compound. The city trusts its dead to him and its harvests likewise."
         },
         {
@@ -1345,7 +1345,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "happiness": 15, "growth": 1.5 },
+          "effects": { "happiness": 15, "growth": 1.5, "civic": 10, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A precinct of pilgrimage famous the length of the river, thronged at every flood season. Around the lord of rebirth, the city itself is reborn larger every year."
         }
       ]
@@ -1364,7 +1364,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "health": 4, "growth": 0.3, "happiness": 1 },
+          "effects": { "health": 4, "growth": 0.3, "happiness": 1, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A small shrine of the great enchantress, keeper of the words that mend. Mothers bring fevered children here first, and physicians second."
         },
         {
@@ -1373,7 +1373,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "health": 6, "growth": 0.5, "happiness": 2 },
+          "effects": { "health": 6, "growth": 0.5, "happiness": 2, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "Her priests bind wounds and mix remedies under the lady of magic's protection. The town's wells are cleaner for their fussing, and its people for their care."
         },
         {
@@ -1382,7 +1382,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "health": 9, "growth": 0.7, "happiness": 3 },
+          "effects": { "health": 9, "growth": 0.7, "happiness": 3, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Healing sleep, herb courts, and the murmur of spells fill the great mother's house. Illness in this city meets an organized and ancient resistance."
         },
         {
@@ -1391,7 +1391,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "health": 12, "growth": 1.0, "happiness": 4 },
+          "effects": { "health": 12, "growth": 1.0, "happiness": 4, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "A compound of sanatoria and sacred pools where the throne-crowned lady works her mercies. Pilgrims arrive on stretchers and leave on foot."
         },
         {
@@ -1400,7 +1400,7 @@
           "min_settlement_level": "huge_city",
           "cost": 6500,
           "build_turns": 5,
-          "effects": { "health": 15, "growth": 1.2, "happiness": 5 },
+          "effects": { "health": 15, "growth": 1.2, "happiness": 5, "civic": 10, "burden": 2.5, "assimilation_pull": 5 },
           "description": "The mistress of magic's grandest precinct, famous wherever ships sail. A metropolis in her keeping outlives plagues that empty other capitals."
         }
       ]
@@ -1419,7 +1419,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 2 },
+          "effects": { "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1, "martial": 1 },
           "description": "A craftsman's shrine to the god who thought the world and spoke it into being. Local smiths and potters leave their best piece of the year at his feet."
         },
         {
@@ -1428,7 +1428,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "effects": { "happiness": 3, "weapon_upgrade": 1, "burden": 1.2, "assimilation_pull": 2.3, "knowledge": 2, "martial": 1.7 },
           "description": "The maker-god's temple charters the town's workshops and proves their bronze. Spearheads bearing his stamp pass inspection without argument."
         },
         {
@@ -1437,7 +1437,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1, "burden": 1.8, "assimilation_pull": 3.7, "knowledge": 3, "martial": 2.3 },
           "description": "Foundries, joineries, and sculptors' yards work under the great artificer's charter. Arms and armor from his city are copied everywhere and equaled nowhere nearby."
         },
         {
@@ -1446,7 +1446,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1 },
+          "effects": { "happiness": 5, "weapon_upgrade": 2, "armor_upgrade": 1, "burden": 2.5, "assimilation_pull": 5, "knowledge": 4, "martial": 3 },
           "description": "A vast compound where the god of makers oversees a thousand workshops at once. What leaves its gates is finished in every sense of the word."
         }
       ]
@@ -1465,7 +1465,7 @@
           "min_settlement_level": "village",
           "cost": 300,
           "build_turns": 1,
-          "effects": { "happiness": 7 },
+          "effects": { "happiness": 7, "civic": -1, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A shrine of the golden lady, loud with sistrum rattles on feast days. The village works hard because it celebrates harder."
         },
         {
@@ -1474,7 +1474,7 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
-          "effects": { "happiness": 11 },
+          "effects": { "happiness": 11, "civic": -2.3, "burden": 1.2, "assimilation_pull": 2.3 },
           "description": "Music, beer, and dancing pour out of the lady of joy's house on her festivals. Even the tax scribes are seen smiling, briefly."
         },
         {
@@ -1483,7 +1483,7 @@
           "min_settlement_level": "minor_city",
           "cost": 1500,
           "build_turns": 3,
-          "effects": { "happiness": 15 },
+          "effects": { "happiness": 15, "civic": -3.7, "burden": 1.8, "assimilation_pull": 3.7 },
           "description": "The city's great festivals of drunkenness and song are held in her columned courts. A people this well feasted forgives its rulers almost anything."
         },
         {
@@ -1492,7 +1492,7 @@
           "min_settlement_level": "large_city",
           "cost": 3200,
           "build_turns": 4,
-          "effects": { "happiness": 19 },
+          "effects": { "happiness": 19, "civic": -5, "burden": 2.5, "assimilation_pull": 5 },
           "description": "A radiant compound of music halls, birth houses, and festival courts. Her calendar keeps the city so busy rejoicing that discontent cannot book a date."
         }
       ]
@@ -1511,7 +1511,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "law": 4, "happiness": 2 },
+          "effects": { "law": 4, "happiness": 2, "civic": 2, "coercion": 0.5, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A thunder-scarred oak marks the wheel-god's grove. Oaths sworn beneath it are kept, because everyone has seen what happens to that tree."
         },
         {
@@ -1520,7 +1520,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "law": 7, "happiness": 3 },
+          "effects": { "law": 7, "happiness": 3, "civic": 3.5, "coercion": 1, "burden": 1, "assimilation_pull": 2 },
           "description": "Carved wheels and offering pits ring the holy trees where the tribe's disputes are judged. The thunderer's silence during a verdict counts as agreement."
         },
         {
@@ -1529,7 +1529,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "law": 10, "happiness": 4 },
+          "effects": { "law": 10, "happiness": 4, "civic": 5, "coercion": 1.5, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A great enclosure of standing timbers where chiefs are sworn and law is spoken from memory. Feuds are settled here before the sky god settles them harder."
         },
         {
@@ -1538,7 +1538,7 @@
           "min_settlement_level": "minor_city",
           "cost": 2400,
           "build_turns": 3,
-          "effects": { "law": 13, "happiness": 5 },
+          "effects": { "law": 13, "happiness": 5, "civic": 6.5, "coercion": 2, "burden": 2, "assimilation_pull": 4 },
           "description": "The tribe's grandest sanctuary, its posts sheathed in bronze and its judgments final. Kings travel days to be crowned under the wheel."
         }
       ]
@@ -1557,7 +1557,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "happiness": 3 },
+          "effects": { "happiness": 3, "civic": -1, "burden": 0.5, "assimilation_pull": 1, "martial": 1 },
           "description": "A war-grove of the tribe's own protector, hung with the shields of the fallen. Boys leave their first hunting kill here and take home a warrior's nerve."
         },
         {
@@ -1566,7 +1566,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "happiness": 4, "recruit_xp": 1 },
+          "effects": { "happiness": 4, "recruit_xp": 1, "civic": -1.8, "burden": 1, "assimilation_pull": 2, "martial": 2 },
           "description": "Warbands are sworn to the tribe-father before they march, blades touched to the sacred cauldron. Men bound by that oath do not break first."
         },
         {
@@ -1575,7 +1575,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "happiness": 5, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 5, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -2.5, "burden": 1.5, "assimilation_pull": 3, "martial": 3 },
           "description": "Trophies of a dozen wars crowd the god's enclosure, and the smiths who serve it forge with old grudges in mind. Warbands raised here arrive angry and well armed."
         },
         {
@@ -1584,7 +1584,7 @@
           "min_settlement_level": "minor_city",
           "cost": 2400,
           "build_turns": 3,
-          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1 },
+          "effects": { "happiness": 6, "recruit_xp": 2, "weapon_upgrade": 1, "civic": -3.2, "burden": 2, "assimilation_pull": 4, "martial": 4 },
           "description": "The greatest war-sanctuary of the tribes, where whole confederations swear common cause. Its consecrated hosts have ended the histories of richer peoples."
         }
       ]
@@ -1603,7 +1603,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "happiness": 4, "growth": 0.4 },
+          "effects": { "happiness": 4, "growth": 0.4, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A meadow shrine of the horse mother, strewn with grain and mare's milk. Foals, calves, and children all seem to thrive within sight of it."
         },
         {
@@ -1612,7 +1612,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "happiness": 6, "growth": 0.7 },
+          "effects": { "happiness": 6, "growth": 0.7, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "The lady of the herds blesses paddock and hearth alike. Good grass, easy births, and full byres follow her festivals."
         },
         {
@@ -1621,7 +1621,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "happiness": 9, "growth": 1.0 },
+          "effects": { "happiness": 9, "growth": 1.0, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "Carved mares guard an enclosure rich with offerings of bread and bridles. The settlement grows like its herds: steadily, and with much noise."
         },
         {
@@ -1630,7 +1630,7 @@
           "min_settlement_level": "minor_city",
           "cost": 2400,
           "build_turns": 3,
-          "effects": { "happiness": 12, "growth": 1.3 },
+          "effects": { "happiness": 12, "growth": 1.3, "civic": 8, "burden": 2, "assimilation_pull": 4 },
           "description": "The great mother of horses keeps her finest sanctuary here, ringed by breeding runs. Wealth in this tribe is counted in hooves, and the count keeps rising."
         }
       ]
@@ -1649,7 +1649,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "happiness": 2 },
+          "effects": { "happiness": 2, "burden": 0.5, "assimilation_pull": 1, "knowledge": 1, "martial": 1 },
           "description": "The smith god's grove stands beside the village forge, ashes mingling with offerings. Iron cooled in its spring is said to hate going dull."
         },
         {
@@ -1658,7 +1658,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "happiness": 3, "weapon_upgrade": 1 },
+          "effects": { "happiness": 3, "weapon_upgrade": 1, "burden": 1.2, "assimilation_pull": 2.3, "knowledge": 2, "martial": 1.7 },
           "description": "Smiths take their hammer-oaths before the divine craftsman, and their longswords show it. Traders come from other tribes and pretend they haven't."
         },
         {
@@ -1667,7 +1667,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1 },
+          "effects": { "happiness": 4, "weapon_upgrade": 1, "armor_upgrade": 1, "burden": 1.8, "assimilation_pull": 3.7, "knowledge": 3, "martial": 2.3 },
           "description": "Forge-fires burn inside the sacred enclosure itself, worked by masters of the god's own line. Mail from these anvils is buried with chiefs and envied by kings."
         }
       ]
@@ -1686,7 +1686,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "happiness": 6 },
+          "effects": { "happiness": 6, "civic": -1, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A cheerful grove of the mallet god, keeper of the cask and the feast. Village quarrels are drowned here in fair shares of ale."
         },
         {
@@ -1695,7 +1695,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "happiness": 10 },
+          "effects": { "happiness": 10, "civic": -2.3, "burden": 1.2, "assimilation_pull": 2.3 },
           "description": "The god of good striking and good drinking hosts feasts that last from moonrise to milking. A town that feasts together fights outsiders, not itself."
         },
         {
@@ -1704,7 +1704,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "happiness": 14 },
+          "effects": { "happiness": 14, "civic": -3.7, "burden": 1.8, "assimilation_pull": 3.7 },
           "description": "Great feasting halls flank the sanctuary, and the god's mallet taps every new barrel first. Chiefs settle rivalries here over meat and boasting instead of blood."
         }
       ]
@@ -1723,7 +1723,7 @@
           "min_settlement_level": "village",
           "cost": 250,
           "build_turns": 1,
-          "effects": { "health": 3, "growth": 0.3, "happiness": 1 },
+          "effects": { "health": 3, "growth": 0.3, "happiness": 1, "civic": 2, "burden": 0.5, "assimilation_pull": 1 },
           "description": "A lake-island grove of the earth mother, approached barefoot and in silence. Her peace lies on the village like deep water: sickness struggles to cross it."
         },
         {
@@ -1732,7 +1732,7 @@
           "min_settlement_level": "town",
           "cost": 600,
           "build_turns": 2,
-          "effects": { "health": 6, "growth": 0.5, "happiness": 2 },
+          "effects": { "health": 6, "growth": 0.5, "happiness": 2, "civic": 4, "burden": 1, "assimilation_pull": 2 },
           "description": "When the goddess's veiled wagon passes, all iron is put away and all wounds are tended. The wise women of her grove know every herb in the forest."
         },
         {
@@ -1741,7 +1741,7 @@
           "min_settlement_level": "large_town",
           "cost": 1300,
           "build_turns": 3,
-          "effects": { "health": 9, "growth": 0.8, "happiness": 3 },
+          "effects": { "health": 9, "growth": 0.8, "happiness": 3, "civic": 6, "burden": 1.5, "assimilation_pull": 3 },
           "description": "A great sanctuary of the mothering earth, its springs sacred and its truce absolute. The tribe's children grow up unusually many and unusually loud."
         }
       ]

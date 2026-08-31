@@ -21,6 +21,9 @@ var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
 var glossary: Dictionary = {}          # section -> {id -> {id, name, blurb}}
+var advances: Dictionary = {}          # id -> advance dict
+var edicts: Dictionary = {}            # id -> edict dict (one standing order per province)
+var society: Dictionary = {}           # axes, unrest states, historical patterns
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -92,6 +95,16 @@ func _load_all(dir: String) -> void:
 	win_conditions = _read_json(dir + "/win_conditions.json").get("conditions", [])
 	names = _read_json(dir + "/names.json").get("pools", {})
 	mercenary_pools = _read_json(dir + "/mercenaries.json").get("pools", [])
+
+	for advance in _read_json(dir + "/advances.json").get("advances", []):
+		if advances.has(advance["id"]):
+			load_errors.append("duplicate advance id: %s" % advance["id"])
+		advances[advance["id"]] = advance
+	for edict in _read_json(dir + "/edicts.json").get("edicts", []):
+		if edicts.has(edict["id"]):
+			load_errors.append("duplicate edict id: %s" % edict["id"])
+		edicts[edict["id"]] = edict
+	society = _read_json(dir + "/society.json")
 
 
 func _read_json(path: String) -> Dictionary:

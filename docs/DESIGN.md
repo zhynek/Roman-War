@@ -2,7 +2,7 @@
 
 **Status:** living document. Describes both the design intent and what the engine in
 `src/core/` actually implements today — Phases 0–4 of the roadmap, the Phase-7
-senate foundation loop, and the Phase-8 campaign UI. Section 10's status table is
+senate foundation loop, and the Phase-8 campaign UI. Section 11's status table is
 the single source of truth; where a system is planned but not built, this document
 says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
@@ -35,8 +35,13 @@ Two supporting principles enforced throughout:
 - **Determinism.** `src/core/` is scene-free: no `Node`, no UI, no wall clock, no
   unseeded randomness. Every random draw goes through one `CampaignRng` whose state
   lives inside the game state, so a saved campaign replays identically.
-- **Legible math.** Population growth and public order are *summed lists of named
-  factors*, never opaque numbers. The rules return breakdowns
+- **Consequence, not bookkeeping.** The societal layer (§4) is the only part of the engine
+  with memory, and it is what makes a decision weigh something. Its uncertainty is
+  structural — delay, hysteresis, coupled feedback and partial observability — never a
+  dice roll: no part of it consumes randomness. Outcomes should be hard to predict in
+  advance and obvious in hindsight.
+- **Legible math.** Population growth, public order and every societal flow are *summed
+  lists of named factors*, never opaque numbers. The rules return breakdowns
   (`[{label, value}, ...]`) the UI will render directly on settlement scrolls.
 
 ## 2. The Campaign Loop
@@ -66,19 +71,20 @@ the world in a **fixed order** so campaigns are reproducible:
 | 1 | AI turns | Every non-player faction acts (currently `AiStub`: passive settlement management) |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
 | 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
-| 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
+| 4 | Edicts & treasuries | Standing orders tick (a new one starts taking hold and is billed the same turn), then per faction: income − upkeep − edict upkeep; deep debt forces unit disbandment |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
-| 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
-| 7 | Events | Scripted/date/condition events, disasters, then senate politics |
-| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
-| 9 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
+| 6 | Society | The eight stocks integrate (§4); surveys are taken where due; advances are gained or forgotten. Faction stocks resolve before provincial ones, because militarisation and ambition are inputs to every province's load |
+| 7 | Public order | Riots damage settlements; sustained collapse — or a province in open revolt — triggers secession to the rebels |
+| 8 | Events | Scripted/date/condition events, disasters, then senate politics |
+| 9 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 10 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
 
 Governorship is re-derived from character presence (`SettlementRules.refresh_governors`)
 at the top of the resolution, before anything reads it.
 
 `end_turn` returns a report dictionary (`sieges`, `completed_buildings`,
-`completed_units`, `rioted`, `revolted`, `events`, `senate`, `characters`,
-`winner`) that the UI presents as the start-of-turn event log.
+`completed_units`, `rioted`, `revolted`, `events`, `society`, `advances`, `senate`,
+`characters`, `winner`) that the UI presents as the start-of-turn event log.
 
 ### 2.4 The map
 
@@ -141,6 +147,7 @@ Growth per turn is a summed factor list (`GrowthRules.breakdown`), clamped to
 | squalor | −population ÷ 3,000 %, capped at −25 |
 | plague | −10% while infected |
 | recently_conquered | −1% while the counter runs |
+| unrest | −1.5% restive, −3% in open revolt — fields go unworked, and those who can leave do |
 
 A grain route exists to any grain-producing region owned by a trade partner (or
 yourself) that is land-adjacent or reachable through a shared sea zone via a port.
@@ -159,7 +166,7 @@ cure. Population never drops below 400.
 
 Order is **base 100 + a summed factor list** (`PublicOrderRules.breakdown`), floored
 at 0. Law and Happiness are distinct axes: both feed order, but Law additionally
-suppresses corruption (§4.3).
+suppresses corruption (§5.3).
 
 | Factor | Value |
 |---|---|
@@ -170,15 +177,24 @@ suppresses corruption (§4.3).
 | governor | +5 per influence point; −5 if ungoverned |
 | squalor | −population ÷ 3,000, capped at −25 |
 | distance_to_capital | −8% per hop beyond 2 free hops, capped at −80 (§3.4) |
-| culture_penalty | −(foreign building share × 40) (§3.5) |
+| culture_penalty | −((100 − Belonging) ÷ 100 × 40) — now a drifting stock, not a building census (§3.5, §4) |
 | recently_conquered | up to −30, decaying 5 per turn |
 | wonders | faction-wide happiness wonders |
 | population_boom | +5 when growth ≥ +2.5% |
+| standing | (Standing − 50) × 0.30 — consent read as order (§4) |
+| grievance | −Grievance × 0.35 — accumulated resentment read as order |
+| coercion | +Σ `coercion` effects × 1.5, scaled by martial spirit — order bought with force |
+| restive / in_revolt | −12 / −30 once the province has crossed its unrest threshold |
+
+Order is therefore as much a **readout** of the societal layer as a thing in itself, and
+the `grievance` and `coercion` factors are deliberately left unnetted: seeing both at once
+is the only way a player can notice that a province is calm because it is held down.
 
 **Riots:** order below **75** riots the settlement — 1% of the population dies and
 there is a 25% chance a random building loses a tier.
-**Revolts:** order below **50** for **3 consecutive turns** makes the settlement
-secede to the rebel faction — garrison destroyed, queues cleared, governor expelled.
+**Revolts:** two roads. Order below **50** for **3 consecutive turns**, as before — or a
+province that has been in open revolt for `rebellious_turns_to_revolt`, which fires
+**regardless of the order number**. Coercion buys time, not immunity.
 
 ### 3.4 Taxes, distance, and the capital
 
@@ -189,14 +205,21 @@ Five tax levels (`very_low … very_high`) trade income (×0.5 → ×1.5 on a ba
 Distance to capital is measured in BFS hops over land adjacency: the first 2 hops
 are free, then 8% order penalty per hop, capped at 80%. Regions unreachable by land
 from the capital pay the cap. The player may **move the capital** at any time to
-re-center the empire; corruption (§4.3) uses the same distances.
+re-center the empire; corruption (§5.3) uses the same distances.
 
 ### 3.5 Culture penalty and conquest
 
-Order suffers by **(foreign-culture buildings ÷ total buildings) × 40**. It is
-worked off by demolishing foreign buildings a tier at a time (farms and government
-chains excepted) and building your own. One wonder can cancel the penalty for one
-culture's buildings faction-wide.
+Order suffers by **((100 − Belonging) ÷ 100) × 40**, where Belonging is the drifting
+assimilation stock (§4.1) rather than a building census taken this turn. A province
+becomes yours over decades or not at all.
+
+The old census survives as the friction term: `SettlementRules.foreign_building_share` is
+the share of standing chains belonging to another culture, and it scales down the
+assimilation contact your own buildings provide. Demolishing foreign buildings a tier at a
+time (farms and government chains excepted) therefore still helps — it clears the way for
+your culture to spread, rather than deleting a penalty outright. One wonder can still
+excuse one culture's buildings faction-wide. A resentful province does not assimilate at
+all, whatever you build in it.
 
 On capture the victor chooses (`CombatRules.capture_settlement`):
 
@@ -209,9 +232,199 @@ On capture the victor chooses (`CombatRules.capture_settlement`):
 Losing its last settlement destroys a faction; its field armies defect to the
 rebels.
 
-## 4. Economy
+## 4. Society — the weight of decisions
 
-### 4.1 Income streams
+The strategy layer's other systems are instantaneous: order, growth and income are
+recomputed from scratch every turn. That is why, before this layer existed, no decision
+could ever come due. The societal layer is the only part of the engine with memory, and
+that memory is what gives a choice its weight.
+
+It is deliberately small — eight stocks, each moving by a summed list of named factors in
+exactly the shape growth and public order already use — and it consumes **no randomness at
+all**. Everything that makes an outcome hard to predict is structural: delay, hysteresis,
+coupled feedback, and the fact that you cannot see your own empire without building the
+means to.
+
+### 4.1 The stocks
+
+Per settlement, under `state.settlements[id].society`:
+
+| Stock | In game | Range | What it is |
+|---|---|---|---|
+| `legitimacy` | Standing | 0–100 | Consent: rule accepted rather than enforced. Relaxes toward a target set by what you have built |
+| `grievance` | Grievance | 0–100 | Accumulated coerced obligation. Hysteretic — it does not unwind when its cause does |
+| `assimilation` | Belonging | 0–100 | Cultural convergence with the ruling culture. Diffusion, with resentment as friction |
+| `expectation` | What the City Expects | 0–60 | What the city has come to believe it is owed |
+
+Per faction, under `state.factions[id].society`:
+
+| Stock | In game | Range | What it is |
+|---|---|---|---|
+| `elite_pressure` | Ambition | 0–100 | Claimants measured against the offices and commands that exist to absorb them |
+| `martial_ethos` | Martial Spirit | 0–100 | What a people has come to believe it is for |
+| `knowledge` | Craft | 0–100 | Accumulated practice. Decays every year it is not taught |
+| `spoils` | Plunder's Share | 0–100 | How much of the income was taken rather than made |
+
+Plus `unrest_state` (`calm` / `restive` / `rebellious`) with `unrest_turns`, a `survey`
+snapshot for partial observability, `plunder_pending` as a within-turn loot buffer, and
+`civic_shock`, a decaying empire-wide reputation penalty.
+
+### 4.2 The one asymmetry the model turns on
+
+Each province is asked to bear a **load** — taxes, squalor, conscription, quartered troops,
+the burden of what has been built there, corruption, elite exactions, foreign rule, broken
+promises. Against that stands its **consent**, which is the legitimacy stock. Whatever
+consent does not cover has to be **coerced**, and only the coerced share charges grievance:
+
+```
+grievance += grievance_charge_rate  * max(0, load - legitimacy)
+           - grievance_relief_rate  * max(0, legitimacy - load)
+```
+
+Coercion — garrisons, walls, execution grounds, a militarised state — raises public order
+and appears **nowhere** in that equation. So a garrisoned province reads perfectly calm
+while the pressure builds underneath it, and the settlement panel shows both numbers at
+once precisely because netting them is what hides the problem:
+
+```
+Public order: 134%
+    garrison  +70.4
+Society — Settled
+    grievance  -52.7
+    asked of it  57.9
+    granted willingly  9.7
+    compelled  48.2  — this is what grievance is charging on
+```
+
+Coercion buys time, not immunity. A province that has withdrawn its consent entirely
+secedes after `rebellious_turns_to_revolt` whatever the order number says.
+
+### 4.3 The civic counterpart
+
+Provision — games, festivals, baths, clean water — raises order the moment it arrives, and
+the city slowly stops experiencing it as generosity. `expectation` rises toward provision
+in about twelve years and falls back over forty-five, and the shortfall enters the load as
+`broken_promises`. Withdrawing a bath house therefore leaves a city worse off than never
+having built one: public generosity is a standing commitment, not a purchase. Expectation
+is seeded at whatever a province already receives, so nothing is ever retroactively owed.
+
+### 4.4 Both extremes of ambition fail
+
+`elite_pressure` grows with income and with every province taken, and is drained by
+**offices** (government tiers across the empire) and by **military commands** (armies in
+the field). That single choice makes the model fail symmetrically:
+
+- **Militarist** — martial spirit raises the conscription load in every province, drags the
+  legitimacy target down, and puts armies in the hands of ambitious men.
+- **Pacifist** — nothing absorbs ambitious sons but politics, so a wealthy demilitarised
+  state eats itself from the inside.
+
+A legitimate state damps the growth of claimants (`elite_legitimacy_damping`): one its own
+elite believes in turns them into servants rather than factions. Above
+`elite_civil_war_threshold` a Roman house is forced into civil war on ambition alone,
+alongside the standing-based route in §8; other cultures get the generic path through
+society-triggered events.
+
+### 4.5 Conquest reaches the conqueror
+
+`spoils` is a long-memory average of how much of each turn's income was taken rather than
+made. It drags the legitimacy target in **every** province the faction holds and amplifies
+corruption everywhere. Because it is an average with a long constant, it outlives the
+conquest that raised it — which is why the reckoning arrives in peacetime, in a province
+that never saw a soldier.
+
+### 4.6 Legibility
+
+A state can only act on what it can see, and seeing is infrastructure. `clarity` is
+**derived, never stored**, from distance to the capital, `road_level`, the government tier,
+the governor's management, and the `clarity_bonus` of any advances held. It decides what
+the player is told:
+
+- **exact** — live figures, this turn;
+- **banded** — a survey rounded to `clarity_band_size` and several turns old;
+- **rumour** — no figures at all, only the unrest state.
+
+This is **lag, not lying**: the reported number is a real reading from a real earlier turn.
+It is fully deterministic, replays identically from a save, and consumes no randomness —
+which matters, because these queries are called from the UI arbitrarily often and must
+never touch `state.rng_state`.
+
+### 4.7 Craft and advances
+
+`knowledge` accrues from schools, markets, harbours and forges — scaled by how well the
+society they sit in is functioning — and decays proportionally. `data/advances.json`
+unlocks from it at thresholds and is **lost again** below `threshold ×
+advance_retention_factor`. Nothing is destroyed; it simply stops being taught.
+
+### 4.8 Where it runs, and determinism
+
+`SocietyRules.apply_turn` runs between growth and public order (§2.3): faction stocks
+resolve first because militarisation and ambition are inputs to every province's load. All
+three settlement stocks are integrated **simultaneously** from one snapshot of the previous
+turn, so the breakdown the UI shows is the one the engine used.
+
+Every stored stock is quantized onto a four-decimal grid. Godot's `JSON.stringify` does not
+round-trip an arbitrary double, so continuous state would make a loaded save drift from the
+live game — the exact failure the determinism contract forbids. `snappedf()` is **not**
+equivalent: it can land on a double adjacent to the grid point, which then prints and
+re-parses as a different number.
+
+### 4.9 What the player is meant to learn
+
+Every flow is a named factor, so a breakdown is always readable. When a crisis fires, the
+event names the historical mechanism it illustrates — `pattern` resolves into
+`data/society.json`, and the turn log prints the in-world text and then the scholarship
+underneath it: elite overproduction, the placation trap, rule by fear, the Malthusian
+ceiling, asabiyya at the frontier, the slow dividend of public works, forgotten craft,
+conquest indigestion, and ruling in the dark.
+
+### 4.10 Edicts — the fast lever
+
+Every stock above moves on a 17-to-90 turn constant, which is the point, and it leaves the
+player with nothing to do in the year they notice a problem: building is slow, demolishing
+is slower, and retaxing nudges one term. Edicts are the answer — one standing order per
+province, chosen from `data/edicts.json`, each trading one thing for another.
+
+An edict is deliberately shaped like **a building you can raise and pull down in a few
+turns**. Its effects use the same closed vocabulary the building chains use, and
+`SettlementRules.effect_total` folds them in, so an edict reaches public order, growth,
+income, corruption, the load, the legitimacy target, provision, belonging, martial spirit
+and craft without any of those readers knowing edicts exist. Only five keys need their own
+reader, because they are not additive settlement effects: `grievance_relief`,
+`elite_pressure`, `income_pct`, `clarity_bonus` and `build_cost_pct`.
+
+**Taking hold is gradual; letting go is instant.** Effects scale by
+`turns_held / settle_turns`, so an order bites over two to six turns. Revoking stops it the
+same turn, while whatever it moved decays at the stock's own pace, and `cooldown_turns`
+stops the player flip-flopping to farm the ramp. That asymmetry is what makes the Corn Dole
+a promise rather than a purchase: the provision vanishes at once and the `expectation` it
+created does not, so the shortfall lands in the load as `broken_promises` (§4.3).
+
+| Edict | Buys | Costs |
+|---|---|---|
+| The Corn Dole | `happiness`, `civic` | denarii per 1,000 people — and it becomes expected |
+| Public Works | `civic`, `growth` | denarii per 1,000 people, `burden` |
+| A Grant of Citizenship | `assimilation_pull`, `civic` | `elite_pressure`, `income_pct` down |
+| The Census | `clarity_bonus`, `law` | `burden`: being counted is being taxed properly |
+| The Amnesty | `grievance_relief` | `elite_pressure`, `law` down |
+| Martial Law | `coercion`, `law` | `civic` heavily, `burden`, `trade_pct` down |
+| The Labour Levy | `build_cost_pct` down, here only | `burden` heavily, `civic` down |
+| The Tax Farmers | `income_pct` up sharply | `civic` down, `law` down, `burden` |
+| The Legion Levy | `martial` | `burden`, `growth` down, `civic` down |
+
+Two of them carry the layer's lessons directly. **Martial Law** is the coercion trap in one
+click and is meant to be tempting: it raises order immediately and visibly while the
+legitimacy target collapses, and the settlement panel shows both in the same breath.
+**The Amnesty** is the way out of a crisis — the one direct hand the player has on a stock —
+and it is a decision rather than an undo: it empties the ledger of grievances in about
+fourteen turns and leaves you with the men you pardoned.
+
+The validator enforces the premise: an edict that costs nothing, in denarii or in a
+societal stock, fails the build.
+
+## 5. Economy
+
+### 5.1 Income streams
 
 Per-settlement income (`EconomyRules.settlement_income_breakdown`):
 
@@ -219,13 +432,13 @@ Per-settlement income (`EconomyRules.settlement_income_breakdown`):
 - **Farming** — fertility × 80 + building `farm_income` effects, ± 20% harvest
   variance (rolled only at resolution; UI previews show the expected value), plus
   a farm-income wonder bonus.
-- **Trade** — see §4.2.
+- **Trade** — see §5.2.
 - **Mines** — building `mine_income`, buildable only where an ore resource exists.
-- **Corruption** — subtracts a percentage of the gross (§4.3).
+- **Corruption** — subtracts a percentage of the gross (§5.3).
 
 One-off income: loot from conquest, event treasury effects, senate mission rewards.
 
-### 4.2 Trade model
+### 5.2 Trade model
 
 Trade flows between settlements whose owners are the same faction or hold a
 `trade`, `alliance`, or `protectorate` stance:
@@ -242,7 +455,7 @@ Resources both regions already have earn no premium, so route value is driven by
 genuine exchange — the map data places grain, silver, iron, purple dye, and the
 rest to make geography matter.
 
-### 4.3 Corruption, upkeep, debt
+### 5.3 Corruption, upkeep, debt
 
 - **Corruption:** 1.5% of gross settlement income per hop beyond the 2 free
   capital hops, capped at 30%, then reduced by local Law (×(1 − law ⋅ 0.01)).
@@ -258,16 +471,16 @@ rest to make geography matter.
   (0.8 / 1.0 / 1.2 / 1.4 for easy → very hard) and, at higher difficulties, a flat
   order bonus — the AI gets richer, never smarter.
 
-## 5. Military
+## 6. Military
 
-### 5.1 Recruitment
+### 6.1 Recruitment
 
 Unit availability (`RecruitmentRules.available_units`) is gated by:
 
 1. **Faction** — `units.json` lists owning factions (`all` for universal,
    `mercenary` for hire-only pools).
 2. **Era** — `pre_marian` / `post_marian` / `any`; the army-reform event flips
-   every Roman-culture faction to the professional era (§8).
+   every Roman-culture faction to the professional era (§9).
 3. **Buildings** — requirements name a building *kind* and level (never a chain
    id), e.g. `barracks ≥ 3`; temple-recruited elites additionally require a
    specific god.
@@ -277,7 +490,7 @@ population** (which may never fall below 400). One unit completes per turn from
 the head of the queue and joins the garrison, with starting experience from any
 forge-type `recruit_xp` building effects.
 
-### 5.2 Experience, retraining, merging
+### 6.2 Experience, retraining, merging
 
 - Units carry **experience 0–9** (chevrons); each grants +10% effective strength.
   Winners of a battle gain +1.
@@ -287,7 +500,7 @@ forge-type `recruit_xp` building effects.
 - **Merging** combines depleted same-template units, keeping the higher
   experience.
 
-### 5.3 Movement and forced march
+### 6.3 Movement and forced march
 
 Armies get **2 movement points** per turn. Entering a region costs its terrain
 rate (plains/steppe 1.0; forest/hills/desert 1.5; mountains/marsh 2.0) reduced by
@@ -316,6 +529,7 @@ the army gets there. A visibly barred destination halts the path in the
 cheapest region beside it.
 
 ### 5.4 Sieges
+### 6.4 Sieges
 
 A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itself:
 
@@ -328,7 +542,7 @@ A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itsel
 - A captured settlement goes through the occupy/enslave/exterminate choice; the
   turn engine's automatic starve-outs default to occupation.
 
-### 5.5 The BattleResolver contract
+### 6.5 The BattleResolver contract
 
 The single seam between campaign and battle, quoted from
 `src/core/rules/battle/battle_resolver.gd`:
@@ -363,7 +577,7 @@ Campaign modules (`CombatRules`, `SiegeRules`, `TurnEngine`) consume only this
 contract. A future real-time battle scene implements the same method; the campaign
 never learns which ran.
 
-### 5.6 Auto-resolve model
+### 6.6 Auto-resolve model
 
 `AutoResolver` estimates each side's strength as
 Σ soldiers × quality × (1 + experience × 10%), where quality =
@@ -376,9 +590,9 @@ scatter); units falling under 10% strength are destroyed. A losing side's genera
 dies with 10% probability. The model is deliberately conservative — it exists to be
 replaced.
 
-## 6. Characters, Agents & Diplomacy
+## 7. Characters, Agents & Diplomacy
 
-### 6.1 Built now (Phase 4)
+### 7.1 Built now (Phase 4)
 
 - **Characters** live in the game state with faction, name, age, role
   (leader/heir/family/spouse/child), gender, father link,
@@ -425,7 +639,7 @@ replaced.
   `campaign.json`. Stances gate movement, trade routes and grain imports; attacking
   or besieging declares war, and `DiplomacyRules.set_stance` changes them directly.
 
-### 6.2 Planned (Phase 5)
+### 7.2 Planned (Phase 5)
 
 - **Agents:** envoys, spies, and assassins (infiltration, gate-opening,
   counter-espionage, sabotage, assassination as skill-vs-security probability).
@@ -436,7 +650,7 @@ replaced.
   of truth, the negotiation layer bolts on without retrofits — today's UI simply
   sets a stance directly.
 
-## 7. Factions & Cultures
+## 8. Factions & Cultures
 
 Twenty-one factions across seven cultures (`data/factions.json`,
 `data/cultures.json`). Culture determines the building tree (including which
@@ -468,7 +682,7 @@ victory requires the senate destroyed. Offices, punitive late-game missions, and
 a richer standing economy are Phase 7 content — the state fields and mission
 plumbing require no retrofit.
 
-## 8. Events, Wonders, Victory
+## 9. Events, Wonders, Victory
 
 **Events** (`data/events.json`, `EventRules`) come in two kinds, all recorded in
 `events_fired` so once-only events never repeat:
@@ -498,9 +712,9 @@ Roman long campaigns additionally require civil-war victory (the senate destroye
 The campaign ends in `time_up` past AD 14 if no one has won. The mode lives in
 `state.campaign_mode` (default `long`).
 
-## 9. Data Architecture
+## 10. Data Architecture
 
-### 9.1 Tables and schemas
+### 10.1 Tables and schemas
 
 Every table in `data/` validates against the same-named schema in `schemas/`
 (`buildings.json` and `temples.json` share `buildings.schema.json`). Shared
@@ -526,19 +740,25 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
 | glossary.json | UI vocabulary: unit classes, attributes, effects, building kinds (id, name, blurb each) | info cards, map dossier (`Game.unit_profile` / `building_profile`) |
+| advances.json | what a society works out, and can forget | Active — `AdvanceRules`, unlocked and lost from the Craft stock |
+| society.json | axis names, unrest states, historical patterns, clarity levels | Active — the pedagogy surface: `pattern` on a crisis event resolves here |
+| edicts.json | one standing provincial order — the player's fast lever | Active — `EdictRules`, folded into `SettlementRules.effect_total` |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
 never by chain id (so every culture's barracks satisfies "barracks ≥ 2"); building
-effects use a closed key vocabulary (`law, happiness, growth, health, trade_pct,
-farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade, wall_level,
-road_level, port_level`); every level's effects are **standing totals at that
+effects use a closed key vocabulary — the original thirteen (`law, happiness, growth,
+health, trade_pct, farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade,
+wall_level, road_level, port_level`) plus the six societal keys that carry what a building
+*costs* (`civic, coercion, burden, assimilation_pull, knowledge, martial`; `civic` is the
+only one that may be negative, and it is what makes an amphitheatre a trade-off rather
+than a free good); every level's effects are **standing totals at that
 tier** — a level-3 market's `trade_pct` replaces level 2's rather than stacking
 on it (`SettlementRules.effect_total` reads only the built tier per chain and
 sums across chains), and tier effects (`wall_level`, `road_level`, `port_level`)
 take the maximum across chains.
 
-### 9.2 The validator
+### 10.2 The validator
 
 `tools/validate_data.py` runs every schema, then the cross-file checks JSON Schema
 cannot express — including map-position sanity (no two region tokens closer than
@@ -547,6 +767,12 @@ map-geometry coherence (every region has territory containing its own position;
 every land adjacency has exactly one road ending at its two positions), balance
 terrain coverage (`movement.terrain_cost` and `battle.terrain_defense_multiplier`
 keys pinned to the terrain enum — a missing key was a runtime crash) and
+cannot express — including that **every effect key authored in the data has an engine
+reader**, the check that would have caught `weapon_upgrade` and `armor_upgrade` sitting
+dead in 34 building levels across two phases, and that each unrest ignition threshold sits
+above its extinction threshold, because without that gap there is no hysteresis and a
+crisis simply reverses when its cause does — including map-position sanity (no two region tokens closer than
+1.2 world units; a warning when land-adjacent regions sit more than 35 apart) and
 trigger liveness (any trait/ancillary trigger kind no engine call site fires is
 reported as dead content, except the deliberately forward-authored `office_gained`): id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
@@ -562,7 +788,7 @@ test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover
 growth, order, economy, construction, recruitment, movement/visibility, battle,
 and a multi-turn campaign integration run) on every push.
 
-### 9.3 Determinism & save model
+### 10.3 Determinism & save model
 
 - `GameData` (content) is loaded once and never mutated. `GameState` is a **plain
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
@@ -575,13 +801,13 @@ and a multi-turn campaign integration run) on every push.
   (seed, actions) sequences produce identical campaigns — the property the
   integration tests and future replay/debugging tools rely on.
 
-## 10. Roadmap
+## 11. Roadmap
 
 Phases follow the research report (§17). Status as of this document:
 
 | Phase | Scope | Status |
 |---|---|---|
-| 0 — Design & setup | Schemas for all 16 tables, repo, CI, save format, this document | **Done** |
+| 0 — Design & setup | Schemas for every data table, repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
@@ -591,9 +817,11 @@ Phases follow the research report (§17). Status as of this document:
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable, map modernized**: start menu (house/difficulty/seed); a geographic terrain map generated from the region graph (`data/map_geometry.json` — coastlines, province polygons, meandering roads) rendered in retained layers with terrain fills and topography glyphs, culture- and wall-tier-styled settlement icons, army roundels with counts, fleets at sea-zone anchors, fog veil, hover tooltips, movement-range overlay and terrain-priced path previews with multi-turn march orders; settlement panel with live factor breakdowns/taxes/queues; army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison); fleet orders from the map; family scroll; turn log; save/load; unified dark theme, responsive window. Balancing pass and tutorial pending |
 | 9 — Visual & command layer | Building/unit art, right-click detail and garrison views, troop classes tied to their buildings, click-to-attack with animated battle playback | **Delivered 2026-08-27.** Procedural illustrations (29 compositions), unit/building info cards, right-click map dossiers over rebound left/middle-drag panning, and an animated battle playback driven by AutoResolver's additive round log. Record in [`docs/HANDOFF.md`](HANDOFF.md) §5 |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| 9 — Society & consequence | Eight societal stocks, the coercion asymmetry, the euergetism ratchet, elite overproduction, plunder's share, belonging as diffusion, craft and advances, legibility, authored crises naming their historical pattern, and a real trade-off on all 81 building chains | **Done**, including provincial edicts (§4.10) as the player's fast lever. Remaining: AI that understands any of it (Phase 6), and an empire-wide policy slot alongside the provincial one |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
-## 11. Clean-Room Policy
+## 12. Clean-Room Policy
 
 Roman War is a spiritual successor at the *mechanics* level only.
 

@@ -60,6 +60,22 @@ python3 tools/validate_data.py
   gates the upgrade, and barbarian cultures are capped below the top tiers.
 - The treasury can go negative; armies cost upkeep every turn; sustained debt
   disbands units.
+- **Every building buys something and costs something.** Under the order and
+  growth numbers sits a societal layer of eight slow-moving stocks — Standing,
+  Grievance, Belonging, Expectation, Ambition, Martial Spirit, Craft and
+  Plunder's Share — with memory that the rest of the engine does not have. Its
+  load-bearing rule is one subtraction: whatever a province is asked to bear
+  beyond what it consents to has to be *coerced*, and only the coerced share
+  charges Grievance. Garrisons raise public order and do not lower the load, so
+  a held-down province reads calm while the pressure builds and then goes all at
+  once. The same shape runs the other way: provision becomes expectation, so
+  withdrawing a bath house leaves a city worse off than never having built one.
+  Nothing in the layer is random — the difficulty is delay, hysteresis, coupled
+  feedback, and not being able to see a province you have built no road to.
+- Because those stocks move over decades, each province can hold one **standing
+  edict** — a corn dole, a census, martial law, an amnesty — that acts within a
+  few turns and trades one thing for another. It is the player's fast lever, and
+  it is shaped like a building you can raise and pull down in a season.
 - The whole `GameState` is a plain dictionary: saving is `JSON.stringify`, and
   every random draw goes through one seeded RNG, so campaigns replay
   deterministically.
@@ -69,11 +85,12 @@ python3 tools/validate_data.py
 Phases 0–4 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
 sieges, mercenaries, events, victory checks, and the full character layer
-(traits, retinues, family tree, succession). A playable campaign-map UI sits
-on top: geographic map with fog of war, settlement/army panels driven by the
-engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
-passive stub today), agents & diplomacy negotiation, and senate depth are the
-next phases; their data tables and state hooks already exist.
+(traits, retinues, family tree, succession), plus the societal layer that makes
+those decisions weigh something. A playable campaign-map UI sits on top:
+geographic map with fog of war, settlement/army panels driven by the engine's
+factor breakdowns, family scroll, and save/load. Campaign AI (a passive stub
+today), agents & diplomacy negotiation, and senate depth are the next phases;
+their data tables and state hooks already exist.
 
 ## Clean-room policy
 

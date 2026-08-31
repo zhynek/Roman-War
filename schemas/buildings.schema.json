@@ -63,7 +63,13 @@
                     "armor_upgrade": { "type": "integer", "minimum": 0, "maximum": 2 },
                     "wall_level": { "type": "integer", "minimum": 1, "maximum": 5 },
                     "road_level": { "type": "integer", "minimum": 1, "maximum": 3 },
-                    "port_level": { "type": "integer", "minimum": 1, "maximum": 3 }
+                    "port_level": { "type": "integer", "minimum": 1, "maximum": 3 },
+                    "civic": { "type": "number" },
+                    "coercion": { "type": "number", "minimum": 0 },
+                    "burden": { "type": "number", "minimum": 0 },
+                    "assimilation_pull": { "type": "number", "minimum": 0 },
+                    "knowledge": { "type": "number", "minimum": 0 },
+                    "martial": { "type": "number", "minimum": 0 }
                   }
                 },
                 "description": { "type": "string" }

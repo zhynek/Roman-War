@@ -16,10 +16,21 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 - Building chain kinds: `government, walls, barracks, stables, archery_range,
   siege_workshop, naval, market, farms, roads, port, mines, health,
   entertainment, execution, education, temple`.
-- Settlement `effects` keys: `law, happiness, growth, health, trade_pct,
+- Settlement `effects` keys, benefits: `law, happiness, growth, health, trade_pct,
   farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade,
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
   percentage points; `*_income` are denarii per turn).
+- Settlement `effects` keys, societal costs: `civic, coercion, burden,
+  assimilation_pull, knowledge, martial`. These feed the societal stocks
+  (`docs/DESIGN.md` §4) and are what make a building a decision rather than a
+  free good. **`civic` is the only key that may be negative** — an amphitheatre
+  buys order now and erodes standing slowly. Every one of these keys must have
+  an engine reader; the validator fails the build if one goes dead.
+- Edict `effects` keys: the settlement keys above, which reach every reader
+  through `SettlementRules.effect_total`, plus five that need their own reader —
+  `grievance_relief, elite_pressure, income_pct, clarity_bonus, build_cost_pct`.
+  Every edict must cost something, in denarii or in a societal stock; the
+  validator fails the build on a free one.
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):

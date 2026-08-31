@@ -28,6 +28,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 		"defender_general": general_profile(data, state, defender),
 		"attacker_fatigued": attacker.get("forced_march", false),
 		"sally": false,
+		"attacker_martial": SocietyRules.faction_stocks_for(data, state, String(attacker["owner"]))["martial_ethos"],
+		"defender_martial": SocietyRules.faction_stocks_for(data, state, String(defender["owner"]))["martial_ethos"],
 	})
 
 	_process_general_deaths(data, state, attacker, defender, result)
@@ -118,7 +120,14 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	settlement["tax_level"] = "normal"
 	settlement["recently_conquered"] = int(ceil(float(order_penalty) / float(maxi(decay, 1))))
 
+	# A captured province starts resentful and a stranger to its new masters; the
+	# conqueror gains one more victorious house expecting to be rewarded, and an
+	# atrocity is remembered in every province he holds, not only this one.
+	SocietyRules.record_conquest(data, state, region_id, new_owner, occupation)
+	EdictRules.clear(settlement)
+
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
+	SocietyRules.record_plunder(data, state, new_owner, float(loot))
 
 	var taken := displace_characters(data, state, region_id, previous_owner)
 
