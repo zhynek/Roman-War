@@ -1,0 +1,95 @@
+{
+  "$schema": "../schemas/edicts.schema.json",
+  "edicts": [
+    {
+      "id": "grain_dole",
+      "name": "The Corn Dole",
+      "min_settlement_level": "town",
+      "requires_building_kind": "market",
+      "upkeep_per_1000_pop": 34,
+      "settle_turns": 3,
+      "cooldown_turns": 6,
+      "pattern": "placation_trap",
+      "effects": { "happiness": 9, "civic": 3 },
+      "description": "A measured ration against the bad year, distributed by ticket and by name. It quiets the city at once — and within a decade the city has stopped experiencing it as generosity. Stop it then and you will be taking something away."
+    },
+    {
+      "id": "public_works",
+      "name": "Public Works",
+      "min_settlement_level": "town",
+      "upkeep_per_1000_pop": 26,
+      "settle_turns": 5,
+      "cooldown_turns": 4,
+      "pattern": "civic_dividend",
+      "effects": { "civic": 7, "growth": 0.5, "burden": 2 },
+      "description": "Standing gangs on the drains, the roads and the porticoes, paid from the treasury rather than levied. Slower to be noticed than a distribution of corn, and remembered longer."
+    },
+    {
+      "id": "grant_of_citizenship",
+      "name": "A Grant of Citizenship",
+      "min_settlement_level": "minor_city",
+      "settle_turns": 6,
+      "cooldown_turns": 12,
+      "effects": { "assimilation_pull": 6, "civic": 5, "income_pct": -18, "elite_pressure": 0.45 },
+      "description": "The men of this province become your countrymen, with what that costs and what it buys. They pay as citizens pay, and their sons will expect the careers that citizens' sons expect."
+    },
+    {
+      "id": "census",
+      "name": "The Census",
+      "min_settlement_level": "large_town",
+      "requires_building_kind": "government",
+      "settle_turns": 4,
+      "cooldown_turns": 6,
+      "pattern": "legibility_gap",
+      "effects": { "clarity_bonus": 0.3, "law": 5, "burden": 3 },
+      "description": "Households counted, land measured, obligations written down. You will finally know what this province is — and so will your tax collectors, which is precisely what the province objects to."
+    },
+    {
+      "id": "amnesty",
+      "name": "The Amnesty",
+      "min_settlement_level": "village",
+      "settle_turns": 2,
+      "cooldown_turns": 14,
+      "effects": { "grievance_relief": 2.5, "civic": 2, "law": -8, "elite_pressure": 0.6 },
+      "description": "Debts of blood written off, exiles recalled, the men who led the last rising left unhanged. It is the only thing that empties a province's ledger of grievances quickly, and you will meet some of those men again."
+    },
+    {
+      "id": "martial_law",
+      "name": "Martial Law",
+      "min_settlement_level": "village",
+      "settle_turns": 2,
+      "cooldown_turns": 8,
+      "pattern": "coercion_spiral",
+      "effects": { "coercion": 7, "law": 6, "civic": -9, "burden": 4, "trade_pct": -20 },
+      "description": "The garrison commander governs, the courts sit when he says, and the markets open under guard. Order will improve tonight. Nothing else about this province will."
+    },
+    {
+      "id": "labour_levy",
+      "name": "The Labour Levy",
+      "min_settlement_level": "village",
+      "settle_turns": 3,
+      "cooldown_turns": 6,
+      "effects": { "build_cost_pct": -28, "burden": 6, "civic": -4 },
+      "description": "So many days a year owed to the state by every household, in stone-hauling and ditch-digging rather than coin. The cheapest way to build anything, and it is paid for by people who did not agree to it."
+    },
+    {
+      "id": "tax_farming",
+      "name": "The Tax Farmers",
+      "min_settlement_level": "town",
+      "settle_turns": 2,
+      "cooldown_turns": 8,
+      "effects": { "income_pct": 32, "civic": -7, "law": -7, "burden": 3 },
+      "description": "The right to collect here is sold at auction, and whoever buys it collects what he can. It fills the treasury this year without a single official on your payroll, and it teaches the province exactly what your rule is for."
+    },
+    {
+      "id": "legion_levy",
+      "name": "The Legion Levy",
+      "min_settlement_level": "town",
+      "requires_building_kind": "barracks",
+      "settle_turns": 4,
+      "cooldown_turns": 6,
+      "effects": { "martial": 6, "burden": 4, "growth": -1.0, "civic": -3 },
+      "description": "A standing obligation of men, renewed every season, from a province that has learned to expect the recruiting officer. It is where a martial people comes from, and the fields notice first."
+    }
+  ]
+}

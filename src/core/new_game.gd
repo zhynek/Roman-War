@@ -15,6 +15,7 @@ class_name NewGame
 ##                recruitment_queue: [...], governor: char_id|null,
 ##                slave_bonus_turns, plague_turns, recently_conquered,
 ##                low_order_streak, siege: null|{besieger, turns, equipment_ready},
+##                edict: {id, turns_held, cooldown},
 ##                society: {legitimacy, grievance, assimilation, unrest_state,
 ##                          unrest_turns, survey: {}}}}
 ##  armies: {army_id: {owner, region, units: [unit], general: char_id|null,
@@ -146,6 +147,7 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 		"recently_conquered": 0,
 		"low_order_streak": 0,
 		"siege": null,
+		"edict": EdictRules.new_record(),
 	}
 	# Starting garrisons were raised by the city they stand in, so they carry its
 	# forges and armouries just as newly recruited units do.

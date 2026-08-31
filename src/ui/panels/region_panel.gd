@@ -95,6 +95,8 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		action_taken.emit())
 	tax_row.add_child(tax_options)
 
+	_edict_section()
+
 	var capital: String = game.state["factions"][player]["capital"]
 	if capital != region_id:
 		_action_button("Make this the capital", func():
@@ -247,6 +249,78 @@ func _label(text: String, color: Color = Color(0.85, 0.85, 0.85)) -> void:
 	label.add_theme_color_override("font_color", color)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(label)
+
+
+func _edict_section() -> void:
+	## The province's one standing order, and the player's only fast lever on
+	## stocks that otherwise move over decades. Mirrors the tax selector: one
+	## choice per settlement, changed in place.
+	##
+	## While an order stands — or while the last one is still unwinding — the
+	## list collapses to the choice actually on offer. Every other edict is
+	## unavailable for the same reason, and saying so nine times over teaches
+	## nobody anything; one line does it.
+	var status: Dictionary = game.edict_status(region_id)
+	var standing: bool = status["id"] != EdictRules.NONE
+	var record := EdictRules.of(game.state["settlements"][region_id])
+
+	var row := HBoxContainer.new()
+	add_child(row)
+	var caption := Label.new()
+	caption.text = "Edict:"
+	row.add_child(caption)
+
+	var options := OptionButton.new()
+	var choices: Array = []
+	if standing:
+		choices.append({"id": status["id"], "name": String(status["name"]), "allowed": true, "reason": ""})
+		choices.append({"id": EdictRules.NONE, "name": "— revoke —", "allowed": true, "reason": ""})
+	else:
+		choices.append({"id": EdictRules.NONE, "name": "— none —", "allowed": true, "reason": ""})
+		# While a cooldown runs, nothing is available and all for the same
+		# reason, which the line below states once.
+		if int(record["cooldown"]) == 0:
+			choices.append_array(game.available_edicts(region_id))
+
+	for i in range(choices.size()):
+		var entry: Dictionary = choices[i]
+		var label: String = entry["name"]
+		if not entry["allowed"]:
+			label += "  (%s)" % entry["reason"]
+		options.add_item(label)
+		options.set_item_disabled(i, not entry["allowed"])
+	options.selected = 0
+	options.item_selected.connect(func(index: int):
+		var chosen: String = choices[index]["id"]
+		if chosen == EdictRules.NONE:
+			game.revoke_edict(region_id)
+		elif chosen != String(status["id"]):
+			game.set_edict(region_id, chosen)
+		action_taken.emit())
+	row.add_child(options)
+
+	if not standing:
+		if int(record["cooldown"]) > 0:
+			_label("    the last order is still being unwound — %d turns" % int(record["cooldown"]),
+				Color(0.8, 0.75, 0.6))
+		return
+
+	# How far the order has taken hold, what it is costing, and what it is doing.
+	var held := int(status["turns_held"])
+	var settle := int(status["settle_turns"])
+	if held < settle:
+		_label("    taking hold: %d of %d turns" % [held, settle], Color(0.8, 0.75, 0.6))
+	if float(status["upkeep"]) > 0.0:
+		_label("    costing %d a turn" % int(round(float(status["upkeep"]))), Color(0.9, 0.55, 0.5))
+	var effects: Dictionary = status["effects"]
+	var keys: Array = effects.keys()
+	keys.sort()
+	var factors: Array = []
+	for key in keys:
+		factors.append({"label": key, "value": float(effects[key]) * float(status["strength"])})
+	_breakdown("    in force: %s" % status["name"], factors)
+	_label("    another order can be given once this one is revoked and unwound",
+		Color(0.7, 0.7, 0.7))
 
 
 func _society_section() -> void:

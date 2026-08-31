@@ -30,6 +30,27 @@ func set_tax_level(region_id: String, tax_level: String) -> bool:
 	return true
 
 
+func set_edict(region_id: String, edict_id: String) -> bool:
+	## Issue the province's one standing order. It takes a few turns to take
+	## hold — see EdictRules — which is fast against stocks that move over
+	## decades, but is not a switch.
+	return EdictRules.issue(data, state, region_id, edict_id)
+
+
+func revoke_edict(region_id: String) -> bool:
+	## Immediate, and followed by a cooldown. Whatever the edict moved decays at
+	## its own pace: stopping the corn dole does not unmake the expectation.
+	return EdictRules.revoke(data, state, region_id)
+
+
+func available_edicts(region_id: String) -> Array:
+	return EdictRules.available(data, state, region_id)
+
+
+func edict_status(region_id: String) -> Dictionary:
+	return EdictRules.status(data, state, region_id)
+
+
 func queue_building(region_id: String, chain_id: String) -> bool:
 	return ConstructionRules.queue_project(data, state, region_id, chain_id)
 

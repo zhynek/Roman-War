@@ -51,6 +51,18 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 	if corruption > 0.0:
 		factors.append({"label": "corruption", "value": -corruption})
 
+	# A standing order can turn the province's takings up or down sharply — tax
+	# farmers fill the treasury this year, citizens pay as citizens pay.
+	var income_pct := EdictRules.effect(data, settlement, "income_pct")
+	if income_pct != 0.0:
+		factors.append({"label": "edict", "value": gross * income_pct / 100.0})
+
+	# ...and the generous orders send a bill every turn, scaled by the number of
+	# people being provided for.
+	var edict_upkeep := EdictRules.upkeep(data, settlement)
+	if edict_upkeep > 0.0:
+		factors.append({"label": "edict_upkeep", "value": -edict_upkeep})
+
 	# A province that has stopped cooperating stops paying. Tax farmers need an
 	# escort; markets that do open, open quietly.
 	var society_rules: Dictionary = data.balance["society"]

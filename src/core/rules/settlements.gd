@@ -1,5 +1,7 @@
 class_name SettlementRules
 ## Shared settlement queries used by growth, order, economy, construction.
+## effect_total() folds in the settlement's standing edict, so every reader of a
+## building effect sees an edict's contribution without knowing edicts exist.
 
 
 static func settlement_level(data: GameData, settlement: Dictionary) -> String:
@@ -28,6 +30,11 @@ static func effect_total(data: GameData, settlement: Dictionary, effect: String)
 		var built_tier := mini(int(settlement["buildings"][chain_id]), chain["levels"].size())
 		if built_tier > 0:
 			total += float(chain["levels"][built_tier - 1].get("effects", {}).get(effect, 0.0))
+	# A standing edict is a building you can raise and pull down in a few turns,
+	# so it contributes here rather than through a parallel path. This one line
+	# is what carries edicts into order, growth, income, corruption, the load,
+	# the legitimacy target, provision, belonging, martial spirit and craft.
+	total += EdictRules.effect(data, settlement, effect)
 	return total
 
 

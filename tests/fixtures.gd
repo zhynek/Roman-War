@@ -16,6 +16,10 @@ static func data() -> GameData:
 		game_data.advances[advance["id"]] = advance
 	game_data.society = JSON.parse_string(
 		FileAccess.get_file_as_string("res://data/society.json"))
+	var edict_doc: Dictionary = JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/edicts.json"))
+	for edict in edict_doc.get("edicts", []):
+		game_data.edicts[edict["id"]] = edict
 
 	game_data.cultures = {
 		"roman": {"id": "roman", "name": "Roman", "max_settlement_level": "huge_city"},
@@ -65,6 +69,13 @@ static func data() -> GameData:
 			"levels": [
 				{"id": "wall_1", "name": "Palisade", "min_settlement_level": "village", "cost": 300, "build_turns": 1, "effects": {"wall_level": 1, "coercion": 2, "burden": 1, "martial": 1}, "description": ""},
 				{"id": "wall_2", "name": "Stone Wall", "min_settlement_level": "large_town", "cost": 900, "build_turns": 2, "effects": {"wall_level": 2, "coercion": 4, "burden": 2, "martial": 2}, "description": ""},
+			],
+		},
+		{
+			"id": "test_market", "kind": "market", "cultures": ["roman", "barbarian"], "name": "Market",
+			"levels": [
+				{"id": "market_1", "name": "Market Stalls", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"trade_pct": 10, "knowledge": 1}, "description": ""},
+				{"id": "market_2", "name": "Forum", "min_settlement_level": "town", "cost": 900, "build_turns": 2, "effects": {"trade_pct": 20, "knowledge": 2}, "description": ""},
 			],
 		},
 		{
@@ -276,4 +287,5 @@ static func _settlement(game_data: GameData, owner: String, population: int, bui
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
 		"siege": null,
 		"society": SocietyRules.new_settlement_society(game_data, true, 0.0),
+		"edict": EdictRules.new_record(),
 	}

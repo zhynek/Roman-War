@@ -218,5 +218,6 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	# it just threw off, and it belongs to nobody but itself.
 	settlement["society"] = SocietyRules.new_settlement_society(
 		data, true, SocietyRules.provision(data, settlement))
+	EdictRules.clear(settlement)
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
 	SettlementRules.refresh_governors(data, state)

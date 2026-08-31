@@ -47,7 +47,7 @@ static func available_projects(data: GameData, state: Dictionary, region_id: Str
 			"kind": chain["kind"],
 			"level_id": next_level["id"],
 			"name": next_level["name"],
-			"cost": _discounted_cost(data, state, settlement["owner"], chain, next_level),
+			"cost": _discounted_cost(data, state, settlement, chain, next_level),
 			"build_turns": _discounted_turns(data, state, settlement["owner"], next_level),
 		})
 	return projects
@@ -128,14 +128,17 @@ static func _has_other_temple(data: GameData, settlement: Dictionary, chain_id: 
 	return false
 
 
-static func _discounted_cost(data: GameData, state: Dictionary, faction_id: String, chain: Dictionary, level: Dictionary) -> int:
+static func _discounted_cost(data: GameData, state: Dictionary, settlement: Dictionary, chain: Dictionary, level: Dictionary) -> int:
+	var faction_id: String = settlement["owner"]
 	var cost := float(level["cost"])
 	if chain["kind"] == "temple":
 		var discount := SettlementRules.faction_owns_wonder_effect(
 			data, state, faction_id, "religious_building_discount_pct")
 		cost *= 1.0 - discount / 100.0
-	# Craft that has been worked out makes everything cheaper to raise.
+	# Craft that has been worked out makes everything cheaper to raise, and a
+	# labour levy makes it cheaper here — paid in days owed rather than coin.
 	cost *= 1.0 + AdvanceRules.effect_total(data, state, faction_id, "build_cost_pct") / 100.0
+	cost *= 1.0 + EdictRules.effect(data, settlement, "build_cost_pct") / 100.0
 	return maxi(0, int(round(cost)))
 
 

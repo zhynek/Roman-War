@@ -124,6 +124,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	# conqueror gains one more victorious house expecting to be rewarded, and an
 	# atrocity is remembered in every province he holds, not only this one.
 	SocietyRules.record_conquest(data, state, region_id, new_owner, occupation)
+	EdictRules.clear(settlement)
 
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 	SocietyRules.record_plunder(data, state, new_owner, float(loot))

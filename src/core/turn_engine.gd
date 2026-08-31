@@ -3,7 +3,8 @@ class_name TurnEngine
 ##   1. AI stub turns (non-player factions)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
-##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
+##   4. Standing edicts tick, then faction treasuries resolve (income - upkeep,
+##      edict upkeep, debt disbandment)
 ##   5. Population growth, slaves, plague
 ##   6. Society: legitimacy, grievance, belonging, elite pressure, martial ethos,
 ##      craft — then surveys and knowledge advances
@@ -58,6 +59,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		var completed_units := RecruitmentRules.advance_queues(data, state, region_id)
 		if not completed_units.is_empty():
 			report["completed_units"][region_id] = completed_units
+
+	# Standing orders tick first: a freshly issued edict starts taking hold and
+	# is billed in the same turn it is given.
+	EdictRules.advance_turn(data, state, region_ids)
 
 	for faction_id in faction_ids:
 		if state["factions"][faction_id]["alive"]:

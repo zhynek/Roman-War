@@ -38,6 +38,8 @@ static func clarity(data: GameData, state: Dictionary, region_id: String) -> flo
 		value += float(management) * float(rules["clarity_governor_management_bonus"])
 
 	value += AdvanceRules.effect_total(data, state, owner, "clarity_bonus")
+	# A census is sight bought outright, and much faster than a road.
+	value += EdictRules.effect(data, settlement, "clarity_bonus")
 	return clampf(value, float(rules["clarity_min"]), 1.0)
 
 

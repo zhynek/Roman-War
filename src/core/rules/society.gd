@@ -392,6 +392,9 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	# a state must find somewhere to put.
 	claimants += float(stocks["knowledge"]) * float(rules["elite_gain_per_knowledge"])
 	elite += claimants * damping
+	# Standing orders that create new men with expectations — an enfranchisement,
+	# an amnesty — add claimants the legitimacy of the state does not damp away.
+	elite += EdictRules.faction_effect_total(data, state, faction_id, "elite_pressure", region_ids)
 	elite -= float(offices) * float(rules["elite_office_absorption_per_tier"])
 	elite -= float(commands) * float(rules["elite_command_absorption_per_army"]) \
 		* (float(rules["elite_command_martial_floor"]) + martial_share)
@@ -485,6 +488,10 @@ static func apply_settlement_turn(data: GameData, state: Dictionary, region_id: 
 	var new_grievance := grievance \
 		+ maxf(0.0, settlement_load - legitimacy) * float(rules["grievance_charge_rate"]) \
 		- maxf(0.0, legitimacy - settlement_load) * float(rules["grievance_relief_rate"]) * relief_factor
+	# An amnesty is the one hand the player has directly on a stock, and it is
+	# the only way out of a crisis that does not take a generation. It is not
+	# free: see the edict's own elite_pressure and law costs.
+	new_grievance -= EdictRules.effect(data, settlement, "grievance_relief")
 	new_grievance = clampf(new_grievance, 0.0, float(rules["grievance_max"]))
 
 	# 3. Belonging diffuses on contact. A resentful province never assimilates.

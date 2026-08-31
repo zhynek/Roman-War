@@ -41,6 +41,7 @@ TABLES = {
     "mercenaries.json": "mercenaries.schema.json",
     "advances.json": "advances.schema.json",
     "society.json": "society.schema.json",
+    "edicts.json": "edicts.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -437,6 +438,7 @@ def cross_checks(t: dict[str, dict]) -> None:
                     err(f"campaign: character {character['id']}: unknown trait {trait_id}")
 
     # --- society, advances, and effect-key liveness -------------------------
+    KINDS = {chain["kind"] for chain in chains.values()}
     society = t.get("society.json", {})
     patterns = {p["id"] for p in society.get("patterns", [])}
     axis_ids = {a["id"] for a in society.get("axes", [])}
@@ -462,6 +464,40 @@ def cross_checks(t: dict[str, dict]) -> None:
                      if a.get("culture", culture) == culture]
         if not reachable:
             err(f"advances: culture {culture} can reach no advance at all")
+
+    edict_ids: set[str] = set()
+    for edict in t.get("edicts.json", {}).get("edicts", []):
+        if edict["id"] in edict_ids:
+            err(f"edicts: duplicate id {edict['id']}")
+        edict_ids.add(edict["id"])
+        if edict["min_settlement_level"] not in LEVELS:
+            err(f"edicts: {edict['id']}: unknown settlement level {edict['min_settlement_level']}")
+        kind = edict.get("requires_building_kind")
+        if kind and kind not in KINDS:
+            err(f"edicts: {edict['id']}: unknown building kind {kind}")
+        for culture in edict.get("cultures", []):
+            if culture not in cultures:
+                err(f"edicts: {edict['id']}: unknown culture {culture}")
+        pattern = edict.get("pattern")
+        if pattern and pattern not in patterns:
+            err(f"edicts: {edict['id']}: unknown society pattern {pattern}")
+        # The whole premise of this layer is that everything trades. An edict
+        # with no cost at all is a free good and does not belong here.
+        effects = edict.get("effects", {})
+        costly_when_negative = ("civic", "law", "growth", "health", "trade_pct", "income_pct")
+        costly_when_positive = ("burden", "coercion", "elite_pressure")
+        pays = (edict.get("upkeep_per_1000_pop", 0) > 0
+                or any(effects.get(k, 0) < 0 for k in costly_when_negative)
+                or any(effects.get(k, 0) > 0 for k in costly_when_positive))
+        if not pays:
+            err(f"edicts: {edict['id']} costs nothing — every edict must trade "
+                f"something, in denarii or in one of the societal stocks")
+    # A village must have at least one order available to it, or the lever does
+    # not exist for a player who has just lost everything but one province.
+    if not any(e["min_settlement_level"] == "village"
+               for e in t.get("edicts.json", {}).get("edicts", [])):
+        err("edicts: no edict is available at village level — the fast lever "
+            "disappears exactly when a player most needs one")
 
     for event in t.get("events.json", {}).get("events", []):
         pattern = event.get("pattern")
@@ -494,6 +530,10 @@ def cross_checks(t: dict[str, dict]) -> None:
                          for a in adv.get("effects", {})):
         if f'"{effect}"' not in engine_text:
             err(f"advances: effect key '{effect}' is authored but no engine code reads it")
+    for effect in sorted(e for edict in t.get("edicts.json", {}).get("edicts", [])
+                         for e in edict.get("effects", {})):
+        if f'"{effect}"' not in engine_text:
+            err(f"edicts: effect key '{effect}' is authored but no engine code reads it")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
@@ -536,7 +576,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "advances", "axes"):
+                "advances", "axes", "edicts"):
         if key in document:
             return len(document[key])
     return 0
