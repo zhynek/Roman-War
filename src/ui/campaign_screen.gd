@@ -17,6 +17,8 @@ var game: Game
 
 var map_view: MapView
 var region_panel: RegionPanel
+var quest_panel: QuestPanel
+var build_drawer: BuildDrawer
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
@@ -30,6 +32,13 @@ var map_menu: MapContextMenu
 var battle_screen: BattleScreen
 var _card_catcher: Control
 var playback_enabled := true
+# The drawer's selection is hoisted here, exactly like selected_army: RegionPanel
+# destroys and rebuilds all its children on every refresh, so nothing stateful
+# can live inside it.
+var drawer_open := false
+var drawer_tab := "construction"
+var drawer_chain := ""
+var drawer_tier := 0
 var _victory_shown := false
 var _day_beats: Array = []
 var _treasury_shown := 0.0
@@ -58,6 +67,7 @@ func _ready() -> void:
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 
+
 	var root := VBoxContainer.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
@@ -80,6 +90,19 @@ func _ready() -> void:
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
 
+	# The drawer is a child of MapView so it stops exactly at the right column's
+	# edge however the user drags the splitter. An overlay on this screen with a
+	# fixed right offset would be wrong the moment the divider moved, and an
+	# HSplitContainer takes only two children.
+	build_drawer = BuildDrawer.new()
+	build_drawer.closed.connect(close_drawer)
+	build_drawer.queued.connect(refresh)
+	build_drawer.chain_selected.connect(_on_drawer_chain)
+	build_drawer.tier_selected.connect(_on_drawer_tier)
+	build_drawer.tab_selected.connect(_on_drawer_tab)
+	map_view.add_child(build_drawer)
+	map_view.resized.connect(func(): build_drawer.fit_to(map_view.size))
+
 	var side := VBoxContainer.new()
 	side.custom_minimum_size = Vector2(360, 0)
 	split.add_child(side)
@@ -96,7 +119,12 @@ func _ready() -> void:
 	region_panel.unit_info_requested.connect(open_unit_card)
 	region_panel.building_info_requested.connect(open_building_card)
 	region_panel.battle_fought.connect(_on_battle_fought)
+	region_panel.explore_requested.connect(_explore_order)
+	region_panel.drawer_requested.connect(open_drawer)
 	scroll.add_child(region_panel)
+
+	quest_panel = QuestPanel.new()
+	side.add_child(quest_panel)
 
 	report_log = RichTextLabel.new()
 	report_log.custom_minimum_size = Vector2(0, 160)
@@ -234,12 +262,103 @@ func refresh() -> void:
 	map_view.refresh_state()
 	_refresh_range_overlay()
 	_refresh_fleet_overlay()
+	_render_drawer()
+
+	# The trail's checklist and its map guidance travel together: every
+	# active stage with a target lights that region up.
+	var overview := GuidedRules.overview(game.data, game.state)
+	quest_panel.render(game, overview)
+	var highlights := {}
+	for stage in overview["active"]:
+		if stage["target_region"] != "":
+			highlights[stage["target_region"]] = true
+	map_view.highlight_regions = highlights
+	# Ownership or fog may have moved: rebake the cached land layer. Selection
+	# clicks deliberately skip this — they change nothing the land shows.
+	map_view.refresh_state()
+	map_view.queue_redraw()
 
 	# The banner waits for the day to finish: an age that ends mid-sequence
 	# should still get its dawn-to-dusk telling before the campaign is called.
 	if game.state["winner"] != null and not _victory_shown \
 			and not turn_sequence.is_playing() and not dispatch_panel.visible:
 		_show_victory_banner(String(game.state["winner"]))
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	## Keyboard camera: the whole map is reachable without a mouse. Arrows or
+	## WASD walk the view, +/- zoom, Home returns to the capital.
+	if map_view == null or not (event is InputEventKey):
+		return
+	var key := event as InputEventKey
+	if not key.pressed:
+		return
+	# Escape closes the drawer before anything else looks at the key. Only this
+	# one binding, so the existing arrow/WASD camera contract is untouched.
+	if key.keycode == KEY_ESCAPE and drawer_open:
+		close_drawer()
+		get_viewport().set_input_as_handled()
+		return
+	var handled := true
+	match key.keycode:
+		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
+			map_view.zoom_by(MapView.ZOOM_STEP)
+		KEY_MINUS, KEY_KP_SUBTRACT:
+			map_view.zoom_by(1.0 / MapView.ZOOM_STEP)
+		KEY_LEFT, KEY_A:
+			map_view.pan_by(Vector2(-MapView.KEY_PAN_STEP, 0))
+		KEY_RIGHT, KEY_D:
+			map_view.pan_by(Vector2(MapView.KEY_PAN_STEP, 0))
+		KEY_UP, KEY_W:
+			map_view.pan_by(Vector2(0, -MapView.KEY_PAN_STEP))
+		KEY_DOWN, KEY_S:
+			map_view.pan_by(Vector2(0, MapView.KEY_PAN_STEP))
+		KEY_HOME, KEY_0, KEY_KP_0:
+			map_view.reset_view()
+		_:
+			handled = false
+	if handled:
+		get_viewport().set_input_as_handled()
+
+
+func open_drawer(tab: String = "construction", chain_id: String = "") -> void:
+	drawer_open = true
+	drawer_tab = tab
+	drawer_chain = chain_id
+	drawer_tier = 0
+	build_drawer.visible = true
+	build_drawer.fit_to(map_view.size)
+	_render_drawer()
+
+
+func close_drawer() -> void:
+	drawer_open = false
+	build_drawer.visible = false
+
+
+func _render_drawer() -> void:
+	if not drawer_open:
+		return
+	build_drawer.visible = true
+	build_drawer.fit_to(map_view.size)
+	build_drawer.render(game, map_view.selected_region, drawer_tab, drawer_chain, drawer_tier)
+
+
+func _on_drawer_chain(chain_id: String) -> void:
+	drawer_chain = chain_id
+	drawer_tier = 0
+	_render_drawer()
+
+
+func _on_drawer_tier(index: int) -> void:
+	drawer_tier = index
+	_render_drawer()
+
+
+func _on_drawer_tab(tab: String) -> void:
+	drawer_tab = tab
+	drawer_tier = 0
+	_render_drawer()
 
 
 func _on_region_clicked(region_id: String) -> void:
@@ -254,6 +373,13 @@ func _on_region_clicked(region_id: String) -> void:
 	_deselect_fleet()
 	region_panel.show_region(game, region_id)
 	_refresh_range_overlay()
+	# This path does not go through refresh(), so without this the drawer would
+	# keep showing the previous city's ladder after a click on the map.
+	if drawer_open:
+		drawer_chain = ""
+		drawer_tier = 0
+		_render_drawer()
+	map_view.queue_redraw()
 
 
 func _on_army_selected(army_id: String) -> void:
@@ -514,6 +640,24 @@ func _resolve_siege(target_region: String, expected_owner: String) -> void:
 	_after_order()
 
 
+func _explore_order(army_id: String) -> void:
+	var result := game.explore_site(army_id)
+	if result.is_empty():
+		_log("There is nothing here the army can search this season.")
+		return
+	var site: Dictionary = result["site"]
+	var outcome: Dictionary = result["outcome"]
+	_log("[color=#d8b878][b]%s searched.[/b] %s[/color]" % [site["name"], outcome["text"]])
+	var dialog := AcceptDialog.new()
+	dialog.title = site["name"]
+	dialog.dialog_text = "%s\n\n%s" % [site["text"], outcome["text"]]
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
+	_after_order()
+
+
 func _confirm(text: String, on_accept: Callable) -> void:
 	var dialog := ConfirmationDialog.new()
 	dialog.dialog_text = text
@@ -557,6 +701,10 @@ func _end_turn() -> void:
 		_on_day_played()
 		return
 	turn_sequence.play(game, DispatchRules.sequence_beats(game.data, _day_beats), map_view)
+
+
+func _faction_name(faction_id: String) -> String:
+	return game.data.factions.get(faction_id, {}).get("name", faction_id)
 
 
 func _on_day_played() -> void:
@@ -744,5 +892,6 @@ func _spacer() -> Control:
 func _bar_button(text: String, handler: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
+	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(handler)
 	return button

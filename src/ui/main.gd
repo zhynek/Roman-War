@@ -9,6 +9,7 @@ var _faction_ids: Array = []
 @onready var faction_options: OptionButton = $Center/Menu/FactionRow/Factions
 @onready var difficulty_options: OptionButton = $Center/Menu/DifficultyRow/Difficulty
 @onready var seed_spin: SpinBox = $Center/Menu/SeedRow/Seed
+@onready var guided_check: CheckButton = $Center/Menu/GuidedRow/Guided
 @onready var status_label: Label = $Center/Menu/Status
 
 
@@ -46,6 +47,7 @@ func _on_start_pressed() -> void:
 		return
 	var faction_id: String = _faction_ids[faction_options.selected]
 	var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
-	var game := Game.new_campaign(faction_id, int(seed_spin.value), difficulty)
+	var game := Game.new_campaign(faction_id, int(seed_spin.value), difficulty,
+		"long", guided_check.button_pressed)
 	$Center.visible = false
 	add_child(CampaignScreen.create(game))

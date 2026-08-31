@@ -4,6 +4,16 @@ class_name Fixtures
 ## single source of truth the tests guard.
 
 
+static var _shared: GameData = null
+
+
+static func shared_data() -> GameData:
+	## The add_* helpers take no GameData, so they draw on one built once.
+	if _shared == null:
+		_shared = data()
+	return _shared
+
+
 static func data() -> GameData:
 	var game_data := GameData.new()
 	var balance_text := FileAccess.get_file_as_string("res://data/balance.json")
@@ -293,6 +303,22 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 		"movement_left": 2.0, "forced_march": false,
 	}
 	return army_id
+
+
+static func enable_guided(campaign_state: Dictionary) -> void:
+	## The fixture state ships without the trail (like a pre-trail save);
+	## guided tests opt in explicitly.
+	campaign_state["guided"] = {"enabled": true, "counters": {}, "stages": {}}
+	campaign_state["sites_explored"] = []
+
+
+static func add_faction(campaign_state: Dictionary, faction_id: String, capital: String) -> void:
+	campaign_state["factions"][faction_id] = _faction(shared_data(), capital)
+
+
+static func add_settlement(campaign_state: Dictionary, region: String, owner: String, population: int, buildings: Dictionary) -> void:
+	campaign_state["settlements"][region] = _settlement(shared_data(), owner, population, buildings)
+
 
 
 static func _faction(game_data: GameData, capital: String) -> Dictionary:

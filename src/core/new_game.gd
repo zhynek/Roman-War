@@ -24,13 +24,23 @@ class_name NewGame
 ##  characters: {char_id: {faction, name, age, role, command, management,
 ##                         influence, traits, ancillaries, location, alive}}
 ##  events_fired: [event_id], winner: null|String, next_id: int
+##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
+##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
+##      war staleness, campaign goals, and when pairs last made peace
+##  sites_explored: [site_id] — points of interest already searched
+##  guided: {enabled: bool, counters: {key: int}, stages: {stage_id:
+##           {status: "active"|"done"|"expired"|"cooldown", started_turn,
+##            base: {counters snapshot}, target: String|null, fired,
+##            cooldown_until}}} — the guided campaign trail (GuidedRules);
+##          factions may also carry boons: {recruit_xp, income_pct, movement}
+##          granted by trail rewards (created lazily on first grant)
 ##
 ## A "unit" is {template, experience, strength_pct}.
 
 const ConstantsScript = preload("res://src/core/constants.gd")
 
 
-static func build(data: GameData, player_faction: String, seed_value: int, difficulty: String = "medium", campaign_mode: String = "long") -> Dictionary:
+static func build(data: GameData, player_faction: String, seed_value: int, difficulty: String = "medium", campaign_mode: String = "long", guided: bool = true) -> Dictionary:
 	var rng := CampaignRng.seeded(seed_value)
 	var state := {
 		"turn": 0,
@@ -50,6 +60,9 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"journal": {"turn": 0, "beats": []},
 		"winner": null,
 		"next_id": 1,
+		"ai": {"war_turns": {}, "targets": {}, "peace_turn": {}},
+		"sites_explored": [],
+		"guided": {"enabled": guided, "counters": {}, "stages": {}},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -122,6 +135,11 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["mercenary_pools"] = pools
 
 	MovementRules.reset_movement(data, state)
+
+	# The trail greets the player from turn zero: start stages open now, so
+	# deeds done before the first end-turn already count toward them.
+	GuidedRules.process_turn(data, state)
+
 	state["rng_state"] = rng.state_string()
 	return state
 

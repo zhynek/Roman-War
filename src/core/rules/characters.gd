@@ -52,6 +52,36 @@ static func battle_profile(data: GameData, character: Dictionary) -> Dictionary:
 	}
 
 
+static func best_free_general(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> Variant:
+	## The highest-command adult male of the house standing in the settlement
+	## and not already leading an army — the commander a newly raised field
+	## army gets (AI musters and the player's raise-army action alike).
+	## null means a captain takes the column.
+	var leading := {}
+	for army in state["armies"].values():
+		if army["general"] != null:
+			leading[army["general"]] = true
+	var best = null
+	var best_command := -1
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character["alive"] or character["faction"] != faction_id:
+			continue
+		if character.get("location", "") != region_id or leading.has(char_id):
+			continue
+		if character.get("gender", "male") != "male" or character["role"] in ["spouse", "child"]:
+			continue
+		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
+			continue
+		var command := effective(data, character, "command")
+		if command > best_command:
+			best = char_id
+			best_command = command
+	return best
+
+
 ## --- Trait points ---------------------------------------------------------
 
 static func award_points(data: GameData, character: Dictionary, trait_id: String, points: int) -> void:

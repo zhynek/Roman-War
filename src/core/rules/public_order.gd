@@ -220,4 +220,6 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 		data, true, SocietyRules.provision(data, settlement))
 	EdictRules.clear(settlement)
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
+	# A house can lose its last city to its own people, not just to conquest.
+	CombatRules.check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)

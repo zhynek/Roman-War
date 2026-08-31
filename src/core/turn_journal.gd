@@ -50,12 +50,17 @@ const KINDS: Array[String] = [
 	"march_onward",
 	"battle_fought",
 	"siege_begun",
+	"assault_repelled",
 	"siege_starved",
 	"settlement_captured",
 	"world_event",
 	"disaster",
 	# Our cause.
 	"mission_issued",
+	# The guided campaign trail — the player's own thread through the age.
+	"trail_started",
+	"trail_complete",
+	"trail_expired",
 	"mission_progress",
 	"mission_complete",
 	"mission_failed",

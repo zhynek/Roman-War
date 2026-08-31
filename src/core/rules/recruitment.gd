@@ -55,6 +55,9 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 	var settlement: Dictionary = state["settlements"][region_id]
 	var completed: Array = []
 	var remaining: Array = []
+	# Guided-trail boons can sharpen a faction's recruits beyond its buildings.
+	var boon_xp := int(state["factions"][settlement["owner"]].get("boons", {}).get("recruit_xp", 0))
+	var experience_max := int(data.balance["recruitment"]["experience_max"])
 	var first := true
 	for job in settlement["recruitment_queue"]:
 		if first:
@@ -64,9 +67,12 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			# Quality is stamped on the unit at the moment it is raised, and
 			# travels with it: a legion equipped in a city with good forges stays
 			# well equipped wherever it marches.
+			var experience := mini(
+				int(SettlementRules.effect_max(data, settlement, "recruit_xp")) + boon_xp,
+				experience_max)
 			settlement["garrison"].append({
 				"template": job["template"],
-				"experience": int(SettlementRules.effect_max(data, settlement, "recruit_xp")),
+				"experience": experience,
 				"weapon": int(SettlementRules.effect_max(data, settlement, "weapon_upgrade")),
 				"armor": int(SettlementRules.effect_max(data, settlement, "armor_upgrade")),
 				"strength_pct": 100,

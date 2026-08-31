@@ -1,0 +1,301 @@
+{
+  "$schema": "../schemas/effects_glossary.schema.json",
+  "headings": [
+    {
+      "id": "money",
+      "name": "Money"
+    },
+    {
+      "id": "soldiers",
+      "name": "Soldiers"
+    },
+    {
+      "id": "order",
+      "name": "Order"
+    },
+    {
+      "id": "learning",
+      "name": "Learning"
+    },
+    {
+      "id": "defence",
+      "name": "Defence"
+    },
+    {
+      "id": "movement",
+      "name": "Movement"
+    },
+    {
+      "id": "growth",
+      "name": "Growth and health"
+    }
+  ],
+  "effects": [
+    {
+      "key": "law",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Law and order {value} public order",
+      "derived": [
+        {
+          "id": "corruption_relief_pct",
+          "heading": "money",
+          "precision": 1,
+          "signed": false,
+          "line": "Corruption on the take falls {value} points, to {new}%"
+        }
+      ]
+    },
+    {
+      "key": "happiness",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Contentment {value} public order"
+    },
+    {
+      "key": "trade_pct",
+      "heading": "money",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Every trade route yields {value}%"
+    },
+    {
+      "key": "farm_income",
+      "heading": "money",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Farm income {value} denarii a turn"
+    },
+    {
+      "key": "mine_income",
+      "heading": "money",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Mine income {value} denarii a turn"
+    },
+    {
+      "key": "recruit_xp",
+      "heading": "soldiers",
+      "aggregation": "max",
+      "status": "live",
+      "line": "New troops muster with {new} experience",
+      "note": "Only the town's best training ground counts, not the sum.",
+      "derived": [
+        {
+          "id": "recruit_xp_cap",
+          "heading": "soldiers",
+          "precision": 0,
+          "signed": false,
+          "line": "Experience stops at {new}"
+        }
+      ]
+    },
+    {
+      "key": "weapon_upgrade",
+      "heading": "soldiers",
+      "aggregation": "max",
+      "status": "inert",
+      "line": "Armoury and weapon smithy, tier {new}",
+      "note": "Recorded in the ledgers, but it does not yet reach the battlefield."
+    },
+    {
+      "key": "armor_upgrade",
+      "heading": "soldiers",
+      "aggregation": "max",
+      "status": "inert",
+      "line": "Armourers' workshops, tier {new}",
+      "note": "Recorded in the ledgers, but it does not yet reach the battlefield."
+    },
+    {
+      "key": "wall_level",
+      "heading": "defence",
+      "aggregation": "max",
+      "status": "live",
+      "line": "Walls at tier {new}",
+      "derived": [
+        {
+          "id": "wall_defence_multiplier",
+          "heading": "defence",
+          "precision": 1,
+          "signed": false,
+          "line": "Defenders fight at {new} times their strength in a storm, up from {old}"
+        }
+      ]
+    },
+    {
+      "key": "road_level",
+      "heading": "movement",
+      "aggregation": "max",
+      "status": "live",
+      "line": "Roads at tier {new}"
+    },
+    {
+      "key": "port_level",
+      "heading": "money",
+      "aggregation": "max",
+      "status": "live",
+      "line": "Harbour at tier {new}",
+      "derived": [
+        {
+          "id": "sea_routes",
+          "heading": "money",
+          "precision": 0,
+          "signed": false,
+          "line": "Room for {new} sea trade routes, up from {old}"
+        }
+      ]
+    },
+    {
+      "key": "growth",
+      "heading": "growth",
+      "aggregation": "sum",
+      "status": "live",
+      "precision": 1,
+      "line": "Population growth {value}% a turn"
+    },
+    {
+      "key": "health",
+      "heading": "growth",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Public health {value}",
+      "note": "Healthy cities grow faster and hold the plague off longer."
+    },
+    {
+      "key": "civic",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Public benefit {value} the standing this city grants you"
+    },
+    {
+      "key": "burden",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "What it costs those living under it {value} the load they bear"
+    },
+    {
+      "key": "coercion",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Order held by force {value}, whether or not it is consented to"
+    },
+    {
+      "key": "assimilation_pull",
+      "heading": "order",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Draws this people toward counting itself among yours {value}"
+    },
+    {
+      "key": "martial",
+      "heading": "soldiers",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Turns the people toward arms {value}"
+    },
+    {
+      "key": "knowledge",
+      "heading": "learning",
+      "aggregation": "sum",
+      "status": "live",
+      "line": "Craft kept alive and taught on {value}"
+    }
+  ],
+  "blockers": [
+    {
+      "kind": "culture",
+      "line": "{culture} builders do not raise this."
+    },
+    {
+      "kind": "settlement",
+      "line": "Needs a {needs}. This is a {have}."
+    },
+    {
+      "kind": "population",
+      "line": "Needs {needs} people. {have} live here."
+    },
+    {
+      "kind": "coastal",
+      "line": "Only on the coast."
+    },
+    {
+      "kind": "resource",
+      "line": "Needs {resource} in this province."
+    },
+    {
+      "kind": "temple",
+      "line": "{name} already stands here, and a settlement keeps one temple."
+    },
+    {
+      "kind": "queued",
+      "line": "Already rising. Ready in {turns_left} turns."
+    },
+    {
+      "kind": "predecessor",
+      "line": "Raise the {needs} first."
+    },
+    {
+      "kind": "culture_cap",
+      "line": "{culture} rule reaches no higher than a {cap}."
+    },
+    {
+      "kind": "already_built",
+      "line": "This already stands."
+    },
+    {
+      "kind": "no_such_tier",
+      "line": "The chain ends here."
+    }
+  ],
+  "kind_notes": [
+    {
+      "kind": "education",
+      "heading": "learning",
+      "line": "Letters, law and the habit of argument on paper. There is no book of learning to finish here, but a governor who sits in a city of scholars may in time gather tutors and philosophers into his household, and a head for administration."
+    },
+    {
+      "kind": "temple",
+      "heading": "learning",
+      "line": "A settlement keeps one god. Pulling a temple down is how a conquered city is weaned off a foreign cult."
+    }
+  ],
+  "captions": [
+    {
+      "id": "income_approximate",
+      "line": "Harvests vary by up to a fifth either way, so coin figures are an estimate."
+    },
+    {
+      "id": "growth_at_cap",
+      "line": "This city already grows as fast as it can, so this will not move the figure until something else slows it."
+    },
+    {
+      "id": "already_matched",
+      "line": "{rival} already gives the town this much, so nothing changes."
+    },
+    {
+      "id": "cumulative_delta",
+      "line": "Measured against what stands today, {steps} steps up."
+    },
+    {
+      "id": "foreign_chain",
+      "line": "Foreign work, left standing by the last owner. Your masons cannot carry it further, and it feeds the unrest until it comes down."
+    },
+    {
+      "id": "no_new_troops",
+      "line": "No new troops. It trains the ones you have."
+    },
+    {
+      "id": "era_locked",
+      "line": "Not until the legions are reformed."
+    },
+    {
+      "id": "rebuild_full_price",
+      "line": "A riot or a disaster can knock a building back a tier, and there is no cheap repair: it is rebuilt at full price."
+    }
+  ]
+}

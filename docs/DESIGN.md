@@ -5,6 +5,10 @@
 senate foundation loop, and the Phase-8 campaign UI. Section 11's status table is
 the single source of truth; where a system is planned but not built, this document
 says so explicitly. Design rationale and genre research:
+`src/core/` actually implements today — Phases 0–4 and 6 of the roadmap, the
+Phase-7 senate foundation loop, the Phase-8 campaign UI, and the guided
+trail (§10). Section 12's status table is the single source of truth; where a system is planned but not built, this
+document says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
 
 ---
@@ -69,6 +73,7 @@ the world in a **fixed order** so campaigns are reproducible:
 | # | Step | Notes |
 |---|------|-------|
 | 1 | AI turns | Every non-player faction acts (`AiRules`: settlement management, storming an invested city, marching on a weaker hostile neighbour, occasional war declaration) |
+| 1 | AI turns | Every non-player faction acts (`FactionAi`, §9): peace/war decisions, assaults & battles, marching, mustering, then settlement management |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
 | 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
 | 4 | Edicts & treasuries | Standing orders tick (a new one starts taking hold and is billed the same turn), then per faction: income − upkeep − edict upkeep; deep debt forces unit disbandment |
@@ -77,6 +82,10 @@ the world in a **fixed order** so campaigns are reproducible:
 | 7 | Public order | Riots damage settlements; sustained collapse — or a province in open revolt — triggers secession to the rebels |
 | 8 | Events | Scripted/date/condition events, disasters, then senate politics |
 | 9 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
+| 7 | Events | Scripted/date/condition events, disasters, then senate politics |
+| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 9 | Guided trail | `GuidedRules.process_turn` (§10) judges the turn's final world: stages complete/expire, rewards pay, new stages open |
 | 10 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
 
 Governorship is re-derived from character presence (`SettlementRules.refresh_governors`)
@@ -135,6 +144,8 @@ control and SKIP. `DispatchPanel` closes the day with the recap, sectioned by th
 chapters `dispatch.json` declares. Playback is presentation only:
 `CampaignScreen.playback_enabled = false` resolves the identical turn with no
 animation, which is how the headless suite drives twenty-five turns in a loop.
+`ai`, `guided`, `winner`) that the UI presents as the start-of-turn event
+log.
 
 ### 2.4 The map
 
@@ -144,7 +155,7 @@ marsh`), a fertility rating (0–3), resources, land adjacencies, and the sea zo
 touches (non-empty = coastal). Sea zones form their own adjacency graph for fleets.
 Every region also carries a **`position`** (`x` 0–100 west→east, `y` 0–100
 north→south) placing it at its real geographic location, which is what the campaign
-map draws; sea zones carry optional anchor positions reserved for zone labelling.
+map draws; sea zones carry anchor positions the map uses for its sea labels.
 `MapRules` provides BFS hop counts (cached per map, used for distance-to-capital and
 corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
 faction sees its own regions and armies plus one hop out, and every coastal region
@@ -624,8 +635,12 @@ The single seam between campaign and battle, quoted from
 ```
 
 Campaign modules (`CombatRules`, `SiegeRules`, `TurnEngine`) consume only this
-contract. A future real-time battle scene implements the same method; the campaign
-never learns which ran.
+contract. The interface additionally carries one static helper, deliberately
+part of the seam: `BattleResolver.force_strength(data, units, general,
+experience_pct)` — the shared, resolver-agnostic strength estimate the faction
+AI (§9) plans with, so its expectations track whatever resolver actually
+fights the battle. A future real-time battle scene implements the same
+`resolve` method; the campaign never learns which ran.
 
 ### 6.6 Auto-resolve model
 
@@ -688,6 +703,8 @@ replaced.
   `war / neutral / trade / alliance / protectorate`, kept symmetric, seeded from
   `campaign.json`. Stances gate movement, trade routes and grain imports; attacking
   or besieging declares war, and `DiplomacyRules.set_stance` changes them directly.
+  Since Phase 6 the AI declares wars of its own and lets stalled AI-to-AI wars
+  gutter out into white peace (§9) — it never negotiates with the player.
 
 ### 7.2 Planned (Phase 5)
 
@@ -765,6 +782,123 @@ The campaign ends in `time_up` past AD 14 if no one has won. The mode lives in
 ## 10. Data Architecture
 
 ### 10.1 Tables and schemas
+## 9. AI Opponents
+
+Phase 6 replaced the passive settlement stub with a modular faction AI
+(`src/core/rules/ai/`), run for every non-player faction at the top of each
+end-turn. It is **deliberately mechanical**: every decision is a deterministic
+threshold or priority read from balance data (the `ai` section, plus
+`movement.sea_move_cost` for sea routing), evaluated in sorted order, with no
+randomness outside the shared battle resolution. Difficulty stays economic
+(§4.3) — the AI never gets smarter, only richer.
+
+| Module | Owns |
+|---|---|
+| `FactionAi` | Orchestration: capital housekeeping → peace → target choice → war declaration → military → economy; `begin_round` ages the war ledger once per world turn |
+| `AiAssess` | Pure queries: force power (via `BattleResolver.force_strength`, part of the resolver interface), threat levels (`interior/frontier/threatened`), traversal maps (land hops + sea crossings), expansion target scoring |
+| `AiDiplomacy` | Deliberate war (full war chest, favorable odds, neutral neighbors only, capped simultaneous wars, a cooldown after a peace; neither the Roman houses nor the senate open on each other — the civil-war rules own that) and white peace for stalled AI-to-AI wars |
+| `AiMilitary` | Laying sieges only with the strength to survive the eventual sally, assaulting at `assault_odds` (else starving them out), lifting hopeless sieges, relieving besieged settlements, field battles by odds, fighting open a road blocked by a hostile army, retreats, marching on the target (crossing by sea when that is the cheaper or only open road), merging co-located waves, raising armies from garrison surpluses with the best free general |
+| `AiEconomy` | Capital relocation when lost, taxes as high as order safely bears (with hysteresis against flapping), retraining, debt-shedding (fleets first), garrison floors by threat — raised for rioting cities and for very rich factions — and priority-scored construction |
+
+Behavioral notes:
+
+- **Targets are recomputed, not remembered**: the nearest reachable enemy
+  settlement (the least defended — garrison scaled by terrain and walls —
+  breaks ties), preferring the senate mission target. Distance is measured
+  from the faction's own territory, so a marching expedition never
+  flip-flops its goal.
+- **Wars end in three bands.** The staleness ledger (`state.ai.war_turns`)
+  resets on physical prosecution — a siege between the pair, or an army on
+  the other's ground. A quiet war nobody aims at any more ends after
+  `peace_min_war_turns`; one still being mustered against holds out for
+  `peace_stale_war_turns`; when either treasury is too empty to make the
+  intent credible, `peace_exhausted_war_turns` suffices. A fresh peace is
+  protected by a re-declaration cooldown (`peace_cooldown_turns`).
+- **Wars against the player never end by themselves** — ending them is Phase
+  5's negotiation table, and the player's own business.
+- **Rebels are a garrison, not a power**: they defend, retrain and recruit at
+  home, abandon sieges inherited from dead factions' defecting armies, and
+  never expand, declare, or make peace.
+- **AI captures always occupy** — enslavement and extermination stay player
+  decisions.
+- **Single-region islands sit outside the AI's war planning** (Sardinia,
+  Britannia, Crete, Rhodes, Cyprus): with no land adjacency there is no legal
+  way for *anyone*, player included, to invade them once at war — landing in
+  hostile territory needs the amphibious operations of the Phase 3 naval
+  remainder. Until then the AI neither targets them nor counts them
+  reachable, and island factions expand only if war finds them.
+
+## 10. The Guided Trail & Points of Interest
+
+An onboarding-and-engagement layer added after Phase 6: a **guided campaign
+trail** of data-driven stages, and **points of interest** the player explores
+on the map. Both are pure content (`data/guided_campaign.json`,
+`data/sites.json`): the trail is judged by one RNG-free rules module
+(`src/core/rules/guided.gd`), while exploration resolves in
+`Game.explore_site` through the campaign RNG.
+
+### 10.1 The trail
+
+- **Stages** carry a trigger, objectives, a completion rule (`all`/`any` —
+  the flexibility knob), optional expiry and cooldowns, and a reward.
+  Sixteen tutorial-arc stages chain by `after` triggers from setting a tax
+  level through raising armies, exploration, first blood, and conquest;
+  four **reactive stages** recur all campaign with cooldowns whenever war
+  and misfortune reach the player — a war under way with anyone (stances
+  are symmetric and record no declarer, so the stage answers wars the
+  player starts too), a city besieged (target-bound: it pays only if
+  *that* city is saved), intruders at the borders, a debt spiral.
+- **Objectives** are deterministic: counter-based deeds (taxes set,
+  buildings queued — optionally by kind, units recruited, armies raised and
+  marched, mercenaries hired, sites searched, battles won, regions
+  captured, senate missions) or live state reads (regions held, treasury,
+  a governor in the capital, no siege on the recorded target, clear
+  borders). Player-intent deeds count in the `Game` facade (the AI never
+  calls it); field battles and captures count at `CombatRules` choke
+  points and siege battles in `SiegeRules.assault`, so defensive victories,
+  repelled walls, and starve-outs all count. One-shot tutorial stages
+  credit deeds from the whole campaign (a battle won before its stage
+  opened still counts); **repeatable stages demand fresh deeds**, measured
+  from their opening snapshot. Start stages open at campaign creation, so
+  turn-zero setup already counts.
+- **Evaluation is two-phase** inside `GuidedRules.process_turn` (end-turn
+  step 9): active stages are judged first, then new stages open — a
+  reactive stage can never open and pay in the same turn. Expiry closes a
+  stage without failing the trail (`after` accepts done-or-expired).
+- **Rewards**: treasury gold; all-faction unit grants mustering in the
+  capital (the senate-mission rule — silently lost with a lost capital);
+  experience for the field armies; and **boons** — small permanent faction
+  modifiers (`+recruit XP`, `+income %`, `+movement`) stored on the
+  faction and read at three engine points. Repeatable stages may not grant
+  boons (validator-enforced).
+- The trail is chosen at campaign start (default on) and lives in
+  `state.guided`; a pre-trail save simply has none and every read is
+  defensive.
+
+### 10.2 Points of interest
+
+Twenty-two authored sites — caches, ruins, deserters' camps, shrines,
+watchposts — each in its own region, spread so every playable faction can reach one
+in its opening turns and the rest reward ranging out (several sit in
+rebel lands, conquest-gated). A player army standing on a site searches it
+(`Game.explore_site`): one weighted outcome per site, ever — gold, soldiers
+who join the column (overflow musters at the capital), or experience —
+drawn from the campaign RNG through the same state round-trip as battles.
+Searching spends the season's movement. **Sites are player-only** by
+design: they are the reward for exploring, and the AI deliberately marches
+past them. Searching a site inside a neutral faction's region is allowed
+and draws no diplomatic reaction — deliberate, so every faction can reach
+finds beyond its own borders without a war. Unexplored sites show as gold diamonds on the map; the quest
+panel lights objective targets up through the map's highlight ring.
+
+The trail also introduced a player ability the engine previously reserved
+for the AI: **raising a field army** from a garrison
+(`Game.raise_army` — the whole garrison marches out under the best free
+general present).
+
+## 11. Data Architecture
+
+### 11.1 Tables and schemas
 
 Every table in `data/` validates against the same-named schema in `schemas/`
 (`buildings.json` and `temples.json` share `buildings.schema.json`). Shared
@@ -793,6 +927,11 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | advances.json | what a society works out, and can forget | Active — `AdvanceRules`, unlocked and lost from the Craft stock |
 | society.json | axis names, unrest states, historical patterns, clarity levels | Active — the pedagogy surface: `pattern` on a crisis event resolves here |
 | edicts.json | one standing provincial order — the player's fast lever | Active — `EdictRules`, folded into `SettlementRules.effect_total` |
+| sites.json | 22 explorable points of interest with weighted outcomes | Active — `Game.explore_site`, quest UI, map markers (§10.2) |
+| guided_campaign.json | the guided trail's 20 stages: triggers, objectives, rewards | Active — `GuidedRules` (§10.1) |
+| effects_glossary.json | player-facing wording for the 13 effect keys, the blockers, and the standing captions | `BuildingInfo` → the building yard |
+| building_art.json | 20 procedural recipes, 18 materials, 7 culture tracks: the drawn buildings | `BuildingArt` → `ArtPainter` |
+| unit_art.json | 12 class templates, 7 culture kits, per-unit signatures, attribute cues | `UnitArt` → `ArtPainter` |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
@@ -809,6 +948,7 @@ sums across chains), and tier effects (`wall_level`, `road_level`, `port_level`)
 take the maximum across chains.
 
 ### 10.2 The validator
+### 11.2 The validator
 
 `tools/validate_data.py` runs every schema, then the cross-file checks JSON Schema
 cannot express — including map-position sanity (no two region tokens closer than
@@ -836,9 +976,11 @@ father/general/trait references resolving; long and short win conditions present
 for every playable and unlockable faction. CI runs the validator and the headless
 test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover
 growth, order, economy, construction, recruitment, movement/visibility, battle,
-and a multi-turn campaign integration run) on every push.
+characters, diplomacy/war, the faction AI, the guided trail and exploration,
+UI smoke, and a multi-turn campaign integration run) on every push.
 
 ### 10.3 Determinism & save model
+### 11.3 Determinism & save model
 
 - `GameData` (content) is loaded once and never mutated. `GameState` is a **plain
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
@@ -852,12 +994,14 @@ and a multi-turn campaign integration run) on every push.
   integration tests and future replay/debugging tools rely on.
 
 ## 11. Roadmap
+## 12. Roadmap
 
 Phases follow the research report (§17). Status as of this document:
 
 | Phase | Scope | Status |
 |---|---|---|
 | 0 — Design & setup | Schemas for every data table, repo, CI, save format, this document | **Done** |
+| 0 — Design & setup | Schemas for all data tables, repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
@@ -873,6 +1017,13 @@ Phases follow the research report (§17). Status as of this document:
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 12. Clean-Room Policy
+| 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done at foundation depth** (§9): `FactionAi` + assess/diplomacy/military/economy modules — deliberate wars, white peace, sieges & assaults, defence, sea invasions, mustering with generals, threat-based garrisons, priority construction, debt-shedding; all thresholds in balance data. Remaining: per-faction personalities, AI mercenary hiring, fleet operations, and hostile-island invasions once amphibious landings exist (§9) |
+| 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable procedural terrain map (Voronoi province polygons with wobbled coasts and shelf, terrain fills + relief glyphs, cased roads & sea lanes, owner tokens, army badges, siege rings, wonders, sea labels, geography-visible fog; camera reachable by drag, wheel, trackpad pinch/scroll, on-map buttons and the keyboard; maximized window with canvas_items stretch), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| Guided trail & exploration | Stage-driven onboarding + reactive objectives, rewards & boons, 22 explorable sites, quest UI | **Done at foundation depth** (§10). Remaining: per-faction trail flavor, more site variety, site respawns/late-game chains |
+| Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
+
+## 13. Clean-Room Policy
 
 Roman War is a spiritual successor at the *mechanics* level only.
 

@@ -7,7 +7,7 @@ game is built so it can drop in without changing anything else).
 
 ## Starting a campaign
 
-You pick three things and press **BEGIN THE CAMPAIGN**:
+You pick a few things and press **BEGIN THE CAMPAIGN**:
 
 - **House** — who you play. The three Roman houses (Julii, Junii, Cornelii) are
   the intended starting choices; the others are listed as unlockable and are
@@ -16,6 +16,11 @@ You pick three things and press **BEGIN THE CAMPAIGN**:
   order in their cities). It does not make them cleverer.
 - **World seed** — the same number replays exactly the same world. Change it for
   a different run of luck; keep it to compare two attempts fairly.
+- **Guided trail** — on by default. A running list of objectives that walks you
+  through the game and reacts to what happens to you, paying rewards along the
+  way. Veterans can switch it off. It changes no rule of the world — but its
+  rewards are real gold and troops, so a guided run of a seed plays out
+  differently from an unguided one.
 
 The year is 270 BC. Each turn is half a year (summer, then winter), and the
 campaign runs to AD 14.
@@ -59,6 +64,24 @@ campaign runs to AD 14.
     road on the map is not always the quickest.
   - **Click a sea** holding one of your fleets to take the helm, then click
     a highlighted neighbouring sea to sail.
+- **The map** — a painted Mediterranean, drawn entirely by code from the game
+  data: terrain-coloured provinces (olive plains, ochre hills, grey peaks,
+  dark forest, pale desert) with mountains, trees and hills sketched on them,
+  a shallow-water shelf along every coast, and named seas. Each province's
+  settlement is a circle coloured by its owner and sized by its city tier;
+  the cased tan lines between settlements are roads, dashed lines are sea
+  routes. Small squares beside a city are armies. A red ring means the city
+  is under siege. Land you have not scouted shows its geography — muted, with
+  a dark marker where its settlement lies — but hides its owner, roads, names
+  and armies until you get someone close enough to look.
+  - **Move the map**: drag it with any mouse button, use the **arrow keys**
+    (or WASD), or two-finger scroll on a trackpad.
+  - **Zoom**: the **+ and −** buttons in the map's bottom-right corner, the
+    **+ / −** keys, a trackpad pinch, or the mouse wheel.
+  - **Lost?** The **Home** button (or the Home key) returns you to your
+    capital at the default zoom.
+  - **Left-click** a region to select it. City names appear once you are
+    zoomed in a little.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
 - **Bottom right** — the turn log: every report of the day just closed, in one
@@ -147,6 +170,16 @@ old, or nothing but "the province is said to be restive". Roads, a bigger
 government building and a resident governor buy you the truth. Not knowing is a
 real cost, and it is one you can spend money to fix.
 
+**Open the building yard** (or the muster hall) and a drawer slides up over the
+map. On the left is everything this city can hold; in the middle a drawing of
+the building with what it is and what it will do for your money, your soldiers,
+your public order; along the bottom the whole ladder of that building's life,
+every rung drawn, marked as built, rising, next, or locked with the reason said
+plainly — *Needs a Large Town. This is a Town.* Click a rung to see it. For
+barracks, stables and shipyards each rung also names the troops it opens, so you
+can see what an upgrade is actually worth before you pay for it. The **Soldiers**
+tab does the same for troops, and shows which building tier each one waits on.
+
 From the same panel you can set **taxes**, **build**, **recruit**, **retrain**
 a battered garrison, **demolish** a building (the way you work off the unrest a
 conquered city's foreign temples cause), and **make this city your capital**
@@ -183,6 +216,14 @@ panel to select it. Now:
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
+- **Raise a field army** from any of your garrisons (button on the city panel):
+  the whole garrison marches out under the best commander standing in the city.
+  Mind the empty walls you leave behind — garrisons also keep order.
+- **Search points of interest.** Gold diamonds on the map mark places worth a
+  look — ruins, caches, deserters' camps. March an army onto one and press
+  **Search** in its panel: you might find treasure, veterans' wisdom, or
+  soldiers who join your cause. Each place gives up its secret once, only to
+  you, and the search takes the rest of the season.
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.
@@ -212,6 +253,22 @@ about you) is the next phase of development; today the other side simply
 accepts. Your fleets are in this window too, because they live on the sea
 rather than in a region.
 
+## The guided trail
+
+With the trail on, the **Objectives** box on the right shows what the game
+suggests doing next — from setting your first tax level through raising
+armies, exploring, and taking your first city. Objectives are flexible:
+some offer alternative paths (hire mercenaries *or* raise levies), timed
+ones simply lapse without punishing you, and targets light up on the map
+with a yellow ring. Completing steps pays denarii, troops, experience — and
+occasionally a permanent edge for your whole realm, like sharper recruits or
+a small income bonus.
+
+The trail also answers the world: war comes — declared by you or on you —
+someone besieges your city, or crosses your border, and a rewarded objective
+appears to see it through. These return throughout the whole campaign (after
+a cooldown), so fighting well always pays.
+
 ## Winning
 
 Check the top bar for your progress. A long campaign wants around 50 regions
@@ -230,6 +287,17 @@ Honest list, so you know what you are looking at:
   battle on paper; the animated field you watch is a faithful replay of that
   verdict, not an interactive fight. Commanding troops in real time is a
   later phase.
+- **The computer players fight, but they do not talk.** They develop their
+  cities, raise led armies, take rebel towns, declare wars when strong, defend
+  what is theirs, and let hopeless wars gutter out between themselves — expect
+  the map to change without you. What they cannot do yet is negotiate: no
+  offers, tribute, or peace terms with *you* until the diplomacy phase lands.
+- **Battles resolve on paper.** You see the outcome, not the fight.
+- **Hostile islands cannot be invaded.** A single-region island (Sardinia,
+  Britain, Crete, Rhodes, Cyprus) can only be entered by sea while its owner
+  is not at war with you — land first, then lay siege. Once war is declared
+  there is no way ashore, for you or the computer, until naval landings
+  arrive with the fleet phase.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full
@@ -251,6 +319,8 @@ Honest list, so you know what you are looking at:
   (offices, elections) is later. Your standing charge and its deadline sit in the
   top bar; blockade and assassination charges are written but not yet playable.
 - **The art is placeholder.** Coloured circles, not painted maps.
+- **All art is drawn by code.** The map is a procedural painting rebuilt from
+  the data every launch; there are no character portraits or battle scenes yet.
 
 ## macOS blocks the app on first launch
 

@@ -189,6 +189,8 @@ static func faction_turn_breakdown(data: GameData, state: Dictionary, faction_id
 		difficulty_multiplier = float(ai_rules["difficulty_income_multiplier"].get(
 			state.get("difficulty", "medium"), 1.0))
 	income *= difficulty_multiplier
+	# Guided-trail boons: a small permanent income edge, granted by rewards.
+	income *= 1.0 + float(state["factions"][faction_id].get("boons", {}).get("income_pct", 0.0)) / 100.0
 
 	var upkeep := faction_upkeep(data, state, faction_id)
 	return {"income": income, "upkeep": upkeep, "net": income - float(upkeep)}
@@ -207,10 +209,19 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 
 
 static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_id: String) -> bool:
+	## Sorted, because ties are common — most armies field several units of the
+	## same template, so "the costliest" is nearly always a tie and the winner
+	## was whichever the dictionary happened to yield first. A JSON round trip
+	## reorders that, and the loaded campaign then disbanded a DIFFERENT unit
+	## from the live one: same seed, same rng, divergent world. No random draw
+	## is involved, which is why the rng state matched while the armies did not.
 	var worst_army: Dictionary = {}
 	var worst_index := -1
 	var worst_upkeep := 0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
 		for i in range(army["units"].size()):

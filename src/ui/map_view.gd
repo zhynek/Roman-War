@@ -24,6 +24,14 @@ const WORLD_SCALE := 14.0
 ## an order to move the camera.
 const DRAG_START_DISTANCE := 6.0
 
+## Camera controls are deliberately redundant, because plenty of players have
+## no mouse: the keyboard and the on-map buttons reach the same zoom_by /
+## pan_by / reset_view as the wheel and the drag do.
+const ZOOM_STEP := 1.15
+const KEY_PAN_STEP := 90.0
+const ZOOM_MIN := 0.35
+const ZOOM_MAX := 3.0
+
 var game: Game
 var selected_region := "":
 	set(value):
@@ -69,6 +77,10 @@ var _camera_offset := Vector2(-200, -200)
 var _pan_target: Vector2 = Vector2.ZERO
 var _pan_seconds := 0.0
 var _panning := false
+## center_on before the first layout has no size to centre against, so the
+## request is held until the map is laid out. Without this the camera lands on
+## -world_pos + 0/2 and the player opens on empty sea.
+var _pending_center := ""
 var _zoom := 1.0
 var _dragging := false
 var _left_down := false
@@ -99,6 +111,7 @@ func _ready() -> void:
 	_font = get_theme_default_font()
 	map_font = _font
 	geometry = MapGeometry.load_from()
+	resized.connect(_on_resized)
 
 	_world_root = Node2D.new()
 	add_child(_world_root)
@@ -125,6 +138,8 @@ func _ready() -> void:
 	_tooltip_label.custom_minimum_size = Vector2(240, 0)
 	tooltip.add_child(_tooltip_label)
 	add_child(tooltip)
+
+	_build_camera_buttons()
 	mouse_exited.connect(_clear_hover)
 
 
@@ -193,9 +208,20 @@ func to_screen(world: Vector2) -> Vector2:
 func center_on(region_id: String) -> void:
 	if game == null or not game.data.regions.has(region_id):
 		return
+	if size.x <= 1.0 or size.y <= 1.0:
+		_pending_center = region_id
+		return
 	_panning = false
 	_camera_offset = _offset_centering(region_id)
 	queue_redraw()
+
+
+func _on_resized() -> void:
+	if _pending_center == "":
+		return
+	var pending := _pending_center
+	_pending_center = ""
+	center_on(pending)
 
 
 func center_on_selected() -> void:
@@ -384,10 +410,70 @@ func _gui_input(event: InputEvent) -> void:
 			_update_hover(motion.position)
 
 
+func _build_camera_buttons() -> void:
+	var column := VBoxContainer.new()
+	column.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	column.offset_left = -44.0
+	column.offset_top = -112.0
+	column.offset_right = -10.0
+	column.offset_bottom = -10.0
+	column.add_theme_constant_override("separation", 4)
+	# Only the buttons swallow clicks; the gaps between them stay map.
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+	column.add_child(_camera_button("+", "Zoom in   (+ key)", 18,
+		func(): zoom_by(ZOOM_STEP)))
+	column.add_child(_camera_button("-", "Zoom out   (- key)", 18,
+		func(): zoom_by(1.0 / ZOOM_STEP)))
+	column.add_child(_camera_button("Home", "Back to your capital   (Home key)", 10,
+		func(): reset_view()))
+
+
+func _camera_button(text: String, tooltip: String, font_size: int, handler: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.tooltip_text = tooltip
+	button.custom_minimum_size = Vector2(34, 30)
+	button.add_theme_font_size_override("font_size", font_size)
+	# Never take keyboard focus, or the arrow keys would drive the buttons
+	# instead of the map.
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(handler)
+	return button
+
+
+func zoom_by(factor: float) -> void:
+	## Zoom about the middle of the view — what a key press or a button means,
+	## as opposed to the wheel, which zooms about the pointer.
+	_zoom_at(size * 0.5, factor)
+
+
+func pan_by(look_delta: Vector2) -> void:
+	## Move the view in the given screen direction: pan_by(RIGHT) looks further
+	## east. Distances are screen pixels, so panning feels the same at any zoom.
+	## Unclamped, like every other direct write to _camera_offset.
+	_panning = false
+	_camera_offset -= look_delta / _zoom
+	queue_redraw()
+
+
+func reset_view() -> void:
+	## Home: back to the player's capital at a readable zoom.
+	_panning = false
+	_zoom = 1.0
+	if game != null:
+		var capital: String = String(
+			game.state["factions"][game.state["player_faction"]].get("capital", ""))
+		if game.data.regions.has(capital):
+			center_on(capital)
+			return
+	queue_redraw()
+
+
 func _zoom_at(screen_point: Vector2, factor: float) -> void:
 	_panning = false
 	var before := screen_point / _zoom - _camera_offset
-	_zoom = clampf(_zoom * factor, 0.35, 3.0)
+	_zoom = clampf(_zoom * factor, ZOOM_MIN, ZOOM_MAX)
 	_camera_offset = screen_point / _zoom - before
 
 

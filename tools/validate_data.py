@@ -46,6 +46,11 @@ TABLES = {
     "society.json": "society.schema.json",
     "edicts.json": "edicts.schema.json",
     "dispatch.json": "dispatch.schema.json",
+    "sites.json": "sites.schema.json",
+    "guided_campaign.json": "guided_campaign.schema.json",
+    "effects_glossary.json": "effects_glossary.schema.json",
+    "building_art.json": "building_art.schema.json",
+    "unit_art.json": "unit_art.schema.json",
 }
 
 LIVE_MISSION_KINDS: set[str] = set()  # filled from SenateRules at startup
@@ -664,11 +669,269 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"missions: {mission['id']}: kind {kind} is neither judged by "
                 f"SenateRules nor listed in FORWARD_MISSION_KINDS as content "
                 f"authored ahead of the system that will resolve it")
+    # --- sites ------------------------------------------------------------
+    built_kinds = {c["kind"] for c in chains.values()}
+    all_faction_templates = {u["id"] for u in t.get("units.json", {}).get("units", [])
+                             if "all" in u.get("factions", [])}
+
+    def check_reward_units(reward: dict, label: str) -> None:
+        for grant in reward.get("units", []):
+            if grant["template"] not in units:
+                err(f"{label}: unknown unit {grant['template']}")
+            elif grant["template"] not in all_faction_templates:
+                err(f"{label}: unit {grant['template']} is not an all-faction template "
+                    f"(the player can be any faction)")
+
+    site_ids: set[str] = set()
+    site_regions: set[str] = set()
+    for site in t.get("sites.json", {}).get("sites", []):
+        if site["id"] in site_ids:
+            err(f"sites: duplicate id {site['id']}")
+        site_ids.add(site["id"])
+        if site["region"] not in regions:
+            err(f"sites: {site['id']}: unknown region {site['region']}")
+        if site["region"] in site_regions:
+            err(f"sites: {site['id']}: region {site['region']} already has a site")
+        site_regions.add(site["region"])
+        for outcome in site["outcomes"]:
+            check_reward_units(outcome.get("reward", {}), f"sites: {site['id']}")
+
+    # --- guided campaign --------------------------------------------------
+    stages = t.get("guided_campaign.json", {}).get("stages", [])
+    stage_ids: set[str] = set()
+    for stage in stages:
+        if stage["id"] in stage_ids:
+            err(f"guided_campaign: duplicate stage id {stage['id']}")
+        stage_ids.add(stage["id"])
+    starts: list[str] = []
+    reachable: set[str] = set()
+    roman_only_ids = {s["id"] for s in stages if s["trigger"].get("roman_only")}
+    for stage in stages:
+        sid = stage["id"]
+        trigger = stage["trigger"]
+        if trigger["kind"] == "after":
+            if not trigger.get("stages"):
+                err(f"guided_campaign: {sid}: 'after' trigger needs a stages list")
+        elif "stages" in trigger:
+            err(f"guided_campaign: {sid}: trigger.stages only belongs on kind 'after'")
+        if trigger["kind"] == "start":
+            starts.append(sid)
+            reachable.add(sid)
+        for ref in trigger.get("stages", []) + trigger.get("requires", []):
+            if ref not in stage_ids:
+                err(f"guided_campaign: {sid}: unknown stage reference {ref}")
+            elif ref == sid:
+                err(f"guided_campaign: {sid}: references itself — it can never open")
+            elif ref in roman_only_ids and not trigger.get("roman_only"):
+                warn(f"guided_campaign: {sid}: gated behind roman-only stage {ref} "
+                     f"but is not roman_only itself — dead for every other faction")
+        if stage.get("repeatable"):
+            if "cooldown_turns" not in stage:
+                err(f"guided_campaign: {sid}: repeatable stages need cooldown_turns")
+            if stage.get("reward", {}).get("boon"):
+                err(f"guided_campaign: {sid}: repeatable stages must not grant boons "
+                    f"(permanent bonuses would stack forever)")
+        elif "cooldown_turns" in stage:
+            err(f"guided_campaign: {sid}: cooldown_turns without repeatable is dead data")
+        for objective in stage["objectives"]:
+            if objective["kind"] == "treasury_at_least":
+                if "amount" not in objective:
+                    err(f"guided_campaign: {sid}: treasury_at_least needs an amount")
+            elif "amount" in objective:
+                err(f"guided_campaign: {sid}: 'amount' only belongs on treasury_at_least "
+                    f"(counted objectives use 'count')")
+            if objective["kind"] == "no_siege_on_target" \
+                    and trigger["kind"] != "player_settlement_besieged":
+                err(f"guided_campaign: {sid}: no_siege_on_target only works on "
+                    f"player_settlement_besieged stages (it needs the recorded target)")
+            kind_ref = objective.get("building_kind")
+            if kind_ref is not None:
+                if objective["kind"] != "queue_building":
+                    err(f"guided_campaign: {sid}: building_kind only belongs on queue_building")
+                elif kind_ref not in built_kinds:
+                    err(f"guided_campaign: {sid}: unknown building kind {kind_ref}")
+        check_reward_units(stage.get("reward", {}), f"guided_campaign: {sid}")
+    if stages and not starts:
+        err("guided_campaign: no stage with a 'start' trigger — the trail can never begin")
+    # Every 'after' stage must be reachable from a start stage.
+    grew = True
+    while grew:
+        grew = False
+        for stage in stages:
+            sid = stage["id"]
+            if sid in reachable or stage["trigger"]["kind"] != "after":
+                continue
+            if all(parent in reachable for parent in stage["trigger"].get("stages", [])):
+                reachable.add(sid)
+                grew = True
+    for stage in stages:
+        if stage["trigger"]["kind"] == "after" and stage["id"] not in reachable:
+            err(f"guided_campaign: {stage['id']}: unreachable from any start stage")
+
+    # --- effects glossary -------------------------------------------------
+    # The drawer may only describe effects the data actually uses, and may only
+    # claim an effect works if some engine call site reads it. Both halves are
+    # checked here; the runtime twin lives in tests/test_building_info.gd.
+    glossary = t.get("effects_glossary.json", {})
+    described = {row["key"]: row for row in glossary.get("effects", [])}
+    used_effects: set[str] = set()
+    for chain in chains.values():
+        for level in chain["levels"]:
+            used_effects.update(level.get("effects", {}))
+    for key in sorted(used_effects):
+        if key not in described:
+            err(f"effects_glossary: no wording for effect '{key}', which the data uses")
+    for key, row in described.items():
+        if key not in used_effects:
+            warn(f"effects_glossary: '{key}' is described but no building grants it")
+        if row["status"] == "inert" and not row.get("note"):
+            err(f"effects_glossary: inert effect '{key}' must carry a note")
+    # Aggregation has to mirror the engine, or the drawer sums what the engine maxes.
+    max_aggregated = {"recruit_xp", "weapon_upgrade", "armor_upgrade",
+                      "wall_level", "road_level", "port_level"}
+    for key, row in described.items():
+        expected = "max" if key in max_aggregated else "sum"
+        if row["aggregation"] != expected:
+            err(f"effects_glossary: '{key}' is aggregated as {row['aggregation']}, "
+                f"but SettlementRules treats it as {expected}")
+    heading_ids = {h["id"] for h in glossary.get("headings", [])}
+    for key, row in described.items():
+        if row["heading"] not in heading_ids:
+            err(f"effects_glossary: '{key}' files under unknown heading '{row['heading']}'")
+        for derived in row.get("derived", []):
+            if derived["heading"] not in heading_ids:
+                err(f"effects_glossary: derived '{derived['id']}' files under "
+                    f"unknown heading '{derived['heading']}'")
+    # Every blocker ConstructionRules can emit needs a sentence.
+    blocker_kinds = {b["kind"] for b in glossary.get("blockers", [])}
+    for kind in ("culture", "settlement", "population", "coastal", "resource",
+                 "temple", "queued", "predecessor", "culture_cap",
+                 "already_built", "no_such_tier"):
+        if kind not in blocker_kinds:
+            err(f"effects_glossary: no sentence for the '{kind}' blocker")
+    for note in glossary.get("kind_notes", []):
+        if note["kind"] not in built_kinds:
+            err(f"effects_glossary: kind_note names unknown building kind '{note['kind']}'")
+
+    # --- building art -----------------------------------------------------
+    # The game ships no images, so every level must reach a recipe or it draws
+    # nothing. The schema closes the part vocabulary; these checks close the
+    # cross-file references the schema cannot see.
+    art = t.get("building_art.json", {})
+    art_materials = set(art.get("materials", {}))
+    art_fragments = set(art.get("fragments", {}))
+
+    def walk_parts(container):
+        for part in container.get("base", []):
+            yield part
+        for tier in container.get("tiers", []):
+            for part in tier.get("add", []):
+                yield part
+        for part in container.get("add", []):
+            yield part
+
+    def check_material(name, where):
+        if name and name not in ("$track",) and name not in art_materials:
+            err(f"building_art: {where}: unknown material '{name}'")
+
+    recipe_ids: set[str] = set()
+    generic = 0
+    for recipe in art.get("recipes", []):
+        rid = recipe["id"]
+        if rid in recipe_ids:
+            err(f"building_art: duplicate recipe id '{rid}'")
+        recipe_ids.add(rid)
+        if rid == "generic":
+            generic += 1
+        for chain_id in recipe.get("chains", []):
+            if chain_id not in chains:
+                err(f"building_art: {rid}: unknown chain '{chain_id}'")
+        for kind in recipe.get("kinds", []):
+            if kind not in built_kinds:
+                err(f"building_art: {rid}: unknown building kind '{kind}'")
+        for culture in recipe.get("cultures", []):
+            if culture not in cultures:
+                err(f"building_art: {rid}: unknown culture '{culture}'")
+        check_material(recipe.get("scene", {}).get("ground_mat"), f"{rid}: scene")
+        for tier in recipe.get("tiers", []):
+            check_material(tier.get("material"), f"{rid}: tier material")
+            for name in tier.get("set", {}):
+                check_material(tier["set"][name].get("mat"), f"{rid}: set {name}")
+        for part in walk_parts(recipe):
+            check_material(part.get("mat"), f"{rid}: part {part.get('part', part.get('use'))}")
+            if "use" in part and part["use"] not in art_fragments:
+                err(f"building_art: {rid}: unknown fragment '{part['use']}'")
+    if generic != 1:
+        err("building_art: exactly one recipe with id 'generic' is required, "
+            "or an unrecipe'd level draws nothing")
+    for archetype, cult in art.get("cults", {}).items():
+        for part in walk_parts(cult):
+            check_material(part.get("mat"), f"building_art: cult {archetype}")
+    for culture in sorted(cultures):
+        lane = art.get("tracks", {}).get(culture, [])
+        if len(lane) != 6:
+            err(f"building_art: tracks.{culture} needs one material per tier (6)")
+        for material in lane:
+            check_material(material, f"tracks.{culture}")
+
+    # Coverage: resolve every chain the way BuildingArt.recipe_for does.
+    by_chain = {c: r for r in art.get("recipes", []) for c in r.get("chains", [])}
+    by_kind_culture, by_kind = {}, {}
+    for recipe in art.get("recipes", []):
+        for kind in recipe.get("kinds", []):
+            if recipe.get("cultures"):
+                for culture in recipe["cultures"]:
+                    by_kind_culture[(kind, culture)] = recipe
+            else:
+                by_kind[kind] = recipe
+    for chain in chains.values():
+        for culture in chain["cultures"]:
+            picked = (by_chain.get(chain["id"])
+                      or by_kind_culture.get((chain["kind"], culture))
+                      or by_kind.get(chain["kind"]))
+            if picked is None:
+                err(f"building_art: no recipe reaches {chain['id']} as {culture}")
+            elif len(picked.get("tiers", [])) < len(chain["levels"]):
+                warn(f"building_art: {picked['id']} gives {len(picked.get('tiers', []))} tiers "
+                     f"for {chain['id']}'s {len(chain['levels'])} levels — the top ones repeat")
+    for chain_id in art.get("emblems", {}):
+        if chain_id not in chains:
+            err(f"building_art: emblem for unknown chain '{chain_id}'")
+        elif chains[chain_id]["kind"] != "temple":
+            err(f"building_art: emblem on non-temple chain '{chain_id}'")
+
+    # --- unit art ---------------------------------------------------------
+    # Class and culture are orthogonal, so the roster is covered by two small
+    # tables. Anything they miss would draw nothing at all.
+    unit_art = t.get("unit_art.json", {})
+    class_ids = {c["id"] for c in unit_art.get("classes", [])}
+    kit_ids = {k["id"] for k in unit_art.get("kits", [])}
+    cue_ids = set(unit_art.get("attributes", {}))
+    for unit in units.values():
+        if unit["class"] not in class_ids:
+            err(f"unit_art: no template for the {unit['class']} class "
+                f"(needed by {unit['id']})")
+        if unit["culture"] not in kit_ids:
+            err(f"unit_art: no kit for {unit['culture']} troops (needed by {unit['id']})")
+        for attribute in unit.get("attributes", []):
+            if attribute not in cue_ids:
+                err(f"unit_art: the '{attribute}' attribute has no visual cue "
+                    f"(needed by {unit['id']})")
+    for override in unit_art.get("units", []):
+        if override["id"] not in units:
+            err(f"unit_art: signature for unknown unit '{override['id']}'")
+    for cue in cue_ids:
+        if not any(cue in unit.get("attributes", []) for unit in units.values()):
+            warn(f"unit_art: the '{cue}' cue is authored but no unit carries it")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+    for table_name in ("build_priority", "frontier_build_bonus"):
+        for kind in balance.get("ai", {}).get(table_name, {}):
+            if kind not in built_kinds:
+                err(f"balance: ai.{table_name} names unknown building kind '{kind}'")
 
     # Terrain tables must cover the terrain enum exactly: movement.gd indexes
     # terrain_cost directly, so a missing key is a runtime crash, and an extra
@@ -783,9 +1046,10 @@ def _entity_count(document: dict) -> int:
     if "unit_classes" in document:
         return sum(len(document.get(key, [])) for key in
                    ("unit_classes", "attributes", "effects", "building_kinds"))
-    for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "cells", "advances", "axes", "edicts"):
+    for key in ("cultures", "factions", "chains", "units", "regions",
+                "traits", "ancillaries", "events", "wonders", "missions",
+                "conditions", "pools", "cells", "advances", "axes",
+                "edicts", "sites", "stages", "effects", "recipes"):
         if key in document:
             return len(document[key])
     return len(document.get("beats", []))

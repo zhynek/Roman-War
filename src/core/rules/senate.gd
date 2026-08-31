@@ -46,6 +46,9 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				_grant_reward_units(state, faction_id, reward)
 				notices.append(_notice("mission_complete", faction_id, mission))
 				faction["mission"] = null
+				notices.append({"kind": "mission_complete", "faction": faction_id, "mission": mission["template"]})
+				if faction_id == state.get("player_faction", ""):
+					GuidedRules.bump(state, "senate_missions")
 			elif int(mission["turns_left"]) <= 0:
 				var template: Dictionary = data.missions[mission["template"]]
 				var penalty: Dictionary = template.get("penalty", {})

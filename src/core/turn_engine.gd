@@ -1,14 +1,6 @@
 class_name TurnEngine
-
-## A province's temper, as the society layer reports it, mapped to the beat the
-## day's sequence plays for it.
-const _PROVINCE_TEMPER := {
-	SocietyRules.UNREST_CALM: "province_settled",
-	SocietyRules.UNREST_RESTIVE: "province_restive",
-	SocietyRules.UNREST_REBELLIOUS: "province_rebellious",
-}
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
-##   1. AI turns (non-player factions): build, muster, march, besiege, declare
+##   1. AI faction turns (diplomacy, battles, movement, settlement management)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
 ##   4. Standing edicts tick, then faction treasuries resolve (income - upkeep,
@@ -17,12 +9,30 @@ const _PROVINCE_TEMPER := {
 ##   6. Society: legitimacy, grievance, belonging, elite pressure, martial ethos,
 ##      craft — then surveys and knowledge advances
 ##   7. Public order: riots and revolts (a readout of the societal stocks)
-##   8. Events, disasters, senate politics
+##   8. Events, disasters, senate politics, character triggers, and the guided
+##      campaign trail judging the turn (stages complete/expire/open)
 ##   9. Date advances (2 turns/year), movement points reset, victory check
 ##
 ## Every notable step appends a beat to the turn journal (see TurnJournal),
 ## which is stored in state["journal"] for the day's sequence and Dispatch and
 ## returned inside the report dict the UI already consumed.
+
+
+
+## The guided trail's stages, mapped to their beats.
+const _TRAIL_BEATS := {
+	"stage_started": "trail_started",
+	"stage_complete": "trail_complete",
+	"stage_expired": "trail_expired",
+}
+
+## A province's temper, as the society layer reports it, mapped to the beat the
+## day's sequence plays for it.
+const _PROVINCE_TEMPER := {
+	SocietyRules.UNREST_CALM: "province_settled",
+	SocietyRules.UNREST_RESTIVE: "province_restive",
+	SocietyRules.UNREST_REBELLIOUS: "province_rebellious",
+}
 
 
 static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver) -> Dictionary:
@@ -32,7 +42,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"society": [], "advances": [],
+		"society": [], "advances": [], "ai": [], "guided": [],
 		"senate": [], "characters": [], "marches": [], "winner": null,
 		"journal": journal,
 	}
@@ -45,9 +55,13 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
 
+	FactionAi.begin_round(data, state)
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
-			AiRules.take_turn(data, state, faction_id, rng, resolver, journal)
+			FactionAi.take_turn(data, state, faction_id, rng, resolver,
+				report["ai"], report["characters"])
+	for notice in report["ai"]:
+		_journal_ai_notice(journal, notice)
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)
@@ -176,8 +190,14 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	for notice in report["senate"]:
 		_journal_senate_notice(data, journal, notice)
 
-	var character_notices := CharacterRules.process_turn(data, state, rng)
-	report["characters"].append_array(character_notices)
+	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
+	report["guided"] = GuidedRules.process_turn(data, state)
+	for notice in report["guided"]:
+		# The trail is the player's own thread through the age, so it belongs
+		# in the day beside the Senate's charge rather than in a side panel.
+		TurnJournal.add(journal, String(_TRAIL_BEATS.get(String(notice["kind"]), "")), {
+			"faction": String(state["player_faction"]), "subject": String(notice["stage"]),
+		})
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
 
@@ -254,4 +274,29 @@ static func _journal_senate_notice(data: GameData, journal: Array, notice: Dicti
 		"subject": template_id,
 		"value": int(notice.get("turns_left", template.get("reward", {}).get("treasury", 0))),
 		"extra": {"reward_treasury": int(template.get("reward", {}).get("treasury", 0))},
+	})
+
+
+## The modular AI reports what it did; the journal turns that into the day the
+## player watches. War and peace are deliberately NOT taken from here — the
+## end-of-turn stance diff already catches every path a stance can change by,
+## including the player's own panel and a battle declaring war by drawing
+## blood, and taking both would report each war twice.
+const _AI_BEATS := {
+	"battle": "battle_fought",
+	"captured": "settlement_captured",
+	"siege_laid": "siege_begun",
+	"assault_repelled": "assault_repelled",
+}
+
+
+static func _journal_ai_notice(journal: Array, notice: Dictionary) -> void:
+	var kind: String = String(_AI_BEATS.get(String(notice.get("kind", "")), ""))
+	if kind == "":
+		return
+	TurnJournal.add(journal, kind, {
+		"faction": String(notice.get("faction", "")),
+		"other": String(notice.get("against", notice.get("previous_owner", ""))),
+		"region": String(notice.get("region", "")),
+		"extra": {"won": String(notice.get("winner", "")) == "attacker"},
 	})

@@ -140,6 +140,8 @@ static func _subject_name(data: GameData, state: Dictionary, beat: Dictionary) -
 			return String(data.missions.get(subject, {}).get("name", subject))
 		"advance_gained", "advance_lost":
 			return String(data.advances.get(subject, {}).get("name", subject))
+		"trail_started", "trail_complete", "trail_expired":
+			return String(data.guided_stage_index.get(subject, {}).get("name", subject))
 	if state.get("characters", {}).has(subject):
 		return String(state["characters"][subject].get("name", subject))
 	return subject.replace("_", " ")

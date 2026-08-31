@@ -39,6 +39,9 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   other in both directions by the validator.
 - **Campaign code may only call `BattleResolver.resolve(...)`** — never assume
   auto-resolve specifics.
+- **Campaign code may only call `BattleResolver.resolve(...)`** — plus the
+  interface's shared `BattleResolver.force_strength(...)` estimate — and never
+  assume auto-resolve specifics.
 
 ## Workflow
 
@@ -63,5 +66,11 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   large_city, huge_city`.
 - Building chains have a `kind` (e.g. `government, walls, barracks, farms,
   temple`); units reference requirements by `kind` + level, never by chain id.
+- **Player-facing sentences are content**: they live in `data/effects_glossary.json`,
+  not in GDScript. `src/core/` returns `{kind, params}` and never authors English.
+- **There are no image files and none may be added.** Buildings and units are
+  drawn at runtime from `data/building_art.json` and `data/unit_art.json` by
+  `BuildingArt`/`UnitArt` (resolve) and `ArtPainter` (draw). Never `randf()` in
+  art: hash from the id, as `MapGeometry` does, or the picture changes run to run.
 - Clean-room: original names/descriptions/values only; historical terms
   (hastati, Latium, Jupiter) are fine, copied game text/data/assets are not.

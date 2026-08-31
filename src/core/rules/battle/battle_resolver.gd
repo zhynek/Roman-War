@@ -1,7 +1,9 @@
 class_name BattleResolver
 extends RefCounted
-## THE swappable battle interface. Campaign code only ever calls resolve() and
-## consumes the BattleResult dictionary — it never knows whether the battle was
+## THE swappable battle interface. Campaign code only ever calls resolve() —
+## plus the static force_strength() estimate below, which is part of this
+## interface precisely so estimates stay resolver-agnostic — and consumes the
+## BattleResult dictionary. It never knows whether the battle was
 ## auto-resolved or fought in a (future) real-time battle scene.
 ##
 ## Contract:

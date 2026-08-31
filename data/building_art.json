@@ -1,0 +1,6120 @@
+{
+  "$schema": "../schemas/building_art.schema.json",
+  "materials": {
+    "earth": {
+      "lit": "#8b7554",
+      "mid": "#6b5a41",
+      "shadow": "#403528",
+      "ink": 0.32,
+      "grain": 0.85,
+      "edge": 0.55
+    },
+    "turf": {
+      "lit": "#8a9455",
+      "mid": "#6f7a44",
+      "shadow": "#414a27",
+      "ink": 0.3,
+      "grain": 0.8,
+      "edge": 0.5
+    },
+    "timber": {
+      "lit": "#9a7448",
+      "mid": "#7a5a36",
+      "shadow": "#4a361f",
+      "ink": 0.45,
+      "grain": 0.9,
+      "edge": 0.7
+    },
+    "wattle": {
+      "lit": "#a99070",
+      "mid": "#8a7550",
+      "shadow": "#564630",
+      "ink": 0.4,
+      "grain": 1.0,
+      "edge": 0.55
+    },
+    "thatch": {
+      "lit": "#c8a664",
+      "mid": "#a8894f",
+      "shadow": "#6b562e",
+      "ink": 0.35,
+      "grain": 1.0,
+      "edge": 0.45
+    },
+    "mudbrick": {
+      "lit": "#c6a279",
+      "mid": "#a9865c",
+      "shadow": "#6d5336",
+      "ink": 0.42,
+      "grain": 0.65,
+      "edge": 0.7
+    },
+    "stucco": {
+      "lit": "#ead9b6",
+      "mid": "#d8c7a4",
+      "shadow": "#96866a",
+      "ink": 0.5,
+      "grain": 0.3,
+      "edge": 0.85
+    },
+    "rubble": {
+      "lit": "#a49c8e",
+      "mid": "#8a8377",
+      "shadow": "#544f47",
+      "ink": 0.46,
+      "grain": 0.75,
+      "edge": 0.75
+    },
+    "ashlar": {
+      "lit": "#cdc5b0",
+      "mid": "#b5ad9a",
+      "shadow": "#7a7364",
+      "ink": 0.6,
+      "grain": 0.35,
+      "edge": 1.0
+    },
+    "marble": {
+      "lit": "#f6efdc",
+      "mid": "#ede3c7",
+      "shadow": "#b8ab8c",
+      "ink": 0.72,
+      "grain": 0.1,
+      "edge": 1.0
+    },
+    "sandstone": {
+      "lit": "#dcbc86",
+      "mid": "#c3a068",
+      "shadow": "#7f6742",
+      "ink": 0.52,
+      "grain": 0.45,
+      "edge": 0.9
+    },
+    "granite": {
+      "lit": "#a8a29a",
+      "mid": "#8c8781",
+      "shadow": "#55514d",
+      "ink": 0.62,
+      "grain": 0.4,
+      "edge": 1.0
+    },
+    "terracotta": {
+      "lit": "#c66c40",
+      "mid": "#a8542f",
+      "shadow": "#66311b",
+      "ink": 0.48,
+      "grain": 0.55,
+      "edge": 0.85
+    },
+    "bronze": {
+      "lit": "#ab8646",
+      "mid": "#8a6a34",
+      "shadow": "#4f3d1e",
+      "ink": 0.55,
+      "grain": 0.25,
+      "edge": 0.95
+    },
+    "gilt": {
+      "lit": "#f0cd6e",
+      "mid": "#c9a247",
+      "shadow": "#8a6c26",
+      "ink": 0.5,
+      "grain": 0.15,
+      "edge": 1.0,
+      "tint": 0.15
+    },
+    "iron": {
+      "lit": "#7b8087",
+      "mid": "#5b5f64",
+      "shadow": "#32353a",
+      "ink": 0.58,
+      "grain": 0.3,
+      "edge": 0.95
+    },
+    "cloth": {
+      "lit": "#e2d8bd",
+      "mid": "#c9bda0",
+      "shadow": "#8a8069",
+      "ink": 0.4,
+      "grain": 0.2,
+      "edge": 0.6,
+      "tint": 0.85
+    },
+    "water": {
+      "lit": "#3f7392",
+      "mid": "#2d5673",
+      "shadow": "#1c3648",
+      "ink": 0.25,
+      "grain": 0.15,
+      "edge": 0.3
+    },
+    "homespun": {
+      "lit": "#b9ad93",
+      "mid": "#9a8f78",
+      "shadow": "#5f5849",
+      "ink": 0.42,
+      "grain": 0.3,
+      "edge": 0.6,
+      "tint": 0.18
+    }
+  },
+  "tracks": {
+    "roman": [
+      "timber",
+      "timber",
+      "ashlar",
+      "ashlar",
+      "marble",
+      "marble"
+    ],
+    "greek": [
+      "timber",
+      "mudbrick",
+      "ashlar",
+      "marble",
+      "marble",
+      "marble"
+    ],
+    "eastern": [
+      "mudbrick",
+      "mudbrick",
+      "mudbrick",
+      "sandstone",
+      "sandstone",
+      "granite"
+    ],
+    "carthaginian": [
+      "timber",
+      "mudbrick",
+      "stucco",
+      "ashlar",
+      "ashlar",
+      "ashlar"
+    ],
+    "egyptian": [
+      "mudbrick",
+      "mudbrick",
+      "sandstone",
+      "sandstone",
+      "granite",
+      "granite"
+    ],
+    "barbarian": [
+      "timber",
+      "timber",
+      "timber",
+      "timber",
+      "timber",
+      "timber"
+    ],
+    "neutral": [
+      "timber",
+      "rubble",
+      "rubble",
+      "ashlar",
+      "ashlar",
+      "ashlar"
+    ]
+  },
+  "fragments": {
+    "portico": {
+      "params": {
+        "columns": 4,
+        "order": "tuscan",
+        "roof": "tiled",
+        "roof_mat": "terracotta",
+        "akroteria": 0,
+        "tympanum": "none"
+      },
+      "parts": [
+        {
+          "part": "column_row",
+          "at": [
+            0.5,
+            0.88
+          ],
+          "size": [
+            0.92,
+            0.6
+          ],
+          "p": {
+            "columns": "$columns",
+            "order": "$order",
+            "spacing": 1.9
+          }
+        },
+        {
+          "part": "entablature",
+          "at": [
+            0.5,
+            0.28
+          ],
+          "size": [
+            1.0,
+            0.11
+          ],
+          "p": {
+            "cornice": true,
+            "order": "$order"
+          }
+        },
+        {
+          "part": "roof",
+          "at": [
+            0.5,
+            0.19
+          ],
+          "size": [
+            0.96,
+            0.1
+          ],
+          "mat": "$roof_mat",
+          "layer": "back",
+          "p": {
+            "style": "$roof",
+            "pitch": 0.34,
+            "ribs": 9
+          }
+        },
+        {
+          "part": "pediment",
+          "at": [
+            0.5,
+            0.17
+          ],
+          "size": [
+            1.04,
+            0.17
+          ],
+          "p": {
+            "akroteria": "$akroteria",
+            "tympanum": "$tympanum"
+          }
+        }
+      ]
+    },
+    "colonnade_wing": {
+      "params": {
+        "columns": 6,
+        "order": "tuscan",
+        "roof": "tiled",
+        "roof_mat": "terracotta"
+      },
+      "parts": [
+        {
+          "part": "column_row",
+          "at": [
+            0.5,
+            0.9
+          ],
+          "size": [
+            0.94,
+            0.66
+          ],
+          "p": {
+            "columns": "$columns",
+            "order": "$order",
+            "spacing": 1.7
+          }
+        },
+        {
+          "part": "entablature",
+          "at": [
+            0.5,
+            0.24
+          ],
+          "size": [
+            1.0,
+            0.1
+          ],
+          "p": {
+            "cornice": true,
+            "order": "$order"
+          }
+        },
+        {
+          "part": "roof",
+          "at": [
+            0.5,
+            0.15
+          ],
+          "size": [
+            1.02,
+            0.11
+          ],
+          "mat": "$roof_mat",
+          "layer": "back",
+          "p": {
+            "style": "$roof",
+            "pitch": 0.3,
+            "ribs": 8
+          }
+        }
+      ]
+    }
+  },
+  "cults": {
+    "law": {
+      "from_tier": 2,
+      "add": [
+        {
+          "name": "cult_law",
+          "part": "stele",
+          "at": [
+            0.26,
+            0.86
+          ],
+          "size": [
+            0.05,
+            0.13
+          ],
+          "mat": "$track",
+          "p": {
+            "lines": 5
+          }
+        }
+      ]
+    },
+    "battle": {
+      "from_tier": 2,
+      "add": [
+        {
+          "name": "cult_battle",
+          "part": "trophy",
+          "at": [
+            0.26,
+            0.86
+          ],
+          "size": [
+            0.09,
+            0.17
+          ],
+          "mat": "iron",
+          "p": {
+            "shield": "scutum",
+            "helmet": "crest"
+          }
+        }
+      ]
+    },
+    "fertility": {
+      "from_tier": 1,
+      "add": [
+        {
+          "name": "cult_fert",
+          "part": "beasts",
+          "at": [
+            0.8,
+            0.89
+          ],
+          "size": [
+            0.16,
+            0.09
+          ],
+          "mat": "earth",
+          "layer": "front",
+          "p": {
+            "kind": "ox",
+            "count": 1
+          }
+        },
+        {
+          "name": "cult_jars",
+          "part": "vessels",
+          "at": [
+            0.24,
+            0.88
+          ],
+          "size": [
+            0.1,
+            0.08
+          ],
+          "mat": "terracotta",
+          "p": {
+            "count": 3,
+            "kind": "grain"
+          }
+        }
+      ]
+    },
+    "fun": {
+      "from_tier": 2,
+      "add": [
+        {
+          "name": "cult_fun",
+          "part": "awning",
+          "at": [
+            0.22,
+            0.86
+          ],
+          "size": [
+            0.2,
+            0.1
+          ],
+          "mat": "cloth",
+          "p": {
+            "scallops": 5,
+            "poles": 2
+          }
+        }
+      ]
+    },
+    "trade": {
+      "from_tier": 1,
+      "add": [
+        {
+          "name": "cult_trade",
+          "part": "vessels",
+          "at": [
+            0.24,
+            0.88
+          ],
+          "size": [
+            0.13,
+            0.1
+          ],
+          "mat": "terracotta",
+          "p": {
+            "count": 5,
+            "kind": "amphora"
+          }
+        }
+      ]
+    },
+    "forge": {
+      "from_tier": 1,
+      "add": [
+        {
+          "name": "cult_forge",
+          "part": "forge",
+          "at": [
+            0.22,
+            0.87
+          ],
+          "size": [
+            0.16,
+            0.14
+          ],
+          "mat": "$track",
+          "p": {
+            "chimney": 0.5,
+            "smoke": 3,
+            "glow": true
+          }
+        }
+      ]
+    },
+    "healing": {
+      "from_tier": 2,
+      "add": [
+        {
+          "name": "cult_heal",
+          "part": "well",
+          "at": [
+            0.24,
+            0.88
+          ],
+          "size": [
+            0.12,
+            0.09
+          ],
+          "mat": "ashlar",
+          "p": {
+            "style": "well",
+            "frame": true
+          }
+        }
+      ]
+    },
+    "naval": {
+      "from_tier": 2,
+      "add": [
+        {
+          "name": "cult_naval",
+          "part": "hull",
+          "at": [
+            0.8,
+            0.9
+          ],
+          "size": [
+            0.24,
+            0.09
+          ],
+          "mat": "timber",
+          "layer": "front",
+          "p": {
+            "oars": 7,
+            "ram": true,
+            "beached": true
+          }
+        }
+      ]
+    }
+  },
+  "emblems": {
+    "roman_jupiter": {
+      "emblem": "bolt",
+      "cloth": "#b8342c"
+    },
+    "roman_mars": {
+      "emblem": "spear",
+      "cloth": "#8f2b20"
+    },
+    "roman_ceres": {
+      "emblem": "grain",
+      "cloth": "#c39a3f"
+    },
+    "roman_mercury": {
+      "emblem": "caduceus",
+      "cloth": "#3f7d6a"
+    },
+    "roman_bacchus": {
+      "emblem": "vine",
+      "cloth": "#6a2c5c"
+    },
+    "roman_vulcan": {
+      "emblem": "hammer",
+      "cloth": "#8a4a22"
+    },
+    "greek_zeus": {
+      "emblem": "bolt",
+      "cloth": "#2f5f9e"
+    },
+    "greek_ares": {
+      "emblem": "spear",
+      "cloth": "#8f2b20"
+    },
+    "greek_hermes": {
+      "emblem": "caduceus",
+      "cloth": "#3f7d6a"
+    },
+    "greek_dionysus": {
+      "emblem": "vine",
+      "cloth": "#6a2c5c"
+    },
+    "greek_asclepius": {
+      "emblem": "serpent",
+      "cloth": "#4f7d6a"
+    },
+    "greek_poseidon": {
+      "emblem": "wave",
+      "cloth": "#2f6f8e"
+    },
+    "eastern_ahura_mazda": {
+      "emblem": "flame",
+      "cloth": "#c08a3a"
+    },
+    "eastern_verethragna": {
+      "emblem": "spear",
+      "cloth": "#8f2b20"
+    },
+    "eastern_anahita": {
+      "emblem": "grain",
+      "cloth": "#4f7d8a"
+    },
+    "eastern_mithra": {
+      "emblem": "sun",
+      "cloth": "#c8a23a"
+    },
+    "eastern_atar": {
+      "emblem": "flame",
+      "cloth": "#b8562a"
+    },
+    "carthaginian_baal_hammon": {
+      "emblem": "sun",
+      "cloth": "#7a4a86"
+    },
+    "carthaginian_tanit": {
+      "emblem": "moon",
+      "cloth": "#5f6f9e"
+    },
+    "carthaginian_melqart": {
+      "emblem": "caduceus",
+      "cloth": "#3f7d6a"
+    },
+    "carthaginian_eshmun": {
+      "emblem": "serpent",
+      "cloth": "#4f7d6a"
+    },
+    "carthaginian_reshef": {
+      "emblem": "spear",
+      "cloth": "#8f2b20"
+    },
+    "carthaginian_astarte": {
+      "emblem": "moon",
+      "cloth": "#8a4a7a"
+    },
+    "egyptian_ra": {
+      "emblem": "sun",
+      "cloth": "#d0a12e"
+    },
+    "egyptian_horus": {
+      "emblem": "eagle",
+      "cloth": "#c08a3a"
+    },
+    "egyptian_osiris": {
+      "emblem": "grain",
+      "cloth": "#3f7d5a"
+    },
+    "egyptian_isis": {
+      "emblem": "disc",
+      "cloth": "#4f6f9e"
+    },
+    "egyptian_ptah": {
+      "emblem": "hammer",
+      "cloth": "#8a4a22"
+    },
+    "egyptian_hathor": {
+      "emblem": "disc",
+      "cloth": "#c08a5a"
+    },
+    "barbarian_taranis": {
+      "emblem": "bolt",
+      "cloth": "#4f6b3a"
+    },
+    "barbarian_teutates": {
+      "emblem": "boar",
+      "cloth": "#5a4a2a"
+    },
+    "barbarian_epona": {
+      "emblem": "horse",
+      "cloth": "#4f6b3a"
+    },
+    "barbarian_gobannos": {
+      "emblem": "hammer",
+      "cloth": "#8a4a22"
+    },
+    "barbarian_sucellus": {
+      "emblem": "vine",
+      "cloth": "#6a4a2c"
+    },
+    "barbarian_nerthus": {
+      "emblem": "grain",
+      "cloth": "#4f6b4a"
+    }
+  },
+  "recipes": [
+    {
+      "id": "kind_government",
+      "kinds": [
+        "government"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "cypress",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "rail",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.86,
+                0.09
+              ],
+              "p": {
+                "count": 13,
+                "cap": "none",
+                "rails": 2,
+                "lean": 0.14
+              }
+            },
+            {
+              "name": "bench",
+              "part": "mound",
+              "at": [
+                0.6,
+                0.86
+              ],
+              "size": [
+                0.22,
+                0.08
+              ],
+              "p": {
+                "trodden": true
+              }
+            },
+            {
+              "name": "folk",
+              "part": "crowd",
+              "at": [
+                0.38,
+                0.88
+              ],
+              "size": [
+                0.3,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 6,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "hall",
+              "part": "box",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.42,
+                0.19
+              ],
+              "p": {
+                "courses": 2,
+                "openings": 2
+              }
+            },
+            {
+              "name": "top",
+              "part": "roof",
+              "at": [
+                0.5,
+                0.67
+              ],
+              "size": [
+                0.48,
+                0.1
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            }
+          ],
+          "drop": [
+            "mound"
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "loggia",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.56,
+                0.17
+              ],
+              "p": {
+                "count": 4,
+                "arch": "round",
+                "voussoirs": 7,
+                "dark": 0.42
+              }
+            },
+            {
+              "name": "stair",
+              "part": "steps",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.34,
+                0.05
+              ],
+              "layer": "front",
+              "p": {
+                "count": 2
+              }
+            }
+          ],
+          "set": {
+            "hall": {
+              "size": [
+                0.62,
+                0.25
+              ],
+              "p": {
+                "courses": 4,
+                "openings": 3
+              }
+            },
+            "top": {
+              "at": [
+                0.5,
+                0.61
+              ],
+              "size": [
+                0.68,
+                0.11
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "tower",
+              "part": "box",
+              "at": [
+                0.83,
+                0.86
+              ],
+              "size": [
+                0.16,
+                0.34
+              ],
+              "p": {
+                "courses": 6,
+                "cap": "cornice",
+                "slits": 2
+              }
+            },
+            {
+              "name": "flag",
+              "part": "standard",
+              "at": [
+                0.83,
+                0.52
+              ],
+              "size": [
+                0.05,
+                0.14
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "disc",
+                "fly": 0.55,
+                "count": 1
+              }
+            }
+          ],
+          "set": {
+            "hall": {
+              "size": [
+                0.68,
+                0.28
+              ]
+            },
+            "top": {
+              "at": [
+                0.5,
+                0.58
+              ],
+              "size": [
+                0.74,
+                0.12
+              ]
+            },
+            "loggia": {
+              "size": [
+                0.62,
+                0.19
+              ],
+              "p": {
+                "count": 5,
+                "arch": "round",
+                "voussoirs": 8,
+                "dark": 0.42
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "front",
+              "use": "portico",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.46,
+                0.4
+              ],
+              "mat": "marble",
+              "p": {
+                "columns": 6,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 3
+              }
+            },
+            {
+              "name": "patron",
+              "part": "statue",
+              "at": [
+                0.14,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.19
+              ],
+              "mat": "bronze",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.32
+              }
+            }
+          ],
+          "drop": [
+            "loggia"
+          ],
+          "set": {
+            "hall": {
+              "size": [
+                0.78,
+                0.3
+              ]
+            },
+            "top": {
+              "at": [
+                0.5,
+                0.56
+              ],
+              "size": [
+                0.84,
+                0.12
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "wing_l",
+              "use": "colonnade_wing",
+              "at": [
+                0.13,
+                0.9
+              ],
+              "size": [
+                0.28,
+                0.28
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "wing_r",
+              "use": "colonnade_wing",
+              "at": [
+                0.87,
+                0.9
+              ],
+              "size": [
+                0.28,
+                0.28
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "petitioners",
+              "part": "crowd",
+              "at": [
+                0.44,
+                0.92
+              ],
+              "size": [
+                0.5,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 13,
+                "depth": 3
+              }
+            }
+          ],
+          "set": {
+            "front": {
+              "size": [
+                0.56,
+                0.46
+              ],
+              "p": {
+                "columns": 8,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "gilt",
+                "akroteria": 5
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_walls",
+      "kinds": [
+        "walls"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.58,
+        "sky": "clear",
+        "flora": "none",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [
+        {
+          "name": "trench",
+          "part": "bank",
+          "at": [
+            0.5,
+            0.92
+          ],
+          "size": [
+            1.16,
+            0.09
+          ],
+          "mat": "earth",
+          "layer": "back",
+          "p": {
+            "ditch": true,
+            "batter": 0.3
+          }
+        }
+      ],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "rampart",
+              "part": "bank",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                1.08,
+                0.15
+              ],
+              "mat": "turf",
+              "p": {
+                "batter": 0.42,
+                "tufts": 8
+              }
+            },
+            {
+              "name": "stakes",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.68
+              ],
+              "size": [
+                1.02,
+                0.12
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 19,
+                "cap": "point",
+                "rails": 0,
+                "lean": 0.12
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "curtain",
+              "part": "box",
+              "at": [
+                0.5,
+                0.68
+              ],
+              "size": [
+                1.04,
+                0.17
+              ],
+              "p": {
+                "courses": 3,
+                "batter": 0.04
+              }
+            },
+            {
+              "name": "tower_l",
+              "part": "box",
+              "at": [
+                0.22,
+                0.68
+              ],
+              "size": [
+                0.16,
+                0.29
+              ],
+              "p": {
+                "courses": 4,
+                "cap": "hoard",
+                "slits": 2
+              }
+            }
+          ],
+          "drop": [
+            "stakes"
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "gate",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                0.22,
+                0.25
+              ],
+              "p": {
+                "count": 1,
+                "arch": "round",
+                "voussoirs": 9,
+                "dark": 0.55
+              }
+            },
+            {
+              "name": "crest",
+              "part": "crest",
+              "at": [
+                0.5,
+                0.45
+              ],
+              "size": [
+                1.08,
+                0.04
+              ],
+              "p": {
+                "style": "crenel",
+                "count": 17
+              }
+            }
+          ],
+          "drop": [
+            "rampart"
+          ],
+          "set": {
+            "curtain": {
+              "size": [
+                1.08,
+                0.23
+              ],
+              "p": {
+                "courses": 6,
+                "batter": 0.05
+              }
+            },
+            "tower_l": {
+              "size": [
+                0.17,
+                0.35
+              ],
+              "p": {
+                "courses": 7,
+                "cap": "crenel",
+                "slits": 3
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "tower_r",
+              "part": "box",
+              "at": [
+                0.79,
+                0.68
+              ],
+              "size": [
+                0.17,
+                0.41
+              ],
+              "p": {
+                "courses": 8,
+                "cap": "crenel",
+                "slits": 3
+              }
+            },
+            {
+              "name": "banner",
+              "part": "standard",
+              "at": [
+                0.22,
+                0.33
+              ],
+              "size": [
+                0.05,
+                0.14
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "disc",
+                "fly": 0.6,
+                "count": 1
+              }
+            }
+          ],
+          "set": {
+            "curtain": {
+              "size": [
+                1.12,
+                0.29
+              ]
+            },
+            "crest": {
+              "at": [
+                0.5,
+                0.39
+              ],
+              "size": [
+                1.12,
+                0.045
+              ],
+              "p": {
+                "style": "crenel",
+                "count": 19
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "bastion_l",
+              "part": "box",
+              "at": [
+                0.1,
+                0.83
+              ],
+              "size": [
+                0.23,
+                0.31
+              ],
+              "p": {
+                "batter": 0.24,
+                "courses": 8,
+                "cap": "crenel"
+              }
+            },
+            {
+              "name": "bastion_r",
+              "part": "box",
+              "at": [
+                0.9,
+                0.83
+              ],
+              "size": [
+                0.23,
+                0.31
+              ],
+              "p": {
+                "batter": 0.24,
+                "courses": 8,
+                "cap": "crenel"
+              }
+            },
+            {
+              "name": "gate_god",
+              "part": "statue",
+              "at": [
+                0.5,
+                0.51
+              ],
+              "size": [
+                0.07,
+                0.11
+              ],
+              "mat": "marble",
+              "lod": 1,
+              "p": {
+                "pose": "standing",
+                "plinth": 0.34
+              }
+            },
+            {
+              "name": "watch",
+              "part": "crowd",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.42,
+                0.05
+              ],
+              "mat": "iron",
+              "layer": "front",
+              "lod": 1,
+              "p": {
+                "count": 9,
+                "depth": 2,
+                "ranked": true
+              }
+            }
+          ],
+          "set": {
+            "curtain": {
+              "size": [
+                1.16,
+                0.33
+              ]
+            },
+            "gate": {
+              "size": [
+                0.26,
+                0.31
+              ],
+              "mat": "marble",
+              "p": {
+                "count": 1,
+                "arch": "round",
+                "voussoirs": 11,
+                "dark": 0.6
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_barracks",
+      "kinds": [
+        "barracks"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "none",
+        "ground_mat": "earth",
+        "figures": [
+          [
+            0.09,
+            0.89
+          ],
+          [
+            0.93,
+            0.86
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "fence",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                1.08,
+                0.09
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 16,
+                "cap": "none",
+                "rails": 2,
+                "lean": 0.16
+              }
+            },
+            {
+              "name": "mound",
+              "part": "mound",
+              "at": [
+                0.64,
+                0.87
+              ],
+              "size": [
+                0.25,
+                0.09
+              ],
+              "mat": "earth",
+              "p": {
+                "trodden": true
+              }
+            },
+            {
+              "name": "muster",
+              "part": "crowd",
+              "at": [
+                0.38,
+                0.89
+              ],
+              "size": [
+                0.34,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 7,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "pells",
+              "part": "posts",
+              "at": [
+                0.27,
+                0.87
+              ],
+              "size": [
+                0.26,
+                0.16
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 4,
+                "cap": "cross",
+                "rails": 0
+              }
+            },
+            {
+              "name": "dummies",
+              "part": "posts",
+              "at": [
+                0.74,
+                0.87
+              ],
+              "size": [
+                0.21,
+                0.15
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 3,
+                "cap": "shield",
+                "rails": 0
+              }
+            },
+            {
+              "name": "shed",
+              "part": "box",
+              "at": [
+                0.52,
+                0.87
+              ],
+              "size": [
+                0.31,
+                0.14
+              ],
+              "mat": "timber",
+              "layer": "back",
+              "p": {
+                "courses": 2
+              }
+            },
+            {
+              "name": "shedroof",
+              "part": "roof",
+              "at": [
+                0.52,
+                0.73
+              ],
+              "size": [
+                0.35,
+                0.09
+              ],
+              "mat": "thatch",
+              "layer": "back",
+              "p": {
+                "style": "thatch",
+                "pitch": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "doors",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                0.68,
+                0.14
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 5,
+                "arch": "square",
+                "dark": 0.5
+              }
+            },
+            {
+              "name": "rack",
+              "part": "posts",
+              "at": [
+                0.11,
+                0.87
+              ],
+              "size": [
+                0.14,
+                0.12
+              ],
+              "mat": "timber",
+              "lod": 1,
+              "p": {
+                "count": 2,
+                "cap": "shield",
+                "rails": 1
+              }
+            }
+          ],
+          "drop": [
+            "fence",
+            "mound"
+          ],
+          "set": {
+            "shed": {
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                0.74,
+                0.2
+              ],
+              "p": {
+                "courses": 3
+              }
+            },
+            "shedroof": {
+              "at": [
+                0.5,
+                0.67
+              ],
+              "size": [
+                0.8,
+                0.12
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.5,
+                "ribs": 9
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "ditch",
+              "part": "bank",
+              "at": [
+                0.5,
+                0.94
+              ],
+              "size": [
+                1.18,
+                0.1
+              ],
+              "mat": "earth",
+              "layer": "back",
+              "p": {
+                "ditch": true,
+                "batter": 0.35
+              }
+            },
+            {
+              "name": "vallum",
+              "part": "bank",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                1.12,
+                0.13
+              ],
+              "mat": "turf",
+              "layer": "back",
+              "p": {
+                "batter": 0.4,
+                "tufts": 6,
+                "stakes": 12
+              }
+            },
+            {
+              "name": "gate",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                0.19,
+                0.17
+              ],
+              "mat": "timber",
+              "layer": "back",
+              "p": {
+                "count": 1,
+                "arch": "square",
+                "dark": 0.6
+              }
+            },
+            {
+              "name": "signa",
+              "part": "standard",
+              "at": [
+                0.31,
+                0.71
+              ],
+              "size": [
+                0.05,
+                0.17
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "eagle",
+                "fly": 0.35,
+                "count": 3
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "portico",
+              "use": "colonnade_wing",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.92,
+                0.36
+              ],
+              "mat": "ashlar",
+              "p": {
+                "columns": 9,
+                "order": "tuscan"
+              }
+            },
+            {
+              "name": "altar",
+              "part": "altar",
+              "at": [
+                0.5,
+                0.89
+              ],
+              "size": [
+                0.13,
+                0.09
+              ],
+              "mat": "marble",
+              "layer": "front",
+              "p": {
+                "fire": true,
+                "steps": 1
+              }
+            },
+            {
+              "name": "mars",
+              "part": "statue",
+              "at": [
+                0.82,
+                0.84
+              ],
+              "size": [
+                0.1,
+                0.21
+              ],
+              "mat": "marble",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3,
+                "spear": true
+              }
+            },
+            {
+              "name": "drill",
+              "part": "crowd",
+              "at": [
+                0.34,
+                0.91
+              ],
+              "size": [
+                0.48,
+                0.07
+              ],
+              "mat": "iron",
+              "layer": "front",
+              "p": {
+                "count": 13,
+                "depth": 3,
+                "ranked": true
+              }
+            }
+          ],
+          "drop": [
+            "shed",
+            "shedroof",
+            "doors",
+            "pells",
+            "dummies"
+          ],
+          "set": {
+            "signa": {
+              "at": [
+                0.28,
+                0.64
+              ],
+              "size": [
+                0.06,
+                0.23
+              ],
+              "p": {
+                "finial": "eagle",
+                "fly": 0.4,
+                "count": 5
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_stables",
+      "kinds": [
+        "stables"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "none",
+        "ground_mat": "earth",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "shelter",
+              "part": "canopy",
+              "at": [
+                0.22,
+                0.86
+              ],
+              "size": [
+                0.28,
+                0.2
+              ],
+              "mat": "timber",
+              "p": {
+                "posts": 3,
+                "roof": "thatch",
+                "drape": false
+              }
+            },
+            {
+              "name": "rail",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                0.96,
+                0.1
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 11,
+                "cap": "none",
+                "rails": 2,
+                "lean": 0.1
+              }
+            },
+            {
+              "name": "herd",
+              "part": "beasts",
+              "at": [
+                0.58,
+                0.89
+              ],
+              "size": [
+                0.3,
+                0.1
+              ],
+              "mat": "earth",
+              "layer": "front",
+              "p": {
+                "kind": "horse",
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "shed",
+              "part": "box",
+              "at": [
+                0.32,
+                0.86
+              ],
+              "size": [
+                0.36,
+                0.17
+              ],
+              "p": {
+                "courses": 2,
+                "openings": 3
+              }
+            },
+            {
+              "name": "shroof",
+              "part": "roof",
+              "at": [
+                0.32,
+                0.69
+              ],
+              "size": [
+                0.42,
+                0.1
+              ],
+              "mat": "thatch",
+              "p": {
+                "style": "thatch",
+                "pitch": 0.55
+              }
+            }
+          ],
+          "drop": [
+            "shelter"
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "stalls",
+              "part": "arcade",
+              "at": [
+                0.32,
+                0.86
+              ],
+              "size": [
+                0.34,
+                0.14
+              ],
+              "p": {
+                "count": 4,
+                "arch": "square",
+                "dark": 0.5
+              }
+            },
+            {
+              "name": "grooms",
+              "part": "crowd",
+              "at": [
+                0.78,
+                0.9
+              ],
+              "size": [
+                0.24,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "lod": 1,
+              "p": {
+                "count": 4,
+                "depth": 1
+              }
+            }
+          ],
+          "set": {
+            "shed": {
+              "size": [
+                0.44,
+                0.23
+              ],
+              "p": {
+                "courses": 4,
+                "openings": 3
+              }
+            },
+            "shroof": {
+              "at": [
+                0.32,
+                0.63
+              ],
+              "size": [
+                0.5,
+                0.11
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            },
+            "herd": {
+              "size": [
+                0.34,
+                0.11
+              ],
+              "p": {
+                "kind": "horse",
+                "count": 3
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "ensign",
+              "part": "standard",
+              "at": [
+                0.86,
+                0.72
+              ],
+              "size": [
+                0.05,
+                0.15
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "horse",
+                "fly": 0.5,
+                "count": 1
+              }
+            },
+            {
+              "name": "paddock",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.93
+              ],
+              "size": [
+                1.14,
+                0.06
+              ],
+              "mat": "timber",
+              "layer": "back",
+              "lod": 1,
+              "p": {
+                "count": 18,
+                "cap": "none",
+                "rails": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kind_archery_range",
+      "kinds": [
+        "archery_range"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "none",
+        "ground_mat": "earth",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "line",
+              "part": "posts",
+              "at": [
+                0.36,
+                0.87
+              ],
+              "size": [
+                0.44,
+                0.07
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 7,
+                "cap": "none",
+                "rails": 1,
+                "lean": 0.05
+              }
+            },
+            {
+              "name": "butts",
+              "part": "posts",
+              "at": [
+                0.78,
+                0.87
+              ],
+              "size": [
+                0.26,
+                0.16
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 3,
+                "cap": "shield",
+                "rails": 0
+              }
+            },
+            {
+              "name": "archers",
+              "part": "crowd",
+              "at": [
+                0.28,
+                0.89
+              ],
+              "size": [
+                0.3,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 5,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "shed",
+              "part": "box",
+              "at": [
+                0.3,
+                0.86
+              ],
+              "size": [
+                0.3,
+                0.14
+              ],
+              "p": {
+                "courses": 2,
+                "openings": 2
+              }
+            },
+            {
+              "name": "shroof",
+              "part": "roof",
+              "at": [
+                0.3,
+                0.72
+              ],
+              "size": [
+                0.36,
+                0.09
+              ],
+              "mat": "thatch",
+              "p": {
+                "style": "thatch",
+                "pitch": 0.55
+              }
+            },
+            {
+              "name": "rack",
+              "part": "posts",
+              "at": [
+                0.56,
+                0.87
+              ],
+              "size": [
+                0.12,
+                0.12
+              ],
+              "mat": "timber",
+              "lod": 1,
+              "p": {
+                "count": 2,
+                "cap": "none",
+                "rails": 2
+              }
+            }
+          ],
+          "set": {
+            "archers": {
+              "p": {
+                "count": 7,
+                "depth": 2,
+                "ranked": true
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "tower",
+              "part": "box",
+              "at": [
+                0.1,
+                0.86
+              ],
+              "size": [
+                0.14,
+                0.3
+              ],
+              "p": {
+                "courses": 6,
+                "cap": "crenel",
+                "slits": 2
+              }
+            }
+          ],
+          "set": {
+            "shed": {
+              "size": [
+                0.38,
+                0.19
+              ],
+              "p": {
+                "courses": 4,
+                "openings": 3
+              }
+            },
+            "shroof": {
+              "at": [
+                0.3,
+                0.67
+              ],
+              "size": [
+                0.44,
+                0.1
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 6
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_siege_workshop",
+      "kinds": [
+        "siege_workshop"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "none",
+        "ground_mat": "earth",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "stock",
+              "part": "vessels",
+              "at": [
+                0.86,
+                0.88
+              ],
+              "size": [
+                0.16,
+                0.1
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 4,
+                "kind": "grain",
+                "stacked": true
+              }
+            },
+            {
+              "name": "frame",
+              "part": "posts",
+              "at": [
+                0.6,
+                0.87
+              ],
+              "size": [
+                0.34,
+                0.2
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 4,
+                "cap": "cross",
+                "rails": 2
+              }
+            },
+            {
+              "name": "bench",
+              "part": "box",
+              "at": [
+                0.26,
+                0.88
+              ],
+              "size": [
+                0.22,
+                0.09
+              ],
+              "mat": "timber",
+              "p": {
+                "courses": 1
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "hall",
+              "part": "box",
+              "at": [
+                0.44,
+                0.87
+              ],
+              "size": [
+                0.44,
+                0.2
+              ],
+              "p": {
+                "courses": 3,
+                "openings": 2
+              }
+            },
+            {
+              "name": "hroof",
+              "part": "roof",
+              "at": [
+                0.44,
+                0.67
+              ],
+              "size": [
+                0.5,
+                0.11
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            },
+            {
+              "name": "forge",
+              "part": "forge",
+              "at": [
+                0.83,
+                0.87
+              ],
+              "size": [
+                0.17,
+                0.16
+              ],
+              "p": {
+                "chimney": 0.55,
+                "smoke": 3,
+                "glow": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "doors",
+              "part": "arcade",
+              "at": [
+                0.44,
+                0.87
+              ],
+              "size": [
+                0.38,
+                0.15
+              ],
+              "p": {
+                "count": 3,
+                "arch": "square",
+                "dark": 0.55
+              }
+            },
+            {
+              "name": "wrights",
+              "part": "crowd",
+              "at": [
+                0.16,
+                0.9
+              ],
+              "size": [
+                0.22,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "lod": 1,
+              "p": {
+                "count": 4,
+                "depth": 1
+              }
+            }
+          ],
+          "set": {
+            "hall": {
+              "size": [
+                0.54,
+                0.24
+              ],
+              "p": {
+                "courses": 5,
+                "openings": 3
+              }
+            },
+            "hroof": {
+              "at": [
+                0.44,
+                0.63
+              ],
+              "size": [
+                0.6,
+                0.12
+              ]
+            },
+            "frame": {
+              "at": [
+                0.68,
+                0.87
+              ],
+              "size": [
+                0.38,
+                0.26
+              ],
+              "p": {
+                "count": 5,
+                "cap": "cross",
+                "rails": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_naval",
+      "kinds": [
+        "naval"
+      ],
+      "scene": {
+        "ground": 0.9,
+        "horizon": 0.48,
+        "sky": "clear",
+        "water": 0.62,
+        "flora": "none",
+        "figures": [
+          [
+            0.1,
+            0.92
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "keel",
+              "part": "posts",
+              "at": [
+                0.28,
+                0.9
+              ],
+              "size": [
+                0.3,
+                0.1
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 5,
+                "cap": "none",
+                "rails": 1
+              }
+            },
+            {
+              "name": "slip",
+              "part": "quay",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.86,
+                0.09
+              ],
+              "mat": "timber",
+              "p": {
+                "style": "piles",
+                "piles": 7,
+                "bollards": 0
+              }
+            },
+            {
+              "name": "boat",
+              "part": "hull",
+              "at": [
+                0.7,
+                0.82
+              ],
+              "size": [
+                0.32,
+                0.09
+              ],
+              "mat": "timber",
+              "p": {
+                "oars": 7,
+                "mast": true,
+                "ram": false
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "sheds",
+              "part": "arcade",
+              "at": [
+                0.34,
+                0.84
+              ],
+              "size": [
+                0.56,
+                0.2
+              ],
+              "p": {
+                "count": 3,
+                "arch": "square",
+                "dark": 0.55
+              }
+            },
+            {
+              "name": "shedtop",
+              "part": "roof",
+              "at": [
+                0.34,
+                0.64
+              ],
+              "size": [
+                0.62,
+                0.1
+              ],
+              "mat": "terracotta",
+              "layer": "back",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.4,
+                "ribs": 7
+              }
+            }
+          ],
+          "set": {
+            "slip": {
+              "mat": "ashlar",
+              "size": [
+                1.02,
+                0.11
+              ],
+              "p": {
+                "style": "stone",
+                "courses": 3,
+                "bollards": 4
+              }
+            },
+            "boat": {
+              "at": [
+                0.76,
+                0.8
+              ],
+              "size": [
+                0.38,
+                0.1
+              ],
+              "p": {
+                "oars": 11,
+                "mast": true,
+                "sail": true,
+                "ram": true
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "warship",
+              "part": "hull",
+              "at": [
+                0.36,
+                0.93
+              ],
+              "size": [
+                0.46,
+                0.11
+              ],
+              "mat": "timber",
+              "layer": "front",
+              "p": {
+                "oars": 15,
+                "mast": true,
+                "ram": true,
+                "shields": 7
+              }
+            },
+            {
+              "name": "crews",
+              "part": "crowd",
+              "at": [
+                0.66,
+                0.92
+              ],
+              "size": [
+                0.3,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "lod": 1,
+              "p": {
+                "count": 7,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "sheds": {
+              "size": [
+                0.66,
+                0.24
+              ],
+              "p": {
+                "count": 4,
+                "arch": "square",
+                "dark": 0.55
+              }
+            },
+            "shedtop": {
+              "at": [
+                0.34,
+                0.6
+              ],
+              "size": [
+                0.72,
+                0.11
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_port",
+      "kinds": [
+        "port"
+      ],
+      "scene": {
+        "ground": 0.88,
+        "horizon": 0.5,
+        "sky": "clear",
+        "water": 0.6,
+        "flora": "none",
+        "figures": [
+          [
+            0.12,
+            0.9
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "jetty",
+              "part": "quay",
+              "at": [
+                0.55,
+                0.89
+              ],
+              "size": [
+                0.7,
+                0.1
+              ],
+              "mat": "timber",
+              "p": {
+                "style": "piles",
+                "piles": 7,
+                "bollards": 0
+              }
+            },
+            {
+              "name": "boat",
+              "part": "hull",
+              "at": [
+                0.78,
+                0.81
+              ],
+              "size": [
+                0.28,
+                0.08
+              ],
+              "mat": "timber",
+              "p": {
+                "oars": 0,
+                "mast": true,
+                "sail": false
+              }
+            },
+            {
+              "name": "nets",
+              "part": "posts",
+              "at": [
+                0.24,
+                0.89
+              ],
+              "size": [
+                0.18,
+                0.12
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 3,
+                "cap": "none",
+                "rails": 2,
+                "drape": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "store",
+              "part": "box",
+              "at": [
+                0.28,
+                0.76
+              ],
+              "size": [
+                0.34,
+                0.18
+              ],
+              "layer": "back",
+              "p": {
+                "courses": 5,
+                "openings": 3
+              }
+            },
+            {
+              "name": "sroof",
+              "part": "roof",
+              "at": [
+                0.28,
+                0.58
+              ],
+              "size": [
+                0.4,
+                0.1
+              ],
+              "mat": "terracotta",
+              "layer": "back",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            },
+            {
+              "name": "cargo",
+              "part": "vessels",
+              "at": [
+                0.13,
+                0.88
+              ],
+              "size": [
+                0.14,
+                0.1
+              ],
+              "mat": "terracotta",
+              "p": {
+                "count": 6,
+                "kind": "amphora",
+                "stacked": true
+              }
+            }
+          ],
+          "drop": [
+            "nets"
+          ],
+          "set": {
+            "jetty": {
+              "at": [
+                0.5,
+                0.89
+              ],
+              "size": [
+                1.06,
+                0.13
+              ],
+              "mat": "ashlar",
+              "p": {
+                "style": "stone",
+                "courses": 3,
+                "bollards": 5
+              }
+            },
+            "boat": {
+              "at": [
+                0.72,
+                0.79
+              ],
+              "size": [
+                0.34,
+                0.1
+              ],
+              "p": {
+                "oars": 9,
+                "mast": true,
+                "sail": true
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "mole",
+              "part": "arcade",
+              "at": [
+                0.74,
+                0.87
+              ],
+              "size": [
+                0.52,
+                0.14
+              ],
+              "layer": "back",
+              "p": {
+                "count": 4,
+                "arch": "round",
+                "dark": 0.45
+              }
+            },
+            {
+              "name": "pharos",
+              "part": "box",
+              "at": [
+                0.93,
+                0.85
+              ],
+              "size": [
+                0.11,
+                0.42
+              ],
+              "p": {
+                "batter": 0.34,
+                "courses": 9,
+                "cap": "cornice"
+              }
+            },
+            {
+              "name": "beacon",
+              "part": "altar",
+              "at": [
+                0.93,
+                0.43
+              ],
+              "size": [
+                0.08,
+                0.06
+              ],
+              "mat": "iron",
+              "p": {
+                "fire": true,
+                "steps": 0,
+                "smoke": 3
+              }
+            },
+            {
+              "name": "dockers",
+              "part": "crowd",
+              "at": [
+                0.46,
+                0.91
+              ],
+              "size": [
+                0.44,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "store": {
+              "size": [
+                0.44,
+                0.22
+              ]
+            },
+            "sroof": {
+              "at": [
+                0.28,
+                0.54
+              ],
+              "size": [
+                0.5,
+                0.11
+              ]
+            },
+            "boat": {
+              "at": [
+                0.64,
+                0.78
+              ],
+              "size": [
+                0.4,
+                0.11
+              ],
+              "p": {
+                "oars": 13,
+                "mast": true,
+                "sail": true,
+                "ram": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_market",
+      "kinds": [
+        "market"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "olive",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [
+        {
+          "name": "paving",
+          "part": "field_strips",
+          "at": [
+            0.5,
+            0.94
+          ],
+          "size": [
+            1.18,
+            0.1
+          ],
+          "mat": "$track",
+          "layer": "back",
+          "p": {
+            "rows": 3,
+            "style": "paving"
+          }
+        }
+      ],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "stall_a",
+              "part": "stall",
+              "at": [
+                0.34,
+                0.86
+              ],
+              "size": [
+                0.24,
+                0.17
+              ],
+              "mat": "timber",
+              "p": {
+                "awning": true,
+                "goods": 4
+              }
+            },
+            {
+              "name": "stall_b",
+              "part": "stall",
+              "at": [
+                0.66,
+                0.86
+              ],
+              "size": [
+                0.22,
+                0.15
+              ],
+              "mat": "timber",
+              "p": {
+                "awning": true,
+                "goods": 3
+              }
+            },
+            {
+              "name": "jars",
+              "part": "vessels",
+              "at": [
+                0.87,
+                0.88
+              ],
+              "size": [
+                0.12,
+                0.09
+              ],
+              "mat": "terracotta",
+              "p": {
+                "count": 4,
+                "kind": "amphora"
+              }
+            },
+            {
+              "name": "shoppers",
+              "part": "crowd",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.52,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 9,
+                "depth": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "house",
+              "part": "box",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.4,
+                0.2
+              ],
+              "layer": "back",
+              "p": {
+                "courses": 4,
+                "openings": 3
+              }
+            },
+            {
+              "name": "houseroof",
+              "part": "roof",
+              "at": [
+                0.5,
+                0.66
+              ],
+              "size": [
+                0.46,
+                0.1
+              ],
+              "mat": "terracotta",
+              "layer": "back",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "loggia",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.58,
+                0.17
+              ],
+              "p": {
+                "count": 4,
+                "arch": "round",
+                "voussoirs": 7,
+                "dark": 0.42
+              }
+            },
+            {
+              "name": "fount",
+              "part": "well",
+              "at": [
+                0.13,
+                0.89
+              ],
+              "size": [
+                0.13,
+                0.09
+              ],
+              "mat": "ashlar",
+              "lod": 1,
+              "p": {
+                "style": "well",
+                "frame": true
+              }
+            }
+          ],
+          "set": {
+            "house": {
+              "size": [
+                0.62,
+                0.28
+              ],
+              "p": {
+                "courses": 6,
+                "openings": 3
+              }
+            },
+            "houseroof": {
+              "at": [
+                0.5,
+                0.58
+              ],
+              "size": [
+                0.68,
+                0.11
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "porch",
+              "use": "portico",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.36,
+                0.34
+              ],
+              "mat": "marble",
+              "p": {
+                "columns": 4,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 0
+              }
+            }
+          ],
+          "drop": [
+            "stall_b"
+          ],
+          "set": {
+            "house": {
+              "size": [
+                0.84,
+                0.34
+              ]
+            },
+            "houseroof": {
+              "at": [
+                0.5,
+                0.52
+              ],
+              "size": [
+                0.9,
+                0.12
+              ]
+            },
+            "loggia": {
+              "size": [
+                0.8,
+                0.2
+              ],
+              "p": {
+                "count": 6,
+                "arch": "round",
+                "voussoirs": 9,
+                "dark": 0.42
+              }
+            },
+            "shoppers": {
+              "size": [
+                0.66,
+                0.07
+              ],
+              "p": {
+                "count": 15,
+                "depth": 3
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "upper",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.64
+              ],
+              "size": [
+                0.96,
+                0.15
+              ],
+              "mat": "marble",
+              "lod": 1,
+              "p": {
+                "count": 11,
+                "arch": "round",
+                "dark": 0.3
+              }
+            },
+            {
+              "name": "patron",
+              "part": "statue",
+              "at": [
+                0.1,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.19
+              ],
+              "mat": "bronze",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.32
+              }
+            },
+            {
+              "name": "ensign",
+              "part": "standard",
+              "at": [
+                0.9,
+                0.74
+              ],
+              "size": [
+                0.05,
+                0.16
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "disc",
+                "fly": 0.55,
+                "count": 1
+              }
+            }
+          ],
+          "set": {
+            "loggia": {
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.96,
+                0.22
+              ],
+              "p": {
+                "count": 7,
+                "arch": "round",
+                "voussoirs": 9,
+                "dark": 0.42
+              }
+            },
+            "porch": {
+              "size": [
+                0.42,
+                0.4
+              ],
+              "p": {
+                "columns": 6,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "gilt",
+                "akroteria": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_farms",
+      "kinds": [
+        "farms"
+      ],
+      "scene": {
+        "ground": 0.74,
+        "horizon": 0.48,
+        "sky": "clear",
+        "flora": "olive",
+        "figures": [
+          [
+            0.16,
+            0.87
+          ]
+        ]
+      },
+      "base": [
+        {
+          "name": "strips",
+          "part": "field_strips",
+          "at": [
+            0.5,
+            0.99
+          ],
+          "size": [
+            1.2,
+            0.28
+          ],
+          "mat": "earth",
+          "layer": "back",
+          "p": {
+            "rows": 5,
+            "style": "furrow",
+            "crop": 0.0
+          }
+        }
+      ],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "hut",
+              "part": "box",
+              "at": [
+                0.76,
+                0.78
+              ],
+              "size": [
+                0.16,
+                0.1
+              ],
+              "mat": "wattle",
+              "p": {
+                "courses": 1
+              }
+            },
+            {
+              "name": "hutroof",
+              "part": "roof",
+              "at": [
+                0.76,
+                0.68
+              ],
+              "size": [
+                0.2,
+                0.1
+              ],
+              "mat": "thatch",
+              "p": {
+                "style": "conical",
+                "pitch": 0.85
+              }
+            }
+          ],
+          "set": {
+            "strips": {
+              "p": {
+                "rows": 3,
+                "style": "furrow",
+                "crop": 0.2,
+                "stumps": 3
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "granary",
+              "part": "granary",
+              "at": [
+                0.34,
+                0.78
+              ],
+              "size": [
+                0.2,
+                0.22
+              ],
+              "mat": "timber",
+              "p": {
+                "stilts": 4,
+                "vents": 3,
+                "roof": "thatch"
+              }
+            },
+            {
+              "name": "hedge",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.82
+              ],
+              "size": [
+                1.1,
+                0.05
+              ],
+              "mat": "timber",
+              "layer": "back",
+              "lod": 1,
+              "p": {
+                "count": 20,
+                "cap": "none",
+                "rails": 1,
+                "lean": 0.1
+              }
+            }
+          ],
+          "set": {
+            "strips": {
+              "p": {
+                "rows": 4,
+                "style": "furrow",
+                "crop": 0.5
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "oxen",
+              "part": "beasts",
+              "at": [
+                0.24,
+                0.92
+              ],
+              "size": [
+                0.22,
+                0.09
+              ],
+              "mat": "earth",
+              "layer": "front",
+              "p": {
+                "kind": "ox",
+                "count": 2,
+                "yoke": true
+              }
+            },
+            {
+              "name": "villa",
+              "part": "box",
+              "at": [
+                0.68,
+                0.78
+              ],
+              "size": [
+                0.34,
+                0.16
+              ],
+              "mat": "stucco",
+              "p": {
+                "courses": 3,
+                "openings": 3
+              }
+            },
+            {
+              "name": "vroof",
+              "part": "roof",
+              "at": [
+                0.68,
+                0.62
+              ],
+              "size": [
+                0.4,
+                0.1
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.42,
+                "ribs": 8
+              }
+            }
+          ],
+          "drop": [
+            "hut",
+            "hutroof"
+          ],
+          "set": {
+            "strips": {
+              "size": [
+                1.2,
+                0.32
+              ],
+              "p": {
+                "rows": 6,
+                "style": "furrow",
+                "crop": 0.8
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "canal",
+              "part": "quay",
+              "at": [
+                0.5,
+                1.0
+              ],
+              "size": [
+                1.2,
+                0.09
+              ],
+              "mat": "water",
+              "layer": "back",
+              "p": {
+                "style": "canal",
+                "ripples": 5
+              }
+            },
+            {
+              "name": "duct",
+              "part": "arcade",
+              "at": [
+                0.24,
+                0.78
+              ],
+              "size": [
+                0.48,
+                0.2
+              ],
+              "mat": "ashlar",
+              "layer": "back",
+              "p": {
+                "count": 5,
+                "arch": "round",
+                "channel": true,
+                "dark": 0.3
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "porch",
+              "use": "portico",
+              "at": [
+                0.66,
+                0.78
+              ],
+              "size": [
+                0.3,
+                0.26
+              ],
+              "mat": "marble",
+              "p": {
+                "columns": 4,
+                "order": "tuscan",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 0
+              }
+            },
+            {
+              "name": "silos",
+              "part": "granary",
+              "at": [
+                0.18,
+                0.8
+              ],
+              "size": [
+                0.26,
+                0.24
+              ],
+              "mat": "ashlar",
+              "p": {
+                "stilts": 0,
+                "vents": 4,
+                "roof": "tiled",
+                "count": 2
+              }
+            },
+            {
+              "name": "hands",
+              "part": "crowd",
+              "at": [
+                0.44,
+                0.94
+              ],
+              "size": [
+                0.4,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "villa": {
+              "at": [
+                0.66,
+                0.78
+              ],
+              "size": [
+                0.48,
+                0.2
+              ]
+            },
+            "vroof": {
+              "at": [
+                0.66,
+                0.58
+              ],
+              "size": [
+                0.54,
+                0.11
+              ]
+            },
+            "duct": {
+              "size": [
+                0.62,
+                0.26
+              ],
+              "p": {
+                "count": 7,
+                "arch": "round",
+                "channel": true,
+                "dark": 0.3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_roads",
+      "kinds": [
+        "roads"
+      ],
+      "scene": {
+        "ground": 0.78,
+        "horizon": 0.52,
+        "sky": "clear",
+        "flora": "cypress",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [
+        {
+          "name": "way",
+          "part": "field_strips",
+          "at": [
+            0.5,
+            0.98
+          ],
+          "size": [
+            1.2,
+            0.26
+          ],
+          "mat": "earth",
+          "layer": "back",
+          "p": {
+            "rows": 3,
+            "style": "road"
+          }
+        }
+      ],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "stone",
+              "part": "posts",
+              "at": [
+                0.82,
+                0.84
+              ],
+              "size": [
+                0.06,
+                0.12
+              ],
+              "mat": "rubble",
+              "p": {
+                "count": 1,
+                "cap": "none",
+                "rails": 0
+              }
+            },
+            {
+              "name": "mule",
+              "part": "beasts",
+              "at": [
+                0.32,
+                0.9
+              ],
+              "size": [
+                0.18,
+                0.08
+              ],
+              "mat": "earth",
+              "layer": "front",
+              "p": {
+                "kind": "ox",
+                "count": 1
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "milestone",
+              "part": "box",
+              "at": [
+                0.82,
+                0.84
+              ],
+              "size": [
+                0.07,
+                0.18
+              ],
+              "p": {
+                "courses": 3,
+                "cap": "cornice"
+              }
+            },
+            {
+              "name": "paving",
+              "part": "field_strips",
+              "at": [
+                0.5,
+                0.98
+              ],
+              "size": [
+                1.2,
+                0.22
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "p": {
+                "rows": 4,
+                "style": "paving"
+              }
+            }
+          ],
+          "drop": [
+            "stone"
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "bridge",
+              "part": "arcade",
+              "at": [
+                0.34,
+                0.82
+              ],
+              "size": [
+                0.56,
+                0.22
+              ],
+              "layer": "back",
+              "p": {
+                "count": 4,
+                "arch": "round",
+                "voussoirs": 7,
+                "dark": 0.42
+              }
+            },
+            {
+              "name": "herm",
+              "part": "statue",
+              "at": [
+                0.9,
+                0.84
+              ],
+              "size": [
+                0.07,
+                0.16
+              ],
+              "mat": "marble",
+              "lod": 1,
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3
+              }
+            },
+            {
+              "name": "traffic",
+              "part": "crowd",
+              "at": [
+                0.44,
+                0.93
+              ],
+              "size": [
+                0.38,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "lod": 1,
+              "p": {
+                "count": 7,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "milestone": {
+              "size": [
+                0.08,
+                0.22
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_mines",
+      "kinds": [
+        "mines"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.54,
+        "sky": "dust",
+        "flora": "pine",
+        "ground_mat": "rubble",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "spoil",
+              "part": "mound",
+              "at": [
+                0.74,
+                0.87
+              ],
+              "size": [
+                0.34,
+                0.14
+              ],
+              "mat": "earth",
+              "p": {
+                "speckle": 7
+              }
+            },
+            {
+              "name": "adit",
+              "part": "mine_head",
+              "at": [
+                0.36,
+                0.86
+              ],
+              "size": [
+                0.24,
+                0.22
+              ],
+              "mat": "timber",
+              "p": {
+                "windlass": true
+              }
+            },
+            {
+              "name": "baskets",
+              "part": "vessels",
+              "at": [
+                0.14,
+                0.89
+              ],
+              "size": [
+                0.11,
+                0.07
+              ],
+              "mat": "wattle",
+              "p": {
+                "count": 3,
+                "kind": "grain"
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "shed",
+              "part": "box",
+              "at": [
+                0.64,
+                0.85
+              ],
+              "size": [
+                0.28,
+                0.16
+              ],
+              "p": {
+                "courses": 3,
+                "openings": 2
+              }
+            },
+            {
+              "name": "sroof",
+              "part": "roof",
+              "at": [
+                0.64,
+                0.69
+              ],
+              "size": [
+                0.34,
+                0.09
+              ],
+              "mat": "thatch",
+              "p": {
+                "style": "thatch",
+                "pitch": 0.55
+              }
+            },
+            {
+              "name": "smelt",
+              "part": "forge",
+              "at": [
+                0.88,
+                0.86
+              ],
+              "size": [
+                0.16,
+                0.16
+              ],
+              "p": {
+                "chimney": 0.6,
+                "smoke": 4,
+                "glow": true
+              }
+            },
+            {
+              "name": "gangs",
+              "part": "crowd",
+              "at": [
+                0.3,
+                0.91
+              ],
+              "size": [
+                0.28,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 6,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ],
+          "set": {
+            "adit": {
+              "size": [
+                0.28,
+                0.26
+              ],
+              "p": {
+                "windlass": true,
+                "spoil": true
+              }
+            },
+            "spoil": {
+              "size": [
+                0.4,
+                0.16
+              ],
+              "p": {
+                "speckle": 11
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_health",
+      "kinds": [
+        "health"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "olive",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "well",
+              "part": "well",
+              "at": [
+                0.5,
+                0.87
+              ],
+              "size": [
+                0.18,
+                0.12
+              ],
+              "mat": "rubble",
+              "p": {
+                "style": "well",
+                "frame": true
+              }
+            },
+            {
+              "name": "rail",
+              "part": "posts",
+              "at": [
+                0.78,
+                0.87
+              ],
+              "size": [
+                0.2,
+                0.08
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 4,
+                "cap": "none",
+                "rails": 1
+              }
+            },
+            {
+              "name": "folk",
+              "part": "crowd",
+              "at": [
+                0.26,
+                0.9
+              ],
+              "size": [
+                0.24,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 5,
+                "depth": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "baths",
+              "part": "box",
+              "at": [
+                0.52,
+                0.86
+              ],
+              "size": [
+                0.46,
+                0.2
+              ],
+              "p": {
+                "courses": 4,
+                "openings": 3
+              }
+            },
+            {
+              "name": "btop",
+              "part": "roof",
+              "at": [
+                0.52,
+                0.66
+              ],
+              "size": [
+                0.52,
+                0.12
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "dome",
+                "pitch": 0.55,
+                "ribs": 7
+              }
+            },
+            {
+              "name": "steam",
+              "part": "smoke",
+              "at": [
+                0.52,
+                0.54
+              ],
+              "size": [
+                0.14,
+                0.1
+              ],
+              "mat": "cloth",
+              "p": {
+                "puffs": 3,
+                "drift": 0.4
+              }
+            }
+          ],
+          "set": {
+            "well": {
+              "at": [
+                0.16,
+                0.88
+              ],
+              "size": [
+                0.13,
+                0.09
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "duct",
+              "part": "arcade",
+              "at": [
+                0.24,
+                0.72
+              ],
+              "size": [
+                0.5,
+                0.3
+              ],
+              "mat": "ashlar",
+              "layer": "back",
+              "p": {
+                "count": 5,
+                "arch": "round",
+                "channel": true,
+                "dark": 0.3
+              }
+            },
+            {
+              "name": "hygieia",
+              "part": "statue",
+              "at": [
+                0.86,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.18
+              ],
+              "mat": "marble",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3
+              }
+            }
+          ],
+          "set": {
+            "baths": {
+              "size": [
+                0.58,
+                0.26
+              ],
+              "p": {
+                "courses": 6,
+                "openings": 4
+              }
+            },
+            "btop": {
+              "at": [
+                0.52,
+                0.6
+              ],
+              "size": [
+                0.64,
+                0.13
+              ]
+            },
+            "folk": {
+              "size": [
+                0.34,
+                0.06
+              ],
+              "p": {
+                "count": 9,
+                "depth": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_entertainment",
+      "kinds": [
+        "entertainment"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "none",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "ground",
+              "part": "mound",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.66,
+                0.07
+              ],
+              "mat": "earth",
+              "layer": "back",
+              "p": {
+                "trodden": true
+              }
+            },
+            {
+              "name": "awning",
+              "part": "awning",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.44,
+                0.14
+              ],
+              "mat": "cloth",
+              "p": {
+                "scallops": 6,
+                "poles": 2
+              }
+            },
+            {
+              "name": "revel",
+              "part": "crowd",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.56,
+                0.07
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "tiers",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.78,
+                0.2
+              ],
+              "p": {
+                "count": 6,
+                "arch": "round",
+                "voussoirs": 6,
+                "dark": 0.45
+              }
+            },
+            {
+              "name": "rim",
+              "part": "crest",
+              "at": [
+                0.5,
+                0.63
+              ],
+              "size": [
+                0.8,
+                0.04
+              ],
+              "p": {
+                "style": "ridge",
+                "count": 13
+              }
+            }
+          ],
+          "drop": [
+            "awning"
+          ],
+          "set": {
+            "revel": {
+              "size": [
+                0.62,
+                0.07
+              ],
+              "p": {
+                "count": 13,
+                "depth": 3
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "upper",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.66
+              ],
+              "size": [
+                0.96,
+                0.17
+              ],
+              "lod": 1,
+              "p": {
+                "count": 9,
+                "arch": "round",
+                "dark": 0.32
+              }
+            },
+            {
+              "name": "flags",
+              "part": "standard",
+              "at": [
+                0.09,
+                0.6
+              ],
+              "size": [
+                0.05,
+                0.15
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "disc",
+                "fly": 0.6,
+                "count": 1
+              }
+            },
+            {
+              "name": "victor",
+              "part": "statue",
+              "at": [
+                0.9,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.18
+              ],
+              "mat": "bronze",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3
+              }
+            }
+          ],
+          "set": {
+            "tiers": {
+              "size": [
+                0.96,
+                0.24
+              ],
+              "p": {
+                "count": 8,
+                "arch": "round",
+                "voussoirs": 7,
+                "dark": 0.45
+              }
+            },
+            "rim": {
+              "at": [
+                0.5,
+                0.49
+              ],
+              "size": [
+                0.98,
+                0.045
+              ],
+              "p": {
+                "style": "ridge",
+                "count": 17
+              }
+            },
+            "revel": {
+              "size": [
+                0.7,
+                0.07
+              ],
+              "p": {
+                "count": 17,
+                "depth": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_execution",
+      "kinds": [
+        "execution"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "overcast",
+        "flora": "none",
+        "ground_mat": "earth",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "gibbet",
+              "part": "posts",
+              "at": [
+                0.62,
+                0.86
+              ],
+              "size": [
+                0.26,
+                0.24
+              ],
+              "mat": "timber",
+              "p": {
+                "count": 2,
+                "cap": "cross",
+                "rails": 1
+              }
+            },
+            {
+              "name": "block",
+              "part": "mound",
+              "at": [
+                0.34,
+                0.87
+              ],
+              "size": [
+                0.18,
+                0.08
+              ],
+              "mat": "rubble"
+            },
+            {
+              "name": "onlookers",
+              "part": "crowd",
+              "at": [
+                0.46,
+                0.91
+              ],
+              "size": [
+                0.44,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 9,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kind_education",
+      "kinds": [
+        "education"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "cypress",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "school",
+              "part": "box",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.4,
+                0.19
+              ],
+              "p": {
+                "courses": 3,
+                "openings": 3
+              }
+            },
+            {
+              "name": "sroof",
+              "part": "roof",
+              "at": [
+                0.5,
+                0.67
+              ],
+              "size": [
+                0.46,
+                0.1
+              ],
+              "mat": "terracotta",
+              "p": {
+                "style": "tiled",
+                "pitch": 0.45,
+                "ribs": 7
+              }
+            },
+            {
+              "name": "pupils",
+              "part": "crowd",
+              "at": [
+                0.22,
+                0.9
+              ],
+              "size": [
+                0.24,
+                0.05
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 5,
+                "depth": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "front",
+              "use": "portico",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.44,
+                0.36
+              ],
+              "mat": "$track",
+              "p": {
+                "columns": 4,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 0
+              }
+            },
+            {
+              "name": "sage",
+              "part": "statue",
+              "at": [
+                0.85,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.18
+              ],
+              "mat": "marble",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.32
+              }
+            },
+            {
+              "name": "stair",
+              "part": "steps",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                0.32,
+                0.05
+              ],
+              "layer": "front",
+              "p": {
+                "count": 3
+              }
+            }
+          ],
+          "set": {
+            "school": {
+              "size": [
+                0.56,
+                0.24
+              ]
+            },
+            "sroof": {
+              "at": [
+                0.5,
+                0.62
+              ],
+              "size": [
+                0.62,
+                0.11
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "wing_l",
+              "use": "colonnade_wing",
+              "at": [
+                0.13,
+                0.9
+              ],
+              "size": [
+                0.26,
+                0.28
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "wing_r",
+              "use": "colonnade_wing",
+              "at": [
+                0.87,
+                0.9
+              ],
+              "size": [
+                0.26,
+                0.28
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "scrolls",
+              "part": "vessels",
+              "at": [
+                0.2,
+                0.89
+              ],
+              "size": [
+                0.11,
+                0.08
+              ],
+              "mat": "cloth",
+              "lod": 1,
+              "p": {
+                "count": 5,
+                "kind": "scroll"
+              }
+            },
+            {
+              "name": "scholars",
+              "part": "crowd",
+              "at": [
+                0.5,
+                0.93
+              ],
+              "size": [
+                0.46,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 3
+              }
+            }
+          ],
+          "drop": [
+            "pupils"
+          ],
+          "set": {
+            "school": {
+              "size": [
+                0.72,
+                0.3
+              ],
+              "mat": "marble"
+            },
+            "sroof": {
+              "at": [
+                0.5,
+                0.56
+              ],
+              "size": [
+                0.78,
+                0.12
+              ]
+            },
+            "front": {
+              "size": [
+                0.52,
+                0.42
+              ],
+              "mat": "marble",
+              "p": {
+                "columns": 6,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "gilt",
+                "akroteria": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "kind_temple",
+      "kinds": [
+        "temple"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "cypress",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "altar",
+              "part": "altar",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                0.15,
+                0.1
+              ],
+              "mat": "rubble",
+              "p": {
+                "fire": true,
+                "steps": 1
+              }
+            },
+            {
+              "name": "canopy",
+              "part": "canopy",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                0.32,
+                0.27
+              ],
+              "mat": "timber",
+              "p": {
+                "posts": 4,
+                "roof": "flat",
+                "drape": true
+              }
+            },
+            {
+              "name": "grove",
+              "part": "tree",
+              "at": [
+                0.83,
+                0.85
+              ],
+              "size": [
+                0.17,
+                0.26
+              ],
+              "mat": "turf",
+              "layer": "front",
+              "p": {
+                "kind": "cypress",
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "podium",
+              "part": "podium",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                0.5,
+                0.07
+              ],
+              "mat": "rubble",
+              "p": {
+                "courses": 2,
+                "moulding": true
+              }
+            },
+            {
+              "name": "front",
+              "use": "portico",
+              "at": [
+                0.5,
+                0.76
+              ],
+              "size": [
+                0.46,
+                0.36
+              ],
+              "mat": "$track",
+              "p": {
+                "columns": 4,
+                "order": "tuscan",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 0
+              }
+            },
+            {
+              "name": "stair",
+              "part": "steps",
+              "at": [
+                0.5,
+                0.83
+              ],
+              "size": [
+                0.3,
+                0.07
+              ],
+              "mat": "rubble",
+              "layer": "front",
+              "p": {
+                "count": 3
+              }
+            }
+          ],
+          "drop": [
+            "canopy"
+          ],
+          "set": {
+            "altar": {
+              "at": [
+                0.21,
+                0.86
+              ],
+              "size": [
+                0.11,
+                0.07
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "flank",
+              "part": "column_row",
+              "at": [
+                0.86,
+                0.74
+              ],
+              "size": [
+                0.24,
+                0.3
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "lod": 1,
+              "p": {
+                "columns": 4,
+                "order": "tuscan",
+                "spacing": 1.9
+              }
+            },
+            {
+              "name": "signa",
+              "part": "standard",
+              "at": [
+                0.19,
+                0.68
+              ],
+              "size": [
+                0.05,
+                0.16
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "$emblem",
+                "fly": 0.45,
+                "count": 2
+              }
+            }
+          ],
+          "set": {
+            "podium": {
+              "size": [
+                0.66,
+                0.09
+              ],
+              "p": {
+                "courses": 3,
+                "moulding": true
+              }
+            },
+            "front": {
+              "at": [
+                0.5,
+                0.74
+              ],
+              "size": [
+                0.62,
+                0.44
+              ],
+              "p": {
+                "columns": 6,
+                "order": "tuscan",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 3
+              }
+            },
+            "stair": {
+              "size": [
+                0.4,
+                0.09
+              ],
+              "p": {
+                "count": 4
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "temenos",
+              "part": "box",
+              "at": [
+                0.5,
+                0.92
+              ],
+              "size": [
+                1.14,
+                0.1
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "p": {
+                "courses": 3,
+                "cap": "cornice"
+              }
+            },
+            {
+              "name": "propylon",
+              "part": "arcade",
+              "at": [
+                0.12,
+                0.92
+              ],
+              "size": [
+                0.2,
+                0.16
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "p": {
+                "count": 1,
+                "arch": "square",
+                "dark": 0.5
+              }
+            },
+            {
+              "name": "votives",
+              "part": "statue",
+              "at": [
+                0.8,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.16
+              ],
+              "mat": "marble",
+              "lod": 1,
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3
+              }
+            },
+            {
+              "name": "pilgrims",
+              "part": "crowd",
+              "at": [
+                0.4,
+                0.92
+              ],
+              "size": [
+                0.44,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "podium": {
+              "size": [
+                0.8,
+                0.11
+              ]
+            },
+            "front": {
+              "at": [
+                0.5,
+                0.72
+              ],
+              "size": [
+                0.7,
+                0.5
+              ],
+              "p": {
+                "columns": 6,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "terracotta",
+                "akroteria": 3,
+                "tympanum": "$emblem"
+              }
+            },
+            "stair": {
+              "size": [
+                0.46,
+                0.11
+              ],
+              "p": {
+                "count": 5
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "wing_l",
+              "use": "colonnade_wing",
+              "at": [
+                0.13,
+                0.88
+              ],
+              "size": [
+                0.3,
+                0.3
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "wing_r",
+              "use": "colonnade_wing",
+              "at": [
+                0.87,
+                0.88
+              ],
+              "size": [
+                0.3,
+                0.3
+              ],
+              "mat": "marble",
+              "layer": "back",
+              "p": {
+                "columns": 5,
+                "order": "ionic"
+              }
+            },
+            {
+              "name": "colossus",
+              "part": "statue",
+              "at": [
+                0.5,
+                0.88
+              ],
+              "size": [
+                0.09,
+                0.22
+              ],
+              "mat": "gilt",
+              "layer": "front",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.26
+              }
+            }
+          ],
+          "set": {
+            "podium": {
+              "size": [
+                0.94,
+                0.14
+              ]
+            },
+            "front": {
+              "at": [
+                0.5,
+                0.69
+              ],
+              "size": [
+                0.84,
+                0.56
+              ],
+              "p": {
+                "columns": 8,
+                "order": "ionic",
+                "roof": "tiled",
+                "roof_mat": "gilt",
+                "akroteria": 5,
+                "tympanum": "$emblem"
+              }
+            },
+            "stair": {
+              "size": [
+                0.56,
+                0.14
+              ],
+              "p": {
+                "count": 7
+              }
+            },
+            "pilgrims": {
+              "size": [
+                0.62,
+                0.07
+              ],
+              "p": {
+                "count": 17,
+                "depth": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "temple_egyptian",
+      "kinds": [
+        "temple"
+      ],
+      "cultures": [
+        "egyptian"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "dust",
+        "flora": "palm",
+        "ground_mat": "sandstone",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "altar",
+              "part": "altar",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.15,
+                0.09
+              ],
+              "mat": "mudbrick",
+              "p": {
+                "fire": true,
+                "steps": 1
+              }
+            },
+            {
+              "name": "poles",
+              "part": "canopy",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.34,
+                0.24
+              ],
+              "mat": "timber",
+              "p": {
+                "posts": 4,
+                "roof": "flat",
+                "drape": true
+              }
+            },
+            {
+              "name": "palms",
+              "part": "tree",
+              "at": [
+                0.85,
+                0.86
+              ],
+              "size": [
+                0.18,
+                0.28
+              ],
+              "mat": "turf",
+              "layer": "front",
+              "p": {
+                "kind": "palm",
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "pylon",
+              "part": "pylon",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.54,
+                0.3
+              ],
+              "mat": "$track",
+              "p": {
+                "batter": 0.22,
+                "cavetto": true,
+                "flagstaffs": 2
+              }
+            },
+            {
+              "name": "hall",
+              "part": "box",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.34,
+                0.18
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "p": {
+                "courses": 4
+              }
+            }
+          ],
+          "drop": [
+            "poles"
+          ],
+          "set": {
+            "altar": {
+              "at": [
+                0.2,
+                0.87
+              ],
+              "size": [
+                0.11,
+                0.07
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "obl_l",
+              "part": "obelisk",
+              "at": [
+                0.22,
+                0.84
+              ],
+              "size": [
+                0.06,
+                0.3
+              ],
+              "mat": "granite",
+              "p": {
+                "pyramidion": true
+              }
+            },
+            {
+              "name": "obl_r",
+              "part": "obelisk",
+              "at": [
+                0.78,
+                0.84
+              ],
+              "size": [
+                0.06,
+                0.3
+              ],
+              "mat": "granite",
+              "p": {
+                "pyramidion": true
+              }
+            },
+            {
+              "name": "hypostyle",
+              "part": "column_row",
+              "at": [
+                0.5,
+                0.82
+              ],
+              "size": [
+                0.42,
+                0.3
+              ],
+              "mat": "$track",
+              "layer": "back",
+              "lod": 1,
+              "p": {
+                "columns": 5,
+                "order": "tuscan",
+                "spacing": 1.5
+              }
+            }
+          ],
+          "set": {
+            "pylon": {
+              "size": [
+                0.66,
+                0.36
+              ],
+              "p": {
+                "batter": 0.22,
+                "cavetto": true,
+                "flagstaffs": 2
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "colossi",
+              "part": "statue",
+              "at": [
+                0.34,
+                0.87
+              ],
+              "size": [
+                0.09,
+                0.2
+              ],
+              "mat": "granite",
+              "p": {
+                "pose": "seated",
+                "plinth": 0.22
+              }
+            },
+            {
+              "name": "colossi2",
+              "part": "statue",
+              "at": [
+                0.66,
+                0.87
+              ],
+              "size": [
+                0.09,
+                0.2
+              ],
+              "mat": "granite",
+              "p": {
+                "pose": "seated",
+                "plinth": 0.22
+              }
+            },
+            {
+              "name": "pilgrims",
+              "part": "crowd",
+              "at": [
+                0.5,
+                0.93
+              ],
+              "size": [
+                0.46,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 11,
+                "depth": 2
+              }
+            }
+          ],
+          "set": {
+            "pylon": {
+              "size": [
+                0.78,
+                0.42
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "avenue",
+              "part": "arcade",
+              "at": [
+                0.5,
+                0.95
+              ],
+              "size": [
+                1.1,
+                0.1
+              ],
+              "mat": "sandstone",
+              "layer": "back",
+              "lod": 1,
+              "p": {
+                "count": 7,
+                "arch": "square",
+                "dark": 0.35
+              }
+            },
+            {
+              "name": "banners",
+              "part": "standard",
+              "at": [
+                0.14,
+                0.62
+              ],
+              "size": [
+                0.05,
+                0.18
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "$emblem",
+                "fly": 0.5,
+                "count": 2
+              }
+            }
+          ],
+          "set": {
+            "pylon": {
+              "size": [
+                0.92,
+                0.48
+              ]
+            },
+            "hall": {
+              "size": [
+                0.46,
+                0.24
+              ]
+            },
+            "pilgrims": {
+              "size": [
+                0.62,
+                0.07
+              ],
+              "p": {
+                "count": 17,
+                "depth": 3
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "temple_barbarian",
+      "kinds": [
+        "temple"
+      ],
+      "cultures": [
+        "barbarian"
+      ],
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "overcast",
+        "flora": "pine",
+        "ground_mat": "turf",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [],
+      "tiers": [
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "ring",
+              "part": "stones",
+              "at": [
+                0.5,
+                0.86
+              ],
+              "size": [
+                0.52,
+                0.24
+              ],
+              "mat": "granite",
+              "p": {
+                "count": 5,
+                "lintels": false
+              }
+            },
+            {
+              "name": "stone",
+              "part": "altar",
+              "at": [
+                0.5,
+                0.88
+              ],
+              "size": [
+                0.14,
+                0.08
+              ],
+              "mat": "rubble",
+              "p": {
+                "fire": true,
+                "steps": 0
+              }
+            },
+            {
+              "name": "grove",
+              "part": "tree",
+              "at": [
+                0.86,
+                0.87
+              ],
+              "size": [
+                0.2,
+                0.3
+              ],
+              "mat": "turf",
+              "layer": "front",
+              "p": {
+                "kind": "pine",
+                "count": 2
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "palisade",
+              "part": "posts",
+              "at": [
+                0.5,
+                0.9
+              ],
+              "size": [
+                1.06,
+                0.12
+              ],
+              "mat": "timber",
+              "layer": "back",
+              "p": {
+                "count": 17,
+                "cap": "point",
+                "rails": 1,
+                "lean": 0.14
+              }
+            },
+            {
+              "name": "spoils",
+              "part": "trophy",
+              "at": [
+                0.22,
+                0.86
+              ],
+              "size": [
+                0.1,
+                0.18
+              ],
+              "mat": "iron",
+              "p": {
+                "shield": "oval",
+                "helmet": "horned"
+              }
+            }
+          ],
+          "set": {
+            "ring": {
+              "size": [
+                0.62,
+                0.28
+              ],
+              "p": {
+                "count": 7,
+                "lintels": true
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "shelter",
+              "part": "canopy",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.4,
+                0.26
+              ],
+              "mat": "timber",
+              "p": {
+                "posts": 4,
+                "roof": "thatch",
+                "drape": true
+              }
+            },
+            {
+              "name": "tribe",
+              "part": "crowd",
+              "at": [
+                0.44,
+                0.92
+              ],
+              "size": [
+                0.42,
+                0.06
+              ],
+              "mat": "homespun",
+              "layer": "front",
+              "p": {
+                "count": 9,
+                "depth": 2,
+                "ragged": true
+              }
+            }
+          ],
+          "set": {
+            "ring": {
+              "size": [
+                0.72,
+                0.32
+              ],
+              "p": {
+                "count": 9,
+                "lintels": true
+              }
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "totems",
+              "part": "standard",
+              "at": [
+                0.14,
+                0.68
+              ],
+              "size": [
+                0.06,
+                0.2
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "$emblem",
+                "fly": 0.45,
+                "count": 2
+              }
+            },
+            {
+              "name": "barrow",
+              "part": "mound",
+              "at": [
+                0.82,
+                0.9
+              ],
+              "size": [
+                0.32,
+                0.14
+              ],
+              "mat": "turf",
+              "p": {
+                "speckle": 0
+              }
+            }
+          ],
+          "set": {
+            "ring": {
+              "size": [
+                0.82,
+                0.36
+              ],
+              "p": {
+                "count": 11,
+                "lintels": true
+              }
+            },
+            "tribe": {
+              "size": [
+                0.56,
+                0.07
+              ],
+              "p": {
+                "count": 13,
+                "depth": 3,
+                "ragged": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "generic",
+      "scene": {
+        "ground": 0.8,
+        "horizon": 0.56,
+        "sky": "clear",
+        "flora": "olive",
+        "figures": [
+          [
+            0.11,
+            0.87
+          ]
+        ]
+      },
+      "base": [
+        {
+          "name": "hall",
+          "part": "box",
+          "at": [
+            0.5,
+            0.84
+          ],
+          "size": [
+            0.46,
+            0.2
+          ],
+          "mat": "$track",
+          "p": {
+            "courses": 3,
+            "openings": 2
+          }
+        },
+        {
+          "name": "top",
+          "part": "roof",
+          "at": [
+            0.5,
+            0.64
+          ],
+          "size": [
+            0.52,
+            0.11
+          ],
+          "mat": "$track",
+          "p": {
+            "style": "tiled",
+            "pitch": 0.45,
+            "ribs": 7
+          }
+        }
+      ],
+      "tiers": [
+        {
+          "material": "$track"
+        },
+        {
+          "material": "$track",
+          "set": {
+            "hall": {
+              "size": [
+                0.54,
+                0.24
+              ]
+            },
+            "top": {
+              "at": [
+                0.5,
+                0.6
+              ],
+              "size": [
+                0.6,
+                0.12
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "porch",
+              "part": "column_row",
+              "at": [
+                0.5,
+                0.84
+              ],
+              "size": [
+                0.4,
+                0.2
+              ],
+              "p": {
+                "columns": 4,
+                "order": "tuscan",
+                "spacing": 1.9
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "wing",
+              "part": "box",
+              "at": [
+                0.15,
+                0.86
+              ],
+              "size": [
+                0.24,
+                0.16
+              ],
+              "layer": "back",
+              "p": {
+                "courses": 3
+              }
+            }
+          ],
+          "set": {
+            "hall": {
+              "size": [
+                0.68,
+                0.3
+              ]
+            }
+          }
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "mark",
+              "part": "standard",
+              "at": [
+                0.85,
+                0.74
+              ],
+              "size": [
+                0.05,
+                0.15
+              ],
+              "mat": "cloth",
+              "p": {
+                "finial": "disc",
+                "fly": 0.5,
+                "count": 1
+              }
+            }
+          ]
+        },
+        {
+          "material": "$track",
+          "add": [
+            {
+              "name": "sign",
+              "part": "statue",
+              "at": [
+                0.18,
+                0.86
+              ],
+              "size": [
+                0.08,
+                0.16
+              ],
+              "mat": "marble",
+              "p": {
+                "pose": "standing",
+                "plinth": 0.3
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

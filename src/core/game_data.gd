@@ -27,6 +27,11 @@ var society: Dictionary = {}           # axes, unrest states, historical pattern
 var campaign: Dictionary = {}
 var dispatch_beats: Dictionary = {}    # beat kind -> presentation entry
 var dispatch_chapters: Array = []      # the day's acts, in playing order
+var sites: Dictionary = {}             # id -> point-of-interest dict
+var sites_by_region: Dictionary = {}   # region id -> point-of-interest dict
+var guided_stages: Array = []          # guided-campaign stages, authored order
+var guided_stage_index: Dictionary = {}  # stage id -> stage dict
+var effects_glossary: Dictionary = {}  # the player-facing wording for building effects
 
 var load_errors: PackedStringArray = []
 
@@ -73,6 +78,7 @@ func _load_all(dir: String) -> void:
 		for entry in glossary_doc.get(section, []):
 			entries[entry["id"]] = entry
 		glossary[section] = entries
+	effects_glossary = _read_json(dir + "/effects_glossary.json")
 
 	var map_data := _read_json(dir + "/regions.json")
 	for region in map_data.get("regions", []):
@@ -111,6 +117,14 @@ func _load_all(dir: String) -> void:
 	dispatch_chapters = dispatch_data.get("chapters", [])
 	for beat in dispatch_data.get("beats", []):
 		dispatch_beats[beat["id"]] = beat
+	for site in _read_json(dir + "/sites.json").get("sites", []):
+		if sites.has(site["id"]):
+			load_errors.append("duplicate site id: %s" % site["id"])
+		sites[site["id"]] = site
+		sites_by_region[site["region"]] = site
+	guided_stages = _read_json(dir + "/guided_campaign.json").get("stages", [])
+	for stage in guided_stages:
+		guided_stage_index[stage["id"]] = stage
 
 
 func _read_json(path: String) -> Dictionary:

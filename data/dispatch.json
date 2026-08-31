@@ -620,6 +620,54 @@
       "in_dispatch": true,
       "headline": "The column marches on toward {region}",
       "body": "Another day's ground covered. Long marches are measured in seasons, not in orders."
+    },
+    {
+      "id": "assault_repelled",
+      "chapter": "world",
+      "visibility": "own_or_region",
+      "severity": 5,
+      "tone": "good",
+      "icon": "siege",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "The assault on {settlement} is thrown back",
+      "body": "They came at the wall and the wall held. The ladders are still lying where they fell."
+    },
+    {
+      "id": "trail_started",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 4,
+      "tone": "neutral",
+      "icon": "map",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "A new charge on the trail: {subject}",
+      "body": "The next thing worth doing, set out plainly, with a season in which to do it."
+    },
+    {
+      "id": "trail_complete",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 5,
+      "tone": "good",
+      "icon": "map",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "Trail complete: {subject}",
+      "body": "Done, and the reward with it. The road ahead opens a little further."
+    },
+    {
+      "id": "trail_expired",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "warning",
+      "icon": "map",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "The trail has lapsed: {subject}",
+      "body": "The season for it passed. Nothing is lost that cannot be won another way, but the moment was there and went."
     }
   ]
 }

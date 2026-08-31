@@ -18,7 +18,7 @@ var _content: VBoxContainer
 var _scroll: ScrollContainer
 
 
-class ArtPlate:
+class CardPlate:
 	extends Control
 	## The swappable art slot: draws a building or a unit through the
 	## Illustrations contract.
@@ -146,7 +146,7 @@ func _header_row(title: String, chip: String) -> void:
 
 
 func _art(mode: String, subject: String, culture: String, tier: int) -> void:
-	var plate := ArtPlate.new()
+	var plate := CardPlate.new()
 	plate.mode = mode
 	plate.subject = subject
 	plate.culture = culture

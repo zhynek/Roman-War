@@ -11,6 +11,8 @@ signal siege_requested(region_id: String)
 signal unit_info_requested(template_id: String)
 signal building_info_requested(chain_id: String)
 signal battle_fought(result: Dictionary, defender_name: String)
+signal explore_requested(army_id: String)
+signal drawer_requested(tab: String, chain_id: String)
 
 var game: Game
 var region_id := ""
@@ -56,6 +58,9 @@ func _rebuild() -> void:
 	var resources: Array = region.get("resources", [])
 	if not resources.is_empty():
 		_label("Goods: " + ", ".join(resources))
+	var site := _unexplored_site()
+	if not site.is_empty():
+		_label("A place worth searching: %s" % site["name"], Color(0.9, 0.8, 0.5))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty():
@@ -90,6 +95,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	tax_label.text = "Taxes:"
 	tax_row.add_child(tax_label)
 	var tax_options := OptionButton.new()
+	tax_options.focus_mode = Control.FOCUS_NONE
 	for tax_level in Constants.TAX_LEVELS:
 		tax_options.add_item(tax_level.capitalize().replace("_", " "))
 	tax_options.selected = Constants.TAX_LEVELS.find(String(settlement["tax_level"]))
@@ -123,14 +129,32 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
+		if settlement["siege"] == null:
+			_action_button("Raise a field army (the garrison marches out)", func():
+				game.raise_army(region_id)
+				action_taken.emit())
 
-	# Construction
+	# Construction. The wall of unexplained "Build X (5000, 4t)" buttons is now
+	# one door into the building yard, plus a short cheap-and-ready list so the
+	# one-click route (and the trail's "queue a building" step) still works.
 	_header("Construction", 12)
 	for job in settlement["construction_queue"]:
 		_label("  building %s — %d turns left" % [_chain_name(job["chain"]), int(job["turns_left"])])
-	for project in game.available_buildings(region_id):
+	var projects: Array = game.available_buildings(region_id)
+	_action_button("Open the building yard — %d project%s"
+		% [projects.size(), "" if projects.size() == 1 else "s"],
+		func(): drawer_requested.emit("construction", ""))
+	var purse := int(game.state["factions"][game.state["player_faction"]]["treasury"])
+	var affordable: Array = []
+	for project in projects:
+		if int(project["cost"]) <= purse:
+			affordable.append(project)
+	affordable.sort_custom(func(a, b): return int(a["cost"]) < int(b["cost"]))
+	for i in mini(affordable.size(), 3):
+		var project: Dictionary = affordable[i]
 		var build_chain: String = project["chain"]
-		_action_button("Build %s (%d, %dt)" % [project["name"], int(project["cost"]), int(project["build_turns"])],
+		_action_button("Build %s (%d, %dt)"
+			% [project["name"], int(project["cost"]), int(project["build_turns"])],
 			func():
 				game.queue_building(region_id, build_chain)
 				action_taken.emit(),
@@ -155,6 +179,8 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_header("Recruitment", 12)
 	for job in settlement["recruitment_queue"]:
 		_label("  mustering %s" % _template_name(job["template"]))
+	_action_button("Open the muster hall",
+		func(): drawer_requested.emit("units", ""))
 	for unit in game.available_units(region_id):
 		var recruit_id: String = unit["id"]
 		_action_button("Recruit %s (%d)" % [unit["name"], int(unit["cost"])],
@@ -187,6 +213,7 @@ func _build_armies_section() -> void:
 		if army["owner"] == player:
 			var button := Button.new()
 			button.text = ("▶ " if army_id == selected_army else "") + title
+			button.focus_mode = Control.FOCUS_NONE
 			button.pressed.connect(func(): army_selected.emit(army_id))
 			add_child(button)
 			if army_id == selected_army:
@@ -229,6 +256,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	if not settlement.is_empty() and settlement.get("siege") != null \
 			and settlement["siege"]["besieger"] == army_id:
 		var occupation_options := OptionButton.new()
+		occupation_options.focus_mode = Control.FOCUS_NONE
 		for choice in ["occupy", "enslave", "exterminate"]:
 			occupation_options.add_item(choice.capitalize())
 		add_child(occupation_options)
@@ -243,6 +271,14 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 			battle_fought.emit(assault_result, holder_name)
 			action_taken.emit())
 
+	var site := _unexplored_site()
+	if not site.is_empty():
+		_header("Point of interest", 12)
+		var can_search: bool = float(army["movement_left"]) > 0.0
+		_action_button("Search the %s" % site["name"] if can_search
+				else "Search the %s (no movement left)" % site["name"],
+			func(): explore_requested.emit(army_id))
+
 	var offers := game.mercenaries_available(region_id)
 	if not offers.is_empty():
 		_header("Mercenaries for hire", 12)
@@ -253,6 +289,13 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 					game.hire_mercenary(army_id, offer_template)
 					action_taken.emit(),
 				func(): unit_info_requested.emit(offer_template))
+
+
+func _unexplored_site() -> Dictionary:
+	var site: Dictionary = game.data.sites_by_region.get(region_id, {})
+	if site.is_empty() or game.state.get("sites_explored", []).has(site["id"]):
+		return {}
+	return site
 
 
 ## --- Small builders -------------------------------------------------------
@@ -399,6 +442,8 @@ func _breakdown(title: String, factors: Array) -> void:
 func _action_button(text: String, handler: Callable, info: Callable = Callable()) -> void:
 	var button := Button.new()
 	button.text = text
+	# Focus stays off the panel so the arrow keys always drive the map.
+	button.focus_mode = Control.FOCUS_NONE
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
 	if info.is_valid():

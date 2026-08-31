@@ -300,6 +300,43 @@ func test_polygon_picking_and_state_caches(t) -> void:
 	fixture_view.free()
 
 
+func test_screen_fills_its_window(t) -> void:
+	## The campaign screen once set anchors without offsets, leaving it at size
+	## (0, 0) so every child fell back to its minimum and the game huddled in
+	## the top-left corner of the window.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 7)
+	var host := Control.new()
+	tree.root.add_child(host)
+	host.size = Vector2(1440, 900)
+	var screen := CampaignScreen.create(game)
+	host.add_child(screen)
+
+	t.check_eq(screen.size, host.size, "the screen fills its host, not its minimum size")
+	t.check(screen.size.x > 0.0 and screen.size.y > 0.0, "the screen has a real rect")
+	host.free()
+
+
+func test_map_centres_once_it_knows_its_size(t) -> void:
+	## center_on before the first layout has no size to centre against, so the
+	## request is held until the map is laid out.
+	var game := Game.new_campaign("cornelii", 7)
+	var view := MapView.new()
+	view.game = game
+	var before := view._camera_offset
+	view.center_on("latium")
+	t.check_eq(view._camera_offset, before, "an unsized map does not centre on nothing")
+	t.check_eq(view._pending_center, "latium", "the request is remembered")
+
+	view.size = Vector2(900, 600)
+	view._on_resized()
+	t.check_eq(view._pending_center, "", "the pending request is spent")
+	var centre := view.to_screen(view.world_pos(game.data.regions["latium"]))
+	t.check_near(centre.x, 450.0, 0.5, "centred horizontally once sized")
+	t.check_near(centre.y, 300.0, 0.5, "centred vertically once sized")
+	view.free()
+
+
 func test_movement_ux_paths(t) -> void:
 	## Range overlay, hover path preview, tooltip content, and a multi-hop
 	## click that becomes a march order — never a war. The world is searched
@@ -448,6 +485,115 @@ func _sea_reachable(game: Game, from_region: String, to_region: String) -> bool:
 			if to_zones.has(adjacent_zone):
 				return true
 	return false
+
+
+func test_map_camera_controls(t) -> void:
+	## Every camera route a mouseless player has: buttons, keys, gestures.
+	## The zoom_by / pan_by / reset_view API came from the other map branch and
+	## is grafted onto the renderer main kept, so this still holds.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(800, 600)
+	tree.root.add_child(view)
+
+	var start_zoom: float = view._zoom
+	view.zoom_by(MapView.ZOOM_STEP)
+	t.check(view._zoom > start_zoom, "zoom in reaches a closer view")
+	view.zoom_by(1.0 / MapView.ZOOM_STEP)
+	t.check_near(view._zoom, start_zoom, 0.0001, "zoom out returns to where it began")
+
+	# Zooming about the middle keeps the middle of the map where it was.
+	var middle := view.size / 2.0
+	var before := view._region_at(middle)
+	view.zoom_by(MapView.ZOOM_STEP)
+	t.check_eq(view._region_at(middle), before, "the view zooms about its own centre")
+
+	for i in range(40):
+		view.zoom_by(MapView.ZOOM_STEP)
+	t.check_near(view._zoom, MapView.ZOOM_MAX, 0.0001, "zoom stops at the near limit")
+	for i in range(80):
+		view.zoom_by(1.0 / MapView.ZOOM_STEP)
+	t.check_near(view._zoom, MapView.ZOOM_MIN, 0.0001, "zoom stops at the far limit")
+
+	# Panning right must move the view east: a region's screen x drops.
+	view.reset_view()
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	var anchor := view.to_screen(view.world_pos(game.data.regions[capital]))
+	view.pan_by(Vector2(MapView.KEY_PAN_STEP, 0))
+	var after_right := view.to_screen(view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.x - after_right.x, MapView.KEY_PAN_STEP, 0.001, "panning right looks east")
+	view.pan_by(Vector2(-MapView.KEY_PAN_STEP, MapView.KEY_PAN_STEP))
+	var after_down := view.to_screen(view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.y - after_down.y, MapView.KEY_PAN_STEP, 0.001, "panning down looks south")
+	t.check_near(after_down.x, anchor.x, 0.001, "and the sideways pan undoes itself")
+
+	# Home returns to the capital at the default zoom, however lost you are.
+	view.pan_by(Vector2(4000, -2500))
+	view.zoom_by(MapView.ZOOM_STEP)
+	view.reset_view()
+	t.check_near(view._zoom, 1.0, 0.0001, "Home restores the default zoom")
+	t.check_eq(view._region_at(view.size / 2.0), capital, "Home recentres on the capital")
+
+	# The on-map buttons exist, and none of them can steal the arrow keys.
+	var buttons: Array = []
+	for child in view.get_children():
+		if child is VBoxContainer:
+			for grandchild in child.get_children():
+				if grandchild is Button:
+					buttons.append(grandchild)
+	t.check_eq(buttons.size(), 3, "zoom in, zoom out and Home sit on the map")
+	for button in buttons:
+		t.check_eq(button.focus_mode, Control.FOCUS_NONE, "camera buttons never take focus")
+	(buttons[0] as Button).pressed.emit()
+	t.check(view._zoom > 1.0, "the + button zooms in")
+	(buttons[1] as Button).pressed.emit()
+	t.check_near(view._zoom, 1.0, 0.0001, "the - button zooms back out")
+
+	view.free()
+
+
+func test_keyboard_camera_through_the_screen(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 7)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen.size = Vector2(1200, 800)
+
+	var zoom_before: float = screen.map_view._zoom
+	screen._unhandled_key_input(_key(KEY_EQUAL))
+	t.check(screen.map_view._zoom > zoom_before, "+ zooms in")
+	screen._unhandled_key_input(_key(KEY_MINUS))
+	t.check_near(screen.map_view._zoom, zoom_before, 0.0001, "- zooms out")
+
+	var capital: String = game.state["factions"]["julii"]["capital"]
+	screen.map_view.reset_view()
+	var anchor := screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital]))
+	screen._unhandled_key_input(_key(KEY_RIGHT))
+	var panned := screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital]))
+	t.check_near(anchor.x - panned.x, MapView.KEY_PAN_STEP, 0.001, "the right arrow looks east")
+	screen._unhandled_key_input(_key(KEY_D))
+	t.check(screen.map_view.to_screen(screen.map_view.world_pos(game.data.regions[capital])).x < panned.x,
+		"D pans like the right arrow")
+
+	screen._unhandled_key_input(_key(KEY_HOME))
+	t.check_eq(screen.map_view._region_at(screen.map_view.size / 2.0), capital,
+		"Home brings the capital back to the middle")
+
+	# A key the map does not use is left alone for everything else.
+	var untouched: float = screen.map_view._zoom
+	screen._unhandled_key_input(_key(KEY_F5))
+	t.check_near(screen.map_view._zoom, untouched, 0.0001, "unrelated keys move nothing")
+
+	screen.free()
+
+
+func _key(keycode: Key) -> InputEventKey:
+	var event := InputEventKey.new()
+	event.keycode = keycode
+	event.pressed = true
+	return event
 
 
 func test_many_turns_through_the_ui(t) -> void:
@@ -632,3 +778,200 @@ func test_campaign_screen_fills_its_window(t) -> void:
 			"%s fills the window height" % overlay.get_class())
 
 	screen.free()
+
+
+func test_clicking_inside_a_province_selects_it(t) -> void:
+	## The map paints whole territories, so a click well away from the token —
+	## but inside the province — must still select that region. Written against
+	## the geometry main kept: cells carry convex fills and the lookup is
+	## region_at_world, rather than the other branch's raw polygon per cell.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 42)
+	var view := MapView.new()
+	view.game = game
+	view.size = Vector2(900, 700)
+	tree.root.add_child(view)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	view.center_on(capital)
+	t.check(view.geometry != null, "the campaign has map geometry")
+
+	# Walk outward from the seat until we are well outside the old anchor disc
+	# but still inside the capital's own territory.
+	var seat := view.world_pos(game.data.regions[capital])
+	var far_inside := Vector2.ZERO
+	for ring in range(4, 14):
+		var radius := float(ring) * 8.0
+		for step in range(24):
+			var candidate := seat + Vector2.RIGHT.rotated(TAU * step / 24.0) * radius
+			if view.geometry.region_at_world(candidate) == capital \
+					and candidate.distance_to(seat) > 30.0:
+				far_inside = candidate
+				break
+		if far_inside != Vector2.ZERO:
+			break
+	t.check(far_inside != Vector2.ZERO, "the capital's province has room beyond its token")
+	t.check_eq(view._region_at(view.to_screen(far_inside)), capital,
+		"a click inside the province selects it")
+	view.free()
+
+
+func test_building_yard_opens_and_shows_a_chain(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 11)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+
+	t.check(not screen.build_drawer.visible, "the yard starts shut")
+	screen.open_drawer("construction", "")
+	t.check(screen.build_drawer.visible, "and opens on request")
+	# Opening with nothing chosen must never land on a blank pane.
+	t.check(screen.build_drawer._list.get_child_count() > 0, "the chain list fills")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "the detail pane fills")
+	t.check(screen.build_drawer._ladder.get_child_count() > 0, "the tier ladder fills")
+
+	screen.open_drawer("construction", "roman_walls")
+	var ladder: int = screen.build_drawer._ladder.get_child_count()
+	t.check(ladder >= 5, "the walls ladder shows every rung and its chevrons (%d)" % ladder)
+	screen.queue_free()
+
+
+func test_the_yard_follows_the_map_selection(t) -> void:
+	## _on_region_clicked does not go through refresh(), so without an explicit
+	## re-render the drawer keeps showing the previous city's ladder.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 12)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var owned: Array = []
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "cornelii":
+			owned.append(region_id)
+	owned.sort()
+	t.check(owned.size() >= 2, "the house holds more than one city to compare")
+	screen._on_region_clicked(String(owned[0]))
+	screen.open_drawer("construction", "")
+	var first := screen.build_drawer._title.text
+	screen._on_region_clicked(String(owned[1]))
+	t.check(screen.build_drawer._title.text != first,
+		"clicking another city redraws the yard for it")
+	screen.queue_free()
+
+
+func test_the_yard_survives_a_refresh_and_a_turn(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 13)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "roman_walls")
+	screen.refresh()
+	t.check(screen.build_drawer.visible, "a refresh does not shut the yard")
+	t.check(screen.build_drawer._ladder.get_child_count() > 0, "nor empty it")
+	t.check_eq(screen.drawer_chain, "roman_walls", "the chosen chain is remembered")
+	game.end_turn()
+	screen.refresh()
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "and it survives a turn")
+	screen.queue_free()
+
+
+func test_escape_shuts_the_yard_and_leaves_the_camera_alone(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 14)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "")
+	screen._unhandled_key_input(_key(KEY_ESCAPE))
+	t.check(not screen.build_drawer.visible, "escape shuts it")
+	# The arrow keys must still drive the map: that contract predates the drawer.
+	var before: Vector2 = screen.map_view._camera_offset
+	screen._unhandled_key_input(_key(KEY_RIGHT))
+	t.check(screen.map_view._camera_offset != before, "and the camera still answers")
+	screen.queue_free()
+
+
+func test_the_yard_queues_through_the_facade(t) -> void:
+	## Queueing must go through Game so the guided trail's counters still fire.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 15)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+	var before := int(game.state["guided"]["counters"].get("buildings_queued", 0))
+	var projects: Array = game.available_buildings(capital)
+	t.check(not projects.is_empty(), "the capital has something to raise")
+	projects.sort_custom(func(a, b): return int(a["cost"]) < int(b["cost"]))
+	var purse := int(game.state["factions"]["cornelii"]["treasury"])
+	t.check(int(projects[0]["cost"]) <= purse, "and can afford the cheapest of them")
+	t.check(game.queue_building(capital, String(projects[0]["chain"])), "the order takes")
+	t.check_eq(int(game.state["guided"]["counters"].get("buildings_queued", 0)), before + 1,
+		"the trail still counts a queued building")
+	screen.queue_free()
+
+
+func test_the_yard_fits_the_map_at_its_minimum_size(t) -> void:
+	## MapView's own minimum is 600x400. A fixed plate height cannot coexist
+	## with that, so the drawer measures itself against the map it sits in.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 16)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen._on_region_clicked(String(game.state["factions"]["cornelii"]["capital"]))
+	screen.open_drawer("construction", "roman_walls")
+	screen.build_drawer.fit_to(Vector2(600, 400))
+	t.check(absf(screen.build_drawer.offset_top) < 400.0,
+		"the drawer never taller than the map that holds it")
+	t.check(screen.build_drawer._compact, "and it goes compact when the map is short")
+	screen.build_drawer.render(game, screen.map_view.selected_region,
+		"construction", "roman_walls", 0)
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "still rendering when compact")
+	screen.build_drawer.fit_to(Vector2(1600, 1000))
+	t.check(not screen.build_drawer._compact, "and back to full on a big window")
+	screen.queue_free()
+
+
+func test_the_muster_hall_shows_a_unit_and_what_it_needs(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 17)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var capital: String = game.state["factions"]["cornelii"]["capital"]
+	screen._on_region_clicked(capital)
+	screen.open_drawer("units", "")
+	t.check(screen.build_drawer._list.get_child_count() > 0, "the roster fills")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "a unit is shown")
+	# The reverse link: a unit's panel draws the ladder of the chain that opens it.
+	t.check(screen.build_drawer._ladder.get_child_count() > 0,
+		"and the training ground's ladder with it")
+
+	screen.open_drawer("units", "roman_principes")
+	var sheet := game.unit_dossier(capital, "roman_principes")
+	t.check_eq(String(sheet["requires"]["kind"]), "barracks", "principes want a barracks")
+	t.check(screen.build_drawer._detail.get_child_count() > 0, "and the panel renders for them")
+	screen.queue_free()
+
+
+func test_both_tabs_render_for_every_owned_city(t) -> void:
+	## The drawer must survive whatever the map selection is: a village with
+	## almost nothing built, a captured foreign city, a city under siege.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("cornelii", 18)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	for i in 6:
+		game.end_turn()
+	var owned: Array = []
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "cornelii":
+			owned.append(region_id)
+	owned.sort()
+	for region_id in owned:
+		screen._on_region_clicked(String(region_id))
+		for tab in ["construction", "units"]:
+			screen.open_drawer(tab, "")
+			t.check(screen.build_drawer._detail.get_child_count() > 0,
+				"%s renders in %s" % [tab, region_id])
+	screen.queue_free()
