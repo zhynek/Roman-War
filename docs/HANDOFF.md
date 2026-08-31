@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 21
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -27,11 +27,15 @@ invasions, mustering, threat-based garrisons, priority construction; DESIGN.md
 the **guided campaign trail + points of interest** (DESIGN.md §10): 20
 data-driven stages (16 tutorial-arc + 4 reactive with cooldowns), rewards
 including permanent faction boons, 22 explorable sites, a quest panel, map
-markers/highlights, and the player's raise-army action.
+markers/highlights, and the player's raise-army action. Newest: the **building
+yard** (DESIGN.md §10.3) — a drawer over the map that says what a building is,
+what it does, what it leads to and why it is locked, with every building and
+unit **drawn at runtime** from recipe data rather than image files.
 
-**Green as of this branch:** 100 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/ai-opponents-5y68t6`. A Mac build from
-the pre-AI foundation was delivered to the user, who is playtesting.
+**Green as of this branch:** 148 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. Branch `claude/building-details-upgrades-kiq3tt`
+(fast-forwarded from `claude/ai-opponents-5y68t6`). A Mac build from the pre-AI
+foundation was delivered to the user, who is playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -96,7 +100,43 @@ slice before shipping**, or the app will not launch.
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
 
-## 5. Three ways forward
+## 4b. The building yard, and the rules it added
+
+Four things a newcomer will trip over otherwise:
+
+- **`ConstructionRules.blockers_for` is the only answer to "may this be built".**
+  It returns `{kind, params}`, and `available_projects` offers a chain iff the
+  next tier has no blockers. Add a filter there and nowhere else, or
+  `tests/test_building_info.gd`'s cross-check will fail — deliberately.
+- **Sentences are content.** `data/effects_glossary.json` holds the wording;
+  `src/core/` returns `{kind, params}` and never authors English. Numbers stay
+  in `balance.json`. The schema refuses an `inert` effect without a note, which
+  is what keeps `weapon_upgrade` / `armor_upgrade` (45 uses, no engine reader)
+  from being sold to the player as working bonuses.
+- **Effects are standing totals at a tier, not increments**, so an upgrade is
+  worth `new - old`; and the five keys read through `effect_max` must be diffed
+  against the best *other* chain in the town, or a shipyard claims recruit
+  experience a Field of Mars already provides.
+- **There are no image files and none may be added.** `BuildingArt` / `UnitArt`
+  resolve a level or a unit into a parts list in a normalised 0..1 stage;
+  `ArtPainter` draws it with the map's own primitives and palette. Never
+  `randf()` — hash from the id, as `MapGeometry` does. Two traps that bite:
+  `Array.sort_custom` is **not stable** (parts sort on `layer * 1000 + index`),
+  and the plate cache must live on the resolver keyed to `GameData`, because the
+  panels holding the plates are rebuilt on every player order.
+
+Look at the art rather than reasoning about it:
+
+```sh
+SHOT_MODE=contact SHOT_KIND=walls SHOT_OUT=/tmp/walls.png \
+  xvfb-run -a -s "-screen 0 1920x1200x24" godot --path . --script res://tools/screenshot.gd
+SHOT_OUT=/tmp/yard.png SHOT_TURNS=8 SHOT_DRAWER=construction SHOT_CHAIN=roman_barracks \
+  xvfb-run -a -s "-screen 0 1920x1200x24" godot --path . --script res://tools/screenshot.gd
+```
+
+Every visual fix in that work came from opening the PNG, not from reading code.
+
+## 5. Ways forward
 
 The user has not committed to a direction. Each is self-contained; pick one and
 paste its prompt.
@@ -119,6 +159,24 @@ Driven by whatever the playtest surfaced.
 
 If the user reports a problem, **ask for the world seed** — the same seed
 reproduces their exact campaign, which makes any bug directly debuggable.
+
+### The one the user actually wants next — societal trade-offs
+The user's stated ambition for the core of the game: investment in military,
+public benefit, learning and infrastructure should trade off against each other
+in ways that are *felt* rather than tabulated, and that teach something true
+about history and societies. Guns without bread works for a while, then does
+not. They explicitly want **first-principles and physics-like, not a
+ten-thousand-parameter cause-and-effect weighing scale** — or a deliberate
+hybrid. The building yard is the natural surface for it: it already names what
+each choice buys, so it can be made to name what each choice costs.
+
+> Design and build the societal trade-off model: a small number of conserved,
+> first-principles quantities (something like legitimacy, cohesion, capacity)
+> that every investment moves in more than one direction, with lags and
+> thresholds rather than per-building bonuses. Keep every constant in
+> balance.json, keep it deterministic, surface it in the existing breakdowns and
+> the building yard, and prove the emergent claim with long headless campaigns:
+> an all-military build order must actually collapse, and for a legible reason.
 
 ### Phase 6 follow-ups — deepening the AI
 The AI plays the whole game but uniformly; the thresholds live in balance
@@ -158,7 +216,13 @@ amphibious landings, not to AI work.
   `SHOT_OUT=x.png SHOT_ZOOM=-8 SHOT_TURNS=30 xvfb-run -a -s "-screen 0 1600x1000x24"
   godot --rendering-driver opengl3 --path . --script res://tools/screenshot.gd`
   (SHOT_ZOOM is in 1.15× steps; shoot turn 30 as well as 0 — fog hides most
-  of the world at turn 0). No portraits or battle art yet.
+  of the world at turn 0). No portraits or battle art yet — but buildings and
+  units are now drawn (§4b), so the pattern for character portraits exists.
+- **`weapon_upgrade` and `armor_upgrade` still have no engine reader.** 45 uses
+  across the building data, zero call sites in `src/`. The UI is honest about
+  it; wiring them into `AutoResolver` would be a small, self-contained win, and
+  flipping `status` to `live` in `effects_glossary.json` is the only other
+  change needed.
 
 ## 7. Process notes
 
