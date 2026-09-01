@@ -29,15 +29,30 @@ integration of five of those branches and is the only branch worth building.
 | `building-details-upgrades` (contains `ai-opponents`) | The modular AI, the guided campaign trail, the building yard and muster hall, 312 procedural building illustrations, the no-mouse camera |
 | `project-handoff-familiarization` | Campaign agents and a real negotiation model, the knowledge/technique engine, the chronicle and epithets, AI personas |
 
-**NOT merged: `handoff-repo-familiarization-jgqty6`.** Roughly 1,470 of its
-lines are a third implementation of systems `main` already has — its own AI
-(742), agents (308), negotiation (307) and tutorial (113). Merging those would
-be damage, not integration. What it holds that `main` genuinely lacks is small
-and worth taking on its own: the **Advisor** (in-game LLM counsel and
-feedback-to-ticket, `src/ui/advisor/`, `data/advisor.json`), the **office
-ladder** (`data/offices.json`), `src/core/rules/armies.gd`, the build-version
-stamp on the start menu, and `.github/workflows/claude-triage.yml`. Take those
-as a focused change against `main`; do not merge the branch.
+**Deleted, not merged: `handoff-repo-familiarization-jgqty6`** (head
+`bd8be2549e9a39dafe496f1cb97cd6237ace10a9`, deleted 2026-09-01 after review).
+Roughly 1,470 of its lines were a third implementation of systems `main`
+already has — its own AI (742), agents (308), negotiation (307) and tutorial
+(113). Merging those would have been damage, not integration.
+
+Five things it held that `main` still lacks went with it. They are worth
+rebuilding or recovering if anyone wants them: the **Advisor** (in-game LLM
+counsel and feedback-to-ticket, `src/ui/advisor/`, `data/advisor.json`), the
+**office ladder** (`data/offices.json`), `src/core/rules/armies.gd`, the
+build-version stamp on the start menu, and `.github/workflows/claude-triage.yml`.
+The commit is unreachable but not immediately garbage: `git fetch origin
+bd8be2549e9a39dafe496f1cb97cd6237ace10a9` recovers it while GitHub still holds
+the object. Do not resurrect the branch wholesale — take the five pieces.
+
+**Also superseded: `next-phase-roadmap-sjrj35`.** It carried eight commits that
+never reached `main`, which looks alarming until you diff it: it is the earlier
+draft of the same map work `modernize-map-world-view` finished, and `main`'s
+copy of every source file it touches is a strict superset (`map_view.gd` 603 vs
+540 lines, `settlement_icons.gd` 321 vs 255, `ui_style.gd` 155 vs 94,
+`validate_data.py` 1281 vs 556). Its three map test files are absent from `main`
+by absorption, not loss — `test_pathfinding.gd` and `test_ui_smoke.gd` cover
+march orders across turns and saves, halts, order supersession, sieges, fog,
+polygon picking and fleet orders. Nothing to take from it.
 
 **Green on `main`:** 336 tests / 0 failures across 37 test files, validator
 0 errors / 0 warnings across 31 data tables, clean boot. A turn costs ~360 ms.
@@ -405,11 +420,26 @@ already reads the round log it would produce.
 
 ## 9. Process notes
 
+- **Branch from `main`, merge back to `main`, delete the branch.** This is the
+  rule the repository did not have, and §1 is the bill: eight sessions forked
+  the same commit, none merged, and every build shipped one session's work
+  while the owner reasonably assumed it shipped all of it. Before starting,
+  `git fetch origin main && git checkout -b <branch> origin/main` — never fork
+  whatever the container happened to clone. Before finishing, merge to `main`
+  and push it. A branch that outlives its merge is sprawl.
+- **Check for forks before you build anything.**
+  `git branch -r` plus `git rev-list --count origin/main..<branch>` for each
+  takes ten seconds and tells you whether someone else has already built what
+  you are about to build. Three separate AI implementations and three map
+  renderers existed here because nobody ran it.
+- **Never resolve a prose conflict by keeping both sides.** A merge that
+  concatenates two docs produces a document that contradicts itself, and it
+  will be believed. Read both, decide which is true of the merged tree, and
+  write that. `ddf5f51` is what it costs to clean up afterwards.
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
   Develop on whatever branch the session assigns and push to `origin`; CI runs
-  the two gates on every push. **Merge to `main` when the work is done** — §1
-  is what happens when nobody does.
+  the two gates on every push.
 - **Run adversarial review agents after anything substantial.** Three
   reviewers, each with a distinct lens (determinism & save-compat;
   data/schema/clean-room and historical fidelity; balance, exploits & AI
