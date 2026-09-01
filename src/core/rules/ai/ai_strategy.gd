@@ -1,11 +1,15 @@
 class_name AiStrategy
-## Target selection and force estimation for the campaign AI. A faction holds
-## one persistent objective ({kind: "defend"|"take", region, set_turn}) in
-## state.factions[fid].ai.objective — persistence stops armies oscillating
-## between equally-scored targets. Objectives refresh when achieved, invalid,
-## stale (balance ai.objective_stale_turns), or when a defense need appears
-## (defense always outranks expansion). Deterministic: sorted candidate loops,
-## strict-improvement argmax, region-id tie-breaks, no rng.
+## Force estimation for the campaign AI, the diplomacy layer and the knowledge
+## layer: what a stack, a garrison or a whole faction is worth in a fight.
+## Deterministic: sorted candidate loops, strict-improvement argmax, region-id
+## tie-breaks, no rng.
+##
+## NOTE: refresh_objective and the persistent-objective machinery below
+## (state.factions[fid].ai.objective) are NOT driven on main — FactionAi picks
+## targets through AiAssess.choose_target instead. The code is kept because it
+## is the more considered design (objectives persist, so armies cannot
+## oscillate between equally-scored targets), but nothing calls it today. Wire
+## it or delete it deliberately; do not assume it is live.
 
 
 static func refresh_objective(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary) -> Dictionary:

@@ -98,13 +98,22 @@ func _soak(seed_value: int) -> void:
 		seed_adopted[faction_id] = adopted_set
 	_adopted_by_seed[seed_value] = seed_adopted
 
-	var edict_categories := {}
+	# Reads 0 until the AI learns to issue edicts: EdictRules.issue has one
+	# caller, and it is the player facade (HANDOFF §7). Counted anyway, because
+	# the day that changes this is the line that shows it.
+	var edicts_by_id := {}
 	var edicts_held := 0
-	for faction_id in alive:
-		for eid in game.state["factions"][faction_id].get("edicts", {}):
-			var category: String = game.data.edicts.get(eid, {}).get("category", "?")
-			edict_categories[category] = int(edict_categories.get(category, 0)) + 1
-			edicts_held += 1
+	var region_ids: Array = game.state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = game.state["settlements"][region_id]
+		if not alive.has(String(settlement["owner"])):
+			continue
+		var eid: String = String(EdictRules.of(settlement)["id"])
+		if eid == EdictRules.NONE:
+			continue
+		edicts_by_id[eid] = int(edicts_by_id.get(eid, 0)) + 1
+		edicts_held += 1
 
 	var chronicle_kinds := {}
 	for entry in game.state["chronicle"]:
@@ -119,7 +128,8 @@ func _soak(seed_value: int) -> void:
 		% [alive.size(), game.state["factions"].size(), broke, rebels_left])
 	print("  adoptions beyond the endowment: %d (%d in crisis), distinct signatures: %d/%d" \
 		% [adoptions_beyond_start, crisis_adoptions, signatures.size(), alive.size()])
-	print("  edicts held: %d %s" % [edicts_held, str(_sorted_counts(edict_categories))])
+	print("  edicts standing: %d/%d provinces %s" \
+		% [edicts_held, region_ids.size(), str(_sorted_counts(edicts_by_id))])
 	print("  chronicle: %d entries %s" % [game.state["chronicle"].size(), str(_sorted_counts(chronicle_kinds))])
 	print("  avg end_turn: %d ms" % int(float(total_ms) / TURNS))
 

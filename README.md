@@ -82,53 +82,42 @@ python3 tools/validate_data.py
 
 ## Status
 
-Phases 0–6 of the research report's roadmap are built and tested: campaign
-map, turn loop, settlements, economy, recruitment, auto-resolved battles,
-sieges, mercenaries, events, victory checks, and the full character layer
-(traits, retinues, family tree, succession), plus the societal layer that makes
-those decisions weigh something. A playable campaign-map UI sits on top:
-geographic map with fog of war, settlement/army panels driven by the engine's
-factor breakdowns, family scroll, and save/load. Campaign AI (a passive stub
-today), agents & diplomacy negotiation, and senate depth are the next phases;
-their data tables and state hooks already exist.
-Phases 0–4 and 6 of the research report's roadmap are built and tested:
-campaign map, turn loop, settlements, economy, recruitment, auto-resolved
-battles, sieges, mercenaries, events, victory checks, the full character layer
-(traits, retinues, family tree, succession), and modular AI opponents that
-expand, declare wars, defend, and manage their realms deterministically. A
-playable campaign-map UI sits on top: geographic map with fog of war,
-settlement/army panels driven by the engine's factor breakdowns, family
-scroll, save/load, and a guided campaign trail — objectives that teach the
-game, react to the world, and pay rewards — with 22 explorable points of
-interest on the map. Agents & diplomacy negotiation and senate depth are the
-next phases; their data tables and state hooks already exist.
-sieges (with amphibious landings), mercenaries, events, victory checks, the
-full character layer (traits, retinues, family tree with seeded households,
-succession), the agents & diplomacy layer (attitude model with memory,
-negotiation offers with tribute and region deals, diplomats/spies/assassins
-on the map), and a persona-driven campaign AI that garrisons, builds, raises
-armies, clears the independents, declares wars it thinks it can win, and sues
-for peace when losing — the world moves without the player.
+Phases 0–6 of the research report's roadmap are built and tested: campaign map,
+turn loop, settlements, economy, recruitment, auto-resolved battles, sieges
+(with amphibious landings), mercenaries, events, victory checks, the full
+character layer (traits, retinues, family tree with seeded households,
+succession), the societal layer that makes those decisions weigh something, the
+agents & diplomacy layer (attitude model with memory, negotiation offers with
+tribute and region deals, diplomats/spies/assassins on the map), and a
+persona-driven campaign AI that garrisons, builds, raises armies, clears the
+independents, declares wars it thinks it can win, and sues for peace when
+losing — the world moves without the player.
 
 On top of that sits the Deep Strategy layer (DESIGN.md §12): 37 historical
 techniques that spread by contact, conquest and espionage — awareness is
 free, institutionalizing costs treasury and years, defeat discounts military
 reform (the corvus law), and recruits are armed to their city's standard for
-life; 16 edicts with real consequence webs (the grain dole that collapses
-with the treasury, tax farming against the census levy, repeal shocks); and
-a structured chronicle that writes each campaign's history — wars ledgered
+life; nine provincial edicts, one standing order per province, that bite over
+a few turns and stop the moment they are revoked while whatever they moved
+stays moved (the grain dole that becomes an expectation, martial law that buys
+order and spends everything else); and a structured chronicle that writes each campaign's history — wars ledgered
 and summarized, reigns summed, generals earning epithets from their deeds —
 rendered as prose in an annals scroll and stored as machine-readable data
 (the contract for an optional future AI narrator). Every technique, edict
 and epithet carries its documented historical basis; ten players end in ten
 measurably different worlds, and the soak prints the divergence as a number.
 
-A playable campaign-map UI covers it all: geographic map with fog of war,
-settlement/army/agent panels driven by the engine's factor breakdowns, a
-negotiation scroll with live appraisal, knowledge/edicts/annals/family
-scrolls, world-news turn log, and save/load. Senate/politics depth, naval
-combat, and a real-time battle scene are the next phases; their data tables
-and state hooks already exist.
+A playable campaign-map UI covers it all: a procedurally painted terrain map
+with fog of war and settlement iconography drawn from the campaign data;
+settlement/army/agent panels driven by the engine's factor breakdowns; the
+building yard and muster hall with illustrated ladders; a negotiation scroll
+with live appraisal; knowledge, edicts, annals and family scrolls; a guided
+campaign trail of objectives that react to the world and pay real rewards, with
+explorable points of interest; an animated battle replay; a sequenced end turn
+that plays the day out on the map and closes on a Daily Dispatch; and
+save/load. Senate/politics depth (offices, elections), naval combat, and a
+real-time battle scene are the next phases; their data tables and state hooks
+already exist.
 
 ## Clean-room policy
 

@@ -511,3 +511,37 @@ func test_plunders_share_outlives_the_conquest(t) -> void:
 	var one_turn_later: float = SocietyRules.faction_stocks(data, faction)["spoils"]
 	t.check(one_turn_later < at_war, "it does start to fall")
 	t.check(one_turn_later > at_war * 0.5, "but a single peaceful year does not undo it")
+
+
+func test_the_senate_drifts_popular_standing_and_never_assigns_it(t) -> void:
+	## The invariant HANDOFF §5.11 names: SenateRules moves popular_standing
+	## TOWARD the regional baseline instead of recomputing it, because edict
+	## tension deltas and the per-turn drips write the same number. An
+	## overwrite would silently turn every edict's political cost into dead
+	## code, which is how this shipped as a bug once.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rules: Dictionary = data.balance["senate"]
+	var faction: Dictionary = state["factions"]["red"]
+
+	# Put politics somewhere the baseline is not, the way an edict would.
+	var displaced := -4.0
+	faction["popular_standing"] = displaced
+	var before := float(faction["popular_standing"])
+	SenateRules.process_turn(data, state, CampaignRng.seeded(9))
+	var after := float(faction["popular_standing"])
+
+	t.check(after != before, "the senate turn moved the crowd's mood at all")
+	# One turn may only close a fraction of the gap: a jump straight to the
+	# baseline is exactly the overwrite this test exists to catch.
+	var baseline := minf(float(rules["max_standing"]),
+		float(state["settlements"].size()) * float(rules["popular_standing_per_region"]))
+	if absf(baseline - before) > 0.001:
+		var closed := (after - before) / (baseline - before)
+		t.check(closed > 0.0, "it drifted toward the baseline, not away from it")
+		t.check(closed < 0.9, "it drifted a fraction of the gap, not onto the baseline")
+
+	# And what it stores must survive a JSON round trip, or a loaded save
+	# diverges from the live game a turn later.
+	var reparsed = JSON.parse_string(JSON.stringify(after))
+	t.check_eq(float(reparsed), after, "popular_standing is quantized for the save")

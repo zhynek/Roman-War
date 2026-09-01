@@ -29,7 +29,9 @@ campaign runs to AD 14.
 
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
+  Buttons: **Dispatch**, **Family**, **Diplomacy**, **Knowledge**, **Annals**,
+  **Save**, **Load**, and **END TURN**. (Edicts are issued per province, so
+  they live on the city panel rather than up here.)
 - **The map** — a terrain map of the whole world: coastlines, province
   borders, and the lie of the land (mountain ridges, forests, hills, marsh,
   desert). Every province is tinted by its terrain and washed with its
@@ -42,8 +44,11 @@ campaign runs to AD 14.
   their unit count and a star when a general leads; your fleets ride at
   anchor in their named seas.
   - **Drag with the left or middle mouse button** (or **WASD/arrows**) to
-    move the map; **scroll** to zoom; **double-click** to center on a
-    province.
+    move the map; **scroll** (or a trackpad pinch, or the **+ / −** keys) to
+    zoom; **double-click** to center on a province.
+  - Prefer buttons? **+**, **−** and **Home** sit in the map's bottom-right
+    corner. **Home** (or the Home key) returns you to your capital at a
+    readable zoom whenever you get lost.
   - **Left-click** a province to select it — a click only counts if the
     mouse does not travel, so dragging never mis-clicks; **hover** for its
     details.
@@ -64,24 +69,6 @@ campaign runs to AD 14.
     road on the map is not always the quickest.
   - **Click a sea** holding one of your fleets to take the helm, then click
     a highlighted neighbouring sea to sail.
-- **The map** — a painted Mediterranean, drawn entirely by code from the game
-  data: terrain-coloured provinces (olive plains, ochre hills, grey peaks,
-  dark forest, pale desert) with mountains, trees and hills sketched on them,
-  a shallow-water shelf along every coast, and named seas. Each province's
-  settlement is a circle coloured by its owner and sized by its city tier;
-  the cased tan lines between settlements are roads, dashed lines are sea
-  routes. Small squares beside a city are armies. A red ring means the city
-  is under siege. Land you have not scouted shows its geography — muted, with
-  a dark marker where its settlement lies — but hides its owner, roads, names
-  and armies until you get someone close enough to look.
-  - **Move the map**: drag it with any mouse button, use the **arrow keys**
-    (or WASD), or two-finger scroll on a trackpad.
-  - **Zoom**: the **+ and −** buttons in the map's bottom-right corner, the
-    **+ / −** keys, a trackpad pinch, or the mouse wheel.
-  - **Lost?** The **Home** button (or the Home key) returns you to your
-    capital at the default zoom.
-  - **Left-click** a region to select it. City names appear once you are
-    zoomed in a little.
 - **Right panel** — everything about the region you clicked, and every action
   you can take there.
 - **Bottom right** — the turn log: every report of the day just closed, in one
@@ -149,20 +136,9 @@ them as generosity and starts expecting them. Take them away and it is angrier
 than if you had never built them at all. Public generosity is a promise, not a
 purchase.
 
-Each province can hold **one standing order** — an edict — and it is the only
-thing you can do that acts in years rather than decades. The **Corn Dole** quiets
-a city at once and sends a bill every turn, and after a decade the city has
-stopped experiencing it as generosity: stop it then and you are taking something
-away. **Martial Law** will improve the order number tonight and ruin everything
-else about the province; you can watch both happen in the same panel, which is
-the point. **The Amnesty** is the only thing that empties a province's ledger of
-grievances quickly, and you will meet some of the men you pardoned again. There
-are also a census, a labour levy, tax farmers, public works, a grant of
-citizenship, and a levy for the legions.
-
-An order takes a few turns to take hold, and stops the moment you revoke it —
-but whatever it moved stays moved. After revoking, that province cannot take
-another order for a while, so switching is a decision too.
+Each province can hold **one standing order** — an edict — set from this
+panel. It is the only lever you have that acts in years rather than decades;
+the **Edicts** section below says what each one costs you.
 
 A distant province you have built no road to, with no one of yours standing in
 it, will not report exact figures — you will get a rounded survey several turns
@@ -316,19 +292,25 @@ new practice, everyone hears of it.
 
 ## Edicts
 
-The **Edicts** scroll is the book of policies — the statecraft lever beside
-the building queue. Standing policies are held at upkeep until struck down:
-the grain dole (dear, and dearer the more mouths), cult patronage, land for
-veterans, tax farming *or* the census levy (never both), the citizen levy
-*or* hired companies, the wider franchise, free harbors, the royal post.
-One-time decrees — games, debt remission, a sacred truce — buy a mood that
-fades. Every effect appears by name in your city breakdowns.
+Every province can hold **one standing order**, chosen on that city's panel —
+the statecraft lever beside the building queue, and the only thing you can do
+that acts in years rather than decades.
 
-Mind the tensions: enacting moves your standing with Senate and people,
-repealing angers whoever loved the policy (the scroll states the price
-before you strike it down), and **if your treasury runs dry the costliest
-policy collapses on its own** — the dole ends when the silver does, and the
-crowd does not care whose fault it was.
+The **Corn Dole** quiets a city at once and sends a bill every turn that grows
+with the population; after a decade the city has stopped experiencing it as
+generosity, so stopping it then is taking something away. **Martial Law**
+improves the order number tonight and ruins everything else about the province —
+you can watch both happen in the same panel, which is the point. **The Amnesty**
+is the only thing that empties a province's ledger of grievances quickly, and
+you will meet some of the men you pardoned again. There are also a **census**, a
+**labour levy**, **tax farmers**, **public works**, a **grant of citizenship**,
+and a **levy for the legions**. Each names its price and its requirements up
+front — some want a settlement of a certain size, some a particular building.
+
+An order takes a few turns to take hold and stops the moment you revoke it, but
+whatever it moved stays moved. After revoking, that province cannot take another
+order for a while, so switching is a decision too. Every effect appears by name
+in the city's own breakdowns.
 
 ## The Annals
 
@@ -385,52 +367,24 @@ a colder attitude toward you, never extra cleverness.
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, but they do not scheme, invade, or negotiate. Real opponents are
-  the next phase. Expect a quiet world.
 - **Battles play back, but are not fought.** The auto-resolver decides every
   battle on paper; the animated field you watch is a faithful replay of that
-  verdict, not an interactive fight. Commanding troops in real time is a
-  later phase.
-- **The computer players fight, but they do not talk.** They develop their
-  cities, raise led armies, take rebel towns, declare wars when strong, defend
-  what is theirs, and let hopeless wars gutter out between themselves — expect
-  the map to change without you. What they cannot do yet is negotiate: no
-  offers, tribute, or peace terms with *you* until the diplomacy phase lands.
-- **Battles resolve on paper.** You see the outcome, not the fight.
-- **Hostile islands cannot be invaded.** A single-region island (Sardinia,
-  Britain, Crete, Rhodes, Cyprus) can only be entered by sea while its owner
-  is not at war with you — land first, then lay siege. Once war is declared
-  there is no way ashore, for you or the computer, until naval landings
-  arrive with the fleet phase.
-- **Agents** (spies, diplomats, assassins) are designed and their data exists,
-  but they are not playable yet.
-- **Battles resolve on paper.** You see the outcome, not the fight.
-- **The AI does not use agents** against you yet — your spies and blades are
-  a player's edge this build (their counter-intelligence still works).
-- **Naval combat** — fleets move and watch the coasts, but do not fight or
-  blockade yet.
-- **The Senate** issues missions and the civil war can trigger, but the full
-  political system (offices, elections) is later.
-- **The art is original vector work, still early.** The map, towns, and
-  tokens are drawn by the engine from the campaign data — expect the style
-  to keep sharpening.
-- **The computer players are bounded, not clever.** They manage their cities,
-  storm a city they have surrounded once the rams are ready and the odds are
-  good, march on a weaker neighbour they are already at war with, and now and
-  then declare war on someone they are not bound to. They do **not** negotiate,
-  plan an economy, use fleets, or coordinate two armies toward one goal. Expect
-  a world that moves — borders do change hands — but not a cunning one.
-- **Battles resolve on paper.** You see the outcome, not the fight.
-- **Agents** (spies, diplomats, assassins) are designed and their data exists,
-  but they are not playable yet.
-- **The Senate** issues one charge at a time — take a province, win an alliance,
-  open a market — and the civil war can trigger, but the full political system
-  (offices, elections) is later. Your standing charge and its deadline sit in the
-  top bar; blockade and assassination charges are written but not yet playable.
-- **The art is placeholder.** Coloured circles, not painted maps.
-- **All art is drawn by code.** The map is a procedural painting rebuilt from
-  the data every launch; there are no character portraits or battle scenes yet.
+  verdict, not an interactive fight. Commanding troops in real time is a later
+  phase — the game is built so it can drop in without changing anything else.
+- **The computer players do not use agents against you.** Spies, blades and
+  envoys are a player's edge this build; the AI's counter-intelligence still
+  works, so your own agents can still fail.
+- **Naval combat.** Fleets move and watch the coasts, but they do not fight,
+  and there are no port blockades yet. (Armies still cross the sea, and an
+  amphibious landing on an enemy shore already works.)
+- **Senate politics beyond missions.** The Senate sets you a charge and the
+  civil war can trigger, but offices and elections are a later phase. Of the
+  Senate's authored charges, blockading a port and driving a rival to take his
+  own life are written and waiting on those systems.
+- **All art is drawn by code.** The map, the towns, the buildings and the
+  troops are procedural vector work rebuilt from the campaign data every
+  launch. There are no character portraits and no battle-scene art yet, and
+  the style will keep sharpening.
 
 ## macOS blocks the app on first launch
 

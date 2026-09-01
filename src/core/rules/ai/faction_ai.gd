@@ -1,11 +1,18 @@
 class_name FactionAi
-## Phase 6: one non-player faction's full turn, replacing the passive AiStub.
-## Modular behaviors, all deterministic and tuned from data/balance.json "ai":
+## One non-player faction's full turn. Modular behaviors, all deterministic
+## and tuned from data/balance.json "ai":
 ##
-##   AiDiplomacy — deliberate war declarations, white peace for stalled AI wars
+##   AiDiplomacy — war declarations, offers, tribute, peace when losing
 ##   AiAssess    — power estimates, reachability, threat levels, target choice
 ##   AiMilitary  — sieges, defence, field battles, marching, mustering
 ##   AiEconomy   — capital, taxes, retraining, recruitment, construction
+##   AiStrategy  — faction-wide strength pricing, taken once per world turn
+##   AiPolicy    — which craft the court takes up next (§12)
+##   AiRules     — the persona table behind all of it (data/ai.json)
+##
+## Order: capital → diplomacy → target → military → economy → policy, so a war
+## declared this turn shapes this turn's objective, the armies act on it, and
+## the settlements spend whatever the war effort left.
 ##
 ## Difficulty never makes the AI smarter — it stays the documented income
 ## multiplier and order bonus (EconomyRules / PublicOrderRules); a richer AI
