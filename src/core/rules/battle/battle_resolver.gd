@@ -56,17 +56,24 @@ static func force_strength(data: GameData, units: Array, general: Variant, exper
 	## general profile {command, troop_morale} of EFFECTIVE values (base
 	## attributes plus trait and retinue modifiers — see CharacterRules).
 	var battle_rules: Dictionary = data.balance["battle"]
+	## A unit's weapons/armor stamp (recruit-time arming from city forges and
+	## practiced techniques) scales its attack and defense respectively.
+	var weapon_pct := float(battle_rules.get("weapon_upgrade_attack_pct", 0.0))
+	var armor_pct := float(battle_rules.get("armor_upgrade_defense_pct", 0.0))
 	var strength := 0.0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if template.is_empty():
 			continue
 		var soldiers := float(template["soldiers"]) * float(unit["strength_pct"]) / 100.0
-		var weapon := float(unit.get("weapon", 0)) * float(battle_rules["weapon_upgrade_attack_pct"]) / 100.0
-		var armor := float(unit.get("armor", 0)) * float(battle_rules["armor_upgrade_defense_pct"]) / 100.0
+		var weapon := float(unit.get("weapon", 0)) * weapon_pct / 100.0
+		var armor := float(unit.get("armor", 0)) * armor_pct / 100.0
+		# Weapons scale what a unit deals, armor what it takes. Morale and the
+		# charge stand outside both: better armor does not make braver men.
 		var quality := (float(template["attack"]) + float(template.get("missile_attack", 0)) * 0.5) \
 				* (1.0 + weapon) \
-			+ (float(template["defense"]) + float(template["morale"]) * 0.5) * (1.0 + armor) \
+			+ float(template["defense"]) * (1.0 + armor) \
+			+ float(template["morale"]) * 0.5 \
 			+ float(template.get("charge", 0)) * 0.25
 		var experience_bonus := 1.0 + float(unit["experience"]) * experience_pct_per_chevron / 100.0
 		strength += soldiers * quality * experience_bonus

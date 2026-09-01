@@ -19,9 +19,15 @@ class_name FactionAi
 ## re-declaration cooldown) — a plain JSON dict, so saves round-trip.
 
 
+## The world's pricing, taken once at the top of the turn and handed to every
+## house's diplomacy. Cleared and refilled by begin_round, never saved.
+static var _round_strengths: Dictionary = {}
+
+
 static func begin_round(data: GameData, state: Dictionary) -> void:
 	## Once per world turn, before any faction acts.
 	AiDiplomacy.tick_wars(data, state)
+	_round_strengths = AiStrategy.all_faction_strengths(data, state)
 
 
 static func take_turn(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng, resolver: BattleResolver, ai_notices: Array, character_notices: Array) -> void:
@@ -39,10 +45,11 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, rng
 
 	if not is_rebel:
 		AiEconomy.fix_capital(data, state, faction_id)
-		AiDiplomacy.consider_peace(data, state, faction_id, ai_notices)
+		# Diplomacy first, so a war declared this turn shapes this turn's
+		# objective. Temperament comes from the persona table in data/ai.json.
+		AiDiplomacy.run(data, state, faction_id,
+			AiRules.persona_for(data, faction_id), ai_notices, _round_strengths)
 		context["target"] = AiAssess.choose_target(data, state, faction_id)
-		if context["target"] == "" and AiDiplomacy.consider_war(data, state, faction_id, ai_notices):
-			context["target"] = AiAssess.choose_target(data, state, faction_id)
 		# The ledger remembers what this house is campaigning for, so a war
 		# being mustered for counts as prosecuted, not stalled.
 		var targets: Dictionary = AiDiplomacy.ai_memory(state)["targets"]
@@ -55,6 +62,9 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, rng
 
 	AiMilitary.take_turn(data, state, faction_id, context, rng, resolver, ai_notices, character_notices)
 	AiEconomy.take_turn(data, state, faction_id, context)
+	if not is_rebel:
+		# What the court takes up next. Rebels have no court.
+		AiPolicy.run(data, state, faction_id, AiRules.persona_for(data, faction_id))
 
 
 static func _staging_for(state: Dictionary, faction_id: String, goal_costs: Dictionary) -> String:

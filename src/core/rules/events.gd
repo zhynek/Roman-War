@@ -13,21 +13,45 @@ class_name EventRules
 
 
 static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) -> Array:
+	# Repeatable events rest between firings; their cooldowns tick first.
+	if state.has("event_cooldowns"):
+		var cooldowns: Dictionary = state["event_cooldowns"]
+		var cooling_ids: Array = cooldowns.keys()
+		cooling_ids.sort()
+		for event_id in cooling_ids:
+			cooldowns[event_id] = int(cooldowns[event_id]) - 1
+			if int(cooldowns[event_id]) <= 0:
+				cooldowns.erase(event_id)
+
 	var fired: Array = []
 	for event in data.events:
 		# The fired check runs AFTER the trigger, because a per-faction condition
 		# has to be able to match a house that has not fired it yet even when
 		# another already has.
+		var event_id: String = event["id"]
+		var once: bool = event.get("once", true)
+		if once and state["events_fired"].has(event_id):
+			continue
+		if not once and int(state.get("event_cooldowns", {}).get(event_id, 0)) > 0:
+			continue
 		var hit := _trigger_matches(data, state, event)
 		if hit.is_empty():
 			continue
 		var fired_key := _fired_key(event, hit)
-		if event.get("once", true) and state["events_fired"].has(fired_key):
+		if once and state["events_fired"].has(fired_key):
 			continue
 		_apply_event(data, state, event, hit)
-		state["events_fired"].append(fired_key)
+		# A once-only event is remembered by its fired key, which carries the
+		# faction for a per_faction event so each house can meet it in turn.
+		# A repeatable one takes a cooldown instead.
+		if once:
+			state["events_fired"].append(fired_key)
+		else:
+			if not state.has("event_cooldowns"):
+				state["event_cooldowns"] = {}
+			state["event_cooldowns"][event_id] = int(event.get("cooldown_turns", 8))
 		fired.append({
-			"kind": "event", "id": event["id"], "faction": hit.get("faction", ""),
+			"kind": "event", "id": event_id, "faction": hit.get("faction", ""),
 			"pattern": event.get("pattern", ""),
 		})
 
@@ -39,6 +63,9 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 			continue
 		_apply_disaster(state, disaster, region_id, rng)
 		fired.append({"kind": "disaster", "id": disaster["id"], "region": region_id})
+		ChronicleRules.record(data, state, "disaster",
+			{"faction": state["settlements"][region_id]["owner"], "region": region_id},
+			5, {"disaster": String(disaster["id"])})
 	return fired
 
 
@@ -56,7 +83,9 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 			var resource: String = trigger.get("hidden_resource", "")
 			var excluded: Array = trigger.get("exclude_regions", [])
 			var required_culture: String = trigger.get("culture", "")
-			for region_id in state["settlements"]:
+			var region_ids: Array = state["settlements"].keys()
+			region_ids.sort()  # first-match steers the context — sorted
+			for region_id in region_ids:
 				if excluded.has(region_id):
 					continue
 				var region: Dictionary = data.regions[region_id]
@@ -76,12 +105,49 @@ static func _trigger_matches(data: GameData, state: Dictionary, event: Dictionar
 				return {"faction": target}
 			return {}
 		"first_civil_war":
-			for faction_id in state["factions"]:
+			var faction_ids: Array = state["factions"].keys()
+			faction_ids.sort()  # first-match steers the context — sorted
+			for faction_id in faction_ids:
 				if state["factions"][faction_id]["at_civil_war"]:
 					return {"faction": faction_id}
 			return {}
 		"society_stat":
 			return _society_match(data, state, event, trigger)
+		"treasury_above":
+			# A named faction's fortune, or the first (sorted) court so rich.
+			var threshold := int(trigger.get("threshold", 0))
+			var wanted := String(trigger.get("faction", ""))
+			if wanted != "":
+				if state["factions"].get(wanted, {}).get("alive", false) \
+						and int(state["factions"][wanted]["treasury"]) > threshold:
+					return {"faction": wanted}
+				return {}
+			var faction_ids: Array = state["factions"].keys()
+			faction_ids.sort()  # first-match steers the context — sorted
+			for faction_id in faction_ids:
+				var faction: Dictionary = state["factions"][faction_id]
+				if faction_id != "rebels" and faction["alive"] \
+						and int(faction["treasury"]) > threshold:
+					return {"faction": faction_id}
+			return {}
+		"regions_held":
+			var needed := int(trigger.get("count", 0))
+			var wanted := String(trigger.get("faction", ""))
+			var counts := {}
+			for settlement in state["settlements"].values():  # pure counting
+				counts[settlement["owner"]] = int(counts.get(settlement["owner"], 0)) + 1
+			if wanted != "":
+				if state["factions"].get(wanted, {}).get("alive", false) \
+						and int(counts.get(wanted, 0)) >= needed:
+					return {"faction": wanted}
+				return {}
+			var faction_ids: Array = state["factions"].keys()
+			faction_ids.sort()
+			for faction_id in faction_ids:
+				if faction_id != "rebels" and state["factions"][faction_id]["alive"] \
+						and int(counts.get(faction_id, 0)) >= needed:
+					return {"faction": faction_id}
+			return {}
 	return {}
 
 
@@ -195,6 +261,22 @@ static func _apply_event(data: GameData, state: Dictionary, event: Dictionary, c
 			"value": float(effects["happiness_all_settlements"]),
 			"turns": int(effects.get("happiness_turns", 2)),
 		}
+	if effects.has("happiness_faction") and target != "":
+		# A mood on ONE court's lands — the stacking modifier container, so
+		# several such moods coexist (unlike the legacy single slot above).
+		var mood: Dictionary = effects["happiness_faction"]
+		ModifierRules.add(state, target, "", "happiness",
+			float(mood["value"]), int(mood.get("turns", 4)), "event:" + String(event["id"]))
+	if effects.has("grant_technique") and target != "":
+		# Scripted historical spread: the craft becomes PRACTICED outright,
+		# however the court stood with it before.
+		var technique_id := String(effects["grant_technique"])
+		if data.techniques.has(technique_id) and not KnowledgeRules.adopted(state, target, technique_id):
+			KnowledgeRules.knowledge_of(state, target)[technique_id] = {
+				"stage": "adopted", "turn": int(state["turn"]), "progress": 0, "discount_pct": 0.0,
+			}
+			ChronicleRules.record(data, state, "technique_adopted",
+				{"faction": target, "technique": technique_id}, 4, {"scripted": true})
 
 
 static func tick_event_happiness(state: Dictionary) -> void:

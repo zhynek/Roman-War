@@ -25,6 +25,12 @@ SCHEMAS = ROOT / "schemas"
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
     "balance.json": "balance.schema.json",
+    "ai.json": "ai.schema.json",
+    "agents.json": "agents.schema.json",
+    "techniques.json": "techniques.schema.json",
+    "edicts.json": "edicts.schema.json",
+    "epithets.json": "epithets.schema.json",
+    "annals.json": "annals.schema.json",
     "cultures.json": "cultures.schema.json",
     "factions.json": "factions.schema.json",
     "buildings.json": "buildings.schema.json",
@@ -72,6 +78,9 @@ DISPATCH_TOKENS = {
     "faction", "other_faction", "region", "settlement", "subject",
     "value", "value_abs", "turn", "year", "season", "detail",
 }
+# Mission kinds authored ahead of their systems, same idea: port blockades are
+# the Phase 3 naval remainder; leader_suicide needs Phase 7 senate depth.
+FORWARD_MISSIONS = {"blockade_port", "leader_suicide"}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -119,6 +128,30 @@ def cross_checks(t: dict[str, dict]) -> None:
     if sum(1 for f in factions.values() if f.get("is_senate")) != 1:
         err("factions: exactly one senate faction required")
 
+    # --- ai personas ------------------------------------------------------
+    personas = {p["id"]: p for p in t.get("ai.json", {}).get("personas", [])}
+    if "default" not in personas:
+        err("ai: a persona with id 'default' is required (the engine's fallback)")
+    referenced = set()
+    for faction in factions.values():
+        persona_id = faction.get("ai_persona")
+        if persona_id is None:
+            continue
+        if persona_id not in personas:
+            err(f"factions: {faction['id']}: unknown ai_persona {persona_id}")
+        else:
+            referenced.add(persona_id)
+    for persona_id in personas:
+        if persona_id != "default" and persona_id not in referenced:
+            warn(f"ai: persona {persona_id} is referenced by no faction")
+
+    # --- agents -----------------------------------------------------------
+    agent_kinds = {a["id"]: a for a in t.get("agents.json", {}).get("agents", [])}
+    for required_kind in ("diplomat", "spy", "assassin"):
+        if required_kind not in agent_kinds:
+            err(f"agents: kind {required_kind} missing (the engine expects all three)")
+
+
     # --- buildings + temples ---------------------------------------------
     chains: dict[str, dict] = {}
     level_ids: dict[str, str] = {}  # level id -> chain id
@@ -157,6 +190,15 @@ def cross_checks(t: dict[str, dict]) -> None:
             if not any(c["kind"] == kind and culture in c["cultures"] for c in chains.values()):
                 if culture != "neutral":
                     warn(f"buildings: culture {culture} has no {kind} chain")
+        for agent_kind in agent_kinds.values():
+            satisfiable = any(
+                c["kind"] == agent_kind["building_kind"]
+                and len(c["levels"]) >= agent_kind["building_level"]
+                and culture in c["cultures"]
+                for c in chains.values())
+            if not satisfiable and culture != "neutral":
+                warn(f"agents: {agent_kind['id']} gate {agent_kind['building_kind']} "
+                     f"L{agent_kind['building_level']} unsatisfiable for culture {culture}")
 
     # --- units ------------------------------------------------------------
     units = {u["id"]: u for u in t.get("units.json", {}).get("units", [])}
@@ -186,6 +228,139 @@ def cross_checks(t: dict[str, dict]) -> None:
                        if faction_id in u["factions"] or "all" in u["factions"]]
         if len(recruitable) < 3:
             err(f"units: faction {faction_id} can recruit only {len(recruitable)} unit types")
+
+    # --- techniques -------------------------------------------------------
+    techniques = {}
+    for technique in t.get("techniques.json", {}).get("techniques", []):
+        if technique["id"] in techniques:
+            err(f"techniques: duplicate id {technique['id']}")
+        techniques[technique["id"]] = technique
+
+    all_resources = set()
+    all_hidden = set()
+    for region in t.get("regions.json", {}).get("regions", []):
+        all_resources.update(region.get("resources", []))
+        all_hidden.update(region.get("hidden_resources", []))
+
+    for technique in techniques.values():
+        tid = technique["id"]
+        for fid in technique["start_adopted"].get("factions", []):
+            if fid not in factions:
+                err(f"techniques: {tid}: unknown start_adopted faction {fid}")
+        prereq = technique["prerequisites"]
+        for dependency in prereq.get("techniques", []):
+            if dependency not in techniques:
+                err(f"techniques: {tid}: unknown prerequisite technique {dependency}")
+        if prereq["resource"] and prereq["resource"] not in all_resources:
+            err(f"techniques: {tid}: prerequisite resource {prereq['resource']} "
+                f"appears in no region")
+        if prereq["hidden_resource"] and prereq["hidden_resource"] not in all_hidden:
+            err(f"techniques: {tid}: prerequisite hidden_resource "
+                f"{prereq['hidden_resource']} appears in no region")
+
+    # Prerequisite graph must be acyclic (DFS with colors).
+    color = {}  # 0 unvisited, 1 in-stack, 2 done
+
+    def visit(tid: str) -> bool:
+        if color.get(tid, 0) == 1:
+            return False
+        if color.get(tid, 0) == 2:
+            return True
+        color[tid] = 1
+        for dependency in techniques.get(tid, {}).get("prerequisites", {}).get("techniques", []):
+            if dependency in techniques and not visit(dependency):
+                err(f"techniques: prerequisite cycle through {tid} -> {dependency}")
+                return False
+        color[tid] = 2
+        return True
+
+    for tid in sorted(techniques):
+        visit(tid)
+
+    # Per-culture reachability: warn when a technique names a culture as
+    # originator or starting holder whose building tree can never satisfy the
+    # institution gate (history has holes, but authored ones should be meant).
+    for technique in techniques.values():
+        need_kind = technique["prerequisites"]["building_kind"]
+        need_level = technique["prerequisites"]["building_level"]
+        if not need_kind or need_level <= 0:
+            continue
+        for culture in set(technique["origin_cultures"]) | set(technique["start_adopted"]["cultures"]):
+            satisfiable = any(
+                c["kind"] == need_kind and len(c["levels"]) >= need_level
+                and culture in c["cultures"]
+                for c in chains.values())
+            if not satisfiable and culture != "neutral":
+                warn(f"techniques: {technique['id']}: culture {culture} is named as "
+                     f"origin/holder but can never build {need_kind} L{need_level}")
+
+    # requires_technique gates on units and building levels must resolve.
+    for unit in units.values():
+        gate = unit.get("requires_technique", "")
+        if gate and gate not in techniques:
+            err(f"units: {unit['id']}: unknown requires_technique {gate}")
+    for chain in chains.values():
+        for level in chain["levels"]:
+            gate = level.get("requires_technique", "")
+            if gate and gate not in techniques:
+                err(f"buildings: {level['id']}: unknown requires_technique {gate}")
+
+    # The edicts cross-checks that lived here belonged to the OTHER edicts
+    # engine (prerequisites/tensions/decree-vs-standing). main kept the
+    # provincial-edicts table instead, whose own checks run further down, so
+    # these validated a shape data/edicts.json does not have.
+
+    # --- epithets and annals ----------------------------------------------
+    epithet_ids = set()
+    for epithet in t.get("epithets.json", {}).get("epithets", []):
+        if epithet["id"] in epithet_ids:
+            err(f"epithets: duplicate id {epithet['id']}")
+        epithet_ids.add(epithet["id"])
+
+    # Annals templates: placeholders must be resolvable — subject names, the
+    # date, or a detail key the engine actually writes for that kind.
+    ANNALS_TOKENS = {
+        "faction", "other_faction", "character", "region", "technique",
+        "edict", "epithet", "year", "season",
+        # detail keys per the recording sites:
+        "winner", "attacker_soldiers", "defender_soldiers", "occupation",
+        "loot", "population", "assault", "turns", "battles",
+        "cities_taken_a", "cities_taken_b", "age", "battles_won",
+        "cities_taken", "techniques_completed", "edicts_enacted", "disaster",
+        "index",
+    }
+    for kind, variants in t.get("annals.json", {}).get("templates", {}).items():
+        for template in variants:
+            for token in re.findall(r"\{([a-z_]+)\}", template):
+                if token not in ANNALS_TOKENS:
+                    err(f"annals: {kind}: unknown placeholder {{{token}}}")
+
+    # Hidden resources must be referenced by SOMETHING (event or technique) —
+    # and vice versa the events check below already validates its own refs.
+    referenced_hidden = {technique["prerequisites"]["hidden_resource"]
+                         for technique in techniques.values()
+                         if technique["prerequisites"]["hidden_resource"]}
+    for event in t.get("events.json", {}).get("events", []):
+        hidden = event.get("trigger", {}).get("hidden_resource", "")
+        if hidden:
+            referenced_hidden.add(hidden)
+            if hidden not in all_hidden:
+                err(f"events: {event['id']}: hidden_resource {hidden} appears in no region")
+    for hidden in sorted(all_hidden - referenced_hidden):
+        warn(f"regions: hidden resource {hidden} is referenced by no event or technique")
+
+    # Repeatable events must rest (a cooldown-less once:false event would fire
+    # every single turn its condition holds), and scripted technique grants
+    # must name real crafts.
+    for event in t.get("events.json", {}).get("events", []):
+        if event.get("once", True) is False and "cooldown_turns" not in event:
+            err(f"events: {event['id']}: once:false requires cooldown_turns")
+        granted = event.get("effects", {}).get("grant_technique", "")
+        if granted and granted not in techniques:
+            err(f"events: {event['id']}: unknown grant_technique {granted}")
+        target = event.get("trigger", {}).get("faction", "")
+        if target and target not in factions:
+            err(f"events: {event['id']}: unknown trigger faction {target}")
 
     # --- regions ----------------------------------------------------------
     regions = {r["id"]: r for r in t.get("regions.json", {}).get("regions", [])}
@@ -408,6 +583,8 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"campaign: {fid}: needs exactly one leader, has {roles.count('leader')}")
         if roles.count("heir") > 1:
             err(f"campaign: {fid}: more than one heir")
+        come_of_age = int(balance.get("characters", {}).get("come_of_age", 16))
+        females = 0
         for character in faction_setup.get("characters", []):
             if character["id"] in character_ids:
                 err(f"campaign: duplicate character id {character['id']}")
@@ -415,11 +592,37 @@ def cross_checks(t: dict[str, dict]) -> None:
             location = character.get("location", "")
             if location and location not in regions:
                 err(f"campaign: character {character['id']}: unknown location {location}")
-        known = {c["id"] for c in faction_setup.get("characters", [])}
+            gender = character.get("gender", "female" if character["role"] == "spouse" else "male")
+            if gender == "female":
+                females += 1
+            # Only BOYS must be re-roled by coming of age: the engine keeps
+            # daughters as role "child" past 16 until a suitor marries in, so a
+            # seeded 16-17-year-old marriageable daughter is legal data.
+            if character["role"] == "child" and gender == "male" \
+                    and int(character["age"]) >= come_of_age:
+                err(f"campaign: character {character['id']}: a boy of {character['age']} "
+                    f"is past coming of age ({come_of_age}) — seed him as 'family'")
+            if character["role"] == "spouse" and gender == "male":
+                warn(f"campaign: character {character['id']}: a male spouse will confuse "
+                     f"the family tree (marriage brings husbands in as 'family')")
+            if character["role"] in ("leader", "heir") and gender == "female":
+                err(f"campaign: character {character['id']}: a female {character['role']} "
+                    f"breaks succession (the engine only seats adult men)")
+            location = character.get("location", "")
+            if location and location in regions and location not in own_regions:
+                err(f"campaign: character {character['id']}: stands in {location}, "
+                    f"which {fid} does not hold at start")
+        known = {c["id"]: c for c in faction_setup.get("characters", [])}
         for character in faction_setup.get("characters", []):
             father = character.get("father")
             if father and father not in known:
                 err(f"campaign: character {character['id']}: unknown father {father}")
+            elif father and int(known[father]["age"]) - int(character["age"]) < 16:
+                err(f"campaign: character {character['id']}: father {father} is only "
+                    f"{int(known[father]['age']) - int(character['age'])} years older")
+        if faction_setup.get("characters", []) and females == 0:
+            warn(f"campaign: {fid}: a house seeded with no women bootstraps its "
+                 f"family tree very slowly")
         for army in faction_setup.get("armies", []):
             general = army.get("general")
             if general and general not in known:
@@ -515,6 +718,20 @@ def cross_checks(t: dict[str, dict]) -> None:
                     continue
                 warn(f"{source_name}: {entry['id']}: trigger '{trigger['when']}' is never "
                      f"fired by any engine call site (dead content)")
+
+    # Same discipline for mission kinds: every kind must either be issued by an
+    # engine call site or be explicitly forward-authored.
+    issued_kinds = set()
+    for source in engine_dir.rglob("*.gd"):
+        text = source.read_text()
+        for kind in ("take_region", "make_alliance", "reach_trade_agreement",
+                     "assassinate_leader", "blockade_port", "leader_suicide"):
+            if f'"{kind}"' in text:
+                issued_kinds.add(kind)
+    for mission in t.get("missions.json", {}).get("missions", []):
+        if mission["kind"] not in issued_kinds and mission["kind"] not in FORWARD_MISSIONS:
+            warn(f"missions: {mission['id']}: kind '{mission['kind']}' is never "
+                 f"issued by any engine call site (dead content)")
     for faction_setup in campaign.get("factions", []):
         for character in faction_setup.get("characters", []):
             for trait_id in character.get("traits", []):
@@ -1016,7 +1233,10 @@ def main() -> int:
         print(f"WARN  {message}")
     for message in errors:
         print(f"ERROR {message}")
-    counts = {name: _entity_count(doc) for name, doc in tables.items()}
+    # balance.json is sections of constants, not entities — keep it out of the
+    # entity summary (its "agents" section would otherwise miscount).
+    counts = {name: (0 if name == "balance.json" else _entity_count(doc))
+              for name, doc in tables.items()}
     summary = ", ".join(f"{name.removesuffix('.json')}={count}" for name, count in counts.items() if count)
     print(f"\n{len(errors)} errors, {len(warnings)} warnings [{summary}]")
     return 1 if errors else 0
@@ -1049,7 +1269,9 @@ def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions",
                 "traits", "ancillaries", "events", "wonders", "missions",
                 "conditions", "pools", "cells", "advances", "axes",
-                "edicts", "sites", "stages", "effects", "recipes"):
+                "edicts", "sites", "stages", "effects", "recipes",
+                "personas", "agents", "techniques", "epithets",
+                "templates"):
         if key in document:
             return len(document[key])
     return len(document.get("beats", []))

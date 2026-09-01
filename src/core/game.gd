@@ -22,9 +22,12 @@ func end_turn() -> Dictionary:
 
 
 ## --- Settlement actions --------------------------------------------------
+## Every player action verifies ownership first: the facade is the UI, test
+## and mod surface, and must never let "player" input drive another faction's
+## pieces (that would also perturb the deterministic simulation).
 
 func set_tax_level(region_id: String, tax_level: String) -> bool:
-	if not Constants.TAX_LEVELS.has(tax_level):
+	if not _owns_settlement(region_id) or not Constants.TAX_LEVELS.has(tax_level):
 		return false
 	state["settlements"][region_id]["tax_level"] = tax_level
 	if state["settlements"][region_id]["owner"] == state["player_faction"]:
@@ -61,9 +64,14 @@ func queue_building(region_id: String, chain_id: String) -> bool:
 		if kind != "":
 			GuidedRules.bump(state, "buildings_queued:%s" % kind)
 	return queued
+	if not _owns_settlement(region_id):
+		return false
+	return ConstructionRules.queue_project(data, state, region_id, chain_id)
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return ConstructionRules.demolish(data, state, region_id, chain_id)
 
 
@@ -72,9 +80,14 @@ func queue_unit(region_id: String, template_id: String) -> bool:
 	if queued and state["settlements"][region_id]["owner"] == state["player_faction"]:
 		GuidedRules.bump(state, "units_recruited")
 	return queued
+	if not _owns_settlement(region_id):
+		return false
+	return RecruitmentRules.queue_unit(data, state, region_id, template_id)
 
 
 func retrain_garrison(region_id: String) -> int:
+	if not _owns_settlement(region_id):
+		return 0
 	return RecruitmentRules.retrain_garrison(data, state, region_id)
 
 
@@ -90,6 +103,8 @@ func move_capital(region_id: String) -> bool:
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
 	_cancel_march(army_id)
+	if not _owns_army(army_id):
+		return false
 	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
 	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
 	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
@@ -98,11 +113,15 @@ func move_army(army_id: String, to_region: String, forced_march: bool = false) -
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
+	if state["fleets"].get(fleet_id, {}).get("owner", "") != state["player_faction"]:
+		return false
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	_cancel_march(attacker_id)
+	if not _owns_army(attacker_id):
+		return {}
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
@@ -111,7 +130,7 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 
 func declare_war(other_faction: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
-	return DiplomacyRules.declare_war(state, fid, other_faction)
+	return DiplomacyRules.declare_war(data, state, fid, other_faction)
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
@@ -119,8 +138,64 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
 
 
+## --- Diplomacy (Phase 5) ---------------------------------------------------
+
+func attitude_of(other_faction: String) -> Array:
+	## How the other faction currently feels about the player, as named factors.
+	return DiplomacyRules.attitude_breakdown(data, state, other_faction, String(state["player_faction"]))
+
+
+func preview_offer(offer: Dictionary) -> Dictionary:
+	## Price an offer without proposing it — the negotiation dialog's live hint.
+	offer["from"] = String(state["player_faction"])
+	if not state["factions"].get(offer.get("to", ""), {}).get("alive", false):
+		return {"accept": false, "score": 0.0, "breakdown": [], "vetoes": ["their_court_is_ashes"]}
+	return DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
+
+
+func propose_offer(offer: Dictionary) -> Dictionary:
+	## Put the offer to the other side; it takes effect at once if accepted.
+	offer["from"] = String(state["player_faction"])
+	if not state["factions"].get(offer.get("to", ""), {}).get("alive", false):
+		return {"accept": false, "score": 0.0, "breakdown": [], "vetoes": ["their_court_is_ashes"]}
+	var verdict := DiplomacyRules.evaluate_offer(data, state, offer["from"], offer["to"], offer)
+	if verdict["accept"]:
+		DiplomacyRules.apply_offer(data, state, offer)
+	return verdict
+
+
+func pending_offers() -> Array:
+	## Offers other factions have laid before the player, oldest first — only
+	## those that still stand (the proposer alive, solvent, and not at a war
+	## begun since the envoy set out).
+	var mine: Array = []
+	for offer in state["pending_offers"]:
+		if offer.get("to", "") == state["player_faction"] \
+				and DiplomacyRules.offer_still_stands(data, state, offer):
+			mine.append(offer)
+	return mine
+
+
+func respond_offer(offer_id: String, accept: bool) -> bool:
+	## Returns true when the offer was applied (or declined); false when it was
+	## found but no longer stands — the envoy has quietly withdrawn.
+	for i in range(state["pending_offers"].size()):
+		var offer: Dictionary = state["pending_offers"][i]
+		if offer.get("id", "") != offer_id or offer.get("to", "") != state["player_faction"]:
+			continue
+		state["pending_offers"].remove_at(i)
+		if accept:
+			if not DiplomacyRules.offer_still_stands(data, state, offer):
+				return false
+			DiplomacyRules.apply_offer(data, state, offer)
+		return true
+	return false
+
+
 func sea_move_army(army_id: String, to_region: String) -> bool:
 	_cancel_march(army_id)
+	if not _owns_army(army_id):
+		return false
 	return MovementRules.sea_move_army(data, state, army_id, to_region)
 	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
 	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
@@ -192,10 +267,115 @@ func hire_mercenary(army_id: String, template_id: String) -> bool:
 	if hired and state["armies"][army_id]["owner"] == state["player_faction"]:
 		GuidedRules.bump(state, "mercs_hired")
 	return hired
+	if not _owns_army(army_id):
+		return false
+	return MercenaryRules.hire(data, state, army_id, template_id)
 
 
 func mercenaries_available(region_id: String) -> Array:
 	return MercenaryRules.available(data, state, region_id)
+
+
+## --- Agents (Phase 5) ------------------------------------------------------
+
+func recruit_agent(region_id: String, kind: String) -> String:
+	if state["settlements"].get(region_id, {}).get("owner", "") != state["player_faction"]:
+		return ""
+	return AgentRules.recruit_agent(data, state, region_id, kind)
+
+
+func move_agent(agent_id: String, to_region: String) -> bool:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return false
+	return AgentRules.move_agent(data, state, agent_id, to_region)
+
+
+func agent_scout(agent_id: String) -> Dictionary:
+	return AgentRules.scout_report(data, state, agent_id)
+
+
+func agent_assassinate(agent_id: String, target_char_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	var rng := _rng()
+	var result := AgentRules.assassinate(data, state, rng, agent_id, target_char_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func agent_bribe(agent_id: String, army_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	return AgentRules.bribe_army(data, state, agent_id, army_id)
+
+
+func agent_steal_technique(agent_id: String, technique_id: String) -> Dictionary:
+	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
+		return {}
+	var rng := _rng()
+	var result := AgentRules.steal_technique(data, state, rng, agent_id, technique_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func agents_in(region_id: String) -> Array:
+	## Agents standing in a region, sorted by id — [{id, agent}] for the UI.
+	var found: Array = []
+	var agent_ids: Array = state["agents"].keys()
+	agent_ids.sort()
+	for agent_id in agent_ids:
+		if state["agents"][agent_id]["region"] == region_id:
+			found.append({"id": agent_id, "agent": state["agents"][agent_id]})
+	return found
+
+
+## --- Knowledge (Phase 6) ---------------------------------------------------
+
+func technique_overview(faction_id: String = "") -> Dictionary:
+	## Everything the knowledge panel shows for one court: what it practices,
+	## what its craftsmen are institutionalizing, what it merely knows of (with
+	## the price of taking it up), and the reform pressure on its arsenal.
+	## Fog of knowledge: only techniques in the faction's own ledger appear.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	if not state["factions"].has(fid):
+		return {"entries": [], "reform_pressure": 0.0}
+	var caches := KnowledgeRules.build_caches(data, state, false)
+	var knowledge := KnowledgeRules.knowledge_of(state, fid)
+	var entries: Array = []
+	var tids: Array = knowledge.keys()
+	tids.sort()
+	for tid in tids:
+		var technique: Dictionary = data.techniques.get(tid, {})
+		if technique.is_empty():
+			continue
+		var entry: Dictionary = knowledge[tid]
+		entries.append({
+			"id": tid,
+			"name": technique["name"],
+			"domain": technique["domain"],
+			"stage": entry["stage"],
+			"progress": int(entry.get("progress", 0)),
+			"turns": int(technique["adoption"]["turns"]),
+			"cost": KnowledgeRules.adoption_cost(data, state, fid, tid),
+			"ready": KnowledgeRules.prerequisites_met(data, state, caches, fid, technique),
+			"effects": technique.get("effects", {}),
+			"historical_basis": technique["historical_basis"],
+		})
+	return {
+		"entries": entries,
+		"reform_pressure": float(state["factions"][fid].get("reform_pressure", 0.0)),
+	}
+
+
+func begin_adoption(technique_id: String) -> Dictionary:
+	return KnowledgeRules.begin_adoption(data, state, String(state["player_faction"]), technique_id)
+
+
+## The faction-scoped edict facade that lived here (edict_overview /
+## enact_edict / repeal_edict, and a Book of Policies for the whole house)
+## belonged to the other edicts engine. main holds edicts PER PROVINCE — see
+## the province facade below and EdictRules.issue/revoke/status — so there is
+## no faction-wide ledger for those methods to read.
 
 
 ## --- Family & characters --------------------------------------------------
@@ -231,9 +411,12 @@ func character_sheet(char_id: String) -> Dictionary:
 	var ancillaries: Array = []
 	for ancillary_id in character["ancillaries"]:
 		ancillaries.append(data.ancillaries.get(ancillary_id, {}).get("name", ancillary_id))
+	var epithet_id := String(character.get("epithet", ""))
 	return {
 		"id": char_id,
 		"name": character["name"],
+		"epithet": String(data.epithets.get(epithet_id, {}).get("name", "")) if epithet_id != "" else "",
+		"deeds": character.get("deeds", {}),
 		"age": character["age"],
 		"role": character["role"],
 		"faction": character["faction"],
@@ -260,11 +443,15 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 func besiege(army_id: String, region_id: String) -> bool:
 	_cancel_march(army_id)
+	if not _owns_army(army_id):
+		return false
 	return SiegeRules.begin_siege(data, state, army_id, region_id)
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
 	_cancel_march(army_id)
+	if not _owns_army(army_id):
+		return {}
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):
@@ -279,10 +466,10 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 
 
 func garrison_army(army_id: String) -> bool:
-	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if not _owns_army(army_id):
 		return false
 	_cancel_march(army_id)
+	var army: Dictionary = state["armies"][army_id]
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
@@ -363,8 +550,6 @@ func explore_site(army_id: String) -> Dictionary:
 	state["rng_state"] = rng.state_string()
 	return {"site": site, "outcome": picked}
 
-
-## --- Queries (for UI scrolls) --------------------------------------------
 
 func growth_breakdown(region_id: String) -> Array:
 	return GrowthRules.breakdown(data, state, region_id)
@@ -611,6 +796,7 @@ func load_from(path: String) -> bool:
 	var loaded := SaveGame.read_file(path)
 	if loaded.is_empty():
 		return false
+	NewGame.ensure_state_keys(loaded, data)
 	state = loaded
 	return true
 
@@ -625,3 +811,9 @@ func _cancel_march(army_id: String) -> void:
 	var army: Dictionary = state["armies"].get(army_id, {})
 	army.erase("march_path")
 	army.erase("march_forced")
+func _owns_army(army_id: String) -> bool:
+	return state["armies"].get(army_id, {}).get("owner", "") == state["player_faction"]
+
+
+func _owns_settlement(region_id: String) -> bool:
+	return state["settlements"].get(region_id, {}).get("owner", "") == state["player_faction"]

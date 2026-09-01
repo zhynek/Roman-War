@@ -76,6 +76,21 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	t.check(screen.family_panel._content.get_child_count() > 0, "family listed")
 	screen.family_panel.hide()
 
+	# The knowledge scroll opens with the Roman endowment already practiced.
+	screen.knowledge_panel.open_for(game)
+	t.check(screen.knowledge_panel._content.get_child_count() > 0, "knowledge scroll populated")
+	screen.knowledge_panel.hide()
+
+	# The book of policies opens with the authored edicts on offer.
+	screen.edicts_panel.open_for(game)
+	t.check(screen.edicts_panel._content.get_child_count() > 0, "book of policies populated")
+	screen.edicts_panel.hide()
+
+	# The annals open (a turn has passed — the scribes have something).
+	screen.annals_panel.open_for(game)
+	t.check(screen.annals_panel._content.get_child_count() > 0, "the annals render")
+	screen.annals_panel.hide()
+
 	screen.free()
 
 
@@ -629,6 +644,144 @@ func test_many_turns_through_the_ui(t) -> void:
 	screen.free()
 
 
+func test_negotiation_and_envoys(t) -> void:
+	## The diplomacy scroll's new machinery, driven headless: attitude rows,
+	## the negotiation dialog's live appraisal and proposal path, a pending
+	## envoy answered, and the world-news log formatting.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	screen.diplomacy_panel.open_for(game)
+	t.check(screen.diplomacy_panel._content.get_child_count() > 0, "the powers are listed")
+
+	# The negotiation dialog previews and proposes a trade offer.
+	var negotiation: NegotiationDialog = screen.diplomacy_panel.negotiation
+	negotiation.open_for(game, "carthage")
+	t.check(negotiation._hint.get_parsed_text().length() > 0, "the live appraisal renders")
+	var trade_index := negotiation._stance_values.find("trade")
+	t.check(trade_index >= 0, "trade is on the table with a neutral power")
+	negotiation._stance.selected = trade_index
+	var offer := negotiation.build_offer()
+	t.check_eq(offer["to"], "carthage", "the offer addresses the right court")
+	t.check_eq(offer["stance"], "trade", "with the chosen stance")
+	negotiation._propose()
+	t.check(negotiation._hint.get_parsed_text().length() > 0, "the verdict is shown either way")
+	# A second click must never re-apply an agreement (the accepted form
+	# rebuilds empty; a refused one just gets refused again).
+	var state_after_first := JSON.stringify(JSON.parse_string(JSON.stringify(game.state)))
+	negotiation._propose()
+	t.check_eq(JSON.stringify(JSON.parse_string(JSON.stringify(game.state))), state_after_first,
+		"proposing twice changes nothing the first click did not")
+	negotiation.hide()
+
+	# A pending envoy renders and can be answered.
+	game.state["pending_offers"].append({"id": "offer_test", "from": "carthage", "to": "julii",
+		"stance": "trade", "give_payment": 0, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": [], "expires_turn": 999})
+	screen.diplomacy_panel._rebuild()
+	t.check(screen.diplomacy_panel._content.get_child_count() > 0, "the envoy section renders")
+	t.check(game.respond_offer("offer_test", true), "the envoy is answered")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "carthage"), "trade",
+		"and the agreement stands")
+	screen.diplomacy_panel.hide()
+
+	# World news formatting covers every event kind without touching state.
+	var log_before: int = screen.report_log.get_parsed_text().length()
+	screen._log_world_news({
+		"ai": [
+			{"kind": "war_declared", "by": "gaul", "on": "julii"},
+			{"kind": "war_declared", "by": "gaul", "on": "germania"},
+			{"kind": "ai_conquest", "faction": "gaul", "region": "latium", "occupation": "occupy", "from": "rebels"},
+			{"kind": "peace_made", "between": ["gaul", "germania"]},
+			{"kind": "trade_agreed", "between": ["carthage", "egypt"]},
+			{"kind": "offer_sent", "from": "carthage", "to": "julii"},
+			{"kind": "ai_attack", "faction": "gaul", "defender": "julii", "region": "latium", "winner": "attacker"},
+			{"kind": "ai_siege", "faction": "gaul", "region": "latium", "owner": "julii"},
+		],
+		"diplomacy": [
+			{"kind": "tribute_paid", "from": "julii", "to": "gaul", "amount": 100},
+			{"kind": "tribute_paid", "from": "gaul", "to": "julii", "amount": 100},
+			{"kind": "offer_expired", "from": "carthage"},
+		],
+	})
+	t.check(screen.report_log.get_parsed_text().length() > log_before, "world news reached the log")
+
+	screen.free()
+
+
+func test_agent_orders_through_the_ui(t) -> void:
+	## Recruit an agent, select him in the panel, walk him across a border by
+	## clicking the map, and read a spy's report — the whole loop headless.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	# Find any julii settlement able to train any agent kind at campaign start
+	# (spies want a market, which a young province may not have built yet).
+	var home := ""
+	var kind := ""
+	var region_ids: Array = game.state["settlements"].keys()
+	region_ids.sort()
+	var kind_ids: Array = game.data.agent_kinds.keys()
+	kind_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = game.state["settlements"][region_id]
+		if settlement["owner"] != "julii":
+			continue
+		for candidate in kind_ids:
+			if candidate != "spy" and home != "":
+				continue  # prefer a spy so the report path gets exercised
+			if AgentRules.building_gate_met(game.data, settlement, game.data.agent_kinds[candidate]):
+				home = region_id
+				kind = candidate
+				if kind == "spy":
+					break
+		if kind == "spy":
+			break
+	t.check(home != "", "some julii town can train an agent at the start")
+
+	var agent_id := game.recruit_agent(home, kind)
+	t.check(agent_id != "", "the agent is hired through the facade")
+
+	screen._on_region_clicked(home)
+	var rows_before: int = screen.region_panel.get_child_count()
+	screen._on_agent_selected(agent_id)
+	t.check_eq(screen.selected_agent, agent_id, "the agent is selected")
+	t.check(screen.region_panel.get_child_count() > rows_before, "his orders unfold in the panel")
+
+	AgentRules.reset_movement(game.data, game.state)
+	var neighbors: Array = game.data.regions[home].get("adjacent", []).duplicate()
+	neighbors.sort()
+	var destination: String = neighbors[0]
+	screen._on_region_clicked(destination)
+	t.check_eq(game.state["agents"][agent_id]["region"], destination,
+		"a map click walks the agent across any border")
+	t.check_eq(screen.selected_agent, agent_id, "and he stays selected for the next step")
+
+	if kind == "spy":
+		screen._scout_order(agent_id)
+		t.check(screen.report_log.get_parsed_text().contains("informer reports"),
+			"the spy's report reaches the log")
+
+	# Selecting an army drops the agent selection, and vice versa.
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		if game.state["armies"][candidate]["owner"] == "julii":
+			army_id = candidate
+			break
+	if army_id != "":
+		screen._on_region_clicked(game.state["armies"][army_id]["region"])
+		screen._on_army_selected(army_id)
+		t.check_eq(screen.selected_agent, "", "army selection clears the agent")
+
+	screen.free()
+
+
 func test_start_menu_scene_loads(t) -> void:
 	var scene: PackedScene = load("res://src/ui/main.tscn")
 	t.check(scene != null, "main scene parses")
@@ -752,6 +905,7 @@ func test_campaign_screen_fills_its_window(t) -> void:
 	## size in the top-left corner, growing only by the delta of a window
 	## resize — Godot's grey clear colour over the rest of the window. The
 	## screen, and every full-rect overlay on it, must anchor AND zero offsets.
+	## resize. The whole screen must anchor full-rect AND zero its offsets.
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 11)
 	var screen := CampaignScreen.create(game)
@@ -975,3 +1129,13 @@ func test_both_tabs_render_for_every_owned_city(t) -> void:
 			t.check(screen.build_drawer._detail.get_child_count() > 0,
 				"%s renders in %s" % [tab, region_id])
 	screen.queue_free()
+	t.check_near(screen.anchor_top, 0.0, 0.001, "and the top")
+	t.check_near(screen.anchor_right, 1.0, 0.001, "stretched to the right edge")
+	t.check_near(screen.anchor_bottom, 1.0, 0.001, "and the bottom")
+	# The offsets are the actual bug: nonzero here means the screen renders
+	# smaller than its window by exactly that much, forever.
+	t.check_near(screen.offset_left, 0.0, 0.001, "no left inset")
+	t.check_near(screen.offset_top, 0.0, 0.001, "no top inset")
+	t.check_near(screen.offset_right, 0.0, 0.001, "no right inset — the screen fills the window")
+	t.check_near(screen.offset_bottom, 0.0, 0.001, "no bottom inset")
+	screen.free()

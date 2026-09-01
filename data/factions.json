@@ -3,6 +3,7 @@
   "factions": [
     {
       "id": "julii",
+      "ai_persona": "imperial",
       "name": "House of the Julii",
       "culture": "roman",
       "playable": "playable",
@@ -13,6 +14,7 @@
     },
     {
       "id": "junii",
+      "ai_persona": "imperial",
       "name": "House of the Junii",
       "culture": "roman",
       "playable": "playable",
@@ -23,6 +25,7 @@
     },
     {
       "id": "cornelii",
+      "ai_persona": "imperial",
       "name": "House of the Cornelii",
       "culture": "roman",
       "playable": "playable",
@@ -33,6 +36,7 @@
     },
     {
       "id": "senate",
+      "ai_persona": "custodial",
       "name": "The Senate and People",
       "culture": "roman",
       "playable": "nonplayable",
@@ -43,6 +47,7 @@
     },
     {
       "id": "macedon",
+      "ai_persona": "imperial",
       "name": "Kingdom of Macedon",
       "culture": "greek",
       "playable": "nonplayable",
@@ -52,6 +57,7 @@
     },
     {
       "id": "greek_cities",
+      "ai_persona": "mercantile",
       "name": "League of Free Cities",
       "culture": "greek",
       "playable": "unlockable",
@@ -61,6 +67,7 @@
     },
     {
       "id": "seleucia",
+      "ai_persona": "imperial",
       "name": "Seleucid Realm",
       "culture": "greek",
       "playable": "unlockable",
@@ -70,6 +77,7 @@
     },
     {
       "id": "thracia",
+      "ai_persona": "expansionist",
       "name": "Thracian Tribes",
       "culture": "greek",
       "playable": "nonplayable",
@@ -79,6 +87,7 @@
     },
     {
       "id": "parthia",
+      "ai_persona": "imperial",
       "name": "Parthian Kingdom",
       "culture": "eastern",
       "playable": "unlockable",
@@ -88,6 +97,7 @@
     },
     {
       "id": "armenia",
+      "ai_persona": "imperial",
       "name": "Kingdom of Armenia",
       "culture": "eastern",
       "playable": "nonplayable",
@@ -97,6 +107,7 @@
     },
     {
       "id": "pontus",
+      "ai_persona": "imperial",
       "name": "Kingdom of Pontus",
       "culture": "eastern",
       "playable": "nonplayable",
@@ -106,6 +117,7 @@
     },
     {
       "id": "carthage",
+      "ai_persona": "mercantile",
       "name": "Republic of Carthage",
       "culture": "carthaginian",
       "playable": "unlockable",
@@ -115,6 +127,7 @@
     },
     {
       "id": "numidia",
+      "ai_persona": "expansionist",
       "name": "Numidian Kingdoms",
       "culture": "barbarian",
       "playable": "nonplayable",
@@ -124,6 +137,7 @@
     },
     {
       "id": "egypt",
+      "ai_persona": "mercantile",
       "name": "Kingdom of the Nile",
       "culture": "egyptian",
       "playable": "unlockable",
@@ -133,6 +147,7 @@
     },
     {
       "id": "gaul",
+      "ai_persona": "expansionist",
       "name": "Gallic Tribes",
       "culture": "barbarian",
       "playable": "unlockable",
@@ -142,6 +157,7 @@
     },
     {
       "id": "germania",
+      "ai_persona": "expansionist",
       "name": "Germanic Tribes",
       "culture": "barbarian",
       "playable": "unlockable",
@@ -151,6 +167,7 @@
     },
     {
       "id": "britannia",
+      "ai_persona": "expansionist",
       "name": "British Tribes",
       "culture": "barbarian",
       "playable": "unlockable",
@@ -160,6 +177,7 @@
     },
     {
       "id": "dacia",
+      "ai_persona": "expansionist",
       "name": "Dacian Tribes",
       "culture": "barbarian",
       "playable": "nonplayable",
@@ -169,6 +187,7 @@
     },
     {
       "id": "hispania",
+      "ai_persona": "expansionist",
       "name": "Iberian Tribes",
       "culture": "barbarian",
       "playable": "nonplayable",
@@ -178,6 +197,7 @@
     },
     {
       "id": "scythia",
+      "ai_persona": "expansionist",
       "name": "Scythian Hordes",
       "culture": "barbarian",
       "playable": "nonplayable",

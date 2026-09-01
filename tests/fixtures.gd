@@ -113,6 +113,13 @@ static func data() -> GameData:
 				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"martial": 4, "civic": -2, "burden": 1}, "description": ""},
 			],
 		},
+		{
+			"id": "test_education", "kind": "education", "cultures": ["roman"], "name": "Learning",
+			"levels": [
+				{"id": "edu_1", "name": "School", "min_settlement_level": "village", "cost": 500, "build_turns": 1, "effects": {}, "description": ""},
+				{"id": "edu_2", "name": "Academy", "min_settlement_level": "town", "cost": 1000, "build_turns": 2, "effects": {}, "description": ""},
+			],
+		},
 	]
 	for chain in chains:
 		game_data.chains[chain["id"]] = chain
@@ -166,6 +173,7 @@ static func data() -> GameData:
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
 	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+	game_data.index_grain_regions()
 
 	# A mountain pass arcs over the plains line: alpha-zeta-eta-epsilon is one
 	# hop shorter than the four-step line but strictly dearer (2.0 + 1.5 + 1.0
@@ -238,10 +246,105 @@ static func data() -> GameData:
 				{"when": "turn_end_governing", "condition": {"building_kind": "government", "min_building_level": 1}, "chance": 1.0},
 			],
 		},
+		"test_bodyguard": {
+			"id": "test_bodyguard", "name": "Bodyguard",
+			"effects": {"personal_security": 4},
+			"triggers": [],
+		},
+		"test_spycatcher": {
+			"id": "test_spycatcher", "name": "Spy Catcher",
+			"effects": {"agent_skill": 3},
+			"triggers": [],
+		},
 	}
 	game_data.names = {
 		"roman": {"male": ["Testus", "Probus", "Cassius"], "female": ["Testa", "Proba"], "surnames": ["Fixturus"]},
 		"barbarian": {"male": ["Brox", "Karn"], "female": ["Enna"]},
+	}
+
+	game_data.ai_personas = {
+		"default": {
+			"id": "default", "name": "Balanced",
+			"aggression": 1.0, "expansion_drive": 1.0, "peace_willingness": 1.0,
+			"occupation": "occupy",
+			"build_weights": {"order": 1.0, "growth": 1.0, "income": 1.0, "military": 1.0, "walls": 1.0},
+			"knowledge_priorities": {"military": 1.0, "economic": 1.0, "civic": 1.0},
+			"edict_priorities": {"welfare": 1.0, "religion": 1.0, "land": 1.0, "citizenship": 1.0,
+				"taxation": 1.0, "debt": 1.0, "military": 1.0, "trade": 1.0},
+			"garrison_min_units": 2, "garrison_frontier_units": 4, "army_size_target": 8,
+		},
+	}
+
+	game_data.agent_kinds = {
+		"diplomat": {"id": "diplomat", "name": "Envoy", "cost": 250, "upkeep": 30,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
+		"spy": {"id": "spy", "name": "Informer", "cost": 300, "upkeep": 40,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
+		"assassin": {"id": "assassin", "name": "Hired Blade", "cost": 500, "upkeep": 60,
+			"building_kind": "government", "building_level": 1, "base_skill": 1, "movement_points": 3},
+	}
+
+	game_data.techniques = {
+		"test_smithing": {
+			"id": "test_smithing", "name": "Pattern Smithing", "domain": "metallurgy_craft",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": ["barbarian"], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "barracks", "building_level": 1, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 600, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"weapon_upgrade": 1},
+		},
+		"test_letters": {
+			"id": "test_letters", "name": "Letters", "domain": "scholarship_statecraft",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": ["roman"],
+			"prerequisites": {"building_kind": "education", "building_level": 1, "resource": "", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 400, "turns": 1},
+			"culture_resistance": {"barbarian": 2.0},
+			"effects": {"scholarship": 1},
+		},
+		"test_irrigation": {
+			"id": "test_irrigation", "name": "Ditch Irrigation", "domain": "agrarian",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "farms", "building_level": 1, "resource": "grain", "hidden_resource": "", "coastal": false, "techniques": []},
+			"adoption": {"cost": 500, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"growth": 0.5, "farm_income_pct": 10},
+		},
+		"test_greatworks": {
+			"id": "test_greatworks", "name": "Great Works", "domain": "military_engineering",
+			"historical_basis": "fixture",
+			"start_adopted": {"cultures": [], "factions": []},
+			"origin_cultures": [],
+			"prerequisites": {"building_kind": "", "building_level": 0, "resource": "", "hidden_resource": "", "coastal": false, "techniques": ["test_letters"]},
+			"adoption": {"cost": 800, "turns": 2},
+			"culture_resistance": {},
+			"effects": {"wall_level_bonus": 1},
+		},
+	}
+
+	# The fixture edicts that lived here belonged to the other edicts engine and
+	# overwrote the real table loaded above, which is what test_edicts.gd reads.
+
+	game_data.epithets = {
+		"test_victor": {
+			"id": "test_victor", "name": "the Victor", "historical_basis": "fixture",
+			"precedence": 10, "requires": {"battles_won": 2}, "limits": {},
+		},
+		"test_guardian": {
+			"id": "test_guardian", "name": "the Guardian", "historical_basis": "fixture",
+			"precedence": 20, "requires": {"battles_won": 1}, "limits": {"cities_lost": 0},
+		},
+	}
+	game_data.annals = {
+		"battle": ["{faction} and {other_faction} met in battle near {region}."],
+		"city_taken": ["{faction} took {region} from {other_faction}.",
+			"The gates of {region} were opened to {faction}."],
+		"epithet_earned": ["{character} of {faction} was named {epithet}."],
 	}
 
 	return game_data
@@ -252,6 +355,7 @@ static func state(game_data: GameData) -> Dictionary:
 	var campaign_state := {
 		"turn": 0, "year": -270, "season": "summer", "rng_state": "0",
 		"difficulty": "medium", "campaign_mode": "long", "event_happiness": null,
+		"modifiers": [], "chronicle": [], "wars": [],
 		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
 		"factions": {
@@ -265,7 +369,8 @@ static func state(game_data: GameData) -> Dictionary:
 			"alpha": _settlement(game_data, "blue", 1200, {"tribal_government": 1}),
 		},
 		"armies": {}, "fleets": {}, "characters": {},
-		"events_fired": [], "winner": null, "next_id": 1,
+		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
+		"tributes": [], "pending_offers": [], "agents": {},
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}
@@ -288,6 +393,8 @@ static func add_character(campaign_state: Dictionary, faction: String, char_id: 
 		"ancillaries": overrides.get("ancillaries", []).duplicate(),
 		"location": overrides.get("location", ""),
 		"alive": true,
+		"deeds": {},
+		"epithet": "",
 	}
 	return char_id
 
@@ -327,6 +434,8 @@ static func _faction(game_data: GameData, capital: String) -> Dictionary:
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
 		"society": SocietyRules.new_faction_society(game_data), "advances": [],
+		"ai": {}, "attitude_memory": {},
+		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
 	}
 
 

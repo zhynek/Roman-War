@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "annals.schema.json",
+  "title": "Annals templates (in-game prose for chronicle entries)",
+  "description": "Prose templates per chronicle kind. Placeholders in {braces} substitute resolved subject names ({faction}, {other_faction}, {character}, {region}, {technique}, {edict}, {epithet}), the date ({year} as '270 BC' prose, {season}), and any scalar detail key. The variant is chosen by entry id modulo the variant count - stable, no rng. The optional online narrator can replace this prose wholesale; it can never replace the entries.",
+  "type": "object",
+  "required": ["templates"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "templates": {
+      "type": "object",
+      "required": [
+        "war_declared", "battle", "city_taken", "city_sacked", "city_revolted",
+        "peace_made", "alliance_made", "technique_originated", "technique_adopted",
+        "edict_enacted", "edict_lapsed", "leader_died", "succession",
+        "reign_summary", "war_summary", "faction_destroyed", "disaster",
+        "epithet_earned"
+      ],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "../schemas/agents.schema.json",
+  "agents": [
+    {
+      "id": "diplomat",
+      "name": "Envoy",
+      "cost": 250,
+      "upkeep": 30,
+      "building_kind": "government",
+      "building_level": 2,
+      "base_skill": 1,
+      "movement_points": 3,
+      "description": "A smooth-tongued representative of the house. His presence at a foreign court sweetens any terms laid before it, and leaderless bands of soldiers have been known to find his purse more persuasive than their cause."
+    },
+    {
+      "id": "spy",
+      "name": "Informer",
+      "cost": 300,
+      "upkeep": 40,
+      "building_kind": "market",
+      "building_level": 1,
+      "base_skill": 1,
+      "movement_points": 3,
+      "description": "A trader in secrets. Settled in a foreign city he counts its garrison and reads its mood; when an army storms the walls, his opened gate is worth a siege tower."
+    },
+    {
+      "id": "assassin",
+      "name": "Hired Blade",
+      "cost": 500,
+      "upkeep": 60,
+      "building_kind": "market",
+      "building_level": 2,
+      "base_skill": 1,
+      "movement_points": 3,
+      "description": "A quiet solution to a loud problem. Success sharpens his craft; failure tends to be its own punishment. Wary targets with careful retinues are far harder marks."
+    }
+  ]
+}

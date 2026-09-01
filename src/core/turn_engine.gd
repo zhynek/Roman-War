@@ -1,6 +1,8 @@
 class_name TurnEngine
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
 ##   1. AI faction turns (diplomacy, battles, movement, settlement management)
+##   1. AI turns (non-player factions: strategy, armies, settlements)
+##   1.5 Diplomacy upkeep: tribute payments, memory decay, offer expiry
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
 ##   4. Standing edicts tick, then faction treasuries resolve (income - upkeep,
@@ -43,9 +45,14 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
 		"society": [], "advances": [], "ai": [], "guided": [],
+		"knowledge": [], "edicts": [], "diplomacy": [],
 		"senate": [], "characters": [], "marches": [], "winner": null,
 		"journal": journal,
 	}
+
+	# The chronicle diffs the world before and after the season resolves
+	# (wars, reigns, alliances, destructions) — snapshot first.
+	var pre := ChronicleRules.snapshot(state)
 
 	# World loops iterate in sorted id order so the RNG stream is identical
 	# no matter how the state dictionaries were built (fresh game or loaded
@@ -62,6 +69,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 				report["ai"], report["characters"])
 	for notice in report["ai"]:
 		_journal_ai_notice(journal, notice)
+
+	report["diplomacy"] = DiplomacyRules.process_turn(data, state)
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)
@@ -126,6 +135,9 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			if purse.get("disbanded", false):
 				TurnJournal.add(journal, "unit_disbanded", {"faction": faction_id})
 
+	# Right after the treasuries settle: standing drips, cooldowns, and the
+	# insolvency rule — the dole collapses the turn the silver runs out.
+
 	for region_id in region_ids:
 		# A settlement outgrowing (or losing) its tier is caught by the
 		# end-of-turn snapshot diff, which sees construction, riot damage and
@@ -186,6 +198,13 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 				"region": fired.get("region", ""), "subject": fired["id"],
 			})
 
+	report["knowledge"] = KnowledgeRules.process_turn(data, state, rng)
+	for notice in report["knowledge"]:
+		TurnJournal.add(journal, String(notice.get("kind", "")), {
+			"faction": String(notice.get("faction", "")),
+			"other": String(notice.get("from", "")),
+			"subject": String(notice.get("technique", "")),
+		})
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	for notice in report["senate"]:
 		_journal_senate_notice(data, journal, notice)
@@ -199,6 +218,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			"faction": String(state["player_faction"]), "subject": String(notice["stage"]),
 		})
 	EventRules.tick_event_happiness(state)
+	ModifierRules.tick(state)
 	MercenaryRules.replenish(data, state)
 
 	state["turn"] = int(state["turn"]) + 1
@@ -254,6 +274,10 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		TurnJournal.add(journal, "campaign_decided", {"faction": String(report["winner"])})
 
 	state["journal"] = {"turn": int(state["turn"]), "beats": journal}
+	# The scribes write last: derived records (wars, reigns, alliances,
+	# destructions) against the snapshot, then compaction. No rng.
+	ChronicleRules.collect(data, state, report, pre)
+
 	state["rng_state"] = rng.state_string()
 	return report
 

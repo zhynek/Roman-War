@@ -16,13 +16,35 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 
 	factors.append({"label": "base", "value": float(order_rules["base"])})
 
-	var law := law_total(data, state, region_id)
+	# Building law only — edict law arrives via its own edict:<id> factor
+	# below (law_total, which feeds corruption, sums both).
+	var law := SettlementRules.effect_total(data, settlement, "law")
 	if law != 0.0:
 		factors.append({"label": "law", "value": law})
 
 	var happiness := SettlementRules.effect_total(data, settlement, "happiness")
 	if happiness != 0.0:
 		factors.append({"label": "happiness_buildings", "value": happiness})
+
+	var knowledge_happiness := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "happiness")
+	if knowledge_happiness != 0.0:
+		factors.append({"label": "knowledge", "value": knowledge_happiness})
+
+	# Each standing edict shows its hand by name (happiness and law both feed
+	# order one-for-one); decree moods and repeal shocks sum as one factor.
+	# Null-checks over .get defaults: this is the breakdown hot path.
+	var held = state["factions"][settlement["owner"]].get("edicts")
+	if held != null and not (held as Dictionary).is_empty():
+		var edict_ids: Array = (held as Dictionary).keys()
+		edict_ids.sort()
+		for eid in edict_ids:
+			var effects: Dictionary = data.edicts.get(eid, {}).get("effects", {})
+			var value := float(effects.get("happiness", 0.0)) + float(effects.get("law", 0.0))
+			if value != 0.0:
+				factors.append({"label": "edict:" + String(eid), "value": value})
+	var moods := ModifierRules.sum_for(state, settlement["owner"], region_id, "happiness")
+	if moods != 0.0:
+		factors.append({"label": "decrees", "value": moods})
 
 	var tax_happiness: float = order_rules["tax_happiness"][settlement["tax_level"]]
 	if tax_happiness != 0.0:
@@ -120,8 +142,10 @@ static func total(data: GameData, state: Dictionary, region_id: String) -> float
 
 
 static func law_total(data: GameData, state: Dictionary, region_id: String) -> float:
+	## Building law plus standing-edict law — corruption suppression reads this.
 	var settlement: Dictionary = state["settlements"][region_id]
-	return SettlementRules.effect_total(data, settlement, "law")
+	return SettlementRules.effect_total(data, settlement, "law") \
+		+ EdictRules.faction_effect_total(data, state, settlement["owner"], "law")
 
 
 static func garrison_bonus(data: GameData, settlement: Dictionary) -> float:
@@ -205,6 +229,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	## flees to the nearest city the house still holds.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var previous_owner: String = settlement["owner"]
+	ChronicleRules.record(data, state, "city_revolted",
+		{"faction": previous_owner, "region": region_id}, 5)
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
 	settlement["construction_queue"] = []
@@ -221,5 +247,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	EdictRules.clear(settlement)
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
 	# A house can lose its last city to its own people, not just to conquest.
+	# A revolt can take a faction's LAST settlement — the destruction check
+	# must run here just as it does after capture and cession, or a landless
+	# zombie faction keeps playing full turns.
 	CombatRules.check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)

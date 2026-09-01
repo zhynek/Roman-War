@@ -21,10 +21,13 @@ var quest_panel: QuestPanel
 var build_drawer: BuildDrawer
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
+var knowledge_panel: KnowledgePanel
+var annals_panel: AnnalsPanel
 var report_log: RichTextLabel
 var turn_sequence: TurnSequence
 var dispatch_panel: DispatchPanel
 var top_labels := {}
+var top_swatch: ColorRect
 var selected_army := ""
 var selected_fleet := ""
 var info_card: InfoCard
@@ -39,6 +42,7 @@ var drawer_open := false
 var drawer_tab := "construction"
 var drawer_chain := ""
 var drawer_tier := 0
+var selected_agent := ""
 var _victory_shown := false
 var _day_beats: Array = []
 var _treasury_shown := 0.0
@@ -68,6 +72,11 @@ func _ready() -> void:
 	add_child(background)
 
 
+	# set_anchors_AND_OFFSETS_preset, not set_anchors_preset: the latter keeps
+	# the control's current rect (0x0 for a freshly built Control), so the whole
+	# screen would render at its minimum size in the top-left corner and grow
+	# only by the DELTA of a window resize. Verified in-engine.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var root := VBoxContainer.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
@@ -121,6 +130,11 @@ func _ready() -> void:
 	region_panel.battle_fought.connect(_on_battle_fought)
 	region_panel.explore_requested.connect(_explore_order)
 	region_panel.drawer_requested.connect(open_drawer)
+	region_panel.agent_selected.connect(_on_agent_selected)
+	region_panel.scout_requested.connect(_scout_order)
+	region_panel.assassinate_requested.connect(_assassinate_order)
+	region_panel.bribe_requested.connect(_bribe_order)
+	region_panel.steal_requested.connect(_steal_order)
 	scroll.add_child(region_panel)
 
 	quest_panel = QuestPanel.new()
@@ -150,6 +164,13 @@ func _ready() -> void:
 
 	_treasury_shown = float(game.state["factions"][game.state["player_faction"]]["treasury"])
 	set_process(true)
+	knowledge_panel = KnowledgePanel.new()
+	knowledge_panel.knowledge_changed.connect(refresh)
+	add_child(knowledge_panel)
+
+
+	annals_panel = AnnalsPanel.new()
+	add_child(annals_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
@@ -171,6 +192,9 @@ func _build_top_bar() -> PanelContainer:
 	swatch.color = Color.html(faction.get("color", "#808080"))
 	swatch.custom_minimum_size = Vector2(6, 0)
 	bar.add_child(swatch)
+	top_swatch = ColorRect.new()
+	top_swatch.custom_minimum_size = Vector2(18, 18)
+	bar.add_child(top_swatch)
 
 	for key in ["faction", "treasury", "date", "society", "senate", "victory", "mission"]:
 		var label := Label.new()
@@ -181,12 +205,16 @@ func _build_top_bar() -> PanelContainer:
 			label.add_theme_color_override("font_color", UiStyle.TEXT)
 		bar.add_child(label)
 		top_labels[key] = label
-	top_labels["faction"].text = " %s   " % faction["name"]
 
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Dispatch", _show_dispatch))
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
+	# The house-wide Book of Policies lived here. main holds edicts PER
+	# PROVINCE, so they are issued and revoked from the region panel, where the
+	# province they bind is the thing you are already looking at.
+	bar.add_child(_bar_button("Annals", func(): annals_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -242,9 +270,19 @@ func refresh() -> void:
 		readings.append("%s %.0f" % [String(factor["label"]).replace("_", " ").capitalize(),
 			absf(float(factor["value"]))])
 	top_labels["society"].text = "%s   " % "  ·  ".join(PackedStringArray(readings))
-	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
+
+	# The whole identity re-derives here, not just at build time — a loaded
+	# save may belong to a different house than the campaign that was running.
+	# The treasury and the date are NOT re-set here: the ticker above owns the
+	# treasury label so it can count the day's swing rather than snap to it.
+	var faction_info: Dictionary = game.data.factions[game.state["player_faction"]]
+	top_swatch.color = Color.html(faction_info.get("color", "#808080"))
+	top_labels["faction"].text = " %s   " % faction_info["name"]
+	if faction_info.get("is_roman_house", false):
 		top_labels["senate"].text = "Senate %.0f · People %.0f   " \
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
+	else:
+		top_labels["senate"].text = ""
 	var progress := game.victory_progress()
 	if not progress.is_empty():
 		top_labels["victory"].text = "Regions %d/%d   " \
@@ -258,8 +296,7 @@ func refresh() -> void:
 			int(mission["turns_left"])]
 
 	if map_view.selected_region != "":
-		region_panel.show_region(game, map_view.selected_region, selected_army)
-	map_view.refresh_state()
+		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	_refresh_range_overlay()
 	_refresh_fleet_overlay()
 	_render_drawer()
@@ -362,15 +399,20 @@ func _on_drawer_tab(tab: String) -> void:
 
 
 func _on_region_clicked(region_id: String) -> void:
-	# With one of our armies selected, a click on another region is an order.
-	# Shift makes it a forced march: double range, weary men.
+	# With one of our armies (or agents) selected, a click on another region is
+	# an order. Shift makes an army's march forced: double range, weary men.
 	if selected_army != "" and game.state["armies"].has(selected_army) \
 			and region_id != game.state["armies"][selected_army]["region"]:
 		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
 		return
+	if selected_agent != "" and game.state["agents"].has(selected_agent) \
+			and region_id != game.state["agents"][selected_agent]["region"]:
+		_agent_order(region_id)
+		return
 	map_view.selected_region = region_id
 	selected_army = ""
 	_deselect_fleet()
+	selected_agent = ""
 	region_panel.show_region(game, region_id)
 	_refresh_range_overlay()
 	# This path does not go through refresh(), so without this the drawer would
@@ -384,6 +426,7 @@ func _on_region_clicked(region_id: String) -> void:
 
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
+	selected_agent = ""
 	region_panel.show_region(game, map_view.selected_region, selected_army)
 	_refresh_range_overlay()
 
@@ -507,6 +550,93 @@ func _tooltip_for(region_id: String) -> String:
 				"Forced march" if forced else "March", float(preview["cost"]),
 				"arrives this turn" if turns <= 1 else "%d turns" % turns])
 	return "\n".join(lines)
+
+
+func _on_agent_selected(agent_id: String) -> void:
+	selected_agent = "" if selected_agent == agent_id else agent_id
+	selected_army = ""
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+
+
+func _agent_order(target_region: String) -> void:
+	if game.move_agent(selected_agent, target_region):
+		_log("Our agent slips away toward %s." % game.data.regions[target_region]["name"])
+	else:
+		_log("Our agent cannot reach %s this season." % game.data.regions[target_region]["name"])
+	if game.state["agents"].has(selected_agent):
+		map_view.selected_region = game.state["agents"][selected_agent]["region"]
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+	refresh()
+
+
+func _scout_order(agent_id: String) -> void:
+	var report := game.agent_scout(agent_id)
+	if report.is_empty():
+		return
+	var lines := "Population %d, public order %d%%.\n" \
+		% [int(report["population"]), int(report["public_order"])]
+	if report["under_siege"]:
+		lines += "The city is under siege.\n"
+	lines += "\nGarrison (%d):\n" % report["garrison"].size()
+	for unit in report["garrison"]:
+		lines += "  %s — %d%%\n" % [unit["name"], int(unit["strength_pct"])]
+	lines += "\nWorks:\n"
+	for building in report["buildings"]:
+		lines += "  %s\n" % building
+	var dialog := AcceptDialog.new()
+	dialog.title = "The informer's report: %s" \
+		% game.data.regions[report["region"]]["settlement_name"]
+	dialog.dialog_text = lines
+	add_child(dialog)
+	dialog.popup_centered()
+	_log("Our informer reports from %s." % game.data.regions[report["region"]]["settlement_name"])
+
+
+func _assassinate_order(agent_id: String, target_char_id: String) -> void:
+	var target: Dictionary = game.state["characters"].get(target_char_id, {})
+	if target.is_empty():
+		return
+	_confirm("Send the blade against %s? Failure may cost us the man." % target["name"], func():
+		var result := game.agent_assassinate(agent_id, target_char_id)
+		if result.get("success", false):
+			_log("[color=#e06050][b]%s is dead.[/b] No one knows whose coin paid for it.[/color]"
+				% target["name"])
+		elif result.get("agent_lost", false):
+			_log("[color=#e0a060]The attempt on %s failed — our blade was taken.[/color]"
+				% target["name"])
+		elif result.get("attempted", false):
+			_log("The attempt on %s failed; our man slipped away." % target["name"])
+		refresh())
+
+
+func _steal_order(agent_id: String, technique_id: String) -> void:
+	var technique_name: String = game.data.techniques.get(technique_id, {}).get("name", technique_id)
+	_confirm("Send our informer after the secrets of %s? Failure may cost us the man." % technique_name, func():
+		var result := game.agent_steal_technique(agent_id, technique_id)
+		if result.get("success", false):
+			_log("[color=#80a0c0][b]The drawings of %s are ours.[/b] Taking it up will come cheaper now (Knowledge).[/color]"
+				% technique_name)
+		elif result.get("agent_lost", false):
+			_log("[color=#e0a060]Our informer was taken copying the secrets of %s.[/color]" % technique_name)
+		elif result.get("attempted", false):
+			_log("Our informer came away empty-handed; the %s secrets are still kept." % technique_name)
+		refresh())
+
+
+func _bribe_order(agent_id: String, army_id: String) -> void:
+	var army: Dictionary = game.state["armies"].get(army_id, {})
+	if army.is_empty():
+		return
+	var cost := AgentRules.bribe_cost(game.data, army)
+	_confirm("Pay %d to send this band home?" % cost, func():
+		var result := game.agent_bribe(agent_id, army_id)
+		if result.get("success", false):
+			_log("The band took our %d and scattered." % int(result["cost"]))
+		elif result.get("refused_loyal", false):
+			_log("They follow their general, not our purse.")
+		else:
+			_log("Our purse cannot meet their price.")
+		refresh())
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -701,6 +831,56 @@ func _end_turn() -> void:
 		_on_day_played()
 		return
 	turn_sequence.play(game, DispatchRules.sequence_beats(game.data, _day_beats), map_view)
+	selected_agent = ""
+	refresh()
+
+
+func _log_world_news(report: Dictionary) -> void:
+	## The living world: wars, conquests, treaties and envoys. World-shaking
+	## news is always heard; skirmish detail only when it touches the player.
+	var player: String = game.state["player_faction"]
+	for event in report["ai"]:
+		match String(event.get("kind", "")):
+			"war_declared":
+				var color := "#e06050" if event["on"] == player else "#d0a0a0"
+				_log("[color=%s][b]%s declares war on %s![/b][/color]"
+					% [color, _faction_name(event["by"]), _faction_name(event["on"])])
+			"ai_conquest":
+				_log("[color=#d0a0a0]%s has taken %s from %s.[/color]"
+					% [_faction_name(event["faction"]),
+						game.data.regions.get(event["region"], {}).get("settlement_name", event["region"]),
+						_faction_name(event["from"])])
+			"peace_made":
+				_log("[color=#a0c0a0]Peace between %s and %s.[/color]"
+					% [_faction_name(event["between"][0]), _faction_name(event["between"][1])])
+			"trade_agreed":
+				_log("[color=#a0c0a0]%s and %s open their markets to each other.[/color]"
+					% [_faction_name(event["between"][0]), _faction_name(event["between"][1])])
+			"offer_sent":
+				if event["to"] == player:
+					_log("[color=#c0b060][b]An envoy from %s awaits our answer (Diplomacy).[/b][/color]"
+						% _faction_name(event["from"]))
+			"ai_attack":
+				if event["defender"] == player:
+					_log("[color=#e06050][b]%s attacks our army near %s — the %s prevail.[/b][/color]"
+						% [_faction_name(event["faction"]),
+							game.data.regions.get(event["region"], {}).get("name", event["region"]),
+							"attackers" if event.get("winner", "") == "attacker" else "defenders"])
+			"ai_siege":
+				if event["owner"] == player:
+					_log("[color=#e06050][b]%s lays siege to %s![/b][/color]"
+						% [_faction_name(event["faction"]),
+							game.data.regions.get(event["region"], {}).get("settlement_name", event["region"])])
+	for event in report["diplomacy"]:
+		match String(event.get("kind", "")):
+			"tribute_paid":
+				if event["from"] == player:
+					_log("We pay %d in tribute to %s." % [int(event["amount"]), _faction_name(event["to"])])
+				elif event["to"] == player:
+					_log("[color=#a0c0a0]Tribute of %d arrives from %s.[/color]"
+						% [int(event["amount"]), _faction_name(event["from"])])
+			"offer_expired":
+				_log("The envoy from %s departs unanswered." % _faction_name(event["from"]))
 
 
 func _faction_name(faction_id: String) -> String:
@@ -863,6 +1043,7 @@ func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
 		_deselect_fleet()
+		selected_agent = ""
 		map_view.selected_region = ""
 		map_view.path_preview = {}
 		region_panel.clear_panel()

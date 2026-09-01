@@ -13,7 +13,7 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
-	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
+	DiplomacyRules.declare_war(data, state, attacker["owner"], defender["owner"])
 	var region: Dictionary = data.regions[defender["region"]]
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
@@ -33,6 +33,30 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	})
 
 	_process_general_deaths(data, state, attacker, defender, result)
+	# Defeat teaches: the beaten court accumulates reform pressure (the
+	# boarding-bridge law — see KnowledgeRules).
+	var attacker_won_field: bool = result["winner"] == "attacker"
+	KnowledgeRules.on_battle_lost(data, state,
+		String(defender["owner"] if attacker_won_field else attacker["owner"]))
+	# The annals: one battle entry whoever fought it (player and AI battles
+	# both pass through here), the war ledger's count, the generals' deeds.
+	ChronicleRules.on_battle(state, attacker["owner"], defender["owner"])
+	var battle_subjects := {
+		"faction": attacker["owner"], "other_faction": defender["owner"],
+		"region": defender["region"],
+	}
+	var winner_general = attacker["general"] if attacker_won_field else defender["general"]
+	if winner_general != null:
+		battle_subjects["character"] = winner_general
+	ChronicleRules.record(data, state, "battle", battle_subjects,
+		6 if attacker_soldiers + defender_soldiers >= 1500 else 4, {
+			"winner": String(result["winner"]),
+			"attacker_soldiers": attacker_soldiers,
+			"defender_soldiers": defender_soldiers,
+		})
+	ChronicleRules.add_deed(state, winner_general, "battles_won")
+	ChronicleRules.add_deed(state,
+		defender["general"] if attacker_won_field else attacker["general"], "battles_lost")
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
 		MovementRules.sync_general_location(state, attacker)
@@ -135,6 +159,23 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
 	SocietyRules.record_plunder(data, state, new_owner, float(loot))
 
+	# The fall of a city both teaches and warns: the victor gains awareness of
+	# every craft its late owner practiced (with a conquest discount toward
+	# adopting them), and the loser's court accumulates reform pressure.
+	KnowledgeRules.on_settlement_captured(data, state, new_owner, previous_owner)
+	KnowledgeRules.on_settlement_lost(data, state, previous_owner)
+
+	# The annals: every capture path comes through here — occupation decides
+	# whether the scribes write a taking or a sack. The loser's leader carries
+	# the loss BEFORE displacement, which may cost him his life in the fall.
+	ChronicleRules.on_city_taken(state, new_owner, previous_owner)
+	ChronicleRules.record(data, state,
+		"city_taken" if occupation == "occupy" else "city_sacked", {
+			"faction": new_owner, "other_faction": previous_owner, "region": region_id,
+		}, 6 if occupation == "occupy" else 7,
+		{"occupation": occupation, "loot": loot, "population": int(settlement["population"])})
+	ChronicleRules.add_deed(state, ChronicleRules.leader_of(state, previous_owner), "cities_lost")
+
 	var taken := displace_characters(data, state, region_id, previous_owner)
 
 	# Every capture path funnels through here — assault, starve-out, AI or
@@ -153,6 +194,7 @@ static func fire_occupation_triggers(data: GameData, state: Dictionary, rng: Cam
 	## path (assault or starve-out, player or AI) must come through here.
 	if general_id == null or not state["characters"].has(general_id):
 		return
+	ChronicleRules.add_deed(state, general_id, "cities_taken")
 	var context := {"occupation": occupation}
 	CharacterRules.fire_trigger(data, state, general_id, "settlement_captured", context, rng, notices)
 	if occupation == "enslave":
@@ -338,6 +380,11 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 
 
 static func check_faction_destroyed(state: Dictionary) -> void:
+	## Public entry for other modules that transfer settlements (cessions).
+	_check_faction_destroyed(state)
+
+
+static func _check_faction_destroyed(state: Dictionary) -> void:
 	for faction_id in state["factions"]:
 		var faction: Dictionary = state["factions"][faction_id]
 		if not faction["alive"] or faction_id == "rebels":

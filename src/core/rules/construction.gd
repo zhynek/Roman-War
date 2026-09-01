@@ -142,6 +142,12 @@ static func available_projects(data: GameData, state: Dictionary, region_id: Str
 			continue
 		var next_level: Dictionary = chain["levels"][built_tier]
 		var quote := quoted_cost(data, state, settlement, chain, next_level)
+
+		# A level may require a PRACTICED technique (the era gate generalized).
+		var needed_technique: String = next_level.get("requires_technique", "")
+		if needed_technique != "" and not KnowledgeRules.adopted(state, settlement["owner"], needed_technique):
+			continue
+
 		projects.append({
 			"chain": chain["id"],
 			"kind": chain["kind"],
@@ -230,6 +236,10 @@ static func _discounted_cost(data: GameData, state: Dictionary, settlement: Dict
 	# labour levy makes it cheaper here — paid in days owed rather than coin.
 	cost *= 1.0 + AdvanceRules.effect_total(data, state, faction_id, "build_cost_pct") / 100.0
 	cost *= 1.0 + EdictRules.effect(data, settlement, "build_cost_pct") / 100.0
+	# Practiced builder's craft (concrete) cheapens every project too: all three
+	# effects are authored negative, so each multiplier only shrinks the bill.
+	# The early return the merge left here skipped this one entirely.
+	cost *= 1.0 + KnowledgeRules.faction_effect_total(data, state, faction_id, "build_cost_pct") / 100.0
 	return maxi(0, int(round(cost)))
 
 

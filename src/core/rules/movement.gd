@@ -16,10 +16,17 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 			points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
 		# Guided-trail boons march the whole faction a little harder.
 		points += float(state["factions"][army["owner"]].get("boons", {}).get("movement", 0.0))
+		# Practiced logistics (marching camps, surveyed roads) speed every column.
+		points += KnowledgeRules.faction_effect_total(data, state, String(army["owner"]), "movement_points")
 		army["movement_left"] = maxf(points, 0.5)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
-		fleet["movement_left"] = base
+		# Naval technique and the great lighthouse (the wonder's long-dormant
+		# naval_movement_pct, wired at last) stretch a season's sailing.
+		var naval_pct := KnowledgeRules.faction_effect_total(data, state, String(fleet["owner"]), "naval_movement_pct") \
+			+ SettlementRules.faction_owns_wonder_effect(data, state, String(fleet["owner"]), "naval_movement_pct")
+		fleet["movement_left"] = base * (1.0 + naval_pct / 100.0)
+	AgentRules.reset_movement(data, state)
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String) -> float:
@@ -74,6 +81,13 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	## region may cross to another coastal region on the same or an adjacent
 	## sea zone, spending its whole turn. Explicit embark-on-fleet transport
 	## can replace this later without touching callers.
+	##
+	## Landing on the shore of a faction you are AT WAR with is an amphibious
+	## invasion: allowed as long as no hostile field army contests the beach
+	## (the garrison waits behind its walls — besiege it next turn). Without
+	## this, island regions with no land link — rebel-held Creta and Cyprus
+	## among them — could never change hands, and Egypt's long campaign could
+	## never be won.
 	var army: Dictionary = state["armies"][army_id]
 	var from_zones: Array = data.regions.get(army["region"], {}).get("sea_zones", [])
 	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
@@ -95,10 +109,6 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 		return false
 	if _hostile_army_in(state, army["owner"], to_region):
 		return false
-	if state["settlements"].has(to_region):
-		var holder: String = state["settlements"][to_region]["owner"]
-		if _at_war(state, army["owner"], holder):
-			return false
 	army["movement_left"] = 0.0
 	army["region"] = to_region
 	sync_general_location(state, army)

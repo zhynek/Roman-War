@@ -34,6 +34,10 @@ const KINDS: Array[String] = [
 	"province_rebellious",
 	# What the people have worked out, and what they have forgotten.
 	"advance_gained",
+	# The crafts a people works out, takes up, or hears of from abroad.
+	"technique_originated",
+	"technique_adopted",
+	"technique_spread",
 	"advance_lost",
 	"capital_growth",
 	"capital_decline",

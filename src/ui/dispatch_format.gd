@@ -138,6 +138,8 @@ static func _subject_name(data: GameData, state: Dictionary, beat: Dictionary) -
 			return subject.replace("_", " ")
 		"mission_issued", "mission_progress", "mission_complete", "mission_failed":
 			return String(data.missions.get(subject, {}).get("name", subject))
+		"technique_originated", "technique_adopted", "technique_spread":
+			return String(data.techniques.get(subject, {}).get("name", subject))
 		"advance_gained", "advance_lost":
 			return String(data.advances.get(subject, {}).get("name", subject))
 		"trail_started", "trail_complete", "trail_expired":

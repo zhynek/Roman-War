@@ -19,7 +19,9 @@ func test_every_unit_resolves(t) -> void:
 		t.check_eq(String(plate["title"]), String(data.units[template_id]["name"]),
 			"%s is titled" % template_id)
 		seen += 1
-	t.check_eq(seen, 91, "every unit template has a picture")
+	# Against the table, not a magic number: a merge that adds a unit should
+	# fail because the unit has no picture, not because a constant went stale.
+	t.check_eq(seen, data.units.size(), "every unit template has a picture")
 
 
 func test_every_class_and_culture_is_dressed(t) -> void:

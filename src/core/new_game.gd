@@ -50,6 +50,9 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"difficulty": difficulty,
 		"campaign_mode": campaign_mode,
 		"event_happiness": null,
+		"modifiers": [],
+		"chronicle": [],
+		"wars": [],
 		"player_faction": player_faction,
 		"factions": {},
 		"settlements": {},
@@ -63,6 +66,10 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"ai": {"war_turns": {}, "targets": {}, "peace_turn": {}},
 		"sites_explored": [],
 		"guided": {"enabled": guided, "counters": {}, "stages": {}},
+		"event_cooldowns": {},
+		"tributes": [],
+		"pending_offers": [],
+		"agents": {},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -81,6 +88,12 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"society": SocietyRules.new_faction_society(data),
 			"advances": [],
 			"war_cooldown": 0,
+			"ai": {},
+			"attitude_memory": {},
+			"knowledge": _starting_knowledge(data, fid),
+			"reform_pressure": 0.0,
+			"edicts": {},
+			"edict_cooldowns": {},
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -100,6 +113,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false, "war_cooldown": 0,
 		"society": SocietyRules.new_faction_society(data),
+		"ai": {}, "attitude_memory": {},
+		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -124,6 +139,15 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	# Governorship is derived from presence, so it is simply computed, never seeded.
 	SettlementRules.refresh_governors(data, state)
 
+	# Reign ledgers open with the founding leaders (the chronicle's collect
+	# pass would seed the same values lazily; build states them outright).
+	var reign_ids: Array = state["factions"].keys()
+	reign_ids.sort()
+	for fid in reign_ids:
+		state["factions"][fid]["reign"] = {
+			"leader": ChronicleRules.leader_of(state, fid), "since_turn": 0,
+		}
+
 	# Mercenary pools start at their initial counts (fractional replenishment
 	# accumulates in the counts, so they are floats).
 	var pools := {}
@@ -142,6 +166,93 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 
 	state["rng_state"] = rng.state_string()
 	return state
+
+
+static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
+	## Fill state keys added by later phases with their defaults, so a save
+	## written before those phases loads cleanly (save compatibility is
+	## additive; SAVE_VERSION stays 1). Every new engine reader ALSO tolerates
+	## the missing key via .get — this just normalizes eagerly on load.
+	## With `data` supplied, a pre-knowledge save's factions receive their
+	## culture's 270 BC technique endowment instead of an empty ledger.
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		if not faction.has("ai"):
+			faction["ai"] = {}
+		if not faction.has("attitude_memory"):
+			faction["attitude_memory"] = {}
+		if not faction.has("reform_pressure"):
+			faction["reform_pressure"] = 0.0
+		if not faction.has("knowledge"):
+			faction["knowledge"] = {} if (data == null or faction_id == "rebels") \
+				else _starting_knowledge(data, faction_id)
+		if not faction.has("edicts"):
+			faction["edicts"] = {}
+		if not faction.has("edict_cooldowns"):
+			faction["edict_cooldowns"] = {}
+	if not state.has("modifiers"):
+		state["modifiers"] = []
+	if not state.has("chronicle"):
+		state["chronicle"] = []
+	if not state.has("wars"):
+		state["wars"] = []
+	if not state.has("event_cooldowns"):
+		state["event_cooldowns"] = {}
+	# Chronicle-era per-entity keys (reigns, deeds, epithets, unit arming) are
+	# created lazily by their writers, but the save contract wants them
+	# normalized on load too. Reign fills with the TRUE current leader — a
+	# placeholder would make the first collect() read a false succession.
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		if not faction.has("reign"):
+			faction["reign"] = {
+				"leader": ChronicleRules.leader_of(state, faction_id),
+				"since_turn": int(state.get("turn", 0)),
+			}
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character.has("deeds"):
+			character["deeds"] = {}
+		if not character.has("epithet"):
+			character["epithet"] = ""
+	for army in state["armies"].values():  # pure key-add — order-free
+		_ensure_unit_arms(army["units"])
+	for fleet in state["fleets"].values():
+		_ensure_unit_arms(fleet["ships"])
+	for settlement in state["settlements"].values():
+		_ensure_unit_arms(settlement["garrison"])
+	if not state.has("tributes"):
+		state["tributes"] = []
+	if not state.has("pending_offers"):
+		state["pending_offers"] = []
+	if not state.has("agents"):
+		state["agents"] = {}
+
+
+static func _ensure_unit_arms(units: Array) -> void:
+	for unit in units:
+		if not unit.has("weapon"):
+			unit["weapon"] = 0
+		if not unit.has("armor"):
+			unit["armor"] = 0
+
+
+static func _starting_knowledge(data: GameData, faction_id: String) -> Dictionary:
+	## The 270 BC endowment: crafts this court's culture (or the court itself,
+	## by faction id) already practices when the campaign opens.
+	var culture := data.culture_of_faction(faction_id)
+	var knowledge := {}
+	var technique_ids: Array = data.techniques.keys()
+	technique_ids.sort()
+	for tid in technique_ids:
+		var start: Dictionary = data.techniques[tid].get("start_adopted", {})
+		if start.get("cultures", []).has(culture) or start.get("factions", []).has(faction_id):
+			knowledge[tid] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	return knowledge
 
 
 static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dictionary:
@@ -192,6 +303,8 @@ static func _units(setups: Array) -> Array:
 			"template": setup["template"],
 			"experience": int(setup.get("experience", 0)),
 			"strength_pct": int(setup.get("strength_pct", 100)),
+			"weapon": 0,
+			"armor": 0,
 		})
 	return result
 
@@ -240,4 +353,6 @@ static func _add_character(data: GameData, state: Dictionary, setup: Dictionary,
 		"ancillaries": [],
 		"location": setup.get("location", ""),
 		"alive": true,
+		"deeds": {},
+		"epithet": "",
 	}

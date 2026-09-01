@@ -208,11 +208,19 @@ static func advance_turn(data: GameData, state: Dictionary, region_ids: Array) -
 
 
 static func faction_effect_total(data: GameData, state: Dictionary, faction_id: String,
-		key: String, region_ids: Array) -> float:
+		key: String, region_ids: Array = []) -> float:
 	## Sum an edict effect across every province a faction holds — for the keys
 	## whose target is the faction rather than the settlement.
+	##
+	## Callers on a hot path pass the region list they already have. Callers
+	## that do not have one omit it and pay for the scan: the settlements are
+	## walked in sorted order so the result never depends on dictionary order.
+	var scan := region_ids
+	if scan.is_empty():
+		scan = state["settlements"].keys()
+		scan.sort()
 	var total := 0.0
-	for region_id in region_ids:
+	for region_id in scan:
 		var settlement: Dictionary = state["settlements"][region_id]
 		if settlement["owner"] != faction_id:
 			continue

@@ -11,6 +11,11 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 	for unit in data.units_for_faction(owner):
 		if unit.get("era", "any") != "any" and unit["era"] != faction["era"]:
 			continue
+		# The era gate generalized: a unit may require a PRACTICED technique
+		# (the boarding bridge before corvus marines, and so on).
+		var needed_technique: String = unit.get("requires_technique", "")
+		if needed_technique != "" and not KnowledgeRules.adopted(state, owner, needed_technique):
+			continue
 		if unit["factions"].has("mercenary"):
 			continue
 		if not _requirements_met(data, settlement, unit):
@@ -32,14 +37,15 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 			break
 	if not allowed:
 		return false
-	if int(faction["treasury"]) < int(template["cost"]):
+	var cost := recruit_cost(data, state, settlement["owner"], template)
+	if int(faction["treasury"]) < cost:
 		return false
 	var soldiers := int(template["soldiers"])
 	var min_population := int(data.balance["growth"]["min_population"])
 	if int(settlement["population"]) - soldiers < min_population:
 		return false
 
-	faction["treasury"] = int(faction["treasury"]) - int(template["cost"])
+	faction["treasury"] = int(faction["treasury"]) - cost
 	settlement["population"] = int(settlement["population"]) - soldiers
 	SocietyRules.record_recruitment(data, state, region_id, soldiers)
 	settlement["recruitment_queue"].append({
@@ -51,8 +57,11 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 
 static func advance_queues(data: GameData, state: Dictionary, region_id: String) -> Array:
 	## One unit finishes per turn (the head of the queue). Finished units join
-	## the garrison with experience from blacksmith-style recruit_xp bonuses.
+	## the garrison with experience from blacksmith-style recruit_xp bonuses
+	## (buildings and practiced techniques alike), armed to the city's current
+	## standard — the weapons/armor stamp travels with the unit for life.
 	var settlement: Dictionary = state["settlements"][region_id]
+	var owner: String = settlement["owner"]
 	var completed: Array = []
 	var remaining: Array = []
 	# Guided-trail boons can sharpen a faction's recruits beyond its buildings.
@@ -67,14 +76,20 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			# Quality is stamped on the unit at the moment it is raised, and
 			# travels with it: a legion equipped in a city with good forges stays
 			# well equipped wherever it marches.
-			var experience := mini(
-				int(SettlementRules.effect_max(data, settlement, "recruit_xp")) + boon_xp,
-				experience_max)
+			# Every source a recruit's edge can come from: the city's own
+			# forges and drill grounds, the crafts the people have practiced,
+			# the standing edicts in force, and a guided-trail boon.
+			var experience := clampi(
+				int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
+				+ int(KnowledgeRules.faction_effect_total(data, state, owner, "recruit_xp"))
+				+ int(EdictRules.faction_effect_total(data, state, owner, "recruit_xp"))
+				+ boon_xp,
+				0, experience_max)
 			settlement["garrison"].append({
 				"template": job["template"],
 				"experience": experience,
-				"weapon": int(SettlementRules.effect_max(data, settlement, "weapon_upgrade")),
-				"armor": int(SettlementRules.effect_max(data, settlement, "armor_upgrade")),
+				"weapon": upgrade_level(data, state, settlement, "weapon_upgrade"),
+				"armor": upgrade_level(data, state, settlement, "armor_upgrade"),
 				"strength_pct": 100,
 			})
 			completed.append(job["template"])
@@ -84,21 +99,39 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 	return completed
 
 
+static func upgrade_level(data: GameData, state: Dictionary, settlement: Dictionary, effect: String) -> int:
+	## What the city can arm a recruit with today: its own forges (building
+	## weapon/armor_upgrade effects — authored since the foundation, read at
+	## last) plus the owner's practiced techniques. Clamped 0–3.
+	var total := SettlementRules.effect_total(data, settlement, effect) \
+		+ KnowledgeRules.faction_effect_total(data, state, String(settlement["owner"]), effect)
+	return clampi(int(total), 0, 3)
+
+
 static func retrain_garrison(data: GameData, state: Dictionary, region_id: String) -> int:
 	## Refill depleted garrison units, paying cost proportional to missing men.
+	## Retraining is also RE-ARMING: every unit the city could recruit afresh is
+	## brought up to the current weapons/armor standard, free — the forges and
+	## techniques were the investment. Marching veterans home to re-arm is the
+	## strategic move this buys.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var faction: Dictionary = state["factions"][settlement["owner"]]
+	var weapons_now := upgrade_level(data, state, settlement, "weapon_upgrade")
+	var armor_now := upgrade_level(data, state, settlement, "armor_upgrade")
 	var healed := 0
 	for unit in settlement["garrison"]:
-		var strength := int(unit["strength_pct"])
-		if strength >= 100:
-			continue
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if not _requirements_met(data, settlement, template):
 			continue
+		unit["weapon"] = maxi(int(unit.get("weapon", 0)), weapons_now)
+		unit["armor"] = maxi(int(unit.get("armor", 0)), armor_now)
+		var strength := int(unit["strength_pct"])
+		if strength >= 100:
+			continue
 		var missing_fraction := (100 - strength) / 100.0
 		var cost_factor := float(data.balance["recruitment"]["retrain_cost_factor"])
-		var cost := int(round(int(template["cost"]) * missing_fraction * cost_factor))
+		var cost := int(round(recruit_cost(data, state, settlement["owner"], template) \
+			* missing_fraction * cost_factor))
 		var men := int(round(int(template["soldiers"]) * missing_fraction))
 		var min_population := int(data.balance["growth"]["min_population"])
 		if int(faction["treasury"]) < cost or int(settlement["population"]) - men < min_population:
@@ -109,6 +142,14 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 		unit["strength_pct"] = 100
 		healed += 1
 	return healed
+
+
+static func recruit_cost(data: GameData, state: Dictionary, faction_id: String, template: Dictionary) -> int:
+	## Template cost under the owner's military edicts (the citizen levy
+	## musters cheap, veteran land draws volunteers). Retraining prices off
+	## the same number.
+	return int(round(int(template.get("cost", 0)) * (1.0 + EdictRules.faction_effect_total(
+		data, state, faction_id, "recruit_cost_pct") / 100.0)))
 
 
 static func merge_units(units: Array) -> void:
@@ -124,6 +165,8 @@ static func merge_units(units: Array) -> void:
 				var combined := int(unit["strength_pct"]) + int(other["strength_pct"])
 				unit["strength_pct"] = mini(combined, 100)
 				unit["experience"] = maxi(int(unit["experience"]), int(other["experience"]))
+				unit["weapon"] = maxi(int(unit.get("weapon", 0)), int(other.get("weapon", 0)))
+				unit["armor"] = maxi(int(unit.get("armor", 0)), int(other.get("armor", 0)))
 				var leftover := combined - 100
 				if leftover > 0:
 					other["strength_pct"] = leftover

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ai.schema.json",
+  "title": "AI personas (per-faction campaign temperaments)",
+  "type": "object",
+  "required": ["personas"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "personas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "aggression", "expansion_drive", "peace_willingness",
+          "occupation", "build_weights", "knowledge_priorities", "edict_priorities",
+          "garrison_min_units", "garrison_frontier_units", "army_size_target"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "aggression": { "type": "number", "minimum": 0 },
+          "expansion_drive": { "type": "number", "minimum": 0 },
+          "peace_willingness": { "type": "number", "minimum": 0 },
+          "occupation": { "enum": ["occupy", "enslave", "exterminate"] },
+          "build_weights": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+              "order": { "type": "number", "minimum": 0 },
+              "growth": { "type": "number", "minimum": 0 },
+              "income": { "type": "number", "minimum": 0 },
+              "military": { "type": "number", "minimum": 0 },
+              "walls": { "type": "number", "minimum": 0 }
+            }
+          },
+          "knowledge_priorities": {
+            "type": "object",
+            "required": ["military", "economic", "civic"],
+            "additionalProperties": false,
+            "properties": {
+              "military": { "type": "number", "minimum": 0 },
+              "economic": { "type": "number", "minimum": 0 },
+              "civic": { "type": "number", "minimum": 0 }
+            }
+          },
+          "edict_priorities": {
+            "type": "object",
+            "required": ["welfare", "religion", "land", "citizenship", "taxation",
+              "debt", "military", "trade"],
+            "additionalProperties": false,
+            "properties": {
+              "welfare": { "type": "number", "minimum": 0 },
+              "religion": { "type": "number", "minimum": 0 },
+              "land": { "type": "number", "minimum": 0 },
+              "citizenship": { "type": "number", "minimum": 0 },
+              "taxation": { "type": "number", "minimum": 0 },
+              "debt": { "type": "number", "minimum": 0 },
+              "military": { "type": "number", "minimum": 0 },
+              "trade": { "type": "number", "minimum": 0 }
+            }
+          },
+          "garrison_min_units": { "type": "integer", "minimum": 0 },
+          "garrison_frontier_units": { "type": "integer", "minimum": 0 },
+          "army_size_target": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

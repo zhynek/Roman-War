@@ -15,6 +15,19 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if farm_growth != 0.0:
 		factors.append({"label": "buildings", "value": farm_growth})
 
+	var knowledge_growth := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "growth")
+	if knowledge_growth != 0.0:
+		factors.append({"label": "knowledge", "value": knowledge_growth})
+
+	var held = state["factions"][settlement["owner"]].get("edicts")
+	if held != null and not (held as Dictionary).is_empty():
+		var edict_ids: Array = (held as Dictionary).keys()
+		edict_ids.sort()
+		for eid in edict_ids:
+			var edict_growth := float(data.edicts.get(eid, {}).get("effects", {}).get("growth", 0.0))
+			if edict_growth != 0.0:
+				factors.append({"label": "edict:" + String(eid), "value": edict_growth})
+
 	var health := SettlementRules.effect_total(data, settlement, "health")
 	if health != 0.0:
 		var per_10: float = growth_rules["health_pct_per_10_health"]
@@ -110,13 +123,20 @@ static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictiona
 	if int(settlement["plague_turns"]) > 0:
 		settlement["plague_turns"] = int(settlement["plague_turns"]) - 1
 		return
-	# Plague risk grows with population beyond what health infrastructure supports.
+	# Plague risk grows with population beyond what health infrastructure
+	# supports; practiced techniques (drains, aqueducts, physicians' regimens —
+	# plague_resistance, in people sheltered) raise the whole faction's capacity.
 	var health := SettlementRules.effect_total(data, settlement, "health")
-	var capacity := float(plague_rules["base_capacity"]) + health * float(plague_rules["health_capacity_per_health_pct"])
-	# Engineering raises the ceiling a city can live under: drains, clean water,
-	# and the measured fall of an aqueduct.
+	# Both knowledge layers raise the ceiling a city can live under, and they
+	# work differently: an advance scales the whole capacity (drains, clean
+	# water, the measured fall of an aqueduct), while a practiced technique
+	# adds sheltered people outright.
+	var capacity := float(plague_rules["base_capacity"]) \
+		+ health * float(plague_rules["health_capacity_per_health_pct"])
 	capacity *= 1.0 + AdvanceRules.effect_total(
 		data, state, String(settlement["owner"]), "health_capacity_pct") / 100.0
+	capacity += KnowledgeRules.faction_effect_total(
+		data, state, String(settlement["owner"]), "plague_resistance")
 	var excess := float(settlement["population"]) - capacity
 	if excess <= 0.0:
 		return
@@ -129,17 +149,19 @@ static func _plague_turn(data: GameData, state: Dictionary, settlement: Dictiona
 static func _grain_routes(data: GameData, state: Dictionary, region_id: String) -> int:
 	## Grain flows in from trading-partner or own regions that produce grain and
 	## are reachable by land adjacency or a shared sea zone (needs a port here).
+	## Iterates the immutable grain index, not every settlement — this runs
+	## inside every growth AND order breakdown.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var owner: String = settlement["owner"]
 	var has_port := SettlementRules.effect_max(data, settlement, "port_level") > 0.0
 	var routes := 0
-	for other_id in state["settlements"]:
+	for other_id in data.grain_regions:
 		if other_id == region_id:
 			continue
-		if not data.regions[other_id].get("resources", []).has("grain"):
+		var other = state["settlements"].get(other_id)
+		if other == null:
 			continue
-		var other: Dictionary = state["settlements"][other_id]
-		if not _trades_with(state, owner, other["owner"]):
+		if not _trades_with(state, owner, (other as Dictionary)["owner"]):
 			continue
 		var land := MapRules.are_adjacent(data, region_id, other_id)
 		var sea: bool = has_port and MapRules.shared_sea_zone(data, region_id, other_id)

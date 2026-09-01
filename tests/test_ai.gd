@@ -160,19 +160,30 @@ func test_ai_white_peace_ends_stalled_war_but_never_with_player(t) -> void:
 func test_ai_fights_through_blocking_army(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
-	# Green's road to blue's alpha runs through gamma, where a token blue force
-	# stands in the way. The column must fight the road open, not stall forever.
+	# Green's road to alpha runs through gamma, where a token force stands in
+	# the way. The column must fight the road open, not stall forever.
+	#
+	# The enemy here is the REBELS, deliberately. This scenario used to pit
+	# green against blue, but the campaign now has a real negotiation model:
+	# blue, hopelessly outmatched, sued for peace on the first turn and the war
+	# the test needed simply ended — correct behaviour, wrong test. The
+	# independents keep no envoys and never treat, so the road still has to be
+	# fought open.
 	Fixtures.add_faction(state, "green", "delta")
 	Fixtures.add_settlement(state, "delta", "green", 1000, {"tribal_government": 1})
 	state["settlements"]["delta"]["garrison"].append(
 		{"template": "test_spears", "experience": 0, "strength_pct": 100})
-	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
-	DiplomacyRules.set_stance(state, "green", "blue", "war")
-	DiplomacyRules.set_stance(state, "green", "red", "neutral")
+	state["settlements"]["alpha"]["owner"] = "rebels"
+	# Allied to both powers, so the rebels at alpha are the ONLY thing green can
+	# march on and the blocked road is the whole question. Left neutral, green
+	# rationally declares on red and takes adjacent epsilon instead — correct
+	# play, but a different test.
+	DiplomacyRules.set_stance(state, "green", "blue", "alliance")
+	DiplomacyRules.set_stance(state, "green", "red", "alliance")
 	DiplomacyRules.set_stance(state, "green", "rebels", "war")
 	Fixtures.add_army(state, "green", "delta",
 		["test_spears", "test_spears", "test_spears", "test_spears", "test_spears", "test_spears"])
-	Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
+	Fixtures.add_army(state, "rebels", "gamma", ["test_mob"])
 	var game := _game(data, state)
 
 	var road_battle := false
@@ -183,7 +194,6 @@ func test_ai_fights_through_blocking_army(t) -> void:
 	t.check(road_battle, "the blocking army was brought to battle")
 	t.check_eq(state["settlements"]["alpha"]["owner"], "green",
 		"the campaign continued past the cleared road")
-
 
 func test_ai_stale_war_peace_waits_for_intent(t) -> void:
 	## Ledger semantics, driven directly (a full campaign resolves such wars by
@@ -206,7 +216,7 @@ func test_ai_stale_war_peace_waits_for_intent(t) -> void:
 		FactionAi.begin_round(data, state)
 		# Both houses keep aiming at each other; nobody marches.
 		AiDiplomacy.ai_memory(state)["targets"] = {"blue": "delta", "green": "alpha"}
-		AiDiplomacy.consider_peace(data, state, "blue", notices)
+		AiDiplomacy.white_peace_stalled(data, state, "blue", notices)
 		if i == quick + 1:
 			t.check_eq(DiplomacyRules.stance_between(state, "blue", "green"), "war",
 				"a war still being aimed at outlives the quick-peace window")

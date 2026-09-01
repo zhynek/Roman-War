@@ -668,6 +668,42 @@
       "in_dispatch": true,
       "headline": "The trail has lapsed: {subject}",
       "body": "The season for it passed. Nothing is lost that cannot be won another way, but the moment was there and went."
+    },
+    {
+      "id": "technique_originated",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 5,
+      "tone": "good",
+      "icon": "scroll",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "Our own people have devised {subject}",
+      "body": "Nobody taught them this. Somebody solved a problem that had been solved badly for a long time, and the court may now take it up."
+    },
+    {
+      "id": "technique_adopted",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 4,
+      "tone": "good",
+      "icon": "scroll",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "Our craftsmen now practice {subject}",
+      "body": "Taken up in earnest: enough hands know it that it will be there next season and the season after."
+    },
+    {
+      "id": "technique_spread",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "neutral",
+      "icon": "scroll",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "Word of {subject} reaches our court",
+      "body": "It came from {other_faction}, as most things do \u2014 by a merchant, a deserter, or a captured engineer who preferred talking to the alternative."
     }
   ]
 }

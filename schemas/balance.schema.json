@@ -23,7 +23,12 @@
     "ai",
     "characters",
     "society",
-    "dispatch"
+    "dispatch",
+    "diplomacy",
+    "agents",
+    "knowledge",
+    "edicts",
+    "chronicle"
   ],
   "additionalProperties": false,
   "properties": {
@@ -122,7 +127,124 @@
       "$ref": "#/$defs/numeric_section"
     },
     "ai": {
-      "$ref": "#/$defs/numeric_section"
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "army_action_cap",
+            "assault_ratio",
+            "defend_radius_hops",
+            "difficulty_income_multiplier",
+            "difficulty_order_bonus",
+            "difficulty_player_attitude",
+            "growth_need_boost",
+            "growth_need_threshold",
+            "knowledge_order_boost",
+            "knowledge_war_boost",
+            "merge_ceiling_factor",
+            "military_muster_boost",
+            "min_attack_ratio",
+            "muster_surplus_units",
+            "objective_stale_turns",
+            "order_need_boost",
+            "order_need_threshold",
+            "raise_army_min_units",
+            "retrain_treasury_margin",
+            "sea_target_hops",
+            "siege_min_ratio",
+            "siege_threat_multiplier",
+            "strength_attack_weight",
+            "strength_defense_weight",
+            "strength_morale_weight",
+            "target_base_score",
+            "target_defense_weight",
+            "target_min_score",
+            "target_population_weight",
+            "tax_lower_below_order",
+            "tax_raise_above_order",
+            "treasury_reserve",
+            "unit_value_upkeep_horizon_turns",
+            "walls_frontier_boost"
+          ]
+        }
+      ]
+    },
+    "diplomacy": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "accept_threshold",
+            "ai_offer_cooldown_turns",
+            "alliance_formed_memory",
+            "alliance_min_attitude",
+            "alliance_stance_value",
+            "ambition_attitude_scale",
+            "attitude_value_per_point",
+            "betrayal_memory",
+            "cede_order_penalty",
+            "gift_memory_per_1000",
+            "memory_decay_per_turn",
+            "memory_max",
+            "memory_min",
+            "offer_expiry_turns",
+            "peace_base_value",
+            "peace_concluded_memory",
+            "peace_seek_strength_ratio",
+            "peace_strength_scale",
+            "peace_sweetener_margin",
+            "peace_tribute_turns",
+            "peace_value_max",
+            "region_value_base",
+            "region_value_per_1000_pop",
+            "same_culture_bonus",
+            "senate_alignment_scale",
+            "shared_border_penalty",
+            "stance_attitude",
+            "strength_fear_max",
+            "strength_fear_scale",
+            "trade_min_attitude",
+            "trade_propose_min_willingness",
+            "trade_stance_value",
+            "tribute_default_memory",
+            "tribute_value_factor",
+            "war_declare_attitude",
+            "war_declared_memory",
+            "war_no_room_shift",
+            "war_strength_ratio",
+            "weakness_temptation_max",
+            "weakness_temptation_scale"
+          ]
+        }
+      ]
+    },
+    "agents": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "assassinate_base_chance",
+            "assassinate_max_chance",
+            "assassinate_min_chance",
+            "assassinate_per_counter_intel",
+            "assassinate_per_security",
+            "assassinate_per_skill",
+            "bribe_cost_per_soldier",
+            "bribe_experience_factor",
+            "envoy_offer_bonus_per_skill",
+            "failure_death_chance",
+            "infiltration_wall_reduction",
+            "max_per_faction",
+            "skill_max"
+          ]
+        }
+      ]
     },
     "characters": {
       "$ref": "#/$defs/numeric_section"
@@ -132,6 +254,72 @@
     },
     "dispatch": {
       "$ref": "#/$defs/numeric_section"
+    },
+    "edicts": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "ai_upkeep_income_share",
+            "insolvency_repeal_treasury",
+            "max_enacted",
+            "reenact_cooldown_turns"
+          ]
+        }
+      ]
+    },
+    "chronicle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "compact_min_magnitude",
+            "max_entries",
+            "per_turn_cap"
+          ]
+        }
+      ]
+    },
+    "knowledge": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "required": [
+            "conquest_discount_pct",
+            "diffusion_alliance_mult",
+            "diffusion_base_chance",
+            "diffusion_border_mult",
+            "diffusion_same_culture_mult",
+            "diffusion_scholarship_mult_per_point",
+            "diffusion_trade_mult",
+            "diffusion_war_mult",
+            "espionage_discount_pct",
+            "max_concurrent_adoptions",
+            "origination_base_chance",
+            "origination_education_bonus_per_level",
+            "origination_scholarship_mult_per_point",
+            "reform_military_discount_pct_at_max",
+            "reform_origination_bonus_at_max",
+            "reform_pressure_decay_per_turn",
+            "reform_pressure_max",
+            "reform_pressure_per_battle_loss",
+            "reform_pressure_per_settlement_lost",
+            "steal_base_chance",
+            "steal_caught_memory",
+            "steal_failure_death_chance",
+            "steal_max_chance",
+            "steal_min_chance",
+            "steal_per_counter_intel",
+            "steal_per_skill"
+          ]
+        }
+      ]
     }
   },
   "$defs": {

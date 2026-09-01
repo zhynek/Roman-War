@@ -13,22 +13,30 @@ signal building_info_requested(chain_id: String)
 signal battle_fought(result: Dictionary, defender_name: String)
 signal explore_requested(army_id: String)
 signal drawer_requested(tab: String, chain_id: String)
+signal agent_selected(agent_id: String)
+signal scout_requested(agent_id: String)
+signal assassinate_requested(agent_id: String, target_char_id: String)
+signal bribe_requested(agent_id: String, army_id: String)
+signal steal_requested(agent_id: String, technique_id: String)
 
 var game: Game
 var region_id := ""
 var selected_army := ""
+var selected_agent := ""
 
 
-func show_region(current_game: Game, new_region_id: String, army_id: String = "") -> void:
+func show_region(current_game: Game, new_region_id: String, army_id: String = "", agent_id: String = "") -> void:
 	game = current_game
 	region_id = new_region_id
 	selected_army = army_id
+	selected_agent = agent_id
 	_rebuild()
 
 
 func clear_panel() -> void:
 	region_id = ""
 	selected_army = ""
+	selected_agent = ""
 	_clear_children()
 
 
@@ -66,6 +74,7 @@ func _rebuild() -> void:
 	if not settlement.is_empty():
 		_build_settlement_section(settlement)
 	_build_armies_section()
+	_build_agents_section()
 
 
 func _build_settlement_section(settlement: Dictionary) -> void:
@@ -137,6 +146,13 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	# Construction. The wall of unexplained "Build X (5000, 4t)" buttons is now
 	# one door into the building yard, plus a short cheap-and-ready list so the
 	# one-click route (and the trail's "queue a building" step) still works.
+		_action_button("Raise the garrison into the field", func():
+			game.raise_army(region_id)
+			action_taken.emit())
+
+	# Construction. Unaffordable actions render disabled instead of silently
+	# doing nothing when clicked.
+	var treasury := int(game.state["factions"][player]["treasury"])
 	_header("Construction", 12)
 	for job in settlement["construction_queue"]:
 		_label("  building %s — %d turns left" % [_chain_name(job["chain"]), int(job["turns_left"])])
@@ -188,6 +204,28 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 				game.queue_unit(region_id, recruit_id)
 				action_taken.emit(),
 			func(): unit_info_requested.emit(recruit_id))
+
+	# Agents train here too, behind their building gates.
+	var agent_count := 0
+	for agent in game.state["agents"].values():
+		if agent["owner"] == player:
+			agent_count += 1
+	var at_cap: bool = agent_count >= int(game.data.balance["agents"]["max_per_faction"])
+	var agent_kind_ids: Array = game.data.agent_kinds.keys()
+	agent_kind_ids.sort()
+	for kind in agent_kind_ids:
+		var template: Dictionary = game.data.agent_kinds[kind]
+		if not AgentRules.building_gate_met(game.data, settlement, template):
+			continue
+		var label := "Train %s (%d)" % [template["name"], int(template["cost"])]
+		if at_cap:
+			label += " — all hands employed"
+		var button := _action_button(label,
+			func():
+				game.recruit_agent(region_id, kind)
+				action_taken.emit(),
+			Callable(), at_cap or treasury < int(template["cost"]))
+		button.tooltip_text = String(template.get("description", ""))
 
 
 func _build_armies_section() -> void:
@@ -281,6 +319,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 
 	var offers := game.mercenaries_available(region_id)
 	if not offers.is_empty():
+		var treasury := int(game.state["factions"][game.state["player_faction"]]["treasury"])
 		_header("Mercenaries for hire", 12)
 		for offer in offers:
 			var offer_template: String = offer["template"]
@@ -296,6 +335,104 @@ func _unexplored_site() -> Dictionary:
 	if site.is_empty() or game.state.get("sites_explored", []).has(site["id"]):
 		return {}
 	return site
+
+
+func _build_agents_section() -> void:
+	var player: String = game.state["player_faction"]
+	var here := game.agents_in(region_id)
+	if here.is_empty():
+		return
+	_separator()
+	_header("Agents here", 13)
+	for entry in here:
+		var agent: Dictionary = entry["agent"]
+		var agent_id: String = entry["id"]
+		var faction: Dictionary = game.data.factions.get(agent["owner"], {})
+		var kind_name: String = game.data.agent_kinds.get(agent["kind"], {}).get("name", agent["kind"])
+		var title := "%s %s (skill %d)" % [kind_name, agent["name"], int(agent["skill"])]
+		if agent["owner"] == player:
+			var button := Button.new()
+			button.text = ("◆ " if agent_id == selected_agent else "") + title
+			button.add_theme_font_size_override("font_size", 11)
+			button.pressed.connect(func(): agent_selected.emit(agent_id))
+			add_child(button)
+			if agent_id == selected_agent:
+				_build_selected_agent_detail(agent_id, agent)
+		else:
+			_label("%s — %s" % [faction.get("name", agent["owner"]), title],
+				Color.html(faction.get("color", "#808080")))
+
+
+func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
+	_label("Movement left: %.1f" % float(agent["movement_left"]))
+	_label("Click an adjacent region to travel — any border is open to him.", Color(0.7, 0.8, 0.9))
+
+	match String(agent["kind"]):
+		"spy":
+			if game.state["settlements"].has(region_id):
+				_action_button("Scout the settlement", func(): scout_requested.emit(agent_id))
+				_build_steal_options(agent_id, agent)
+		"assassin":
+			var targets: Array = []
+			var char_ids: Array = game.state["characters"].keys()
+			char_ids.sort()
+			for char_id in char_ids:
+				var character: Dictionary = game.state["characters"][char_id]
+				if character["alive"] and character.get("location", "") == region_id \
+						and character["faction"] != game.state["player_faction"]:
+					targets.append(char_id)
+			if not targets.is_empty():
+				var picker := OptionButton.new()
+				for char_id in targets:
+					var character: Dictionary = game.state["characters"][char_id]
+					var odds := AgentRules.assassination_chance(game.data, game.state, agent, character)
+					picker.add_item("%s (%d%%)" % [character["name"], int(round(odds * 100))])
+				add_child(picker)
+				_action_button("Send the blade", func():
+					if picker.selected >= 0:
+						assassinate_requested.emit(agent_id, targets[picker.selected]))
+		"diplomat":
+			var bands: Array = []
+			var army_ids: Array = game.state["armies"].keys()
+			army_ids.sort()
+			for army_id in army_ids:
+				var army: Dictionary = game.state["armies"][army_id]
+				if army["region"] == region_id and army["owner"] != game.state["player_faction"] \
+						and army["general"] == null:
+					bands.append(army_id)
+			for army_id in bands:
+				var army: Dictionary = game.state["armies"][army_id]
+				var cost := AgentRules.bribe_cost(game.data, army)
+				var owner_name: String = game.data.factions.get(army["owner"], {}).get("name", army["owner"])
+				_action_button("Bribe the %s band — %d units (%d)" % [owner_name, army["units"].size(), cost],
+					func(): bribe_requested.emit(agent_id, army_id))
+
+
+func _build_steal_options(agent_id: String, agent: Dictionary) -> void:
+	## Crafts the city's owner practices and our court has never heard of —
+	## the spy can bring the drawings home, with the odds shown up front.
+	var owner: String = game.state["settlements"][region_id]["owner"]
+	var player: String = game.state["player_faction"]
+	if owner == player:
+		return
+	var ours: Dictionary = game.state["factions"][player].get("knowledge", {})
+	var theirs: Dictionary = game.state["factions"].get(owner, {}).get("knowledge", {})
+	var stealable: Array = []
+	var tids: Array = theirs.keys()
+	tids.sort()
+	for tid in tids:
+		if String(theirs[tid].get("stage", "")) == "adopted" and not ours.has(tid):
+			stealable.append(tid)
+	if stealable.is_empty():
+		return
+	var odds := AgentRules.steal_chance(game.data, game.state, agent)
+	var picker := OptionButton.new()
+	for tid in stealable:
+		picker.add_item(String(game.data.techniques.get(tid, {}).get("name", tid)))
+	add_child(picker)
+	_action_button("Steal the craft (%d%%)" % int(round(odds * 100)), func():
+		if picker.selected >= 0:
+			steal_requested.emit(agent_id, stealable[picker.selected]))
 
 
 ## --- Small builders -------------------------------------------------------
@@ -439,7 +576,11 @@ func _breakdown(title: String, factors: Array) -> void:
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 
-func _action_button(text: String, handler: Callable, info: Callable = Callable()) -> void:
+func _action_button(text: String, handler: Callable, info: Callable = Callable(),
+		unaffordable: bool = false) -> Button:
+	## One button builder for both branches' conventions: `info` wires the
+	## right-click "what is this?" card, `unaffordable` greys it out so the
+	## button can explain itself instead of going dead.
 	var button := Button.new()
 	button.text = text
 	# Focus stays off the panel so the arrow keys always drive the map.
@@ -448,7 +589,9 @@ func _action_button(text: String, handler: Callable, info: Callable = Callable()
 	button.pressed.connect(handler)
 	if info.is_valid():
 		_info_on_rightclick(button, info)
+	button.disabled = unaffordable
 	add_child(button)
+	return button
 
 
 func _info_on_rightclick(control: Control, info: Callable) -> void:
