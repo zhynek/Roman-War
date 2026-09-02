@@ -39,7 +39,8 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 			settlement["siege"] = null
 			continue
 		siege["turns"] = int(siege["turns"]) + 1
-		if int(siege["turns"]) >= int(siege_rules["equipment_turns"]):
+		var besieger_owner: String = state["armies"][siege["besieger"]]["owner"]
+		if int(siege["turns"]) >= equipment_turns_for(data, state, besieger_owner):
 			siege["equipment_ready"] = true
 
 		var level := SettlementRules.settlement_level(data, settlement)
@@ -53,6 +54,38 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 	return results
 
 
+static func equipment_turns_for(data: GameData, state: Dictionary, faction_id: String) -> int:
+	## Turns of investment before an assault can be launched: the base, less
+	## what the besieger's engineering doctrines shave off, never below the floor.
+	var base := int(data.balance["siege"]["equipment_turns"])
+	var delta := int(DoctrineRules.scalar(data, state, faction_id, "siege_equipment_turns"))
+	return maxi(base + delta, int(data.balance["doctrines"]["min_equipment_turns"]))
+
+
+static func assault_context(data: GameData, state: Dictionary, army: Dictionary, region_id: String, starving: bool) -> Dictionary:
+	## The resolver context for storming (or, starving, being sallied from) a
+	## settlement: its wall tier (one less when the defenders are starving),
+	## the governor as the defending general, and both sides' doctrines.
+	var settlement: Dictionary = state["settlements"][region_id]
+	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
+	if starving:
+		wall_level = maxi(0, wall_level - 1)
+	var governor = settlement["governor"]
+	var governor_profile = null
+	if governor != null and state["characters"].has(governor):
+		governor_profile = CharacterRules.battle_profile(data, state["characters"][governor])
+	return {
+		"terrain": data.regions[region_id]["terrain"],
+		"wall_level": wall_level,
+		"attacker_general": CombatRules.general_profile(data, state, army),
+		"defender_general": governor_profile,
+		"attacker_fatigued": false,
+		"sally": starving,
+		"attacker_mods": DoctrineRules.army_mods(data, state, army["owner"]),
+		"defender_mods": DoctrineRules.army_mods(data, state, settlement["owner"]),
+	}
+
+
 static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, army_id: String, region_id: String, starving: bool = false) -> Dictionary:
 	var army: Dictionary = state["armies"][army_id]
 	var settlement: Dictionary = state["settlements"][region_id]
@@ -63,25 +96,12 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	if not siege["equipment_ready"] and not starving:
 		return {}
 
-	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
-	if starving:
-		wall_level = maxi(0, wall_level - 1)
-
 	var governor = settlement["governor"]
-	var governor_profile = null
-	if governor != null and state["characters"].has(governor):
-		governor_profile = CharacterRules.battle_profile(data, state["characters"][governor])
 	var soldiers_before := CombatRules.soldiers_in(data, army["units"]) + CombatRules.soldiers_in(data, settlement["garrison"])
 	var attacker_classes: Array = ArmyRules.shares(data, army["units"]).keys()
 	var defender_classes: Array = ArmyRules.shares(data, settlement["garrison"]).keys()
-	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"], {
-		"terrain": data.regions[region_id]["terrain"],
-		"wall_level": wall_level,
-		"attacker_general": CombatRules.general_profile(data, state, army),
-		"defender_general": governor_profile,
-		"attacker_fatigued": false,
-		"sally": starving,
-	})
+	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"],
+		assault_context(data, state, army, region_id, starving))
 	CombatRules.record_battle(data, state, army["owner"], settlement["owner"], attacker_classes, defender_classes,
 		soldiers_before, result)
 

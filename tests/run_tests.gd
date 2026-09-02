@@ -86,7 +86,12 @@ class TestContext:
 		checks_run += 1
 		if not _loose_eq(actual, expected):
 			failed = true
-			messages.append("%s (expected %s, got %s)" % [message, str(expected), str(actual)])
+			messages.append("%s (expected %s, got %s)" % [message, _short(expected), _short(actual)])
+
+	func _short(value) -> String:
+		# Whole game states get compared; keep a failure readable.
+		var text := str(value)
+		return text if text.length() <= 400 else text.left(400) + "… (%d chars)" % text.length()
 
 	func check_near(actual: float, expected: float, tolerance: float, message: String) -> void:
 		checks_run += 1

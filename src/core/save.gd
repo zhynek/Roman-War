@@ -13,10 +13,12 @@ static func to_json(state: Dictionary) -> String:
 	return JSON.stringify({"version": SAVE_VERSION, "state": state}, "\t")
 
 
-static func from_json(text: String) -> Dictionary:
+static func from_json(text: String, data: GameData = null) -> Dictionary:
 	## Returns the state dict, or {} on failure. JSON numbers arrive as floats;
 	## the engine int()-coerces on read, so no fixup pass is needed. The one
 	## precision-critical field, rng_state, travels as a string (see CampaignRng).
+	## Pass the loaded GameData so an old save can be upgraded with content
+	## (e.g. the campaign's starting doctrines).
 	var parsed = JSON.parse_string(text)
 	if parsed == null or not (parsed is Dictionary):
 		return {}
@@ -26,21 +28,26 @@ static func from_json(text: String) -> Dictionary:
 	var state = parsed.get("state", {})
 	if not (state is Dictionary):
 		return {}
-	upgrade(state, version)
+	upgrade(state, version, data)
 	return state
 
 
-static func upgrade(state: Dictionary, version: int) -> void:
+static func upgrade(state: Dictionary, version: int, data: GameData = null) -> void:
 	## Fill in fields introduced after `version`, with NewGame's defaults and in
 	## NewGame's key order (appended last), so an upgraded save and a live game
 	## stringify identically and march in step.
 	if version < 2:
+		var starting := {}
+		if data != null:
+			for faction_setup in data.campaign.get("factions", []):
+				starting[faction_setup["id"]] = NewGame.starting_doctrines(data, faction_setup)
 		var faction_ids: Array = state.get("factions", {}).keys()
 		faction_ids.sort()
 		for faction_id in faction_ids:
 			var faction: Dictionary = state["factions"][faction_id]
 			if not faction.has("doctrines"):
-				faction["doctrines"] = []
+				# A pre-doctrine save: the faction practises what it did in 270 BC.
+				faction["doctrines"] = starting.get(faction_id, [])
 			if not faction.has("reforms"):
 				faction["reforms"] = []
 			if not faction.has("war_record"):
@@ -64,7 +71,7 @@ static func write_file(state: Dictionary, path: String) -> bool:
 	return true
 
 
-static func read_file(path: String) -> Dictionary:
+static func read_file(path: String, data: GameData = null) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
-	return from_json(FileAccess.get_file_as_string(path))
+	return from_json(FileAccess.get_file_as_string(path), data)

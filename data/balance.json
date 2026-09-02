@@ -274,5 +274,10 @@
     "troop_morale_strength_pct_per_point": 2.0,
     "ancillary_max": 8,
     "max_family_size": 12
+  },
+  "doctrines": {
+    "max_concurrent_reforms": 1,
+    "ai_reserve": 3000,
+    "min_equipment_turns": 1
   }
 }

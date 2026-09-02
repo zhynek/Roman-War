@@ -31,3 +31,10 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String) -> 
 					best = project
 			if not best.is_empty() and int(faction["treasury"]) > int(best["cost"]) + 1000:
 				ConstructionRules.queue_project(data, state, region_id, best["chain"])
+
+	# Even a passive court modernises its army when the treasury allows: the
+	# cheapest doctrine it qualifies for, one reform at a time.
+	if faction.get("reforms", []).is_empty():
+		var pick := DoctrineRules.ai_pick(data, state, faction_id)
+		if pick != "":
+			DoctrineRules.adopt(data, state, faction_id, pick)

@@ -90,7 +90,73 @@ func hire_mercenary(army_id: String, template_id: String) -> bool:
 
 
 func mercenaries_available(region_id: String) -> Array:
-	return MercenaryRules.available(data, state, region_id)
+	return MercenaryRules.available(data, state, region_id, String(state["player_faction"]))
+
+
+## --- Doctrines & battle estimates -------------------------------------------
+
+func available_doctrines(faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return DoctrineRules.available(data, state, fid)
+
+
+func adopt_doctrine(doctrine_id: String) -> bool:
+	return DoctrineRules.adopt(data, state, String(state["player_faction"]), doctrine_id)
+
+
+func faction_doctrines(faction_id: String = "") -> Dictionary:
+	## What the Reforms scroll summarises: {adopted: [{id, name}], reforms:
+	## [{id, name, turns_left}], war_record, war_mood}.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var faction: Dictionary = state["factions"][fid]
+	var adopted: Array = []
+	for doctrine_id in faction.get("doctrines", []):
+		adopted.append({"id": doctrine_id, "name": data.doctrines.get(doctrine_id, {}).get("name", doctrine_id)})
+	var reforms: Array = []
+	for reform in faction.get("reforms", []):
+		reforms.append({"id": reform["doctrine"], "turns_left": int(reform["turns_left"]),
+			"name": data.doctrines.get(reform["doctrine"], {}).get("name", reform["doctrine"])})
+	return {
+		"adopted": adopted,
+		"reforms": reforms,
+		"war_record": faction.get("war_record", NewGame.empty_war_record()),
+		"war_mood": faction.get("war_mood"),
+	}
+
+
+func battle_estimate(attacker_id: String, defender_id: String) -> Dictionary:
+	## The RNG-free odds of a field battle (see BattleResolver.estimate); {}
+	## when the two armies cannot come to grips.
+	var attacker: Dictionary = state["armies"].get(attacker_id, {})
+	var defender: Dictionary = state["armies"].get(defender_id, {})
+	if attacker.is_empty() or defender.is_empty() or attacker["owner"] == defender["owner"]:
+		return {}
+	if attacker["region"] != defender["region"] 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
+		return {}
+	return BattleResolver.estimate(data, attacker["units"], defender["units"],
+		CombatRules.battle_context(data, state, attacker, defender))
+
+
+func assault_estimate(army_id: String, region_id: String) -> Dictionary:
+	## Odds of storming a settlement this army is besieging; {} otherwise.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if army.is_empty() or settlement.is_empty():
+		return {}
+	var siege = settlement.get("siege")
+	if siege == null or siege["besieger"] != army_id:
+		return {}
+	return BattleResolver.estimate(data, army["units"], settlement["garrison"],
+		SiegeRules.assault_context(data, state, army, region_id, false))
+
+
+func army_summary(army_id: String) -> Dictionary:
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {}
+	var summary := ArmyRules.summary(data, army["units"])
+	summary["owner"] = army["owner"]
+	return summary
 
 
 ## --- Family & characters --------------------------------------------------
@@ -222,7 +288,7 @@ func save_to(path: String) -> bool:
 
 
 func load_from(path: String) -> bool:
-	var loaded := SaveGame.read_file(path)
+	var loaded := SaveGame.read_file(path, data)
 	if loaded.is_empty():
 		return false
 	state = loaded

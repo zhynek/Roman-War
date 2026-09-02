@@ -92,6 +92,9 @@
           "faction": "cornelii",
           "stance": "alliance"
         }
+      ],
+      "doctrines": [
+        "manipular_drill"
       ]
     },
     {
@@ -233,6 +236,9 @@
           "faction": "cornelii",
           "stance": "alliance"
         }
+      ],
+      "doctrines": [
+        "manipular_drill"
       ]
     },
     {
@@ -369,6 +375,9 @@
           "faction": "cornelii",
           "stance": "alliance"
         }
+      ],
+      "doctrines": [
+        "manipular_drill"
       ]
     },
     {
@@ -519,6 +528,9 @@
           "faction": "junii",
           "stance": "alliance"
         }
+      ],
+      "doctrines": [
+        "manipular_drill"
       ]
     },
     {
@@ -701,6 +713,9 @@
           "faction": "hispania",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "mercenary_contracts"
       ]
     },
     {
@@ -865,6 +880,9 @@
           "faction": "egypt",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "hoplite_tradition"
       ]
     },
     {
@@ -976,6 +994,9 @@
           "faction": "seleucia",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "sarissa_drill"
       ]
     },
     {
@@ -1045,6 +1066,9 @@
           "influence": 2,
           "location": "thracia"
         }
+      ],
+      "doctrines": [
+        "sarissa_drill"
       ]
     },
     {
@@ -1208,6 +1232,9 @@
           "faction": "macedon",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "sarissa_drill"
       ]
     },
     {
@@ -1385,6 +1412,9 @@
           "faction": "greek_cities",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "ptolemaic_phalanx"
       ]
     },
     {
@@ -1499,6 +1529,9 @@
           "influence": 2,
           "location": "parthia"
         }
+      ],
+      "doctrines": [
+        "composite_bow_mastery"
       ]
     },
     {
@@ -1575,6 +1608,9 @@
           "influence": 2,
           "location": "armenia"
         }
+      ],
+      "doctrines": [
+        "composite_bow_mastery"
       ]
     },
     {
@@ -1793,6 +1829,9 @@
           "influence": 3,
           "location": "arvernia"
         }
+      ],
+      "doctrines": [
+        "warband_fury"
       ]
     },
     {
@@ -1901,6 +1940,9 @@
           ],
           "location": "cimbria"
         }
+      ],
+      "doctrines": [
+        "warband_fury"
       ]
     },
     {
@@ -1985,6 +2027,9 @@
           ],
           "location": "britannia"
         }
+      ],
+      "doctrines": [
+        "warband_fury"
       ]
     },
     {
@@ -2064,6 +2109,9 @@
           ],
           "location": "dacia"
         }
+      ],
+      "doctrines": [
+        "warband_fury"
       ]
     },
     {
@@ -2167,6 +2215,9 @@
           "faction": "carthage",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "warband_fury"
       ]
     },
     {
@@ -2246,6 +2297,9 @@
           "influence": 2,
           "location": "scythia"
         }
+      ],
+      "doctrines": [
+        "horse_lords"
       ]
     },
     {
@@ -2335,6 +2389,9 @@
           "faction": "carthage",
           "stance": "trade"
         }
+      ],
+      "doctrines": [
+        "numidian_horse"
       ]
     }
   ],

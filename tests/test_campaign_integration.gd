@@ -76,12 +76,30 @@ func test_save_round_trip(t) -> void:
 	t.check_eq(_canonical(game.state), _canonical(resumed.state), "resumed game marches in step")
 
 
+func test_forty_turns_deterministic_with_reforms(t) -> void:
+	var first := Game.new_campaign("julii", 4242)
+	var second := Game.new_campaign("julii", 4242)
+	for i in range(40):
+		first.end_turn()
+		second.end_turn()
+	t.check_eq(JSON.stringify(first.state), JSON.stringify(second.state), "forty turns replay identically")
+	var starting := {}
+	for setup in first.data.campaign["factions"]:
+		starting[setup["id"]] = setup.get("doctrines", [])
+	var learned := 0
+	for faction_id in first.state["factions"]:
+		if faction_id == first.state["player_faction"]:
+			continue
+		if first.state["factions"][faction_id]["doctrines"].size() > starting.get(faction_id, []).size():
+			learned += 1
+	t.check(learned >= 1, "some rival adopted a doctrine on its own (%d did)" % learned)
+
+
 func test_save_v1_upgrades(t) -> void:
 	## A save written before the military layer lacks the doctrine / war-record /
-	## levy-strain fields. It must still load, gain them, and march in step.
+	## levy-strain fields. It must still load, gain them (with the campaign's
+	## starting doctrines when the loader has the data), and march in step.
 	var game := Game.new_campaign("julii", 7)
-	for i in range(2):
-		game.end_turn()
 	var stripped: Dictionary = JSON.parse_string(JSON.stringify(game.state))
 	for faction_id in stripped["factions"]:
 		for key in ["doctrines", "reforms", "war_record", "war_mood"]:
@@ -90,8 +108,12 @@ func test_save_v1_upgrades(t) -> void:
 		stripped["settlements"][region_id].erase("levy_strain")
 	var legacy := JSON.stringify({"version": 1, "state": stripped})
 
-	var restored := SaveGame.from_json(legacy)
+	var blind := SaveGame.from_json(legacy)
+	t.check(not blind.is_empty() and blind["factions"]["julii"]["doctrines"].is_empty(),
+		"without content the upgrade can only add empty fields")
+	var restored := SaveGame.from_json(legacy, game.data)
 	t.check(not restored.is_empty(), "a version-1 save still loads")
+	t.check_eq(restored["factions"]["julii"]["doctrines"], ["manipular_drill"], "starting doctrines restored from the campaign")
 	t.check(restored["factions"]["julii"].has("war_record"), "upgrade fills the war record")
 	t.check_eq(float(restored["settlements"].values()[0]["levy_strain"]), 0.0, "upgrade fills levy strain")
 	t.check(SaveGame.from_json(JSON.stringify({"version": SaveGame.SAVE_VERSION + 1, "state": {}})).is_empty(),
@@ -101,8 +123,9 @@ func test_save_v1_upgrades(t) -> void:
 	resumed.data = game.data
 	resumed.resolver = AutoResolver.new()
 	resumed.state = restored
-	game.end_turn()
-	resumed.end_turn()
+	for i in range(3):
+		game.end_turn()
+		resumed.end_turn()
 	t.check_eq(_canonical(game.state), _canonical(resumed.state), "upgraded save marches in step")
 
 

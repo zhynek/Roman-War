@@ -2,7 +2,7 @@ class_name TurnEngine
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
 ##   1. AI stub turns (non-player factions)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
-##   3. Construction and recruitment queues advance
+##   3. Construction and recruitment queues advance; military reforms progress
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
 ##   5. Population growth, slaves, plague
 ##   6. Public order: riots and revolts
@@ -17,7 +17,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var rng := CampaignRng.from_state_string(String(state["rng_state"]))
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
-		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
+		"completed_units": {}, "reforms": {}, "rioted": [], "revolted": [], "events": [],
 		"senate": [], "characters": [], "winner": null,
 	}
 
@@ -56,6 +56,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		var completed_units := RecruitmentRules.advance_queues(data, state, region_id)
 		if not completed_units.is_empty():
 			report["completed_units"][region_id] = completed_units
+
+	report["reforms"] = DoctrineRules.advance_reforms(data, state)
 
 	for faction_id in faction_ids:
 		if state["factions"][faction_id]["alive"]:

@@ -51,15 +51,17 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	return true
 
 
-static func recruit_profile(data: GameData, state: Dictionary, region_id: String, _template_id: String = "") -> Dictionary:
+static func recruit_profile(data: GameData, state: Dictionary, region_id: String, template_id: String = "") -> Dictionary:
 	## What a unit raised or refitted in this settlement receives: starting
-	## experience from the best drill-style recruit_xp building, and the weapon
-	## and armour levels its forges, armouries and war temples can issue (summed
-	## across chains, capped by balance.recruitment.upgrade_max).
+	## experience from the best drill-style recruit_xp building plus the owner's
+	## doctrines, and the weapon and armour levels its forges, armouries and war
+	## temples can issue (summed across chains, capped by
+	## balance.recruitment.upgrade_max plus any doctrine that raises the cap).
 	var settlement: Dictionary = state["settlements"][region_id]
+	var owner: String = settlement["owner"]
 	var recruitment_rules: Dictionary = data.balance["recruitment"]
-	var upgrade_max := int(recruitment_rules["upgrade_max"])
-	var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
+	var upgrade_max := int(recruitment_rules["upgrade_max"]) + int(DoctrineRules.scalar(data, state, owner, "upgrade_cap"))
+	var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp")) 		+ DoctrineRules.recruit_xp_for(data, state, owner, ArmyRules.class_of(data, template_id))
 	return {
 		"experience": clampi(experience, 0, int(recruitment_rules["experience_max"])),
 		"weapon": clampi(int(SettlementRules.effect_total(data, settlement, "weapon_upgrade")), 0, upgrade_max),
@@ -146,6 +148,7 @@ static func add_levy_strain(data: GameData, state: Dictionary, region_id: String
 	var drill := SettlementRules.effect_total(data, settlement, "drill")
 	var softening := maxf(0.0, 1.0 - drill * float(order_rules["levy_strain_drill_reduction_pct"]) / 100.0)
 	var added := float(soldiers) / float(population) * float(order_rules["levy_strain_scale"]) * softening
+	added *= maxf(0.0, 1.0 + DoctrineRules.scalar(data, state, settlement["owner"], "levy_strain_pct") / 100.0)
 	settlement["levy_strain"] = minf(float(settlement.get("levy_strain", 0.0)) + added,
 		float(order_rules["levy_strain_max"]))
 

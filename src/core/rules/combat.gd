@@ -14,7 +14,6 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
 	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
-	var region: Dictionary = data.regions[defender["region"]]
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
 	var defender_soldiers := soldiers_in(data, defender["units"])
@@ -23,14 +22,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	var attacker_had_general: bool = attacker["general"] != null
 	var defender_had_general: bool = defender["general"] != null
 
-	var result := resolver.resolve(data, rng, attacker["units"], defender["units"], {
-		"terrain": region["terrain"],
-		"wall_level": 0,
-		"attacker_general": general_profile(data, state, attacker),
-		"defender_general": general_profile(data, state, defender),
-		"attacker_fatigued": attacker.get("forced_march", false),
-		"sally": false,
-	})
+	var result := resolver.resolve(data, rng, attacker["units"], defender["units"],
+		battle_context(data, state, attacker, defender))
 
 	record_battle(data, state, attacker["owner"], defender["owner"], attacker_classes, defender_classes,
 		attacker_soldiers + defender_soldiers, result)
@@ -67,6 +60,23 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	_cleanup_destroyed_army(data, state, attacker_id)
 	_cleanup_destroyed_army(data, state, defender_id)
 	return result
+
+
+static func battle_context(data: GameData, state: Dictionary, attacker: Dictionary, defender: Dictionary) -> Dictionary:
+	## The resolver context for a field battle: the defender's ground, both
+	## generals, fatigue, and each side's doctrine modifiers pre-merged so the
+	## resolver stays state-free. Shared by attack_army and the odds preview.
+	var region: Dictionary = data.regions[defender["region"]]
+	return {
+		"terrain": region["terrain"],
+		"wall_level": 0,
+		"attacker_general": general_profile(data, state, attacker),
+		"defender_general": general_profile(data, state, defender),
+		"attacker_fatigued": attacker.get("forced_march", false),
+		"sally": false,
+		"attacker_mods": DoctrineRules.army_mods(data, state, attacker["owner"]),
+		"defender_mods": DoctrineRules.army_mods(data, state, defender["owner"]),
+	}
 
 
 static func record_battle(data: GameData, state: Dictionary, attacker_owner: String, defender_owner: String, attacker_classes: Array, defender_classes: Array, soldiers_before: int, result: Dictionary) -> void:

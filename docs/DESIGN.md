@@ -65,7 +65,7 @@ the world in a **fixed order** so campaigns are reproducible:
 |---|------|-------|
 | 1 | AI turns | Every non-player faction acts (currently `AiStub`: passive settlement management) |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
-| 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
+| 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn; then every faction's military reforms tick (`DoctrineRules.advance_reforms`) |
 | 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
@@ -77,8 +77,8 @@ Governorship is re-derived from character presence (`SettlementRules.refresh_gov
 at the top of the resolution, before anything reads it.
 
 `end_turn` returns a report dictionary (`sieges`, `completed_buildings`,
-`completed_units`, `rioted`, `revolted`, `events`, `senate`, `characters`,
-`winner`) that the UI presents as the start-of-turn event log.
+`completed_units`, `reforms`, `rioted`, `revolted`, `events`, `senate`,
+`characters`, `winner`) that the UI presents as the start-of-turn event log.
 
 ### 2.4 The map
 
@@ -413,6 +413,45 @@ Military buildings shape the men they produce, and the towns that hold them:
 - `requires_building` is a general chain prerequisite: a chain is offered only
   where the settlement already holds the named kind at the named tier.
 
+### 5.8 Doctrines
+
+Military technology is a matter of **doctrines** (`data/doctrines.json`,
+`DoctrineRules`): faction-wide reforms adopted for denarii and turns, one at a
+time (`balance.doctrines.max_concurrent_reforms`), paid up front, behind
+prerequisites that are all AND-ed:
+
+| Prerequisite | Meaning |
+|---|---|
+| `doctrines` | earlier doctrines adopted (a tree, validated acyclic) |
+| `building {kind, level}` | some owned settlement holds that kind at that tier |
+| `resource` | some owned region yields it (`horses`, `iron`, `elephants` …) |
+| `era` | the faction's era (`cohort_reform` needs `post_marian`) |
+| `battles_won` / `battles_lost` | the faction's war record |
+| `faced {class, battles}` | it has fought armies containing that class in ≥ n battles — how a people *learns from whom it fights*: the Iberian sword after facing infantry, woodland ambush after meeting legions |
+
+Every faction's **war record** (`{battles_won, battles_lost, faced: {class: n}}`)
+is kept by `CombatRules.record_battle` after every field battle and assault.
+Doctrines are culture-scoped (`cultures`), optionally faction-scoped
+(`factions`); 270 BC starting doctrines come from `campaign.json` (Rome's
+manipular drill, Macedon's sarissa, Parthia's composite bow, Numidia's
+horsemanship …), and a version-1 save loaded with content receives them too.
+
+Effects use a closed vocabulary that the validator requires an engine reader
+for: per-class stat deltas, matchup and terrain percentages, side-wide battle
+scalars (`strength_pct`, `attacking_pct`, `assault_pct`, `wall_defense_pct`,
+`pursuit_pct`, `escape_pct`, `fatigue_immune`) — all merged campaign-side into
+the `ArmyMods` dict the resolver receives; and campaign scalars: `upkeep_pct`
+per class (`EconomyRules`), `recruit_xp` per class (`RecruitmentRules`),
+`upgrade_cap`, `siege_equipment_turns` (`SiegeRules.equipment_turns_for`),
+`garrison_order_pct` (§3.3), `levy_strain_pct`, `movement`
+(`MovementRules.reset_movement`), `mercenary_cost_pct`. Reforms tick in the
+turn engine after the queues (§2.3) and completions appear in the turn report
+under `reforms`. `AiStub` adopts the cheapest doctrine it qualifies for whenever
+its treasury exceeds the cost plus `balance.doctrines.ai_reserve`, so rivals
+modernise too. The catalogue (34 doctrines with historical notes: Roman,
+Hellenistic, Eastern, Punic, Egyptian, tribal and shared) is laid out for the
+player in `docs/MILITARY_STRATEGY.md`.
+
 ## 6. Characters, Agents & Diplomacy
 
 ### 6.1 Built now (Phase 4)
@@ -553,8 +592,9 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | temples.json | temple chains (one god each, archetyped), per culture | construction, effects, elite units |
 | units.json | unit templates: stats, costs, requirements, era, class, attributes | recruitment, battle |
 | unit_classes.json | the unit-class counter matrix, per-class terrain / assault / wall / policing weights, attribute effects | battle estimator, public order |
+| doctrines.json | 34 military doctrines: cultures, cost, turns, prerequisites, effects, historical notes | `DoctrineRules` and every reader in §5.8 |
 | regions.json | region graph + sea zones, terrain, fertility, resources, hidden resources | map, economy, growth |
-| campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy; rebel holdings | NewGame |
+| campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy, starting doctrines; rebel holdings | NewGame |
 | traits.json / ancillaries.json | trigger-driven character content | Phase 4 engine (loaded now) |
 | events.json | scripted events + disasters | EventRules |
 | wonders.json | wonders and their faction-wide effects | settlements, economy, construction |
@@ -586,8 +626,11 @@ culture's cap; monotonic `min_settlement_level` within chains; temple chains car
 god + archetype; every unit's requirement satisfiable by some chain of its
 culture; every faction able to recruit ≥ 3 unit types; a unit-class and an
 attribute record for every value the units schema admits (and no others), with
-matchup pair products inside the 0.85–1.15 authoring band; every building effect
-key read by some rules module (dead content fails the build); land and sea adjacency
+matchup pair products inside the 0.85–1.15 authoring band; every building and
+doctrine effect key read by some rules module (dead content fails the build);
+doctrine cultures / factions / prerequisite doctrines / resources valid, the
+prerequisite tree acyclic, at least three doctrines per culture, and every
+campaign starting doctrine open to its faction; land and sea adjacency
 symmetric and the whole map connected; wonders and regions back-reference each
 other; the campaign start settles every region exactly once, capitals owned,
 government tier consistent with starting population, exactly one leader per house,

@@ -40,6 +40,7 @@ TABLES = {
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
     "unit_classes.json": "unit_classes.schema.json",
+    "doctrines.json": "doctrines.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -490,19 +491,82 @@ def cross_checks(t: dict[str, dict]) -> None:
                 if trait_id not in trait_defs:
                     err(f"campaign: character {character['id']}: unknown trait {trait_id}")
 
-    # --- effect-key liveness ----------------------------------------------
-    # Every effect key the buildings schema admits must be read by some rules
-    # module (as a quoted literal): weapon/armour upgrades shipped authored but
-    # unread for four phases, and a closed vocabulary should not rot silently.
-    effect_keys = _schema_effect_keys("buildings.schema.json")
-    for key in sorted(effect_keys):
-        if key in FORWARD_EFFECTS:
+    # --- doctrines --------------------------------------------------------
+    doctrines = {d["id"]: d for d in t.get("doctrines.json", {}).get("doctrines", [])}
+    if len(doctrines) != len(t.get("doctrines.json", {}).get("doctrines", [])):
+        err("doctrines: duplicate doctrine id")
+    resource_enum = set()
+    regions_schema = json.loads((SCHEMAS / "regions.schema.json").read_text())
+    try:
+        resource_enum = set(regions_schema["properties"]["regions"]["items"]["properties"]["resources"]["items"]["enum"])
+    except KeyError:
+        resource_enum = {r for region in regions.values() for r in region.get("resources", [])}
+    for doctrine in doctrines.values():
+        for culture in doctrine["cultures"]:
+            if culture not in cultures:
+                err(f"doctrines: {doctrine['id']}: unknown culture {culture}")
+        for faction_id in doctrine.get("factions", []):
+            if faction_id not in factions:
+                err(f"doctrines: {doctrine['id']}: unknown faction {faction_id}")
+            elif factions[faction_id]["culture"] not in doctrine["cultures"]:
+                err(f"doctrines: {doctrine['id']}: faction {faction_id} is not of a listed culture")
+        if doctrine.get("era", "any") != "any" and doctrine["cultures"] != ["roman"]:
+            warn(f"doctrines: {doctrine['id']}: era gating outside the roman culture")
+        prerequisites = doctrine.get("prerequisites", {})
+        for needed in prerequisites.get("doctrines", []):
+            if needed not in doctrines:
+                err(f"doctrines: {doctrine['id']}: unknown prerequisite doctrine {needed}")
+        building = prerequisites.get("building")
+        if building:
+            buildable = any(c["kind"] == building["kind"] and len(c["levels"]) >= building["level"]
+                            and any(culture in c["cultures"] for culture in doctrine["cultures"])
+                            for c in chains.values())
+            if not buildable:
+                err(f"doctrines: {doctrine['id']}: no culture it serves can build {building['kind']} L{building['level']}")
+        resource = prerequisites.get("resource")
+        if resource and resource_enum and resource not in resource_enum:
+            err(f"doctrines: {doctrine['id']}: unknown resource {resource}")
+    # Prerequisite chains must be acyclic, or a doctrine can never be adopted.
+    def _reaches(start: str, target: str, seen: set[str]) -> bool:
+        for needed in doctrines.get(start, {}).get("prerequisites", {}).get("doctrines", []):
+            if needed == target or (needed not in seen and _reaches(needed, target, seen | {needed})):
+                return True
+        return False
+    for doctrine_id in sorted(doctrines):
+        if _reaches(doctrine_id, doctrine_id, set()):
+            err(f"doctrines: {doctrine_id}: prerequisite cycle")
+    for culture in sorted(cultures):
+        if culture == "neutral":
             continue
-        if f'"{key}"' not in engine_text:
-            err(f"buildings.schema: effect key '{key}' has no engine reader under src/core "
-                f"(dead content — implement it or list it in FORWARD_EFFECTS)")
+        count = sum(1 for d in doctrines.values() if culture in d["cultures"])
+        if count < 3:
+            warn(f"doctrines: culture {culture} has only {count} doctrines to pursue")
+    for faction_setup in campaign.get("factions", []):
+        for doctrine_id in faction_setup.get("doctrines", []):
+            doctrine = doctrines.get(doctrine_id)
+            if doctrine is None:
+                err(f"campaign: {faction_setup['id']}: unknown starting doctrine {doctrine_id}")
+                continue
+            culture = factions.get(faction_setup["id"], {}).get("culture")
+            allowed = doctrine.get("factions")
+            if culture not in doctrine["cultures"] or (allowed and faction_setup["id"] not in allowed):
+                err(f"campaign: {faction_setup['id']}: starting doctrine {doctrine_id} is not open to it")
+
+    # --- effect-key liveness ----------------------------------------------
+    # Every effect key a schema admits must be read by some rules module (as a
+    # quoted literal): weapon/armour upgrades shipped authored but unread for
+    # four phases, and a closed vocabulary should not rot silently.
+    for schema_name, effect_keys in (
+            ("buildings.schema.json", _schema_effect_keys("buildings.schema.json", "chains", "levels")),
+            ("doctrines.schema.json", _schema_effect_keys("doctrines.schema.json", "doctrines"))):
+        for key in sorted(effect_keys):
+            if key in FORWARD_EFFECTS:
+                continue
+            if f'"{key}"' not in engine_text:
+                err(f"{schema_name}: effect key '{key}' has no engine reader under src/core "
+                    f"(dead content — implement it or list it in FORWARD_EFFECTS)")
     for key in sorted(FORWARD_EFFECTS):
-        if key not in effect_keys:
+        if key not in _schema_effect_keys("buildings.schema.json", "chains", "levels"):
             warn(f"validator: FORWARD_EFFECTS lists '{key}', which the schema no longer admits")
 
     # --- balance sanity ---------------------------------------------------
@@ -516,11 +580,12 @@ def _engine_source() -> str:
     return "\n".join(path.read_text() for path in sorted((ROOT / "src" / "core").rglob("*.gd")))
 
 
-def _schema_effect_keys(schema_name: str) -> set[str]:
-    schema = json.loads((SCHEMAS / schema_name).read_text())
-    effects = (schema["properties"]["chains"]["items"]["properties"]["levels"]["items"]
-               ["properties"]["effects"]["properties"])
-    return set(effects)
+def _schema_effect_keys(schema_name: str, *array_path: str) -> set[str]:
+    """Keys of the `effects` object reached by descending the given array properties."""
+    node = json.loads((SCHEMAS / schema_name).read_text())
+    for name in array_path:
+        node = node["properties"][name]["items"]
+    return set(node["properties"]["effects"]["properties"])
 
 
 def main() -> int:
@@ -538,9 +603,9 @@ def main() -> int:
 
 
 def _entity_count(document: dict) -> int:
-    for key in ("cultures", "factions", "chains", "units", "classes", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
-        if key in document:
+    for key in ("cultures", "factions", "chains", "units", "classes", "doctrines", "regions",
+                "traits", "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
+        if isinstance(document.get(key), list):
             return len(document[key])
     return 0
 

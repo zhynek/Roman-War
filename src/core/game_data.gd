@@ -63,6 +63,8 @@ func _load_all(dir: String) -> void:
 
 	for unit in _read_json(dir + "/units.json").get("units", []):
 		units[unit["id"]] = unit
+	for doctrine in _read_json(dir + "/doctrines.json").get("doctrines", []):
+		doctrines[doctrine["id"]] = doctrine
 	var class_data := _read_json(dir + "/unit_classes.json")
 	for record in class_data.get("classes", []):
 		unit_classes[record["id"]] = record

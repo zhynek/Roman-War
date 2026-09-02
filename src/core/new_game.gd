@@ -68,7 +68,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
-			"doctrines": _starting_doctrines(data, faction_setup),
+			"doctrines": starting_doctrines(data, faction_setup),
 			"reforms": [],
 			"war_record": empty_war_record(),
 			"war_mood": null,
@@ -161,7 +161,7 @@ static func empty_war_record() -> Dictionary:
 	return {"battles_won": 0, "battles_lost": 0, "faced": {}}
 
 
-static func _starting_doctrines(data: GameData, faction_setup: Dictionary) -> Array:
+static func starting_doctrines(data: GameData, faction_setup: Dictionary) -> Array:
 	## Doctrines a faction already practises in 270 BC (campaign.json), kept
 	## sorted like every other doctrine list; unknown ids are dropped.
 	var result: Array = []

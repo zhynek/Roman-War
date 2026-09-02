@@ -21,7 +21,8 @@
     "siege",
     "senate",
     "ai",
-    "characters"
+    "characters",
+    "doctrines"
   ],
   "additionalProperties": false,
   "properties": {
@@ -123,6 +124,9 @@
       "$ref": "#/$defs/numeric_section"
     },
     "characters": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "doctrines": {
       "$ref": "#/$defs/numeric_section"
     }
   },

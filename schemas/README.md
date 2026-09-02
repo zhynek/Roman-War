@@ -30,6 +30,11 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 - Unit attributes: `can_hide_forest, warcry, phalanx, testudo, frighten_infantry,
   frighten_cavalry, can_sap, hardy, fast_moving, shield_wall` — each needs an
   effects record in `unit_classes.json` (percentages, additive).
+- Doctrines (`doctrines.json`): `cultures` from the list above, optional
+  `factions`, `era`, `cost`, `turns`, AND-ed `prerequisites` (`doctrines`,
+  `building {kind, level}`, `resource`, `battles_won`, `battles_lost`,
+  `faced {class, battles}`) and a closed `effects` vocabulary — every key must
+  have an engine reader, which the validator checks.
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):

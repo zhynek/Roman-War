@@ -14,6 +14,8 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 			# "movement" effect is a flat bonus in movement points (base 2.0),
 			# so a Quartermaster's +0.25 is a real quarter-step, not a rounding.
 			points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
+		# Remount herds and river supply stretch every army of the faction.
+		points += DoctrineRules.scalar(data, state, army["owner"], "movement")
 		army["movement_left"] = maxf(points, 0.5)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():

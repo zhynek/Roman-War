@@ -22,7 +22,8 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if tax_happiness != 0.0:
 		factors.append({"label": "taxes", "value": tax_happiness})
 
-	var garrison := garrison_bonus(data, settlement, SettlementRules.effect_total(data, settlement, "drill"))
+	var garrison := garrison_bonus(data, settlement, SettlementRules.effect_total(data, settlement, "drill"),
+		DoctrineRules.scalar(data, state, settlement["owner"], "garrison_order_pct"))
 	if garrison > 0.0:
 		factors.append({"label": "garrison", "value": garrison})
 

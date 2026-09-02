@@ -119,24 +119,30 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 	return corruption
 
 
-static func army_upkeep(data: GameData, units: Array) -> int:
+static func army_upkeep(data: GameData, units: Array, upkeep_pct_by_class: Dictionary = {}) -> int:
+	## Per-unit upkeep, each class scaled by the owner's doctrines (a remount
+	## herd makes horse cheaper, a native levy makes spears cheaper).
 	var upkeep := 0
 	for unit in units:
-		upkeep += int(data.units.get(unit["template"], {}).get("upkeep", 0))
+		var template: Dictionary = data.units.get(unit["template"], {})
+		var base := int(template.get("upkeep", 0))
+		var pct := float(upkeep_pct_by_class.get(template.get("class", ""), 0.0))
+		upkeep += int(round(base * (1.0 + pct / 100.0))) if pct != 0.0 else base
 	return upkeep
 
 
 static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String) -> int:
+	var pct_by_class := DoctrineRules.upkeep_pct_by_class(data, state, faction_id)
 	var upkeep := 0
 	for army in state["armies"].values():
 		if army["owner"] == faction_id:
-			upkeep += army_upkeep(data, army["units"])
+			upkeep += army_upkeep(data, army["units"], pct_by_class)
 	for fleet in state["fleets"].values():
 		if fleet["owner"] == faction_id:
-			upkeep += army_upkeep(data, fleet["ships"])
+			upkeep += army_upkeep(data, fleet["ships"], pct_by_class)
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
-			upkeep += army_upkeep(data, settlement["garrison"])
+			upkeep += army_upkeep(data, settlement["garrison"], pct_by_class)
 	return upkeep
 
 

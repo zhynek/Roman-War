@@ -10,11 +10,16 @@ static func pool_for_region(data: GameData, region_id: String) -> Dictionary:
 	return {}
 
 
-static func available(data: GameData, state: Dictionary, region_id: String) -> Array:
+static func available(data: GameData, state: Dictionary, region_id: String, faction_id: String = "") -> Array:
+	## Offers in this region; prices reflect the hiring faction's doctrines
+	## (mercenary_cost_pct) when it is named.
 	var pool := pool_for_region(data, region_id)
 	if pool.is_empty():
 		return []
 	var counts: Dictionary = state["mercenary_pools"].get(pool["id"], {})
+	var discount := 1.0
+	if faction_id != "" and state["factions"].has(faction_id):
+		discount = maxf(0.0, 1.0 + DoctrineRules.scalar(data, state, faction_id, "mercenary_cost_pct") / 100.0)
 	var offers: Array = []
 	for entry in pool["units"]:
 		if int(counts.get(entry["template"], 0.0)) < 1:
@@ -22,7 +27,7 @@ static func available(data: GameData, state: Dictionary, region_id: String) -> A
 		var template: Dictionary = data.units.get(entry["template"], {})
 		offers.append({
 			"template": entry["template"],
-			"cost": int(round(int(template.get("cost", 0)) * float(entry["cost_multiplier"]))),
+			"cost": int(round(int(template.get("cost", 0)) * float(entry["cost_multiplier"]) * discount)),
 			"upkeep": int(template.get("upkeep", 0)),
 			"in_pool": int(counts.get(entry["template"], 0.0)),
 		})
@@ -36,7 +41,7 @@ static func hire(data: GameData, state: Dictionary, army_id: String, template_id
 	var pool := pool_for_region(data, army["region"])
 	if pool.is_empty():
 		return false
-	for offer in available(data, state, army["region"]):
+	for offer in available(data, state, army["region"], army["owner"]):
 		if offer["template"] != template_id:
 			continue
 		var faction: Dictionary = state["factions"][army["owner"]]

@@ -74,6 +74,12 @@ static func data() -> GameData:
 			],
 		},
 		{
+			"id": "test_stables", "kind": "stables", "cultures": ["roman"], "name": "Stables",
+			"levels": [
+				{"id": "stables_1", "name": "Paddock", "min_settlement_level": "town", "cost": 600, "build_turns": 1, "effects": {}, "description": ""},
+			],
+		},
+		{
 			"id": "test_armoury", "kind": "armoury", "cultures": ["roman"], "name": "Armoury",
 			"requires_building": {"kind": "barracks", "level": 2},
 			"levels": [
@@ -193,6 +199,25 @@ static func data() -> GameData:
 			"triggers": [
 				{"when": "turn_end_governing", "condition": {"building_kind": "government", "min_building_level": 1}, "chance": 1.0},
 			],
+		},
+	}
+	game_data.doctrines = {
+		"test_horse_drill": {
+			"id": "test_horse_drill", "name": "Horse Drill", "cultures": ["roman"], "cost": 1000, "turns": 2,
+			"prerequisites": {"building": {"kind": "stables", "level": 1}},
+			"effects": {"class_stats": [{"class": "cavalry", "attack": 3}], "upkeep_pct": [{"class": "cavalry", "pct": -20}]},
+			"historical_note": "", "description": "",
+		},
+		"test_camp_law": {
+			"id": "test_camp_law", "name": "Camp Law", "cultures": ["roman"], "cost": 800, "turns": 1,
+			"prerequisites": {"battles_won": 1},
+			"effects": {"garrison_order_pct": 20, "siege_equipment_turns": -1, "movement": 0.5, "levy_strain_pct": -50},
+			"historical_note": "", "description": "",
+		},
+		"test_tribal_fury": {
+			"id": "test_tribal_fury", "name": "Tribal Fury", "cultures": ["barbarian"], "cost": 500, "turns": 1,
+			"effects": {"attacking_pct": 10},
+			"historical_note": "", "description": "",
 		},
 	}
 	game_data.names = {
