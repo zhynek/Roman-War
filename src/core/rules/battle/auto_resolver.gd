@@ -1,34 +1,22 @@
 class_name AutoResolver
 extends BattleResolver
-## Statistical battle estimator: strengths from numbers x stats x experience,
-## modified by terrain, walls, generals, and fatigue, with bounded randomness.
-## Deliberately conservative — the future real-time resolver replaces this
-## behind the same interface.
+## Statistical battle resolver. Strengths come from the shared, RNG-free
+## BattleResolver.estimate() (numbers x quality x kit x experience, unit-class
+## matchups against the enemy's composition, per-class terrain and walls,
+## generals, doctrines, combined arms, fatigue); this class adds the fortune
+## rolls, casualties, experience and the general's fate. Deliberately a paper
+## model — a real-time battle scene replaces it behind the same interface.
 
 
 func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_units: Array, context: Dictionary) -> Dictionary:
 	var battle_rules: Dictionary = data.balance["battle"]
-	var experience_pct := float(battle_rules["experience_strength_pct_per_chevron"])
+	var estimate := BattleResolver.estimate(data, attacker_units, defender_units, context)
 
-	var attacker_strength := BattleResolver.force_strength(
-		data, attacker_units, context.get("attacker_general"), experience_pct)
-	var defender_strength := BattleResolver.force_strength(
-		data, defender_units, context.get("defender_general"), experience_pct)
-
-	var terrain: String = context.get("terrain", "plains")
-	defender_strength *= float(battle_rules["terrain_defense_multiplier"].get(terrain, 1.0))
-
-	var wall_level := int(context.get("wall_level", 0))
-	var wall_multipliers: Array = battle_rules["wall_defense_multiplier"]
-	defender_strength *= float(wall_multipliers[mini(wall_level, wall_multipliers.size() - 1)])
-
-	if context.get("attacker_fatigued", false):
-		attacker_strength *= float(battle_rules["fatigue_multiplier"])
-	if context.get("sally", false):
-		defender_strength *= 1.0 + float(data.balance["siege"]["sally_strength_bonus_pct"]) / 100.0
-
-	attacker_strength *= rng.randf_pct(float(battle_rules["randomness_pct"]))
-	defender_strength *= rng.randf_pct(float(battle_rules["randomness_pct"]))
+	var randomness := float(battle_rules["randomness_pct"])
+	var attacker_fortune := rng.randf_pct(randomness)
+	var defender_fortune := rng.randf_pct(randomness)
+	var attacker_strength: float = estimate["attacker"]["strength"] * attacker_fortune
+	var defender_strength: float = estimate["defender"]["strength"] * defender_fortune
 
 	var attacker_won := attacker_strength > defender_strength
 	var ratio := 1.0
@@ -69,6 +57,12 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 		"attacker_general_died": attacker_general_died,
 		"defender_general_died": defender_general_died,
 		"experience_gained": experience_gain,
+		"breakdown": {
+			"attacker": estimate["attacker"],
+			"defender": estimate["defender"],
+			"ratio": estimate["ratio"],
+			"fortune": {"attacker": attacker_fortune, "defender": defender_fortune},
+		},
 	}
 
 

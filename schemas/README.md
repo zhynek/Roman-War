@@ -20,6 +20,12 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade,
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
   percentage points; `*_income` are denarii per turn).
+- Unit classes: `infantry, spear, pike, missile, cavalry, horse_archer, chariot,
+  elephant, siege, ship, general_bodyguard, peasant` — each needs a record in
+  `unit_classes.json` (matchups, terrain, assault, wall_defense, garrison_weight).
+- Unit attributes: `can_hide_forest, warcry, phalanx, testudo, frighten_infantry,
+  frighten_cavalry, can_sap, hardy, fast_moving, shield_wall` — each needs an
+  effects record in `unit_classes.json` (percentages, additive).
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):

@@ -1,0 +1,426 @@
+{
+  "$schema": "../schemas/unit_classes.schema.json",
+  "classes": [
+    {
+      "id": "infantry",
+      "name": "Sword and Axe Infantry",
+      "role": "line",
+      "matchups": {
+        "spear": 1.05,
+        "pike": 1.0,
+        "missile": 1.05,
+        "cavalry": 0.9,
+        "horse_archer": 0.8,
+        "chariot": 0.92,
+        "elephant": 0.9,
+        "siege": 1.1,
+        "general_bodyguard": 0.92,
+        "peasant": 1.05
+      },
+      "terrain": {
+        "hills": 1.05,
+        "marsh": 0.9
+      },
+      "description": "Close-order foot who fight with sword, axe or short spear and shield: the line that decides most battles. Steady against other foot and at home on broken ground, but a flank or rear charge by horse breaks them, and they cannot catch skirmishers who will not stand. The Roman legion and the Gallic warband are both of this class."
+    },
+    {
+      "id": "spear",
+      "name": "Spear Infantry",
+      "role": "line",
+      "matchups": {
+        "infantry": 0.97,
+        "pike": 0.95,
+        "missile": 1.0,
+        "cavalry": 1.15,
+        "horse_archer": 0.87,
+        "chariot": 1.05,
+        "elephant": 0.95,
+        "siege": 1.05,
+        "general_bodyguard": 1.1,
+        "peasant": 1.05
+      },
+      "terrain": {
+        "hills": 1.05,
+        "forest": 0.95,
+        "marsh": 0.9
+      },
+      "assault": 0.9,
+      "wall_defense": 1.1,
+      "description": "Foot who fight with a long thrusting spear and a large shield. Horses will not charge a steady hedge of points, so spearmen anchor a line against cavalry and chariots; against swords in a press they give ground slowly, and they cannot reach archers who keep their distance."
+    },
+    {
+      "id": "pike",
+      "name": "Pike Phalanx",
+      "role": "line",
+      "matchups": {
+        "infantry": 0.95,
+        "spear": 1.05,
+        "missile": 0.9,
+        "cavalry": 1.25,
+        "horse_archer": 0.8,
+        "chariot": 1.15,
+        "elephant": 1.0,
+        "siege": 0.9,
+        "general_bodyguard": 1.2,
+        "peasant": 1.05
+      },
+      "terrain": {
+        "plains": 1.1,
+        "steppe": 1.05,
+        "hills": 0.8,
+        "forest": 0.75,
+        "mountains": 0.75,
+        "marsh": 0.75
+      },
+      "assault": 0.7,
+      "wall_defense": 0.8,
+      "garrison_weight": 0.8,
+      "description": "Deep blocks of the Macedonian sarissa, the two-handed pike. Frontally on level ground nothing pushes through them, and cavalry that charges them dies on the points; but the block cannot turn, loses its order on hills and in woods, and is helpless against missiles it cannot chase. Cynoscephalae and Pydna were lost on broken ground, not in the pike-to-pike push."
+    },
+    {
+      "id": "missile",
+      "name": "Foot Missiles",
+      "role": "missile",
+      "matchups": {
+        "infantry": 0.95,
+        "spear": 1.0,
+        "pike": 1.1,
+        "cavalry": 0.8,
+        "horse_archer": 1.1,
+        "chariot": 1.15,
+        "elephant": 1.2,
+        "siege": 1.05,
+        "general_bodyguard": 0.85,
+        "peasant": 1.1
+      },
+      "terrain": {
+        "plains": 0.95,
+        "hills": 1.15,
+        "forest": 1.05,
+        "mountains": 1.15
+      },
+      "wall_defense": 1.3,
+      "garrison_weight": 0.8,
+      "description": "Archers, slingers and javelin men who wound at range and run when charged. They break up elephants and chariots, wear down slow pike blocks and outshoot horse archers from a hill; caught in the open by horse they are ridden down. Slingers against Parthian horse archers won Ventidius his triumph in 38 BC."
+    },
+    {
+      "id": "cavalry",
+      "name": "Shock Cavalry",
+      "role": "shock",
+      "matchups": {
+        "infantry": 1.12,
+        "spear": 0.82,
+        "pike": 0.75,
+        "missile": 1.2,
+        "horse_archer": 1.15,
+        "chariot": 1.05,
+        "elephant": 0.85,
+        "siege": 1.25,
+        "general_bodyguard": 0.95,
+        "peasant": 1.15
+      },
+      "terrain": {
+        "plains": 1.05,
+        "steppe": 1.1,
+        "hills": 0.85,
+        "forest": 0.7,
+        "mountains": 0.65,
+        "marsh": 0.7
+      },
+      "assault": 0.5,
+      "wall_defense": 0.6,
+      "garrison_weight": 0.9,
+      "description": "Lancers and heavy horse who win by the charge. On open ground they ride down archers, roll up infantry from the flank and run down anyone who breaks, and most of a beaten army dies in that pursuit. Against a steady spear or pike front they achieve nothing, in woods and mountains they are dismounted men on bad footing, and inside a city wall they are useless."
+    },
+    {
+      "id": "horse_archer",
+      "name": "Horse Archers",
+      "role": "missile",
+      "matchups": {
+        "infantry": 1.2,
+        "spear": 1.12,
+        "pike": 1.2,
+        "missile": 0.9,
+        "cavalry": 0.82,
+        "chariot": 1.05,
+        "elephant": 1.1,
+        "siege": 1.15,
+        "general_bodyguard": 0.85,
+        "peasant": 1.15
+      },
+      "terrain": {
+        "plains": 1.05,
+        "steppe": 1.15,
+        "desert": 1.1,
+        "hills": 0.85,
+        "forest": 0.65,
+        "mountains": 0.65,
+        "marsh": 0.7
+      },
+      "assault": 0.5,
+      "wall_defense": 0.7,
+      "garrison_weight": 0.7,
+      "description": "Mounted bowmen of the steppe and the Iranian plateau who shoot and never close. On open plains they empty an army of foot at no cost, as Crassus learned at Carrhae; light cavalry that can catch them, slingers who can outrange them, and any wood or mountain take the plains away from them."
+    },
+    {
+      "id": "chariot",
+      "name": "Chariots",
+      "role": "shock",
+      "matchups": {
+        "infantry": 1.1,
+        "spear": 0.9,
+        "pike": 0.75,
+        "missile": 0.85,
+        "cavalry": 0.95,
+        "horse_archer": 0.95,
+        "elephant": 0.8,
+        "siege": 1.1,
+        "general_bodyguard": 0.9,
+        "peasant": 1.15
+      },
+      "terrain": {
+        "plains": 1.1,
+        "steppe": 1.05,
+        "desert": 0.9,
+        "hills": 0.65,
+        "forest": 0.5,
+        "mountains": 0.5,
+        "marsh": 0.5
+      },
+      "assault": 0.3,
+      "wall_defense": 0.3,
+      "garrison_weight": 0.3,
+      "description": "The war cart of Britain and the scythed chariots of the Hellenistic east. A terrifying charge on flat ground against loose foot, a wreck against pikes, spears or any obstacle, and easy meat for missiles: at Magnesia the Seleucid scythed chariots were shot to pieces before reaching the line."
+    },
+    {
+      "id": "elephant",
+      "name": "War Elephants",
+      "role": "shock",
+      "matchups": {
+        "infantry": 1.15,
+        "spear": 1.05,
+        "pike": 1.0,
+        "missile": 0.75,
+        "cavalry": 1.15,
+        "horse_archer": 0.9,
+        "chariot": 1.15,
+        "siege": 0.85,
+        "general_bodyguard": 1.1,
+        "peasant": 1.2
+      },
+      "terrain": {
+        "plains": 1.05,
+        "desert": 0.95,
+        "hills": 0.9,
+        "forest": 0.8,
+        "mountains": 0.7,
+        "marsh": 0.75
+      },
+      "assault": 0.6,
+      "wall_defense": 0.4,
+      "garrison_weight": 0.3,
+      "description": "Beasts that horses will not face and that trample close-order foot, but that panic under missile fire and turn on their own side. Pyrrhus won with them at Heraclea; Scipio opened lanes for them at Zama and let his skirmishers finish them."
+    },
+    {
+      "id": "siege",
+      "name": "Artillery",
+      "role": "artillery",
+      "matchups": {
+        "infantry": 0.9,
+        "spear": 0.95,
+        "pike": 1.15,
+        "missile": 0.95,
+        "cavalry": 0.75,
+        "horse_archer": 0.85,
+        "chariot": 0.9,
+        "elephant": 1.2,
+        "general_bodyguard": 0.8,
+        "peasant": 1.05
+      },
+      "terrain": {
+        "hills": 0.9,
+        "forest": 0.8,
+        "mountains": 0.7,
+        "marsh": 0.6
+      },
+      "assault": 1.6,
+      "wall_defense": 1.3,
+      "garrison_weight": 0.2,
+      "description": "Bolt throwers, stone throwers and rams. Decisive against walls and dense pike blocks, a liability in a running fight: slow, few, and lost the moment cavalry reaches them."
+    },
+    {
+      "id": "general_bodyguard",
+      "name": "General's Escort",
+      "role": "guard",
+      "matchups": {
+        "infantry": 1.1,
+        "spear": 0.85,
+        "pike": 0.75,
+        "missile": 1.15,
+        "cavalry": 1.05,
+        "horse_archer": 1.15,
+        "chariot": 1.1,
+        "elephant": 0.85,
+        "siege": 1.2,
+        "peasant": 1.15
+      },
+      "terrain": {
+        "steppe": 1.05,
+        "hills": 0.9,
+        "forest": 0.8,
+        "mountains": 0.75,
+        "marsh": 0.8
+      },
+      "assault": 0.6,
+      "wall_defense": 0.7,
+      "garrison_weight": 1.5,
+      "description": "The general's mounted escort: picked heavy horse, few in number, that fight as shock cavalry and carry the commander's life with them."
+    },
+    {
+      "id": "peasant",
+      "name": "Levied Peasants",
+      "role": "levy",
+      "matchups": {
+        "infantry": 0.95,
+        "spear": 0.95,
+        "pike": 0.95,
+        "missile": 0.9,
+        "cavalry": 0.85,
+        "horse_archer": 0.85,
+        "chariot": 0.85,
+        "elephant": 0.8,
+        "siege": 0.95,
+        "general_bodyguard": 0.85
+      },
+      "assault": 0.9,
+      "wall_defense": 0.9,
+      "garrison_weight": 0.5,
+      "description": "Farmhands with whatever they brought from the fields. They fill a line, police a town badly, and break under any real pressure."
+    },
+    {
+      "id": "ship",
+      "name": "Warships",
+      "role": "naval",
+      "garrison_weight": 0.0,
+      "description": "Warships fight at sea and are not part of a land battle."
+    }
+  ],
+  "attributes": [
+    {
+      "id": "phalanx",
+      "name": "Phalanx",
+      "effects": {
+        "matchups": {
+          "cavalry": 15,
+          "general_bodyguard": 15,
+          "chariot": 10,
+          "elephant": 10
+        },
+        "terrain": {
+          "hills": -10,
+          "forest": -10,
+          "mountains": -10,
+          "marsh": -10
+        }
+      },
+      "description": "Fights as a close-order spear or pike block: a wall against horse and chariots, but one that comes apart on rough ground."
+    },
+    {
+      "id": "shield_wall",
+      "name": "Shield Wall",
+      "effects": {
+        "matchups": {
+          "missile": 15,
+          "horse_archer": 15,
+          "cavalry": 5
+        }
+      },
+      "description": "Locked shields turn arrows and slingstones and steady the line against a charge."
+    },
+    {
+      "id": "testudo",
+      "name": "Testudo",
+      "effects": {
+        "assault_pct": 15,
+        "matchups": {
+          "missile": 15,
+          "horse_archer": 10
+        }
+      },
+      "description": "Roofed with shields, the unit approaches walls and archers under cover; it is a drill for storming and for enduring, not for charging horse."
+    },
+    {
+      "id": "warcry",
+      "name": "War Cry",
+      "effects": {
+        "attacking_pct": 8
+      },
+      "description": "Works itself into a fury before the charge: harder-hitting when attacking, no help when standing to receive."
+    },
+    {
+      "id": "frighten_infantry",
+      "name": "Frightens Infantry",
+      "effects": {
+        "matchups": {
+          "infantry": 10,
+          "spear": 10,
+          "missile": 10,
+          "peasant": 15
+        }
+      },
+      "description": "Foot soldiers who have never seen the like of it waver before contact."
+    },
+    {
+      "id": "frighten_cavalry",
+      "name": "Frightens Horses",
+      "effects": {
+        "matchups": {
+          "cavalry": 15,
+          "horse_archer": 10,
+          "chariot": 15,
+          "general_bodyguard": 15
+        }
+      },
+      "description": "Horses refuse to close with the smell and noise: elephants and camels have broken cavalry that had never met them."
+    },
+    {
+      "id": "can_hide_forest",
+      "name": "Woodsmen",
+      "effects": {
+        "terrain": {
+          "forest": 20
+        }
+      },
+      "description": "At home under the trees, where a column marching through can be ambushed: the lesson of the Litana forest and the Teutoburg."
+    },
+    {
+      "id": "hardy",
+      "name": "Hardy",
+      "effects": {
+        "terrain": {
+          "desert": 10,
+          "mountains": 10,
+          "marsh": 5
+        }
+      },
+      "description": "Bred to thirst, cold and thin air; fights well where others merely endure."
+    },
+    {
+      "id": "fast_moving",
+      "name": "Fleet",
+      "effects": {
+        "escape_pct": 25,
+        "pursuit_pct": 20
+      },
+      "description": "Runs down a broken enemy and gets away from a lost battle: the Numidian horse at Cannae and at Zama."
+    },
+    {
+      "id": "can_sap",
+      "name": "Sappers",
+      "effects": {
+        "assault_pct": 20
+      },
+      "description": "Undermines and breaches walls, so an assault reaches the streets with less blood on the ramparts."
+    }
+  ]
+}

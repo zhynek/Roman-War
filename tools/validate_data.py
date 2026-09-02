@@ -39,6 +39,7 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "unit_classes.json": "unit_classes.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -156,6 +157,40 @@ def cross_checks(t: dict[str, dict]) -> None:
                 f"unsatisfiable for culture {unit['culture']}")
         if unit.get("era", "any") != "any" and unit["culture"] != "roman":
             warn(f"units: {unit['id']}: era gating on a non-roman unit")
+
+    # --- unit classes -----------------------------------------------------
+    # Every class and attribute the units schema admits needs a record (and
+    # vice versa): the resolver reads the matrix for every unit it meets.
+    units_schema = json.loads((SCHEMAS / "units.schema.json").read_text())
+    unit_props = units_schema["properties"]["units"]["items"]["properties"]
+    class_enum = set(unit_props["class"]["enum"])
+    attribute_enum = set(unit_props["attributes"]["items"]["enum"])
+    class_table = t.get("unit_classes.json", {})
+    class_records = {c["id"]: c for c in class_table.get("classes", [])}
+    attribute_records = {a["id"]: a for a in class_table.get("attributes", [])}
+    for class_id in sorted(class_enum - set(class_records)):
+        err(f"unit_classes: no record for unit class '{class_id}'")
+    for class_id in sorted(set(class_records) - class_enum):
+        err(f"unit_classes: class '{class_id}' is not in the units schema")
+    for attribute_id in sorted(attribute_enum - set(attribute_records)):
+        err(f"unit_classes: no record for unit attribute '{attribute_id}'")
+    for attribute_id in sorted(set(attribute_records) - attribute_enum):
+        err(f"unit_classes: attribute '{attribute_id}' is not in the units schema")
+    if len(class_records) != len(class_table.get("classes", [])):
+        err("unit_classes: duplicate class id")
+    if len(attribute_records) != len(class_table.get("attributes", [])):
+        err("unit_classes: duplicate attribute id")
+    class_ids = sorted(class_records)
+    for index, mine in enumerate(class_ids):
+        matchups = class_records[mine].get("matchups", {})
+        if mine in matchups:
+            warn(f"unit_classes: {mine} lists a matchup against itself (ignored by the resolver)")
+        for theirs in class_ids[index + 1:]:
+            product = float(matchups.get(theirs, 1.0)) \
+                * float(class_records[theirs].get("matchups", {}).get(mine, 1.0))
+            if product < 0.85 or product > 1.15:
+                warn(f"unit_classes: {mine} vs {theirs} matchups multiply to {product:.2f} "
+                     f"(authoring band 0.85-1.15; the net counter is their ratio)")
 
     for faction_id, faction in factions.items():
         if faction.get("is_rebel"):
@@ -484,7 +519,7 @@ def main() -> int:
 
 
 def _entity_count(document: dict) -> int:
-    for key in ("cultures", "factions", "chains", "units", "regions", "traits",
+    for key in ("cultures", "factions", "chains", "units", "classes", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
         if key in document:
             return len(document[key])

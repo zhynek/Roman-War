@@ -312,51 +312,69 @@ A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itsel
 
 ### 5.5 The BattleResolver contract
 
-The single seam between campaign and battle, quoted from
-`src/core/rules/battle/battle_resolver.gd`:
+The single seam between campaign and battle, `src/core/rules/battle/battle_resolver.gd`
+(the file's header comment is authoritative):
 
 ```
-## Contract:
-##   resolve(data, rng, attacker_units, defender_units, context) -> BattleResult
-##
-##   attacker_units / defender_units: Arrays of unit dicts
-##     {template: String, experience: int 0-9, strength_pct: int 1-100}
-##     Mutated IN PLACE: casualties reduce strength_pct, destroyed units are
-##     removed, survivors may gain experience.
-##
-##   context: {
-##     terrain: String,            # terrain of the battle region
-##     wall_level: int,            # 0 in the field; settlement wall tier if assault
-##     attacker_general: Dictionary|null,   # character dict (command matters)
-##     defender_general: Dictionary|null,
-##     attacker_fatigued: bool,    # forced march
-##     sally: bool,                # defenders sallying out of a siege
-##   }
-##
-##   BattleResult: {
-##     winner: "attacker"|"defender",
-##     attacker_casualty_pct: float, defender_casualty_pct: float,
-##     attacker_general_died: bool, defender_general_died: bool,
-##     experience_gained: int,
-##   }
+resolve(data, rng, attacker_units, defender_units, context) -> BattleResult
+
+unit:    {template, experience 0-9, strength_pct 1-100, weapon? 0-3, armor? 0-3}
+         (mutated in place: casualties, destruction, experience)
+context: {terrain, wall_level, attacker_general, defender_general,
+          attacker_fatigued, sally, attacker_mods?, defender_mods?}
+         *_mods = ArmyMods, a pre-merged dict of faction-wide modifiers
+         (class stat deltas, matchup / terrain percentages, scalar bonuses)
+         built campaign-side so the resolver never reads game state.
+BattleResult: {winner, attacker_casualty_pct, defender_casualty_pct,
+               attacker_general_died, defender_general_died, experience_gained,
+               breakdown: {attacker: SideEstimate, defender: SideEstimate,
+                           ratio, fortune: {attacker, defender}}}
 ```
 
+`BattleResolver.estimate(data, attacker_units, defender_units, context)` is the
+shared, **RNG-free** half of the model. It returns both sides' `SideEstimate`
+— strength, a multiplicative factor list `[{label, value}]` (`base` carries the
+raw soldiers × quality sum; every other entry is a multiplier), per-class rows,
+per-unit profiles — plus the paper `ratio` and an analytic `attacker_win_chance`.
+Every resolver and the UI's odds preview read the same numbers from it.
 Campaign modules (`CombatRules`, `SiegeRules`, `TurnEngine`) consume only this
-contract. A future real-time battle scene implements the same method; the campaign
-never learns which ran.
+contract. A future real-time battle scene implements the same `resolve`; the
+campaign never learns which ran.
 
 ### 5.6 Auto-resolve model
 
-`AutoResolver` estimates each side's strength as
-Σ soldiers × quality × (1 + experience × 10%), where quality =
-attack + missile×0.5 + defense + morale×0.5 + charge×0.25, multiplied by
-(1 + general command × 0.05). The defender is then scaled by terrain
-(forest ×1.15, hills ×1.2, mountains ×1.35, marsh ×1.1) and walls; fatigue and
-sally modifiers apply; both sides roll ±20% randomness. Casualties derive from the
-strength ratio (base 25% each, +35% for the loser, clamped 2–95%, per-unit ±30%
-scatter); units falling under 10% strength are destroyed. A losing side's general
-dies with 10% probability. The model is deliberately conservative — it exists to be
-replaced.
+Per unit, in order (each stage is a named factor in the breakdown):
+
+1. **base** — soldiers × quality, quality = attack + missile×0.5 + defense +
+   morale×0.5 + charge×0.25.
+2. **upgrades** — weapon levels add to attack, armour levels to defense
+   (`battle.weapon_upgrade_attack_per_level`, `armor_upgrade_defense_per_level`).
+3. **doctrines** — class stat deltas from the side's `ArmyMods` (plus its
+   `strength_pct` / `attacking_pct` scalars, merged into the same factor).
+4. **experience** — +10% per chevron.
+5. **matchups** — `1 + (Σ enemy_share × M[my class][their class] − 1) × matchup_weight`,
+   where enemy shares are *slot* shares (one unit card = one slot, scaled by
+   strength) and `M` is `data/unit_classes.json` times the unit's attribute and
+   doctrine percentages. Pikes and spears stop cavalry, cavalry rides down
+   infantry and foot missiles, missiles shred elephants, chariots and slow pike
+   blocks, horse archers kite infantry but lose to light horse and slingers.
+6. **class_terrain** — the per-class terrain table (cavalry and pikes suffer in
+   woods and mountains, missiles like high ground), for both sides.
+7. **assault / wall_defense** — when `wall_level > 0`, each class's storming or
+   wall-holding multiplier (cavalry 0.5 / 0.6, artillery 1.6 / 1.3 …).
+8. **attacking** — attribute bonuses that fire only when charging (war cry).
+9. **fatigue** — forced-march malus unless the unit or doctrine is immune.
+
+Then side-wide: **general** (command 5%/pt, troop morale 2%/pt), the defender's
+**terrain** ground bonus and **walls** tier multiplier, **combined_arms** (+6%
+when line, shock and missile roles each hold ≥15% of the cards), and **sally**.
+Both sides then roll ±15% fortune (`battle.randomness_pct`) and the higher
+strength wins; `win_chance` integrates those two rolls analytically so the UI
+can say "72% to win". Casualties derive from the post-fortune ratio (base 25%
+each, +35% for the loser, clamped 2–95%, per-unit ±30% scatter); units under
+10% strength are destroyed; winners gain +1 experience; a losing side's general
+dies with 10% probability. The model is a paper one by design — it exists to be
+replaced behind the same interface.
 
 ## 6. Characters, Agents & Diplomacy
 
@@ -496,7 +514,8 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | factions.json | 21 factions, colors, politics flags | everything |
 | buildings.json | non-temple chains: government, walls, military, economy, health, entertainment, education | construction, effects |
 | temples.json | temple chains (one god each, archetyped), per culture | construction, effects, elite units |
-| units.json | unit templates: stats, costs, requirements, era | recruitment, battle |
+| units.json | unit templates: stats, costs, requirements, era, class, attributes | recruitment, battle |
+| unit_classes.json | the unit-class counter matrix, per-class terrain / assault / wall / policing weights, attribute effects | battle estimator, public order |
 | regions.json | region graph + sea zones, terrain, fertility, resources, hidden resources | map, economy, growth |
 | campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy; rebel holdings | NewGame |
 | traits.json / ancillaries.json | trigger-driven character content | Phase 4 engine (loaded now) |
@@ -528,7 +547,10 @@ reported as dead content, except the deliberately forward-authored `office_gaine
 faction; exactly one government chain per culture with tier count matching the
 culture's cap; monotonic `min_settlement_level` within chains; temple chains carry
 god + archetype; every unit's requirement satisfiable by some chain of its
-culture; every faction able to recruit ≥ 3 unit types; land and sea adjacency
+culture; every faction able to recruit ≥ 3 unit types; a unit-class and an
+attribute record for every value the units schema admits (and no others), with
+matchup pair products inside the 0.85–1.15 authoring band; every building effect
+key read by some rules module (dead content fails the build); land and sea adjacency
 symmetric and the whole map connected; wonders and regions back-reference each
 other; the campaign start settles every region exactly once, capitals owned,
 government tier consistent with starting population, exactly one leader per house,

@@ -22,6 +22,10 @@ const BUILDING_KINDS: Array[String] = [
 
 const STANCES: Array[String] = ["war", "neutral", "trade", "alliance", "protectorate"]
 
+## Unit-class roles (data/unit_classes.json) that must all be present in a force
+## for the combined-arms bonus: a line to hold, a shock arm to break, missiles to wear.
+const COMBINED_ARMS_ROLES: Array[String] = ["line", "shock", "missile"]
+
 
 static func level_index(level: String) -> int:
 	return SETTLEMENT_LEVELS.find(level)

@@ -8,6 +8,13 @@ static func data() -> GameData:
 	var game_data := GameData.new()
 	var balance_text := FileAccess.get_file_as_string("res://data/balance.json")
 	game_data.balance = JSON.parse_string(balance_text)
+	# The unit-class counter matrix and attribute effects are tunables too:
+	# the battle tests run against the shipped table, not a stand-in.
+	var class_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/unit_classes.json"))
+	for record in class_data.get("classes", []):
+		game_data.unit_classes[record["id"]] = record
+	for record in class_data.get("attributes", []):
+		game_data.unit_attributes[record["id"]] = record
 
 	game_data.cultures = {
 		"roman": {"id": "roman", "name": "Roman", "max_settlement_level": "huge_city"},
@@ -91,6 +98,26 @@ static func data() -> GameData:
 			"id": "test_mob", "name": "Mob", "class": "peasant", "culture": "neutral",
 			"factions": ["all"], "soldiers": 60, "attack": 2, "defense": 2, "morale": 2,
 			"cost": 100, "upkeep": 50, "requirements": {"building_kind": "government", "building_level": 1},
+			"era": "any", "description": "",
+		},
+		# Three arms of EQUAL base mass (soldiers x quality = 2,400), so the
+		# matchup tests measure counters and ground, never raw stats.
+		"test_pikes": {
+			"id": "test_pikes", "name": "Pikes", "class": "pike", "culture": "roman",
+			"factions": ["red"], "soldiers": 120, "attack": 6, "defense": 11, "morale": 6, "speed": 4,
+			"cost": 500, "upkeep": 140, "requirements": {"building_kind": "barracks", "building_level": 1},
+			"era": "any", "attributes": ["phalanx"], "description": "",
+		},
+		"test_horse": {
+			"id": "test_horse", "name": "Horse", "class": "cavalry", "culture": "roman",
+			"factions": ["red"], "soldiers": 80, "attack": 11, "charge": 12, "defense": 11, "morale": 10, "speed": 8,
+			"cost": 700, "upkeep": 200, "requirements": {"building_kind": "stables", "building_level": 1},
+			"era": "any", "description": "",
+		},
+		"test_slingers": {
+			"id": "test_slingers", "name": "Slingers", "class": "missile", "culture": "roman",
+			"factions": ["red"], "soldiers": 120, "attack": 4, "missile_attack": 10, "defense": 7, "morale": 8, "speed": 5,
+			"cost": 400, "upkeep": 120, "requirements": {"building_kind": "archery_range", "building_level": 1},
 			"era": "any", "description": "",
 		},
 	}

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "unit_classes.schema.json",
+  "title": "Unit classes (counter matrix, terrain, walls, policing) and unit attribute effects",
+  "type": "object",
+  "required": ["classes", "attributes"],
+  "additionalProperties": false,
+  "$defs": {
+    "unit_class": {
+      "enum": ["infantry", "spear", "pike", "missile", "cavalry", "horse_archer", "chariot", "elephant", "siege", "ship", "general_bodyguard", "peasant"]
+    },
+    "terrain": {
+      "enum": ["plains", "forest", "hills", "mountains", "desert", "steppe", "marsh"]
+    },
+    "class_multipliers": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/unit_class" },
+      "additionalProperties": { "type": "number", "minimum": 0.25, "maximum": 4 },
+      "description": "Multiplier on this class's strength for the share of the enemy made of that class; omitted = 1.0"
+    },
+    "terrain_multipliers": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/terrain" },
+      "additionalProperties": { "type": "number", "minimum": 0.25, "maximum": 4 },
+      "description": "Multiplier on this class's strength when fighting on that terrain; omitted = 1.0"
+    },
+    "class_pcts": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/unit_class" },
+      "additionalProperties": { "type": "number", "minimum": -90, "maximum": 300 }
+    },
+    "terrain_pcts": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/terrain" },
+      "additionalProperties": { "type": "number", "minimum": -90, "maximum": 300 }
+    }
+  },
+  "properties": {
+    "$schema": { "type": "string" },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "role", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "#/$defs/unit_class" },
+          "name": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["line", "shock", "missile", "artillery", "naval", "levy", "guard"] },
+          "matchups": { "$ref": "#/$defs/class_multipliers" },
+          "terrain": { "$ref": "#/$defs/terrain_multipliers" },
+          "assault": { "type": "number", "minimum": 0, "maximum": 4, "description": "Attacker multiplier when storming walls (wall_level > 0); default 1.0" },
+          "wall_defense": { "type": "number", "minimum": 0, "maximum": 4, "description": "Defender multiplier when holding walls (wall_level > 0); default 1.0" },
+          "garrison_weight": { "type": "number", "minimum": 0, "maximum": 4, "description": "Public-order policing value per soldier; default 1.0" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "effects", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["can_hide_forest", "warcry", "phalanx", "testudo", "frighten_infantry", "frighten_cavalry", "can_sap", "hardy", "fast_moving", "shield_wall"] },
+          "name": { "type": "string", "minLength": 1 },
+          "effects": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "matchups": { "$ref": "#/$defs/class_pcts" },
+              "terrain": { "$ref": "#/$defs/terrain_pcts" },
+              "assault_pct": { "type": "number" },
+              "wall_defense_pct": { "type": "number" },
+              "attacking_pct": { "type": "number" },
+              "escape_pct": { "type": "number" },
+              "pursuit_pct": { "type": "number" },
+              "fatigue_immune": { "type": "boolean" }
+            },
+            "description": "Percent modifiers, additive with each other; the battle subset of the doctrine effect vocabulary"
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}
