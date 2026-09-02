@@ -113,6 +113,8 @@ static func white_peace_stalled(data: GameData, state: Dictionary, faction_id: S
 	for other_id in AiAssess.enemies_of(state, faction_id):
 		if not _peace_capable(data, state, other_id):
 			continue
+		if DiplomacyRules.roman_peace_forbidden(data, state, faction_id, other_id):
+			continue  # a civil war never gutters out
 		var key := war_key(faction_id, other_id)
 		var quiet := int(war_turns.get(key, 0))
 		var threshold := int(ai_rules["peace_min_war_turns"])
@@ -142,6 +144,8 @@ static func _consider_peace(data: GameData, state: Dictionary, faction_id: Strin
 			continue  # there is no treating with brigands
 		if not DiplomacyRules.at_war(state, faction_id, other_id):
 			continue
+		if DiplomacyRules.roman_peace_forbidden(data, state, faction_id, other_id):
+			continue  # no suing for peace in a civil war — it is settled by the sword
 		var their_strength: float = strengths[other_id]
 		if my_strength >= their_strength * threshold:
 			continue  # the war is not lost enough to sue for peace
@@ -255,10 +259,7 @@ static func _reachable_via(reach: Dictionary, other_id: String) -> bool:
 
 
 static func _roman_internal(data: GameData, a: String, b: String) -> bool:
-	var faction_a: Dictionary = data.factions.get(a, {})
-	var faction_b: Dictionary = data.factions.get(b, {})
-	return (faction_a.get("is_roman_house", false) or faction_a.get("is_senate", false)) \
-		and (faction_b.get("is_roman_house", false) or faction_b.get("is_senate", false))
+	return DiplomacyRules.roman_internal(data, a, b)
 
 
 static func war_key(a: String, b: String) -> String:

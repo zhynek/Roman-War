@@ -243,8 +243,9 @@
     "popular_drift_factor": 0.15,
     "election_standing_weight": 1.0,
     "annals_office_min_rank": 3,
-    "civil_war_popular_threshold": 6,
-    "civil_war_senate_threshold": -5
+    "leader_suicide_standing": -5,
+    "leader_suicide_popular_min": 5,
+    "civil_war_join_standing": 1
   },
   "ai": {
     "difficulty_income_multiplier": {

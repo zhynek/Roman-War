@@ -9,7 +9,7 @@ class_name NewGame
 ##      with it any playtest report replays exactly
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
 ##                   popular_standing, diplomacy: {other_fid: stance},
-##                   mission: null|{...}, at_civil_war: bool,
+##                   mission: null|{...}, at_civil_war: bool, outlawed: bool,
 ##                   society: {elite_pressure, martial_ethos, knowledge,
 ##                             civic_shock}, advances: [advance_id]}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
@@ -90,6 +90,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
+			"outlawed": false,
 			"society": SocietyRules.new_faction_society(data),
 			"advances": [],
 			"war_cooldown": 0,
@@ -116,7 +117,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false, "war_cooldown": 0,
+		"mission": null, "at_civil_war": false, "outlawed": false, "war_cooldown": 0,
 		"society": SocietyRules.new_faction_society(data),
 		"ai": {}, "attitude_memory": {},
 		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
@@ -197,6 +198,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 			faction["edicts"] = {}
 		if not faction.has("edict_cooldowns"):
 			faction["edict_cooldowns"] = {}
+		if not faction.has("outlawed"):
+			faction["outlawed"] = false
 	if not state.has("modifiers"):
 		state["modifiers"] = []
 	if not state.has("chronicle"):

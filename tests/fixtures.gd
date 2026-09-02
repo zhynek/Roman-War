@@ -461,7 +461,7 @@ static func _faction(game_data: GameData, capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false,
+		"mission": null, "at_civil_war": false, "outlawed": false,
 		"society": SocietyRules.new_faction_society(game_data), "advances": [],
 		"ai": {}, "attitude_memory": {},
 		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},

@@ -23,6 +23,43 @@ static func at_war(state: Dictionary, a: String, b: String) -> bool:
 	return a != b and stance_between(state, a, b) == "war"
 
 
+static func roman_internal(data: GameData, a: String, b: String) -> bool:
+	## Two Roman parties — houses or the Senate. Their quarrels stay in the
+	## forum until a civil war breaks, and once it has they are settled by the
+	## sword alone. Both rules lapse with the Republic: once the Senate has
+	## fallen the houses are powers like any other.
+	var faction_a: Dictionary = data.factions.get(a, {})
+	var faction_b: Dictionary = data.factions.get(b, {})
+	return (faction_a.get("is_roman_house", false) or faction_a.get("is_senate", false)) \
+		and (faction_b.get("is_roman_house", false) or faction_b.get("is_senate", false))
+
+
+static func roman_war_forbidden(data: GameData, state: Dictionary, a: String, b: String) -> bool:
+	## No Roman party may make war on another while the Senate stands, until
+	## one of them has broken with the Republic.
+	if not roman_internal(data, a, b) or not _senate_stands(data, state):
+		return false
+	return not (bool(state["factions"][a].get("at_civil_war", false))
+		or bool(state["factions"][b].get("at_civil_war", false)))
+
+
+static func roman_peace_forbidden(data: GameData, state: Dictionary, a: String, b: String) -> bool:
+	## A civil war is never talked away: no envoy, no silver, no quiet
+	## guttering out. It ends when the Senate falls, or the rebels do.
+	if not roman_internal(data, a, b) or not _senate_stands(data, state):
+		return false
+	return bool(state["factions"][a].get("at_civil_war", false)) \
+		or bool(state["factions"][b].get("at_civil_war", false))
+
+
+static func _senate_stands(data: GameData, state: Dictionary) -> bool:
+	for faction_id in state["factions"]:  # pure any() — order-free
+		if data.factions.get(faction_id, {}).get("is_senate", false) \
+				and state["factions"][faction_id]["alive"]:
+			return true
+	return false
+
+
 static func set_stance(state: Dictionary, a: String, b: String, stance: String) -> bool:
 	if a == b or not Constants.STANCES.has(stance):
 		return false
@@ -39,6 +76,8 @@ static func declare_war(data: GameData, state: Dictionary, a: String, b: String)
 	## alliance cuts deeper than an honest enemy's trumpets.
 	if a == b or not state["factions"].has(a) or not state["factions"].has(b):
 		return false
+	if roman_war_forbidden(data, state, a, b):
+		return false  # Roman quarrels stay in the forum until a civil war breaks
 	var rules: Dictionary = data.balance["diplomacy"]
 	var previous := stance_between(state, a, b)
 	if previous != "war":
@@ -162,6 +201,12 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 		# silver could buy a permanent peace no rebel would ever break.
 		return {"accept": false, "score": 0.0, "breakdown": [],
 			"vetoes": ["no_treating_with_brigands"]}
+	var proposed_stance: String = offer.get("stance", "")
+	if proposed_stance != "" and proposed_stance != "war" \
+			and roman_peace_forbidden(data, state, from_id, to_id):
+		# A civil war is settled by the sword, not the envoy.
+		return {"accept": false, "score": 0.0, "breakdown": [],
+			"vetoes": ["the_republic_is_at_war_with_itself"]}
 
 	var give_payment := int(offer.get("give_payment", 0))
 	if give_payment > 0:
@@ -229,6 +274,8 @@ static func offer_still_stands(data: GameData, state: Dictionary, offer: Diction
 	var stance: String = offer.get("stance", "")
 	if stance != "" and stance != "neutral" and at_war(state, from_id, to_id):
 		return false
+	if stance != "" and stance != "war" and roman_peace_forbidden(data, state, from_id, to_id):
+		return false  # an envoy sent before the break is recalled by it
 	return true
 
 
@@ -271,7 +318,8 @@ static func apply_offer(data: GameData, state: Dictionary, offer: Dictionary) ->
 			cede_region(data, state, region_id, from_id)
 
 	var stance: String = offer.get("stance", "")
-	if stance != "" and Constants.STANCES.has(stance):
+	if stance != "" and Constants.STANCES.has(stance) \
+			and not (stance != "war" and roman_peace_forbidden(data, state, from_id, to_id)):
 		var ends_a_war := at_war(state, from_id, to_id) and stance != "war"
 		set_stance(state, from_id, to_id, stance)
 		if ends_a_war:

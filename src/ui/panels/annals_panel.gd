@@ -7,7 +7,7 @@ extends AcceptDialog
 
 const FILTERS := ["All", "Wars", "Court", "Wisdom & World"]
 const WAR_KINDS := ["war_declared", "battle", "city_taken", "city_sacked",
-	"city_revolted", "peace_made", "war_summary", "faction_destroyed"]
+	"city_revolted", "peace_made", "war_summary", "faction_destroyed", "civil_war"]
 const COURT_KINDS := ["alliance_made", "edict_enacted", "edict_lapsed",
 	"leader_died", "succession", "reign_summary", "epithet_earned", "office_taken"]
 
@@ -80,7 +80,7 @@ func _passes_filter(kind: String, wanted: int) -> bool:
 
 
 func _color_for(kind: String) -> Color:
-	if kind in ["city_sacked", "faction_destroyed", "disaster"]:
+	if kind in ["city_sacked", "faction_destroyed", "disaster", "civil_war"]:
 		return Color(0.9, 0.55, 0.5)
 	if kind in ["technique_adopted", "technique_originated"]:
 		return Color(0.6, 0.75, 0.9)

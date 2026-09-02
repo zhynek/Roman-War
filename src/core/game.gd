@@ -135,7 +135,18 @@ func declare_war(other_faction: String, faction_id: String = "") -> bool:
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	if stance == "war" and DiplomacyRules.roman_war_forbidden(data, state, fid, other_faction):
+		return false
+	if stance != "war" and DiplomacyRules.roman_peace_forbidden(data, state, fid, other_faction):
+		return false
 	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
+
+
+func comply_senate_demand() -> bool:
+	## The patriarch dies for the house. Succession settles at once; the
+	## Senate pays when it next judges the charge. No randomness is drawn.
+	var notices: Array = []
+	return SenateRules.comply_with_demand(data, state, String(state["player_faction"]), notices)
 
 
 ## --- Diplomacy (Phase 5) ---------------------------------------------------

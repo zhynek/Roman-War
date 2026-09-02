@@ -70,9 +70,9 @@ LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_cit
 FORWARD_TRIGGERS: set[str] = set()
 
 # Mission kinds authored ahead of the systems that resolve them. SenateRules
-# judges only LIVE_KINDS; these need port blockades (Phase 3 remainder) and
-# campaign agents (Phase 5), so they are forward content, not dead content.
-FORWARD_MISSION_KINDS = {"blockade_port", "assassinate_leader", "leader_suicide"}
+# judges only LIVE_KINDS; port blockades are the Phase 3 remainder, so they
+# are forward content, not dead content.
+FORWARD_MISSION_KINDS = {"blockade_port"}
 
 # The only substitutions src/ui/dispatch_format.gd knows how to make. A token
 # outside this set would print as a literal brace on the player's screen.
@@ -81,8 +81,8 @@ DISPATCH_TOKENS = {
     "value", "value_abs", "turn", "year", "season", "detail",
 }
 # Mission kinds authored ahead of their systems, same idea: port blockades are
-# the Phase 3 naval remainder; leader_suicide needs Phase 7 senate depth.
-FORWARD_MISSIONS = {"blockade_port", "leader_suicide"}
+# the Phase 3 naval remainder.
+FORWARD_MISSIONS = {"blockade_port"}
 
 errors: list[str] = []
 warnings: list[str] = []

@@ -290,7 +290,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 static func _journal_senate_notice(data: GameData, journal: Array, notice: Dictionary) -> void:
 	var kind: String = String(notice["kind"])
 	if kind == "civil_war":
-		TurnJournal.add(journal, "civil_war", {"faction": notice["faction"]})
+		TurnJournal.add(journal, "civil_war", {"faction": notice["faction"],
+			"extra": {"pattern": String(notice.get("pattern", ""))}})
 		return
 	if not ["mission_issued", "mission_progress", "mission_complete", "mission_failed"].has(kind):
 		return

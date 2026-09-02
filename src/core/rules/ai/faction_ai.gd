@@ -8,6 +8,7 @@ class_name FactionAi
 ##   AiEconomy   — capital, taxes, retraining, recruitment, construction
 ##   AiStrategy  — faction-wide strength pricing, taken once per world turn
 ##   AiPolicy    — which craft the court takes up next (§12)
+##   AiPolitics  — how a Roman house answers the Senate's demand (Phase 7)
 ##   AiRules     — the persona table behind all of it (data/ai.json)
 ##
 ## Order: capital → diplomacy → target → military → economy → policy, so a war
@@ -56,6 +57,8 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, rng
 		# objective. Temperament comes from the persona table in data/ai.json.
 		AiDiplomacy.run(data, state, faction_id,
 			AiRules.persona_for(data, faction_id), ai_notices, _round_strengths)
+		# The Senate's demand, when one stands: comply on the last turn.
+		AiPolitics.take_turn(data, state, faction_id, character_notices)
 		context["target"] = AiAssess.choose_target(data, state, faction_id)
 		# The ledger remembers what this house is campaigning for, so a war
 		# being mustered for counts as prosecuted, not stalled.

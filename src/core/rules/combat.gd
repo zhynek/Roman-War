@@ -12,8 +12,11 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	if attacker["region"] != defender["region"] \
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
-	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
-	DiplomacyRules.declare_war(data, state, attacker["owner"], defender["owner"])
+	# Attacking IS a declaration of war — alliances end the moment blood is
+	# drawn. A war the Republic forbids (Roman on Roman before the break) is
+	# refused here too, so no blade can start what no herald may.
+	if not DiplomacyRules.declare_war(data, state, attacker["owner"], defender["owner"]):
+		return {}
 	var region: Dictionary = data.regions[defender["region"]]
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])

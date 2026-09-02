@@ -301,6 +301,15 @@
         "faction": "egypt"
       },
       "text": "The oldest throne in the world stands empty. The granary of the sea, the treasury that outbid every rival, the Museum where the age kept its learning - all of it passes to other hands. The river will flood on schedule, indifferent; the scholars will serve new patrons, as scholars do. But no one again will rule as god-king over the gift of the Nile."
+    },
+    {
+      "id": "fall_of_the_senate",
+      "name": "The Curia Falls Silent",
+      "trigger": {
+        "condition": "faction_destroyed",
+        "faction": "senate"
+      },
+      "text": "There is no Senate. The benches where the conscript fathers sat in their broad stripes are empty, and the door of the Curia stands open to the Forum wind. Whoever holds Rome now holds it by the sword and the legions, and the old forms - the elections, the magistracies, the year named for its consuls - will be kept only so long as it suits him. The Republic is over; what replaces it has not yet found its name."
     }
   ],
   "disasters": [
