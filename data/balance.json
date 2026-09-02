@@ -216,7 +216,11 @@
     "experience_gain_underdog": 2,
     "underdog_strength_ratio": 1.3,
     "decisive_loser_casualty_pct": 50,
-    "decisive_winner_casualty_pct": 20
+    "decisive_winner_casualty_pct": 20,
+    "walkover_ratio": 20.0,
+    "neutral_speed": 5,
+    "melee_ratio_floor": 0.35,
+    "unit_destroyed_below_pct": 10
   },
   "siege": {
     "equipment_turns": 2,

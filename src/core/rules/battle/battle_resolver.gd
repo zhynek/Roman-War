@@ -33,12 +33,15 @@ extends RefCounted
 ##
 ##   BattleResult: {
 ##     winner: "attacker"|"defender",
-##     attacker_casualty_pct: float, defender_casualty_pct: float,
+##     attacker_casualty_pct: float, defender_casualty_pct: float,   # men actually lost
 ##     attacker_general_died: bool, defender_general_died: bool,
-##     experience_gained: int,
+##     experience_gained: int,                                       # applied to the victors
+##     attacker_destroyed: bool, defender_destroyed: bool,           # no unit left standing
+##     walkover: bool,          # one side had no strength: no fight, no losses, no lesson
 ##     breakdown: {attacker: SideEstimate, defender: SideEstimate, ratio: float,
 ##                 fortune: {attacker: float, defender: float}},
 ##   }
+##   Campaign code treats every key but `winner` as optional (.get with defaults).
 ##
 ## estimate(data, attacker_units, defender_units, context) is the shared,
 ## RNG-free half of the model: every resolver (and the UI's odds preview)
@@ -50,10 +53,14 @@ extends RefCounted
 ##     factors: [{label, value}],  # multiplicative; "base" carries the raw
 ##                                 #   soldiers x quality sum, every other value
 ##                                 #   is a multiplier (only those != 1.0 listed)
-##     rows: [{class, units, soldiers, share, matchup, terrain}],  # per class
-##     units: [UnitProfile],       # aligned with the unit array
+##     rows: [{class, cards, units (slots), soldiers, share, matchup, terrain}],  # per class
+##     units: [UnitProfile],       # one per unit with a known template; `index`
+##                                 #   is its position in the unit array
 ##     shares: {class: share}, pursuit: float,
 ##   }
+##   UnitProfile: {index, template, class, soldiers, mass, quality, experience,
+##     matchup, terrain, walls, attacking, fatigue, strength, pursuit, escape,
+##     weight (slot share of the card), chain (strength after each stage)}
 
 
 func resolve(_data: GameData, _rng: CampaignRng, _attacker_units: Array, _defender_units: Array, _context: Dictionary) -> Dictionary:
@@ -68,13 +75,21 @@ static func estimate(data: GameData, attacker_units: Array, defender_units: Arra
 	var defender_shares := ArmyRules.shares(data, defender_units)
 	var attacker := side_estimate(data, attacker_units, defender_shares, context, true)
 	var defender := side_estimate(data, defender_units, attacker_shares, context, false)
+	# A side with no strength at all (an empty garrison, a phantom army) is a
+	# walkover: the ratio is pinned to a nominal extreme rather than "even".
+	var walkover_ratio := float(data.balance["battle"]["walkover_ratio"])
 	var ratio := 1.0
 	if attacker["strength"] > 0.0 and defender["strength"] > 0.0:
 		ratio = attacker["strength"] / defender["strength"]
+	elif attacker["strength"] > 0.0:
+		ratio = walkover_ratio
+	elif defender["strength"] > 0.0:
+		ratio = 1.0 / walkover_ratio
 	return {
 		"attacker": attacker,
 		"defender": defender,
 		"ratio": ratio,
+		"walkover": attacker["strength"] <= 0.0 or defender["strength"] <= 0.0,
 		"attacker_win_chance": win_chance(attacker["strength"], defender["strength"],
 			float(data.balance["battle"]["randomness_pct"])),
 	}
@@ -108,9 +123,10 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 		if profile.is_empty():
 			continue
 		profile["index"] = index
+		var weight := float(unit["strength_pct"]) / 100.0
+		profile["weight"] = weight
 		profiles.append(profile)
 		soldiers_total += int(profile["soldiers"])
-		var weight := float(unit["strength_pct"]) / 100.0
 		pursuit_weighted += float(profile["pursuit"]) * weight
 		slots += weight
 		var chain: Array = profile["chain"]
@@ -141,7 +157,7 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 			float(battle_rules["terrain_defense_multiplier"].get(terrain, 1.0)), strength)
 		var wall_multipliers: Array = battle_rules["wall_defense_multiplier"]
 		strength = _apply_factor(factors, "walls",
-			float(wall_multipliers[mini(wall_level, wall_multipliers.size() - 1)]), strength)
+			float(wall_multipliers[clampi(wall_level, 0, wall_multipliers.size() - 1)]), strength)
 
 	strength = _apply_factor(factors, "combined_arms", combined_arms_factor(data, units), strength)
 
@@ -234,7 +250,8 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 		running *= factor
 		chain.append(running)
 
-	var speed_offset := float(template.get("speed", 5)) - 5.0
+	var neutral_speed := float(battle_rules["neutral_speed"])
+	var speed_offset := float(template.get("speed", neutral_speed)) - neutral_speed
 	var pursuit := 1.0 + speed_offset * float(battle_rules["pursuit_pct_per_speed_point"]) / 100.0 \
 		+ float(attribute_effects.get("pursuit_pct", 0.0)) / 100.0 \
 		+ float(mods.get("pursuit_pct", 0.0)) / 100.0
@@ -378,24 +395,28 @@ static func _merge_factor(factors: Array, label: String, value: float) -> void:
 
 
 static func _class_rows(profiles: Array, own_shares: Dictionary) -> Array:
+	## Per-class summary: cards, slots (strength-weighted, as ArmyRules counts
+	## them), men, share, and slot-weighted mean matchup and terrain factors.
 	var by_class := {}
 	for profile in profiles:
 		var unit_class: String = profile["class"]
+		var weight := float(profile.get("weight", 1.0))
 		var row: Dictionary = by_class.get(unit_class,
-			{"class": unit_class, "units": 0.0, "soldiers": 0, "share": 0.0, "matchup": 0.0, "terrain": 0.0})
-		row["units"] = float(row["units"]) + 1.0
+			{"class": unit_class, "cards": 0, "units": 0.0, "soldiers": 0, "share": 0.0, "matchup": 0.0, "terrain": 0.0})
+		row["cards"] = int(row["cards"]) + 1
+		row["units"] = float(row["units"]) + weight
 		row["soldiers"] = int(row["soldiers"]) + int(profile["soldiers"])
-		row["matchup"] = float(row["matchup"]) + float(profile["matchup"])
-		row["terrain"] = float(row["terrain"]) + float(profile["terrain"])
+		row["matchup"] = float(row["matchup"]) + float(profile["matchup"]) * weight
+		row["terrain"] = float(row["terrain"]) + float(profile["terrain"]) * weight
 		by_class[unit_class] = row
 	var rows: Array = []
 	var classes: Array = by_class.keys()
 	classes.sort()
 	for unit_class in classes:
 		var row: Dictionary = by_class[unit_class]
-		var count := float(row["units"])
-		row["matchup"] = float(row["matchup"]) / count
-		row["terrain"] = float(row["terrain"]) / count
+		var slots := maxf(float(row["units"]), 0.000001)
+		row["matchup"] = float(row["matchup"]) / slots
+		row["terrain"] = float(row["terrain"]) / slots
 		row["share"] = float(own_shares.get(unit_class, 0.0))
 		rows.append(row)
 	return rows

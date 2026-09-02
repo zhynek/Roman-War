@@ -269,3 +269,17 @@ func test_upgraded_unit_wins_more(t) -> void:
 		if result["winner"] == "attacker":
 			wins += 1
 	t.check(wins >= 24, "two weapon and one armour level win the mirror match at least 24 of 30 (won %d)" % wins)
+
+
+func test_walkover_costs_nothing(t) -> void:
+	var data := Fixtures.data()
+	var estimate := BattleResolver.estimate(data, _army(["test_elites", "test_elites"]), [], _context())
+	t.check(estimate["walkover"], "no defenders is a walkover")
+	t.check_near(float(estimate["ratio"]), float(data.balance["battle"]["walkover_ratio"]), 0.0001, "the ratio is pinned, not even")
+	t.check_near(float(estimate["attacker_win_chance"]), 1.0, 0.0001, "and certain")
+	var attackers := _army(["test_elites", "test_elites"])
+	var result := AutoResolver.new().resolve(data, CampaignRng.seeded(1), attackers, [], _context())
+	t.check_eq(result["winner"], "attacker", "the attackers walk in")
+	t.check_near(float(result["attacker_casualty_pct"]), 0.0, 0.0001, "nobody is lost")
+	t.check_eq(int(attackers[0]["experience"]), 0, "nobody learns anything")
+	t.check(result["walkover"] and result["defender_destroyed"], "flagged as a walkover over a destroyed side")

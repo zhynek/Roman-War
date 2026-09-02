@@ -40,7 +40,7 @@ static func shares(data: GameData, units: Array) -> Dictionary:
 
 
 static func composition(data: GameData, units: Array) -> Dictionary:
-	## {class: {units: float slots, soldiers: int, share: float}}, keys sorted.
+	## {class: {units: float slots, cards: int, soldiers: int, share: float}}, keys sorted.
 	var by_class := {}
 	var total_slots := 0.0
 	for unit in units:
@@ -49,8 +49,9 @@ static func composition(data: GameData, units: Array) -> Dictionary:
 		if unit_class == "":
 			continue
 		var weight := float(unit["strength_pct"]) / 100.0
-		var entry: Dictionary = by_class.get(unit_class, {"units": 0.0, "soldiers": 0, "share": 0.0})
+		var entry: Dictionary = by_class.get(unit_class, {"units": 0.0, "cards": 0, "soldiers": 0, "share": 0.0})
 		entry["units"] = float(entry["units"]) + weight
+		entry["cards"] = int(entry["cards"]) + 1
 		entry["soldiers"] = int(entry["soldiers"]) \
 			+ int(ceil(int(template.get("soldiers", 0)) * int(unit["strength_pct"]) / 100.0))
 		by_class[unit_class] = entry

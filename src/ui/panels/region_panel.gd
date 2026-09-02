@@ -8,7 +8,7 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
-signal battle_fought(result: Dictionary, title: String)
+signal assault_requested(region_id: String, occupation: String)
 
 var game: Game
 var region_id := ""
@@ -147,16 +147,14 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_header("Recruitment", 12)
 	for job in settlement["recruitment_queue"]:
 		_label("  mustering %s" % _template_name(job["template"]))
-	var recruits := game.available_units(region_id)
-	if not recruits.is_empty():
-		var profile := game.recruit_profile(region_id)
+	for unit in game.available_units(region_id):
+		# What this recruit will carry out of this town: chevrons and kit.
+		var profile := game.recruit_profile(region_id, unit["id"])
 		var issue := _kit_text(profile)
 		if int(profile["experience"]) > 0:
-			issue = ("xp%d" % int(profile["experience"])) + ("  " + issue if issue != "" else "")
-		if issue != "":
-			_label("  recruits here receive: %s" % issue, Color(0.7, 0.8, 0.9))
-	for unit in recruits:
-		_action_button("Recruit %s [%s] (%d)" % [unit["name"], String(unit.get("class", "")).replace("_", " "), int(unit["cost"])],
+			issue = ("xp%d" % int(profile["experience"])) + (" " + issue if issue != "" else "")
+		_action_button("Recruit %s [%s] (%d)%s" % [unit["name"], String(unit.get("class", "")).replace("_", " "),
+				int(unit["cost"]), " — " + issue if issue != "" else ""],
 			func():
 				game.queue_unit(region_id, unit["id"])
 				action_taken.emit())
@@ -208,8 +206,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	if not summary.is_empty() and int(summary["units"]) > 0:
 		var parts: Array = []
 		for unit_class in summary["by_class"]:
-			parts.append("%d %s" % [int(round(float(summary["by_class"][unit_class]["units"]))),
-				String(unit_class).replace("_", " ")])
+			parts.append("%d %s" % [int(summary["by_class"][unit_class]["cards"]), String(unit_class).replace("_", " ")])
 		_label("%d men · %s · avg xp %.1f" % [int(summary["soldiers"]), ", ".join(parts), float(summary["avg_experience"])],
 			Color(0.9, 0.85, 0.6))
 	for unit in army["units"]:
@@ -232,16 +229,17 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 		for choice in ["occupy", "enslave", "exterminate"]:
 			occupation_options.add_item(choice.capitalize())
 		add_child(occupation_options)
-		var can_assault: bool = settlement["siege"].get("equipment_ready", false)
-		var assault_text := "Assault the walls!" if can_assault else "Assault (equipment not ready)"
+		var siege: Dictionary = settlement["siege"]
+		var can_assault: bool = siege.get("equipment_ready", false)
+		var ready_in := SiegeRules.equipment_turns_for(game.data, game.state, army["owner"]) - int(siege["turns"])
+		var assault_text := "Assault the walls!" if can_assault \
+			else "Assault (engines ready in %d turn%s)" % [maxi(ready_in, 1), "" if ready_in == 1 else "s"]
 		var estimate := game.assault_estimate(army_id, region_id)
 		if not estimate.is_empty():
 			assault_text += "  " + odds_text(estimate)
-		_action_button(assault_text, func():
-			var choice: String = ["occupy", "enslave", "exterminate"][occupation_options.selected]
-			var result := game.assault_settlement(army_id, region_id, choice)
-			battle_fought.emit(result, "Assault on %s" % settlement_display_name())
-			action_taken.emit())
+		var assault_button := _action_button(assault_text, func():
+			assault_requested.emit(region_id, ["occupy", "enslave", "exterminate"][occupation_options.selected]))
+		assault_button.disabled = not can_assault
 
 	var offers := game.mercenaries_available(region_id)
 	if not offers.is_empty():
@@ -281,12 +279,13 @@ func _breakdown(title: String, factors: Array) -> void:
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 
-func _action_button(text: String, handler: Callable) -> void:
+func _action_button(text: String, handler: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
 	add_child(button)
+	return button
 
 
 func _separator() -> void:
@@ -299,8 +298,14 @@ func settlement_display_name() -> String:
 
 static func odds_text(estimate: Dictionary) -> String:
 	## "odds 1.42:1 — 78% to win", from BattleResolver.estimate's paper ratio.
-	return "odds %.2f:1 — %d%% to win" % [float(estimate.get("ratio", 1.0)),
-		int(round(float(estimate.get("attacker_win_chance", 0.5)) * 100.0))]
+	## A chance that is not exactly certain never shows as 0% or 100%.
+	if int(estimate.get("defender", {}).get("soldiers", 1)) <= 0:
+		return "undefended"
+	var chance := float(estimate.get("attacker_win_chance", 0.5))
+	var percent := int(round(chance * 100.0))
+	if chance > 0.0 and chance < 1.0:
+		percent = clampi(percent, 1, 99)
+	return "odds %.2f:1 — %d%% to win" % [float(estimate.get("ratio", 1.0)), percent]
 
 
 func _unit_line(unit: Dictionary) -> String:

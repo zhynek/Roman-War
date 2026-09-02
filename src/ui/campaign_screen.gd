@@ -58,7 +58,7 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
-	region_panel.battle_fought.connect(_log_battle)
+	region_panel.assault_requested.connect(assault_order)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -214,8 +214,10 @@ func attack_army_order(defender_id: String) -> void:
 	if not DiplomacyRules.at_war(game.state, player, defender["owner"]):
 		text = "This will declare war on %s. " % faction_name + text
 	var estimate := game.battle_estimate(selected_army, defender_id)
-	if not estimate.is_empty():
-		text += "\n" + RegionPanel.odds_text(estimate)
+	if estimate.is_empty():
+		_log("The army cannot come to grips with the enemy from here.")
+		return
+	text += "\n" + RegionPanel.odds_text(estimate)
 	_confirm(text, func(): _resolve_attack(defender_id))
 
 
@@ -224,13 +226,31 @@ func _resolve_attack(defender_id: String) -> void:
 	_after_order()
 
 
+func assault_order(region_id: String, occupation: String) -> void:
+	## Storming a city is confirmed like any attack, with the odds and the fate
+	## chosen for the townsfolk spelled out — extermination is not a mis-click.
+	var settlement_name: String = game.data.regions.get(region_id, {}).get("settlement_name", region_id)
+	var text := "Storm the walls of %s and %s the city?" % [settlement_name, occupation]
+	var estimate := game.assault_estimate(selected_army, region_id)
+	if not estimate.is_empty():
+		text += "\n" + RegionPanel.odds_text(estimate)
+	_confirm(text, func(): _resolve_assault(region_id, occupation))
+
+
+func _resolve_assault(region_id: String, occupation: String) -> void:
+	var settlement_name: String = game.data.regions.get(region_id, {}).get("settlement_name", region_id)
+	_log_battle(game.assault_settlement(selected_army, region_id, occupation), "Assault on %s" % settlement_name)
+	_after_order()
+
+
 func _log_battle(result: Dictionary, title: String) -> void:
-	## The battle report: who prevailed, what it cost, and — from the
-	## resolver's breakdown — the factors that decided it.
+	## The battle report: who prevailed, what it cost, what fell, and — from
+	## the resolver's breakdown — the factors that decided it. Every key is
+	## optional: a future resolver may report less.
 	if result.is_empty():
-		_log("%s: the army cannot come to grips with the enemy from here." % title)
+		_log("%s: the enemy could not be brought to battle." % title)
 		return
-	var attacker_won: bool = result["winner"] == "attacker"
+	var attacker_won: bool = result.get("winner", "") == "attacker"
 	var line := "[b]%s![/b] The %s prevail — attackers lose %d%%, defenders %d%%." % [title,
 		"attackers" if attacker_won else "defenders",
 		int(round(float(result.get("attacker_casualty_pct", 0.0)))),
@@ -240,21 +260,41 @@ func _log_battle(result: Dictionary, title: String) -> void:
 	elif result.get("attacker_destroyed", false):
 		line += " The attackers are destroyed."
 	_log(line)
-	var breakdown: Dictionary = result.get("breakdown", {})
-	if not breakdown.is_empty():
+	var breakdown = result.get("breakdown")
+	if breakdown is Dictionary and not breakdown.is_empty():
 		_log("    " + battle_summary(breakdown))
+	var capture = result.get("capture")
+	if capture is Dictionary and not capture.is_empty():
+		_log("[color=#e0a060]The city is taken and %s — %d denarii of loot%s.[/color]" % [
+			{"occupy": "occupied", "enslave": "its people enslaved", "exterminate": "its people put to the sword"}.get(
+				capture.get("occupation", "occupy"), "occupied"),
+			int(capture.get("loot", 0)),
+			", %d slaves sent to your cities" % int(capture["slaves"]) if int(capture.get("slaves", 0)) > 0 else ""])
+	_log_character_notices(result.get("character_notices", []))
+
+
+const FACTOR_NAMES := {
+	"upgrades": "kit", "matchups": "matchups", "class_terrain": "ground by arm", "terrain": "defender's ground",
+	"walls": "walls", "assault": "storming walls", "wall_defense": "holding walls", "general": "general",
+	"doctrines": "doctrines", "combined_arms": "combined arms", "attacking": "the charge", "fatigue": "fatigue",
+	"sally": "sally", "experience": "experience",
+}
 
 
 static func battle_summary(breakdown: Dictionary) -> String:
-	## "Attackers ×1.21 matchups, ×0.85 class terrain · Defenders ×2.00 walls ·
-	##  paper odds 1.42:1, fortune 1.05 / 0.93"
+	## "Attackers ×1.21 matchups, ×0.85 ground by arm · Defenders ×2.00 walls ·
+	##  paper odds 1.42:1, fortune att 1.05 / def 0.93"
 	var parts: Array = []
 	for side in ["attacker", "defender"]:
-		var top := _decisive_factors(breakdown[side]["factors"], 3)
+		var side_estimate = breakdown.get(side, {})
+		var factors: Array = side_estimate.get("factors", []) if side_estimate is Dictionary else []
+		var top := _decisive_factors(factors, 3)
 		if not top.is_empty():
 			parts.append("%s %s" % ["Attackers" if side == "attacker" else "Defenders", ", ".join(top)])
-	var fortune: Dictionary = breakdown.get("fortune", {})
-	parts.append("paper odds %.2f:1, fortune %.2f / %.2f" % [float(breakdown.get("ratio", 1.0)),
+	var fortune = breakdown.get("fortune", {})
+	if not (fortune is Dictionary):
+		fortune = {}
+	parts.append("paper odds %.2f:1, fortune att %.2f / def %.2f" % [float(breakdown.get("ratio", 1.0)),
 		float(fortune.get("attacker", 1.0)), float(fortune.get("defender", 1.0))])
 	return " · ".join(parts)
 
@@ -271,7 +311,8 @@ static func _decisive_factors(factors: Array, count: int) -> Array:
 		return swing_a > swing_b if swing_a != swing_b else String(a["label"]) < String(b["label"]))
 	var lines: Array = []
 	for factor in candidates.slice(0, count):
-		lines.append("×%.2f %s" % [float(factor["value"]), String(factor["label"]).replace("_", " ")])
+		var label := String(factor["label"])
+		lines.append("×%.2f %s" % [float(factor["value"]), FACTOR_NAMES.get(label, label.replace("_", " "))])
 	return lines
 
 
@@ -360,7 +401,30 @@ func _log_report(report: Dictionary) -> void:
 			var mission_name: String = game.data.missions.get(mission_id, {}).get("name", mission_id)
 			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
 				"" if mission_name == "" else " — " + mission_name])
-	for notice in report["characters"]:
+	_log_character_notices(report["characters"])
+	for faction_id in report.get("reforms", {}):
+		if faction_id == player:
+			for doctrine_id in report["reforms"][faction_id]:
+				_log("[color=#c0b060]Reform complete: %s[/color]"
+					% game.data.doctrines.get(doctrine_id, {}).get("name", doctrine_id))
+	# Starve-outs are full battles; report the ones we can see like any other.
+	var visible := game.visible_regions()
+	for siege_event in report["sieges"]:
+		if not visible.has(siege_event["region"]):
+			continue
+		var settlement_name: String = game.data.regions[siege_event["region"]]["settlement_name"]
+		var siege_result: Dictionary = siege_event.get("result", {})
+		var outcome := "the starving garrison sallies and the city falls." \
+			if siege_result.get("captured", false) else "the starving garrison sallies and breaks the siege."
+		_log("The siege of %s is decided: %s" % [settlement_name, outcome])
+		if not siege_result.is_empty():
+			_log_battle(siege_result, "Sally at %s" % settlement_name)
+
+
+func _log_character_notices(notices: Array) -> void:
+	## Trait and retinue news for our own people (and anyone in our service).
+	var player: String = game.state["player_faction"]
+	for notice in notices:
 		if notice.get("faction", "") != player and not _is_player_character(notice.get("character", "")):
 			continue
 		var who: String = game.state["characters"].get(notice.get("character", ""), {}).get("name", "")
@@ -369,17 +433,7 @@ func _log_report(report: Dictionary) -> void:
 			detail = " — " + String(notice["name"])
 		elif notice.has("ancillary"):
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
-		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
-	for faction_id in report.get("reforms", {}):
-		if faction_id == player:
-			for doctrine_id in report["reforms"][faction_id]:
-				_log("[color=#c0b060]Reform complete: %s[/color]"
-					% game.data.doctrines.get(doctrine_id, {}).get("name", doctrine_id))
-	for siege_event in report["sieges"]:
-		var siege_result: Dictionary = siege_event.get("result", {})
-		var outcome := "the starving garrison sallies and the city falls." 			if siege_result.get("captured", false) else "the starving garrison sallies and breaks the siege."
-		_log("The siege of %s is decided: %s" % [game.data.regions[siege_event["region"]]["settlement_name"], outcome])
-
+		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice.get("kind", "news")).replace("_", " "), who, detail])
 
 func _is_player_character(char_id: String) -> bool:
 	return game.state["characters"].get(char_id, {}).get("faction", "") == game.state["player_faction"]

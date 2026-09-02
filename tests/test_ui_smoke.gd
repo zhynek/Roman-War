@@ -196,10 +196,75 @@ func test_reforms_panel_and_battle_odds(t) -> void:
 			dialog = child
 	t.check(dialog != null and dialog.dialog_text.contains("% to win"), "the attack is confirmed with its odds")
 
-	screen._resolve_attack(rebel_id)
+	dialog.confirmed.emit()
+	t.check(dialog.is_queued_for_deletion(), "the confirmation is freed once answered")
 	var log_text := screen.report_log.get_parsed_text()
 	t.check(log_text.contains("Battle!") and log_text.contains("%"), "the battle and its losses are logged")
 	t.check(log_text.contains("paper odds"), "with the factors that decided it")
 	t.check(int(game.state["factions"]["julii"]["war_record"]["battles_won"]) + \
 		int(game.state["factions"]["julii"]["war_record"]["battles_lost"]) == 1, "the war record counts it")
+
+	# A resolver that reports only the contract's minimum must still log cleanly.
+	screen._log_battle({"winner": "attacker"}, "Skirmish")
+	t.check(screen.report_log.get_parsed_text().contains("Skirmish!"), "a minimal result logs without its breakdown")
+	screen.free()
+
+
+func test_siege_and_assault_through_the_ui(t) -> void:
+	## Besiege a neighbouring rebel town, wait for the engines, and storm it
+	## through the confirmation — the one attack path the other tests skip.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	var army_id := ""
+	var target := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		var army: Dictionary = game.state["armies"][candidate]
+		if army["owner"] != "julii":
+			continue
+		for neighbor in game.data.regions[army["region"]]["adjacent"]:
+			var settlement: Dictionary = game.state["settlements"].get(neighbor, {})
+			if settlement.get("owner", "") == "rebels" \
+					and Constants.level_index(SettlementRules.settlement_level(game.data, settlement)) >= 1:
+				army_id = candidate
+				target = neighbor
+				break
+		if target != "":
+			break
+	t.check(target != "", "a julii army starts next to a rebel town")
+	if target == "":
+		screen.free()
+		return
+	screen._on_region_clicked(game.state["armies"][army_id]["region"])
+	screen._on_army_selected(army_id)
+	screen.besiege_order(target)
+	t.check(game.state["settlements"][target]["siege"] != null, "the siege is laid")
+	for i in range(SiegeRules.equipment_turns_for(game.data, game.state, "julii")):
+		screen._end_turn()
+	var siege = game.state["settlements"][target]["siege"]
+	t.check(siege != null and siege.get("equipment_ready", false), "the engines are ready in time")
+	screen._on_region_clicked(target)
+	screen._on_army_selected(army_id)
+	var assault_button: Button = null
+	for child in screen.region_panel.get_children():
+		if child is Button and String(child.text).begins_with("Assault"):
+			assault_button = child
+	t.check(assault_button != null and not assault_button.disabled and String(assault_button.text).contains("% to win"),
+		"the assault button is live and shows the odds")
+
+	screen.assault_order(target, "occupy")
+	var dialog: ConfirmationDialog = null
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialog = child
+	t.check(dialog != null and dialog.dialog_text.contains("Storm the walls"), "storming is confirmed")
+	dialog.confirmed.emit()
+	var log_text := screen.report_log.get_parsed_text()
+	t.check(log_text.contains("Assault on"), "the assault is reported")
+	if game.state["settlements"][target]["owner"] == "julii":
+		t.check(log_text.contains("taken"), "and so is the capture")
 	screen.free()

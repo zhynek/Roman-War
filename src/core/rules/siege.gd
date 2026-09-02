@@ -103,7 +103,7 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"],
 		assault_context(data, state, army, region_id, starving))
 	CombatRules.record_battle(data, state, army["owner"], settlement["owner"], attacker_classes, defender_classes,
-		soldiers_before, result)
+		soldiers_before, result, army["units"], settlement["garrison"])
 
 	if result.get("attacker_general_died", false) and army["general"] != null:
 		CharacterRules.kill(state, army["general"], data)

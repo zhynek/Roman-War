@@ -69,7 +69,7 @@ static func prerequisites_unmet(data: GameData, state: Dictionary, faction_id: S
 			reasons.append("requires %s" % data.doctrines.get(needed, {}).get("name", needed))
 	var building: Dictionary = prerequisites.get("building", {})
 	if not building.is_empty() and not _owns_building(data, state, faction_id, String(building["kind"]), int(building["level"])):
-		reasons.append("needs a %s of tier %d in some town" % [String(building["kind"]).replace("_", " "), int(building["level"])])
+		reasons.append("needs %s at tier %d in some town" % [String(building["kind"]).replace("_", " "), int(building["level"])])
 	var resource: String = prerequisites.get("resource", "")
 	if resource != "" and not _owns_resource(data, state, faction_id, resource):
 		reasons.append("needs a region that yields %s" % resource.replace("_", " "))

@@ -190,3 +190,28 @@ func test_skirmishes_do_not_move_the_mood(t) -> void:
 	t.check_eq(result["winner"], "attacker", "the cohorts win the skirmish")
 	t.check(state["factions"]["red"]["war_mood"] == null, "three hundred men engaged is no triumph")
 	t.check_eq(int(state["factions"]["red"]["war_record"]["battles_won"]), 1, "but it still counts as a battle")
+
+
+func test_walkover_is_not_a_battle(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_elites", "test_elites"])
+	state["settlements"]["alpha"]["garrison"] = []
+	t.check(SiegeRules.begin_siege(data, state, army_id, "alpha"), "siege laid on the empty town")
+	state["settlements"]["alpha"]["siege"]["equipment_ready"] = true
+	var result := SiegeRules.assault(data, state, CampaignRng.seeded(3), AutoResolver.new(), army_id, "alpha")
+	t.check(result.get("captured", false) and result.get("walkover", false), "the empty town falls without a fight")
+	t.check_eq(int(state["factions"]["red"]["war_record"]["battles_won"]), 0, "a walkover is no victory for the record")
+	t.check(state["factions"]["red"]["war_mood"] == null, "and no triumph")
+
+
+func test_stronger_mood_stands(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	CombatRules.set_war_mood(state, "red", "defeat", -8.0, 4)
+	CombatRules.set_war_mood(state, "red", "triumph", 5.0, 4)
+	t.check_near(float(state["factions"]["red"]["war_mood"]["value"]), -8.0, 0.001, "a small triumph does not erase a deep shock")
+	CombatRules.set_war_mood(state, "red", "defeat", -8.0, 2)
+	t.check_eq(int(state["factions"]["red"]["war_mood"]["turns"]), 2, "an equal blow restarts the clock")
+	CombatRules.set_war_mood(state, "red", "triumph", 12.0, 3)
+	t.check_near(float(state["factions"]["red"]["war_mood"]["value"]), 12.0, 0.001, "a greater one replaces it")

@@ -23,6 +23,25 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 	var attacker_before := ArmyRules.soldiers(data, attacker_units)
 	var defender_before := ArmyRules.soldiers(data, defender_units)
 
+	# No enemy in the field: walk in. Nothing is rolled, lost or learned.
+	if bool(estimate.get("walkover", false)):
+		var attacker_stands: bool = float(estimate["attacker"]["strength"]) > 0.0
+		return {
+			"winner": "attacker" if attacker_stands else "defender",
+			"attacker_casualty_pct": 0.0,
+			"defender_casualty_pct": 0.0,
+			"attacker_general_died": false,
+			"defender_general_died": false,
+			"experience_gained": 0,
+			"attacker_destroyed": attacker_units.is_empty(),
+			"defender_destroyed": defender_units.is_empty(),
+			"walkover": true,
+			"breakdown": {
+				"attacker": estimate["attacker"], "defender": estimate["defender"],
+				"ratio": estimate["ratio"], "fortune": {"attacker": 1.0, "defender": 1.0},
+			},
+		}
+
 	# Fortune: two draws, attacker first (the order every save replays).
 	var randomness := float(battle_rules["randomness_pct"])
 	var attacker_fortune := rng.randf_pct(randomness)
@@ -35,11 +54,12 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 	if attacker_strength > 0.0 and defender_strength > 0.0:
 		ratio = attacker_strength / defender_strength
 
-	# Melee pools from the ratio, clamped as a whole.
+	# Melee pools from the ratio (floored so a rout is not free), clamped as a whole.
 	var casualty_min := float(battle_rules["casualty_min_pct"])
 	var casualty_max := float(battle_rules["casualty_max_pct"])
-	var attacker_melee := clampf(float(battle_rules["attacker_casualty_base_pct"]) / maxf(ratio, 0.35), casualty_min, casualty_max)
-	var defender_melee := clampf(float(battle_rules["defender_casualty_base_pct"]) * maxf(ratio, 0.35), casualty_min, casualty_max)
+	var ratio_floor := float(battle_rules["melee_ratio_floor"])
+	var attacker_melee := clampf(float(battle_rules["attacker_casualty_base_pct"]) / maxf(ratio, ratio_floor), casualty_min, casualty_max)
+	var defender_melee := clampf(float(battle_rules["defender_casualty_base_pct"]) * maxf(ratio, ratio_floor), casualty_min, casualty_max)
 
 	# The rout: the loser's extra losses, driven by how fast the winner can chase.
 	var winner_estimate: Dictionary = estimate["attacker"] if attacker_won else estimate["defender"]
@@ -79,6 +99,7 @@ func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_u
 		"experience_gained": experience_gain,
 		"attacker_destroyed": attacker_units.is_empty(),
 		"defender_destroyed": defender_units.is_empty(),
+		"walkover": false,
 		"breakdown": {
 			"attacker": estimate["attacker"],
 			"defender": estimate["defender"],
@@ -123,6 +144,7 @@ static func distribute_casualties(units: Array, side: Dictionary, melee_pct: flo
 
 	var casualty_max := float(battle_rules["casualty_max_pct"])
 	var scatter := float(battle_rules["unit_casualty_scatter_pct"])
+	var destroyed_below := int(battle_rules["unit_destroyed_below_pct"])
 	for i in range(units.size() - 1, -1, -1):
 		var unit: Dictionary = units[i]
 		var profile: Dictionary = profiles.get(i, {})
@@ -130,7 +152,7 @@ static func distribute_casualties(units: Array, side: Dictionary, melee_pct: flo
 		var loss := (melee_pct * float(weights[i]) * normaliser + rout_pct_value / escape) * rng.randf_pct(scatter)
 		loss = clampf(loss, 0.0, casualty_max)
 		var remaining := int(round(float(unit["strength_pct"]) * (1.0 - loss / 100.0)))
-		if remaining < 10:
+		if remaining < destroyed_below:
 			units.remove_at(i)
 		else:
 			unit["strength_pct"] = remaining

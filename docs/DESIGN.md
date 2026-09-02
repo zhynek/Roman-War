@@ -69,8 +69,8 @@ the world in a **fixed order** so campaigns are reproducible:
 | 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
-| 7 | Events | Scripted/date/condition events, disasters, then senate politics; war moods (§3.3) fade a turn |
-| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 7 | Events | Scripted/date/condition events, disasters, then senate politics |
+| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member; then event happiness and war moods (§3.3) fade a turn |
 | 9 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
 
 Governorship is re-derived from character presence (`SettlementRules.refresh_governors`)
@@ -176,7 +176,7 @@ suppresses corruption (§4.3).
 | wonders | faction-wide happiness wonders |
 | population_boom | +5 when growth ≥ +2.5% |
 | levy_strain | −strain; recruiting or refilling adds (men ÷ population) × 100 points, softened 15% per drill level, capped at 30, fading 2 per turn |
-| war_mood | +5 for 4 turns in every town of a faction that has just won a **decisive** battle (a triumph); −8 for 4 turns after a decisive defeat. Decisive = ≥1,500 men engaged and the loser destroyed, or ≥50% lost against ≤20% |
+| war_mood | +5 for 4 turns in every town of a faction that has just won a **decisive** battle (a triumph); −8 for 4 turns after a decisive defeat. Decisive = ≥1,500 men engaged and the loser destroyed, or ≥50% lost against ≤20%. The strongest standing mood wins; an equal or stronger one replaces it and restarts the clock |
 
 **Riots:** order below **75** riots the settlement — 1% of the population dies and
 there is a 25% chance a random building loses a tier.
@@ -333,11 +333,15 @@ context: {terrain, wall_level, attacker_general, defender_general,
          *_mods = ArmyMods, a pre-merged dict of faction-wide modifiers
          (class stat deltas, matchup / terrain percentages, scalar bonuses)
          built campaign-side so the resolver never reads game state.
-BattleResult: {winner, attacker_casualty_pct, defender_casualty_pct,
+BattleResult: {winner, attacker_casualty_pct, defender_casualty_pct (men actually lost),
                attacker_general_died, defender_general_died, experience_gained,
+               attacker_destroyed, defender_destroyed, walkover,
                breakdown: {attacker: SideEstimate, defender: SideEstimate,
                            ratio, fortune: {attacker, defender}}}
 ```
+Campaign code treats every key but `winner` as optional: it derives destruction
+from the mutated unit arrays when a resolver omits the flags, and a `walkover`
+(one side had no strength — an empty garrison) is neither recorded nor mourned.
 
 `BattleResolver.estimate(data, attacker_units, defender_units, context)` is the
 shared, **RNG-free** half of the model. It returns both sides' `SideEstimate`
@@ -383,16 +387,22 @@ Both sides then roll ±15% fortune (`battle.randomness_pct`) and the higher
 strength wins; `win_chance` integrates those two rolls analytically so the UI
 can say "72% to win".
 
+An empty garrison or a phantom army is a **walkover**: the paper ratio is
+pinned to `battle.walkover_ratio`, nothing is rolled, nobody is lost, nobody
+learns.
+
 **Casualties** come in two parts. The *melee* pool is set by the post-fortune
-ratio (base 25% each side, clamped 2–95%) and shared out so that units the
+ratio (base 25% each side, ratio floored at `melee_ratio_floor`, clamped
+2–95%) and shared out so that units the
 enemy countered bleed more and units that countered him bleed less — each
 unit's weight is `matchup^−casualty_matchup_weight`, clamped 0.5–2.0 and
 soldier-normalised so the side's mean melee loss is the pool. The *rout* falls
 on the loser only: `loser_extra_casualty_pct × (1 + (winner pursuit − 1) ×
 pursuit_scale)`, where a side's pursuit is the slot-weighted mean of its units'
 speed-derived pursuit factors (a mounted victor runs the beaten down harder),
-divided per losing unit by its own escape factor (fast units get away). One
-±30% scatter draw per unit; units under 10% strength are destroyed. The result
+divided per losing unit by its own escape factor (fast units get away; speed
+`neutral_speed` is the pivot for both). One ±30% scatter draw per unit; units
+under `unit_destroyed_below_pct` strength are destroyed. The result
 reports the men **actually** lost, and `attacker_destroyed` / `defender_destroyed`.
 Winners gain +1 experience, or +2 when they were the paper underdog by ≥1.3;
 a losing side's general dies with 10% probability. The model is a paper one by
