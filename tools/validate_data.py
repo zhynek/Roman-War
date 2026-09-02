@@ -8,6 +8,7 @@ coherence). Exits nonzero on any error. Run from anywhere:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -139,17 +140,26 @@ def cross_checks(t: dict[str, dict]) -> None:
                     warn(f"buildings: culture {culture} has no {kind} chain")
 
     # A chain's building prerequisite must be a kind every culture it serves can
-    # actually raise to that tier, or the chain is unbuildable for them.
+    # actually raise to that tier — within its settlement cap — or the chain is
+    # unbuildable for them; and a chain cannot require its own kind.
+    caps = {c["id"]: c["max_settlement_level"] for c in t.get("cultures.json", {}).get("cultures", [])}
+
+    def can_build(culture: str, kind: str, level: int) -> bool:
+        cap = LEVELS.index(caps.get(culture, LEVELS[-1]))
+        return any(c["kind"] == kind and culture in c["cultures"] and len(c["levels"]) >= level
+                   and LEVELS.index(c["levels"][level - 1]["min_settlement_level"]) <= cap
+                   for c in chains.values())
+
     for chain in chains.values():
         required = chain.get("requires_building")
         if not required:
             continue
+        if required["kind"] == chain["kind"]:
+            err(f"buildings: {chain['id']}: requires its own kind")
         for culture in chain["cultures"]:
-            satisfiable = any(c["kind"] == required["kind"] and culture in c["cultures"]
-                              and len(c["levels"]) >= required["level"] for c in chains.values())
-            if not satisfiable:
+            if not can_build(culture, required["kind"], required["level"]):
                 err(f"buildings: {chain['id']}: requires {required['kind']} L{required['level']}, "
-                    f"which culture {culture} cannot build")
+                    f"which culture {culture} can never build")
 
     # --- units ------------------------------------------------------------
     units = {u["id"]: u for u in t.get("units.json", {}).get("units", [])}
@@ -516,16 +526,33 @@ def cross_checks(t: dict[str, dict]) -> None:
         for needed in prerequisites.get("doctrines", []):
             if needed not in doctrines:
                 err(f"doctrines: {doctrine['id']}: unknown prerequisite doctrine {needed}")
+        served = {factions[f]["culture"] for f in doctrine.get("factions", []) if f in factions} \
+            or set(doctrine["cultures"])
         building = prerequisites.get("building")
         if building:
-            buildable = any(c["kind"] == building["kind"] and len(c["levels"]) >= building["level"]
-                            and any(culture in c["cultures"] for culture in doctrine["cultures"])
-                            for c in chains.values())
-            if not buildable:
-                err(f"doctrines: {doctrine['id']}: no culture it serves can build {building['kind']} L{building['level']}")
+            for culture in sorted(served):
+                if not can_build(culture, building["kind"], building["level"]):
+                    err(f"doctrines: {doctrine['id']}: culture {culture} can never build "
+                        f"{building['kind']} L{building['level']}")
         resource = prerequisites.get("resource")
         if resource and resource_enum and resource not in resource_enum:
             err(f"doctrines: {doctrine['id']}: unknown resource {resource}")
+        # A doctrine whose only effects name classes a faction never fields is a
+        # null purchase — and the AI will buy it.
+        class_effects = ("class_stats", "matchups", "terrain", "upkeep_pct", "recruit_xp")
+        targets = {entry["class"] for key in class_effects for entry in doctrine["effects"].get(key, [])}
+        scalar_effects = set(doctrine["effects"]) - set(class_effects)
+        if targets and "all" not in targets and not scalar_effects:
+            for faction_id, faction in sorted(factions.items()):
+                if faction.get("is_rebel") or faction["culture"] not in doctrine["cultures"]:
+                    continue
+                if doctrine.get("factions") and faction_id not in doctrine["factions"]:
+                    continue
+                fielded = {u["class"] for u in units.values()
+                           if faction_id in u["factions"] or "all" in u["factions"]}
+                if not targets & fielded:
+                    warn(f"doctrines: {doctrine['id']}: {faction_id} may adopt it but fields none of "
+                         f"{sorted(targets)} (null purchase)")
     # Prerequisite chains must be acyclic, or a doctrine can never be adopted.
     def _reaches(start: str, target: str, seen: set[str]) -> bool:
         for needed in doctrines.get(start, {}).get("prerequisites", {}).get("doctrines", []):
@@ -542,7 +569,8 @@ def cross_checks(t: dict[str, dict]) -> None:
         if count < 3:
             warn(f"doctrines: culture {culture} has only {count} doctrines to pursue")
     for faction_setup in campaign.get("factions", []):
-        for doctrine_id in faction_setup.get("doctrines", []):
+        granted = set(faction_setup.get("doctrines", []))
+        for doctrine_id in sorted(granted):
             doctrine = doctrines.get(doctrine_id)
             if doctrine is None:
                 err(f"campaign: {faction_setup['id']}: unknown starting doctrine {doctrine_id}")
@@ -551,23 +579,33 @@ def cross_checks(t: dict[str, dict]) -> None:
             allowed = doctrine.get("factions")
             if culture not in doctrine["cultures"] or (allowed and faction_setup["id"] not in allowed):
                 err(f"campaign: {faction_setup['id']}: starting doctrine {doctrine_id} is not open to it")
+            if doctrine.get("era", "any") == "post_marian":
+                err(f"campaign: {faction_setup['id']}: starting doctrine {doctrine_id} needs the post-marian era")
+            for needed in doctrine.get("prerequisites", {}).get("doctrines", []):
+                if needed not in granted:
+                    err(f"campaign: {faction_setup['id']}: starting doctrine {doctrine_id} needs {needed}, "
+                        f"which is not granted")
 
     # --- effect-key liveness ----------------------------------------------
     # Every effect key a schema admits must be read by some rules module (as a
-    # quoted literal): weapon/armour upgrades shipped authored but unread for
-    # four phases, and a closed vocabulary should not rot silently.
+    # quoted literal in code, not in a comment and not in DoctrineRules' key
+    # registry): weapon/armour upgrades shipped authored but unread for four
+    # phases, and a closed vocabulary should not rot silently.
+    readers = _reader_source()
+    all_effect_keys = _schema_effect_keys("buildings.schema.json", "chains", "levels") \
+        | _schema_effect_keys("doctrines.schema.json", "doctrines")
     for schema_name, effect_keys in (
             ("buildings.schema.json", _schema_effect_keys("buildings.schema.json", "chains", "levels")),
             ("doctrines.schema.json", _schema_effect_keys("doctrines.schema.json", "doctrines"))):
         for key in sorted(effect_keys):
             if key in FORWARD_EFFECTS:
                 continue
-            if f'"{key}"' not in engine_text:
+            if f'"{key}"' not in readers:
                 err(f"{schema_name}: effect key '{key}' has no engine reader under src/core "
                     f"(dead content — implement it or list it in FORWARD_EFFECTS)")
     for key in sorted(FORWARD_EFFECTS):
-        if key not in _schema_effect_keys("buildings.schema.json", "chains", "levels"):
-            warn(f"validator: FORWARD_EFFECTS lists '{key}', which the schema no longer admits")
+        if key not in all_effect_keys:
+            warn(f"validator: FORWARD_EFFECTS lists '{key}', which no schema admits")
 
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
@@ -578,6 +616,14 @@ def cross_checks(t: dict[str, dict]) -> None:
 def _engine_source() -> str:
     """Every GDScript under src/core, concatenated, for literal-reader checks."""
     return "\n".join(path.read_text() for path in sorted((ROOT / "src" / "core").rglob("*.gd")))
+
+
+def _reader_source() -> str:
+    """Engine source with comment lines and DoctrineRules' SCALAR_KEYS registry
+    removed, so a quoted key counts as read only where code actually reads it."""
+    text = _engine_source()
+    text = re.sub(r"const SCALAR_KEYS: Array\[String\] = \[.*?\]", "", text, flags=re.S)
+    return "\n".join(line for line in text.splitlines() if not line.strip().startswith("#"))
 
 
 def _schema_effect_keys(schema_name: str, *array_path: str) -> set[str]:

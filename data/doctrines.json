@@ -182,7 +182,7 @@
           }
         ]
       },
-      "historical_note": "The riveted mail shirt was a Celtic invention of the third century BC; Rome copied it as the lorica hamata and wore it for the next four hundred years. It needs iron, and a great deal of a smith's time.",
+      "historical_note": "The riveted mail shirt was a Celtic invention of the third century BC; Rome copied it as the lorica hamata and wore it for the rest of its history. It needs iron, and a great deal of a smith's time.",
       "description": "Mail shirts for the line: infantry and spearmen take fewer wounds. Needs a region that yields iron."
     },
     {
@@ -190,6 +190,11 @@
       "name": "Sarissa Drill",
       "cultures": [
         "greek"
+      ],
+      "factions": [
+        "macedon",
+        "seleucia",
+        "thracia"
       ],
       "cost": 1500,
       "turns": 2,
@@ -266,7 +271,7 @@
           }
         ]
       },
-      "historical_note": "Philip's and Alexander's Companion cavalry charged in a wedge, the point aimed at a seam in the enemy line: Chaeronea (338 BC) and Gaugamela (331 BC) were decided by it, with the phalanx as the anvil.",
+      "historical_note": "Philip's and Alexander's Companion cavalry charged in a wedge, the point aimed at a seam in the enemy line. Gaugamela (331 BC) was decided by it; at Chaeronea (338 BC) the young Alexander led the stroke that broke the Theban line, with the phalanx as the anvil.",
       "description": "Heavy horse trained to charge in a wedge: harder charges that find the seams in an infantry line."
     },
     {
@@ -293,7 +298,7 @@
         "assault_pct": 10,
         "wall_defense_pct": 10
       },
-      "historical_note": "Torsion catapults, powered by twisted sinew, appear under Dionysius I of Syracuse (c. 399 BC); by the siege of Rhodes (305 BC) Hellenistic engineers were building them by the hundred, and every city wall answered with its own.",
+      "historical_note": "Catapults appear under Dionysius I of Syracuse (399 BC); the torsion engine, powered by twisted sinew, under Philip II two generations later. By the siege of Rhodes (305 BC) Hellenistic engineers were building them by the hundred, and every city wall answered with its own.",
       "description": "Bolt and stone throwers of the latest pattern: artillery hits harder, assaults carry further, and your own walls shoot back."
     },
     {
@@ -301,6 +306,11 @@
       "name": "Thureophoroi Reform",
       "cultures": [
         "greek"
+      ],
+      "factions": [
+        "macedon",
+        "seleucia",
+        "thracia"
       ],
       "cost": 2000,
       "turns": 3,
@@ -326,7 +336,7 @@
           }
         ]
       },
-      "historical_note": "After Cynoscephalae (197 BC) and Pydna (168 BC) showed what broken ground did to a pike block, Greek states raised looser-order thureophoroi with the oval shield and trained the phalanx to keep its intervals on a slope. Learned from a defeat.",
+      "historical_note": "The thureophoroi, looser-order foot behind the Celtic oval shield, came into Greek armies in the 270s BC after the Galatian invasion; after Magnesia (190 BC) and Pydna (168 BC) had shown what broken ground did to a pike block, the kingdoms went further and paraded whole regiments armed in the Roman fashion (Daphne, 166 BC). Learned from a defeat.",
       "description": "Looser order for rough country: infantry and pikes keep their footing on hills and in woods. Available after a defeat."
     },
     {
@@ -334,6 +344,9 @@
       "name": "Elephant Corps",
       "cultures": [
         "greek"
+      ],
+      "factions": [
+        "seleucia"
       ],
       "cost": 3500,
       "turns": 4,
@@ -409,6 +422,10 @@
       "name": "Composite Bow Mastery",
       "cultures": [
         "eastern"
+      ],
+      "factions": [
+        "parthia",
+        "armenia"
       ],
       "cost": 1500,
       "turns": 2,
@@ -602,7 +619,7 @@
           }
         ]
       },
-      "historical_note": "The Sacred Band was Carthage's one native regiment: sons of the great houses, armoured and drilled as hoplites, who died almost to a man at the Crimissus (341 BC) rather than break.",
+      "historical_note": "The Sacred Band was Carthage's one standing citizen regiment: sons of the great houses, armoured and drilled as hoplites, who died almost to a man at the Crimissus (341 BC) rather than break.",
       "description": "Citizen spearmen drilled as a sacred regiment: spear units hold and endure like the Band."
     },
     {
@@ -615,10 +632,6 @@
       "turns": 2,
       "effects": {
         "class_stats": [
-          {
-            "class": "pike",
-            "defense": 1
-          },
           {
             "class": "spear",
             "defense": 1
@@ -633,7 +646,7 @@
         ]
       },
       "historical_note": "The Ptolemies settled Macedonian and Greek soldiers on Nile land in return for service, and drilled them in the sarissa; at Raphia (217 BC) that phalanx, stiffened with twenty thousand Egyptians, broke the Seleucid centre.",
-      "description": "Settler-soldiers drilled in the Macedonian manner: pikes and spears hold harder and turn back horse."
+      "description": "Settler-soldiers drilled in the Macedonian manner: spearmen hold harder and turn back horse."
     },
     {
       "id": "machimoi_levy",
@@ -733,7 +746,7 @@
           }
         ]
       },
-      "historical_note": "The Boii annihilated two legions in the Litana forest (216 BC) by felling half-cut trees onto the column; Arminius did the same to three in the Teutoburg (AD 9). Both had served with Rome first and knew how it marched.",
+      "historical_note": "The Boii annihilated two legions in the Litana forest (216 BC) by felling half-cut trees onto the column; Arminius did the same to three in the Teutoburg (AD 9). Arminius had served with Rome first and knew how it marched.",
       "description": "Fight where the trees are: foot soldiers of every kind are deadlier in forest. Learned from facing infantry."
     },
     {
@@ -793,7 +806,7 @@
     },
     {
       "id": "horse_lords",
-      "name": "Horse Lords",
+      "name": "Steppe Horsemanship",
       "cultures": [
         "barbarian"
       ],
@@ -847,7 +860,7 @@
           }
         ]
       },
-      "historical_note": "Rome's evocati, veterans recalled to stiffen new legions, and the Hellenistic argyraspides show the same idea: seed every new unit with men who have seen a battle.",
+      "historical_note": "Rome's evocati, veterans recalled to stiffen new legions, and the Hellenistic habit of brigading old soldiers with new levies show the same idea: seed every new unit with men who have seen a battle.",
       "description": "Veterans train the recruits: every new unit starts a chevron wiser. Available after five victories."
     },
     {

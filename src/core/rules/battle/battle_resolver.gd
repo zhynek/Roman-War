@@ -9,7 +9,8 @@ extends RefCounted
 ##
 ##   attacker_units / defender_units: Arrays of unit dicts
 ##     {template: String, experience: int 0-9, strength_pct: int 1-100,
-##      weapon: int 0-3 (optional), armor: int 0-3 (optional)}
+##      weapon: int (optional), armor: int (optional)}  — 0..recruitment.upgrade_max,
+##      one more with a cap-raising doctrine
 ##     Mutated IN PLACE: casualties reduce strength_pct, destroyed units are
 ##     removed, survivors may gain experience.
 ##

@@ -59,7 +59,7 @@ static func equipment_turns_for(data: GameData, state: Dictionary, faction_id: S
 	## what the besieger's engineering doctrines shave off, never below the floor.
 	var base := int(data.balance["siege"]["equipment_turns"])
 	var delta := int(DoctrineRules.scalar(data, state, faction_id, "siege_equipment_turns"))
-	return maxi(base + delta, int(data.balance["doctrines"]["min_equipment_turns"]))
+	return maxi(base + delta, int(data.balance["siege"]["min_equipment_turns"]))
 
 
 static func assault_context(data: GameData, state: Dictionary, army: Dictionary, region_id: String, starving: bool) -> Dictionary:

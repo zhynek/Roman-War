@@ -23,15 +23,18 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
   percentage points; `*_income` are denarii per turn; `recruit_xp` is the best
   tier's value, `weapon_upgrade`/`armor_upgrade` sum across chains up to
-  `balance.recruitment.upgrade_max`, `drill` sums and feeds garrison policing).
+  `balance.recruitment.upgrade_max` plus any cap-raising doctrine, `drill` sums
+  and feeds garrison policing and softens levy strain).
 - Unit classes: `infantry, spear, pike, missile, cavalry, horse_archer, chariot,
   elephant, siege, ship, general_bodyguard, peasant` — each needs a record in
-  `unit_classes.json` (matchups, terrain, assault, wall_defense, garrison_weight).
-- Unit attributes: `can_hide_forest, warcry, phalanx, testudo, frighten_infantry,
-  frighten_cavalry, can_sap, hardy, fast_moving, shield_wall` — each needs an
+  `unit_classes.json` (matchups, terrain, assault, wall_defense, garrison_weight,
+  mass).
+- Unit attributes: `forest_ambusher, war_cry, phalanx, testudo, terrifies_foot,
+  terrifies_horse, sapper, hardy, fast_moving, shield_wall` — each needs an
   effects record in `unit_classes.json` (percentages, additive).
-- Doctrines (`doctrines.json`): `cultures` from the list above, optional
-  `factions`, `era`, `cost`, `turns`, AND-ed `prerequisites` (`doctrines`,
+- Doctrines (`doctrines.json`): `cultures` from the list above except
+  `neutral` (the rebels reform nothing), optional `factions`, `era`, `cost`,
+  `turns`, AND-ed `prerequisites` (`doctrines`,
   `building {kind, level}`, `resource`, `battles_won`, `battles_lost`,
   `faced {class, battles}`) and a closed `effects` vocabulary — every key must
   have an engine reader, which the validator checks.

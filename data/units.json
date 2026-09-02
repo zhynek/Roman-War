@@ -46,7 +46,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_sap"
+        "sapper"
       ],
       "description": "Torsion engines that hurl iron-tipped shafts through shield and man alike. Their crews double as sappers when walls must come down."
     },
@@ -72,7 +72,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_sap"
+        "sapper"
       ],
       "description": "Kicking beasts of timber and sinew that lob quarried stone over any rampart. Slow on the march, terrible once emplaced."
     },
@@ -150,7 +150,7 @@
       },
       "era": "pre_marian",
       "attributes": [
-        "can_hide_forest"
+        "forest_ambusher"
       ],
       "description": "Young men in wolfskin caps who open the battle with a hail of javelins, then slip back through the maniples. Poor, quick, and eager to be noticed."
     },
@@ -533,7 +533,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_hide_forest"
+        "forest_ambusher"
       ],
       "description": "Javelin men with crescent shields who harry, withdraw, and harry again. Cheap to raise and infuriating to catch."
     },
@@ -764,7 +764,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Hillmen swinging the two-handed curved blade that shears through shield-rims and helmets. What they lack in armor they repay in ruin."
     },
@@ -790,8 +790,8 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_infantry",
-        "frighten_cavalry"
+        "terrifies_foot",
+        "terrifies_horse"
       ],
       "description": "Great eastern elephants plated in bronze, towers swaying with javelin men. Horses bolt and battle lines dissolve at their coming."
     },
@@ -1048,7 +1048,7 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_infantry"
+        "terrifies_foot"
       ],
       "description": "Four-horse cars with whirling blades bolted to the axles, driven flat-out at the enemy's center. Against steady troops a gamble; against shaken ones a massacre."
     },
@@ -1269,8 +1269,8 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_infantry",
-        "frighten_cavalry"
+        "terrifies_foot",
+        "terrifies_horse"
       ],
       "description": "Smaller beasts taken from the Atlas woods, driven by hired mahouts who ride with a spike for emergencies. What they start, panic finishes."
     },
@@ -1604,7 +1604,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Every free man of the tribe with spear, long shield, and something to prove. Their first charge can break a line; their second rarely comes."
     },
@@ -1634,7 +1634,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_hide_forest"
+        "forest_ambusher"
       ],
       "description": "Landless youths who fight from the treeline with fistfuls of light javelins. Killing one is easy; finding one is the trick."
     },
@@ -1663,7 +1663,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_hide_forest"
+        "forest_ambusher"
       ],
       "description": "Bowmen who feed their families from the deep woods and feed the crows in war. They shoot from cover, and the forest is all cover to them."
     },
@@ -1719,7 +1719,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Warriors of standing with the long slashing blade the smiths of Gaul are famous for. They come on singing, and the song is about you."
     },
@@ -1745,7 +1745,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Champions bound by oath to a chieftain's table, wearing the torcs of men who have never run. Each has a name-song; none intends it to end badly."
     },
@@ -1819,8 +1819,8 @@
       },
       "era": "any",
       "attributes": [
-        "warcry",
-        "frighten_infantry"
+        "war_cry",
+        "terrifies_foot"
       ],
       "description": "Men who go to battle bare-chested and god-mad, biting their shield rims until the fury takes them. They cannot be frightened, only killed, and killing them is slow."
     },
@@ -1846,8 +1846,8 @@
       },
       "era": "any",
       "attributes": [
-        "warcry",
-        "can_hide_forest"
+        "war_cry",
+        "forest_ambusher"
       ],
       "description": "Island warriors painted in blue spirals that mark them as already claimed by their gods. They burst from the mists howling, which is usually enough."
     },
@@ -1874,7 +1874,7 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_cavalry"
+        "terrifies_horse"
       ],
       "description": "Light wicker cars that deliver a champion to the fight and snatch him out again, drivers running the yoke-pole at full gallop for show. Horses that have never seen one bolt outright."
     },
@@ -1900,7 +1900,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Highlanders swinging the great two-handed falx that opens helmets like shellfish. They trade their own safety for wounds no surgeon will attempt."
     },
@@ -1926,7 +1926,7 @@
       },
       "era": "any",
       "attributes": [
-        "can_hide_forest"
+        "forest_ambusher"
       ],
       "description": "Peninsular fighters with the forward-curved blade that bites like an axe and cuts like a sword. They strike from ambush, vanish, and strike again."
     },
@@ -2031,7 +2031,7 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_cavalry",
+        "terrifies_horse",
         "hardy"
       ],
       "description": "Riders on groaning desert beasts that cross sands no horse survives. The camels' reek alone throws enemy cavalry into confusion."
@@ -2255,7 +2255,7 @@
       },
       "era": "any",
       "attributes": [
-        "warcry"
+        "war_cry"
       ],
       "description": "Exiles and younger sons selling the long blade to whoever pays in gold or glory. They fight like men with nothing to lose, which is precisely what they are."
     },
@@ -2306,8 +2306,8 @@
       },
       "era": "any",
       "attributes": [
-        "frighten_infantry",
-        "frighten_cavalry"
+        "terrifies_foot",
+        "terrifies_horse"
       ],
       "description": "Beasts and mahouts hired as a matched set from the southern trade towns. Ruinously costly, occasionally ruinous to their employer, always ruinous to someone."
     },

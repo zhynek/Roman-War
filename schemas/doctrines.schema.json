@@ -34,8 +34,8 @@
             "type": "array",
             "minItems": 1,
             "uniqueItems": true,
-            "items": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
-            "description": "Cultures whose factions may adopt it (unless `factions` narrows it further)"
+            "items": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian"] },
+            "description": "Cultures whose factions may adopt it (unless `factions` narrows it further); the neutral rebels reform nothing"
           },
           "factions": {
             "type": "array",
@@ -85,9 +85,11 @@
             "properties": {
               "class_stats": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "required": ["class"],
+                  "minProperties": 2,
                   "additionalProperties": false,
                   "properties": {
                     "class": { "$ref": "#/$defs/unit_class" },
@@ -101,6 +103,7 @@
               },
               "matchups": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "required": ["class", "versus", "pct"],
@@ -114,6 +117,7 @@
               },
               "terrain": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "required": ["class", "terrain", "pct"],
@@ -134,6 +138,7 @@
               "fatigue_immune": { "type": "boolean" },
               "upkeep_pct": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "required": ["class", "pct"],
@@ -146,6 +151,7 @@
               },
               "recruit_xp": {
                 "type": "array",
+                "minItems": 1,
                 "items": {
                   "type": "object",
                   "required": ["class", "xp"],

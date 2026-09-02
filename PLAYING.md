@@ -109,8 +109,9 @@ armour copied from the Gauls, and so on for every culture. You adopt one at a
 time for denarii and turns. Each one has prerequisites: buildings of a certain
 tier somewhere in your realm, a region that yields horses or iron or
 elephants, earlier doctrines, battles won or lost, and *arms you have faced*
-— you learn to fight cavalry by fighting cavalry. The scroll tells you exactly
-what still bars each one. The computer houses reform too.
+— Rome adopts the Iberian sword only after meeting foot soldiers in battle, the
+tribes learn to ambush legions only after facing them. The scroll tells you
+exactly what still bars each one. The computer houses reform too.
 
 ## Your family
 

@@ -50,7 +50,7 @@
           "era": { "enum": ["pre_marian", "post_marian", "any"], "default": "any" },
           "attributes": {
             "type": "array",
-            "items": { "enum": ["can_hide_forest", "warcry", "phalanx", "testudo", "frighten_infantry", "frighten_cavalry", "can_sap", "hardy", "fast_moving", "shield_wall"] },
+            "items": { "enum": ["forest_ambusher", "war_cry", "phalanx", "testudo", "terrifies_foot", "terrifies_horse", "sapper", "hardy", "fast_moving", "shield_wall"] },
             "uniqueItems": true
           },
           "description": { "type": "string" }

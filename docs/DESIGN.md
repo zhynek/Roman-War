@@ -2,7 +2,8 @@
 
 **Status:** living document. Describes both the design intent and what the engine in
 `src/core/` actually implements today — Phases 0–4 of the roadmap, the Phase-7
-senate foundation loop, and the Phase-8 campaign UI. Section 10's status table is
+senate foundation loop, the Phase-8 campaign UI, and the military strategy layer
+(§5.5–5.8, §3.3). Section 10's status table is
 the single source of truth; where a system is planned but not built, this document
 says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
@@ -287,7 +288,7 @@ will receive before you pay.
 ### 5.2 Experience, retraining, merging
 
 - Units carry **experience 0–9** (chevrons); each grants +10% effective strength.
-  Winners of a battle gain +1.
+  Winners of a battle gain +1, or +2 when they were the paper underdog (§5.6).
 - **Retraining** in a settlement with the required building refits every
   garrison unit to the town's current kit standard (weapon and armour levels
   are never taken away) and refills depleted units to 100%, costing half the
@@ -301,7 +302,7 @@ Armies get **2 movement points** per turn. Entering a region costs its terrain
 rate (plains/steppe 1.0; forest/hills/desert 1.5; mountains/marsh 2.0) reduced by
 the destination's road tier (×1.0 / 0.75 / 0.6 / 0.5). **Forced march** doubles
 the budget but marks the army fatigued — a −20% battle strength malus until next
-turn. An army cannot *move* into a region containing a hostile army or a hostile
+turn, unless the men (or a doctrine such as camp discipline) are immune. An army cannot *move* into a region containing a hostile army or a hostile
 settlement: that is an attack or a siege, taken as an explicit action. Fleets move
 between adjacent sea zones at 1 point per lane.
 
@@ -309,7 +310,9 @@ between adjacent sea zones at 1 point per lane.
 
 A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itself:
 
-- After **2 turns** siege equipment is ready and an assault may be launched.
+- After **2 turns** (`siege.equipment_turns`, less what the besieger's engineering
+  doctrines shave off, never below `siege.min_equipment_turns`) siege equipment
+  is ready and an assault may be launched.
 - Defenders hold out for **2 / 3 / 4 / 5 / 6 / 8 turns** by settlement level;
   when supplies run out the garrison fights a desperate final sally (walls count
   one tier less, sally strength +10%).
@@ -326,7 +329,8 @@ The single seam between campaign and battle, `src/core/rules/battle/battle_resol
 ```
 resolve(data, rng, attacker_units, defender_units, context) -> BattleResult
 
-unit:    {template, experience 0-9, strength_pct 1-100, weapon? 0-3, armor? 0-3}
+unit:    {template, experience 0-9, strength_pct 1-100, weapon?, armor?}
+         (kit levels 0..recruitment.upgrade_max, one more with a cap-raising doctrine)
          (mutated in place: casualties, destruction, experience)
 context: {terrain, wall_level, attacker_general, defender_general,
           attacker_fatigued, sally, attacker_mods?, defender_mods?}
@@ -422,7 +426,8 @@ Military buildings shape the men they produce, and the towns that hold them:
   the same pool; the sum is capped at `recruitment.upgrade_max` (3).
 - In battle each weapon level adds `battle.weapon_upgrade_attack_per_level` to
   attack and each armour level `armor_upgrade_defense_per_level` to defense
-  (§5.6 stage 2) — an armoury is worth roughly a chevron and a half to a line unit.
+  (§5.6 stage 2) — an armoury is worth roughly a chevron to a legionary or
+  hoplite, nearly two to a levy spearman.
 - `requires_building` is a general chain prerequisite: a chain is offered only
   where the settlement already holds the named kind at the named tier.
 
@@ -604,7 +609,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | buildings.json | non-temple chains: government, walls, military, economy, health, entertainment, education | construction, effects |
 | temples.json | temple chains (one god each, archetyped), per culture | construction, effects, elite units |
 | units.json | unit templates: stats, costs, requirements, era, class, attributes | recruitment, battle |
-| unit_classes.json | the unit-class counter matrix, per-class terrain / assault / wall / policing weights, attribute effects | battle estimator, public order |
+| unit_classes.json | the unit-class counter matrix, per-class terrain / assault / wall / policing weights and fighting mass, attribute effects | battle estimator, public order |
 | doctrines.json | 34 military doctrines: cultures, cost, turns, prerequisites, effects, historical notes | `DoctrineRules` and every reader in §5.8 |
 | regions.json | region graph + sea zones, terrain, fertility, resources, hidden resources | map, economy, growth |
 | campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy, starting doctrines; rebel holdings | NewGame |
@@ -649,9 +654,10 @@ other; the campaign start settles every region exactly once, capitals owned,
 government tier consistent with starting population, exactly one leader per house,
 father/general/trait references resolving; long and short win conditions present
 for every playable and unlockable faction. CI runs the validator and the headless
-test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover
-growth, order, economy, construction, recruitment, movement/visibility, battle,
-and a multi-turn campaign integration run) on every push.
+test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover growth,
+order, economy, construction, recruitment, movement/visibility, battle,
+matchups, army composition, settlements, doctrines, characters, diplomacy and
+war, the UI smoke paths, and a multi-turn campaign integration run) on every push.
 
 ### 9.3 Determinism & save model
 
@@ -675,7 +681,7 @@ Phases follow the research report (§17). Status as of this document:
 
 | Phase | Scope | Status |
 |---|---|---|
-| 0 — Design & setup | Schemas for all 16 tables, repo, CI, save format, this document | **Done** |
+| 0 — Design & setup | Schemas for every data table (18 today), repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth**, plus the **military strategy layer** (§5.5–5.8, §3.3): unit-class counters and per-class terrain/walls in an RNG-free estimator, kit upgrades and armouries, the casualty/rout model, garrison quality, levy strain, war mood, and doctrines. Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |

@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 16
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -29,7 +29,7 @@ faction doctrines (`DoctrineRules`, `data/doctrines.json`) with a Reforms scroll
 attack odds preview and battle reports. `docs/MILITARY_STRATEGY.md` is the
 player-facing guide; DESIGN §5.5–5.8 the spec.
 
-**Green as of the tip of `claude/military-strategy-gameplay-ecnngs`:** 115
+**Green as of the tip of `claude/military-strategy-gameplay-ecnngs`:** 119
 tests / 0 failures, validator 0 errors / 0 warnings, clean boot. A Mac build
 of the pre-military-layer game was delivered to the user, who is playtesting;
 saves from it load (save version 2 upgrades them, granting the campaign's
@@ -60,7 +60,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 119 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 

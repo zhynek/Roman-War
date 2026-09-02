@@ -65,7 +65,7 @@
         "required": ["id", "name", "effects", "description"],
         "additionalProperties": false,
         "properties": {
-          "id": { "enum": ["can_hide_forest", "warcry", "phalanx", "testudo", "frighten_infantry", "frighten_cavalry", "can_sap", "hardy", "fast_moving", "shield_wall"] },
+          "id": { "enum": ["forest_ambusher", "war_cry", "phalanx", "testudo", "terrifies_foot", "terrifies_horse", "sapper", "hardy", "fast_moving", "shield_wall"] },
           "name": { "type": "string", "minLength": 1 },
           "effects": {
             "type": "object",

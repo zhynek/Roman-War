@@ -356,7 +356,7 @@
       "description": "Roofed with shields, the unit approaches walls and archers under cover; it is a drill for storming and for enduring, not for charging horse."
     },
     {
-      "id": "warcry",
+      "id": "war_cry",
       "name": "War Cry",
       "effects": {
         "attacking_pct": 8
@@ -364,7 +364,7 @@
       "description": "Works itself into a fury before the charge: harder-hitting when attacking, no help when standing to receive."
     },
     {
-      "id": "frighten_infantry",
+      "id": "terrifies_foot",
       "name": "Frightens Infantry",
       "effects": {
         "matchups": {
@@ -377,7 +377,7 @@
       "description": "Foot soldiers who have never seen the like of it waver before contact."
     },
     {
-      "id": "frighten_cavalry",
+      "id": "terrifies_horse",
       "name": "Frightens Horses",
       "effects": {
         "matchups": {
@@ -390,7 +390,7 @@
       "description": "Horses refuse to close with the smell and noise: elephants and camels have broken cavalry that had never met them."
     },
     {
-      "id": "can_hide_forest",
+      "id": "forest_ambusher",
       "name": "Woodsmen",
       "effects": {
         "terrain": {
@@ -421,7 +421,7 @@
       "description": "Runs down a broken enemy and gets away from a lost battle: the Numidian horse at Cannae and at Zama."
     },
     {
-      "id": "can_sap",
+      "id": "sapper",
       "name": "Sappers",
       "effects": {
         "assault_pct": 20

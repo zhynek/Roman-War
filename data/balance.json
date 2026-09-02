@@ -232,7 +232,8 @@
       6,
       8
     ],
-    "sally_strength_bonus_pct": 10
+    "sally_strength_bonus_pct": 10,
+    "min_equipment_turns": 1
   },
   "senate": {
     "start_standing": 5,
@@ -281,7 +282,6 @@
   },
   "doctrines": {
     "max_concurrent_reforms": 1,
-    "ai_reserve": 3000,
-    "min_equipment_turns": 1
+    "ai_reserve": 3000
   }
 }
