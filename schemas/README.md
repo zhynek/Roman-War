@@ -31,6 +31,12 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   `grievance_relief, elite_pressure, income_pct, clarity_bonus, build_cost_pct`.
   Every edict must cost something, in denarii or in a societal stock; the
   validator fails the build on a free one.
+- Office `effects` keys: `command, management, influence` — the character
+  attributes, added to the holder for the year through
+  `CharacterRules.effect_total`. Ranks are unique and contiguous from 1,
+  `requires_prior_rank` is 0 or an existing lower rank, exactly one office is
+  `eponymous`, an office flagged `for_life` is kept until its holder dies, every
+  office buys something, and every office carries a `historical_basis`.
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):

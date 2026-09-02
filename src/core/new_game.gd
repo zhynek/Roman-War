@@ -5,9 +5,11 @@ class_name NewGame
 ##  turn: int (0-based), year: int, season: "summer"|"winter"
 ##  rng_state: String (decimal — a 64-bit int loses precision through JSON)
 ##  player_faction: String
+##  world_seed: int — the seed that built this world (0 = unknown, pre-seed save);
+##      with it any playtest report replays exactly
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
 ##                   popular_standing, diplomacy: {other_fid: stance},
-##                   mission: null|{...}, at_civil_war: bool,
+##                   mission: null|{...}, at_civil_war: bool, outlawed: bool,
 ##                   society: {elite_pressure, martial_ethos, knowledge,
 ##                             civic_shock}, advances: [advance_id]}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
@@ -21,8 +23,10 @@ class_name NewGame
 ##  armies: {army_id: {owner, region, units: [unit], general: char_id|null,
 ##                     movement_left: float}}
 ##  fleets: {fleet_id: {owner, sea_zone, ships: [unit], movement_left}}
-##  characters: {char_id: {faction, name, age, role, command, management,
-##                         influence, traits, ancillaries, location, alive}}
+##  characters: {char_id: {faction, name, age, role, gender, father, command,
+##                         management, influence, trait_points, ancillaries,
+##                         location, alive, deeds, epithet,
+##                         office: office_id|null, offices_held: [office_id]}}
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
 ##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
@@ -49,6 +53,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"rng_state": "0",
 		"difficulty": difficulty,
 		"campaign_mode": campaign_mode,
+		"world_seed": seed_value,
 		"event_happiness": null,
 		"modifiers": [],
 		"chronicle": [],
@@ -85,6 +90,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
+			"outlawed": false,
 			"society": SocietyRules.new_faction_society(data),
 			"advances": [],
 			"war_cooldown": 0,
@@ -111,7 +117,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
-		"mission": null, "at_civil_war": false, "war_cooldown": 0,
+		"mission": null, "at_civil_war": false, "outlawed": false, "war_cooldown": 0,
 		"society": SocietyRules.new_faction_society(data),
 		"ai": {}, "attitude_memory": {},
 		"knowledge": {}, "reform_pressure": 0.0, "edicts": {}, "edict_cooldowns": {},
@@ -171,7 +177,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## Fill state keys added by later phases with their defaults, so a save
 	## written before those phases loads cleanly (save compatibility is
-	## additive; SAVE_VERSION stays 1). Every new engine reader ALSO tolerates
+	## additive; SAVE_VERSION stays 2). Every new engine reader ALSO tolerates
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
@@ -192,6 +198,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 			faction["edicts"] = {}
 		if not faction.has("edict_cooldowns"):
 			faction["edict_cooldowns"] = {}
+		if not faction.has("outlawed"):
+			faction["outlawed"] = false
 	if not state.has("modifiers"):
 		state["modifiers"] = []
 	if not state.has("chronicle"):
@@ -200,6 +208,10 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		state["wars"] = []
 	if not state.has("event_cooldowns"):
 		state["event_cooldowns"] = {}
+	if not state.has("world_seed"):
+		# Saves written before the seed travelled cannot recover it; 0 reads
+		# as "unknown" everywhere the seed is shown.
+		state["world_seed"] = 0
 	# Chronicle-era per-entity keys (reigns, deeds, epithets, unit arming) are
 	# created lazily by their writers, but the save contract wants them
 	# normalized on load too. Reign fills with the TRUE current leader — a
@@ -219,6 +231,10 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 			character["deeds"] = {}
 		if not character.has("epithet"):
 			character["epithet"] = ""
+		if not character.has("office"):
+			character["office"] = null
+		if not character.has("offices_held"):
+			character["offices_held"] = []
 	for army in state["armies"].values():  # pure key-add — order-free
 		_ensure_unit_arms(army["units"])
 	for fleet in state["fleets"].values():
@@ -355,4 +371,6 @@ static func _add_character(data: GameData, state: Dictionary, setup: Dictionary,
 		"alive": true,
 		"deeds": {},
 		"epithet": "",
+		"office": null,
+		"offices_held": [],
 	}

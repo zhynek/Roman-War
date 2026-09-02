@@ -77,8 +77,7 @@
       "name": "The Senate Demands Your Life",
       "kind": "leader_suicide",
       "deadline_turns": 4,
-      "min_year": -60,
-      "reward": { "senate_standing": 2 },
+      "reward": { "senate_standing": 6 },
       "penalty": { "senate_standing": -5 },
       "text": "Your house has grown too great, and the conscript fathers are afraid. They decree that your patriarch must open his veins for the good of the Republic; refuse, and be named an enemy of Rome."
     }

@@ -23,6 +23,8 @@ var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var knowledge_panel: KnowledgePanel
 var annals_panel: AnnalsPanel
+var senate_panel: SenatePanel
+var senate_button: Button
 var report_log: RichTextLabel
 var turn_sequence: TurnSequence
 var dispatch_panel: DispatchPanel
@@ -172,6 +174,10 @@ func _ready() -> void:
 	annals_panel = AnnalsPanel.new()
 	add_child(annals_panel)
 
+	senate_panel = SenatePanel.new()
+	senate_panel.senate_changed.connect(refresh)
+	add_child(senate_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -210,6 +216,10 @@ func _build_top_bar() -> PanelContainer:
 	bar.add_child(_bar_button("Dispatch", _show_dispatch))
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	# Roman houses only — refresh() re-derives that, since a loaded save may
+	# belong to another house.
+	senate_button = _bar_button("Senate", func(): senate_panel.open_for(game))
+	bar.add_child(senate_button)
 	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
 	# The house-wide Book of Policies lived here. main holds edicts PER
 	# PROVINCE, so they are issued and revoked from the region panel, where the
@@ -261,7 +271,9 @@ func refresh() -> void:
 	_draw_treasury()
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
-	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
+	var seed_value := int(game.state.get("world_seed", 0))
+	top_labels["date"].text = "%s, %s · seed %s   " % [year_text,
+		String(game.state["season"]).capitalize(), str(seed_value) if seed_value != 0 else "?"]
 	# The three things about your own people you can always see, whatever the
 	# state of your provincial administration.
 	var society: Array = game.faction_society()
@@ -283,6 +295,8 @@ func refresh() -> void:
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
 	else:
 		top_labels["senate"].text = ""
+	if senate_button != null:
+		senate_button.visible = bool(faction_info.get("is_roman_house", false))
 	var progress := game.victory_progress()
 	if not progress.is_empty():
 		top_labels["victory"].text = "Regions %d/%d   " \

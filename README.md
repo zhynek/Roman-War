@@ -82,7 +82,7 @@ python3 tools/validate_data.py
 
 ## Status
 
-Phases 0–6 of the research report's roadmap are built and tested: campaign map,
+Phases 0–7 of the research report's roadmap are built and tested: campaign map,
 turn loop, settlements, economy, recruitment, auto-resolved battles, sieges
 (with amphibious landings), mercenaries, events, victory checks, the full
 character layer (traits, retinues, family tree with seeded households,
@@ -115,9 +115,15 @@ with live appraisal; knowledge, edicts, annals and family scrolls; a guided
 campaign trail of objectives that react to the world and pay real rewards, with
 explorable points of interest; an animated battle replay; a sequenced end turn
 that plays the day out on the map and closes on a Daily Dispatch; and
-save/load. Senate/politics depth (offices, elections), naval combat, and a
-real-time battle scene are the next phases; their data tables and state hooks
-already exist.
+save/load.
+
+The Senate's politics (DESIGN.md §8.1) close the Roman houses' arc: six
+magistracies filled by summer election, offices that reach a man's attributes
+and soak up his house's ambition, the Senate's demand for a patriarch's life
+when a house grows too great, and a civil war in which the other houses pick
+sides, that no envoy can end, and that ends only when the Senate falls. Naval
+combat and a real-time battle scene are the next phases; their data tables and
+state hooks already exist.
 
 ## Clean-room policy
 

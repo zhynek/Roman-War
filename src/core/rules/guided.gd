@@ -25,6 +25,7 @@ const COUNTER_KEYS := {
 	"win_battles": "battles_won",
 	"capture_regions": "regions_captured",
 	"senate_missions": "senate_missions",
+	"offices_won": "offices_won",
 }
 
 
@@ -146,11 +147,11 @@ static func _objective_status(data: GameData, state: Dictionary, stage: Dictiona
 			key = "%s:%s" % [key, objective["building_kind"]]
 		var counters: Dictionary = state["guided"]["counters"]
 		var have := int(counters.get(key, 0))
-		# Recurring challenges demand fresh deeds — only repeatable stages
-		# measure from their opening snapshot. The tutorial arc credits the
-		# whole campaign's history, so a battle won or a site searched before
-		# its stage opens still counts.
-		if stage.get("repeatable", false):
+		# Recurring challenges demand fresh deeds — repeatable stages, and any
+		# objective flagged fresh, measure from their opening snapshot. The
+		# rest of the tutorial arc credits the whole campaign's history, so a
+		# battle won or a site searched before its stage opens still counts.
+		if stage.get("repeatable", false) or objective.get("fresh", false):
 			have -= int(inst["base"].get(key, 0))
 		var need := int(objective.get("count", 1))
 		return {"met": have >= need, "have": maxi(have, 0), "need": need}

@@ -29,6 +29,7 @@ var ai_personas: Dictionary = {}       # id -> persona dict
 var agent_kinds: Dictionary = {}       # id -> agent kind dict (diplomat/spy/assassin)
 var techniques: Dictionary = {}        # id -> technique dict (the knowledge of the age)
 var epithets: Dictionary = {}          # id -> epithet dict (names earned by deeds)
+var offices: Dictionary = {}           # id -> senate office dict (the cursus honorum)
 var annals: Dictionary = {}            # chronicle kind -> [prose template variants]
 var campaign: Dictionary = {}
 var dispatch_beats: Dictionary = {}    # beat kind -> presentation entry
@@ -123,6 +124,10 @@ func _load_all(dir: String) -> void:
 	for epithet in _read_json(dir + "/epithets.json").get("epithets", []):
 		epithets[epithet["id"]] = epithet
 	annals = _read_json(dir + "/annals.json").get("templates", {})
+	for office in _read_json(dir + "/offices.json").get("offices", []):
+		if offices.has(office["id"]):
+			load_errors.append("duplicate office id: %s" % office["id"])
+		offices[office["id"]] = office
 
 	for advance in _read_json(dir + "/advances.json").get("advances", []):
 		if advances.has(advance["id"]):

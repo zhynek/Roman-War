@@ -17,7 +17,8 @@ minutes. It deliberately does **not** repeat the other docs:
 at all: eight sessions each branched off `9026730` and none merged back, so
 every build contained only that session's work and nothing else. That is why a
 build could ship without the map you remembered writing. `main` now carries the
-integration of five of those branches and is the only branch worth building.
+integration of five of those branches, and Phase 7 on top of them, and is the
+only branch worth building.
 
 **Merged into `main`, in this order:**
 
@@ -28,6 +29,7 @@ integration of five of those branches and is the only branch worth building.
 | `daily-campaign-turn-sequence` | The turn journal, the fog-filtered end-turn sequence, the Daily Dispatch |
 | `building-details-upgrades` (contains `ai-opponents`) | The modular AI, the guided campaign trail, the building yard and muster hall, 312 procedural building illustrations, the no-mouse camera |
 | `project-handoff-familiarization` | Campaign agents and a real negotiation model, the knowledge/technique engine, the chronicle and epithets, AI personas |
+| `roman-war-next-phase` (2026-09-02) | Phase 7, the cursus honorum: Senate offices and elections, seats that absorb Ambition, the Senate's demand, outlawry, a civil war with sides and an end, the Senate scroll, journal beats, a trail stage; the world seed persisted, the version stamp, the duplicate `class_name` removed |
 
 **Deleted, not merged: `handoff-repo-familiarization-jgqty6`** (head
 `bd8be2549e9a39dafe496f1cb97cd6237ace10a9`, deleted 2026-09-01 after review).
@@ -35,14 +37,18 @@ Roughly 1,470 of its lines were a third implementation of systems `main`
 already has — its own AI (742), agents (308), negotiation (307) and tutorial
 (113). Merging those would have been damage, not integration.
 
-Five things it held that `main` still lacks went with it. They are worth
-rebuilding or recovering if anyone wants them: the **Advisor** (in-game LLM
-counsel and feedback-to-ticket, `src/ui/advisor/`, `data/advisor.json`), the
-**office ladder** (`data/offices.json`), `src/core/rules/armies.gd`, the
-build-version stamp on the start menu, and `.github/workflows/claude-triage.yml`.
-The commit is unreachable but not immediately garbage: `git fetch origin
+Five things it held that `main` lacked went with it. Phase 7 recovered two —
+the **office ladder** (`data/offices.json`, ported and reworked rather than
+merged: its senate step *assigned* `popular_standing`, which `main` guards
+against) and the build-version stamp on the start menu. Three are still worth
+taking if anyone wants them: the **Advisor** (in-game LLM counsel and
+feedback-to-ticket, `src/ui/advisor/`, `data/advisor.json`),
+`src/core/rules/armies.gd` (which duplicates `CombatRules.raise_army` /
+`detach_to_garrison` — take the idea, not the file), and
+`.github/workflows/claude-triage.yml`. The commit is unreachable but not
+immediately garbage: `git fetch origin
 bd8be2549e9a39dafe496f1cb97cd6237ace10a9` recovers it while GitHub still holds
-the object. Do not resurrect the branch wholesale — take the five pieces.
+the object. Do not resurrect the branch wholesale — take the pieces.
 
 **Also superseded: `next-phase-roadmap-sjrj35`.** It carried eight commits that
 never reached `main`, which looks alarming until you diff it: it is the earlier
@@ -54,8 +60,20 @@ by absorption, not loss — `test_pathfinding.gd` and `test_ui_smoke.gd` cover
 march orders across turns and saves, halts, order supersession, sieges, fog,
 polygon picking and fleet orders. Nothing to take from it.
 
-**Green on `main`:** 336 tests / 0 failures across 37 test files, validator
-0 errors / 0 warnings across 31 data tables, clean boot. A turn costs ~360 ms.
+**Green on `main`:** 366 tests / 0 failures across 38 test files, validator
+0 errors / 0 warnings across 32 data tables, clean boot. A turn costs ~400 ms on
+the soak machine — the figure that machine gave for the trunk before Phase 7 too.
+
+**Phase 7 — the cursus honorum — was merged into `main` on 2026-09-02** (from
+`claude/roman-war-next-phase-8ef54h`, branched at `2c9b602` per §9, six commits).
+Senate offices and summer elections, seats that absorb Ambition, the Senate's
+demand for a patriarch's life, outlawry, a civil war with sides that can never
+be talked away and ends when the Senate falls, the Senate scroll, five journal
+beats and a trail stage — `docs/DESIGN.md` §8.1 is the account. It also
+carried the trunk fixes that were waiting: the world seed persisted and shown
+(§4), the build version on the start menu, a dead duplicate `class_name` that
+broke every suite on a fresh cache (§5.17), and a UI smoke test that had been
+silently truncated.
 
 **Two things the integration surfaced that are worth knowing:**
 
@@ -91,7 +109,7 @@ The two gates that must stay green — the same two CI runs on every push and PR
 
 ```sh
 python3 tools/validate_data.py                                # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd   # 336 tests, 0 failures
+godot --headless --path . --script res://tests/run_tests.gd   # 366 tests, 0 failures
 godot --headless --path . --quit-after 5                      # boots clean: no errors after the version banner
 ```
 
@@ -123,7 +141,7 @@ facade every UI and test calls; `turn_engine.gd` fixes the end-turn order;
 `settlements`, `map`, `visibility`, `dispatch`, `advances`, `pathfinding`,
 `building_info`), with the AI in `rules/ai/`
 (`faction_ai` orchestrates → `ai_diplomacy`, `ai_assess`, `ai_military`,
-`ai_economy`, `ai_strategy`, `ai_policy`, `ai_rules` for personas) and battle
+`ai_economy`, `ai_strategy`, `ai_policy`, `ai_politics`, `ai_rules` for personas) and battle
 behind `rules/battle/battle_resolver.gd`.
 
 **UI** (`src/ui/`) — every panel talks only to the facade:
@@ -135,16 +153,17 @@ behind `rules/battle/battle_resolver.gd`.
 | `panels/diplomacy_panel.gd` | `pending_offers`, `respond_offer`, `declare_war`, `move_fleet` — **fleets live here, not on the map** |
 | `panels/negotiation_dialog.gd` | `preview_offer`, `propose_offer` |
 | `panels/family_panel.gd` | `family_of`, `character_sheet`, `set_heir`, `transfer_ancillary` |
+| `panels/senate_panel.gd` | `senate_overview`, `comply_senate_demand` — the one act the scroll takes |
 | `panels/knowledge_panel.gd` | `technique_overview`, `begin_adoption` |
 | `panels/annals_panel.gd` | none — renders `state.chronicle` through `data/annals.json` |
 | `panels/quest_panel.gd` | the guided trail's objectives and rewards |
 | `panels/build_drawer.gd`, `panels/info_card.gd`, `panels/map_context_menu.gd` | the building yard / muster hall, the illustrated cards, the right-click dossier |
 | `turn_sequence.gd` + `dispatch_panel.gd` | the day's playback and its recap, over `day_beats` |
 
-**Tests** (`tests/`, 37 files over `tests/fixtures.gd`, a synthetic world that
+**Tests** (`tests/`, 38 files over `tests/fixtures.gd`, a synthetic world that
 loads the real `balance.json`). Formula units: `growth`, `economy`,
 `public_order`, `construction`, `recruitment`, `battle`, `battle_log`,
-`movement_visibility`, `pathfinding`, `characters`. Systems: `agents`,
+`movement_visibility`, `pathfinding`, `characters`. Systems: `agents`, `senate_politics`,
 `diplomacy_offers`, `diplomacy_war`, `ai`, `knowledge`, `edicts`, `chronicle`,
 `society`, `legibility`, `advances`, `guided`, `turn_journal`, `dispatch`,
 `events_vocabulary`. Presentation: `map_geometry`, `map_menu`, `illustrations`,
@@ -156,12 +175,11 @@ screen headless; `test_society_longrun.gd` is the slow shape check.
 
 ## 4. Turning a playtest report into work
 
-**Do not ask "what seed?" first.** The seed is entered on the start menu and
-used to seed the RNG, but **it is never written into the game state** — it is
-in no save file, and the UI never shows it again. A player who didn't write it
-down cannot tell you. *(Worth fixing: store `seed` in `NewGame.build`'s state
-dict, back-fill it in `ensure_state_keys`, and show it in the top bar. Small,
-additive, and it makes every future report reproducible.)*
+**Ask "what seed?" first — it is on screen.** The seed is written into the
+state as `world_seed` (saves from before Phase 7 read `0`), shown beside the
+date in the top bar, and `Game.new_campaign(house, seed)` replays the campaign
+exactly — provided the build is the same, which is why the version is on the
+start menu.
 
 **Ask for the save file instead** — it pins the world exactly (`rng_state`
 plus all state). One fixed slot, `user://roman_war_save.json`:
@@ -256,6 +274,27 @@ here. What follows is the rest:
     synchronously completable. The headless suite drives twenty-five turns in a
     loop with no frames; leave playback on there and the second call is refused
     because the first day is still on screen.
+17. **Two files must never share a `class_name`.** A dead `src/ui/map_geometry.gd`
+    duplicated `MapGeometry` (the live one is `src/ui/map/map_geometry.gd`). On a
+    warm `.godot` cache Godot happened to resolve the live one; on a fresh cache
+    (CI, a new clone, after `rm -rf .godot`) it picked the corpse and every suite
+    failed at parse time without naming a test. When a suite dies before printing
+    a line, `grep -rn "class_name X" src/` for duplicates before anything else.
+18. **A new rng draw inside the campaign stream moves every seed-pinned
+    expectation.** The elections fire `office_gained` triggers, which draw
+    `rng.chance`, so from the first summer on every `Game.new_campaign("julii", N)`
+    world differs from the one older tests were pinned to. That is not a
+    determinism failure — replay and save-resume lockstep guard determinism — but
+    re-pin knowingly: read the new value, confirm the mechanism, then update the
+    expectation. `test_society_longrun` moved twice this phase (elections, then
+    the trail's office stage paying the house) and its horizon ended where it
+    began, at sixty — the scratch probe that replays its two plays and prints
+    the Julii's regions per decade is ten minutes well spent before touching it.
+19. **The demand template has no `min_year`, on purpose.**
+    `the_senate_demands_your_life` shipped with `min_year: -60`, unreachable in
+    any campaign a playtester will finish. The greatness gate
+    (`leader_suicide_standing` / `leader_suicide_popular_min`) replaced the
+    calendar gate; do not put the year back.
 
 ### The building yard, and the rules it added
 
@@ -324,8 +363,6 @@ What costs time to rediscover:
 
 ## 7. Known gaps (verified, not guesses)
 
-- **The seed is not persisted** — see §4. This is the single cheapest fix on
-  this list and it makes every future playtest report reproducible.
 - **`AiStrategy`'s persistent-objective machinery is dead code.**
   `refresh_objective` and `state.factions[fid].ai.objective` are called by
   nothing: `FactionAi` picks targets through `AiAssess.choose_target` instead.
@@ -352,14 +389,44 @@ What costs time to rediscover:
   what that fixed). Island factions therefore expand only if war finds them.
 - **Sea-zone `position` values** in `regions.json` are used only to anchor
   fleet icons and sea labels; no zone is a first-class map object.
-- **Two mission kinds are still forward content**: `blockade_port` needs port
-  blockades (Phase 3 remainder) and `leader_suicide` needs Phase 7 offices.
-  `SenateRules.LIVE_KINDS` names what is actually judged, and
-  `FORWARD_MISSION_KINDS` in the validator allowlists the rest — anything in
-  neither list is an error.
-- **`office_gained` triggers are dead** until Phase 7 offices exist. The
-  validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
-  them, and warns about any *other* trigger kind no engine call site fires.
+- **One mission kind is still forward content**: `blockade_port` needs port
+  blockades (Phase 3 remainder). `SenateRules.LIVE_KINDS` names what is judged,
+  `FORWARD_MISSION_KINDS` in the validator allowlists the rest, and
+  `FORWARD_TRIGGERS` is empty — anything in neither list is an error.
+- **The AI never defies the Senate.** `AiPolitics` complies with the demand on
+  its last turn, every persona alike, so an AI house reaches civil war only by
+  Ambition. A `defiance` knob per persona (defy when the house's strength beats
+  the Senate's side by `ai.defy_senate_ratio`) is the contained slice.
+- **Nobody canvasses.** Elections read standing and influence only; there is no
+  lever to buy a seat, and no `Game.declare_civil_war()` — the player crosses
+  the Rubicon only by Ambition or by refusing the demand.
+- **A civil war has sides but no proscriptions or defections**: armies and
+  cities stay with their house; only stances, seats and the ballot change.
+- **AI houses press the Senate's courtship charges now, but cannot buy the
+  answer.** `AiDiplomacy._pursue_charge` sends the envoy a charge names
+  (alliance or trade) every turn the charge stands; the target's attitude
+  decides, so a hated neighbour still fails it. On `main` no AI house ever
+  proposed an alliance, which had sunk every house to −7…−10 by turn 80 and
+  made every civil war everyone-against-the-Senate. Sweetening a refused suit
+  with silver is the next slice; do not paper over it with the join threshold.
+- **The Senate can die of its own grievance, and the Republic's politics with it.**
+  In two of five soak seeds the Senate falls by turn 80–85 without a civil war:
+  its custodial AI takes rebel provinces across the sea (Spain, Crimea,
+  Cyrenaica), loses its armies there, and the society layer's unrest machine
+  takes the provinces — Rome itself in seed 1234 — to the rebels while
+  Latium's order total still reads above 100 (`in_revolt` at grievance −30,
+  legitimacy `standing` −11 after sixty turns of `coercion` +25). Pristine
+  `main` survives the same five seeds, so this is the world shifting under a
+  fragile faction, not a rule Phase 7 added; but once the Senate is gone the
+  offices dissolve, no charge is issued, no house can break, and the long
+  campaign's civil-war condition is met for free. Two contained slices: keep
+  the Senate's field army home (`AiAssess` target scoring for the custodial
+  persona), and look at why the Senate's legitimacy sinks in its own capital.
+- **The player cannot join a rebellion.** A player house is never conscripted
+  into another's civil war (it stands with the Senate unless it is the rebel);
+  a `Game.join_rebellion()` act is the follow-up beside crossing the Rubicon.
+- **Offices are Roman-only.** Other cultures drain Ambition by government tiers
+  alone (DESIGN §4.4); a Hellenistic court or a tribal assembly has no ladder.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
   watchtowers, ambush.
@@ -371,18 +438,21 @@ What costs time to rediscover:
 
 Each is self-contained. The owner has not committed to one.
 
-**Take the five things `handoff-repo-familiarization-jgqty6` uniquely holds**
-(§1) as a focused change against `main`: the Advisor stack, the office ladder,
-`armies.gd`, the build-version stamp, and the triage workflow. This is the one
-piece of unmerged work whose value is already established.
+**Take the three things `handoff-repo-familiarization-jgqty6` still uniquely
+holds** (§1) as a focused change against `main`: the Advisor stack, the idea in
+`armies.gd`, and the triage workflow. The office ladder and the version stamp
+came across with Phase 7.
 
 **Balance & feel (playtest-driven — most likely next).** The numbers in
-`balance.json → ai / diplomacy / knowledge / edicts / society` and the five
+`balance.json → ai / diplomacy / knowledge / edicts / society / senate` and the five
 personas in `data/ai.json` shipped after soak passes, not a hundred games. The
 societal constants are the newest and least playtested in the file. Per-edict
 and per-technique tuning lives in `data/edicts.json` and `data/techniques.json`.
 The soak's `divergence` figure is a tuning target: raise diffusion and
-origination variance and it climbs.
+origination variance and it climbs. The Phase 7 numbers
+(`senate.election_standing_weight`, the demand's two gates,
+`civil_war_join_standing`, `society.elite_office_absorption_per_seat_rank`)
+shipped after the soak's seats-and-demands line, not a hundred games.
 
 **Deepen the AI.** It plays the whole game but uniformly. Worth doing, in
 rough order of payoff: teach it the amphibious landing it already has the rules
@@ -399,9 +469,17 @@ law, a policy of enfranchisement, a settlement of the veterans — shaped like
 `SocietyRules.apply_faction_turn` rather than `effect_total`. Keep it to one
 slot so it stays a decision.
 
-**Phase 7 — senate offices & politics depth.** `office_gained` triggers and the
-`leader_suicide` mission are authored and allowlisted, waiting for offices,
-elections, and late-game senate hostility.
+**Phase 7 follow-ups (each self-contained, each its own commit).** Canvassing —
+`Game.canvass(char_id, denarii)` paying treasury for election score and a
+quantized Ambition shock through a `SocietyRules` helper on the
+`record_plunder` pattern (an office bought outright breeds claimants;
+`too_many_claimants` already says so). Crossing the Rubicon —
+`Game.declare_civil_war()` for a great house that would rather strike first,
+gated on `popular_standing`, setting `at_civil_war` and then
+`SenateRules._declare_civil_war`. AI defiance — a `defiance` persona field and
+`ai.defy_senate_ratio`, judged against the round's strength snapshot. Joining a
+rebellion by choice — the player's counterpart of `house_joins_rebellion`. Then
+proscriptions and army defections once a war is on, and AI canvassing.
 
 **Phase 3 remainder — the sea.** Fleets move and watch but never fight;
 `blockade_port` missions are authored and allowlisted. The corvus technique and

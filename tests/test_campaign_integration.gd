@@ -133,3 +133,16 @@ func test_seeded_daughters_marry_in_time(t) -> void:
 			if notice.get("kind", "") == "marriage":
 				marriages += 1
 	t.check(marriages >= 1, "somewhere in the world a suitor married in (got %d)" % marriages)
+
+
+func test_world_seed_is_recorded_and_survives_a_save(t) -> void:
+	## A playtest report is reproducible only if the save knows which seed
+	## built the world. Saves from before the seed travelled read as 0.
+	var game := Game.new_campaign("julii", 4242)
+	t.check_eq(int(game.state["world_seed"]), 4242, "the seed that built the world is in the state")
+	game.end_turn()
+	var restored := SaveGame.from_json(SaveGame.to_json(game.state))
+	t.check_eq(int(restored.get("world_seed", -1)), 4242, "the seed survives the save round trip")
+	restored.erase("world_seed")
+	NewGame.ensure_state_keys(restored, game.data)
+	t.check_eq(int(restored["world_seed"]), 0, "a pre-seed save is normalized to unknown (0)")

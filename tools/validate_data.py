@@ -43,6 +43,7 @@ TABLES = {
     "events.json": "events.schema.json",
     "wonders.json": "wonders.schema.json",
     "missions.json": "missions.schema.json",
+    "offices.json": "offices.schema.json",
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
@@ -64,13 +65,14 @@ LIVE_MISSION_KINDS: set[str] = set()  # filled from SenateRules at startup
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
 
 # Trigger kinds authored ahead of the system that will fire them. Everything
-# else the engine never fires is flagged as dead content.
-FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
+# else the engine never fires is flagged as dead content. (Empty since the
+# Phase 7 senate offices woke office_gained.)
+FORWARD_TRIGGERS: set[str] = set()
 
 # Mission kinds authored ahead of the systems that resolve them. SenateRules
-# judges only LIVE_KINDS; these need port blockades (Phase 3 remainder) and
-# campaign agents (Phase 5), so they are forward content, not dead content.
-FORWARD_MISSION_KINDS = {"blockade_port", "assassinate_leader", "leader_suicide"}
+# judges only LIVE_KINDS; port blockades are the Phase 3 remainder, so they
+# are forward content, not dead content.
+FORWARD_MISSION_KINDS = {"blockade_port"}
 
 # The only substitutions src/ui/dispatch_format.gd knows how to make. A token
 # outside this set would print as a literal brace on the player's screen.
@@ -79,8 +81,8 @@ DISPATCH_TOKENS = {
     "value", "value_abs", "turn", "year", "season", "detail",
 }
 # Mission kinds authored ahead of their systems, same idea: port blockades are
-# the Phase 3 naval remainder; leader_suicide needs Phase 7 senate depth.
-FORWARD_MISSIONS = {"blockade_port", "leader_suicide"}
+# the Phase 3 naval remainder.
+FORWARD_MISSIONS = {"blockade_port"}
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -321,7 +323,7 @@ def cross_checks(t: dict[str, dict]) -> None:
     # date, or a detail key the engine actually writes for that kind.
     ANNALS_TOKENS = {
         "faction", "other_faction", "character", "region", "technique",
-        "edict", "epithet", "year", "season",
+        "edict", "epithet", "office", "year", "season",
         # detail keys per the recording sites:
         "winner", "attacker_soldiers", "defender_soldiers", "occupation",
         "loot", "population", "assault", "turns", "battles",
@@ -674,6 +676,38 @@ def cross_checks(t: dict[str, dict]) -> None:
         for region_id in disaster["regions"]:
             if region_id not in regions:
                 err(f"events: {disaster['id']}: unknown region {region_id}")
+
+    # --- offices (the cursus honorum) ------------------------------------
+    offices = t.get("offices.json", {}).get("offices", [])
+    office_ids: set[str] = set()
+    office_ranks: dict[int, str] = {}
+    for office in offices:
+        if office["id"] in office_ids:
+            err(f"offices: duplicate id {office['id']}")
+        office_ids.add(office["id"])
+        if office["rank"] in office_ranks:
+            err(f"offices: {office['id']}: rank {office['rank']} is already "
+                f"{office_ranks[office['rank']]}'s — the ladder needs a strict order")
+        office_ranks[office["rank"]] = office["id"]
+        if not str(office.get("historical_basis", "")).strip():
+            err(f"offices: {office['id']}: historical_basis is required — invented history is a bug")
+    if offices and sorted(office_ranks) != list(range(1, len(offices) + 1)):
+        err("offices: ranks must run 1..N without gaps")
+    for office in offices:
+        needs = int(office.get("requires_prior_rank", 0))
+        if needs and (needs not in office_ranks or needs >= int(office["rank"])):
+            err(f"offices: {office['id']}: requires_prior_rank {needs} must name a "
+                f"lower existing rank")
+        if not office.get("effects"):
+            err(f"offices: {office['id']}: an office that buys nothing is not an office")
+    if offices and not any(int(o.get("requires_prior_rank", 0)) == 0 for o in offices):
+        err("offices: no office is open without a prior rank — the ladder has no first rung")
+    min_rank = int(t.get("balance.json", {}).get("senate", {}).get("annals_office_min_rank", 1))
+    if offices and not 1 <= min_rank <= len(offices):
+        err(f"offices: balance.senate.annals_office_min_rank {min_rank} names no rank on the ladder")
+    eponymous = [o["id"] for o in offices if o.get("eponymous", False)]
+    if offices and len(eponymous) != 1:
+        err(f"offices: exactly one office names the year (eponymous); found {eponymous}")
 
     for mission in t.get("missions.json", {}).get("missions", []):
         for unit_reward in mission.get("reward", {}).get("units", []):
@@ -1270,7 +1304,7 @@ def _entity_count(document: dict) -> int:
                 "traits", "ancillaries", "events", "wonders", "missions",
                 "conditions", "pools", "cells", "advances", "axes",
                 "edicts", "sites", "stages", "effects", "recipes",
-                "personas", "agents", "techniques", "epithets",
+                "personas", "agents", "techniques", "epithets", "offices",
                 "templates"):
         if key in document:
             return len(document[key])

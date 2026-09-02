@@ -241,10 +241,14 @@
     "mission_fail_standing": -2,
     "popular_standing_per_region": 0.3,
     "popular_drift_factor": 0.15,
-    "civil_war_popular_threshold": 6,
-    "civil_war_senate_threshold": -5
+    "election_standing_weight": 1.0,
+    "annals_office_min_rank": 3,
+    "leader_suicide_standing": -5,
+    "leader_suicide_popular_min": 5,
+    "civil_war_join_standing": 1
   },
   "ai": {
+    "senate_comply_turns_left": 1,
     "difficulty_income_multiplier": {
       "easy": 0.8,
       "medium": 1.0,
@@ -447,6 +451,7 @@
     "elite_legitimacy_damping": 0.6,
     "elite_conquest_shock": 4.0,
     "elite_office_absorption_per_tier": 0.03,
+    "elite_office_absorption_per_seat_rank": 0.06,
     "elite_command_absorption_per_army": 0.12,
     "elite_command_martial_floor": 0.5,
     "elite_decay_rate": 0.01,

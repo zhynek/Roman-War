@@ -108,7 +108,8 @@ func test_ai_declares_war_only_when_dominant_and_neutral(t) -> void:
 		"the strong neighbor smells weakness")
 	var declared := false
 	for notice in report["ai"]:
-		if notice["kind"] == "war_declared" and notice["faction"] == "blue" and notice["target"] == "red":
+		# AiDiplomacy reports a declaration as {kind, by, on}.
+		if notice["kind"] == "war_declared" and notice.get("by", "") == "blue" and notice.get("on", "") == "red":
 			declared = true
 	t.check(declared, "the declaration reaches the report")
 

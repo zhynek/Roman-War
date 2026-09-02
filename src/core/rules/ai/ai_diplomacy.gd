@@ -34,7 +34,8 @@ static func run(data: GameData, state: Dictionary, faction_id: String, persona: 
 	# model; the second is the other branch's staleness ledger.
 	_consider_peace(data, state, faction_id, persona, events, strengths)
 	white_peace_stalled(data, state, faction_id, events)
-	_consider_trade(data, state, faction_id, persona, events, strengths, reach)
+	if not _pursue_charge(data, state, faction_id, events, strengths):
+		_consider_trade(data, state, faction_id, persona, events, strengths, reach)
 
 
 static func _consider_war(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary, reach: Dictionary) -> void:
@@ -76,9 +77,9 @@ static func _consider_war(data: GameData, state: Dictionary, faction_id: String,
 			continue
 		if DiplomacyRules.at_war(state, faction_id, other_id):
 			continue
-		if _roman_internal(data, faction_id, other_id) \
-				and not (state["factions"][faction_id]["at_civil_war"]
-					or state["factions"][other_id]["at_civil_war"]):
+		if DiplomacyRules.roman_war_forbidden(data, state, faction_id, other_id):
+			# The Republic's own wars are the civil-war rules' to start — and once
+			# the Senate has fallen, the houses are powers like any other.
 			continue  # Roman quarrels stay in the forum until a civil war breaks
 		var attitude := DiplomacyRules.attitude_total(data, state, faction_id, other_id, strengths)
 		if attitude >= threshold:
@@ -113,6 +114,8 @@ static func white_peace_stalled(data: GameData, state: Dictionary, faction_id: S
 	for other_id in AiAssess.enemies_of(state, faction_id):
 		if not _peace_capable(data, state, other_id):
 			continue
+		if DiplomacyRules.roman_peace_forbidden(data, state, faction_id, other_id):
+			continue  # a civil war never gutters out
 		var key := war_key(faction_id, other_id)
 		var quiet := int(war_turns.get(key, 0))
 		var threshold := int(ai_rules["peace_min_war_turns"])
@@ -142,6 +145,8 @@ static func _consider_peace(data: GameData, state: Dictionary, faction_id: Strin
 			continue  # there is no treating with brigands
 		if not DiplomacyRules.at_war(state, faction_id, other_id):
 			continue
+		if DiplomacyRules.roman_peace_forbidden(data, state, faction_id, other_id):
+			continue  # no suing for peace in a civil war — it is settled by the sword
 		var their_strength: float = strengths[other_id]
 		if my_strength >= their_strength * threshold:
 			continue  # the war is not lost enough to sue for peace
@@ -168,6 +173,44 @@ static func _consider_peace(data: GameData, state: Dictionary, faction_id: Strin
 				DiplomacyRules.apply_offer(data, state, offer)
 				events.append({"kind": "peace_made", "between": [faction_id, other_id]})
 		return  # one suit for peace a turn
+
+
+static func _pursue_charge(data: GameData, state: Dictionary, faction_id: String, events: Array, strengths: Dictionary) -> bool:
+	## The Senate's courtship charges name a bordering power and a stance; a
+	## house that holds one sends its envoy there before any other. The target's
+	## court judges the offer as it judges every other (attitude, strengths), so
+	## a charge can still fail — but not for want of asking. True when the suit
+	## was pressed and accepted (or laid before the player), which is the
+	## house's one new agreement for the turn. Draws nothing.
+	var mission = state["factions"][faction_id].get("mission")
+	if mission == null:
+		return false
+	var stance := ""
+	match String(data.missions.get(String(mission.get("template", "")), {}).get("kind", "")):
+		"make_alliance":
+			stance = "alliance"
+		"reach_trade_agreement":
+			stance = "trade"
+		_:
+			return false
+	var other_id := String(mission.get("target_faction", ""))
+	if other_id == "" or not state["factions"].has(other_id) or not state["factions"][other_id]["alive"]:
+		return false
+	var current := DiplomacyRules.stance_between(state, faction_id, other_id)
+	if current == "war" or current == stance or current == "alliance":
+		return false
+	var offer := {"from": faction_id, "to": other_id, "stance": stance,
+		"give_payment": 0, "give_tribute": null, "give_regions": [],
+		"ask_payment": 0, "ask_tribute": null, "ask_regions": []}
+	if other_id == state.get("player_faction", ""):
+		_queue_offer_to_player(data, state, offer, events)
+		return true
+	if DiplomacyRules.evaluate_offer(data, state, faction_id, other_id, offer, strengths)["accept"]:
+		DiplomacyRules.apply_offer(data, state, offer)
+		events.append({"kind": "alliance_made" if stance == "alliance" else "trade_agreed",
+			"between": [faction_id, other_id]})
+		return true
+	return false
 
 
 static func _consider_trade(data: GameData, state: Dictionary, faction_id: String, persona: Dictionary, events: Array, strengths: Dictionary, reach: Dictionary) -> void:
@@ -255,10 +298,7 @@ static func _reachable_via(reach: Dictionary, other_id: String) -> bool:
 
 
 static func _roman_internal(data: GameData, a: String, b: String) -> bool:
-	var faction_a: Dictionary = data.factions.get(a, {})
-	var faction_b: Dictionary = data.factions.get(b, {})
-	return (faction_a.get("is_roman_house", false) or faction_a.get("is_senate", false)) \
-		and (faction_b.get("is_roman_house", false) or faction_b.get("is_senate", false))
+	return DiplomacyRules.roman_internal(data, a, b)
 
 
 static func war_key(a: String, b: String) -> String:

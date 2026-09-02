@@ -15,7 +15,7 @@
         "peace_made", "alliance_made", "technique_originated", "technique_adopted",
         "edict_enacted", "edict_lapsed", "leader_died", "succession",
         "reign_summary", "war_summary", "faction_destroyed", "disaster",
-        "epithet_earned"
+        "epithet_earned", "office_taken", "civil_war"
       ],
       "additionalProperties": false,
       "patternProperties": {

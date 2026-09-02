@@ -12,7 +12,8 @@ class_name ChronicleRules
 ## (DiplomacyRules.apply_offer — the only place they form).
 ##
 ## Characters accrue deeds ({battles_won, battles_lost, sieges_won,
-## cities_taken, cities_lost, techniques_completed, edicts_enacted}) — the
+## cities_taken, cities_lost, techniques_completed, edicts_enacted,
+## offices_held}) — the
 ## vocabulary epithets are earned from (C2). Rebels have no scribes: wars
 ## with rebels are banditry and stay out of the ledger.
 ##
@@ -100,7 +101,7 @@ static func collect(data: GameData, state: Dictionary, report: Dictionary, pre: 
 		if still_at_war:
 			continue
 		war["ended_turn"] = int(pre["turn"])
-		if a_alive and b_alive:
+		if a_alive and b_alive and not bool(war.get("lapsed", false)):
 			_push(data, state, _dated(state, pre, "peace_made",
 				{"faction": a, "other_faction": b}, 5, {}))
 		_push(data, state, _dated(state, pre, "war_summary",
@@ -278,6 +279,8 @@ static func _names_for(data: GameData, state: Dictionary, entry: Dictionary) -> 
 				names[key] = String(data.edicts.get(subject_id, {}).get("name", subject_id))
 			"epithet":
 				names[key] = String(data.epithets.get(subject_id, {}).get("name", subject_id))
+			"office":
+				names[key] = String(data.offices.get(subject_id, {}).get("name", subject_id))
 			_:
 				names[key] = subject_id
 	return names
@@ -306,6 +309,14 @@ static func _living_leaders(state: Dictionary) -> Dictionary:
 				and not leaders.has(character["faction"]):
 			leaders[character["faction"]] = char_id
 	return leaders
+
+
+static func mark_war_lapsed(state: Dictionary, a: String, b: String) -> void:
+	## A war that ends without a peace — the Republic's civil war lapsing
+	## with the Senate's fall. The ledger closes it with a summary and no oaths.
+	var war := _open_war(state, a, b)
+	if not war.is_empty():
+		war["lapsed"] = true
 
 
 static func _open_war(state: Dictionary, a: String, b: String) -> Dictionary:

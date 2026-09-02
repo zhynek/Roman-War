@@ -3,6 +3,8 @@ extends SceneTree
 ## under a real renderer (use xvfb-run on a headless box):
 ##
 ##   xvfb-run -a godot --path . --script res://tools/screenshot.gd -- out_dir=/tmp/shots seed=42 zooms=0.5,1.0,2.0
+##   ... -- panel=senate   opens one of the scrolls (senate, family, diplomacy,
+##                         knowledge, annals) over the map before shooting
 ##
 ## Not a test: CI never runs this. It exists so map work can be eyeballed.
 
@@ -13,6 +15,7 @@ var _seed := 42
 var _zooms: Array = [0.6, 1.2, 2.2]
 var _frame := 0
 var _shot := 0
+var _panel := ""
 
 
 func _init() -> void:
@@ -23,6 +26,7 @@ func _init() -> void:
 		match parts[0]:
 			"out_dir": _out_dir = parts[1]
 			"seed": _seed = int(parts[1])
+			"panel": _panel = parts[1]
 			"zooms":
 				_zooms = []
 				for z in parts[1].split(","):
@@ -38,6 +42,20 @@ func _init() -> void:
 	_holder.add_child(_screen)
 	if OS.get_cmdline_user_args().has("select_army"):
 		_select_army_with_preview.call_deferred()
+	if _panel != "":
+		_open_panel.call_deferred()
+
+
+func _open_panel() -> void:
+	## One of the top-bar scrolls, opened over the map so its rendering can be
+	## eyeballed the way the map is.
+	match _panel:
+		"senate": _screen.senate_panel.open_for(_screen.game)
+		"family": _screen.family_panel.open_for(_screen.game)
+		"diplomacy": _screen.diplomacy_panel.open_for(_screen.game)
+		"knowledge": _screen.knowledge_panel.open_for(_screen.game)
+		"annals": _screen.annals_panel.open_for(_screen.game)
+		_: push_warning("screenshot: unknown panel " + _panel)
 
 
 func _select_army_with_preview() -> void:

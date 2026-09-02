@@ -6,7 +6,8 @@ extends SceneTree
 ## treasury health, turn timing — and now the knowledge landscape: who
 ## practices what, how many DIFFERENT worlds the seeds produce (the
 ## "ten players, ten worlds" claim as a number), crisis-driven adoptions,
-## the books of policies, and the chronicle's shape. Reading this output is
+## the books of policies, the chronicle's shape, and the Republic's politics
+## (seats per house, the Senate's demands, outlawries). Reading this output is
 ## how balance numbers get retuned — the campaign harness asserts
 ## invariants, this shows character.
 
@@ -32,6 +33,9 @@ func _soak(seed_value: int) -> void:
 	var player_sieges := 0
 	var total_ms := 0
 	var crisis_adoptions := 0
+	var offices_gained := 0
+	var demands := 0
+	var civil_wars := {}
 
 	for i in range(TURNS):
 		var started := Time.get_ticks_msec()
@@ -50,12 +54,22 @@ func _soak(seed_value: int) -> void:
 					peaces += 1
 				"trade_agreed":
 					trades += 1
-				"ai_conquest":
+				"captured":
 					var faction: String = event["faction"]
 					conquests[faction] = int(conquests.get(faction, 0)) + 1
-				"ai_siege":
-					if event.get("owner", "") == game.state["player_faction"]:
+				"siege_laid":
+					if game.state["settlements"][event["region"]]["owner"] == game.state["player_faction"]:
 						player_sieges += 1
+		for event in report["senate"]:
+			match String(event.get("kind", "")):
+				"office_gained":
+					offices_gained += 1
+				"mission_issued":
+					if String(event.get("mission", "")) == "the_senate_demands_your_life":
+						demands += 1
+				"civil_war":
+					var pattern: String = String(event.get("pattern", ""))
+					civil_wars[pattern] = int(civil_wars.get(pattern, 0)) + 1
 
 	var alive: Array = []
 	var rebels_left := 0
@@ -120,6 +134,14 @@ func _soak(seed_value: int) -> void:
 		var kind: String = entry["kind"]
 		chronicle_kinds[kind] = int(chronicle_kinds.get(kind, 0)) + 1
 
+	# The Republic's politics: who sits in the magistracies at the end, and
+	# whether the road to civil war was walked. Seats read 0 for every house
+	# once the Senate has fallen — by civil war or by anyone else's sword.
+	var seats_by_house := {}
+	for seat in SenateRules.office_holders(game.data, game.state):
+		var house: String = String(seat["faction"])
+		seats_by_house[house] = int(seats_by_house.get(house, 0)) + 1
+
 	print("=== seed %d, %d turns ===" % [seed_value, TURNS])
 	print("  wars declared: %d, peaces: %d, trade pacts: %d" % [wars, peaces, trades])
 	print("  conquests: %d total, top: %s" % [_sum(conquests), top])
@@ -131,6 +153,10 @@ func _soak(seed_value: int) -> void:
 	print("  edicts standing: %d/%d provinces %s" \
 		% [edicts_held, region_ids.size(), str(_sorted_counts(edicts_by_id))])
 	print("  chronicle: %d entries %s" % [game.state["chronicle"].size(), str(_sorted_counts(chronicle_kinds))])
+	print("  senate: seats %s · offices gained %d · demands %d · civil wars %s · the Republic %s" \
+		% [str(_sorted_counts(seats_by_house)), offices_gained, demands,
+			str(_sorted_counts(civil_wars)),
+			"has fallen" if SenateRules.senate_faction(game.data, game.state) == "" else "stands"])
 	print("  avg end_turn: %d ms" % int(float(total_ms) / TURNS))
 
 

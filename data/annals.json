@@ -25,6 +25,14 @@
       "Peace was sworn between {faction} and {other_faction}.",
       "{faction} and {other_faction} laid down their arms and exchanged oaths."
     ],
+    "office_taken": [
+      "{character} of {faction} was raised to the office of {office}.",
+      "The Senate seated {character} as {office}, to the honor of {faction}."
+    ],
+    "civil_war": [
+      "{faction} broke with the Senate, and the Republic was at war with itself.",
+      "{faction} raised its standards against the Senate; the legions were the answer."
+    ],
     "alliance_made": [
       "{faction} and {other_faction} bound their houses in alliance."
     ],

@@ -205,9 +205,14 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			"other": String(notice.get("from", "")),
 			"subject": String(notice.get("technique", "")),
 		})
-	report["senate"] = SenateRules.process_turn(data, state, rng)
-	for notice in report["senate"]:
-		_journal_senate_notice(data, journal, notice)
+	for notice in SenateRules.process_turn(data, state, rng):
+		# Summer elections fire office_gained triggers; the traits and
+		# retinue they award are the family's news, not the Senate's.
+		if ["trait", "ancillary"].has(String(notice.get("kind", ""))):
+			report["characters"].append(notice)
+		else:
+			report["senate"].append(notice)
+			_journal_senate_notice(data, journal, notice)
 
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	report["guided"] = GuidedRules.process_turn(data, state)
@@ -285,9 +290,27 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 static func _journal_senate_notice(data: GameData, journal: Array, notice: Dictionary) -> void:
 	var kind: String = String(notice["kind"])
 	if kind == "civil_war":
-		TurnJournal.add(journal, "civil_war", {"faction": notice["faction"]})
+		# Outlawry is a decree; the Ambition road is a house breaking on its own.
+		var pattern := String(notice.get("pattern", ""))
+		TurnJournal.add(journal, "civil_war" if pattern == "outlawed" else "civil_war_ambition",
+			{"faction": notice["faction"], "extra": {"pattern": pattern}})
 		return
-	if not ["mission_issued", "mission_progress", "mission_complete", "mission_failed"].has(kind):
+	if kind == "office_gained":
+		var office_id := String(notice.get("office", ""))
+		TurnJournal.add(journal, "office_gained", {"faction": notice["faction"],
+			"subject": String(notice.get("character", "")), "extra": {"detail": office_id}})
+		if data.offices.get(office_id, {}).get("eponymous", false):
+			# The year is named for him: every court hears it.
+			TurnJournal.add(journal, "consuls_elected", {"faction": notice["faction"],
+				"subject": String(notice.get("character", ""))})
+		return
+	if kind == "house_joins_rebellion" or kind == "house_stays_loyal":
+		TurnJournal.add(journal, kind, {"faction": notice["faction"], "other": String(notice.get("other", ""))})
+		return
+	if kind == "civil_war_over":
+		TurnJournal.add(journal, "civil_war_over", {})
+		return
+	if not ["mission_issued", "mission_progress", "mission_complete", "mission_failed", "mission_voided"].has(kind):
 		return
 	var template_id: String = String(notice.get("mission", ""))
 	var template: Dictionary = data.missions.get(template_id, {})

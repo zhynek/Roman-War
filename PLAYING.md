@@ -29,9 +29,10 @@ campaign runs to AD 14.
 
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Dispatch**, **Family**, **Diplomacy**, **Knowledge**, **Annals**,
-  **Save**, **Load**, and **END TURN**. (Edicts are issued per province, so
-  they live on the city panel rather than up here.)
+  Buttons: **Dispatch**, **Family**, **Diplomacy**, **Senate** (Roman houses
+  only), **Knowledge**, **Annals**, **Save**, **Load**, and **END TURN**.
+  (Edicts are issued per province, so they live on the city panel rather than
+  up here.)
 - **The map** — a terrain map of the whole world: coastlines, province
   borders, and the lie of the land (mountain ridges, forests, hills, marsh,
   desert). Every province is tinted by its terrain and washed with its
@@ -220,6 +221,9 @@ one who exterminates cities becomes cruel, and everyone knows it.
   March him out and the city loses him — there is no governing by post.
 - You can **name any adult male heir**. The man you pass over will not forget it.
 - You can **move retinue members** between two family members in the same city.
+- A man holding a **Senate office** shows it beside his name. The office makes
+  him better at his work for the year; the **Senate** scroll says what he may
+  stand for next summer.
 - When your leader dies, the heir succeeds. If a captain wins a battle while
   badly outnumbered, he may be adopted into the family on the spot.
 
@@ -322,12 +326,48 @@ of Walls* for life, one name per man, ever. Filter by Wars, Court, or
 Wisdom & World. Everything there really happened in your campaign; the
 scribes only wrote it down.
 
-## Missions
+## The Senate
 
-The Senate's demands now range wider than "take that region": it may ask you
-to court a foreign power into an **alliance** or a **trade agreement**, or —
-when you are at war — to arrange for a foreign king to **stop being alive**.
-The negotiation scroll and your agents are how those get done.
+A Roman house lives under the Senate of Rome, and the **Senate** button opens
+the scroll that says where you stand: the three houses' standing with the
+conscript fathers and with the people, the magistracies and who holds them,
+which of your own men may stand next summer, the charge laid on your house,
+and how close you are to the break.
+
+- **Charges.** The Senate sets you one task at a time with a deadline: take a
+  rebel region, court a foreign power into an **alliance** or a **trade
+  agreement**, or — when you are at war — arrange for a foreign king to **stop
+  being alive**. Success pays silver and standing, sometimes troops; failure
+  costs standing. The negotiation scroll and your agents are how the harder
+  ones get done.
+- **Offices.** Every summer the Senate fills fifteen seats — four quaestors,
+  four aediles, two praetors, two consuls and two censors, and the pontifex
+  maximus, who keeps his priesthood for life — from the grown men of the houses
+  in good standing. Your house's standing
+  and the man's own influence decide the ballot; the higher rungs want a lower
+  office first, waived when nobody qualifies, and no man steps back down the
+  ladder. An office makes a man better at
+  governing and commanding for the year, the consulship names the year after
+  him and every court hears of it, and — quietly the most important thing —
+  every seat your house holds gives its ambitious sons something to do. A
+  house shut out of the curia breeds claimants instead, and enough of them
+  drag it into civil war on their own.
+- **The demand.** Grow too great while the Senate hates you — the people's
+  regard risen to 5 while the Senate's has sunk to −5 — and the conscript
+  fathers set aside whatever they were asking and demand your patriarch's
+  life. The scroll names the man and the deadline. **Comply** and he dies by
+  his own hand, your heir succeeds, and the Senate's regard recovers enough
+  that it does not name the heir next. Refuse until
+  the deadline falls and the house is **outlawed**: at war with Rome.
+- **Civil war.** Once a house is in arms against the Republic the other houses
+  choose — those the Senate has already alienated join the rebel, the rest
+  stand with the Senate. Your own house is never dragged into another's
+  rebellion: it stands with the Senate unless it is the rebel. Nobody in the
+  Republic can make war on Rome or on
+  another house before that, and nobody can make peace after it: no envoy, no
+  silver. It ends when Rome falls or the rebels do. The house that holds Rome
+  when the Senate is gone holds it by the sword — which is what the long
+  campaign asks of a Roman house.
 
 ## The guided trail
 
@@ -348,7 +388,8 @@ a cooldown), so fighting well always pays.
 ## Winning
 
 Check the top bar for your progress. A long campaign wants around 50 regions
-including Rome; a Roman house must also settle matters with the Senate. A short
+including Rome; a Roman house must also settle matters with the Senate — a
+civil war the Senate must lose (see **The Senate**). A short
 campaign wants about 15 regions and specific rivals destroyed. If nobody manages
 it by AD 14, the age simply closes.
 
@@ -377,10 +418,12 @@ Honest list, so you know what you are looking at:
 - **Naval combat.** Fleets move and watch the coasts, but they do not fight,
   and there are no port blockades yet. (Armies still cross the sea, and an
   amphibious landing on an enemy shore already works.)
-- **Senate politics beyond missions.** The Senate sets you a charge and the
-  civil war can trigger, but offices and elections are a later phase. Of the
-  Senate's authored charges, blockading a port and driving a rival to take his
-  own life are written and waiting on those systems.
+- **Buying elections, and the aftermath of a civil war.** You cannot canvass
+  for a seat with silver, cannot declare on the Senate yourself or join another
+  house's rebellion before the Senate demands your life or your ambitious sons
+  force the matter, and a civil war proscribes nobody: armies and cities stay with their houses. The computer
+  houses always comply with the Senate's demand. Of the Senate's authored
+  charges, blockading a port waits on naval combat.
 - **All art is drawn by code.** The map, the towns, the buildings and the
   troops are procedural vector work rebuilt from the campaign data every
   launch. There are no character portraits and no battle-scene art yet, and
