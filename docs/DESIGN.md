@@ -370,11 +370,22 @@ Then side-wide: **general** (command 5%/pt, troop morale 2%/pt), the defender's
 when line, shock and missile roles each hold ≥15% of the cards), and **sally**.
 Both sides then roll ±15% fortune (`battle.randomness_pct`) and the higher
 strength wins; `win_chance` integrates those two rolls analytically so the UI
-can say "72% to win". Casualties derive from the post-fortune ratio (base 25%
-each, +35% for the loser, clamped 2–95%, per-unit ±30% scatter); units under
-10% strength are destroyed; winners gain +1 experience; a losing side's general
-dies with 10% probability. The model is a paper one by design — it exists to be
-replaced behind the same interface.
+can say "72% to win".
+
+**Casualties** come in two parts. The *melee* pool is set by the post-fortune
+ratio (base 25% each side, clamped 2–95%) and shared out so that units the
+enemy countered bleed more and units that countered him bleed less — each
+unit's weight is `matchup^−casualty_matchup_weight`, clamped 0.5–2.0 and
+soldier-normalised so the side's mean melee loss is the pool. The *rout* falls
+on the loser only: `loser_extra_casualty_pct × (1 + (winner pursuit − 1) ×
+pursuit_scale)`, where a side's pursuit is the slot-weighted mean of its units'
+speed-derived pursuit factors (a mounted victor runs the beaten down harder),
+divided per losing unit by its own escape factor (fast units get away). One
+±30% scatter draw per unit; units under 10% strength are destroyed. The result
+reports the men **actually** lost, and `attacker_destroyed` / `defender_destroyed`.
+Winners gain +1 experience, or +2 when they were the paper underdog by ≥1.3;
+a losing side's general dies with 10% probability. The model is a paper one by
+design — it exists to be replaced behind the same interface.
 
 ## 6. Characters, Agents & Diplomacy
 

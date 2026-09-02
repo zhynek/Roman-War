@@ -143,3 +143,116 @@ func test_win_chance_is_monotonic(t) -> void:
 	t.check(BattleResolver.win_chance(1.3, 1.0, 20.0) < BattleResolver.win_chance(1.3, 1.0, spread), "wider fortune means more upsets")
 	t.check_eq(BattleResolver.win_chance(0.0, 1.0, spread), 0.0, "no army, no chance")
 	t.check_eq(BattleResolver.win_chance(1.0, 0.0, spread), 1.0, "no enemy, no contest")
+
+
+## --- Casualties, the rout and what the result reports --------------------
+
+func _resolve(data: GameData, seed_value: int, attackers: Array, defenders: Array, extra: Dictionary = {}) -> Dictionary:
+	## Runs one battle on fresh copies and returns {result, attackers, defenders}.
+	var attacker_units := _army(attackers)
+	var defender_units := _army(defenders)
+	var result := AutoResolver.new().resolve(data, CampaignRng.seeded(seed_value), attacker_units, defender_units, _context(extra))
+	return {"result": result, "attackers": attacker_units, "defenders": defender_units}
+
+
+func _loss_of(units_after: Array, template: String) -> float:
+	## Strength lost by the (single) unit of this template; destroyed = 100.
+	for unit in units_after:
+		if unit["template"] == template:
+			return 100.0 - float(unit["strength_pct"])
+	return 100.0
+
+
+func test_countered_units_bleed_more(t) -> void:
+	var data := Fixtures.data()
+	# A winning attack (no rout on this side): the melee pool alone is shared
+	# out, and the horse the pikes countered carries more of it than the swords.
+	var horse_loss := 0.0
+	var foot_loss := 0.0
+	for seed_value in range(30):
+		var battle := _resolve(data, seed_value, ["test_horse", "test_elites", "test_elites"], ["test_pikes"])
+		if battle["result"]["winner"] != "attacker":
+			continue
+		horse_loss += _loss_of(battle["attackers"], "test_horse")
+		foot_loss += _loss_of(battle["attackers"], "test_elites")
+	t.check(horse_loss > foot_loss * 1.15,
+		"the cavalry the pikes countered bleeds more than the swordsmen beside it (%.0f vs %.0f)" % [horse_loss / 30.0, foot_loss / 30.0])
+
+
+func test_pursuit_makes_cavalry_winners_kill_more(t) -> void:
+	var data := Fixtures.data()
+	var battle_rules: Dictionary = data.balance["battle"]
+	var horse := BattleResolver.estimate(data, _army(["test_horse", "test_horse"]), _army(["test_slingers"]), _context())
+	var foot := BattleResolver.estimate(data, _army(["test_elites", "test_elites"]), _army(["test_slingers"]), _context())
+	t.check(float(horse["attacker"]["pursuit"]) > float(foot["attacker"]["pursuit"]), "a mounted army pursues faster")
+	var rout_by_horse := AutoResolver.rout_pct(battle_rules, float(horse["attacker"]["pursuit"]))
+	var rout_by_foot := AutoResolver.rout_pct(battle_rules, float(foot["attacker"]["pursuit"]))
+	t.check(rout_by_horse > rout_by_foot, "so the rout it inflicts is bloodier (%.1f vs %.1f)" % [rout_by_horse, rout_by_foot])
+
+	# The same beaten slingers, run down by each: identical melee pool, the rout differs.
+	var rules := battle_rules.duplicate(true)
+	rules["unit_casualty_scatter_pct"] = 0
+	var caught_by_horse := _army(["test_slingers", "test_slingers"])
+	var caught_by_foot := _army(["test_slingers", "test_slingers"])
+	AutoResolver.distribute_casualties(caught_by_horse, horse["defender"], 20.0, rout_by_horse, rules, CampaignRng.seeded(1))
+	AutoResolver.distribute_casualties(caught_by_foot, foot["defender"], 20.0, rout_by_foot, rules, CampaignRng.seeded(1))
+	t.check(int(caught_by_horse[0]["strength_pct"]) < int(caught_by_foot[0]["strength_pct"]),
+		"fewer slingers get away from horsemen (%d%% vs %d%% left)" % [int(caught_by_horse[0]["strength_pct"]), int(caught_by_foot[0]["strength_pct"])])
+
+
+func test_fast_losers_escape(t) -> void:
+	var data := Fixtures.data()
+	var horse_loss := 0.0
+	var pike_loss := 0.0
+	for seed_value in range(30):
+		horse_loss += float(_resolve(data, seed_value, ["test_elites", "test_elites"], ["test_horse"])["result"]["defender_casualty_pct"])
+		pike_loss += float(_resolve(data, seed_value, ["test_elites", "test_elites"], ["test_pikes"])["result"]["defender_casualty_pct"])
+	t.check(horse_loss < pike_loss,
+		"beaten horse ride away; beaten pikemen cannot (%.0f%% vs %.0f%%)" % [horse_loss / 30.0, pike_loss / 30.0])
+
+
+func test_result_reports_actual_losses(t) -> void:
+	var data := Fixtures.data()
+	var attackers := _army(["test_elites", "test_horse", "test_slingers"])
+	var defenders := _army(["test_pikes", "test_spears"])
+	var before_attackers := ArmyRules.soldiers(data, attackers)
+	var before_defenders := ArmyRules.soldiers(data, defenders)
+	var result := AutoResolver.new().resolve(data, CampaignRng.seeded(21), attackers, defenders, _context())
+	var attacker_loss := 100.0 * (1.0 - float(ArmyRules.soldiers(data, attackers)) / before_attackers)
+	var defender_loss := 100.0 * (1.0 - float(ArmyRules.soldiers(data, defenders)) / before_defenders)
+	t.check_near(float(result["attacker_casualty_pct"]), attacker_loss, 0.5, "attacker losses are the men actually lost")
+	t.check_near(float(result["defender_casualty_pct"]), defender_loss, 0.5, "defender losses likewise")
+	t.check(result.has("attacker_destroyed") and result.has("defender_destroyed"), "destruction flags present")
+
+
+func test_crushing_victory_destroys_and_flags(t) -> void:
+	var data := Fixtures.data()
+	var battle := _resolve(data, 4, ["test_elites", "test_elites", "test_elites"], ["test_mob"])
+	t.check_eq(battle["result"]["winner"], "attacker", "three elite cohorts crush a mob")
+	t.check(battle["result"]["defender_destroyed"], "the mob is wiped out")
+	t.check(not battle["result"]["attacker_destroyed"], "the victors stand")
+	t.check_eq(int(battle["result"]["experience_gained"]), int(data.balance["battle"]["experience_gain_on_victory"]),
+		"a favourite's win earns the ordinary lesson")
+
+
+func test_underdog_victory_teaches_twice(t) -> void:
+	var data := Fixtures.data()
+	# Spears and a mob against an elite cohort are the paper underdog by well
+	# over the threshold; widen fortune so some seed still lets them win.
+	data.balance["battle"]["randomness_pct"] = 60
+	var found := false
+	for seed_value in range(300):
+		var battle := _resolve(data, seed_value, ["test_spears", "test_mob"], ["test_elites"])
+		var paper := float(battle["result"]["breakdown"]["ratio"])
+		if paper * float(data.balance["battle"]["underdog_strength_ratio"]) > 1.0:
+			t.check(false, "the spears should be the paper underdog (ratio %.2f)" % paper)
+			return
+		if battle["result"]["winner"] == "attacker":
+			found = true
+			t.check_eq(int(battle["result"]["experience_gained"]), int(data.balance["battle"]["experience_gain_underdog"]),
+				"an underdog's victory is worth double experience")
+			var survivors: Array = battle["attackers"]
+			t.check(survivors.size() > 0 and int(survivors[0]["experience"]) == int(data.balance["battle"]["experience_gain_underdog"]),
+				"and the survivors carry it")
+			break
+	t.check(found, "some fortunate seed lets the underdog win")
