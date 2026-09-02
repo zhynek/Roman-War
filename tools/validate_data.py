@@ -698,6 +698,9 @@ def cross_checks(t: dict[str, dict]) -> None:
         if needs and (needs not in office_ranks or needs >= int(office["rank"])):
             err(f"offices: {office['id']}: requires_prior_rank {needs} must name a "
                 f"lower existing rank")
+    eponymous = [o["id"] for o in offices if o.get("eponymous", False)]
+    if offices and len(eponymous) != 1:
+        err(f"offices: exactly one office names the year (eponymous); found {eponymous}")
 
     for mission in t.get("missions.json", {}).get("missions", []):
         for unit_reward in mission.get("reward", {}).get("units", []):

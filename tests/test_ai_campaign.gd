@@ -105,6 +105,16 @@ func test_map_changes_hands(t) -> void:
 	# day the AI learns to govern rather than only to fight.
 	t.check(edict_entries >= 0, "edicts are chronicled when a court enacts one")
 
+	# The Republic's politics run: fifteen summers in, the magistracies are
+	# filled from the houses' men and the top of the ladder is held — by a
+	# lean-year suffect at worst.
+	var seats: Array = SenateRules.office_holders(game.data, game.state)
+	t.check(seats.size() >= 6, "the Senate's magistracies are filled (%d seats held)" % seats.size())
+	var top_rank := 0
+	for seat in seats:
+		top_rank = maxi(top_rank, int(game.data.offices[seat["office"]]["rank"]))
+	t.check(top_rank >= 5, "a consul or censor sits by turn 60 (top rank %d)" % top_rank)
+
 	var average_ms := float(total_ms) / float(LONG_TURNS)
 	# Raised from 250 ms with the merge, not to hide a regression: a turn now
 	# runs the societal stocks, the knowledge layer, campaign agents and an
