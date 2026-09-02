@@ -20,6 +20,7 @@
           "name": { "type": "string", "minLength": 1 },
           "rank": { "type": "integer", "minimum": 1 },
           "seats": { "type": "integer", "minimum": 1, "maximum": 8 },
+          "eponymous": { "type": "boolean", "description": "The magistracy the year is named for; its elections are proclaimed to every court." },
           "min_age": { "type": "integer", "minimum": 16 },
           "requires_prior_rank": { "type": "integer", "minimum": 0 },
           "effects": {

@@ -17,6 +17,7 @@ const OBJECTIVE_LABELS := {
 	"win_battles": "Win battles",
 	"capture_regions": "Capture settlements",
 	"senate_missions": "Complete a senate mission",
+	"offices_won": "Win an office for the house",
 	"hold_regions": "Hold regions",
 	"treasury_at_least": "Fill the treasury",
 	"governor_in_capital": "A governor in your capital",

@@ -14,12 +14,13 @@ const CIVIC := ["health", "education", "temple", "roads", "farms", "market", "go
 ## turns is conquered outright, and every societal reading is then averaged
 ## over zero regions. Sixty turns still shows the whole arc this test exists
 ## for — force works, then it does not — with both houses still standing to be
-## compared. Shortened again to 50 with Phase 7: the summer elections draw
-## from the campaign stream, and in the shifted world the militarist has
-## lost its LAST province by turn sixty (grievance past 80 by fifty), so the
-## reading averaged over nothing. At fifty it still holds one, on almost no
-## consent, which is the whole claim.
-const HORIZON := 50
+## compared. Phase 7 moved this world twice (the summer elections draw from
+## the campaign stream, and the trail's office stage pays the house); under
+## the final tree the militarist holds both provinces to fifty and one at
+## sixty, on almost no consent — the whole claim — so the horizon is the
+## original sixty again. If it moves once more, probe before re-pinning
+## (HANDOFF §5.18).
+const HORIZON := 60
 const MIDPOINT := 30
 
 

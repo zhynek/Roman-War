@@ -161,4 +161,6 @@ static func _detail_name(data: GameData, beat: Dictionary) -> String:
 		return String(data.traits[detail].get("name", detail))
 	if data.ancillaries.has(detail):
 		return String(data.ancillaries[detail].get("name", detail))
+	if data.offices.has(detail):
+		return String(data.offices[detail].get("name", detail))
 	return detail.replace("_", " ")

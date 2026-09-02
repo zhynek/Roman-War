@@ -6,6 +6,7 @@
       "name": "Quaestor",
       "rank": 1,
       "seats": 4,
+      "eponymous": false,
       "min_age": 20,
       "requires_prior_rank": 0,
       "effects": {
@@ -19,6 +20,7 @@
       "name": "Aedile",
       "rank": 2,
       "seats": 2,
+      "eponymous": false,
       "min_age": 24,
       "requires_prior_rank": 1,
       "effects": {
@@ -33,6 +35,7 @@
       "name": "Praetor",
       "rank": 3,
       "seats": 2,
+      "eponymous": false,
       "min_age": 28,
       "requires_prior_rank": 1,
       "effects": {
@@ -47,6 +50,7 @@
       "name": "Pontifex Maximus",
       "rank": 4,
       "seats": 1,
+      "eponymous": false,
       "min_age": 40,
       "requires_prior_rank": 0,
       "effects": {
@@ -60,6 +64,7 @@
       "name": "Consul",
       "rank": 5,
       "seats": 2,
+      "eponymous": true,
       "min_age": 32,
       "requires_prior_rank": 3,
       "effects": {
@@ -74,6 +79,7 @@
       "name": "Censor",
       "rank": 6,
       "seats": 1,
+      "eponymous": false,
       "min_age": 36,
       "requires_prior_rank": 5,
       "effects": {

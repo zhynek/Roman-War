@@ -69,6 +69,12 @@ const KINDS: Array[String] = [
 	"mission_complete",
 	"mission_failed",
 	"civil_war",
+	# The Republic's politics (Phase 7): the cursus honorum and the civil war's sides.
+	"office_gained",
+	"consuls_elected",
+	"house_joins_rebellion",
+	"house_stays_loyal",
+	"civil_war_over",
 	"victory_progress",
 	"campaign_decided",
 	"family_birth",

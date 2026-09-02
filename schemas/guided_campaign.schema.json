@@ -59,7 +59,7 @@
                     "set_taxes", "queue_building", "recruit_units",
                     "raise_army", "move_army", "hire_mercenaries",
                     "explore_sites", "win_battles", "capture_regions",
-                    "senate_missions", "hold_regions", "treasury_at_least",
+                    "senate_missions", "offices_won", "hold_regions", "treasury_at_least",
                     "governor_in_capital", "no_siege_on_target", "no_intruders"
                   ]
                 },

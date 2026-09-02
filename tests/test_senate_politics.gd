@@ -518,3 +518,56 @@ func test_the_ai_house_complies_on_the_last_turn(t) -> void:
 	var judged := SenateRules.process_turn(data, state, CampaignRng.seeded(4))
 	t.check_eq(_count(judged, "mission_complete"), 1, "which the Senate accepts")
 	t.check(not state["factions"]["green"]["at_civil_war"], "no civil war")
+
+
+## --- Presentation ----------------------------------------------------------
+
+func test_political_beats_render_without_leftover_tokens(t) -> void:
+	## The five Phase 7 beats, rendered through the real prose table.
+	var game := Game.new_campaign("julii", 42)
+	var leader := ChronicleRules.leader_of(game.state, "julii")
+	var journal: Array = []
+	TurnJournal.add(journal, "office_gained", {"faction": "julii", "subject": leader, "extra": {"detail": "consul"}})
+	TurnJournal.add(journal, "consuls_elected", {"faction": "julii", "subject": leader})
+	TurnJournal.add(journal, "house_joins_rebellion", {"faction": "junii", "other": "julii"})
+	TurnJournal.add(journal, "house_stays_loyal", {"faction": "cornelii", "other": "julii"})
+	TurnJournal.add(journal, "civil_war_over", {})
+	t.check_eq(journal.size(), 5, "every political kind is a known beat")
+	for beat in journal:
+		for text in [DispatchFormat.headline(game.data, game.state, beat), DispatchFormat.body(game.data, game.state, beat)]:
+			t.check(text.length() > 0 and not text.contains("{"), "%s renders cleanly: %s" % [beat["kind"], text])
+	var headline := DispatchFormat.headline(game.data, game.state, journal[0])
+	t.check(headline.contains("Consul"), "the office is named, not its id: " + headline)
+
+
+func test_the_senate_overview_reads_the_republic(t) -> void:
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	var game := Game.new()
+	game.data = data
+	game.state = state
+	game.resolver = AutoResolver.new()
+	SenateRules.process_turn(data, state, CampaignRng.seeded(3))
+	var overview := game.senate_overview()
+	t.check(overview["senate_alive"] and overview["is_roman_house"], "a Roman house before a living Senate")
+	t.check_eq(overview["houses"].size(), 2, "both houses are read")
+	var red_row: Dictionary = overview["houses"].filter(func(h): return h["id"] == "red")[0]
+	t.check_eq(int(red_row["seats"]), 3, "red holds three seats")
+	var censor: Dictionary = overview["ladder"][0]
+	t.check_eq(String(censor["id"]), "censor", "the ladder reads from the top")
+	t.check_eq(String(censor["holders"][0]["name"]), "Red Elder", "and names the holder")
+	var men: Array = overview["men"]
+	t.check_eq(men.size(), 3, "the house's men stand before the Senate; the wife does not")
+	t.check_eq(String(men[0]["office"]), "Censor", "an office is shown by name")
+	t.check(overview["charge"] == null or not overview["charge"]["is_demand"], "no demand yet")
+	_hated_and_great(state, "red")
+	data.missions["the_senate_demands_your_life"] = JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/missions.json"))["missions"].filter(
+			func(m): return m["id"] == "the_senate_demands_your_life")[0]
+	state["season"] = "winter"
+	SenateRules.process_turn(data, state, CampaignRng.seeded(4))
+	overview = game.senate_overview()
+	t.check(overview["charge"] != null and overview["charge"]["is_demand"], "the demand is on the scroll")
+	t.check_eq(String(overview["charge"]["target_name"]), "Red Elder", "with the man it names")

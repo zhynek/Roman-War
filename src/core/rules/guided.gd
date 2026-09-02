@@ -25,6 +25,7 @@ const COUNTER_KEYS := {
 	"win_battles": "battles_won",
 	"capture_regions": "regions_captured",
 	"senate_missions": "senate_missions",
+	"offices_won": "offices_won",
 }
 
 

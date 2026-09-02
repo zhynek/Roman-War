@@ -81,6 +81,12 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	t.check(screen.knowledge_panel._content.get_child_count() > 0, "knowledge scroll populated")
 	screen.knowledge_panel.hide()
 
+	# The Senate scroll opens for a Roman house: the ladder, the houses, our men.
+	t.check(screen.senate_button.visible, "a Roman house has a Senate button")
+	screen.senate_panel.open_for(game)
+	t.check(screen.senate_panel._content.get_child_count() > 6, "the senate scroll renders the Republic")
+	screen.senate_panel.hide()
+
 	# The annals open (a turn has passed — the scribes have something).
 	screen.annals_panel.open_for(game)
 	t.check(screen.annals_panel._content.get_child_count() > 0, "the annals render")

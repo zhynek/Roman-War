@@ -142,6 +142,82 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
 
 
+func senate_overview() -> Dictionary:
+	## The Senate scroll's reading: the houses and their standings, the ladder
+	## and who sits on it, the player's own men and what they may stand for,
+	## the standing charge, and where the house stands toward the break.
+	## Read-only; draws nothing.
+	var player := String(state["player_faction"])
+	var senate_rules: Dictionary = data.balance["senate"]
+	var holders_by_office := {}
+	var seats_by_house := {}
+	for seat in SenateRules.office_holders(data, state):
+		var office_id := String(seat["office"])
+		if not holders_by_office.has(office_id):
+			holders_by_office[office_id] = []
+		holders_by_office[office_id].append({"character": seat["holder"],
+			"name": String(state["characters"][seat["holder"]]["name"]), "faction": seat["faction"]})
+		seats_by_house[seat["faction"]] = int(seats_by_house.get(seat["faction"], 0)) + 1
+	var houses: Array = []
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		var info: Dictionary = data.factions.get(faction_id, {})
+		var faction: Dictionary = state["factions"][faction_id]
+		if not info.get("is_roman_house", false) or not faction["alive"]:
+			continue
+		houses.append({"id": faction_id, "name": String(info.get("name", faction_id)),
+			"color": String(info.get("color", "#808080")),
+			"senate_standing": float(faction["senate_standing"]),
+			"popular_standing": float(faction["popular_standing"]),
+			"at_civil_war": bool(faction["at_civil_war"]), "outlawed": bool(faction.get("outlawed", false)),
+			"seats": int(seats_by_house.get(faction_id, 0))})
+	var ladder: Array = []
+	var office_list: Array = data.offices.values()
+	office_list.sort_custom(func(a, b): return int(a["rank"]) > int(b["rank"]))
+	for office in office_list:
+		ladder.append({"id": office["id"], "name": office["name"], "rank": int(office["rank"]),
+			"seats": int(office["seats"]), "min_age": int(office["min_age"]),
+			"holders": holders_by_office.get(office["id"], [])})
+	var men: Array = []
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if character["faction"] != player or not character["alive"] \
+				or String(character.get("gender", "male")) != "male" \
+				or not ["leader", "heir", "family"].has(String(character["role"])):
+			continue
+		var eligible: Array = []
+		for entry in SenateRules.eligible_offices(data, state, char_id):
+			eligible.append({"office": entry["office"], "name": _office_name(entry["office"]),
+				"on_ladder": bool(entry["on_ladder"])})
+		men.append({"id": char_id, "name": String(character["name"]), "age": int(character["age"]),
+			"influence": CharacterRules.effective(data, character, "influence"),
+			"office": _office_name(character.get("office")), "eligible": eligible})
+	var faction: Dictionary = state["factions"][player]
+	var charge = null
+	var mission = faction.get("mission")
+	if mission != null:
+		var template: Dictionary = data.missions.get(String(mission["template"]), {})
+		var target := String(mission.get("target_character", ""))
+		charge = {"name": String(template.get("name", mission["template"])),
+			"text": String(template.get("text", "")), "kind": String(template.get("kind", "")),
+			"turns_left": int(mission.get("turns_left", 0)),
+			"is_demand": String(template.get("kind", "")) == "leader_suicide",
+			"target_name": String(state["characters"].get(target, {}).get("name", "")) if target != "" else ""}
+	return {
+		"senate_alive": SenateRules.senate_faction(data, state) != "",
+		"is_roman_house": bool(data.factions.get(player, {}).get("is_roman_house", false)),
+		"houses": houses, "ladder": ladder, "men": men, "charge": charge,
+		"at_civil_war": bool(faction["at_civil_war"]), "outlawed": bool(faction.get("outlawed", false)),
+		"demand_standing": float(senate_rules["leader_suicide_standing"]),
+		"demand_popular": float(senate_rules["leader_suicide_popular_min"]),
+		"ambition": float(SocietyRules.faction_stocks(data, faction)["elite_pressure"]),
+		"ambition_break": float(data.balance["society"]["elite_civil_war_threshold"]),
+	}
+
+
 func comply_senate_demand() -> bool:
 	## The patriarch dies for the house. Succession settles at once; the
 	## Senate pays when it next judges the charge. No randomness is drawn.
@@ -437,7 +513,15 @@ func character_sheet(char_id: String) -> Dictionary:
 		"traits": traits,
 		"ancillaries": ancillaries,
 		"location": character.get("location", ""),
+		"office": _office_name(character.get("office")),
+		"offices_held": character.get("offices_held", []).map(func(id): return _office_name(id)),
 	}
+
+
+func _office_name(office_id) -> String:
+	if office_id == null or String(office_id) == "":
+		return ""
+	return String(data.offices.get(String(office_id), {}).get("name", String(office_id)))
 
 
 func set_heir(char_id: String) -> bool:

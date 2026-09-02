@@ -104,6 +104,16 @@
       "reward": { "boon": { "income_pct": 2.0 } }
     },
     {
+      "id": "a_seat_in_the_curia",
+      "name": "A Seat in the Curia",
+      "text": "Every summer the Senate fills its magistracies from the men of the houses. Good standing with the Senate and a man of influence will put one of yours in office.",
+      "trigger": { "kind": "after", "stages": ["first_steps"], "roman_only": true },
+      "objectives": [{ "kind": "offices_won" }],
+      "complete": "all",
+      "expires_turns": 40,
+      "reward": { "treasury": 750 }
+    },
+    {
       "id": "senate_counsel",
       "name": "The Senate's Counsel",
       "text": "The conscript fathers reward houses that serve. Complete a senate mission before their patience thins.",

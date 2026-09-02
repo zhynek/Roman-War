@@ -293,6 +293,21 @@ static func _journal_senate_notice(data: GameData, journal: Array, notice: Dicti
 		TurnJournal.add(journal, "civil_war", {"faction": notice["faction"],
 			"extra": {"pattern": String(notice.get("pattern", ""))}})
 		return
+	if kind == "office_gained":
+		var office_id := String(notice.get("office", ""))
+		TurnJournal.add(journal, "office_gained", {"faction": notice["faction"],
+			"subject": String(notice.get("character", "")), "extra": {"detail": office_id}})
+		if data.offices.get(office_id, {}).get("eponymous", false):
+			# The year is named for him: every court hears it.
+			TurnJournal.add(journal, "consuls_elected", {"faction": notice["faction"],
+				"subject": String(notice.get("character", ""))})
+		return
+	if kind == "house_joins_rebellion" or kind == "house_stays_loyal":
+		TurnJournal.add(journal, kind, {"faction": notice["faction"], "other": String(notice.get("other", ""))})
+		return
+	if kind == "civil_war_over":
+		TurnJournal.add(journal, "civil_war_over", {})
+		return
 	if not ["mission_issued", "mission_progress", "mission_complete", "mission_failed"].has(kind):
 		return
 	var template_id: String = String(notice.get("mission", ""))
