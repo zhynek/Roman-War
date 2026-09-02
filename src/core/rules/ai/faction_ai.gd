@@ -11,7 +11,7 @@ class_name FactionAi
 ##   AiPolitics  — how a Roman house answers the Senate's demand (Phase 7)
 ##   AiRules     — the persona table behind all of it (data/ai.json)
 ##
-## Order: capital → diplomacy → target → military → economy → policy, so a war
+## Order: capital → diplomacy → politics → target → military → economy → policy, so a war
 ## declared this turn shapes this turn's objective, the armies act on it, and
 ## the settlements spend whatever the war effort left.
 ##

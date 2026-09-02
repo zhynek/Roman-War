@@ -20,10 +20,13 @@ const LIVE_KINDS: Array[String] = ["take_region", "make_alliance", "reach_trade_
 static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) -> Array:
 	var notices: Array = []
 	# The cursus honorum: every summer the Senate refills its magistracies.
-	# When the Senate itself has fallen, the Republic's offices end with it —
-	# and so does any civil war over it.
-	if senate_faction(data, state) == "":
+	# When the Senate itself has fallen, the Republic's offices end with it,
+	# its charges are void, no demand or break can follow — there is nothing
+	# left to break with — and any civil war over it is settled.
+	var senate_id := senate_faction(data, state)
+	if senate_id == "":
 		_dissolve_offices(state)
+		_void_charges(data, state, notices)
 		_settle_civil_war(data, state, notices)
 	elif String(state["season"]) == "summer":
 		_hold_elections(data, state, rng, notices)
@@ -34,6 +37,8 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 		if not faction["alive"] or not data.factions.get(faction_id, {}).get("is_roman_house", false):
 			continue
 		_drift_popular_standing(data, faction, _region_count(state, faction_id))
+		if senate_id == "":
+			continue
 		# A house in arms against the Republic gets no charges from it.
 		if not faction["at_civil_war"]:
 			_run_charge(data, state, faction_id, rng, notices)
@@ -46,6 +51,21 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 			_declare_civil_war(data, state, faction_id, notices)
 			notices.append({"kind": "civil_war", "faction": faction_id, "pattern": "elite_overproduction"})
 	return notices
+
+
+static func _void_charges(data: GameData, state: Dictionary, notices: Array) -> void:
+	## The conscript fathers are gone, and their charges with them.
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		if data.factions.get(faction_id, {}).get("is_roman_house", false):
+			_void_charge(state["factions"][faction_id], faction_id, notices)
+
+
+static func _void_charge(faction: Dictionary, faction_id: String, notices: Array) -> void:
+	if faction.get("mission") != null:
+		notices.append({"kind": "mission_voided", "faction": faction_id, "mission": faction["mission"]["template"]})
+		faction["mission"] = null
 
 
 static func _drift_popular_standing(data: GameData, faction: Dictionary, region_count: int) -> void:
@@ -115,14 +135,16 @@ static func _run_charge(data: GameData, state: Dictionary, faction_id: String, r
 			maxf(float(senate_rules["min_standing"]),
 				float(faction["senate_standing"]) + float(penalty.get("senate_standing",
 					senate_rules["mission_fail_standing"]))))
-		notices.append(_notice("mission_failed", faction_id, mission))
 		faction["mission"] = null
 		if String(template.get("kind", "")) == "leader_suicide":
 			# Refusal is answered with outlawry: the house is named an enemy
-			# of the Republic, and the civil war begins.
+			# of the Republic, and the civil war begins. The outlawry IS the
+			# verdict; no disappointed note goes in the dispatch beside it.
 			faction["outlawed"] = true
 			_declare_civil_war(data, state, faction_id, notices)
 			notices.append({"kind": "civil_war", "faction": faction_id, "pattern": "outlawed"})
+		else:
+			notices.append(_notice("mission_failed", faction_id, mission))
 	else:
 		# A live charge reports itself every turn, so the player always
 		# sees where the house stands toward its purpose.
@@ -236,17 +258,23 @@ static func office_holders(data: GameData, state: Dictionary) -> Array:
 static func eligible_offices(data: GameData, state: Dictionary, char_id: String) -> Array:
 	## The magistracies a man may stand for at the next election, highest
 	## first: [{office, on_ladder}] — on_ladder false where the cursus honorum
-	## still bars him (he would only be seated as a suffect in a lean year).
+	## still bars him (he would be seated out of turn only in a lean year).
+	## Nothing below the highest rank he has held: the cursus climbs. A man
+	## holding a priesthood for life stands for nothing else.
 	var out: Array = []
 	if not state["characters"].has(char_id):
 		return out
 	var character: Dictionary = state["characters"][char_id]
 	if not _stands_for_office(data, state, character):
 		return out
+	var held = character.get("office")
+	if held != null and data.offices.get(held, {}).get("for_life", false):
+		return out
+	var floor_rank := _highest_rank_held(data, character)
 	var office_list: Array = data.offices.values()
 	office_list.sort_custom(func(a, b): return int(a["rank"]) > int(b["rank"]))
 	for office in office_list:
-		if int(character["age"]) < int(office["min_age"]):
+		if int(character["age"]) < int(office["min_age"]) or int(office["rank"]) < floor_rank:
 			continue
 		var needs_rank := int(office.get("requires_prior_rank", 0))
 		out.append({"office": office["id"],
@@ -274,12 +302,17 @@ static func _hold_elections(data: GameData, state: Dictionary, rng: CampaignRng,
 	## the Senate (weighted) plus his own influence WITHOUT the office he holds
 	## today — a consulship must be defended, not inherited from itself. Ties
 	## break on age, then id, so a loaded save elects the same men. The highest
-	## offices fill first; the cursus honorum (requires_prior_rank) is enforced
-	## while a candidate on the ladder remains and waived after — the Senate
-	## seats a suffect rather than leave a magistracy empty in a lean year.
-	var weight := float(data.balance["senate"].get("election_standing_weight", 1.0))
+	## offices fill first; a man never stands for a rank below the highest he
+	## has held; the cursus honorum (requires_prior_rank) is enforced while a
+	## candidate on the ladder remains and waived after — the Senate seats a
+	## man out of turn rather than leave a magistracy empty in a lean year. An
+	## office held for life (the pontificate) keeps its holder until he dies,
+	## and he stands for nothing else.
+	var weight := float(data.balance["senate"]["election_standing_weight"])
 	var previous := {}
 	var candidates: Array = []  # [score, age, char_id]
+	var taken := {}
+	var held_for_life := {}  # office id -> seats kept by living incumbents
 	var char_ids: Array = state["characters"].keys()
 	char_ids.sort()
 	for char_id in char_ids:
@@ -287,6 +320,10 @@ static func _hold_elections(data: GameData, state: Dictionary, rng: CampaignRng,
 		var held = character.get("office")
 		if held != null:
 			previous[char_id] = held
+			if character["alive"] and data.offices.get(held, {}).get("for_life", false):
+				taken[char_id] = true
+				held_for_life[held] = int(held_for_life.get(held, 0)) + 1
+				continue
 			character["office"] = null
 		if not _stands_for_office(data, state, character):
 			continue
@@ -303,12 +340,11 @@ static func _hold_elections(data: GameData, state: Dictionary, rng: CampaignRng,
 
 	var office_list: Array = data.offices.values()
 	office_list.sort_custom(func(a, b): return int(a["rank"]) > int(b["rank"]))
-	var taken := {}
 	for office in office_list:
-		var seats := int(office["seats"])
+		var seats := int(office["seats"]) - int(held_for_life.get(office["id"], 0))
 		var needs_rank := int(office.get("requires_prior_rank", 0))
-		# Pass one seats the men who climbed the ladder; pass two seats suffects
-		# into whatever is still empty.
+		# Pass one seats the men who climbed the ladder; pass two seats men out
+		# of turn into whatever is still empty.
 		for waived in [false, true]:
 			for entry in candidates:
 				if seats <= 0:
@@ -319,6 +355,8 @@ static func _hold_elections(data: GameData, state: Dictionary, rng: CampaignRng,
 				var character: Dictionary = state["characters"][char_id]
 				if int(character["age"]) < int(office["min_age"]):
 					continue
+				if int(office["rank"]) < _highest_rank_held(data, character):
+					continue  # the cursus climbs
 				if not waived and needs_rank > 0 and not _has_held_rank(data, character, needs_rank):
 					continue
 				taken[char_id] = true
@@ -336,7 +374,7 @@ static func _seat(data: GameData, state: Dictionary, rng: CampaignRng, char_id: 
 		character["offices_held"] = []
 	character["offices_held"].append(office_id)
 	ChronicleRules.add_deed(state, char_id, "offices_held")
-	if int(office["rank"]) >= int(data.balance["senate"].get("annals_office_min_rank", 3)):
+	if int(office["rank"]) >= int(data.balance["senate"]["annals_office_min_rank"]):
 		# Only the higher magistracies make the annals — a dozen quaestors a
 		# year would displace real history from the chronicle's per-turn cap.
 		ChronicleRules.record(data, state, "office_taken",
@@ -349,10 +387,14 @@ static func _seat(data: GameData, state: Dictionary, rng: CampaignRng, char_id: 
 
 
 static func _has_held_rank(data: GameData, character: Dictionary, rank: int) -> bool:
+	return _highest_rank_held(data, character) >= rank
+
+
+static func _highest_rank_held(data: GameData, character: Dictionary) -> int:
+	var highest := 0
 	for office_id in character.get("offices_held", []):
-		if int(data.offices.get(office_id, {}).get("rank", 0)) >= rank:
-			return true
-	return false
+		highest = maxi(highest, int(data.offices.get(office_id, {}).get("rank", 0)))
+	return highest
 
 
 static func _dissolve_offices(state: Dictionary) -> void:
@@ -472,16 +514,21 @@ static func _region_count(state: Dictionary, faction_id: String) -> int:
 static func _declare_civil_war(data: GameData, state: Dictionary, rebel_house: String, notices: Array) -> void:
 	## The house breaks with the Republic: war with the Senate, and every other
 	## house chooses — those the Senate has already alienated march with the
-	## rebel, the rest stand with the conscript fathers. Offices are stripped,
-	## standing charges are void, and the chronicle opens the war. Stances go
-	## through DiplomacyRules so the grudges are remembered like any war's.
+	## rebel, the rest stand with the conscript fathers. The player's house is
+	## never conscripted into another's rebellion: it stands with the Senate
+	## unless it is the rebel itself. Every house in arms is allied with every
+	## other and is a rebel in its own right. Offices are stripped, standing
+	## charges are void, and the chronicle opens the war. Stances go through
+	## DiplomacyRules so the grudges are remembered like any war's.
 	var senate_rules: Dictionary = data.balance["senate"]
 	var rebel: Dictionary = state["factions"][rebel_house]
 	rebel["at_civil_war"] = true
-	rebel["mission"] = null
+	_void_charge(rebel, rebel_house, notices)
 	var senate_id := senate_faction(data, state)
-	if senate_id != "":
-		DiplomacyRules.declare_war(data, state, rebel_house, senate_id)
+	if senate_id == "":
+		return  # nothing to rebel against; process_turn never asks in that case
+	DiplomacyRules.declare_war(data, state, rebel_house, senate_id)
+	var bloc: Array = [rebel_house]
 	var joiners: Array = []
 	var loyalists: Array = []
 	var faction_ids: Array = state["factions"].keys()
@@ -493,25 +540,29 @@ static func _declare_civil_war(data: GameData, state: Dictionary, rebel_house: S
 		if not other["alive"]:
 			continue
 		if other["at_civil_war"]:
-			# Already in arms against the Republic: brothers in rebellion.
-			DiplomacyRules.set_stance(state, rebel_house, other_id, "alliance")
+			bloc.append(other_id)  # already in arms against the Republic
 			continue
-		if float(other["senate_standing"]) <= float(senate_rules["civil_war_join_standing"]):
+		if other_id != state.get("player_faction", "") \
+				and float(other["senate_standing"]) <= float(senate_rules["civil_war_join_standing"]):
 			other["at_civil_war"] = true
-			other["mission"] = null
-			DiplomacyRules.set_stance(state, rebel_house, other_id, "alliance")
-			if senate_id != "":
-				DiplomacyRules.declare_war(data, state, other_id, senate_id)
+			_void_charge(other, other_id, notices)
+			DiplomacyRules.declare_war(data, state, other_id, senate_id)
+			bloc.append(other_id)
 			joiners.append(other_id)
 			notices.append({"kind": "house_joins_rebellion", "faction": other_id, "other": rebel_house})
 		else:
-			DiplomacyRules.declare_war(data, state, other_id, rebel_house)
 			loyalists.append(other_id)
 			notices.append({"kind": "house_stays_loyal", "faction": other_id, "other": rebel_house})
-	for joiner_id in joiners:
-		for loyal_id in loyalists:
-			DiplomacyRules.declare_war(data, state, loyal_id, joiner_id)
-	_strip_offices(state, [rebel_house] + joiners)
+	# Every house in arms stands with every other, and every loyal house
+	# against each of them.
+	for i in range(bloc.size()):
+		for j in range(i + 1, bloc.size()):
+			DiplomacyRules.set_stance(state, bloc[i], bloc[j], "alliance")
+	for loyal_id in loyalists:
+		for rebel_id in bloc:
+			if not DiplomacyRules.at_war(state, loyal_id, rebel_id):
+				DiplomacyRules.declare_war(data, state, loyal_id, rebel_id)
+	_strip_offices(state, bloc)
 	ChronicleRules.record(data, state, "civil_war", {"faction": rebel_house}, 8,
 		{"joiners": joiners.size(), "cause": "outlawed" if rebel.get("outlawed", false) else "ambition"})
 
@@ -519,7 +570,9 @@ static func _declare_civil_war(data: GameData, state: Dictionary, rebel_house: S
 static func _settle_civil_war(data: GameData, state: Dictionary, notices: Array) -> void:
 	## With the Senate gone there is nothing left to rebel against: every
 	## surviving house is a power like any other, its wars with the other
-	## houses lapse into neutrality (alliances stand), and the flags clear.
+	## houses lapse into neutrality (alliances stand; the ledger closes them
+	## without an oath of peace), and the flags clear. A house dead years ago
+	## settles nothing.
 	var roman_ids: Array = []
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
@@ -527,17 +580,20 @@ static func _settle_civil_war(data: GameData, state: Dictionary, notices: Array)
 	for faction_id in faction_ids:
 		if not data.factions.get(faction_id, {}).get("is_roman_house", false):
 			continue
-		roman_ids.append(faction_id)
 		var faction: Dictionary = state["factions"][faction_id]
 		if faction.get("at_civil_war", false) or faction.get("outlawed", false):
 			faction["at_civil_war"] = false
 			faction["outlawed"] = false
-			changed = true
+			if faction["alive"]:
+				changed = true
+		if faction["alive"]:
+			roman_ids.append(faction_id)
 	if not changed:
 		return
 	for i in range(roman_ids.size()):
 		for j in range(i + 1, roman_ids.size()):
 			if DiplomacyRules.at_war(state, roman_ids[i], roman_ids[j]):
+				ChronicleRules.mark_war_lapsed(state, roman_ids[i], roman_ids[j])
 				DiplomacyRules.set_stance(state, roman_ids[i], roman_ids[j], "neutral")
 	notices.append({"kind": "civil_war_over"})
 

@@ -52,7 +52,7 @@ static func _satisfied(data: GameData, state: Dictionary, faction_id: String, co
 		# The Republic must be over: the Senate destroyed, by this house or by
 		# any other that broke with it. A house that survives the Senate's
 		# fall and holds Rome may claim the age.
-		if state["factions"].has("senate") and state["factions"]["senate"]["alive"]:
+		if SenateRules.senate_faction(data, state) != "":
 			return false
 	return true
 

@@ -136,7 +136,7 @@ static func _subject_name(data: GameData, state: Dictionary, beat: Dictionary) -
 				if String(disaster["id"]) == subject:
 					return String(disaster["name"])
 			return subject.replace("_", " ")
-		"mission_issued", "mission_progress", "mission_complete", "mission_failed":
+		"mission_issued", "mission_progress", "mission_complete", "mission_failed", "mission_voided":
 			return String(data.missions.get(subject, {}).get("name", subject))
 		"technique_originated", "technique_adopted", "technique_spread":
 			return String(data.techniques.get(subject, {}).get("name", subject))

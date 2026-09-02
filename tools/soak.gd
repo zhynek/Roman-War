@@ -36,7 +36,6 @@ func _soak(seed_value: int) -> void:
 	var offices_gained := 0
 	var demands := 0
 	var civil_wars := {}
-	var republic_over := false
 
 	for i in range(TURNS):
 		var started := Time.get_ticks_msec()
@@ -71,8 +70,6 @@ func _soak(seed_value: int) -> void:
 				"civil_war":
 					var pattern: String = String(event.get("pattern", ""))
 					civil_wars[pattern] = int(civil_wars.get(pattern, 0)) + 1
-				"civil_war_over":
-					republic_over = true
 
 	var alive: Array = []
 	var rebels_left := 0
@@ -139,7 +136,7 @@ func _soak(seed_value: int) -> void:
 
 	# The Republic's politics: who sits in the magistracies at the end, and
 	# whether the road to civil war was walked. Seats read 0 for every house
-	# once the Senate has fallen.
+	# once the Senate has fallen — by civil war or by anyone else's sword.
 	var seats_by_house := {}
 	for seat in SenateRules.office_holders(game.data, game.state):
 		var house: String = String(seat["faction"])
@@ -158,7 +155,8 @@ func _soak(seed_value: int) -> void:
 	print("  chronicle: %d entries %s" % [game.state["chronicle"].size(), str(_sorted_counts(chronicle_kinds))])
 	print("  senate: seats %s · offices gained %d · demands %d · civil wars %s · the Republic %s" \
 		% [str(_sorted_counts(seats_by_house)), offices_gained, demands,
-			str(_sorted_counts(civil_wars)), "has fallen" if republic_over else "stands"])
+			str(_sorted_counts(civil_wars)),
+			"has fallen" if SenateRules.senate_faction(game.data, game.state) == "" else "stands"])
 	print("  avg end_turn: %d ms" % int(float(total_ms) / TURNS))
 
 

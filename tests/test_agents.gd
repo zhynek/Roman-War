@@ -167,6 +167,7 @@ func test_agent_upkeep_charged(t) -> void:
 func test_senate_demands_a_head(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
+	Fixtures.add_senate(data, state)  # no Senate, no charges (Phase 7)
 	data.missions = {"remove_a_king": {"id": "remove_a_king", "kind": "assassinate_leader",
 		"deadline_turns": 8, "reward": {"treasury": 800}}}
 	Fixtures.add_character(state, "blue", "blue_king", {"role": "leader", "location": "alpha"})

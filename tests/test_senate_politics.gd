@@ -51,7 +51,8 @@ func test_offices_table_is_a_strict_ladder(t) -> void:
 			t.check(["command", "management", "influence"].has(String(key)),
 				"%s effect %s is an attribute" % [office["id"], key])
 	t.check_eq(ranks.size(), 6, "ranks are unique")
-	t.check_eq(seats, 12, "twelve seats in the Republic")
+	t.check_eq(seats, 15, "fifteen seats in the Republic")
+	t.check(data.offices["pontifex"]["for_life"] and not data.offices["consul"]["for_life"], "the pontificate alone is for life")
 
 
 func test_summer_election_seats_by_standing_then_influence(t) -> void:
@@ -63,17 +64,17 @@ func test_summer_election_seats_by_standing_then_influence(t) -> void:
 
 	# Scores: red_elder 13, green_elder 11 (older than red_rising's 11),
 	# red_rising 11, red_young 9. Nobody has climbed the ladder yet, so the
-	# censorship and the consulships go to suffects in score order, highest
-	# office first.
-	t.check_eq(_office_of(state, "red_elder"), "censor", "the highest score takes the censorship")
-	t.check_eq(_office_of(state, "green_elder"), "consul", "a great man of a lesser house takes a consulship")
-	t.check_eq(_office_of(state, "red_rising"), "consul", "the next man the other")
+	# two censorships and a consulship go to men out of turn in score order,
+	# highest office first.
+	t.check_eq(_office_of(state, "red_elder"), "censor", "the highest score takes a censorship")
+	t.check_eq(_office_of(state, "green_elder"), "censor", "the second goes to a great man of a lesser house")
+	t.check_eq(_office_of(state, "red_rising"), "consul", "the next man a consulship")
 	t.check_eq(_office_of(state, "red_young"), "quaestor", "the youth starts as quaestor")
 	t.check_eq(_office_of(state, "red_wife"), "", "wives do not stand")
 	t.check_eq(_count(notices, "office_gained"), 4, "four men took office")
-	t.check_eq(CharacterRules.effective(data, state["characters"]["red_elder"], "influence"), 5 + 1,
+	t.check_eq(CharacterRules.effective(data, state["characters"]["red_elder"], "influence"), 5 + 2,
 		"a censor's influence carries the office's weight")
-	t.check_eq(CharacterRules.effective(data, state["characters"]["red_elder"], "management"), 2 + 2,
+	t.check_eq(CharacterRules.effective(data, state["characters"]["red_elder"], "management"), 2 + 3,
 		"and its authority over the rolls")
 	t.check_eq(CharacterRules.effective(data, state["characters"]["red_rising"], "command"), 2 + 2,
 		"a consul holds imperium")
@@ -124,14 +125,19 @@ func test_death_vacates_a_seat_and_the_cursus_promotes(t) -> void:
 	SenateRules.process_turn(data, state, CampaignRng.seeded(3))
 	CharacterRules.kill(state, "red_elder", data)
 	t.check_eq(_office_of(state, "red_elder"), "", "dead men hold no office")
-	# Next summer the censorship is open. Both consuls have climbed to it on
-	# the ladder; equal scores, so the elder takes it and the other keeps
-	# his consulship.
+	# Next summer a censorship is open. The consul has come of censorial age
+	# and climbed to it on the ladder; nobody of age is left for his old
+	# seat, which stays empty rather than go to a boy.
+	state["characters"]["red_rising"]["age"] = 36
 	SenateRules.process_turn(data, state, CampaignRng.seeded(5))
-	t.check_eq(_office_of(state, "green_elder"), "censor", "the elder consular climbs to censor")
-	t.check_eq(_office_of(state, "red_rising"), "consul", "the younger keeps the consulship")
-	t.check(state["characters"]["green_elder"]["offices_held"].has("consul")
-		and state["characters"]["green_elder"]["offices_held"].has("censor"), "the career records both rungs")
+	t.check_eq(_office_of(state, "green_elder"), "censor", "the elder censor is returned")
+	t.check_eq(_office_of(state, "red_rising"), "censor", "the consular climbs to the censorship")
+	t.check_eq(state["characters"]["red_rising"]["offices_held"], ["consul", "censor"], "the career records both rungs")
+	var consuls := 0
+	for seat in SenateRules.office_holders(data, state):
+		if seat["office"] == "consul":
+			consuls += 1
+	t.check_eq(consuls, 0, "a seat the ladder cannot fill stays empty")
 
 
 func test_a_house_at_civil_war_holds_no_office(t) -> void:
@@ -348,10 +354,15 @@ func test_complying_kills_the_patriarch_and_the_senate_relents(t) -> void:
 	t.check(not game.comply_senate_demand(), "there is no complying twice")
 	var notices := SenateRules.process_turn(data, state, CampaignRng.seeded(5))
 	t.check_eq(_count(notices, "mission_complete"), 1, "the Senate counts the demand met")
-	t.check_near(float(state["factions"]["red"]["senate_standing"]), standing_before + 2.0, 0.001,
-		"and relents by the authored two points")
+	var reward := float(data.missions["the_senate_demands_your_life"]["reward"]["senate_standing"])
+	t.check_near(float(state["factions"]["red"]["senate_standing"]), standing_before + reward, 0.001,
+		"and relents by the authored reward")
+	t.check(float(state["factions"]["red"]["senate_standing"]) > float(data.balance["senate"]["leader_suicide_standing"]),
+		"which lifts the house above the gate")
 	t.check(not state["factions"]["red"]["at_civil_war"], "no civil war")
 	t.check_eq(state["factions"]["red"]["mission"], null, "the demand is discharged")
+	SenateRules.process_turn(data, state, CampaignRng.seeded(6))
+	t.check(_charge_kind(data, state, "red") != "leader_suicide", "so the Senate does not name the heir next")
 
 
 func test_refusal_outlaws_the_house_and_the_houses_take_sides(t) -> void:
@@ -374,7 +385,7 @@ func test_refusal_outlaws_the_house_and_the_houses_take_sides(t) -> void:
 		t.check(red["at_civil_war"], "and at war with the Republic")
 		t.check(DiplomacyRules.at_war(state, "red", "senate"), "war with the Senate")
 		t.check_eq(red["mission"], null, "the demand is spent")
-		t.check_eq(_count(notices, "mission_failed"), 1, "refusal is a failed charge")
+		t.check_eq(_count(notices, "mission_failed"), 0, "the outlawry is the verdict; no disappointed note beside it")
 		t.check_eq(_count(notices, "civil_war"), 1, "and the civil war is proclaimed")
 		t.check_eq(_office_of(state, "red_elder"), "", "a rebel holds no office")
 		var recorded := false
@@ -495,6 +506,12 @@ func test_the_war_ends_when_the_senate_falls(t) -> void:
 	t.check_eq(_count(notices, "civil_war_over"), 1, "and the age turns")
 	t.check_eq(_office_of(state, "green_elder"), "", "the magistracies end with the Republic")
 	t.check(DiplomacyRules.declare_war(data, state, "red", "green"), "the houses are now powers like any other")
+	# And with the Senate gone no house can break with it, however ambitious.
+	state["factions"]["red"]["society"]["elite_pressure"] = float(data.balance["society"]["elite_civil_war_threshold"]) + 5.0
+	var later := SenateRules.process_turn(data, state, CampaignRng.seeded(5))
+	t.check_eq(_count(later, "civil_war"), 0, "no Senate, nothing to break with")
+	t.check(not state["factions"]["red"]["at_civil_war"], "the house stays a power like any other")
+	t.check_eq(_count(later, "civil_war_over"), 0, "and the age turns once")
 
 
 func test_the_ai_house_complies_on_the_last_turn(t) -> void:
@@ -523,7 +540,7 @@ func test_the_ai_house_complies_on_the_last_turn(t) -> void:
 ## --- Presentation ----------------------------------------------------------
 
 func test_political_beats_render_without_leftover_tokens(t) -> void:
-	## The five Phase 7 beats, rendered through the real prose table.
+	## The Phase 7 beats, rendered through the real prose table.
 	var game := Game.new_campaign("julii", 42)
 	var leader := ChronicleRules.leader_of(game.state, "julii")
 	var journal: Array = []
@@ -532,7 +549,9 @@ func test_political_beats_render_without_leftover_tokens(t) -> void:
 	TurnJournal.add(journal, "house_joins_rebellion", {"faction": "junii", "other": "julii"})
 	TurnJournal.add(journal, "house_stays_loyal", {"faction": "cornelii", "other": "julii"})
 	TurnJournal.add(journal, "civil_war_over", {})
-	t.check_eq(journal.size(), 5, "every political kind is a known beat")
+	TurnJournal.add(journal, "civil_war_ambition", {"faction": "junii", "extra": {"pattern": "elite_overproduction"}})
+	TurnJournal.add(journal, "mission_voided", {"faction": "julii", "subject": "the_senate_demands_your_life"})
+	t.check_eq(journal.size(), 7, "every political kind is a known beat")
 	for beat in journal:
 		for text in [DispatchFormat.headline(game.data, game.state, beat), DispatchFormat.body(game.data, game.state, beat)]:
 			t.check(text.length() > 0 and not text.contains("{"), "%s renders cleanly: %s" % [beat["kind"], text])
@@ -557,7 +576,8 @@ func test_the_senate_overview_reads_the_republic(t) -> void:
 	t.check_eq(int(red_row["seats"]), 3, "red holds three seats")
 	var censor: Dictionary = overview["ladder"][0]
 	t.check_eq(String(censor["id"]), "censor", "the ladder reads from the top")
-	t.check_eq(String(censor["holders"][0]["name"]), "Red Elder", "and names the holder")
+	var holder_names: Array = censor["holders"].map(func(h): return String(h["name"]))
+	t.check(holder_names.has("Red Elder"), "and names the holders: " + str(holder_names))
 	var men: Array = overview["men"]
 	t.check_eq(men.size(), 3, "the house's men stand before the Senate; the wife does not")
 	t.check_eq(String(men[0]["office"]), "Censor", "an office is shown by name")
@@ -571,3 +591,167 @@ func test_the_senate_overview_reads_the_republic(t) -> void:
 	overview = game.senate_overview()
 	t.check(overview["charge"] != null and overview["charge"]["is_demand"], "the demand is on the scroll")
 	t.check_eq(String(overview["charge"]["target_name"]), "Red Elder", "with the man it names")
+
+
+## --- The review round's rules ------------------------------------------------
+
+func test_the_cursus_never_runs_backwards(t) -> void:
+	## A praetor too young for the consulship keeps the praetorship; he is not
+	## seated as quaestor beside boys, whatever the score order says.
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	state["characters"]["red_rising"]["age"] = 30
+	state["characters"]["red_rising"]["offices_held"] = ["praetor"]
+	var offices: Array = SenateRules.eligible_offices(data, state, "red_rising").map(func(e): return String(e["office"]))
+	t.check(offices.has("praetor") and not offices.has("aedile") and not offices.has("quaestor"),
+		"a former praetor stands for nothing below the praetorship: " + str(offices))
+	SenateRules.process_turn(data, state, CampaignRng.seeded(3))
+	t.check_eq(_office_of(state, "red_rising"), "praetor", "and is returned as praetor")
+	t.check_eq(_office_of(state, "red_young"), "quaestor", "the quaestorship goes to the youth")
+
+
+func test_the_pontificate_is_held_for_life(t) -> void:
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	Fixtures.add_character(state, "red", "red_priest", {"age": 45, "influence": 2, "location": "beta"})
+	state["characters"]["red_priest"]["office"] = "pontifex"
+	state["characters"]["red_priest"]["offices_held"] = ["pontifex"]
+	t.check(SenateRules.eligible_offices(data, state, "red_priest").is_empty(), "a priest for life stands for nothing else")
+	var notices := SenateRules.process_turn(data, state, CampaignRng.seeded(3))
+	t.check_eq(_office_of(state, "red_priest"), "pontifex", "the summer election leaves the pontificate alone")
+	var pontiffs := 0
+	for seat in SenateRules.office_holders(data, state):
+		if seat["office"] == "pontifex":
+			pontiffs += 1
+	t.check_eq(pontiffs, 1, "and seats no second pontiff")
+	for notice in notices:
+		t.check(String(notice.get("character", "")) != "red_priest", "no laurels for a seat kept rather than won")
+	CharacterRules.kill(state, "red_priest", data)
+	SenateRules.process_turn(data, state, CampaignRng.seeded(4))
+	pontiffs = 0
+	for seat in SenateRules.office_holders(data, state):
+		if seat["office"] == "pontifex":
+			pontiffs += 1
+	t.check_eq(pontiffs, 0, "death opens the seat; nobody free, of age and not above it, takes it this year")
+
+
+func test_a_dead_senate_voids_its_charges_and_forces_no_break(t) -> void:
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	state["factions"]["red"]["mission"] = {"template": "annex_border_province", "turns_left": 6, "target_region": "gamma"}
+	data.missions["annex_border_province"] = {"id": "annex_border_province", "kind": "take_region",
+		"deadline_turns": 10, "reward": {"treasury": 100}}
+	state["factions"]["red"]["society"]["elite_pressure"] = float(data.balance["society"]["elite_civil_war_threshold"]) + 5.0
+	state["factions"]["senate"]["alive"] = false
+	var notices := SenateRules.process_turn(data, state, CampaignRng.seeded(3))
+	t.check_eq(_count(notices, "mission_voided"), 1, "the conscript fathers' charge dies with them")
+	t.check_eq(state["factions"]["red"]["mission"], null, "and is gone")
+	t.check_eq(_count(notices, "mission_issued"), 0, "no new charge comes from a dead Senate")
+	t.check_eq(_count(notices, "civil_war"), 0, "and no house breaks with what is not there")
+	t.check(not state["factions"]["red"]["at_civil_war"], "however ambitious")
+	var again := SenateRules.process_turn(data, state, CampaignRng.seeded(4))
+	t.check_eq(_count(again, "mission_voided") + _count(again, "civil_war_over"), 0, "and nothing repeats")
+
+
+func test_the_player_is_never_conscripted_and_the_bloc_stands_together(t) -> void:
+	## Red is the player. Green breaks with the Senate while red's standing
+	## sits below the join line: red stands with the Senate all the same. When
+	## red's own Ambition later breaks it, the two rebels are allies.
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	state["season"] = "winter"
+	state["factions"]["red"]["senate_standing"] = 0.0
+	state["factions"]["green"]["society"]["elite_pressure"] = float(data.balance["society"]["elite_civil_war_threshold"]) + 1.0
+	var notices := SenateRules.process_turn(data, state, CampaignRng.seeded(3))
+	t.check(state["factions"]["green"]["at_civil_war"], "green breaks")
+	t.check_eq(_count(notices, "house_stays_loyal"), 1, "the player's house is told it stands with the Senate")
+	t.check_eq(_count(notices, "house_joins_rebellion"), 0, "never conscripted")
+	t.check(not state["factions"]["red"]["at_civil_war"], "red is not in rebellion")
+	t.check(DiplomacyRules.at_war(state, "red", "green"), "but at war with the rebel")
+	state["factions"]["red"]["society"]["elite_pressure"] = float(data.balance["society"]["elite_civil_war_threshold"]) + 1.0
+	SenateRules.process_turn(data, state, CampaignRng.seeded(4))
+	t.check(state["factions"]["red"]["at_civil_war"], "red breaks on its own")
+	t.check_eq(DiplomacyRules.stance_between(state, "red", "green"), "alliance", "and the houses in arms stand together")
+	t.check(DiplomacyRules.at_war(state, "red", "senate") and DiplomacyRules.at_war(state, "green", "senate"), "against the Senate")
+
+
+func test_a_lapsed_civil_war_swears_no_peace(t) -> void:
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	NewGame.ensure_state_keys(state, data)
+	state["factions"]["red"]["at_civil_war"] = true
+	DiplomacyRules.declare_war(data, state, "red", "senate")
+	DiplomacyRules.declare_war(data, state, "green", "red")
+	var game := Game.new()
+	game.data = data
+	game.state = state
+	game.resolver = AutoResolver.new()
+	game.end_turn()  # the scribes open the war
+	var opened := false
+	for war in state["wars"]:
+		if [war["a"], war["b"]].has("red") and [war["a"], war["b"]].has("green"):
+			opened = true
+	t.check(opened, "the ledger holds the houses' war")
+	state["factions"]["senate"]["alive"] = false
+	game.end_turn()
+	var peace := 0
+	var summary := 0
+	for entry in state["chronicle"]:
+		var named: Array = entry["subjects"].values()
+		if not (named.has("red") and named.has("green")):
+			continue
+		if String(entry["kind"]) == "peace_made":
+			peace += 1
+		if String(entry["kind"]) == "war_summary":
+			summary += 1
+	t.check_eq(DiplomacyRules.stance_between(state, "red", "green"), "neutral", "the war lapsed with the Senate")
+	t.check_eq(peace, 0, "no oath of peace was sworn")
+	t.check_eq(summary, 1, "the book is closed with a summary")
+
+
+func test_the_ai_presses_the_charge_it_holds(t) -> void:
+	## Green holds a courtship charge naming red — the player — and its envoy
+	## lays the alliance before the player's court rather than a stranger's.
+	var world := _world()
+	var data: GameData = world["data"]
+	var state: Dictionary = world["state"]
+	_men(state)
+	NewGame.ensure_state_keys(state, data)
+	if not state["factions"]["green"].has("ai"):
+		state["factions"]["green"]["ai"] = {}
+	DiplomacyRules.set_stance(state, "red", "green", "neutral")
+	data.missions["court_a_useful_friend"] = {"id": "court_a_useful_friend", "kind": "make_alliance",
+		"deadline_turns": 10, "reward": {"senate_standing": 1}}
+	state["factions"]["green"]["mission"] = {"template": "court_a_useful_friend", "turns_left": 8, "target_faction": "red"}
+	var events: Array = []
+	AiDiplomacy.run(data, state, "green", data.ai_personas["default"], events)
+	var pressed := false
+	for offer in state["pending_offers"]:
+		if offer.get("from", "") == "green" and offer.get("to", "") == "red" and String(offer.get("stance", "")) == "alliance":
+			pressed = true
+	t.check(pressed, "the house's envoy carries the Senate's charge to the player's door")
+	t.check(state["factions"]["green"]["mission"] != null, "the charge stands until the answer")
+
+
+func test_a_fresh_objective_counts_only_new_deeds(t) -> void:
+	var game := Game.new_campaign("julii", 42)
+	game.state["guided"]["counters"]["offices_won"] = 4
+	var stage := {"id": "probe", "objectives": [{"kind": "offices_won", "fresh": true}]}
+	var inst := {"base": {"offices_won": 4}}
+	var stale := GuidedRules._objective_status(game.data, game.state, stage, stage["objectives"][0], inst)
+	t.check(not stale["met"] and int(stale["have"]) == 0, "seats won before the stage opened do not count")
+	GuidedRules.bump(game.state, "offices_won")
+	var fresh := GuidedRules._objective_status(game.data, game.state, stage, stage["objectives"][0], inst)
+	t.check(fresh["met"], "a seat won after it does")
+	var history := GuidedRules._objective_status(game.data, game.state, {"id": "probe"}, {"kind": "offices_won"}, inst)
+	t.check(history["met"] and int(history["have"]) == 5, "an unflagged objective credits the whole campaign, as before")

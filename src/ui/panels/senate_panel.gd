@@ -43,7 +43,7 @@ func _rebuild() -> void:
 
 	_line("The houses of Rome", 15, UiStyle.PARCHMENT)
 	for house in overview["houses"]:
-		var standing := "Senate %+.0f · People %.0f · seats %d" % [house["senate_standing"], house["popular_standing"], house["seats"]]
+		var standing := "Senate %+.1f · People %.1f · seats %d" % [house["senate_standing"], house["popular_standing"], house["seats"]]
 		if house["outlawed"]:
 			standing += " · OUTLAWED"
 		elif house["at_civil_war"]:
@@ -61,7 +61,9 @@ func _rebuild() -> void:
 	else:
 		_line("%s — %d turn%s to answer" % [charge["name"], int(charge["turns_left"]), "" if int(charge["turns_left"]) == 1 else "s"], 13, Color(0.95, 0.9, 0.75))
 		_line("    " + String(charge["text"]), 11, UiStyle.TEXT_DIM)
-		if charge["is_demand"]:
+		if charge["is_demand"] and not charge["can_comply"]:
+			_line("    They named %s, and he is already dead. The Senate will count it when it next sits." % charge["target_name"], 11, UiStyle.TEXT_DIM)
+		elif charge["is_demand"]:
 			_line("    They name %s. Refuse, and the house is outlawed when the deadline falls." % charge["target_name"], 11, Color(0.9, 0.55, 0.5))
 			var comply := Button.new()
 			comply.text = "He dies for the house. Comply."
@@ -93,13 +95,14 @@ func _rebuild() -> void:
 			held if held != "" else "holds no office", int(man["influence"])], 12, Color(0.8, 0.85, 0.95))
 		var stands: Array = []
 		for entry in man["eligible"]:
-			stands.append(String(entry["name"]) + ("" if entry["on_ladder"] else " (as suffect)"))
+			stands.append(String(entry["name"]) + ("" if entry["on_ladder"] else " (out of turn)"))
 		_line("    may stand for: " + (", ".join(stands) if not stands.is_empty() else "nothing yet"), 10, UiStyle.TEXT_DIM)
 	_content.add_child(HSeparator.new())
 
-	_line("The road to the break", 15, UiStyle.PARCHMENT)
-	_line("    The Senate demands a patriarch's life when its regard falls to %+.0f while the people's rises past %.0f. Ambition stands at %.0f; at %.0f the great men of the house break with Rome on their own." % [
-		overview["demand_standing"], overview["demand_popular"], overview["ambition"], overview["ambition_break"]], 11, UiStyle.TEXT_DIM)
+	if not overview["at_civil_war"]:
+		_line("The road to the break", 15, UiStyle.PARCHMENT)
+		_line("    The Senate demands a patriarch's life when its regard falls to %+.0f while the people's rises to %.0f. Ambition stands at %.0f; at %.0f the great men of the house break with Rome on their own." % [
+			overview["demand_standing"], overview["demand_popular"], overview["ambition"], overview["ambition_break"]], 11, UiStyle.TEXT_DIM)
 
 
 func _house_name(faction_id: String) -> String:

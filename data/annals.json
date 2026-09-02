@@ -31,7 +31,7 @@
     ],
     "civil_war": [
       "{faction} broke with the Senate, and the Republic was at war with itself.",
-      "The conscript fathers named {faction} an enemy of Rome; the legions were the answer."
+      "{faction} raised its standards against the Senate; the legions were the answer."
     ],
     "alliance_made": [
       "{faction} and {other_faction} bound their houses in alliance."

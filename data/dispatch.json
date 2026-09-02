@@ -370,6 +370,18 @@
       "body": "The season ran out before the work did. Nothing is said aloud, which is worse than if it were."
     },
     {
+      "id": "mission_voided",
+      "chapter": "cause",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "neutral",
+      "icon": "fasces",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "headline": "The Senate sets aside its charge: {subject}",
+      "body": "The conscript fathers have withdrawn the matter. Nothing is owed and nothing is paid; whatever they want of the house now, they will say next."
+    },
+    {
       "id": "civil_war",
       "chapter": "cause",
       "visibility": "public",
@@ -380,6 +392,18 @@
       "in_dispatch": true,
       "headline": "{faction} is declared an enemy of the Republic",
       "body": "Too loved by the people and too little trusted by the Senate. The other houses are told which side they are on."
+    },
+    {
+      "id": "civil_war_ambition",
+      "chapter": "cause",
+      "visibility": "public",
+      "severity": 5,
+      "tone": "bad",
+      "icon": "banner",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "{faction} breaks with the Senate",
+      "body": "Too many great men and too few commands to give them. The house's ambitious sons have chosen the field over the Forum, and its standards are raised against the Republic. The other houses are told which side they are on."
     },
     {
       "id": "office_gained",

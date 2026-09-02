@@ -698,6 +698,13 @@ def cross_checks(t: dict[str, dict]) -> None:
         if needs and (needs not in office_ranks or needs >= int(office["rank"])):
             err(f"offices: {office['id']}: requires_prior_rank {needs} must name a "
                 f"lower existing rank")
+        if not office.get("effects"):
+            err(f"offices: {office['id']}: an office that buys nothing is not an office")
+    if offices and not any(int(o.get("requires_prior_rank", 0)) == 0 for o in offices):
+        err("offices: no office is open without a prior rank — the ladder has no first rung")
+    min_rank = int(t.get("balance.json", {}).get("senate", {}).get("annals_office_min_rank", 1))
+    if offices and not 1 <= min_rank <= len(offices):
+        err(f"offices: balance.senate.annals_office_min_rank {min_rank} names no rank on the ladder")
     eponymous = [o["id"] for o in offices if o.get("eponymous", False)]
     if offices and len(eponymous) != 1:
         err(f"offices: exactly one office names the year (eponymous); found {eponymous}")

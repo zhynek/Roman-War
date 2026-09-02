@@ -248,6 +248,7 @@
     "civil_war_join_standing": 1
   },
   "ai": {
+    "senate_comply_turns_left": 1,
     "difficulty_income_multiplier": {
       "easy": 0.8,
       "medium": 1.0,
@@ -450,7 +451,7 @@
     "elite_legitimacy_damping": 0.6,
     "elite_conquest_shock": 4.0,
     "elite_office_absorption_per_tier": 0.03,
-    "elite_office_absorption_per_seat_rank": 0.04,
+    "elite_office_absorption_per_seat_rank": 0.06,
     "elite_command_absorption_per_army": 0.12,
     "elite_command_martial_floor": 0.5,
     "elite_decay_rate": 0.01,

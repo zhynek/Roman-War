@@ -16,7 +16,7 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, cha
 	if kind != "leader_suicide":
 		return
 	# The AI acts before the Senate ticks the charge: turns_left == 1 now is
-	# the turn the deadline falls on.
-	if int(mission.get("turns_left", 0)) > 1:
+	# the turn the deadline falls on (balance.ai.senate_comply_turns_left).
+	if int(mission.get("turns_left", 0)) > int(data.balance["ai"]["senate_comply_turns_left"]):
 		return
 	SenateRules.comply_with_demand(data, state, faction_id, character_notices)

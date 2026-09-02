@@ -192,8 +192,11 @@ func senate_overview() -> Dictionary:
 		for entry in SenateRules.eligible_offices(data, state, char_id):
 			eligible.append({"office": entry["office"], "name": _office_name(entry["office"]),
 				"on_ladder": bool(entry["on_ladder"])})
+		# The ballot weighs a man without the office he holds today.
+		var bare: Dictionary = character.duplicate()
+		bare["office"] = null
 		men.append({"id": char_id, "name": String(character["name"]), "age": int(character["age"]),
-			"influence": CharacterRules.effective(data, character, "influence"),
+			"influence": CharacterRules.effective(data, bare, "influence"),
 			"office": _office_name(character.get("office")), "eligible": eligible})
 	var faction: Dictionary = state["factions"][player]
 	var charge = null
@@ -205,6 +208,7 @@ func senate_overview() -> Dictionary:
 			"text": String(template.get("text", "")), "kind": String(template.get("kind", "")),
 			"turns_left": int(mission.get("turns_left", 0)),
 			"is_demand": String(template.get("kind", "")) == "leader_suicide",
+			"can_comply": target != "" and bool(state["characters"].get(target, {}).get("alive", false)),
 			"target_name": String(state["characters"].get(target, {}).get("name", "")) if target != "" else ""}
 	return {
 		"senate_alive": SenateRules.senate_faction(data, state) != "",

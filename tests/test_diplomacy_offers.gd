@@ -249,6 +249,7 @@ func test_senate_voids_missions_against_the_dead(t) -> void:
 func test_senate_courtship_missions(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
+	Fixtures.add_senate(data, state)  # no Senate, no charges (Phase 7)
 	data.missions = {"seal_a_friendship": {"id": "seal_a_friendship", "kind": "make_alliance",
 		"deadline_turns": 8, "reward": {"treasury": 500}}}
 	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
@@ -374,6 +375,7 @@ func test_ai_trades_with_compatible_neighbor(t) -> void:
 func test_trade_mission_accepts_trade_or_alliance(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
+	Fixtures.add_senate(data, state)  # no Senate, no charges (Phase 7)
 	data.missions = {"open_roads": {"id": "open_roads", "kind": "reach_trade_agreement",
 		"deadline_turns": 6, "reward": {"treasury": 300}}}
 	DiplomacyRules.set_stance(state, "red", "blue", "neutral")

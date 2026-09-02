@@ -81,7 +81,7 @@ the world in a **fixed order** so campaigns are reproducible:
 | 10 | Public order | Riots damage settlements; sustained collapse — or a province in open revolt — secedes to the rebels |
 | 11 | Events | Scripted, date and condition events, disasters |
 | 12 | Knowledge | Awareness spreads by contact, adoption programs advance, reform pressure decays (§12) |
-| 13 | Senate | Each summer the magistracies are refilled (§8.1); once the Senate has fallen the Republic's offices dissolve and its civil war is settled. Then per Roman house, in sorted order: popular standing drifts; the charge is judged and a new one issued — the Senate's demand for the patriarch's life outranks whatever charge stood, and a refused demand outlaws the house; Ambition past its threshold forces a civil war on its own |
+| 13 | Senate | Each summer the magistracies are refilled (§8.1); once the Senate has fallen the Republic's offices dissolve, its charges are void and its civil war is settled. Then per Roman house, in sorted order: popular standing drifts; the charge is judged and a new one issued — the Senate's demand for the patriarch's life outranks whatever charge stood, and a refused demand outlaws the house; Ambition past its threshold forces a civil war on its own |
 | 14 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
 | 15 | Guided trail | `GuidedRules.process_turn` (§10) judges the turn's final world: stages complete or expire, rewards pay, new stages open |
 | 16 | Date & bookkeeping | Event happiness and modifiers tick, mercenary pools replenish, turn and season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession, marriage, adoption); movement resets |
@@ -795,21 +795,24 @@ the validator fails any authored kind that is neither live nor
 forward-allowlisted (`blockade_port`, the naval remainder, is the only one left).
 
 **Offices.** `data/offices.json` holds the six magistracies of the cursus:
-quaestor (rank 1, four seats, from age 20), aedile (2, two seats, 24), praetor
-(3, two, 28), pontifex maximus (4, one, 40), consul (5, two, 32) and censor (6,
-one, 36) — twelve seats. Each carries attribute effects (`command`,
+quaestor (rank 1, four seats, from age 20), aedile (2, four seats, 24), praetor
+(3, two, 28), pontifex maximus (4, one, 32, held for life), consul (5, two, 32)
+and censor (6, two, 36) — fifteen seats. Each carries attribute effects (`command`,
 `management`, `influence`) that `CharacterRules.effect_total` adds to the
 holder, so an office reaches governance, battle odds and the choice of heir
 exactly as a trait does. Every **summer** the Senate refills every seat. The
-electorate is every living man of every living house not at civil war who has
+candidates are every living man of every living house not at civil war who has
 reached the office's age; his score is his house's senate standing ×
 `election_standing_weight` plus his own effective influence with the office he
 already holds wiped (the un-officed baseline); ties break on age, then id;
-seats fill from the censorship down. The ladder is enforced through
+seats fill from the censorship down, and a man never stands for a rank below
+the highest he has held — the cursus climbs. The pontifex maximus, the one
+`for_life` office, keeps his seat until death and stands for nothing else. The
+ladder is enforced through
 `requires_prior_rank` against a man's `offices_held` (aedile and praetor want a
 quaestorship, the consulship a praetorship, the censorship a consulship) and
-**waived when no remaining candidate satisfies it**, so a lean year seats
-suffects and the 270 BC start bootstraps itself. Taking a seat appends
+**waived when no remaining candidate satisfies it**, so a lean year seats men
+out of turn and the 270 BC start bootstraps itself. Taking a seat appends
 `offices_held`, credits the `offices_held` deed, records `office_taken` in the
 chronicle from the praetorship up (`annals_office_min_rank`), fires the
 `office_gained` trigger (four traits and three ancillaries hang on it) and the
@@ -820,10 +823,10 @@ the Senate falls every office dissolves.
 
 **Why offices matter.** `SocietyRules.apply_faction_turn` drains a Roman
 house's Ambition by `elite_office_absorption_per_seat_rank` per rank held
-(§4.4) — calibrated so a quaestorship absorbs what one provincial government
-tier does and a consulship more than an army command; the soak's first
-reading, at half that, showed a house holding five seats boil over all the
-same. A house in good standing seats its sons and its claimants have
+(§4.4) — calibrated so a quaestorship absorbs twice what one provincial
+government tier does and a consulship what two and a half army commands do;
+the soak's first reading, at a third of that, showed a house holding five
+seats boil over all the same. A house in good standing seats its sons and its claimants have
 somewhere to go; a house shut out of the curia — its standing collapsed by
 failed charges — loses the drain, and its Ambition climbs toward
 `elite_civil_war_threshold`, the automatic road to civil war.
@@ -835,18 +838,25 @@ too great and too hated — the Senate voids whatever charge stood (no penalty)
 and issues *The Senate Demands Your Life*, naming the patriarch, with the
 charge's four-turn deadline. **Comply** (`Game.comply_senate_demand`; an AI
 house does so on the demand's last turn) and the patriarch dies by his own
-hand, succession runs, and the charge pays (+2 standing). **Refuse** until the
-deadline falls and the house pays the penalty (−5), is marked `outlawed`, and
-is at civil war.
+hand, succession runs, and the charge pays (+6 standing — a life buys the house
+back above the gate, so the Senate does not name the heir next). **Refuse**
+until the deadline falls and the house pays the penalty (−5), is marked
+`outlawed`, and is at civil war; the outlawry is the verdict, so no failed-charge
+beat is printed beside it.
 
 **A civil war with sides.** `_declare_civil_war` sets the rebel's
 `at_civil_war`, declares war on the Senate and lets every other living house
 choose by its own standing: at or below `civil_war_join_standing` (1) it joins
 — an alliance with the rebel, war on the Senate, its own `at_civil_war` — and
-otherwise it stays loyal and declares on the rebel. Rebels lose their seats and
-their place on the ballot; the war is chronicled (`civil_war`, magnitude 8,
-with its joiners and its cause) and the `first_civil_war` event fires on the
-first. Two engine predicates keep the Republic's wars honest.
+otherwise it stays loyal and declares on the rebel. The player's house is never
+conscripted into another's rebellion: it stands with the Senate unless it is
+the rebel itself (joining by choice is a follow-up). Every house in arms is
+allied with every other, and a house that joins is a rebel in its own right —
+its war ends with its death or the Senate's fall, never with the first rebel's.
+Rebels lose their seats and their place on the ballot; the war is chronicled
+(`civil_war`, magnitude 8, with its joiners and its cause), the journal names
+the road (`civil_war` for outlawry, `civil_war_ambition` for the break), and
+the `first_civil_war` event fires on the first. Two engine predicates keep the Republic's wars honest.
 `DiplomacyRules.roman_war_forbidden`: no war among the houses and the Senate
 outside a civil war, enforced inside `declare_war` and therefore in every
 attack and siege — nobody marches on Rome on turn 1. `roman_peace_forbidden`:
@@ -854,13 +864,18 @@ a civil war is **never talked away** — a named veto in `evaluate_offer`,
 queued envoys voided by `offer_still_stands`, the AI's peace and white-peace
 passes skipping the pair, `Game.set_stance` refusing. **The end** is the
 Senate's fall: `at_civil_war` and `outlawed` clear, Roman-internal wars go
-neutral (alliances kept), the offices dissolve and `civil_war_over` is
-proclaimed. A rebel house destroyed ends its wars by death as any faction
-does. Roman long-campaign victory still requires the Senate destroyed; a
+neutral (alliances kept; the ledger closes those wars with a summary and no
+oath of peace), the offices dissolve, every standing charge is voided, and
+`civil_war_over` is proclaimed. From then on no charge is issued or judged and
+no house can break — there is nothing left to break with. A rebel house
+destroyed ends its wars by death as any faction does. Roman long-campaign victory still requires the Senate destroyed; a
 joiner that outlives it and holds Rome may claim it.
 
 **The AI.** `AiPolitics` is the houses' one political act: comply with the
-demand on its last turn. In the core rules an AI house therefore reaches civil
+demand on its last turn (`ai.senate_comply_turns_left`). `AiDiplomacy` also
+presses the Senate's courtship charges — a house holding one sends its envoy to
+the named power before any other, and that court judges the offer as it judges
+every other, so a hated neighbour can still fail the charge. In the core rules an AI house therefore reaches civil
 war only by Ambition. Defiance as a persona knob, canvassing (buying an
 election with silver at the cost of Ambition), a player-declared crossing of
 the Rubicon, and proscriptions are the follow-ups (`docs/HANDOFF.md` §8).
@@ -908,7 +923,7 @@ randomness outside the shared battle resolution. Difficulty stays economic
 |---|---|
 | `FactionAi` | Orchestration: capital housekeeping → diplomacy → politics → target choice → military → economy → policy; `begin_round` ages the war ledger and prices the world's strengths once per world turn |
 | `AiAssess` | Pure queries: force power (via `BattleResolver.force_strength`, part of the resolver interface), threat levels (`interior/frontier/threatened`), traversal maps (land hops + sea crossings), expansion target scoring |
-| `AiDiplomacy` | Deliberate war (full war chest, favorable odds, neutral neighbors only, capped simultaneous wars, a cooldown after a peace; neither the Roman houses nor the senate open on each other — the civil-war rules own that) and white peace for stalled AI-to-AI wars |
+| `AiDiplomacy` | Deliberate war (full war chest, favorable odds, neutral neighbors only, capped simultaneous wars, a cooldown after a peace; neither the Roman houses nor the senate open on each other — the civil-war rules own that), white peace for stalled AI-to-AI wars, and a Roman house's envoy pressing the Senate's courtship charge on the power it names (§8.1) |
 | `AiMilitary` | Laying sieges only with the strength to survive the eventual sally, assaulting at `assault_odds` (else starving them out), lifting hopeless sieges, relieving besieged settlements, field battles by odds, fighting open a road blocked by a hostile army, retreats, marching on the target (crossing by sea when that is the cheaper or only open road), merging co-located waves, raising armies from garrison surpluses with the best free general |
 | `AiStrategy` | The shared force estimators — paper strength of a stack, settlement defense behind walls, whole-faction weight, priced once per world turn and handed to every house. (Its persistent-objective machinery is not driven on main; see the module docstring) |
 | `AiPolicy` | The court's statecraft step: which craft the house takes up next, scored by persona group priority and need against adoption cost (§12) |
@@ -1052,7 +1067,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | events.json | scripted events + disasters | EventRules |
 | wonders.json | wonders and their faction-wide effects | settlements, economy, construction |
 | missions.json | the Senate's charges: mission templates with deadlines, rewards and penalties, the demand for a patriarch's life among them | SenateRules |
-| offices.json | the six magistracies of the cursus honorum: rank, seats, minimum age, the prior rank required, attribute effects, the eponymous consulship | SenateRules elections (§8.1), CharacterRules.effect_total |
+| offices.json | the six magistracies of the cursus honorum: rank, seats, minimum age, the prior rank required, attribute effects, the eponymous consulship, the pontificate held for life | SenateRules elections (§8.1), CharacterRules.effect_total |
 | win_conditions.json | per-faction long/short goals | VictoryRules |
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
@@ -1099,8 +1114,10 @@ trigger liveness (any trait/ancillary trigger kind no engine call site fires is
 reported as dead content; the forward allowlist emptied when the elections began
 firing `office_gained`) and the same liveness discipline for **mission kinds**
 (`blockade_port` alone stays forward-allowlisted, for the naval remainder), the
-office ladder's shape (ranks unique and contiguous from 1, a required prior rank
-that exists below the office's own, exactly one eponymous office): id references
+office ladder's shape (ranks unique and contiguous from 1, a first rung open to
+any man of age, a required prior rank that exists below the office's own, exactly
+one eponymous office, no office that buys nothing, an annals threshold that names
+a rank on the ladder): id references
 across tables; exactly
 one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
@@ -1252,7 +1269,7 @@ streams each called their own layer "Phase 9". Status as of this document:
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, seeded households, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers fire from the summer elections (§8.1) |
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Attitude factor model with decaying memory; offers priced in denarii (payments, tribute schedules, region cessions, stance changes) with live appraisal in the negotiation dialog; AI→player envoys with expiry; diplomats/spies/assassins on the map reading the two formerly-dormant effects (`personal_security`, `agent_skill`); senate courtship & assassination missions. Deferred: AI agent use, sabotage |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done** (§9). Persona-driven (`data/ai.json`) modular AI: economy, objectives/muster, armies (raise/merge/attack/besiege/assault/defend, land & sea movement), war-and-peace initiative with war hunger and a war ledger; difficulty wired as income/order bonuses plus player-attitude bias. Verified by a 60-turn harness (map changes hands, byte-identical replay, save/resume lockstep) and 100-turn soaks. Deferred: AI use of agents, AI retinue management, fleet operations, invading a hostile island (§9) |
-| 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Done** (§8.1). Standings and charges (take a region, win an alliance, open a market, remove a rival king, the Senate's demand for the patriarch's life); the cursus honorum — six magistracies in `data/offices.json`, summer elections by standing and influence with the ladder's prerequisites and lean-year suffects, office effects through `effect_total`, seats that absorb Ambition; compliance or outlawry; a civil war in which the other houses pick sides, that can never be talked away, and that ends when the Senate falls; the Senate scroll, five journal beats, a trail stage; wonders, victory checks. Deferred: canvassing, a player-declared civil war, AI defiance, proscriptions, offices for other cultures |
+| 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Done** (§8.1). Standings and charges (take a region, win an alliance, open a market, remove a rival king, the Senate's demand for the patriarch's life); the cursus honorum — six magistracies in `data/offices.json` (the pontificate held for life), summer elections by standing and influence with the ladder's prerequisites, no stepping down, and lean-year seats out of turn, office effects through `effect_total`, seats that absorb Ambition; compliance or outlawry; a civil war in which the other houses pick sides, that can never be talked away, and that ends when the Senate falls; the Senate scroll, five journal beats, a trail stage; wonders, victory checks. Deferred: canvassing, a player-declared civil war, joining a rebellion by choice, AI defiance, proscriptions, offices for other cultures |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed/trail); a geographic terrain map generated from the region graph (`data/map_geometry.json` — coastlines, province polygons, meandering roads) rendered in retained layers with terrain fills and topography glyphs, culture- and wall-tier-styled settlement icons, army roundels with counts, agent diamonds, fleets at sea-zone anchors, fog veil, hover tooltips, movement-range overlay and terrain-priced path previews with multi-turn march orders; camera by drag, wheel, trackpad, on-map buttons and keyboard; settlement panel with live factor breakdowns/taxes/queues/edicts; army orders (march, sail/land, attack, besiege, assault with occupation choice, mercenaries, garrison, raise); agent orders (travel, scout, assassinate with live odds, bribe, steal); diplomacy, knowledge, annals and family scrolls; world-news turn log; save/load; unified dark theme, responsive window. Balancing pass and tutorial pending |
 | Society & consequence | Eight societal stocks, the coercion asymmetry, the euergetism ratchet, elite overproduction, plunder's share, belonging as diffusion, craft and advances, legibility, authored crises naming their historical pattern, and a real trade-off on all 81 building chains | **Done** (§4), including provincial edicts (§4.10) as the player's fast lever. Remaining: an AI that understands any of it, and an empire-wide policy slot alongside the provincial one |
 | Visual & command layer | Building/unit art, right-click detail and garrison views, troop classes tied to their buildings, click-to-attack with animated battle playback | **Done.** Procedural illustrations, unit/building info cards, right-click map dossiers over rebound left/middle-drag panning, the building yard and muster hall, and an animated battle playback driven by AutoResolver's additive round log |

@@ -64,6 +64,7 @@
                   ]
                 },
                 "count": { "type": "integer", "minimum": 1 },
+                "fresh": { "type": "boolean", "description": "Count only deeds done after the stage opened" },
                 "amount": { "type": "integer", "minimum": 1 },
                 "building_kind": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
               }

@@ -70,7 +70,7 @@ beats and a trail stage — `docs/DESIGN.md` §8.1 is the account. The branch al
 carries the trunk fixes that were waiting: the world seed persisted and shown
 (§4), the build version on the start menu, a dead duplicate `class_name` that
 broke every suite on a fresh cache (§5.17), and a UI smoke test that had been
-silently truncated. Green: 359 tests / 0 failures across 38 test files,
+silently truncated. Green: 366 tests / 0 failures across 38 test files,
 validator 0 errors / 0 warnings across 32 data tables, clean boot.
 
 **Two things the integration surfaced that are worth knowing:**
@@ -400,14 +400,29 @@ What costs time to rediscover:
   the Rubicon only by Ambition or by refusing the demand.
 - **A civil war has sides but no proscriptions or defections**: armies and
   cities stay with their house; only stances, seats and the ballot change.
-- **AI houses fail the Senate's courtship charges, and their standing collapses.**
-  `court_a_useful_friend` asks for an alliance with a bordering foreign power;
-  `AiDiplomacy` never pursues an alliance a charge names, so the AI houses fail
-  it every deadline (−2 each) and sit at −7 to −10 by turn 80 in the soak — on
-  `main` too, where it had no consequence. Now standing decides the ballot and
-  the sides in a civil war, so every civil war tends to pull every other house in
-  (`civil_war_join_standing`). Teaching the AI to court the charge's target is
-  the contained fix; do not paper over it with the join threshold.
+- **AI houses press the Senate's courtship charges now, but cannot buy the
+  answer.** `AiDiplomacy._pursue_charge` sends the envoy a charge names
+  (alliance or trade) every turn the charge stands; the target's attitude
+  decides, so a hated neighbour still fails it. On `main` no AI house ever
+  proposed an alliance, which had sunk every house to −7…−10 by turn 80 and
+  made every civil war everyone-against-the-Senate. Sweetening a refused suit
+  with silver is the next slice; do not paper over it with the join threshold.
+- **The Senate can die of its own grievance, and the Republic's politics with it.**
+  In two of five soak seeds the Senate falls by turn 80–85 without a civil war:
+  its custodial AI takes rebel provinces across the sea (Spain, Crimea,
+  Cyrenaica), loses its armies there, and the society layer's unrest machine
+  takes the provinces — Rome itself in seed 1234 — to the rebels while
+  Latium's order total still reads above 100 (`in_revolt` at grievance −30,
+  legitimacy `standing` −11 after sixty turns of `coercion` +25). Pristine
+  `main` survives the same five seeds, so this is the world shifting under a
+  fragile faction, not a rule Phase 7 added; but once the Senate is gone the
+  offices dissolve, no charge is issued, no house can break, and the long
+  campaign's civil-war condition is met for free. Two contained slices: keep
+  the Senate's field army home (`AiAssess` target scoring for the custodial
+  persona), and look at why the Senate's legitimacy sinks in its own capital.
+- **The player cannot join a rebellion.** A player house is never conscripted
+  into another's civil war (it stands with the Senate unless it is the rebel);
+  a `Game.join_rebellion()` act is the follow-up beside crossing the Rubicon.
 - **Offices are Roman-only.** Other cultures drain Ambition by government tiers
   alone (DESIGN §4.4); a Hellenistic court or a tribal assembly has no ladder.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
@@ -460,7 +475,8 @@ quantized Ambition shock through a `SocietyRules` helper on the
 `Game.declare_civil_war()` for a great house that would rather strike first,
 gated on `popular_standing`, setting `at_civil_war` and then
 `SenateRules._declare_civil_war`. AI defiance — a `defiance` persona field and
-`ai.defy_senate_ratio`, judged against the round's strength snapshot. Then
+`ai.defy_senate_ratio`, judged against the round's strength snapshot. Joining a
+rebellion by choice — the player's counterpart of `house_joins_rebellion`. Then
 proscriptions and army defections once a war is on, and AI canvassing.
 
 **Phase 3 remainder — the sea.** Fleets move and watch but never fight;

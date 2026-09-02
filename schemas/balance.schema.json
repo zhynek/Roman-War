@@ -124,7 +124,19 @@
       "$ref": "#/$defs/numeric_section"
     },
     "senate": {
-      "$ref": "#/$defs/numeric_section"
+      "allOf": [
+        { "$ref": "#/$defs/numeric_section" },
+        {
+          "required": [
+            "start_standing", "max_standing", "min_standing",
+            "mission_success_standing", "mission_fail_standing",
+            "popular_standing_per_region", "popular_drift_factor",
+            "election_standing_weight", "annals_office_min_rank",
+            "leader_suicide_standing", "leader_suicide_popular_min",
+            "civil_war_join_standing"
+          ]
+        }
+      ]
     },
     "ai": {
       "allOf": [
@@ -134,6 +146,7 @@
         {
           "required": [
             "army_action_cap",
+            "senate_comply_turns_left",
             "assault_ratio",
             "defend_radius_hops",
             "difficulty_income_multiplier",

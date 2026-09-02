@@ -106,17 +106,17 @@
     {
       "id": "a_seat_in_the_curia",
       "name": "A Seat in the Curia",
-      "text": "Every summer the Senate fills its magistracies from the men of the houses. Good standing with the Senate and a man of influence will put one of yours in office.",
+      "text": "Every summer the Senate fills its magistracies from the men of the houses. Keep the Senate's charges and put men of influence forward, and the next election will seat one of yours — the Senate scroll says who may stand.",
       "trigger": { "kind": "after", "stages": ["first_steps"], "roman_only": true },
-      "objectives": [{ "kind": "offices_won" }],
+      "objectives": [{ "kind": "offices_won", "fresh": true }],
       "complete": "all",
       "expires_turns": 40,
-      "reward": { "treasury": 750 }
+      "reward": { "treasury": 250 }
     },
     {
       "id": "senate_counsel",
       "name": "The Senate's Counsel",
-      "text": "The conscript fathers reward houses that serve. Complete a senate mission before their patience thins.",
+      "text": "The conscript fathers reward houses that serve. Complete a charge from the Senate before their patience thins.",
       "trigger": { "kind": "after", "stages": ["first_steps"], "roman_only": true },
       "objectives": [{ "kind": "senate_missions" }],
       "complete": "all",

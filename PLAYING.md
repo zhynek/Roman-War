@@ -340,25 +340,30 @@ and how close you are to the break.
   being alive**. Success pays silver and standing, sometimes troops; failure
   costs standing. The negotiation scroll and your agents are how the harder
   ones get done.
-- **Offices.** Every summer the Senate fills twelve seats — four quaestors,
-  two aediles, two praetors, the pontifex maximus, two consuls and the censor —
-  from the grown men of the houses in good standing. Your house's standing
+- **Offices.** Every summer the Senate fills fifteen seats — four quaestors,
+  four aediles, two praetors, two consuls and two censors, and the pontifex
+  maximus, who keeps his priesthood for life — from the grown men of the houses
+  in good standing. Your house's standing
   and the man's own influence decide the ballot; the higher rungs want a lower
-  office first, waived when nobody qualifies. An office makes a man better at
+  office first, waived when nobody qualifies, and no man steps back down the
+  ladder. An office makes a man better at
   governing and commanding for the year, the consulship names the year after
   him and every court hears of it, and — quietly the most important thing —
   every seat your house holds gives its ambitious sons something to do. A
   house shut out of the curia breeds claimants instead, and enough of them
   drag it into civil war on their own.
 - **The demand.** Grow too great while the Senate hates you — the people's
-  regard risen past 5 while the Senate's has sunk to −5 — and the conscript
+  regard risen to 5 while the Senate's has sunk to −5 — and the conscript
   fathers set aside whatever they were asking and demand your patriarch's
   life. The scroll names the man and the deadline. **Comply** and he dies by
-  his own hand, your heir succeeds, and your standing recovers. Refuse until
+  his own hand, your heir succeeds, and the Senate's regard recovers enough
+  that it does not name the heir next. Refuse until
   the deadline falls and the house is **outlawed**: at war with Rome.
 - **Civil war.** Once a house is in arms against the Republic the other houses
   choose — those the Senate has already alienated join the rebel, the rest
-  stand with the Senate. Nobody in the Republic can make war on Rome or on
+  stand with the Senate. Your own house is never dragged into another's
+  rebellion: it stands with the Senate unless it is the rebel. Nobody in the
+  Republic can make war on Rome or on
   another house before that, and nobody can make peace after it: no envoy, no
   silver. It ends when Rome falls or the rebels do. The house that holds Rome
   when the Senate is gone holds it by the sword — which is what the long
@@ -384,7 +389,7 @@ a cooldown), so fighting well always pays.
 
 Check the top bar for your progress. A long campaign wants around 50 regions
 including Rome; a Roman house must also settle matters with the Senate — a
-civil war it has to win (see **The Senate**). A short
+civil war the Senate must lose (see **The Senate**). A short
 campaign wants about 15 regions and specific rivals destroyed. If nobody manages
 it by AD 14, the age simply closes.
 
@@ -414,9 +419,9 @@ Honest list, so you know what you are looking at:
   and there are no port blockades yet. (Armies still cross the sea, and an
   amphibious landing on an enemy shore already works.)
 - **Buying elections, and the aftermath of a civil war.** You cannot canvass
-  for a seat with silver, cannot declare on the Senate yourself before it
-  demands your life or your ambitious sons force the matter, and a civil war
-  proscribes nobody: armies and cities stay with their houses. The computer
+  for a seat with silver, cannot declare on the Senate yourself or join another
+  house's rebellion before the Senate demands your life or your ambitious sons
+  force the matter, and a civil war proscribes nobody: armies and cities stay with their houses. The computer
   houses always comply with the Senate's demand. Of the Senate's authored
   charges, blockading a port waits on naval combat.
 - **All art is drawn by code.** The map, the towns, the buildings and the
