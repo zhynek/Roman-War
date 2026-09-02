@@ -13,6 +13,7 @@ var map_view: MapView
 var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
+var reforms_panel: ReformsPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
@@ -57,6 +58,7 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.battle_fought.connect(_log_battle)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -72,6 +74,10 @@ func _ready() -> void:
 	diplomacy_panel = DiplomacyPanel.new()
 	diplomacy_panel.stance_changed.connect(refresh)
 	add_child(diplomacy_panel)
+
+	reforms_panel = ReformsPanel.new()
+	reforms_panel.reform_adopted.connect(refresh)
+	add_child(reforms_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
@@ -101,6 +107,7 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	bar.add_child(_bar_button("Reforms", func(): reforms_panel.open_for(game)))
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -196,27 +203,76 @@ func _enemy_army_in(region_id: String) -> String:
 
 
 func attack_army_order(defender_id: String) -> void:
-	## Attacking a faction we are not yet at war with is a decision, not a
-	## mis-click, so it is confirmed first.
+	## Every attack is confirmed with its paper odds first; attacking a faction
+	## we are not yet at war with additionally declares war, and says so.
 	var defender: Dictionary = game.state["armies"].get(defender_id, {})
 	if defender.is_empty():
 		return
 	var player: String = game.state["player_faction"]
+	var faction_name: String = game.data.factions.get(defender["owner"], {}).get("name", defender["owner"])
+	var text := "Attack the %s?" % faction_name
 	if not DiplomacyRules.at_war(game.state, player, defender["owner"]):
-		var faction_name: String = game.data.factions.get(defender["owner"], {}).get("name", defender["owner"])
-		_confirm("This will declare war on %s. Attack?" % faction_name,
-			func(): _resolve_attack(defender_id))
-		return
-	_resolve_attack(defender_id)
+		text = "This will declare war on %s. " % faction_name + text
+	var estimate := game.battle_estimate(selected_army, defender_id)
+	if not estimate.is_empty():
+		text += "\n" + RegionPanel.odds_text(estimate)
+	_confirm(text, func(): _resolve_attack(defender_id))
 
 
 func _resolve_attack(defender_id: String) -> void:
-	var result := game.attack_army(selected_army, defender_id)
-	if result.is_empty():
-		_log("The army cannot come to grips with the enemy from here.")
-	else:
-		_log("[b]Battle![/b] The %s prevail." % ("attackers" if result["winner"] == "attacker" else "defenders"))
+	_log_battle(game.attack_army(selected_army, defender_id), "Battle")
 	_after_order()
+
+
+func _log_battle(result: Dictionary, title: String) -> void:
+	## The battle report: who prevailed, what it cost, and — from the
+	## resolver's breakdown — the factors that decided it.
+	if result.is_empty():
+		_log("%s: the army cannot come to grips with the enemy from here." % title)
+		return
+	var attacker_won: bool = result["winner"] == "attacker"
+	var line := "[b]%s![/b] The %s prevail — attackers lose %d%%, defenders %d%%." % [title,
+		"attackers" if attacker_won else "defenders",
+		int(round(float(result.get("attacker_casualty_pct", 0.0)))),
+		int(round(float(result.get("defender_casualty_pct", 0.0))))]
+	if result.get("defender_destroyed", false):
+		line += " The defenders are destroyed."
+	elif result.get("attacker_destroyed", false):
+		line += " The attackers are destroyed."
+	_log(line)
+	var breakdown: Dictionary = result.get("breakdown", {})
+	if not breakdown.is_empty():
+		_log("    " + battle_summary(breakdown))
+
+
+static func battle_summary(breakdown: Dictionary) -> String:
+	## "Attackers ×1.21 matchups, ×0.85 class terrain · Defenders ×2.00 walls ·
+	##  paper odds 1.42:1, fortune 1.05 / 0.93"
+	var parts: Array = []
+	for side in ["attacker", "defender"]:
+		var top := _decisive_factors(breakdown[side]["factors"], 3)
+		if not top.is_empty():
+			parts.append("%s %s" % ["Attackers" if side == "attacker" else "Defenders", ", ".join(top)])
+	var fortune: Dictionary = breakdown.get("fortune", {})
+	parts.append("paper odds %.2f:1, fortune %.2f / %.2f" % [float(breakdown.get("ratio", 1.0)),
+		float(fortune.get("attacker", 1.0)), float(fortune.get("defender", 1.0))])
+	return " · ".join(parts)
+
+
+static func _decisive_factors(factors: Array, count: int) -> Array:
+	var candidates: Array = []
+	for factor in factors:
+		if factor["label"] == "base":
+			continue
+		candidates.append(factor)
+	candidates.sort_custom(func(a, b):
+		var swing_a: float = absf(float(a["value"]) - 1.0)
+		var swing_b: float = absf(float(b["value"]) - 1.0)
+		return swing_a > swing_b if swing_a != swing_b else String(a["label"]) < String(b["label"]))
+	var lines: Array = []
+	for factor in candidates.slice(0, count):
+		lines.append("×%.2f %s" % [float(factor["value"]), String(factor["label"]).replace("_", " ")])
+	return lines
 
 
 func besiege_order(target_region: String) -> void:
@@ -314,8 +370,15 @@ func _log_report(report: Dictionary) -> void:
 		elif notice.has("ancillary"):
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
+	for faction_id in report.get("reforms", {}):
+		if faction_id == player:
+			for doctrine_id in report["reforms"][faction_id]:
+				_log("[color=#c0b060]Reform complete: %s[/color]"
+					% game.data.doctrines.get(doctrine_id, {}).get("name", doctrine_id))
 	for siege_event in report["sieges"]:
-		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+		var siege_result: Dictionary = siege_event.get("result", {})
+		var outcome := "the starving garrison sallies and the city falls." 			if siege_result.get("captured", false) else "the starving garrison sallies and breaks the siege."
+		_log("The siege of %s is decided: %s" % [game.data.regions[siege_event["region"]]["settlement_name"], outcome])
 
 
 func _is_player_character(char_id: String) -> bool:

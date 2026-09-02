@@ -30,7 +30,7 @@ src/core/rules/battle/  BattleResolver interface + auto-resolve implementation
 src/ui/              Campaign UI: start menu, map view, settlement/army/family panels
 tests/               Headless GDScript test suite (godot --headless --script)
 tools/               validate_data.py — schema + cross-reference validation
-docs/                Design document and research report
+docs/                Design document, military strategy guide, handoff notes, research report
 ```
 
 ## Running
@@ -69,11 +69,16 @@ python3 tools/validate_data.py
 Phases 0–4 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
 sieges, mercenaries, events, victory checks, and the full character layer
-(traits, retinues, family tree, succession). A playable campaign-map UI sits
-on top: geographic map with fog of war, settlement/army panels driven by the
-engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
-passive stub today), agents & diplomacy negotiation, and senate depth are the
-next phases; their data tables and state hooks already exist.
+(traits, retinues, family tree, succession). On top of that sits the military
+strategy layer: unit-class counters and per-class terrain in an RNG-free battle
+estimator, weapon and armour upgrades from armouries, a casualty and rout
+model, garrison quality, levy strain and war mood feeding public order, and
+faction doctrines learned from buildings, resources and the enemies a faction
+has fought (see [`docs/MILITARY_STRATEGY.md`](docs/MILITARY_STRATEGY.md)). A
+playable campaign-map UI shows the odds before every attack, the factors that
+decided each battle, and a reforms scroll. Campaign AI (a passive stub today),
+agents & diplomacy negotiation, and senate depth are the next phases; their
+data tables and state hooks already exist.
 
 ## Clean-room policy
 

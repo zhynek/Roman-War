@@ -21,11 +21,19 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 
 **Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
 foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+foundation loop, a playable Phase 8 campaign UI, and the **military strategy
+layer**: unit-class counters and per-class terrain/walls in the RNG-free
+`BattleResolver.estimate()`, weapon/armour kit from armouries, the casualty and
+rout model, garrison quality / levy strain / war mood in public order, and
+faction doctrines (`DoctrineRules`, `data/doctrines.json`) with a Reforms scroll,
+attack odds preview and battle reports. `docs/MILITARY_STRATEGY.md` is the
+player-facing guide; DESIGN §5.5–5.8 the spec.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of the tip of `claude/military-strategy-gameplay-ecnngs`:** 115
+tests / 0 failures, validator 0 errors / 0 warnings, clean boot. A Mac build
+of the pre-military-layer game was delivered to the user, who is playtesting;
+saves from it load (save version 2 upgrades them, granting the campaign's
+starting doctrines).
 
 ## 2. Get productive in five minutes
 
@@ -80,7 +88,7 @@ Python (fat header at offset 0, `cputype 0x0100000c`), overwrite the executable,
 re-zip → 27 MB. **Verify `LC_CODE_SIGNATURE` (cmd `0x1d`) survives in the thinned
 slice before shipping**, or the app will not launch.
 
-## 4. Two determinism traps not in CLAUDE.md
+## 4. Determinism traps not in CLAUDE.md
 
 1. **Sort keys in any loop that can steer an RNG draw.** A JSON round-trip
    reorders dictionaries, so an unsorted iteration makes a loaded save diverge
@@ -89,6 +97,13 @@ slice before shipping**, or the app will not launch.
 2. **`state.rng_state` is a decimal *string*, not an int.** JSON numbers are
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
+3. **Initialise new state fields in `NewGame` *and* `SaveGame.upgrade`, never
+   lazily on first read.** The determinism tests compare canonical JSON of a
+   live game against a loaded one; a key added lazily lands in a different
+   position and the comparison fails even though the numbers agree.
+4. **Doctrine lists are kept sorted** (`DoctrineRules.grant`) and every
+   doctrine-effect merge iterates sorted ids; `war_record.faced` is written in
+   sorted class order. Keep it that way.
 
 ## 5. Three ways forward
 
@@ -96,10 +111,13 @@ The user has not committed to a direction. Each is self-contained; pick one and
 paste its prompt.
 
 ### Phase 6 — AI opponents
-The world currently feels empty: `src/core/rules/ai_stub.gd` is **33 lines** of
-passive settlement management. Nothing expands, declares war, or defends. The
-difficulty multipliers already exist and are already read
-(`balance.json → ai.difficulty_income_multiplier`, `ai.difficulty_order_bonus`).
+The world currently feels empty: `src/core/rules/ai_stub.gd` is a few dozen
+lines of passive settlement management plus doctrine adoption. Nothing
+expands, declares war, or defends. The difficulty multipliers already exist and
+are already read (`balance.json → ai.difficulty_income_multiplier`,
+`ai.difficulty_order_bonus`), and `BattleResolver.estimate()` gives an AI the
+RNG-free odds of any attack, with the counter matrix telling it what to recruit
+against what it has faced (`war_record.faced`).
 
 > Build Phase 6: replace the passive `AiStub` with real modular AI behaviours —
 > economy, expansion, war, and defence — so factions actually play the game.
@@ -138,14 +156,30 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   them, and warns about any *other* trigger kind no engine call site fires.
 - **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
   abstracted crossing today), naval battles, port blockades, forts and
-  watchtowers, ambush.
+  watchtowers, ambush. The `ship` class has no matchups (no naval battles yet).
+- **Military layer edges**: doctrine `escape_pct`/`pursuit_pct` are side-wide
+  (the Parthian shot speeds the whole army's escape, not only horse archers);
+  the AI does not yet read `estimate()` or recruit to counter what it has
+  faced; the counter matrix and doctrine costs have had no playtest tuning.
 - **Art is placeholder** — coloured circles on a geographic map.
 
 ## 7. Process notes
 
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
+  Develop on `claude/military-strategy-gameplay-ecnngs`.
+- **`data/buildings.json` and `data/campaign.json` are plain `indent=2` JSON
+  with no trailing newline and unescaped non-ASCII**: `json.dumps(doc, indent=2,
+  ensure_ascii=False)` round-trips them byte-for-byte, so scripted edits keep
+  diffs small. `balance.json`, `unit_classes.json` and `doctrines.json` end with
+  a newline.
+- **The unit-class counter matrix** is authored so any pair's two multipliers
+  multiply to 0.85–1.15 (validator warns); the net counter is their ratio, and
+  `docs/MILITARY_STRATEGY.md` §2 is generated from the data — regenerate its
+  tables if you retune.
+- **Effect keys must have readers.** The validator fails on any building or
+  doctrine effect key not read (as a quoted literal) under `src/core`; add the
+  reader before the data, or list the key in `FORWARD_EFFECTS` deliberately.
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
   issues** the 60-strong test suite had missed — including armies declaring war
@@ -155,4 +189,5 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   run the suite themselves, and require findings-only output.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
-  must pass before committing.
+  must pass before committing. Run `--import` again after any new `class_name`
+  (`ArmyRules`, `DoctrineRules`, `ReformsPanel` were the latest).

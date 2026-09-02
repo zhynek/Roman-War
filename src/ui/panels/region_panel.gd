@@ -8,6 +8,7 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal battle_fought(result: Dictionary, title: String)
 
 var game: Game
 var region_id := ""
@@ -196,10 +197,21 @@ func _build_armies_section() -> void:
 					and game.state["armies"][selected_army]["region"] == region_id:
 				_action_button("Attack the %s" % faction.get("name", army["owner"]),
 					func(): attack_requested.emit(army_id))
+				var estimate := game.battle_estimate(selected_army, army_id)
+				if not estimate.is_empty():
+					_label("    " + odds_text(estimate), Color(0.9, 0.85, 0.6))
 
 
 func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	_label("Movement left: %.1f" % float(army["movement_left"]))
+	var summary := game.army_summary(army_id)
+	if not summary.is_empty() and int(summary["units"]) > 0:
+		var parts: Array = []
+		for unit_class in summary["by_class"]:
+			parts.append("%d %s" % [int(round(float(summary["by_class"][unit_class]["units"]))),
+				String(unit_class).replace("_", " ")])
+		_label("%d men · %s · avg xp %.1f" % [int(summary["soldiers"]), ", ".join(parts), float(summary["avg_experience"])],
+			Color(0.9, 0.85, 0.6))
 	for unit in army["units"]:
 		_label("  " + _unit_line(unit))
 	_label("Click an adjacent region to march, attack, or besiege.", Color(0.7, 0.8, 0.9))
@@ -221,9 +233,14 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 			occupation_options.add_item(choice.capitalize())
 		add_child(occupation_options)
 		var can_assault: bool = settlement["siege"].get("equipment_ready", false)
-		_action_button("Assault the walls!" if can_assault else "Assault (equipment not ready)", func():
+		var assault_text := "Assault the walls!" if can_assault else "Assault (equipment not ready)"
+		var estimate := game.assault_estimate(army_id, region_id)
+		if not estimate.is_empty():
+			assault_text += "  " + odds_text(estimate)
+		_action_button(assault_text, func():
 			var choice: String = ["occupy", "enslave", "exterminate"][occupation_options.selected]
-			game.assault_settlement(army_id, region_id, choice)
+			var result := game.assault_settlement(army_id, region_id, choice)
+			battle_fought.emit(result, "Assault on %s" % settlement_display_name())
 			action_taken.emit())
 
 	var offers := game.mercenaries_available(region_id)
@@ -278,6 +295,12 @@ func _separator() -> void:
 
 func settlement_display_name() -> String:
 	return game.data.regions.get(region_id, {}).get("settlement_name", region_id)
+
+
+static func odds_text(estimate: Dictionary) -> String:
+	## "odds 1.42:1 — 78% to win", from BattleResolver.estimate's paper ratio.
+	return "odds %.2f:1 — %d%% to win" % [float(estimate.get("ratio", 1.0)),
+		int(round(float(estimate.get("attacker_win_chance", 0.5)) * 100.0))]
 
 
 func _unit_line(unit: Dictionary) -> String:

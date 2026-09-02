@@ -24,7 +24,7 @@ campaign runs to AD 14.
 
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
+  Buttons: **Family**, **Diplomacy**, **Reforms**, **Save**, **Load**, and **END TURN**.
 - **The map** — every region is a circle at its real geographic place, coloured
   by who owns it and sized by how big its city is. Lines are roads between
   neighbouring regions; dashed lines are sea routes. Small squares beside a
@@ -46,7 +46,11 @@ doing well or badly:
 - **Public order** — below 75% the city riots; a sustained collapse means it
   revolts and joins the independents. Garrisons, a governor, entertainment
   buildings and low taxes push it up; squalor, distance from your capital,
-  foreign-culture buildings and high taxes drag it down.
+  foreign-culture buildings and high taxes drag it down. Garrisons count by
+  *quality*: drilled, experienced regular infantry police a town, levies and
+  elephants barely do, and a barracks with drill grounds makes every garrison
+  better at it. Raising troops from a town leaves **levy strain** behind for a
+  few turns — spread the levy across your cities rather than emptying one.
 - **Growth** — how fast the population rises. Population is what upgrades a
   city to the next tier, and also what recruits cost you.
 - **Income** — taxes, farming, trade, mines, minus corruption.
@@ -82,10 +86,31 @@ panel to select it. Now:
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
+- **Before every attack the game shows the paper odds** — *odds 1.42:1 — 78% to
+  win* — and asks. Afterwards the log says who prevailed, what each side lost,
+  and the three factors that decided it: matchups, ground, walls, general,
+  doctrines, fortune. Unit lines show each unit's class, chevrons and kit
+  (`w1/a1`), and the recruitment list shows what a recruit raised here will
+  carry. The counters, terrain effects and doctrines are all laid out in
+  [`docs/MILITARY_STRATEGY.md`](docs/MILITARY_STRATEGY.md); the short version:
+  spears and pikes stop cavalry, cavalry rides down infantry and archers,
+  missiles shred elephants and chariots, horse archers rule open plains and
+  lose in hills and woods, and cavalry is useless in an assault.
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.
 Deep enough debt disbands units for you, starting with the expensive ones.
+
+## Reforms
+
+Open **Reforms** in the top bar. These are your house's military doctrines —
+the manipular drill Rome starts with, the pilum volley, engineering, mail
+armour copied from the Gauls, and so on for every culture. You adopt one at a
+time for denarii and turns. Each one has prerequisites: buildings of a certain
+tier somewhere in your realm, a region that yields horses or iron or
+elephants, earlier doctrines, battles won or lost, and *arms you have faced*
+— you learn to fight cavalry by fighting cavalry. The scroll tells you exactly
+what still bars each one. The computer houses reform too.
 
 ## Your family
 
@@ -125,7 +150,9 @@ Honest list, so you know what you are looking at:
 - **The computer players are deliberately passive.** They manage their cities
   and build, but they do not scheme, invade, or negotiate. Real opponents are
   the next phase. Expect a quiet world.
-- **Battles resolve on paper.** You see the outcome, not the fight.
+- **Battles resolve on paper** — but the paper now shows *why*: composition,
+  ground, kit, doctrine and fortune, each named. There is still no battlefield
+  to watch.
 - **Agents** (spies, diplomats, assassins) are designed and their data exists,
   but they are not playable yet.
 - **The Senate** issues missions and the civil war can trigger, but the full

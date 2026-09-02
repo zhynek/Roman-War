@@ -147,3 +147,59 @@ func test_start_menu_scene_loads(t) -> void:
 		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
 			"the house that was picked is the house that is played")
 	menu.free()
+
+
+func test_reforms_panel_and_battle_odds(t) -> void:
+	## The reforms scroll opens and adopts; an attack is confirmed with its paper
+	## odds and then logged with its losses and the factors that decided it.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	screen.reforms_panel.open_for(game)
+	t.check(screen.reforms_panel._content.get_child_count() > 0, "reforms scroll lists doctrines")
+	var affordable := ""
+	for row in game.available_doctrines():
+		if row["status"] == "available" and int(row["doctrine"]["cost"]) <= int(game.state["factions"]["julii"]["treasury"]):
+			affordable = row["id"]
+			break
+	t.check(affordable != "", "the Julii can afford some reform at the start")
+	if affordable != "":
+		t.check(game.adopt_doctrine(affordable), "adopting through the facade")
+		screen.reforms_panel._rebuild()
+		t.check_eq(game.state["factions"]["julii"]["reforms"].size(), 1, "one reform in progress")
+	screen.reforms_panel.hide()
+
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		if game.state["armies"][candidate]["owner"] == "julii":
+			army_id = candidate
+			break
+	t.check(army_id != "", "julii fields an army")
+	if army_id == "":
+		screen.free()
+		return
+	var army: Dictionary = game.state["armies"][army_id]
+	var neighbor: String = game.data.regions[army["region"]]["adjacent"][0]
+	var rebel_id := Fixtures.add_army(game.state, "rebels", neighbor, ["rural_levies"])
+	screen._on_region_clicked(army["region"])
+	screen._on_army_selected(army_id)
+	t.check(not game.battle_estimate(army_id, rebel_id).is_empty(), "odds can be estimated for the neighbouring band")
+
+	screen.attack_army_order(rebel_id)
+	var dialog: ConfirmationDialog = null
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialog = child
+	t.check(dialog != null and dialog.dialog_text.contains("% to win"), "the attack is confirmed with its odds")
+
+	screen._resolve_attack(rebel_id)
+	var log_text := screen.report_log.get_parsed_text()
+	t.check(log_text.contains("Battle!") and log_text.contains("%"), "the battle and its losses are logged")
+	t.check(log_text.contains("paper odds"), "with the factors that decided it")
+	t.check(int(game.state["factions"]["julii"]["war_record"]["battles_won"]) + \
+		int(game.state["factions"]["julii"]["war_record"]["battles_lost"]) == 1, "the war record counts it")
+	screen.free()
