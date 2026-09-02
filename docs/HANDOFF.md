@@ -17,7 +17,8 @@ minutes. It deliberately does **not** repeat the other docs:
 at all: eight sessions each branched off `9026730` and none merged back, so
 every build contained only that session's work and nothing else. That is why a
 build could ship without the map you remembered writing. `main` now carries the
-integration of five of those branches and is the only branch worth building.
+integration of five of those branches, and Phase 7 on top of them, and is the
+only branch worth building.
 
 **Merged into `main`, in this order:**
 
@@ -28,6 +29,7 @@ integration of five of those branches and is the only branch worth building.
 | `daily-campaign-turn-sequence` | The turn journal, the fog-filtered end-turn sequence, the Daily Dispatch |
 | `building-details-upgrades` (contains `ai-opponents`) | The modular AI, the guided campaign trail, the building yard and muster hall, 312 procedural building illustrations, the no-mouse camera |
 | `project-handoff-familiarization` | Campaign agents and a real negotiation model, the knowledge/technique engine, the chronicle and epithets, AI personas |
+| `roman-war-next-phase` (2026-09-02) | Phase 7, the cursus honorum: Senate offices and elections, seats that absorb Ambition, the Senate's demand, outlawry, a civil war with sides and an end, the Senate scroll, journal beats, a trail stage; the world seed persisted, the version stamp, the duplicate `class_name` removed |
 
 **Deleted, not merged: `handoff-repo-familiarization-jgqty6`** (head
 `bd8be2549e9a39dafe496f1cb97cd6237ace10a9`, deleted 2026-09-01 after review).
@@ -58,20 +60,20 @@ by absorption, not loss — `test_pathfinding.gd` and `test_ui_smoke.gd` cover
 march orders across turns and saves, halts, order supersession, sieges, fog,
 polygon picking and fleet orders. Nothing to take from it.
 
-**Green on `main`:** 336 tests / 0 failures across 37 test files, validator
-0 errors / 0 warnings across 31 data tables, clean boot. A turn costs ~360 ms.
+**Green on `main`:** 366 tests / 0 failures across 38 test files, validator
+0 errors / 0 warnings across 32 data tables, clean boot. A turn costs ~400 ms on
+the soak machine — the figure that machine gave for the trunk before Phase 7 too.
 
-**Phase 7 — the cursus honorum — is built on `claude/roman-war-next-phase-8ef54h`**
-(branched from `main` at `2c9b602` per §9; un-merged until the owner says so).
+**Phase 7 — the cursus honorum — was merged into `main` on 2026-09-02** (from
+`claude/roman-war-next-phase-8ef54h`, branched at `2c9b602` per §9, six commits).
 Senate offices and summer elections, seats that absorb Ambition, the Senate's
 demand for a patriarch's life, outlawry, a civil war with sides that can never
 be talked away and ends when the Senate falls, the Senate scroll, five journal
-beats and a trail stage — `docs/DESIGN.md` §8.1 is the account. The branch also
-carries the trunk fixes that were waiting: the world seed persisted and shown
+beats and a trail stage — `docs/DESIGN.md` §8.1 is the account. It also
+carried the trunk fixes that were waiting: the world seed persisted and shown
 (§4), the build version on the start menu, a dead duplicate `class_name` that
 broke every suite on a fresh cache (§5.17), and a UI smoke test that had been
-silently truncated. Green: 366 tests / 0 failures across 38 test files,
-validator 0 errors / 0 warnings across 32 data tables, clean boot.
+silently truncated.
 
 **Two things the integration surfaced that are worth knowing:**
 
@@ -107,7 +109,7 @@ The two gates that must stay green — the same two CI runs on every push and PR
 
 ```sh
 python3 tools/validate_data.py                                # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd   # 336 tests, 0 failures
+godot --headless --path . --script res://tests/run_tests.gd   # 366 tests, 0 failures
 godot --headless --path . --quit-after 5                      # boots clean: no errors after the version banner
 ```
 
