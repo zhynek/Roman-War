@@ -18,6 +18,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
 	var defender_soldiers := soldiers_in(data, defender["units"])
+	var attacker_classes: Array = ArmyRules.shares(data, attacker["units"]).keys()
+	var defender_classes: Array = ArmyRules.shares(data, defender["units"]).keys()
 	var attacker_had_general: bool = attacker["general"] != null
 	var defender_had_general: bool = defender["general"] != null
 
@@ -30,6 +32,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 		"sally": false,
 	})
 
+	record_battle(data, state, attacker["owner"], defender["owner"], attacker_classes, defender_classes,
+		attacker_soldiers + defender_soldiers, result)
 	_process_general_deaths(data, state, attacker, defender, result)
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
@@ -63,6 +67,61 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	_cleanup_destroyed_army(data, state, attacker_id)
 	_cleanup_destroyed_army(data, state, defender_id)
 	return result
+
+
+static func record_battle(data: GameData, state: Dictionary, attacker_owner: String, defender_owner: String, attacker_classes: Array, defender_classes: Array, soldiers_before: int, result: Dictionary) -> void:
+	## The bookkeeping every battle leaves behind: each faction's war record
+	## (wins, losses, and which arms it has faced — what its doctrines learn
+	## from), and after a decisive field the mood at home: a triumph for the
+	## victor's towns, a shock for the loser's, both fading over a few turns.
+	if result.is_empty():
+		return
+	var attacker_won: bool = result.get("winner", "") == "attacker"
+	_record_side(state, attacker_owner, defender_classes, attacker_won)
+	_record_side(state, defender_owner, attacker_classes, not attacker_won)
+	if not decisive(result, soldiers_before, data.balance["battle"], data.balance["public_order"]):
+		return
+	var order_rules: Dictionary = data.balance["public_order"]
+	var winner := attacker_owner if attacker_won else defender_owner
+	var loser := defender_owner if attacker_won else attacker_owner
+	_set_war_mood(state, winner, "triumph", float(order_rules["triumph_bonus"]), int(order_rules["triumph_turns"]))
+	_set_war_mood(state, loser, "defeat", -float(order_rules["defeat_shock_penalty"]), int(order_rules["defeat_shock_turns"]))
+
+
+static func decisive(result: Dictionary, soldiers_before: int, battle_rules: Dictionary, order_rules: Dictionary) -> bool:
+	## A battle the whole realm hears about: big enough to matter, and either
+	## the loser's army ceased to exist or it was gutted while the victor's
+	## losses stayed light. Deterministic — no dice here.
+	if soldiers_before < int(order_rules["war_mood_min_soldiers"]):
+		return false
+	var attacker_won: bool = result.get("winner", "") == "attacker"
+	var loser_destroyed: bool = result.get("defender_destroyed" if attacker_won else "attacker_destroyed", false)
+	var loser_loss := float(result.get("defender_casualty_pct" if attacker_won else "attacker_casualty_pct", 0.0))
+	var winner_loss := float(result.get("attacker_casualty_pct" if attacker_won else "defender_casualty_pct", 0.0))
+	return loser_destroyed or (loser_loss >= float(battle_rules["decisive_loser_casualty_pct"])
+		and winner_loss <= float(battle_rules["decisive_winner_casualty_pct"]))
+
+
+static func _record_side(state: Dictionary, faction_id: String, enemy_classes: Array, won: bool) -> void:
+	if not state["factions"].has(faction_id):
+		return
+	var faction: Dictionary = state["factions"][faction_id]
+	if not faction.has("war_record"):
+		faction["war_record"] = NewGame.empty_war_record()
+	var record: Dictionary = faction["war_record"]
+	var key := "battles_won" if won else "battles_lost"
+	record[key] = int(record.get(key, 0)) + 1
+	var faced: Dictionary = record["faced"]
+	var classes: Array = enemy_classes.duplicate()
+	classes.sort()
+	for unit_class in classes:
+		faced[unit_class] = int(faced.get(unit_class, 0)) + 1
+
+
+static func _set_war_mood(state: Dictionary, faction_id: String, label: String, value: float, turns: int) -> void:
+	if not state["factions"].has(faction_id) or turns <= 0 or value == 0.0:
+		return
+	state["factions"][faction_id]["war_mood"] = {"label": label, "value": value, "turns": turns}
 
 
 static func soldiers_in(data: GameData, units: Array) -> int:

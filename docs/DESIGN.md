@@ -69,7 +69,7 @@ the world in a **fixed order** so campaigns are reproducible:
 | 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
-| 7 | Events | Scripted/date/condition events, disasters, then senate politics |
+| 7 | Events | Scripted/date/condition events, disasters, then senate politics; war moods (§3.3) fade a turn |
 | 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
 | 9 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
 
@@ -141,6 +141,7 @@ Growth per turn is a summed factor list (`GrowthRules.breakdown`), clamped to
 | squalor | −population ÷ 3,000 %, capped at −25 |
 | plague | −10% while infected |
 | recently_conquered | −1% while the counter runs |
+| levy_strain | −0.05% per strain point (§3.3) |
 
 A grain route exists to any grain-producing region owned by a trade partner (or
 yourself) that is land-adjacent or reachable through a shared sea zone via a port.
@@ -166,7 +167,7 @@ suppresses corruption (§4.3).
 | law | Σ `law` building effects |
 | happiness_buildings | Σ `happiness` effects (temples, entertainment) |
 | taxes | +15 / +5 / 0 / −5 / −15 by tax level |
-| garrison | (soldiers ÷ population) × 400, capped at +80 |
+| garrison | (policing ÷ population) × 400, capped at +80; policing = Σ soldiers × class `garrison_weight` × (1 + 5%/chevron), × (1 + 10% per `drill` level in the town) × doctrine bonus |
 | governor | +5 per influence point; −5 if ungoverned |
 | squalor | −population ÷ 3,000, capped at −25 |
 | distance_to_capital | −8% per hop beyond 2 free hops, capped at −80 (§3.4) |
@@ -174,6 +175,8 @@ suppresses corruption (§4.3).
 | recently_conquered | up to −30, decaying 5 per turn |
 | wonders | faction-wide happiness wonders |
 | population_boom | +5 when growth ≥ +2.5% |
+| levy_strain | −strain; recruiting or refilling adds (men ÷ population) × 100 points, softened 15% per drill level, capped at 30, fading 2 per turn |
+| war_mood | +5 for 4 turns in every town of a faction that has just won a **decisive** battle (a triumph); −8 for 4 turns after a decisive defeat. Decisive = ≥1,500 men engaged and the loser destroyed, or ≥50% lost against ≤20% |
 
 **Riots:** order below **75** riots the settlement — 1% of the population dies and
 there is a 25% chance a random building loses a tier.

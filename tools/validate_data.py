@@ -50,7 +50,7 @@ FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
 
 # Building effect keys authored ahead of their engine reader. Anything else in
 # the schema's closed vocabulary that no rules module reads is dead content.
-FORWARD_EFFECTS = {"drill"}  # policing reader lands with the governance links
+FORWARD_EFFECTS: set[str] = set()
 
 errors: list[str] = []
 warnings: list[str] = []

@@ -48,6 +48,10 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if int(settlement["recently_conquered"]) > 0:
 		factors.append({"label": "recently_conquered", "value": float(growth_rules["recently_conquered_growth_pct"])})
 
+	var strain := float(settlement.get("levy_strain", 0.0))
+	if strain > 0.0:
+		factors.append({"label": "levy_strain", "value": -strain * float(growth_rules["levy_strain_growth_pct_per_point"])})
+
 	return factors
 
 

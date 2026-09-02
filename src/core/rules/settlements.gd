@@ -97,6 +97,22 @@ static func garrison_soldiers(data: GameData, settlement: Dictionary) -> int:
 	return soldiers
 
 
+static func garrison_policing(data: GameData, settlement: Dictionary) -> float:
+	## Soldiers weighted by how useful their arm is at keeping a town quiet
+	## (unit_classes.json garrison_weight: infantry 1.0, elephants 0.3 ...) and
+	## by their experience — drilled veterans police, levies loiter.
+	var per_chevron := float(data.balance["public_order"]["garrison_xp_pct_per_chevron"]) / 100.0
+	var policing := 0.0
+	for unit in settlement["garrison"]:
+		var template: Dictionary = data.units.get(unit["template"], {})
+		if template.is_empty():
+			continue
+		var soldiers := int(ceil(int(template.get("soldiers", 0)) * int(unit["strength_pct"]) / 100.0))
+		var weight := float(data.unit_classes.get(template.get("class", ""), {}).get("garrison_weight", 1.0))
+		policing += soldiers * weight * (1.0 + float(unit.get("experience", 0)) * per_chevron)
+	return policing
+
+
 static func culture_penalty_pct(data: GameData, state: Dictionary, region_id: String) -> float:
 	## Penalty proportional to the share of buildings belonging to foreign cultures.
 	var settlement: Dictionary = state["settlements"][region_id]

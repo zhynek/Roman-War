@@ -6,7 +6,7 @@ class_name TurnEngine
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
 ##   5. Population growth, slaves, plague
 ##   6. Public order: riots and revolts
-##   7. Events, disasters, senate politics
+##   7. Events, disasters, senate politics; war moods fade
 ##   8. Date advances (2 turns/year), movement points reset, victory check
 ##
 ## Returns a report dict of everything notable that happened, for the UI's
@@ -75,6 +75,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	EventRules.tick_event_happiness(state)
+	PublicOrderRules.tick_war_mood(state)
 	MercenaryRules.replenish(data, state)
 
 	state["turn"] = int(state["turn"]) + 1

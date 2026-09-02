@@ -80,3 +80,112 @@ func test_culture_penalty(t) -> void:
 	var penalty := SettlementRules.culture_penalty_pct(data, state, "alpha")
 	var scale := float(data.balance["public_order"]["culture_penalty_scale"])
 	t.check_near(penalty, scale, 0.001, "all-foreign buildings = full culture penalty")
+
+
+## --- The garrison's quality, the levy's cost, the war's mood ----------------
+
+func _garrison_of(templates: Array, experience: int = 0) -> Array:
+	var units: Array = []
+	for template in templates:
+		units.append({"template": template, "experience": experience, "strength_pct": 100})
+	return units
+
+
+func test_garrison_quality_weights_classes(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var beta: Dictionary = state["settlements"]["beta"]
+	beta["garrison"] = _garrison_of(["test_elites"])   # 80 infantry, weight 1.0
+	var infantry := SettlementRules.garrison_policing(data, beta)
+	beta["garrison"] = _garrison_of(["test_horse"])    # 80 cavalry, weight 0.9
+	var horse := SettlementRules.garrison_policing(data, beta)
+	beta["garrison"] = _garrison_of(["test_mob", "test_mob"])  # 120 peasants, weight 0.5
+	var mob := SettlementRules.garrison_policing(data, beta)
+	t.check_near(infantry, 80.0, 0.001, "eighty foot police as eighty")
+	t.check_near(horse, 72.0, 0.001, "horsemen are a little less use in the streets")
+	t.check(mob < horse, "a bigger mob of levies polices worse than fewer regulars")
+
+
+func test_garrison_experience_and_drill(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var beta: Dictionary = state["settlements"]["beta"]
+	beta["garrison"] = _garrison_of(["test_spears"])          # 80 men in a town of 2000: 16 order
+	var green := PublicOrderRules.garrison_bonus(data, beta)
+	t.check_near(green, 16.0, 0.001, "raw headcount suppression as before")
+	beta["garrison"] = _garrison_of(["test_spears"], 4)
+	t.check_near(PublicOrderRules.garrison_bonus(data, beta), 19.2, 0.001, "four chevrons police 20% better")
+	t.check_near(PublicOrderRules.garrison_bonus(data, beta, 1.0), 21.12, 0.001, "and a drill yard adds 10% on top")
+	beta["buildings"]["test_barracks"] = 2  # the fixture drill yard
+	var by_label := {}
+	for factor in PublicOrderRules.breakdown(data, state, "beta"):
+		by_label[factor["label"]] = factor["value"]
+	t.check_near(by_label.get("garrison", 0.0), 21.12, 0.001, "the breakdown reads the town's drill")
+
+
+func test_levy_strain_rises_and_decays(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var beta: Dictionary = state["settlements"]["beta"]
+	var rng := CampaignRng.seeded(1)
+	t.check(RecruitmentRules.queue_unit(data, state, "beta", "test_spears"), "levy raised")
+	t.check_near(float(beta["levy_strain"]), 4.0, 0.001, "80 men of 2000 = 4 strain points")
+	var by_label := {}
+	for factor in PublicOrderRules.breakdown(data, state, "beta"):
+		by_label[factor["label"]] = factor["value"]
+	t.check_near(by_label.get("levy_strain", 0.0), -4.0, 0.001, "the strain weighs on order")
+	by_label = {}
+	for factor in GrowthRules.breakdown(data, state, "beta"):
+		by_label[factor["label"]] = factor["value"]
+	t.check_near(by_label.get("levy_strain", 0.0), -0.2, 0.001, "and a little on growth")
+
+	PublicOrderRules.apply_turn(data, state, "beta", rng)
+	t.check_near(float(beta["levy_strain"]), 2.0, 0.001, "strain fades two points a turn")
+	PublicOrderRules.apply_turn(data, state, "beta", rng)
+	t.check_near(float(beta["levy_strain"]), 0.0, 0.001, "and is forgotten")
+
+	beta["buildings"]["test_barracks"] = 2  # drilled towns resent the levy less
+	RecruitmentRules.queue_unit(data, state, "beta", "test_spears")
+	t.check(float(beta["levy_strain"]) < 4.0 and float(beta["levy_strain"]) > 0.0, "drill softens the levy")
+
+
+func test_war_mood_after_decisive_victory(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var resolver := AutoResolver.new()
+	var rng := CampaignRng.seeded(9)
+	# 1,200 pikemen against 360 peasants: well over the size floor, and a massacre.
+	var pikes: Array = []
+	for i in range(10):
+		pikes.append("test_pikes")
+	var attacker_id := Fixtures.add_army(state, "red", "beta", pikes)
+	var defender_id := Fixtures.add_army(state, "blue", "alpha", ["test_mob", "test_mob", "test_mob", "test_mob", "test_mob", "test_mob"])
+	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
+	t.check_eq(result["winner"], "attacker", "the phalanx wins")
+	var red: Dictionary = state["factions"]["red"]
+	var blue: Dictionary = state["factions"]["blue"]
+	t.check(red["war_mood"] is Dictionary and float(red["war_mood"]["value"]) > 0.0, "a triumph at home for the victor")
+	t.check(blue["war_mood"] is Dictionary and float(blue["war_mood"]["value"]) < 0.0, "a shock at home for the beaten")
+	var by_label := {}
+	for factor in PublicOrderRules.breakdown(data, state, "beta"):
+		by_label[factor["label"]] = factor["value"]
+	t.check_near(by_label.get("war_mood", 0.0), float(data.balance["public_order"]["triumph_bonus"]), 0.001,
+		"the victor's towns feel it")
+	t.check_eq(int(red["war_record"]["battles_won"]), 1, "the win is recorded")
+	t.check_eq(int(blue["war_record"]["battles_lost"]), 1, "so is the loss")
+	t.check_eq(int(red["war_record"]["faced"].get("peasant", 0)), 1, "and whom each side faced")
+	t.check_eq(int(blue["war_record"]["faced"].get("pike", 0)), 1, "the mob remembers the pikes")
+	for i in range(int(data.balance["public_order"]["triumph_turns"])):
+		PublicOrderRules.tick_war_mood(state)
+	t.check(red["war_mood"] == null and blue["war_mood"] == null, "moods fade after their turns")
+
+
+func test_skirmishes_do_not_move_the_mood(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var attacker_id := Fixtures.add_army(state, "red", "beta", ["test_elites", "test_elites", "test_elites"])
+	var defender_id := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	var result := CombatRules.attack_army(data, state, AutoResolver.new(), CampaignRng.seeded(2), attacker_id, defender_id)
+	t.check_eq(result["winner"], "attacker", "the cohorts win the skirmish")
+	t.check(state["factions"]["red"]["war_mood"] == null, "three hundred men engaged is no triumph")
+	t.check_eq(int(state["factions"]["red"]["war_record"]["battles_won"]), 1, "but it still counts as a battle")

@@ -52,7 +52,8 @@
     "recently_conquered_growth_pct": -1.0,
     "max_growth_pct": 6.0,
     "min_growth_pct": -10.0,
-    "min_population": 400
+    "min_population": 400,
+    "levy_strain_growth_pct_per_point": 0.05
   },
   "squalor": {
     "population_per_pct": 3000,
@@ -81,7 +82,18 @@
     "recently_conquered_decay_per_turn": 5,
     "culture_penalty_scale": 40.0,
     "population_boom_bonus": 5,
-    "population_boom_growth_pct": 2.5
+    "population_boom_growth_pct": 2.5,
+    "garrison_xp_pct_per_chevron": 5,
+    "garrison_drill_pct_per_level": 10,
+    "levy_strain_scale": 100,
+    "levy_strain_decay_per_turn": 2,
+    "levy_strain_max": 30,
+    "levy_strain_drill_reduction_pct": 15,
+    "triumph_bonus": 5,
+    "triumph_turns": 4,
+    "defeat_shock_penalty": 8,
+    "defeat_shock_turns": 4,
+    "war_mood_min_soldiers": 1500
   },
   "distance_to_capital": {
     "free_hops": 2,

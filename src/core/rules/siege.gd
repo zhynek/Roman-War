@@ -71,6 +71,9 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var governor_profile = null
 	if governor != null and state["characters"].has(governor):
 		governor_profile = CharacterRules.battle_profile(data, state["characters"][governor])
+	var soldiers_before := CombatRules.soldiers_in(data, army["units"]) + CombatRules.soldiers_in(data, settlement["garrison"])
+	var attacker_classes: Array = ArmyRules.shares(data, army["units"]).keys()
+	var defender_classes: Array = ArmyRules.shares(data, settlement["garrison"]).keys()
 	var result := resolver.resolve(data, rng, army["units"], settlement["garrison"], {
 		"terrain": data.regions[region_id]["terrain"],
 		"wall_level": wall_level,
@@ -79,6 +82,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		"attacker_fatigued": false,
 		"sally": starving,
 	})
+	CombatRules.record_battle(data, state, army["owner"], settlement["owner"], attacker_classes, defender_classes,
+		soldiers_before, result)
 
 	if result.get("attacker_general_died", false) and army["general"] != null:
 		CharacterRules.kill(state, army["general"], data)

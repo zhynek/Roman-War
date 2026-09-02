@@ -22,7 +22,7 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if tax_happiness != 0.0:
 		factors.append({"label": "taxes", "value": tax_happiness})
 
-	var garrison := garrison_bonus(data, settlement)
+	var garrison := garrison_bonus(data, settlement, SettlementRules.effect_total(data, settlement, "drill"))
 	if garrison > 0.0:
 		factors.append({"label": "garrison", "value": garrison})
 
@@ -59,6 +59,14 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 			float(settlement["recently_conquered"]) * decay)
 		factors.append({"label": "recently_conquered", "value": -penalty})
 
+	var strain := float(settlement.get("levy_strain", 0.0))
+	if strain > 0.0:
+		factors.append({"label": "levy_strain", "value": -strain})
+
+	var mood = state["factions"][settlement["owner"]].get("war_mood")
+	if mood is Dictionary and int(mood.get("turns", 0)) > 0 and float(mood.get("value", 0.0)) != 0.0:
+		factors.append({"label": "war_mood", "value": float(mood["value"])})
+
 	var wonder_happiness := SettlementRules.faction_owns_wonder_effect(
 		data, state, settlement["owner"], "happiness_all_settlements")
 	if wonder_happiness != 0.0:
@@ -93,13 +101,38 @@ static func law_total(data: GameData, state: Dictionary, region_id: String) -> f
 	return SettlementRules.effect_total(data, settlement, "law")
 
 
-static func garrison_bonus(data: GameData, settlement: Dictionary) -> float:
+static func garrison_bonus(data: GameData, settlement: Dictionary, drill: float = 0.0, doctrine_pct: float = 0.0) -> float:
+	## Suppression from the garrison: quality-weighted policing (class weight x
+	## experience, see SettlementRules.garrison_policing), raised by the town's
+	## drill yards and any doctrine bonus, over the population, capped.
 	var order_rules: Dictionary = data.balance["public_order"]
-	var soldiers := SettlementRules.garrison_soldiers(data, settlement)
-	if soldiers == 0 or int(settlement["population"]) == 0:
+	var policing := SettlementRules.garrison_policing(data, settlement)
+	if policing <= 0.0 or int(settlement["population"]) == 0:
 		return 0.0
-	var ratio := float(soldiers) / float(settlement["population"])
+	policing *= 1.0 + drill * float(order_rules["garrison_drill_pct_per_level"]) / 100.0
+	policing *= 1.0 + doctrine_pct / 100.0
+	var ratio := policing / float(settlement["population"])
 	return minf(ratio * float(order_rules["garrison_ratio_scale"]), float(order_rules["garrison_max_bonus"]))
+
+
+static func decay_levy_strain(data: GameData, settlement: Dictionary) -> void:
+	var strain := float(settlement.get("levy_strain", 0.0))
+	if strain > 0.0:
+		settlement["levy_strain"] = maxf(0.0, strain - float(data.balance["public_order"]["levy_strain_decay_per_turn"]))
+
+
+static func tick_war_mood(state: Dictionary) -> void:
+	## Triumphs and defeat shocks fade a turn at a time, faction by faction.
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		var faction: Dictionary = state["factions"][faction_id]
+		var mood = faction.get("war_mood")
+		if not (mood is Dictionary):
+			continue
+		mood["turns"] = int(mood.get("turns", 0)) - 1
+		if int(mood["turns"]) <= 0:
+			faction["war_mood"] = null
 
 
 static func distance_penalty(data: GameData, state: Dictionary, region_id: String) -> float:
@@ -121,6 +154,8 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 	var order_rules: Dictionary = data.balance["public_order"]
 	var order := total(data, state, region_id)
 	var result := {"rioted": false, "revolted": false}
+	# This turn's order was judged with the strain still fresh; now it fades.
+	decay_levy_strain(data, settlement)
 
 	if order >= float(order_rules["riot_threshold"]):
 		settlement["low_order_streak"] = 0

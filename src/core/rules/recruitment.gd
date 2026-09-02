@@ -42,6 +42,7 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 		return false
 
 	faction["treasury"] = int(faction["treasury"]) - int(template["cost"])
+	add_levy_strain(data, state, region_id, soldiers)
 	settlement["population"] = int(settlement["population"]) - soldiers
 	settlement["recruitment_queue"].append({
 		"template": template_id,
@@ -128,10 +129,25 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 		if int(faction["treasury"]) < cost or int(settlement["population"]) - men < min_population:
 			continue
 		faction["treasury"] = int(faction["treasury"]) - cost
+		add_levy_strain(data, state, region_id, men)
 		settlement["population"] = int(settlement["population"]) - men
 		unit["strength_pct"] = 100
 		healed += 1
 	return healed
+
+
+static func add_levy_strain(data: GameData, state: Dictionary, region_id: String, soldiers: int) -> void:
+	## Pressing men into service leaves resentment in proportion to the share
+	## of the town they were: strain points that weigh on order and growth and
+	## fade each turn. Drill yards soften the levy (and some doctrines change it).
+	var settlement: Dictionary = state["settlements"][region_id]
+	var order_rules: Dictionary = data.balance["public_order"]
+	var population := maxi(int(settlement["population"]), 1)
+	var drill := SettlementRules.effect_total(data, settlement, "drill")
+	var softening := maxf(0.0, 1.0 - drill * float(order_rules["levy_strain_drill_reduction_pct"]) / 100.0)
+	var added := float(soldiers) / float(population) * float(order_rules["levy_strain_scale"]) * softening
+	settlement["levy_strain"] = minf(float(settlement.get("levy_strain", 0.0)) + added,
+		float(order_rules["levy_strain_max"]))
 
 
 static func merge_units(units: Array) -> void:
