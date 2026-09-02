@@ -699,6 +699,9 @@
           "min_settlement_level": "town",
           "cost": 800,
           "build_turns": 2,
+          "effects": {
+            "drill": 1
+          },
           "description": "Practice posts, wooden swords, and a bawling drillmaster. Farm boys leave with straight backs and blistered hands."
         },
         {
@@ -708,7 +711,9 @@
           "cost": 1700,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1,
+            "law": 2
           },
           "description": "Permanent quarters where maniples learn to open, close, and relieve one another in line. The checkerboard becomes instinct."
         },
@@ -720,7 +725,9 @@
           "build_turns": 3,
           "effects": {
             "recruit_xp": 1,
-            "weapon_upgrade": 1
+            "weapon_upgrade": 1,
+            "drill": 2,
+            "law": 3
           },
           "description": "A standing camp with armories, smiths, and veteran instructors. Its arsenals send men out better armed than they arrived."
         },
@@ -733,7 +740,9 @@
           "effects": {
             "recruit_xp": 2,
             "weapon_upgrade": 1,
-            "armor_upgrade": 1
+            "armor_upgrade": 1,
+            "drill": 2,
+            "law": 4
           },
           "description": "A great training ground consecrated to the war god, where whole legions exercise under the eyes of old triarii. Discipline here is a religion."
         }
@@ -764,6 +773,9 @@
           "min_settlement_level": "town",
           "cost": 800,
           "build_turns": 2,
+          "effects": {
+            "drill": 1
+          },
           "description": "Quarters for a paid town guard who drill in the cool hours and police the market the rest of the day."
         },
         {
@@ -773,7 +785,9 @@
           "cost": 1700,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1,
+            "law": 2
           },
           "description": "Barracks, storerooms, and a drill court for professional infantry. Pike and shield drills raise dust from dawn onward."
         },
@@ -785,7 +799,9 @@
           "build_turns": 3,
           "effects": {
             "recruit_xp": 1,
-            "weapon_upgrade": 1
+            "weapon_upgrade": 1,
+            "drill": 2,
+            "law": 3
           },
           "description": "A crown-funded garrison complex with its own armories and pay office. Service here is a career, not a season."
         },
@@ -798,7 +814,9 @@
           "effects": {
             "recruit_xp": 2,
             "weapon_upgrade": 1,
-            "armor_upgrade": 1
+            "armor_upgrade": 1,
+            "drill": 2,
+            "law": 4
           },
           "description": "The training halls of the household regiments, where the kingdom's best arms and hardest instructors are spent freely."
         }
@@ -827,6 +845,9 @@
           "min_settlement_level": "town",
           "cost": 700,
           "build_turns": 2,
+          "effects": {
+            "drill": 1
+          },
           "description": "A lodge for sworn warriors who winter together, feast together, and fight shoulder to shoulder come spring."
         },
         {
@@ -836,7 +857,9 @@
           "cost": 1500,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1,
+            "law": 2
           },
           "description": "The best of every clan train here under scarred champions. Their oaths bind them to the death of the last man."
         }
@@ -1066,7 +1089,8 @@
           "cost": 3600,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1
           },
           "description": "Riding masters, many of them hired Greeks and Gauls, drill squadrons in wheeling and pursuit. Rome buys the skills it lacks."
         }
@@ -1114,7 +1138,8 @@
           "cost": 4200,
           "build_turns": 4,
           "effects": {
-            "recruit_xp": 2
+            "recruit_xp": 2,
+            "drill": 1
           },
           "description": "Armories of scale barding beside the stalls, and a training ground where horse and rider learn to become one iron beast."
         }
@@ -1153,7 +1178,8 @@
           "cost": 3600,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1
           },
           "description": "Crown stables of imported bloodstock with grooms, veterinarians, and drillmasters to match. Squadrons here ride knee to knee."
         }
@@ -1182,7 +1208,8 @@
           "cost": 1400,
           "build_turns": 2,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1
           },
           "description": "The chief's picked riders train and stable their mounts together, ready to strike wherever the war horn calls."
         }
@@ -1220,7 +1247,8 @@
           "cost": 2200,
           "build_turns": 3,
           "effects": {
-            "recruit_xp": 1
+            "recruit_xp": 1,
+            "drill": 1
           },
           "description": "Champions shoot at gallop-speed marks for silver rings while boys watch and burn to match them."
         }
@@ -1250,6 +1278,9 @@
           "min_settlement_level": "minor_city",
           "cost": 1000,
           "build_turns": 2,
+          "effects": {
+            "drill": 1
+          },
           "description": "A walled range with paid instructors, many of them Cretan. Massed volleys are drilled by trumpet call."
         }
       ]
@@ -1276,6 +1307,9 @@
           "min_settlement_level": "large_town",
           "cost": 900,
           "build_turns": 2,
+          "effects": {
+            "drill": 1
+          },
           "description": "The best hunters winter together, trading tricks of wind, range, and ambush that no drillmaster teaches."
         }
       ]
@@ -1318,6 +1352,144 @@
             "weapon_upgrade": 1
           },
           "description": "Halls where master engineers build wall-breakers on geometric principle, and their smiths turn out finer edges for the army besides."
+        }
+      ]
+    },
+    {
+      "id": "roman_armoury",
+      "kind": "armoury",
+      "cultures": [
+        "roman"
+      ],
+      "name": "Roman Arms Workshops",
+      "requires_building": {
+        "kind": "barracks",
+        "level": 2
+      },
+      "levels": [
+        {
+          "id": "roman_arm_1",
+          "name": "Smithy",
+          "min_settlement_level": "large_town",
+          "cost": 900,
+          "build_turns": 2,
+          "effects": {
+            "weapon_upgrade": 1
+          },
+          "description": "A forge and a row of anvils behind the barracks. Recruits draw a properly ground blade instead of whatever the family owned."
+        },
+        {
+          "id": "roman_arm_2",
+          "name": "Armoury",
+          "min_settlement_level": "minor_city",
+          "cost": 2200,
+          "build_turns": 3,
+          "effects": {
+            "weapon_upgrade": 1,
+            "armor_upgrade": 1
+          },
+          "description": "Racks of mail shirts and helmets kept in state, issued to men on enrolment and taken back from the dead."
+        },
+        {
+          "id": "roman_arm_3",
+          "name": "State Arms Works",
+          "min_settlement_level": "large_city",
+          "cost": 4800,
+          "build_turns": 4,
+          "effects": {
+            "weapon_upgrade": 2,
+            "armor_upgrade": 1
+          },
+          "description": "Contracted workshops turning out swords, pila and mail by the thousand to a fixed pattern. Every cohort marches out identically equipped."
+        }
+      ]
+    },
+    {
+      "id": "civic_armoury",
+      "kind": "armoury",
+      "cultures": [
+        "greek",
+        "eastern",
+        "carthaginian",
+        "egyptian"
+      ],
+      "name": "City Arsenal",
+      "requires_building": {
+        "kind": "barracks",
+        "level": 2
+      },
+      "levels": [
+        {
+          "id": "civic_arm_1",
+          "name": "Bronzesmiths' Row",
+          "min_settlement_level": "large_town",
+          "cost": 900,
+          "build_turns": 2,
+          "effects": {
+            "weapon_upgrade": 1
+          },
+          "description": "A street of smiths under contract to the city, hammering out spearheads and sword blades for the levy."
+        },
+        {
+          "id": "civic_arm_2",
+          "name": "City Arsenal",
+          "min_settlement_level": "minor_city",
+          "cost": 2200,
+          "build_turns": 3,
+          "effects": {
+            "weapon_upgrade": 1,
+            "armor_upgrade": 1
+          },
+          "description": "A public magazine of shields, helmets and cuirasses, inventoried by magistrates and issued at muster."
+        },
+        {
+          "id": "civic_arm_3",
+          "name": "Royal Arsenal",
+          "min_settlement_level": "large_city",
+          "cost": 4800,
+          "build_turns": 4,
+          "effects": {
+            "weapon_upgrade": 2,
+            "armor_upgrade": 1
+          },
+          "description": "Palace workshops where master armourers fit scale and plate for the king's regiments, and the best steel goes to the line."
+        }
+      ]
+    },
+    {
+      "id": "tribal_armoury",
+      "kind": "armoury",
+      "cultures": [
+        "barbarian"
+      ],
+      "name": "Tribal Forges",
+      "requires_building": {
+        "kind": "barracks",
+        "level": 2
+      },
+      "levels": [
+        {
+          "id": "tribal_arm_1",
+          "name": "Smith's Forge",
+          "min_settlement_level": "large_town",
+          "cost": 700,
+          "build_turns": 2,
+          "effects": {
+            "weapon_upgrade": 1
+          },
+          "description": "The smith is a man of standing here; his long swords are the pride of the warband."
+        },
+        {
+          "id": "tribal_arm_2",
+          "name": "Master Smith's Hall",
+          "min_settlement_level": "minor_city",
+          "cost": 1800,
+          "build_turns": 3,
+          "effects": {
+            "weapon_upgrade": 1,
+            "armor_upgrade": 1
+          },
+          "description": "Mail shirts riveted ring by ring. The tribes invented them, and the nobles who can afford one ride into battle in it."
         }
       ]
     },

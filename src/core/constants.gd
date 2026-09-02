@@ -16,8 +16,8 @@ const CULTURES: Array[String] = [
 
 const BUILDING_KINDS: Array[String] = [
 	"government", "walls", "barracks", "stables", "archery_range", "siege_workshop",
-	"naval", "market", "farms", "roads", "port", "mines", "health", "entertainment",
-	"execution", "education", "temple"
+	"armoury", "naval", "market", "farms", "roads", "port", "mines", "health",
+	"entertainment", "execution", "education", "temple"
 ]
 
 const STANCES: Array[String] = ["war", "neutral", "trade", "alliance", "protectorate"]

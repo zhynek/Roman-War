@@ -41,7 +41,7 @@
             "additionalProperties": false,
             "properties": {
               "building_kind": {
-                "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
+                "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "armoury", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
               },
               "building_level": { "type": "integer", "minimum": 1, "maximum": 6 },
               "temple_god": { "type": "string", "description": "Temple-recruited special units: required deity" }

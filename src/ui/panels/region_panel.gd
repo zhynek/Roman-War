@@ -113,7 +113,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	if not garrison.is_empty():
 		_header("Garrison (%d)" % garrison.size(), 12)
 		for unit in garrison:
-			_label("  %s  %d%%" % [_unit_name(unit), int(unit["strength_pct"])])
+			_label("  " + _unit_line(unit))
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
@@ -146,8 +146,16 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_header("Recruitment", 12)
 	for job in settlement["recruitment_queue"]:
 		_label("  mustering %s" % _template_name(job["template"]))
-	for unit in game.available_units(region_id):
-		_action_button("Recruit %s (%d)" % [unit["name"], int(unit["cost"])],
+	var recruits := game.available_units(region_id)
+	if not recruits.is_empty():
+		var profile := game.recruit_profile(region_id)
+		var issue := _kit_text(profile)
+		if int(profile["experience"]) > 0:
+			issue = ("xp%d" % int(profile["experience"])) + ("  " + issue if issue != "" else "")
+		if issue != "":
+			_label("  recruits here receive: %s" % issue, Color(0.7, 0.8, 0.9))
+	for unit in recruits:
+		_action_button("Recruit %s [%s] (%d)" % [unit["name"], String(unit.get("class", "")).replace("_", " "), int(unit["cost"])],
 			func():
 				game.queue_unit(region_id, unit["id"])
 				action_taken.emit())
@@ -193,7 +201,7 @@ func _build_armies_section() -> void:
 func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	_label("Movement left: %.1f" % float(army["movement_left"]))
 	for unit in army["units"]:
-		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
+		_label("  " + _unit_line(unit))
 	_label("Click an adjacent region to march, attack, or besiege.", Color(0.7, 0.8, 0.9))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
@@ -270,6 +278,23 @@ func _separator() -> void:
 
 func settlement_display_name() -> String:
 	return game.data.regions.get(region_id, {}).get("settlement_name", region_id)
+
+
+func _unit_line(unit: Dictionary) -> String:
+	## "Hastati [infantry]  100%  xp2  w1/a1" — class always, kit only when issued.
+	var template: Dictionary = game.data.units.get(unit["template"], {})
+	var line := "%s [%s]  %d%%  xp%d" % [_unit_name(unit), String(template.get("class", "?")).replace("_", " "),
+		int(unit["strength_pct"]), int(unit["experience"])]
+	var kit := _kit_text(unit)
+	return line + ("  " + kit if kit != "" else "")
+
+
+func _kit_text(holder: Dictionary) -> String:
+	var weapon := int(holder.get("weapon", 0))
+	var armor := int(holder.get("armor", 0))
+	if weapon == 0 and armor == 0:
+		return ""
+	return "w%d/a%d" % [weapon, armor]
 
 
 func _unit_name(unit: Dictionary) -> String:

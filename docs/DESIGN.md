@@ -274,18 +274,23 @@ Unit availability (`RecruitmentRules.available_units`) is gated by:
 
 Recruiting pays the unit's cost **and deducts its soldiers from the settlement's
 population** (which may never fall below 400). One unit completes per turn from
-the head of the queue and joins the garrison, with starting experience from any
-forge-type `recruit_xp` building effects.
+the head of the queue and joins the garrison carrying the settlement's **recruit
+profile** (`RecruitmentRules.recruit_profile`): starting experience from the best
+`recruit_xp` building (drill halls, war temples), and `weapon` / `armor` levels
+summed from its forges, armouries and forge temples, capped by
+`balance.recruitment.upgrade_max` (§5.7). The region panel shows what recruits
+will receive before you pay.
 
 ### 5.2 Experience, retraining, merging
 
 - Units carry **experience 0–9** (chevrons); each grants +10% effective strength.
   Winners of a battle gain +1.
-- **Retraining** in a settlement with the required building refills a depleted
-  unit to 100%, costing half the pro-rata recruitment price and drawing the
-  missing men from the population.
+- **Retraining** in a settlement with the required building refits every
+  garrison unit to the town's current kit standard (weapon and armour levels
+  are never taken away) and refills depleted units to 100%, costing half the
+  pro-rata recruitment price and drawing the missing men from the population.
 - **Merging** combines depleted same-template units, keeping the higher
-  experience.
+  experience and the better kit.
 
 ### 5.3 Movement and forced march
 
@@ -386,6 +391,24 @@ reports the men **actually** lost, and `attacker_destroyed` / `defender_destroye
 Winners gain +1 experience, or +2 when they were the paper underdog by ≥1.3;
 a losing side's general dies with 10% probability. The model is a paper one by
 design — it exists to be replaced behind the same interface.
+
+### 5.7 The arms industry
+
+Military buildings shape the men they produce, and the towns that hold them:
+
+- **Barracks** tiers carry `drill` (1/1/2/2 from the drill grounds up; tribal
+  1/1) and, from the third tier, `law` (2/3/4) — a garrison headquarters polices
+  the streets. Top-tier stables and archery ranges add `drill` 1.
+- **Armouries** (`kind: armoury`, one chain per culture group, `requires_building:
+  barracks ≥ 2`) issue `weapon_upgrade` and `armor_upgrade`: smithy → armoury →
+  state arms works (weapon 1 / 1+armour 1 / 2+armour 1; tribal forges stop at the
+  second tier). Barracks L4–5, the great engine works and forge temples add to
+  the same pool; the sum is capped at `recruitment.upgrade_max` (3).
+- In battle each weapon level adds `battle.weapon_upgrade_attack_per_level` to
+  attack and each armour level `armor_upgrade_defense_per_level` to defense
+  (§5.6 stage 2) — an armoury is worth roughly a chevron and a half to a line unit.
+- `requires_building` is a general chain prerequisite: a chain is offered only
+  where the settlement already holds the named kind at the named tier.
 
 ## 6. Characters, Agents & Diplomacy
 
@@ -541,8 +564,8 @@ Structural rules the schemas enforce: lowercase `snake_case` ids; building *leve
 ids globally unique; units reference building requirements by **kind + level**,
 never by chain id (so every culture's barracks satisfies "barracks ≥ 2"); building
 effects use a closed key vocabulary (`law, happiness, growth, health, trade_pct,
-farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade, wall_level,
-road_level, port_level`); every level's effects are **standing totals at that
+farm_income, mine_income, recruit_xp, drill, weapon_upgrade, armor_upgrade,
+wall_level, road_level, port_level`); every level's effects are **standing totals at that
 tier** — a level-3 market's `trade_pct` replaces level 2's rather than stacking
 on it (`SettlementRules.effect_total` reads only the built tier per chain and
 sums across chains), and tier effects (`wall_level`, `road_level`, `port_level`)

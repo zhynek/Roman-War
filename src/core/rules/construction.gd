@@ -26,6 +26,10 @@ static func available_projects(data: GameData, state: Dictionary, region_id: Str
 		var required_resource: String = chain.get("requires_resource", "")
 		if required_resource != "" and not region.get("resources", []).has(required_resource):
 			continue
+		var required_building: Dictionary = chain.get("requires_building", {})
+		if not required_building.is_empty() and SettlementRules.building_tier(
+				data, settlement, String(required_building["kind"])) < int(required_building["level"]):
+			continue
 
 		var built_tier := int(settlement["buildings"].get(chain["id"], 0))
 		if built_tier >= chain["levels"].size():

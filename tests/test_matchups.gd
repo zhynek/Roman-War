@@ -256,3 +256,16 @@ func test_underdog_victory_teaches_twice(t) -> void:
 				"and the survivors carry it")
 			break
 	t.check(found, "some fortunate seed lets the underdog win")
+
+
+func test_upgraded_unit_wins_more(t) -> void:
+	var data := Fixtures.data()
+	var wins := 0
+	for seed_value in range(30):
+		var armed := _army(["test_spears"])
+		armed[0]["weapon"] = 2
+		armed[0]["armor"] = 1
+		var result := AutoResolver.new().resolve(data, CampaignRng.seeded(seed_value), armed, _army(["test_spears"]), _context())
+		if result["winner"] == "attacker":
+			wins += 1
+	t.check(wins >= 24, "two weapon and one armour level win the mirror match at least 24 of 30 (won %d)" % wins)

@@ -1,6 +1,8 @@
 class_name RecruitmentRules
 ## Unit recruitment: gated by faction + culture buildings, paid in denarii and
-## population (soldiers are drawn from the settlement's people).
+## population (soldiers are drawn from the settlement's people). What a town
+## has built also decides what its recruits carry: drill and war temples give
+## starting experience, forges and armouries issue weapon and armour levels.
 
 
 static func available_units(data: GameData, state: Dictionary, region_id: String) -> Array:
@@ -48,9 +50,36 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	return true
 
 
+static func recruit_profile(data: GameData, state: Dictionary, region_id: String, _template_id: String = "") -> Dictionary:
+	## What a unit raised or refitted in this settlement receives: starting
+	## experience from the best drill-style recruit_xp building, and the weapon
+	## and armour levels its forges, armouries and war temples can issue (summed
+	## across chains, capped by balance.recruitment.upgrade_max).
+	var settlement: Dictionary = state["settlements"][region_id]
+	var recruitment_rules: Dictionary = data.balance["recruitment"]
+	var upgrade_max := int(recruitment_rules["upgrade_max"])
+	var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
+	return {
+		"experience": clampi(experience, 0, int(recruitment_rules["experience_max"])),
+		"weapon": clampi(int(SettlementRules.effect_total(data, settlement, "weapon_upgrade")), 0, upgrade_max),
+		"armor": clampi(int(SettlementRules.effect_total(data, settlement, "armor_upgrade")), 0, upgrade_max),
+	}
+
+
+static func stamp_upgrades(unit: Dictionary, profile: Dictionary) -> void:
+	## Issue the settlement's kit to a unit — never taking better kit away. The
+	## keys are only written when non-zero, so an unarmed unit keeps the plain
+	## {template, experience, strength_pct} shape.
+	for key in ["weapon", "armor"]:
+		var level := maxi(int(unit.get(key, 0)), int(profile.get(key, 0)))
+		if level > 0:
+			unit[key] = level
+
+
 static func advance_queues(data: GameData, state: Dictionary, region_id: String) -> Array:
 	## One unit finishes per turn (the head of the queue). Finished units join
-	## the garrison with experience from blacksmith-style recruit_xp bonuses.
+	## the garrison with the settlement's recruit profile: experience from
+	## drill-style buildings, kit from forges and armouries.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var completed: Array = []
 	var remaining: Array = []
@@ -60,12 +89,14 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			job["turns_left"] = int(job["turns_left"]) - 1
 			first = false
 		if int(job["turns_left"]) <= 0:
-			var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
-			settlement["garrison"].append({
+			var profile := recruit_profile(data, state, region_id, job["template"])
+			var unit := {
 				"template": job["template"],
-				"experience": experience,
+				"experience": int(profile["experience"]),
 				"strength_pct": 100,
-			})
+			}
+			stamp_upgrades(unit, profile)
+			settlement["garrison"].append(unit)
 			completed.append(job["template"])
 		else:
 			remaining.append(job)
@@ -74,16 +105,20 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 
 
 static func retrain_garrison(data: GameData, state: Dictionary, region_id: String) -> int:
-	## Refill depleted garrison units, paying cost proportional to missing men.
+	## Refit the garrison to the town's current standard: every unit the town
+	## could recruit draws its weapon and armour levels (never downgraded), and
+	## depleted units are refilled, paying cost proportional to missing men.
+	## Returns the number of units refilled.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var healed := 0
 	for unit in settlement["garrison"]:
-		var strength := int(unit["strength_pct"])
-		if strength >= 100:
-			continue
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if not _requirements_met(data, settlement, template):
+			continue
+		stamp_upgrades(unit, recruit_profile(data, state, region_id, unit["template"]))
+		var strength := int(unit["strength_pct"])
+		if strength >= 100:
 			continue
 		var missing_fraction := (100 - strength) / 100.0
 		var cost_factor := float(data.balance["recruitment"]["retrain_cost_factor"])
@@ -100,7 +135,8 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 
 
 static func merge_units(units: Array) -> void:
-	## Combine same-template depleted units in one force (highest experience kept).
+	## Combine same-template depleted units in one force (highest experience
+	## and the better kit kept).
 	var index := 0
 	while index < units.size():
 		var unit: Dictionary = units[index]
@@ -112,6 +148,7 @@ static func merge_units(units: Array) -> void:
 				var combined := int(unit["strength_pct"]) + int(other["strength_pct"])
 				unit["strength_pct"] = mini(combined, 100)
 				unit["experience"] = maxi(int(unit["experience"]), int(other["experience"]))
+				stamp_upgrades(unit, other)
 				var leftover := combined - 100
 				if leftover > 0:
 					other["strength_pct"] = leftover

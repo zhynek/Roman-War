@@ -70,7 +70,14 @@ static func data() -> GameData:
 			"id": "test_barracks", "kind": "barracks", "cultures": ["roman"], "name": "Barracks",
 			"levels": [
 				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {}, "description": ""},
-				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {}, "description": ""},
+				{"id": "barracks_2", "name": "Drill Yard", "min_settlement_level": "town", "cost": 800, "build_turns": 2, "effects": {"drill": 1, "recruit_xp": 1, "weapon_upgrade": 1}, "description": ""},
+			],
+		},
+		{
+			"id": "test_armoury", "kind": "armoury", "cultures": ["roman"], "name": "Armoury",
+			"requires_building": {"kind": "barracks", "level": 2},
+			"levels": [
+				{"id": "armoury_1", "name": "Smithy", "min_settlement_level": "town", "cost": 600, "build_turns": 1, "effects": {"weapon_upgrade": 1, "armor_upgrade": 1}, "description": ""},
 			],
 		},
 	]

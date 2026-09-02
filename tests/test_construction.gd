@@ -57,3 +57,17 @@ func test_cannot_demolish_farms_or_government(t) -> void:
 	state["settlements"]["beta"]["buildings"]["test_walls"] = 1
 	t.check(ConstructionRules.demolish(data, state, "beta", "test_walls"), "walls can be pulled down")
 	t.check(not state["settlements"]["beta"]["buildings"].has("test_walls"), "tier-1 demolition removes the chain")
+
+
+func test_requires_building_gates_armoury(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var chains := []
+	for project in ConstructionRules.available_projects(data, state, "beta"):
+		chains.append(project["chain"])
+	t.check(not chains.has("test_armoury"), "no armoury without a drill yard")
+	state["settlements"]["beta"]["buildings"]["test_barracks"] = 2
+	chains = []
+	for project in ConstructionRules.available_projects(data, state, "beta"):
+		chains.append(project["chain"])
+	t.check(chains.has("test_armoury"), "a tier-2 barracks unlocks the armoury")

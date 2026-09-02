@@ -50,7 +50,7 @@ FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
 
 # Building effect keys authored ahead of their engine reader. Anything else in
 # the schema's closed vocabulary that no rules module reads is dead content.
-FORWARD_EFFECTS = {"weapon_upgrade", "armor_upgrade"}  # readers land with the arms industry
+FORWARD_EFFECTS = {"drill"}  # policing reader lands with the governance links
 
 errors: list[str] = []
 warnings: list[str] = []
@@ -132,10 +132,23 @@ def cross_checks(t: dict[str, dict]) -> None:
             if cap and tiers != LEVELS.index(cap) + 1:
                 err(f"buildings: {culture} government chain has {tiers} tiers but culture cap is {cap} "
                     f"(needs {LEVELS.index(cap) + 1})")
-        for kind in ("walls", "farms", "barracks"):
+        for kind in ("walls", "farms", "barracks", "armoury"):
             if not any(c["kind"] == kind and culture in c["cultures"] for c in chains.values()):
                 if culture != "neutral":
                     warn(f"buildings: culture {culture} has no {kind} chain")
+
+    # A chain's building prerequisite must be a kind every culture it serves can
+    # actually raise to that tier, or the chain is unbuildable for them.
+    for chain in chains.values():
+        required = chain.get("requires_building")
+        if not required:
+            continue
+        for culture in chain["cultures"]:
+            satisfiable = any(c["kind"] == required["kind"] and culture in c["cultures"]
+                              and len(c["levels"]) >= required["level"] for c in chains.values())
+            if not satisfiable:
+                err(f"buildings: {chain['id']}: requires {required['kind']} L{required['level']}, "
+                    f"which culture {culture} cannot build")
 
     # --- units ------------------------------------------------------------
     units = {u["id"]: u for u in t.get("units.json", {}).get("units", [])}
@@ -301,6 +314,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         settled[region_id] = owner
         owner_culture = factions.get(owner, {}).get("culture")
         seen_chains: set[str] = set()
+        tier_by_kind: dict[str, int] = {}
         government_tier = 0
         for level_id in setup.get("buildings", []):
             if level_id not in level_ids:
@@ -311,6 +325,7 @@ def cross_checks(t: dict[str, dict]) -> None:
                 err(f"campaign: {region_id}: two levels of chain {chain['id']}")
             seen_chains.add(chain["id"])
             tier = next(i for i, lv in enumerate(chain["levels"], 1) if lv["id"] == level_id)
+            tier_by_kind[chain["kind"]] = max(tier_by_kind.get(chain["kind"], 0), tier)
             if chain["kind"] == "government":
                 government_tier = tier
                 if owner_culture not in chain["cultures"]:
@@ -320,6 +335,10 @@ def cross_checks(t: dict[str, dict]) -> None:
             resource = chain.get("requires_resource")
             if resource and resource not in regions[region_id].get("resources", []):
                 err(f"campaign: {region_id}: {level_id} requires resource {resource}")
+        for chain_id in sorted(seen_chains):
+            required = chains[chain_id].get("requires_building")
+            if required and tier_by_kind.get(required["kind"], 0) < required["level"]:
+                err(f"campaign: {region_id}: {chain_id} needs {required['kind']} L{required['level']} at start")
         if government_tier == 0:
             err(f"campaign: {region_id}: no government building at start")
         else:

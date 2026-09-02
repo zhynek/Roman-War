@@ -14,12 +14,16 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 - Terrain: `plains, forest, hills, mountains, desert, steppe, marsh`.
 - Tax levels: `very_low, low, normal, high, very_high`.
 - Building chain kinds: `government, walls, barracks, stables, archery_range,
-  siege_workshop, naval, market, farms, roads, port, mines, health,
-  entertainment, execution, education, temple`.
+  siege_workshop, armoury, naval, market, farms, roads, port, mines, health,
+  entertainment, execution, education, temple`. A chain may carry
+  `requires_building: {kind, level}` — buildable only where the settlement
+  already holds that kind at that tier (armouries need a barracks).
 - Settlement `effects` keys: `law, happiness, growth, health, trade_pct,
-  farm_income, mine_income, recruit_xp, weapon_upgrade, armor_upgrade,
+  farm_income, mine_income, recruit_xp, drill, weapon_upgrade, armor_upgrade,
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
-  percentage points; `*_income` are denarii per turn).
+  percentage points; `*_income` are denarii per turn; `recruit_xp` is the best
+  tier's value, `weapon_upgrade`/`armor_upgrade` sum across chains up to
+  `balance.recruitment.upgrade_max`, `drill` sums and feeds garrison policing).
 - Unit classes: `infantry, spear, pike, missile, cavalry, horse_archer, chariot,
   elephant, siege, ship, general_bodyguard, peasant` — each needs a record in
   `unit_classes.json` (matchups, terrain, assault, wall_defense, garrison_weight).
