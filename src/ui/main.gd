@@ -38,8 +38,10 @@ func _ready() -> void:
 		difficulty_options.add_item(difficulty.capitalize().replace("_", " "))
 	difficulty_options.selected = 1
 
-	status_label.text = "%d factions · %d regions · %d unit types" \
-		% [_data.factions.size(), _data.regions.size(), _data.units.size()]
+	# The version is on screen so a stale copy of the app is obvious at a glance.
+	status_label.text = "v%s  ·  %d factions · %d regions · %d unit types" \
+		% [str(ProjectSettings.get_setting("application/config/version", "dev")),
+			_data.factions.size(), _data.regions.size(), _data.units.size()]
 
 
 func _on_start_pressed() -> void:

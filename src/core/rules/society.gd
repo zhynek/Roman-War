@@ -362,6 +362,20 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 		knowledge_buildings += SettlementRules.effect_total(data, settlement, "knowledge")
 		legitimacy_total += float(stocks_of(data, settlement)["legitimacy"])
 
+	# Phase 7: the magistracies of the Republic are the posts a Roman house's
+	# great men actually compete for. Every seat the house holds absorbs
+	# claimants by its rank; a house shut out of the curia loses that outlet
+	# and its ambitious sons have nowhere to go but each other. (A pure sum —
+	# order-free.)
+	var seat_ranks := 0
+	if data.factions.get(faction_id, {}).get("is_roman_house", false):
+		for character in state["characters"].values():
+			if not character["alive"] or character["faction"] != faction_id:
+				continue
+			var office = character.get("office")
+			if office != null:
+				seat_ranks += int(data.offices.get(office, {}).get("rank", 0))
+
 	var commands := 0
 	var army_ids: Array = state["armies"].keys()
 	army_ids.sort()
@@ -396,6 +410,7 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	# an amnesty — add claimants the legitimacy of the state does not damp away.
 	elite += EdictRules.faction_effect_total(data, state, faction_id, "elite_pressure", region_ids)
 	elite -= float(offices) * float(rules["elite_office_absorption_per_tier"])
+	elite -= float(seat_ranks) * float(rules["elite_office_absorption_per_seat_rank"])
 	elite -= float(commands) * float(rules["elite_command_absorption_per_army"]) \
 		* (float(rules["elite_command_martial_floor"]) + martial_share)
 	elite -= elite * float(rules["elite_decay_rate"])

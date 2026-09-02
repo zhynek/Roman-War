@@ -195,6 +195,8 @@ static func _spawn_character(data: GameData, state: Dictionary, rng: CampaignRng
 		"alive": true,
 		"deeds": {},
 		"epithet": "",
+		"office": null,
+		"offices_held": [],
 	}
 	return char_id
 

@@ -80,7 +80,7 @@ func test_map_changes_hands(t) -> void:
 	for template_kind in ["war_declared", "battle", "city_taken", "city_sacked", "city_revolted",
 			"peace_made", "alliance_made", "technique_originated", "technique_adopted",
 			"edict_enacted", "edict_lapsed", "leader_died", "succession", "reign_summary",
-			"war_summary", "faction_destroyed", "disaster", "epithet_earned"]:
+			"war_summary", "faction_destroyed", "disaster", "epithet_earned", "office_taken"]:
 		kinds[template_kind] = true
 	var chronicle: Array = game.state["chronicle"]
 	t.check(chronicle.size() > 0, "the scribes have been busy")

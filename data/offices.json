@@ -1,0 +1,87 @@
+{
+  "$schema": "../schemas/offices.schema.json",
+  "offices": [
+    {
+      "id": "quaestor",
+      "name": "Quaestor",
+      "rank": 1,
+      "seats": 4,
+      "min_age": 20,
+      "requires_prior_rank": 0,
+      "effects": {
+        "management": 1
+      },
+      "description": "Keeper of the treasury and the army's pay chest. The first rung of the ladder, taken young, and the only one where honest bookkeeping is expected.",
+      "historical_basis": "The quaestorship was the entry magistracy of the Roman cursus honorum. Quaestors administered the state treasury at Rome and served as paymasters and deputies to consuls and provincial governors in the field. The early and middle Republic elected a handful of them each year; Sulla later raised the college to twenty and fixed a minimum age near thirty."
+    },
+    {
+      "id": "aedile",
+      "name": "Aedile",
+      "rank": 2,
+      "seats": 2,
+      "min_age": 24,
+      "requires_prior_rank": 1,
+      "effects": {
+        "management": 1,
+        "influence": 1
+      },
+      "description": "Master of streets, markets, grain and games. He spends his own fortune on spectacles so the crowd remembers his name when he stands again.",
+      "historical_basis": "The aediles maintained the public buildings, streets and water supply of Rome, policed its markets, watched over the grain supply and staged the public games. Ambitious men financed those games lavishly from their own purses to buy popularity for the offices above; Caesar's aedileship of 65 BC, which left him deep in debt, is the notorious example."
+    },
+    {
+      "id": "praetor",
+      "name": "Praetor",
+      "rank": 3,
+      "seats": 2,
+      "min_age": 28,
+      "requires_prior_rank": 1,
+      "effects": {
+        "command": 1,
+        "influence": 1
+      },
+      "description": "Judge of the city and, when the year demands it, a general. He holds imperium, the right to command in the field.",
+      "historical_basis": "The praetorship was created in 366 BC and carried imperium. Praetors presided over the courts at Rome, the urban praetor from the start and a second praetor for cases involving foreigners from 242 BC, and commanded armies and governed provinces when the consuls were elsewhere. The college grew from one to six by the late second century BC."
+    },
+    {
+      "id": "pontifex",
+      "name": "Pontifex Maximus",
+      "rank": 4,
+      "seats": 1,
+      "min_age": 40,
+      "requires_prior_rank": 0,
+      "effects": {
+        "influence": 2
+      },
+      "description": "Highest priest of the state cults. The gods speak through him, which makes him very hard to argue with.",
+      "historical_basis": "The pontifex maximus headed the college of pontiffs, kept the calendar and the sacred law, and was chosen for life from senior men of the state. From the third century BC he was elected by a special assembly of seventeen of the thirty-five tribes rather than co-opted by the college; Caesar won the office in 63 BC by open bribery on a scale that alarmed his creditors."
+    },
+    {
+      "id": "consul",
+      "name": "Consul",
+      "rank": 5,
+      "seats": 2,
+      "min_age": 32,
+      "requires_prior_rank": 3,
+      "effects": {
+        "command": 2,
+        "influence": 2
+      },
+      "description": "One of the two heads of the Republic for a year. Armies, honors and enemies follow the office, and the year is named for him.",
+      "historical_basis": "Two consuls, elected each year by the centuriate assembly, held the supreme civil and military authority of the Republic and gave their names to the year. The lex Villia annalis of 180 BC fixed the ladder beneath the consulship, the praetorship before it and set intervals between offices, and Sulla later fixed the minimum age at forty-two; the earlier Republic knew consuls in their thirties."
+    },
+    {
+      "id": "censor",
+      "name": "Censor",
+      "rank": 6,
+      "seats": 1,
+      "min_age": 36,
+      "requires_prior_rank": 5,
+      "effects": {
+        "management": 2,
+        "influence": 1
+      },
+      "description": "Counter of citizens, judge of morals, letter of the public contracts. One stroke of his stylus can strike a man from the rolls.",
+      "historical_basis": "Two censors were elected at roughly five-year intervals, normally from among former consuls, to hold the census, assign citizens to their classes and tribes, revise the roll of the Senate by expelling the unworthy, and let the state's contracts. Held for eighteen months and ranked above the consulship in dignity, it was the crown of a senatorial career."
+    }
+  ]
+}

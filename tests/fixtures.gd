@@ -30,6 +30,10 @@ static func data() -> GameData:
 		FileAccess.get_file_as_string("res://data/edicts.json"))
 	for edict in edict_doc.get("edicts", []):
 		game_data.edicts[edict["id"]] = edict
+	var office_doc: Dictionary = JSON.parse_string(
+		FileAccess.get_file_as_string("res://data/offices.json"))
+	for office in office_doc.get("offices", []):
+		game_data.offices[office["id"]] = office
 
 	game_data.cultures = {
 		"roman": {"id": "roman", "name": "Roman", "max_settlement_level": "huge_city"},
@@ -354,7 +358,7 @@ static func state(game_data: GameData) -> Dictionary:
 	## Two-faction world: red holds beta (capital) and epsilon, blue holds alpha.
 	var campaign_state := {
 		"turn": 0, "year": -270, "season": "summer", "rng_state": "0",
-		"difficulty": "medium", "campaign_mode": "long", "event_happiness": null,
+		"difficulty": "medium", "campaign_mode": "long", "world_seed": 0, "event_happiness": null,
 		"modifiers": [], "chronicle": [], "wars": [],
 		"mercenary_pools": {"test_pool": {"test_merc": 1.0}},
 		"player_faction": "red",
@@ -395,6 +399,8 @@ static func add_character(campaign_state: Dictionary, faction: String, char_id: 
 		"alive": true,
 		"deeds": {},
 		"epithet": "",
+		"office": null,
+		"offices_held": [],
 	}
 	return char_id
 
@@ -425,6 +431,29 @@ static func add_faction(campaign_state: Dictionary, faction_id: String, capital:
 
 static func add_settlement(campaign_state: Dictionary, region: String, owner: String, population: int, buildings: Dictionary) -> void:
 	campaign_state["settlements"][region] = _settlement(shared_data(), owner, population, buildings)
+
+
+static func add_senate(game_data: GameData, campaign_state: Dictionary, region: String = "gamma") -> void:
+	## A Senate for the politics tests: the flagged faction, a city on the
+	## empty middle region, and an alliance with every Roman house present —
+	## registered in the content tables too, since the engine reads the flag
+	## from data.factions.
+	game_data.factions["senate"] = {"id": "senate", "name": "The Senate", "culture": "roman", "is_senate": true}
+	campaign_state["factions"]["senate"] = _faction(game_data, region)
+	campaign_state["settlements"][region] = _settlement(game_data, "senate", 3000, {"test_government": 2})
+	for faction_id in campaign_state["factions"]:
+		if game_data.factions.get(faction_id, {}).get("is_roman_house", false):
+			DiplomacyRules.set_stance(campaign_state, "senate", faction_id, "alliance")
+
+
+static func add_house(game_data: GameData, campaign_state: Dictionary, faction_id: String, region: String) -> void:
+	## A second Roman house holding one city, allied to the Senate if there is one.
+	game_data.factions[faction_id] = {"id": faction_id, "name": faction_id.capitalize(),
+		"culture": "roman", "is_roman_house": true}
+	campaign_state["factions"][faction_id] = _faction(game_data, region)
+	campaign_state["settlements"][region] = _settlement(game_data, faction_id, 2500, {"test_government": 2})
+	if campaign_state["factions"].has("senate"):
+		DiplomacyRules.set_stance(campaign_state, "senate", faction_id, "alliance")
 
 
 

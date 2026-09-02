@@ -261,7 +261,9 @@ func refresh() -> void:
 	_draw_treasury()
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
-	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
+	var seed_value := int(game.state.get("world_seed", 0))
+	top_labels["date"].text = "%s, %s · seed %s   " % [year_text,
+		String(game.state["season"]).capitalize(), str(seed_value) if seed_value != 0 else "?"]
 	# The three things about your own people you can always see, whatever the
 	# state of your provincial administration.
 	var society: Array = game.faction_society()

@@ -205,9 +205,14 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			"other": String(notice.get("from", "")),
 			"subject": String(notice.get("technique", "")),
 		})
-	report["senate"] = SenateRules.process_turn(data, state, rng)
-	for notice in report["senate"]:
-		_journal_senate_notice(data, journal, notice)
+	for notice in SenateRules.process_turn(data, state, rng):
+		# Summer elections fire office_gained triggers; the traits and
+		# retinue they award are the family's news, not the Senate's.
+		if ["trait", "ancillary"].has(String(notice.get("kind", ""))):
+			report["characters"].append(notice)
+		else:
+			report["senate"].append(notice)
+			_journal_senate_notice(data, journal, notice)
 
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
 	report["guided"] = GuidedRules.process_turn(data, state)

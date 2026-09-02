@@ -17,7 +17,7 @@
         "peace_made", "alliance_made", "technique_originated", "technique_adopted",
         "edict_enacted", "edict_lapsed", "leader_died", "succession",
         "reign_summary", "war_summary", "faction_destroyed", "disaster",
-        "epithet_earned"
+        "epithet_earned", "office_taken"
       ]
     },
     "subjects": {
@@ -30,7 +30,8 @@
         "region": { "type": "string" },
         "technique": { "type": "string" },
         "edict": { "type": "string" },
-        "epithet": { "type": "string" }
+        "epithet": { "type": "string" },
+        "office": { "type": "string" }
       }
     },
     "magnitude": { "type": "integer", "minimum": 1, "maximum": 10 },

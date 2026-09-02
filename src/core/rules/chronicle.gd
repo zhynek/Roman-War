@@ -12,7 +12,8 @@ class_name ChronicleRules
 ## (DiplomacyRules.apply_offer — the only place they form).
 ##
 ## Characters accrue deeds ({battles_won, battles_lost, sieges_won,
-## cities_taken, cities_lost, techniques_completed, edicts_enacted}) — the
+## cities_taken, cities_lost, techniques_completed, edicts_enacted,
+## offices_held}) — the
 ## vocabulary epithets are earned from (C2). Rebels have no scribes: wars
 ## with rebels are banditry and stay out of the ledger.
 ##
@@ -278,6 +279,8 @@ static func _names_for(data: GameData, state: Dictionary, entry: Dictionary) -> 
 				names[key] = String(data.edicts.get(subject_id, {}).get("name", subject_id))
 			"epithet":
 				names[key] = String(data.epithets.get(subject_id, {}).get("name", subject_id))
+			"office":
+				names[key] = String(data.offices.get(subject_id, {}).get("name", subject_id))
 			_:
 				names[key] = subject_id
 	return names

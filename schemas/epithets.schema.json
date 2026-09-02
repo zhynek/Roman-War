@@ -43,7 +43,7 @@
   "$defs": {
     "deed": {
       "enum": ["battles_won", "battles_lost", "sieges_won", "cities_taken",
-        "cities_lost", "techniques_completed", "edicts_enacted"]
+        "cities_lost", "techniques_completed", "edicts_enacted", "offices_held"]
     }
   }
 }

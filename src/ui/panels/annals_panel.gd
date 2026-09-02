@@ -9,7 +9,7 @@ const FILTERS := ["All", "Wars", "Court", "Wisdom & World"]
 const WAR_KINDS := ["war_declared", "battle", "city_taken", "city_sacked",
 	"city_revolted", "peace_made", "war_summary", "faction_destroyed"]
 const COURT_KINDS := ["alliance_made", "edict_enacted", "edict_lapsed",
-	"leader_died", "succession", "reign_summary", "epithet_earned"]
+	"leader_died", "succession", "reign_summary", "epithet_earned", "office_taken"]
 
 var game: Game
 var _content: VBoxContainer

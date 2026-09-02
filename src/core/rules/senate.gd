@@ -1,8 +1,10 @@
 class_name SenateRules
-## Minimal senate loop for the foundation (full politics is a later phase, but
-## the standing fields and mission state exist from day one so nothing needs a
-## retrofit): standings drift with expansion, missions are issued from data
-## templates, deadlines are enforced, and the civil-war threshold is evaluated.
+## The Senate: standings drift with expansion, missions are issued from data
+## templates and their deadlines enforced, and — Phase 7 — the cursus honorum
+## is filled every summer from the men of the Roman houses (data/offices.json;
+## an office lives on the character as character.office and reaches his
+## attributes through CharacterRules.effect_total). The civil-war threshold on
+## Ambition is evaluated here too.
 
 
 ## Mission kinds the engine can actually judge. The rest of missions.json is
@@ -15,6 +17,12 @@ const LIVE_KINDS: Array[String] = ["take_region", "make_alliance", "reach_trade_
 static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) -> Array:
 	var senate_rules: Dictionary = data.balance["senate"]
 	var notices: Array = []
+	# The cursus honorum: every summer the Senate refills its magistracies.
+	# When the Senate itself has fallen, the Republic's offices end with it.
+	if senate_faction(data, state) == "":
+		_dissolve_offices(state)
+	elif String(state["season"]) == "summer":
+		_hold_elections(data, state, rng, notices)
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 	for faction_id in faction_ids:
@@ -107,6 +115,171 @@ static func _notice(kind: String, faction_id: String, mission: Dictionary) -> Di
 		"turns_left": int(mission.get("turns_left", 0)),
 	}
 
+
+## --- Offices: the cursus honorum ------------------------------------------
+
+static func senate_faction(data: GameData, state: Dictionary) -> String:
+	## The Senate's faction id while it lives, "" once it has fallen. Looked
+	## up by flag, never by the literal id.
+	var faction_ids: Array = state["factions"].keys()
+	faction_ids.sort()
+	for faction_id in faction_ids:
+		if data.factions.get(faction_id, {}).get("is_senate", false) \
+				and state["factions"][faction_id]["alive"]:
+			return faction_id
+	return ""
+
+
+static func office_holders(data: GameData, state: Dictionary) -> Array:
+	## [{office, holder, faction}] for every filled seat, highest rank first,
+	## then by holder id — the scroll's ladder.
+	var holders: Array = []
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		var office = character.get("office")
+		if character["alive"] and office != null:
+			holders.append({"office": office, "holder": char_id, "faction": character["faction"]})
+	holders.sort_custom(func(a, b):
+		var rank_a := int(data.offices.get(a["office"], {}).get("rank", 0))
+		var rank_b := int(data.offices.get(b["office"], {}).get("rank", 0))
+		if rank_a != rank_b:
+			return rank_a > rank_b
+		return String(a["holder"]) < String(b["holder"]))
+	return holders
+
+
+static func eligible_offices(data: GameData, state: Dictionary, char_id: String) -> Array:
+	## The magistracies a man may stand for at the next election, highest
+	## first: [{office, on_ladder}] — on_ladder false where the cursus honorum
+	## still bars him (he would only be seated as a suffect in a lean year).
+	var out: Array = []
+	if not state["characters"].has(char_id):
+		return out
+	var character: Dictionary = state["characters"][char_id]
+	if not _stands_for_office(data, state, character):
+		return out
+	var office_list: Array = data.offices.values()
+	office_list.sort_custom(func(a, b): return int(a["rank"]) > int(b["rank"]))
+	for office in office_list:
+		if int(character["age"]) < int(office["min_age"]):
+			continue
+		var needs_rank := int(office.get("requires_prior_rank", 0))
+		out.append({"office": office["id"],
+			"on_ladder": needs_rank <= 0 or _has_held_rank(data, character, needs_rank)})
+	return out
+
+
+static func _stands_for_office(data: GameData, state: Dictionary, character: Dictionary) -> bool:
+	## A living man of a living Roman house that is not at war with the
+	## Republic. Wives and children do not stand; nor does a house in rebellion.
+	if not character["alive"] or String(character.get("gender", "male")) != "male":
+		return false
+	if not ["leader", "heir", "family"].has(String(character["role"])):
+		return false
+	var faction_id: String = character["faction"]
+	if not data.factions.get(faction_id, {}).get("is_roman_house", false):
+		return false
+	var faction: Dictionary = state["factions"].get(faction_id, {})
+	return bool(faction.get("alive", false)) and not bool(faction.get("at_civil_war", false))
+
+
+static func _hold_elections(data: GameData, state: Dictionary, rng: CampaignRng, notices: Array) -> void:
+	## Summer elections. Every seat is refilled from the men of the houses in
+	## the Senate's good graces: a man's score is his house's standing with
+	## the Senate (weighted) plus his own influence WITHOUT the office he holds
+	## today — a consulship must be defended, not inherited from itself. Ties
+	## break on age, then id, so a loaded save elects the same men. The highest
+	## offices fill first; the cursus honorum (requires_prior_rank) is enforced
+	## while a candidate on the ladder remains and waived after — the Senate
+	## seats a suffect rather than leave a magistracy empty in a lean year.
+	var weight := float(data.balance["senate"].get("election_standing_weight", 1.0))
+	var previous := {}
+	var candidates: Array = []  # [score, age, char_id]
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		var held = character.get("office")
+		if held != null:
+			previous[char_id] = held
+			character["office"] = null
+		if not _stands_for_office(data, state, character):
+			continue
+		# The office was cleared above, so effective() is the man without it.
+		var score := float(state["factions"][character["faction"]]["senate_standing"]) * weight \
+			+ float(CharacterRules.effective(data, character, "influence"))
+		candidates.append([score, int(character["age"]), char_id])
+	candidates.sort_custom(func(a, b):
+		if a[0] != b[0]:
+			return a[0] > b[0]
+		if a[1] != b[1]:
+			return a[1] > b[1]
+		return String(a[2]) < String(b[2]))
+
+	var office_list: Array = data.offices.values()
+	office_list.sort_custom(func(a, b): return int(a["rank"]) > int(b["rank"]))
+	var taken := {}
+	for office in office_list:
+		var seats := int(office["seats"])
+		var needs_rank := int(office.get("requires_prior_rank", 0))
+		# Pass one seats the men who climbed the ladder; pass two seats suffects
+		# into whatever is still empty.
+		for waived in [false, true]:
+			for entry in candidates:
+				if seats <= 0:
+					break
+				var char_id: String = entry[2]
+				if taken.has(char_id):
+					continue
+				var character: Dictionary = state["characters"][char_id]
+				if int(character["age"]) < int(office["min_age"]):
+					continue
+				if not waived and needs_rank > 0 and not _has_held_rank(data, character, needs_rank):
+					continue
+				taken[char_id] = true
+				seats -= 1
+				_seat(data, state, rng, char_id, office, previous, notices)
+
+
+static func _seat(data: GameData, state: Dictionary, rng: CampaignRng, char_id: String, office: Dictionary, previous: Dictionary, notices: Array) -> void:
+	var character: Dictionary = state["characters"][char_id]
+	var office_id := String(office["id"])
+	character["office"] = office_id
+	if String(previous.get(char_id, "")) == office_id:
+		return  # returned to the same seat: no new laurels, no new trigger
+	if not character.has("offices_held"):
+		character["offices_held"] = []
+	character["offices_held"].append(office_id)
+	ChronicleRules.add_deed(state, char_id, "offices_held")
+	if int(office["rank"]) >= int(data.balance["senate"].get("annals_office_min_rank", 3)):
+		# Only the higher magistracies make the annals — a dozen quaestors a
+		# year would displace real history from the chronicle's per-turn cap.
+		ChronicleRules.record(data, state, "office_taken",
+			{"character": char_id, "faction": character["faction"], "office": office_id}, 3)
+	CharacterRules.fire_trigger(data, state, char_id, "office_gained", {"office": office_id}, rng, notices)
+	notices.append({"kind": "office_gained", "character": char_id,
+		"faction": character["faction"], "office": office_id, "rank": int(office["rank"])})
+	if character["faction"] == state.get("player_faction", ""):
+		GuidedRules.bump(state, "offices_won")
+
+
+static func _has_held_rank(data: GameData, character: Dictionary, rank: int) -> bool:
+	for office_id in character.get("offices_held", []):
+		if int(data.offices.get(office_id, {}).get("rank", 0)) >= rank:
+			return true
+	return false
+
+
+static func _dissolve_offices(state: Dictionary) -> void:
+	## With the Senate gone there is no one to fill the magistracies.
+	for character in state["characters"].values():  # pure clear — order-free
+		if character.get("office") != null:
+			character["office"] = null
+
+
+## --- Missions --------------------------------------------------------------
 
 static func _issue_mission(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng) -> Dictionary:
 	## take_region targets a nearby rebel region; make_alliance and

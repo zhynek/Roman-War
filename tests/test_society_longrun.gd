@@ -14,8 +14,12 @@ const CIVIC := ["health", "education", "temple", "roads", "farms", "market", "go
 ## turns is conquered outright, and every societal reading is then averaged
 ## over zero regions. Sixty turns still shows the whole arc this test exists
 ## for — force works, then it does not — with both houses still standing to be
-## compared.
-const HORIZON := 60
+## compared. Shortened again to 50 with Phase 7: the summer elections draw
+## from the campaign stream, and in the shifted world the militarist has
+## lost its LAST province by turn sixty (grievance past 80 by fifty), so the
+## reading averaged over nothing. At fifty it still holds one, on almost no
+## consent, which is the whole claim.
+const HORIZON := 50
 const MIDPOINT := 30
 
 

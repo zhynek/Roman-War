@@ -36,6 +36,13 @@ static func effect_total(data: GameData, character: Dictionary, effect: String) 
 	for ancillary_id in character.get("ancillaries", []):
 		var ancillary: Dictionary = data.ancillaries.get(ancillary_id, {})
 		total += float(ancillary.get("effects", {}).get(effect, 0.0))
+	# A senate office carries weight of its own (Phase 7). Untyped on
+	# purpose: the key is null between terms and absent on pre-office saves.
+	var office = character.get("office")
+	if office != null and data.offices.has(office):
+		var office_effects = data.offices[office].get("effects")
+		if office_effects != null:
+			total += float(office_effects.get(effect, 0.0))
 	return total
 
 
@@ -196,6 +203,7 @@ static func kill(state: Dictionary, char_id: String, data: GameData = null, noti
 		var character: Dictionary = state["characters"][char_id]
 		character["alive"] = false
 		character["ancillaries"] = []
+		character["office"] = null  # dead men hold no office
 		faction_id = character["faction"]
 	for settlement in state["settlements"].values():
 		if settlement["governor"] == char_id:
