@@ -176,7 +176,10 @@ reproduces their exact campaign, which makes any bug directly debuggable.
 - **The unit-class counter matrix** is authored so any pair's two multipliers
   multiply to 0.85–1.15 (validator warns); the net counter is their ratio, and
   `docs/MILITARY_STRATEGY.md` §2 is generated from the data — regenerate its
-  tables if you retune.
+  tables if you retune. Mounted and beast classes carry a `mass` (cavalry 2,
+  elephants 8 …) because the roster's per-man stats on 60-man cards would
+  otherwise make a squadron a third of a phalanx; tune mass before touching
+  91 unit templates.
 - **Effect keys must have readers.** The validator fails on any building or
   doctrine effect key not read (as a quoted literal) under `src/core`; add the
   reader before the data, or list the key in `FORWARD_EFFECTS` deliberately.

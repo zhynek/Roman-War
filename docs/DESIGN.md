@@ -353,8 +353,11 @@ campaign never learns which ran.
 
 Per unit, in order (each stage is a named factor in the breakdown):
 
-1. **base** — soldiers × quality, quality = attack + missile×0.5 + defense +
-   morale×0.5 + charge×0.25.
+1. **base** — soldiers × class `mass` × quality, quality = attack + missile×0.5 +
+   defense + morale×0.5 + charge×0.25. `mass` (unit_classes.json) is a soldier's
+   fighting weight relative to a foot soldier: a horseman and his horse 2, a
+   horse archer 2, a chariot 3, an elephant 8, an artillery crew 2, a general's
+   escort 2.5 — so a 60-strong squadron is not a third of a 160-strong phalanx.
 2. **upgrades** — weapon levels add to attack, armour levels to defense
    (`battle.weapon_upgrade_attack_per_level`, `armor_upgrade_defense_per_level`).
 3. **doctrines** — class stat deltas from the side's `ArmyMods` (plus its

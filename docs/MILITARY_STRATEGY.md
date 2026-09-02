@@ -11,8 +11,11 @@ does. The historical notes are the reasons the numbers are what they are.
 A battle is a comparison of two **paper strengths**, then a roll of fortune. Each side's
 strength is built unit by unit, in a fixed order that the battle report names factor by factor:
 
-1. **Base** — men × quality, where quality is attack + defence + half morale + half missile
-   attack + a quarter of the charge value. Numbers matter, but so does the kind of men.
+1. **Base** — men × quality × the class's **mass**, where quality is attack + defence + half
+   morale + half missile attack + a quarter of the charge value, and mass is what one soldier
+   of that class weighs against a foot soldier: a horseman and his horse count as two, a horse
+   archer two, a chariot three, an elephant eight, an artillery crew two, a general's escort
+   two and a half. Numbers matter, but so does the kind of men — and the kind of beast.
 2. **Kit** — each weapon level adds 1 to attack, each armour level 1 to defence (§4).
 3. **Doctrines** — the faction's reforms (§6): stat bonuses for a class, then side-wide percentages.
 4. **Experience** — +10% per chevron, up to nine.

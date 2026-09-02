@@ -53,6 +53,7 @@
           "assault": { "type": "number", "minimum": 0, "maximum": 4, "description": "Attacker multiplier when storming walls (wall_level > 0); default 1.0" },
           "wall_defense": { "type": "number", "minimum": 0, "maximum": 4, "description": "Defender multiplier when holding walls (wall_level > 0); default 1.0" },
           "garrison_weight": { "type": "number", "minimum": 0, "maximum": 4, "description": "Public-order policing value per soldier; default 1.0" },
+          "mass": { "type": "number", "minimum": 0.1, "maximum": 20, "description": "Fighting weight of one soldier of this class relative to a foot soldier (a horseman and his horse count double, an elephant eightfold); default 1.0" },
           "description": { "type": "string" }
         }
       }

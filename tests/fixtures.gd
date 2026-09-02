@@ -113,8 +113,9 @@ static func data() -> GameData:
 			"cost": 100, "upkeep": 50, "requirements": {"building_kind": "government", "building_level": 1},
 			"era": "any", "description": "",
 		},
-		# Three arms of EQUAL base mass (soldiers x quality = 2,400), so the
-		# matchup tests measure counters and ground, never raw stats.
+		# Three arms of EQUAL base mass (soldiers x class mass x quality = 2,400 —
+		# cavalry has mass 2), so the matchup tests measure counters and ground,
+		# never raw stats.
 		"test_pikes": {
 			"id": "test_pikes", "name": "Pikes", "class": "pike", "culture": "roman",
 			"factions": ["red"], "soldiers": 120, "attack": 6, "defense": 11, "morale": 6, "speed": 4,
@@ -123,7 +124,7 @@ static func data() -> GameData:
 		},
 		"test_horse": {
 			"id": "test_horse", "name": "Horse", "class": "cavalry", "culture": "roman",
-			"factions": ["red"], "soldiers": 80, "attack": 11, "charge": 12, "defense": 11, "morale": 10, "speed": 8,
+			"factions": ["red"], "soldiers": 40, "attack": 11, "charge": 12, "defense": 11, "morale": 10, "speed": 8,
 			"cost": 700, "upkeep": 200, "requirements": {"building_kind": "stables", "building_level": 1},
 			"era": "any", "description": "",
 		},

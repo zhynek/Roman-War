@@ -97,13 +97,14 @@ func test_garrison_quality_weights_classes(t) -> void:
 	var beta: Dictionary = state["settlements"]["beta"]
 	beta["garrison"] = _garrison_of(["test_elites"])   # 80 infantry, weight 1.0
 	var infantry := SettlementRules.garrison_policing(data, beta)
-	beta["garrison"] = _garrison_of(["test_horse"])    # 80 cavalry, weight 0.9
+	beta["garrison"] = _garrison_of(["test_horse"])    # 40 cavalry, weight 0.9
 	var horse := SettlementRules.garrison_policing(data, beta)
 	beta["garrison"] = _garrison_of(["test_mob", "test_mob"])  # 120 peasants, weight 0.5
 	var mob := SettlementRules.garrison_policing(data, beta)
 	t.check_near(infantry, 80.0, 0.001, "eighty foot police as eighty")
-	t.check_near(horse, 72.0, 0.001, "horsemen are a little less use in the streets")
-	t.check(mob < horse, "a bigger mob of levies polices worse than fewer regulars")
+	t.check_near(horse, 36.0, 0.001, "forty horsemen police as thirty-six: a little less use per man in the streets")
+	t.check_near(mob, 60.0, 0.001, "a hundred and twenty levies police as sixty")
+	t.check(mob < infantry, "a bigger mob of levies polices worse than fewer regulars")
 
 
 func test_garrison_experience_and_drill(t) -> void:

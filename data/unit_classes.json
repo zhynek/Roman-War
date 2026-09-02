@@ -130,6 +130,7 @@
       "assault": 0.5,
       "wall_defense": 0.6,
       "garrison_weight": 0.9,
+      "mass": 2.0,
       "description": "Lancers and heavy horse who win by the charge. On open ground they ride down archers, roll up infantry from the flank and run down anyone who breaks, and most of a beaten army dies in that pursuit. Against a steady spear or pike front they achieve nothing, in woods and mountains they are dismounted men on bad footing, and inside a city wall they are useless."
     },
     {
@@ -160,6 +161,7 @@
       "assault": 0.5,
       "wall_defense": 0.7,
       "garrison_weight": 0.7,
+      "mass": 2.0,
       "description": "Mounted bowmen of the steppe and the Iranian plateau who shoot and never close. On open plains they empty an army of foot at no cost, as Crassus learned at Carrhae; light cavalry that can catch them, slingers who can outrange them, and any wood or mountain take the plains away from them."
     },
     {
@@ -190,6 +192,7 @@
       "assault": 0.3,
       "wall_defense": 0.3,
       "garrison_weight": 0.3,
+      "mass": 3.0,
       "description": "The war cart of Britain and the scythed chariots of the Hellenistic east. A terrifying charge on flat ground against loose foot, a wreck against pikes, spears or any obstacle, and easy meat for missiles: at Magnesia the Seleucid scythed chariots were shot to pieces before reaching the line."
     },
     {
@@ -219,6 +222,7 @@
       "assault": 0.6,
       "wall_defense": 0.4,
       "garrison_weight": 0.3,
+      "mass": 8.0,
       "description": "Beasts that horses will not face and that trample close-order foot, but that panic under missile fire and turn on their own side. Pyrrhus won with them at Heraclea; Scipio opened lanes for them at Zama and let his skirmishers finish them."
     },
     {
@@ -246,6 +250,7 @@
       "assault": 1.6,
       "wall_defense": 1.3,
       "garrison_weight": 0.2,
+      "mass": 2.0,
       "description": "Bolt throwers, stone throwers and rams. Decisive against walls and dense pike blocks, a liability in a running fight: slow, few, and lost the moment cavalry reaches them."
     },
     {
@@ -274,6 +279,7 @@
       "assault": 0.6,
       "wall_defense": 0.7,
       "garrison_weight": 1.5,
+      "mass": 2.5,
       "description": "The general's mounted escort: picked heavy horse, few in number, that fight as shock cavalry and carry the commander's life with them."
     },
     {

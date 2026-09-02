@@ -181,6 +181,10 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 	var class_record: Dictionary = data.unit_classes.get(unit_class, {})
 	var attribute_effects := _attribute_effects(data, template)
 	var soldiers := float(template["soldiers"]) * float(unit["strength_pct"]) / 100.0
+	# A card's fighting weight is its men times the class's mass: a horseman
+	# and his horse count as two foot soldiers, an elephant as eight, so a
+	# 60-strong squadron is not a third of a 160-strong phalanx.
+	var mass := float(class_record.get("mass", 1.0))
 
 	# 1. base quality from the template alone.
 	var base_quality := _quality(template, {}, 0.0, 0.0)
@@ -220,11 +224,11 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 		fatigue_factor = float(battle_rules["fatigue_multiplier"])
 
 	var chain: Array = []
-	var running := soldiers * base_quality
+	var running := soldiers * mass * base_quality
 	chain.append(running)
-	running = soldiers * upgraded_quality
+	running = soldiers * mass * upgraded_quality
 	chain.append(running)
-	running = soldiers * modded_quality
+	running = soldiers * mass * modded_quality
 	chain.append(running)
 	for factor in [experience_factor, matchup, terrain_factor, wall_factor, attacking_factor, fatigue_factor]:
 		running *= factor
@@ -241,6 +245,7 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 		"template": unit["template"],
 		"class": unit_class,
 		"soldiers": int(ceil(soldiers)),
+		"mass": mass,
 		"quality": modded_quality,
 		"experience": experience_factor,
 		"matchup": matchup,
@@ -378,7 +383,6 @@ static func _class_rows(profiles: Array, own_shares: Dictionary) -> Array:
 		var unit_class: String = profile["class"]
 		var row: Dictionary = by_class.get(unit_class,
 			{"class": unit_class, "units": 0.0, "soldiers": 0, "share": 0.0, "matchup": 0.0, "terrain": 0.0})
-		var weight := float(profile["chain"][0]) / maxf(float(profile["quality"]), 0.000001)  # ~ soldiers
 		row["units"] = float(row["units"]) + 1.0
 		row["soldiers"] = int(row["soldiers"]) + int(profile["soldiers"])
 		row["matchup"] = float(row["matchup"]) + float(profile["matchup"])
