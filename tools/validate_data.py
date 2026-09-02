@@ -47,6 +47,10 @@ LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_cit
 # else the engine never fires is flagged as dead content.
 FORWARD_TRIGGERS = {"office_gained"}  # senate offices are Phase 7
 
+# Building effect keys authored ahead of their engine reader. Anything else in
+# the schema's closed vocabulary that no rules module reads is dead content.
+FORWARD_EFFECTS = {"weapon_upgrade", "armor_upgrade"}  # readers land with the arms industry
+
 errors: list[str] = []
 warnings: list[str] = []
 
@@ -412,15 +416,13 @@ def cross_checks(t: dict[str, dict]) -> None:
     # Trigger kinds the engine actually fires. Anything else is dead content,
     # so a warning names it rather than letting it rot silently.
     fired_kinds = set()
-    engine_dir = ROOT / "src" / "core"
-    for source in engine_dir.rglob("*.gd"):
-        text = source.read_text()
-        for kind in ("turn_end_governing", "turn_end_idle", "turn_end_campaigning",
-                     "battle_won", "battle_lost", "siege_won", "settlement_captured",
-                     "settlement_exterminated", "settlement_enslaved", "office_gained",
-                     "came_of_age"):
-            if f'"{kind}"' in text:
-                fired_kinds.add(kind)
+    engine_text = _engine_source()
+    for kind in ("turn_end_governing", "turn_end_idle", "turn_end_campaigning",
+                 "battle_won", "battle_lost", "siege_won", "settlement_captured",
+                 "settlement_exterminated", "settlement_enslaved", "office_gained",
+                 "came_of_age"):
+        if f'"{kind}"' in engine_text:
+            fired_kinds.add(kind)
     for source_name, key in (("traits.json", "traits"), ("ancillaries.json", "ancillaries")):
         for entry in t.get(source_name, {}).get(key, []):
             for trigger in entry.get("triggers", []):
@@ -434,10 +436,37 @@ def cross_checks(t: dict[str, dict]) -> None:
                 if trait_id not in trait_defs:
                     err(f"campaign: character {character['id']}: unknown trait {trait_id}")
 
+    # --- effect-key liveness ----------------------------------------------
+    # Every effect key the buildings schema admits must be read by some rules
+    # module (as a quoted literal): weapon/armour upgrades shipped authored but
+    # unread for four phases, and a closed vocabulary should not rot silently.
+    effect_keys = _schema_effect_keys("buildings.schema.json")
+    for key in sorted(effect_keys):
+        if key in FORWARD_EFFECTS:
+            continue
+        if f'"{key}"' not in engine_text:
+            err(f"buildings.schema: effect key '{key}' has no engine reader under src/core "
+                f"(dead content — implement it or list it in FORWARD_EFFECTS)")
+    for key in sorted(FORWARD_EFFECTS):
+        if key not in effect_keys:
+            warn(f"validator: FORWARD_EFFECTS lists '{key}', which the schema no longer admits")
+
     # --- balance sanity ---------------------------------------------------
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+
+
+def _engine_source() -> str:
+    """Every GDScript under src/core, concatenated, for literal-reader checks."""
+    return "\n".join(path.read_text() for path in sorted((ROOT / "src" / "core").rglob("*.gd")))
+
+
+def _schema_effect_keys(schema_name: str) -> set[str]:
+    schema = json.loads((SCHEMAS / schema_name).read_text())
+    effects = (schema["properties"]["chains"]["items"]["properties"]["levels"]["items"]
+               ["properties"]["effects"]["properties"])
+    return set(effects)
 
 
 def main() -> int:

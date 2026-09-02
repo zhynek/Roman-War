@@ -232,6 +232,7 @@ static func _faction(capital: String) -> Dictionary:
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
+		"doctrines": [], "reforms": [], "war_record": NewGame.empty_war_record(), "war_mood": null,
 	}
 
 
@@ -241,5 +242,5 @@ static func _settlement(owner: String, population: int, buildings: Dictionary) -
 		"tax_level": "normal", "garrison": [], "construction_queue": [],
 		"recruitment_queue": [], "governor": null, "slave_bonus_turns": 0,
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
-		"siege": null,
+		"siege": null, "levy_strain": 0.0,
 	}

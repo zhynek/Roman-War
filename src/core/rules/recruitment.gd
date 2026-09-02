@@ -129,12 +129,4 @@ static func _requirements_met(data: GameData, settlement: Dictionary, unit: Dict
 	var needed_kind: String = requirements["building_kind"]
 	var needed_level := int(requirements["building_level"])
 	var needed_god: String = requirements.get("temple_god", "")
-	for chain_id in settlement["buildings"]:
-		var chain: Dictionary = data.chains.get(chain_id, {})
-		if chain.is_empty() or chain["kind"] != needed_kind:
-			continue
-		if needed_god != "" and chain.get("god", "") != needed_god:
-			continue
-		if int(settlement["buildings"][chain_id]) >= needed_level:
-			return true
-	return false
+	return SettlementRules.building_tier(data, settlement, needed_kind, needed_god) >= needed_level

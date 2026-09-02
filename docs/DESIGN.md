@@ -544,8 +544,11 @@ and a multi-turn campaign integration run) on every push.
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
   documented at the top of `src/core/new_game.gd`.
 - Saving is `JSON.stringify({version, state})`; loading is the reverse with a
-  version gate (`src/core/save.gd`). Data tables are content, not state, so only
-  the state travels.
+  version gate and an **upgrade path** (`src/core/save.gd`): a save from an
+  older version is accepted and `SaveGame.upgrade` fills the fields later
+  versions added, with `NewGame`'s defaults and in `NewGame`'s key order, so an
+  upgraded save marches in step with a live game. Data tables are content, not
+  state, so only the state travels.
 - All randomness flows through `CampaignRng`; its integer state is persisted in
   `state.rng_state` and threaded through every resolution step, so identical
   (seed, actions) sequences produce identical campaigns — the property the

@@ -275,17 +275,8 @@ static func _condition_met(data: GameData, state: Dictionary, character: Diction
 		if condition.has("building_kind"):
 			var min_level := int(condition.get("min_building_level", 1))
 			var required_god: String = condition.get("temple_god", "")
-			var found := false
-			for chain_id in settlement["buildings"]:
-				var chain: Dictionary = data.chains.get(chain_id, {})
-				if chain.get("kind", "") != String(condition["building_kind"]):
-					continue
-				if required_god != "" and String(chain.get("god", "")) != required_god:
-					continue
-				if int(settlement["buildings"][chain_id]) >= min_level:
-					found = true
-					break
-			if not found:
+			if SettlementRules.building_tier(data, settlement,
+					String(condition["building_kind"]), required_god) < min_level:
 				return false
 		if condition.has("min_public_order") or condition.has("max_public_order"):
 			var order: float = context["public_order"] if context.has("public_order") \

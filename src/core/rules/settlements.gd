@@ -7,11 +7,25 @@ static func settlement_level(data: GameData, settlement: Dictionary) -> String:
 	## A conquered settlement keeps its foreign government building's tier until
 	## the new owner's own chain overtakes it, so captured cities never collapse
 	## back to villages.
-	var tier := 1
-	for chain_id in settlement["buildings"]:
-		if data.chains.get(chain_id, {}).get("kind", "") == "government":
-			tier = maxi(tier, int(settlement["buildings"][chain_id]))
+	var tier := maxi(1, building_tier(data, settlement, "government"))
 	return Constants.SETTLEMENT_LEVELS[mini(tier - 1, Constants.SETTLEMENT_LEVELS.size() - 1)]
+
+
+static func building_tier(data: GameData, settlement: Dictionary, kind: String, god: String = "") -> int:
+	## Highest built tier among this settlement's chains of `kind` (optionally
+	## of one temple god); 0 when none. THE kind-keyed accessor: recruitment
+	## gates, trait conditions, doctrine prerequisites and the settlement level
+	## all read through it, so "does this town have barracks >= 3?" is asked
+	## one way everywhere.
+	var best := 0
+	for chain_id in settlement["buildings"]:
+		var chain: Dictionary = data.chains.get(chain_id, {})
+		if chain.is_empty() or String(chain.get("kind", "")) != kind:
+			continue
+		if god != "" and String(chain.get("god", "")) != god:
+			continue
+		best = maxi(best, int(settlement["buildings"][chain_id]))
+	return best
 
 
 static func effect_total(data: GameData, settlement: Dictionary, effect: String) -> float:

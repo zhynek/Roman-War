@@ -2,7 +2,11 @@ class_name SaveGame
 ## Save/load is nothing more than JSON round-tripping the GameState dict —
 ## by design. Data tables are content, not state, so only the state travels.
 
-const SAVE_VERSION := 1
+## Version history:
+##   1  Phases 0-4 / 7 / 8 foundation state.
+##   2  Military layer: faction doctrines / reforms / war_record / war_mood,
+##      settlement levy_strain (unit weapon/armor are optional keys, no bump).
+const SAVE_VERSION := 2
 
 
 static func to_json(state: Dictionary) -> String:
@@ -16,10 +20,39 @@ static func from_json(text: String) -> Dictionary:
 	var parsed = JSON.parse_string(text)
 	if parsed == null or not (parsed is Dictionary):
 		return {}
-	if int(parsed.get("version", 0)) != SAVE_VERSION:
+	var version := int(parsed.get("version", 0))
+	if version < 1 or version > SAVE_VERSION:
 		return {}
 	var state = parsed.get("state", {})
-	return state if state is Dictionary else {}
+	if not (state is Dictionary):
+		return {}
+	upgrade(state, version)
+	return state
+
+
+static func upgrade(state: Dictionary, version: int) -> void:
+	## Fill in fields introduced after `version`, with NewGame's defaults and in
+	## NewGame's key order (appended last), so an upgraded save and a live game
+	## stringify identically and march in step.
+	if version < 2:
+		var faction_ids: Array = state.get("factions", {}).keys()
+		faction_ids.sort()
+		for faction_id in faction_ids:
+			var faction: Dictionary = state["factions"][faction_id]
+			if not faction.has("doctrines"):
+				faction["doctrines"] = []
+			if not faction.has("reforms"):
+				faction["reforms"] = []
+			if not faction.has("war_record"):
+				faction["war_record"] = NewGame.empty_war_record()
+			if not faction.has("war_mood"):
+				faction["war_mood"] = null
+		var region_ids: Array = state.get("settlements", {}).keys()
+		region_ids.sort()
+		for region_id in region_ids:
+			var settlement: Dictionary = state["settlements"][region_id]
+			if not settlement.has("levy_strain"):
+				settlement["levy_strain"] = 0.0
 
 
 static func write_file(state: Dictionary, path: String) -> bool:

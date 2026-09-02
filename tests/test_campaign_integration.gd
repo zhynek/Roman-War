@@ -76,6 +76,36 @@ func test_save_round_trip(t) -> void:
 	t.check_eq(_canonical(game.state), _canonical(resumed.state), "resumed game marches in step")
 
 
+func test_save_v1_upgrades(t) -> void:
+	## A save written before the military layer lacks the doctrine / war-record /
+	## levy-strain fields. It must still load, gain them, and march in step.
+	var game := Game.new_campaign("julii", 7)
+	for i in range(2):
+		game.end_turn()
+	var stripped: Dictionary = JSON.parse_string(JSON.stringify(game.state))
+	for faction_id in stripped["factions"]:
+		for key in ["doctrines", "reforms", "war_record", "war_mood"]:
+			stripped["factions"][faction_id].erase(key)
+	for region_id in stripped["settlements"]:
+		stripped["settlements"][region_id].erase("levy_strain")
+	var legacy := JSON.stringify({"version": 1, "state": stripped})
+
+	var restored := SaveGame.from_json(legacy)
+	t.check(not restored.is_empty(), "a version-1 save still loads")
+	t.check(restored["factions"]["julii"].has("war_record"), "upgrade fills the war record")
+	t.check_eq(float(restored["settlements"].values()[0]["levy_strain"]), 0.0, "upgrade fills levy strain")
+	t.check(SaveGame.from_json(JSON.stringify({"version": SaveGame.SAVE_VERSION + 1, "state": {}})).is_empty(),
+		"a save from the future is refused")
+
+	var resumed := Game.new()
+	resumed.data = game.data
+	resumed.resolver = AutoResolver.new()
+	resumed.state = restored
+	game.end_turn()
+	resumed.end_turn()
+	t.check_eq(_canonical(game.state), _canonical(resumed.state), "upgraded save marches in step")
+
+
 func _canonical(state: Dictionary) -> String:
 	return JSON.stringify(JSON.parse_string(JSON.stringify(state)))
 

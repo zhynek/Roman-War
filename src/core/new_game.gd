@@ -7,12 +7,16 @@ class_name NewGame
 ##  player_faction: String
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
 ##                   popular_standing, diplomacy: {other_fid: stance},
-##                   mission: null|{...}, at_civil_war: bool}}
+##                   mission: null|{...}, at_civil_war: bool,
+##                   doctrines: [doctrine_id], reforms: [{doctrine, turns_left}],
+##                   war_record: {battles_won, battles_lost, faced: {class: battles}},
+##                   war_mood: null|{label, value, turns}}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
 ##                tax_level, garrison: [unit], construction_queue: [...],
 ##                recruitment_queue: [...], governor: char_id|null,
 ##                slave_bonus_turns, plague_turns, recently_conquered,
-##                low_order_streak, siege: null|{besieger, turns, equipment_ready}}}
+##                low_order_streak, siege: null|{besieger, turns, equipment_ready},
+##                levy_strain: float}}
 ##  armies: {army_id: {owner, region, units: [unit], general: char_id|null,
 ##                     movement_left: float}}
 ##  fleets: {fleet_id: {owner, sea_zone, ships: [unit], movement_left}}
@@ -20,7 +24,12 @@ class_name NewGame
 ##                         influence, traits, ancillaries, location, alive}}
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##
-## A "unit" is {template, experience, strength_pct}.
+## A "unit" is {template, experience, strength_pct} plus optional weapon /
+## armor upgrade levels (absent = 0) stamped by the recruiting settlement.
+##
+## New state fields are ALWAYS initialised here and in SaveGame.upgrade, never
+## lazily on first read: a live game and a loaded save must stringify with the
+## same key order or the determinism tests cannot compare them.
 
 const ConstantsScript = preload("res://src/core/constants.gd")
 
@@ -59,6 +68,10 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"diplomacy": {},
 			"mission": null,
 			"at_civil_war": false,
+			"doctrines": _starting_doctrines(data, faction_setup),
+			"reforms": [],
+			"war_record": empty_war_record(),
+			"war_mood": null,
 		}
 		for entry in faction_setup.get("diplomacy", []):
 			state["factions"][fid]["diplomacy"][entry["faction"]] = entry["stance"]
@@ -77,6 +90,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
 		"mission": null, "at_civil_war": false,
+		"doctrines": [], "reforms": [], "war_record": empty_war_record(), "war_mood": null,
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
 		state["settlements"][settlement_setup["region"]] = _settlement(data, settlement_setup, rebels)
@@ -139,17 +153,38 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 		"recently_conquered": 0,
 		"low_order_streak": 0,
 		"siege": null,
+		"levy_strain": 0.0,
 	}
+
+
+static func empty_war_record() -> Dictionary:
+	return {"battles_won": 0, "battles_lost": 0, "faced": {}}
+
+
+static func _starting_doctrines(data: GameData, faction_setup: Dictionary) -> Array:
+	## Doctrines a faction already practises in 270 BC (campaign.json), kept
+	## sorted like every other doctrine list; unknown ids are dropped.
+	var result: Array = []
+	for doctrine_id in faction_setup.get("doctrines", []):
+		if data.doctrines.has(doctrine_id) and not result.has(doctrine_id):
+			result.append(doctrine_id)
+	result.sort()
+	return result
 
 
 static func _units(setups: Array) -> Array:
 	var result: Array = []
 	for setup in setups:
-		result.append({
+		var unit := {
 			"template": setup["template"],
 			"experience": int(setup.get("experience", 0)),
 			"strength_pct": int(setup.get("strength_pct", 100)),
-		})
+		}
+		if int(setup.get("weapon", 0)) > 0:
+			unit["weapon"] = int(setup["weapon"])
+		if int(setup.get("armor", 0)) > 0:
+			unit["armor"] = int(setup["armor"])
+		result.append(unit)
 	return result
 
 
