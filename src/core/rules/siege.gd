@@ -35,7 +35,9 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 		if siege == null:
 			continue
 		if not state["armies"].has(siege["besieger"]) \
-				or state["armies"][siege["besieger"]]["region"] != region_id:
+				or state["armies"][siege["besieger"]]["region"] != region_id \
+				or not DiplomacyRules.at_war(state, state["armies"][siege["besieger"]]["owner"], settlement["owner"]):
+			# The besieger left, changed banners, or made peace: the siege lifts.
 			settlement["siege"] = null
 			continue
 		siege["turns"] = int(siege["turns"]) + 1
@@ -63,6 +65,10 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var settlement: Dictionary = state["settlements"][region_id]
 	var siege = settlement["siege"]
 	if siege == null or siege["besieger"] != army_id:
+		return {}
+	if not DiplomacyRules.at_war(state, army["owner"], settlement["owner"]):
+		# No assault without a war: a bought army or a peace lifts the siege.
+		settlement["siege"] = null
 		return {}
 	# Without equipment you can only assault once the garrison is starving —
 	# or once a spy inside has unbarred a gate.

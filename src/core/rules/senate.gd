@@ -129,7 +129,7 @@ static func _courts_in_reach(data: GameData, state: Dictionary, faction_id: Stri
 	## Living foreign powers (not Roman, not the independents) holding a
 	## settlement within a few hops of the house's own — the Senate does not
 	## send anyone to treat with kings it has never heard of.
-	var reach := int(data.balance["senate"].get("mission_court_reach_hops", 4))
+	var reach := int(data.balance["senate"]["mission_court_reach_hops"])
 	var near := {}
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
@@ -194,10 +194,13 @@ static func _region_count(state: Dictionary, faction_id: String) -> int:
 
 
 static func _declare_civil_war(data: GameData, state: Dictionary, rebel_house: String) -> void:
-	for other_id in state["factions"]:
+	## The house breaks with the Republic: a declaration of war on the Senate
+	## and every other house, remembered like any other betrayal.
+	var others: Array = state["factions"].keys()
+	others.sort()
+	for other_id in others:
 		if other_id == rebel_house:
 			continue
 		var other: Dictionary = data.factions.get(other_id, {})
 		if other.get("is_roman_house", false) or other.get("is_senate", false):
-			state["factions"][rebel_house]["diplomacy"][other_id] = "war"
-			state["factions"][other_id]["diplomacy"][rebel_house] = "war"
+			DiplomacyRules.declare_war(state, rebel_house, other_id, data)

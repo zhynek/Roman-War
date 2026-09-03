@@ -60,6 +60,7 @@ func _ready() -> void:
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
 	region_panel.negotiate_requested.connect(func(faction_id: String): diplomacy_panel.open_for(game, faction_id))
+	region_panel.confirm_requested.connect(func(text: String, on_accept: Callable): _confirm(text, on_accept))
 	region_panel.notice.connect(_log)
 	scroll.add_child(region_panel)
 
@@ -76,6 +77,8 @@ func _ready() -> void:
 	diplomacy_panel = DiplomacyPanel.new()
 	diplomacy_panel.stance_changed.connect(refresh)
 	diplomacy_panel.war_requested.connect(declare_war_order)
+	diplomacy_panel.treaty_end_requested.connect(end_treaty_order)
+	diplomacy_panel.region_focus_requested.connect(focus_region)
 	diplomacy_panel.notice.connect(_log)
 	add_child(diplomacy_panel)
 
@@ -129,6 +132,11 @@ func refresh() -> void:
 		top_labels["victory"].text = "Regions %d/%d" \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
+	# An army or agent that died or was dismissed leaves no dangling selection.
+	if selected_army != "" and not game.state["armies"].has(selected_army):
+		selected_army = ""
+	if selected_agent != "" and not game.state["agents"].has(selected_agent):
+		selected_agent = ""
 	if map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	map_view.queue_redraw()
@@ -272,26 +280,62 @@ func _resolve_siege(target_region: String) -> void:
 	_after_order()
 
 
-func _confirm(text: String, on_accept: Callable) -> void:
+func _confirm(text: String, on_accept: Callable, host: Node = null) -> void:
+	## `host` is the window the question belongs to: a dialog raised while the
+	## diplomacy scroll (itself exclusive) is open must be its child, or Godot
+	## refuses a second exclusive child of the root.
 	var dialog := ConfirmationDialog.new()
 	dialog.dialog_text = text
 	dialog.confirmed.connect(on_accept)
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
-	add_child(dialog)
+	(host if host != null else self).add_child(dialog)
 	dialog.popup_centered()
 
 
 func declare_war_order(faction_id: String) -> void:
 	## A declaration from the scroll is confirmed like any other first strike.
+	## Breaking a treaty to do it is the costlier act, and the dialog says so.
 	var faction_name: String = game.data.factions.get(faction_id, {}).get("name", faction_id)
-	_confirm("Declare war on %s? Treaties broken this way are remembered by every court." % faction_name,
-		func():
-			if game.declare_war(faction_id):
-				_log("[color=#e06050]We are at war with %s.[/color]" % faction_name)
-			refresh()
-			if diplomacy_panel.visible:
-				diplomacy_panel.open_for(game, faction_id))
+	var player: String = game.state["player_faction"]
+	var text := "Declare war on %s? They will remember it." % faction_name
+	if DiplomacyRules.stance_between(game.state, player, faction_id) in ["trade", "alliance", "protectorate"]:
+		text = "Tear up our treaty and declare war on %s? Every court will call us treacherous for it." % faction_name
+	_confirm(text, func():
+		if game.declare_war(faction_id):
+			_log("[color=#e06050]We are at war with %s.[/color]" % faction_name)
+		refresh()
+		if diplomacy_panel.visible:
+			diplomacy_panel.open_for(game),
+		diplomacy_panel if diplomacy_panel.visible else null)
+
+
+func end_treaty_order(faction_id: String) -> void:
+	## Ending our own treaty needs no envoy and no consent, only a moment's
+	## thought: the other court resents it.
+	var faction_name: String = game.data.factions.get(faction_id, {}).get("name", faction_id)
+	_confirm("End our treaty with %s? They will resent it." % faction_name, func():
+		var result := game.propose({"to": faction_id, "stance": "neutral"})
+		if result.get("accepted", false):
+			_log("Our treaty with %s is at an end." % faction_name)
+		else:
+			_log("%s: %s" % [faction_name, result.get("reason", "the treaty stands")])
+		refresh()
+		if diplomacy_panel.visible:
+			diplomacy_panel.open_for(game),
+		diplomacy_panel if diplomacy_panel.visible else null)
+
+
+func focus_region(region_id: String) -> void:
+	## Jump the map and the panel to a region (the agents list uses it).
+	if not game.data.regions.has(region_id):
+		return
+	selected_army = ""
+	selected_agent = ""
+	map_view.selected_region = region_id
+	map_view.center_on(region_id)
+	region_panel.show_region(game, region_id)
+	refresh()
 
 
 func _after_order() -> void:

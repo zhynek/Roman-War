@@ -34,11 +34,13 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 		visible[agent["region"]] = true
 		var sight := int(data.agent_kinds.get(agent["kind"], {}).get("sight", 0))
 		var frontier: Array = [agent["region"]]
+		var reached := {agent["region"]: true}
 		for hop in range(sight):
 			var next_frontier: Array = []
 			for region_id in frontier:
 				for neighbor in data.regions[region_id].get("adjacent", []):
-					if not visible.has(neighbor):
+					if not reached.has(neighbor):
+						reached[neighbor] = true
 						visible[neighbor] = true
 						next_frontier.append(neighbor)
 			frontier = next_frontier

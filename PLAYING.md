@@ -107,11 +107,15 @@ one who exterminates cities becomes cruel, and everyone knows it.
 Every house starts with an **envoy** and a **spy** in its capital, and a city
 with the right buildings can train more from its panel (envoys need a seat of
 government, spies a market, assassins a bigger one). Agents cost upkeep like
-soldiers. Click a region with one of your agents, click the agent in the right
-panel to select it, then click any region to send it there — agents cross every
-border, war or no war, and take ship across a sea like an army does.
+soldiers; **Dismiss** one when it has served its purpose. Click a region with
+one of your agents, click the agent in the right panel to select it, then
+click any region to send it there — agents cross every border, war or no war,
+and take ship across a sea like an army does. **Every act ends the agent's
+season**, success or failure, so the odds a button shows are the odds of that
+one try; a newly trained agent starts work next season. The Diplomacy scroll
+lists all your agents with a **Go to** button for each.
 
-- **Envoys** are how you talk to other houses (see Diplomacy). Standing next to
+- **Envoys** are how you talk to other houses (see Diplomacy). Standing with
   a foreign army led by a captain, or an independent band, they can also **buy
   it** outright; standing in an independent town, they can buy the town. A
   general of another family will never sell out.
@@ -123,11 +127,12 @@ border, war or no war, and take ship across a sea like an army does.
 - **Assassins** kill foreign family members and foreign agents, or **sabotage**
   a building down a tier. Each attempt shows its odds. Skill against the
   target's security decides it; a leader in his own capital is well guarded, a
-  lone captain of brigands is not. Start on easy marks — a botched attempt
+  foreign envoy on the road is not. Start on easy marks — a botched attempt
   often costs the assassin his life and tells the victim exactly who sent him.
 
-Every turn, spies and assassins standing on foreign land risk being caught by
-the local watch. Envoys never are.
+Agents are never invisible: wherever your fog is lifted you see everyone's,
+and they see yours. Every turn, spies and assassins standing on foreign land
+risk being caught by the local watch. Envoys never are.
 
 ## Diplomacy
 
@@ -138,18 +143,27 @@ remember of your dealings, enemies you share, kinship of culture, the friction
 of a shared border, and any treaties you have broken.
 
 Talks go through an **envoy in contact**: one standing on or beside their land,
-or with their army. Choose the terms (peace, trade rights, an alliance, their
-submission as your protectorate, or ending a treaty), add a gift or a demand
-of gold, tribute per turn either way, and land to cede or demand, then **weigh
-the offer** — the scroll shows their side of the scales line by line. They
-accept exactly when the balance is not against them, so there is no guessing.
-A few things are never for sale: a capital, a last city, and any treaty while
-you are at war (make peace first). The independents keep no court.
+or with their army, who has not yet acted this season. Choose the terms
+(peace, trade rights, an alliance, their submission as your protectorate, or
+stepping a treaty down), add a gift or a demand of gold, tribute per turn
+either way, and land to cede or demand, then **weigh the offer** — the scroll
+shows their side of the scales line by line. They accept exactly when the
+balance is not against them, so there is no guessing. An accepted offer is
+the envoy's work for the season. A few things are never for sale: a capital, a
+last city, trade rights or an alliance while you are at war (make peace
+first), land while at war unless the same offer ends it, submission to a
+weaker house, and more gold or tribute than your treasury holds. The
+independents keep no court. Ending a treaty of your own needs no envoy and no
+consent — the **End treaty** button on the court's row does it — but they
+resent it, and a protectorate cannot release itself. Peace lifts every siege
+between the two of you; the first payment of a tribute goes with the
+signatures, the rest follow each season, and declaring war on a court you
+still owe tribute to is treachery.
 
-Declaring war needs no envoy — but every court remembers a declaration, and
-tearing up a treaty to do it marks your house as treacherous in all their eyes
-for a long time. Your fleets are in this window too, because they live on the
-sea rather than in a region.
+Declaring war needs no envoy — but the court you declare on remembers it, and
+tearing up a treaty to do it marks your house as treacherous in every court's
+eyes for the rest of the game. Your fleets are in this window too, because
+they live on the sea rather than in a region.
 
 ## Winning
 

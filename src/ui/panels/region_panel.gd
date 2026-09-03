@@ -10,6 +10,7 @@ signal agent_selected(agent_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
 signal negotiate_requested(faction_id: String)
+signal confirm_requested(text: String, on_accept: Callable)
 signal notice(text: String)
 
 var game: Game
@@ -167,9 +168,10 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	var agent_offers := game.agent_kinds_available(region_id)
 	if not agent_offers.is_empty():
 		_header("Agents", 12)
-		_label("Security %.1f" % AgentRules.settlement_security(game.data, game.state, region_id))
+		_label("Counter-intelligence %.1f — what enemy agents here roll against"
+			% AgentRules.settlement_security(game.data, game.state, region_id))
 		for offer in agent_offers:
-			_action_button("Train %s (%d, upkeep %d)" % [offer["name"], int(offer["cost"]), int(offer["upkeep"])],
+			var train := _action_button("Train %s (%d, upkeep %d)" % [offer["name"], int(offer["cost"]), int(offer["upkeep"])],
 				func():
 					var agent_id := game.recruit_agent(region_id, offer["id"])
 					if agent_id == "":
@@ -178,6 +180,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 						notice.emit("%s enters our service as %s." % [game.state["agents"][agent_id]["name"],
 							_article(String(offer["name"]))])
 					action_taken.emit())
+			train.tooltip_text = String(game.data.agent_kinds.get(offer["id"], {}).get("description", ""))
 
 
 func _build_spy_report(settlement: Dictionary) -> void:
@@ -190,7 +193,7 @@ func _build_spy_report(settlement: Dictionary) -> void:
 	if watcher == "":
 		return
 	_label("Our spy reports:", Color(0.7, 0.8, 0.9))
-	_label("  Security %.1f" % AgentRules.settlement_security(game.data, game.state, region_id))
+	_label("  Counter-intelligence %.1f" % AgentRules.settlement_security(game.data, game.state, region_id))
 	var garrison: Array = settlement["garrison"]
 	if garrison.is_empty():
 		_label("  No garrison")
@@ -272,8 +275,14 @@ func _build_agents_section() -> void:
 
 
 func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
+	var kind_name := String(game.data.agent_kinds.get(agent["kind"], {}).get("name", agent["kind"])).to_lower()
 	_label("Movement left: %.1f" % float(agent["movement_left"]))
-	_label("Click a region to travel there; a coastal region across the sea to take ship.", Color(0.7, 0.8, 0.9))
+	if not AgentRules.can_act(agent):
+		_label("Has travelled or acted this season; orders resume next season.", Color(0.9, 0.8, 0.5))
+		_build_dismiss_button(agent_id, kind_name)
+		return
+	_label("Click a region to travel there; a coastal region across the sea to take ship. Every act, and every crossing, ends the season.",
+		Color(0.7, 0.8, 0.9))
 
 	# Envoys: talks and purchases.
 	for faction_id in game.factions_in_contact(agent_id):
@@ -289,12 +298,13 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
 		var owner_name: String = game.data.factions.get(army["owner"], {}).get("name", army["owner"])
 		_action_button("Bribe the %s army — %d units (%d)" % [owner_name, army["units"].size(), cost],
 			func():
-				var result := game.bribe_army(agent_id, army_id)
-				if result.get("success", false):
-					notice.emit("Gold changes hands: the %s army takes our banner." % owner_name)
-				else:
-					notice.emit("The bribe of %d is beyond our treasury." % cost)
-				action_taken.emit())
+				_when_sure(army["owner"], "Buying the %s army will sour them on us. Pay %d?" % [owner_name, cost], func():
+					var result := game.bribe_army(agent_id, army_id)
+					if result.get("success", false):
+						notice.emit("Gold changes hands: the %s army takes our banner." % owner_name)
+					else:
+						notice.emit("The bribe of %d is beyond our treasury." % cost)
+					action_taken.emit()))
 	var town_cost := game.bribe_settlement_cost(agent_id)
 	if town_cost >= 0:
 		_action_button("Buy the loyalty of %s (%d)" % [settlement_display_name(), town_cost],
@@ -325,29 +335,52 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
 	for target in game.assassination_targets(agent_id):
 		var target_id: String = target["id"]
 		var target_name: String = target["name"]
+		var target_faction: String = target["faction"]
 		_action_button("Assassinate %s (%d%%)" % [target_name, int(round(float(target["chance"]) * 100.0))],
 			func():
-				var result := game.assassinate(agent_id, target_id)
-				if result.get("success", false):
-					notice.emit("[color=#80b080]%s is dead. No one saw the hand.[/color]" % target_name)
-				elif result.get("caught", false):
-					notice.emit("[color=#e06050]The attempt on %s failed and our assassin was caught and killed.[/color]" % target_name)
-				else:
-					notice.emit("%s survives the attempt; our assassin escapes." % target_name)
-				action_taken.emit())
+				_when_sure(target_faction, "We are not at war with them. A failed attempt on %s will be laid at our door. Send the knife?" % target_name, func():
+					var result := game.assassinate(agent_id, target_id)
+					if result.get("success", false):
+						notice.emit("[color=#80b080]%s is dead. No one saw the hand.[/color]" % target_name)
+					elif result.get("caught", false):
+						notice.emit("[color=#e06050]The attempt on %s failed and our assassin was caught and killed.[/color]" % target_name)
+					else:
+						notice.emit("%s survives the attempt; our assassin escapes." % target_name)
+					action_taken.emit()))
+	var here_owner: String = game.state["settlements"].get(region_id, {}).get("owner", "")
 	for target in game.sabotage_targets(agent_id):
 		var chain_id: String = target["chain"]
 		var chain_name: String = target["name"]
 		_action_button("Sabotage %s (%d%%)" % [chain_name, int(round(float(target["chance"]) * 100.0))],
 			func():
-				var result := game.sabotage(agent_id, chain_id)
-				if result.get("success", false):
-					notice.emit("[color=#80b080]Fire in the night: the %s of %s is wrecked.[/color]" % [chain_name, settlement_display_name()])
-				elif result.get("caught", false):
-					notice.emit("[color=#e06050]Our assassin was caught at the %s and killed.[/color]" % chain_name)
-				else:
-					notice.emit("The %s was too well watched tonight." % chain_name)
-				action_taken.emit())
+				_when_sure(here_owner, "We are not at war with them. Wreck the %s of %s anyway?" % [chain_name, settlement_display_name()], func():
+					var result := game.sabotage(agent_id, chain_id)
+					if result.get("success", false):
+						notice.emit("[color=#80b080]Fire in the night: the %s of %s is wrecked.[/color]" % [chain_name, settlement_display_name()])
+					elif result.get("caught", false):
+						notice.emit("[color=#e06050]Our assassin was caught at the %s and killed.[/color]" % chain_name)
+					else:
+						notice.emit("The %s was too well watched tonight." % chain_name)
+					action_taken.emit()))
+	_build_dismiss_button(agent_id, kind_name)
+
+
+func _build_dismiss_button(agent_id: String, kind_name: String) -> void:
+	_action_button("Dismiss this %s" % kind_name, func():
+		if game.dismiss_agent(agent_id):
+			notice.emit("Our %s is paid off and sent home." % kind_name)
+		action_taken.emit())
+
+
+func _when_sure(faction_id: String, question: String, act: Callable) -> void:
+	## Hostile acts against a power we are at war with (or the independents)
+	## need no second thought; against anyone else they are confirmed first.
+	var player: String = game.state["player_faction"]
+	if faction_id == "" or DiplomacyRules.at_war(game.state, player, faction_id) \
+			or game.data.factions.get(faction_id, {}).get("is_rebel", false):
+		act.call()
+	else:
+		confirm_requested.emit(question, act)
 
 
 func _article(noun: String) -> String:
@@ -426,12 +459,13 @@ func _breakdown(title: String, factors: Array) -> void:
 		_label("    %s  %+.1f" % [String(factor["label"]).replace("_", " "), value], color)
 
 
-func _action_button(text: String, handler: Callable) -> void:
+func _action_button(text: String, handler: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
 	add_child(button)
+	return button
 
 
 func _separator() -> void:

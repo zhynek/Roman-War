@@ -296,6 +296,7 @@
     "assassination_caught_opinion_penalty": 20,
     "assassination_success_opinion_penalty": 5,
     "sabotage_caught_opinion_penalty": 10,
+    "gate_opening_caught_opinion_penalty": 15,
     "attitude_stance": {
       "war": -20,
       "neutral": 0,

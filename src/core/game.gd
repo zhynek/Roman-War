@@ -184,6 +184,10 @@ func factions_in_contact(agent_id: String) -> Array:
 	return AgentRules.factions_in_contact(data, state, agent_id) if _own_agent(agent_id) else []
 
 
+func dismiss_agent(agent_id: String) -> bool:
+	return _own_agent(agent_id) and AgentRules.dismiss(state, agent_id)
+
+
 func _own_agent(agent_id: String) -> bool:
 	return state["agents"].get(agent_id, {}).get("owner", "") == state["player_faction"]
 
@@ -213,19 +217,39 @@ func evaluate_proposal(proposal: Dictionary) -> Dictionary:
 
 
 func propose(proposal: Dictionary) -> Dictionary:
-	## Make an offer through an envoy in contact with the other court. Without
-	## one there are no talks, whatever the terms.
+	## Make an offer through an envoy in contact with the other court and free
+	## to speak this season. Without one there are no talks, whatever the
+	## terms — except ending a treaty of ours, which needs nobody's consent.
 	var full := _complete_proposal(proposal)
-	if full.get("envoy", "") == "":
+	var envoy_id: String = full.get("envoy", "")
+	if envoy_id == "" and not _is_dissolution(full):
+		var verdict := DiplomacyRules.evaluate(data, state, full)
+		if verdict["reason"] != "":
+			return {"accepted": false, "score": 0.0, "factors": [], "reason": verdict["reason"]}
 		return {"accepted": false, "score": 0.0, "factors": [],
-			"reason": "No envoy of ours is in contact with that court."}
+			"reason": "No envoy of ours is in contact with that court and free to speak this season."}
+	if envoy_id != "" and not AgentRules.can_act(state["agents"].get(envoy_id, {})):
+		return {"accepted": false, "score": 0.0, "factors": [],
+			"reason": "Our envoy has already spoken this season."}
 	return DiplomacyRules.propose(data, state, full)
 
 
+func _is_dissolution(proposal: Dictionary) -> bool:
+	## Ending our own trade rights, alliance or protectorate, asking nothing.
+	if proposal.get("stance", "") != "neutral":
+		return false
+	var current := DiplomacyRules.stance_between(state, proposal["from"], proposal.get("to", ""))
+	if current not in ["trade", "alliance", "protectorate"]:
+		return false
+	return int(proposal.get("demand", 0)) <= 0 and int(proposal.get("tribute_demanded_per_turn", 0)) <= 0 \
+		and proposal.get("regions_demanded", []).is_empty()
+
+
 func _complete_proposal(proposal: Dictionary) -> Dictionary:
+	## The player speaks only for the player's house, whatever the dictionary
+	## says; an AI entry point can supply its own proposer later.
 	var full := proposal.duplicate(true)
-	if not full.has("from") or full["from"] == "":
-		full["from"] = state["player_faction"]
+	full["from"] = state["player_faction"]
 	if not full.has("envoy") or full["envoy"] == "":
 		full["envoy"] = AgentRules.best_envoy(data, state, full["from"], full.get("to", ""))
 	return full

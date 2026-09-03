@@ -427,9 +427,13 @@ the engine actions the kind may perform — and every probability in
 capital (`campaign.json`); more are trained in a settlement that has the
 building, appear at once, and step out next season.
 
-- **Movement:** agents walk any road regardless of war (3 points a turn,
-  terrain and road costs as for armies) and take ship coast to coast the same
-  way armies do.
+- **Movement and the season:** agents walk any road regardless of war (3
+  points a turn, terrain and road costs as for armies) and take ship coast to
+  coast the same way armies do. Movement is also the action budget: every
+  attempt (success or failure), every bribe and every accepted offer spends
+  the rest of the season, so the odds a scroll shows are the odds of the one
+  try, and a freshly trained agent waits for next season. Agents can be
+  dismissed to stop their upkeep.
 - **Skill contests** share one shape: success = base + skill·k − difficulty·k,
   clamped between a floor and a ceiling so nothing is ever certain. Difficulty
   is a settlement's **counter-intelligence** (base + its owner's spies inside +
@@ -442,8 +446,9 @@ building, appear at once, and step out next season.
   court is *in contact* when the envoy stands on or beside its land or with
   its army. They also buy captain-led and rebel armies outright (family
   generals never sell out) at a price scaled from the units' cost, and buy
-  independent towns, whose watch keeps its post. Envoys travel openly and are
-  never caught.
+  independent towns, whose watch keeps its post. A bought army keeps no siege
+  its new master is not at war over. Envoys travel openly and are never
+  caught.
 - **Spies** (`watch`, `open_gates`, `counter_espionage`) lift the fog a hop
   around them and let the settlement panel report a foreign city's garrison,
   buildings and queues; inside a city their own army is besieging they can
@@ -455,7 +460,9 @@ building, appear at once, and step out next season.
   how the *Wary* trait is earned.
 - **Detection:** each turn, every covert agent standing in another faction's
   region is rolled against that settlement's counter-intelligence. A caught
-  agent dies and the report says who caught him.
+  agent dies and the report says who caught him. "Covert" means *can be
+  caught*, not hidden: agents of every faction are drawn on the map and listed
+  in the region panel wherever the viewer's fog is lifted.
 
 ### 6.3 Diplomacy (Phase 5)
 
@@ -471,24 +478,35 @@ shared border, and the other side's treachery. The UI renders it as a word
 (`attitude_labels` in balance) and shows the factors.
 
 **Offers** are plain dictionaries — a stance change (peace, trade rights,
-alliance, submission as our protectorate, or ending a treaty), a gift or a
-demand of gold, tribute per turn either way, and regions offered or demanded —
-carried by an envoy. `evaluate` returns the other side's balance as another
+alliance, submission as our protectorate, or stepping a treaty down), a gift
+or a demand of gold, tribute per turn either way, and regions offered or
+demanded — carried by an envoy of the proposer's who is in contact and free to
+speak this season. `evaluate` returns the other side's balance as another
 named factor list: attitude, then the term's own weight (peace depends on
 relative strength and war weariness; alliances on common enemies and strength;
-submission only when crushed), gold at a fixed rate with demands weighed
-heavier than gifts, region values from population and buildings, and the
-envoy's skill. **The evaluation never rolls dice: the other side accepts
-exactly when the balance is not negative**, so the scroll can weigh an offer
-before it is made. Hard refusals sit outside the sum — no treaty while at war,
-no capital or last city ever, no offer to the independents. Dissolving one's
-own treaty needs no consent. Accepted terms apply at once: stances change,
-gold moves, tribute streams are recorded (`state.tributes`) and paid each turn
-until they run out or war ends them, ceded regions change hands peacefully
-(`transfer_settlement`: the garrison marches out as a field army of the old
-owner, family flee as from a fallen city), and a protectorate pays its overlord
-a share of every season's income. An envoy who concludes a treaty grows in
-skill.
+submission on how badly the proposer outmatches them), gold at a fixed rate
+with demands weighed heavier than gifts, region values from population and
+buildings, and the envoy's skill. Gold offered and demanded are netted into
+one figure and region lists are deduplicated, so an offer cannot be padded.
+**The evaluation never rolls dice: the other side accepts exactly when the
+balance is not negative**, so the scroll can weigh an offer before it is made.
+Hard refusals sit outside the sum: no trade rights or alliance while at war,
+no land changing hands at war unless the same offer ends it, no capital or
+last city ever, no submission demanded by the weaker side, no promising more
+gold or tribute than the treasury holds, no offer to the independents. A stance
+below the standing one (alliance to trade, anything to neutral) is a
+dissolution: it needs no consent when nothing is demanded, costs opinion, and
+teaches the envoy nothing; a vassal cannot release itself, only its overlord
+can. Accepted terms apply at once: stances change (peace lifts every siege
+between the two), gold moves, the first installment of a tribute changes
+hands with the signatures and the rest are recorded (`state.tributes`) and
+paid each turn until they run out, the payer cannot pay, or war ends them
+(reneging by declaring war on the payee counts as betrayal), ceded regions
+change hands peacefully (`transfer_settlement`: the garrison marches out as a
+field army of the old owner, family flee as from a fallen city), and a
+protectorate pays its overlord a share of what each season actually earned.
+An accepted offer is the envoy's work for the season; a treaty concluded
+raises his skill by one.
 
 The player's AI opponents *evaluate* offers with this model; making offers of
 their own, and using agents, is Phase 6 work.
@@ -576,7 +594,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | temples.json | temple chains (one god each, archetyped), per culture | construction, effects, elite units |
 | units.json | unit templates: stats, costs, requirements, era | recruitment, battle |
 | regions.json | region graph + sea zones, terrain, fertility, resources, hidden resources | map, economy, growth |
-| campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, diplomacy; rebel holdings | NewGame |
+| campaign.json | the 270 BC start: factions' treasuries, capitals, settlements, armies, fleets, characters, starting agents, diplomacy; rebel holdings | NewGame |
 | traits.json / ancillaries.json | trigger-driven character content | Phase 4 engine (loaded now) |
 | events.json | scripted events + disasters | EventRules |
 | wonders.json | wonders and their faction-wide effects | settlements, economy, construction |
@@ -605,7 +623,9 @@ cannot express — including map-position sanity (no two region tokens closer th
 trigger liveness (any trait/ancillary trigger kind no engine call site fires is
 reported as dead content, except the deliberately forward-authored `office_gained`);
 agent kinds trainable by every culture and at least one kind able to negotiate;
-starting agents of known kinds standing on their own faction's land: id references across tables; exactly one rebel and one senate
+starting agents of known kinds standing on their own faction's land; every
+balance constant the engine indexes present in `balance.json`, and the
+agent/diplomacy sub-tables keyed by known actions and stances; id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
 culture's cap; monotonic `min_settlement_level` within chains; temple chains carry
 god + archetype; every unit's requirement satisfiable by some chain of its
@@ -617,7 +637,8 @@ father/general/trait references resolving; long and short win conditions present
 for every playable and unlockable faction. CI runs the validator and the headless
 test suite (`tests/run_tests.gd` auto-discovers `tests/test_*.gd`; suites cover
 growth, order, economy, construction, recruitment, movement/visibility, battle,
-and a multi-turn campaign integration run) on every push.
+characters, diplomacy and war, agents, negotiation, a multi-turn campaign
+integration run, and a headless UI smoke test) on every push.
 
 ### 9.3 Determinism & save model
 
@@ -629,8 +650,9 @@ and a multi-turn campaign integration run) on every push.
   agents, tributes and the per-faction diplomatic memory); a version-1 save is
   upgraded in place with the defaults a new campaign starts from. Data tables
   are content, not state, so only the state travels.
-- All randomness flows through `CampaignRng`; its integer state is persisted in
-  `state.rng_state` and threaded through every resolution step, so identical
+- All randomness flows through `CampaignRng`; its state is persisted as a
+  decimal string in `state.rng_state` (JSON numbers are float64 and would
+  round a 64-bit state) and threaded through every resolution step, so identical
   (seed, actions) sequences produce identical campaigns — the property the
   integration tests and future replay/debugging tools rely on.
 
@@ -640,7 +662,7 @@ Phases follow the research report (§17). Status as of this document:
 
 | Phase | Scope | Status |
 |---|---|---|
-| 0 — Design & setup | Schemas for all 16 tables, repo, CI, save format, this document | **Done** |
+| 0 — Design & setup | Schemas for all 17 tables, repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
@@ -648,7 +670,7 @@ Phases follow the research report (§17). Status as of this document:
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Agents as state entities with data-driven kinds (`agents.json`), training, free movement, skill contests against settlement counter-intelligence and personal security, gate-opening, assassination (with succession and the `survived_assassination` trigger), sabotage, bribery of armies and towns, detection; opinion memory, attitude breakdown, deterministic offer evaluation (stance, gold, tribute, land, envoy skill), tribute streams, protectorates, peaceful region transfer, treachery. Remaining for Phase 6: AI making offers and using agents |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, civil-war trigger, army reform, wonders, victory checks); missions now come in four kinds (take region, alliance, trade agreement, assassinate a leader); offices, port blockades, the suicide demand and event depth pending |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), agent orders (train, travel, open gates, assassinate, sabotage, bribe) with a spy's report on foreign cities, the negotiating table (terms, gold, tribute, land, weighed before the offer is made), turn log, save/load. Balancing pass and tutorial pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, agent diamonds, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), agent orders (train, travel, open gates, assassinate, sabotage, bribe) with a spy's report on foreign cities, the negotiating table (terms, gold, tribute, land, weighed before the offer is made), turn log, save/load. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy

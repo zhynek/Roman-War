@@ -9,6 +9,8 @@ extends AcceptDialog
 
 signal stance_changed
 signal war_requested(faction_id: String)
+signal treaty_end_requested(faction_id: String)
+signal region_focus_requested(region_id: String)
 signal notice(text: String)
 
 var game: Game
@@ -77,6 +79,15 @@ func _rebuild() -> void:
 		_build_negotiation(player, _focus)
 
 	_content.add_child(HSeparator.new())
+	_header("Our agents")
+	var any_agent := false
+	for agent_id in AgentRules.agents_of(game.state, player):
+		any_agent = true
+		_build_agent_row(agent_id, game.state["agents"][agent_id])
+	if not any_agent:
+		_label("We keep no agents.")
+
+	_content.add_child(HSeparator.new())
 	_header("Fleets")
 	var fleet_ids: Array = game.state["fleets"].keys()
 	fleet_ids.sort()
@@ -111,14 +122,23 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 
 	var envoy := game.best_envoy(faction_id)
 	var treat := Button.new()
-	treat.text = "Treat" if envoy != "" else "No envoy in contact"
+	treat.text = "Treat" if envoy != "" else "No envoy free"
 	treat.disabled = envoy == ""
+	treat.tooltip_text = "" if envoy != "" else "No envoy of ours is in contact with their court and free to speak this season."
 	treat.add_theme_font_size_override("font_size", 11)
 	treat.pressed.connect(func():
 		_focus = faction_id
 		_rebuild())
 	row.add_child(treat)
 
+	# Our own treaty can be ended without an envoy — unless we are the vassal.
+	if stance in ["trade", "alliance", "protectorate"] \
+			and game.state["factions"][player].get("overlord", null) != faction_id:
+		var end_treaty := Button.new()
+		end_treaty.text = "End treaty"
+		end_treaty.add_theme_font_size_override("font_size", 11)
+		end_treaty.pressed.connect(func(): treaty_end_requested.emit(faction_id))
+		row.add_child(end_treaty)
 	if stance != "war":
 		var war := Button.new()
 		war.text = "Declare war"
@@ -128,16 +148,37 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 	_content.add_child(row)
 
 
+func _build_agent_row(agent_id: String, agent: Dictionary) -> void:
+	var kind: Dictionary = game.data.agent_kinds.get(agent["kind"], {})
+	var region: Dictionary = game.data.regions.get(agent["region"], {})
+	var row := HBoxContainer.new()
+	var label := Label.new()
+	label.text = "%s %s — skill %d — at %s%s" % [kind.get("name", agent["kind"]), agent["name"], int(agent["skill"]),
+		region.get("settlement_name", agent["region"]), "" if AgentRules.can_act(agent) else " (done for the season)"]
+	label.add_theme_font_size_override("font_size", 12)
+	label.custom_minimum_size = Vector2(380, 0)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.add_child(label)
+	var go := Button.new()
+	go.text = "Go to"
+	go.add_theme_font_size_override("font_size", 11)
+	go.pressed.connect(func():
+		region_focus_requested.emit(agent["region"])
+		hide())
+	row.add_child(go)
+	_content.add_child(row)
+
+
 func _build_negotiation(player: String, faction_id: String) -> void:
 	var faction: Dictionary = game.data.factions[faction_id]
 	_header("Talks with %s" % faction["name"])
 	var envoy := game.best_envoy(faction_id)
 	if envoy == "":
-		_label("No envoy of ours is in contact with their court. Send one to their lands, or to meet their army.",
+		_label("No envoy of ours is in contact with their court and free to speak this season. Send one to their lands, or to meet their army.",
 			Color(0.9, 0.8, 0.5))
 	else:
 		var agent: Dictionary = game.state["agents"][envoy]
-		_label("Our envoy %s (skill %d) speaks for the house." % [agent["name"], int(agent["skill"])])
+		_label("Our envoy %s (skill %d) speaks for the house. An accepted offer is his work for the season." % [agent["name"], int(agent["skill"])])
 
 	var attitude := game.attitude_of(faction_id)
 	_label("They regard us as %s (%+.0f):" % [attitude["label"], float(attitude["total"])], Color(0.95, 0.9, 0.75))
@@ -175,6 +216,7 @@ func _build_negotiation(player: String, faction_id: String) -> void:
 	var tribute_row := HBoxContainer.new()
 	_tribute = _spin(0, 10000, 50)
 	_tribute_turns = _spin(0, 40, 1)
+	_tribute_turns.value = 10
 	tribute_row.add_child(_caption("Tribute we pay per turn"))
 	tribute_row.add_child(_tribute)
 	tribute_row.add_child(_caption("for turns"))
@@ -183,6 +225,7 @@ func _build_negotiation(player: String, faction_id: String) -> void:
 	var demanded_row := HBoxContainer.new()
 	_tribute_demanded = _spin(0, 10000, 50)
 	_tribute_demanded_turns = _spin(0, 40, 1)
+	_tribute_demanded_turns.value = 10
 	demanded_row.add_child(_caption("Tribute they pay per turn"))
 	demanded_row.add_child(_tribute_demanded)
 	demanded_row.add_child(_caption("for turns"))
@@ -257,6 +300,11 @@ func _weigh() -> void:
 
 func _make_offer() -> void:
 	var proposal := build_proposal()
+	if proposal["stance"] == "" and int(proposal["gift"]) == 0 and int(proposal["demand"]) == 0 \
+			and int(proposal["tribute_per_turn"]) == 0 and int(proposal["tribute_demanded_per_turn"]) == 0 \
+			and proposal["regions_offered"].is_empty() and proposal["regions_demanded"].is_empty():
+		notice.emit("There is nothing on the table.")
+		return
 	var result := game.propose(proposal)
 	var faction_name: String = game.data.factions.get(_focus, {}).get("name", _focus)
 	if result.get("accepted", false):

@@ -11,6 +11,10 @@ class_name AgentRules
 ## Skill contests share one shape: success = base + skill·k − difficulty·k,
 ## clamped. Difficulty is a settlement's counter-intelligence (its own spies,
 ## its governor's informants, its law) or a character's personal security.
+##
+## An agent's movement points are also its action budget: every attempt —
+## success or failure — and every bribe or accepted offer spends the rest of
+## the season, so the odds a scroll shows are the odds of the one try.
 
 
 ## --- Queries ---------------------------------------------------------------
@@ -21,6 +25,15 @@ static func kind_of(data: GameData, agent: Dictionary) -> Dictionary:
 
 static func can(data: GameData, agent: Dictionary, action: String) -> bool:
 	return kind_of(data, agent).get("actions", []).has(action)
+
+
+static func can_act(agent: Dictionary) -> bool:
+	## An agent with no movement left has travelled its fill or already acted.
+	return float(agent.get("movement_left", 0.0)) > 0.0001
+
+
+static func spend_season(agent: Dictionary) -> void:
+	agent["movement_left"] = 0.0
 
 
 static func agents_in(state: Dictionary, region_id: String, owner: String = "") -> Array:
@@ -195,7 +208,7 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 
 static func can_open_gates(data: GameData, state: Dictionary, agent_id: String) -> bool:
 	var agent: Dictionary = state["agents"].get(agent_id, {})
-	if agent.is_empty() or not can(data, agent, "open_gates"):
+	if agent.is_empty() or not can(data, agent, "open_gates") or not can_act(agent):
 		return false
 	var settlement: Dictionary = state["settlements"].get(agent["region"], {})
 	if settlement.is_empty() or settlement["siege"] == null or settlement["siege"].get("gates_open", false):
@@ -216,13 +229,14 @@ static func open_gates(data: GameData, state: Dictionary, rng: CampaignRng, agen
 	var chance := success_chance(data, float(agent["skill"]), settlement_security(data, state, region_id))
 	var result := {"action": "open_gates", "agent": agent_id, "region": region_id,
 		"chance": chance, "success": false, "caught": false, "notices": []}
+	spend_season(agent)
 	if rng.chance(chance):
 		settlement["siege"]["gates_open"] = true
 		result["success"] = true
 		_gain_skill(data, rng, agent)
 	else:
 		result["caught"] = _maybe_caught(data, state, rng, agent_id, "open_gates",
-			settlement["owner"], float(data.balance["diplomacy"]["sabotage_caught_opinion_penalty"]))
+			settlement["owner"], float(data.balance["diplomacy"]["gate_opening_caught_opinion_penalty"]))
 	return result
 
 
@@ -232,7 +246,7 @@ static func assassination_targets(data: GameData, state: Dictionary, agent_id: S
 	## Foreign adult family members and foreign agents in the assassin's region:
 	## [{kind: "character"|"agent", id, name, faction, chance}], deterministic order.
 	var agent: Dictionary = state["agents"].get(agent_id, {})
-	if agent.is_empty() or not can(data, agent, "assassinate"):
+	if agent.is_empty() or not can(data, agent, "assassinate") or not can_act(agent):
 		return []
 	var targets: Array = []
 	var char_ids: Array = state["characters"].keys()
@@ -275,6 +289,7 @@ static func assassinate(data: GameData, state: Dictionary, rng: CampaignRng, age
 	var result := {"action": "assassinate", "agent": agent_id, "target": target_id,
 		"target_name": target["name"], "target_kind": target["kind"], "faction": victim_faction,
 		"chance": float(target["chance"]), "success": false, "caught": false, "notices": []}
+	spend_season(agent)
 	if rng.chance(float(target["chance"])):
 		result["success"] = true
 		if target["kind"] == "character":
@@ -297,7 +312,7 @@ static func sabotage_targets(data: GameData, state: Dictionary, agent_id: String
 	## settlements only; the government seat and farmland are beyond reach):
 	## [{chain, name, chance}] sorted by chain id.
 	var agent: Dictionary = state["agents"].get(agent_id, {})
-	if agent.is_empty() or not can(data, agent, "sabotage"):
+	if agent.is_empty() or not can(data, agent, "sabotage") or not can_act(agent):
 		return []
 	var settlement: Dictionary = state["settlements"].get(agent["region"], {})
 	if settlement.is_empty() or settlement["owner"] == agent["owner"]:
@@ -327,6 +342,7 @@ static func sabotage(data: GameData, state: Dictionary, rng: CampaignRng, agent_
 	var result := {"action": "sabotage", "agent": agent_id, "region": agent["region"], "chain": chain_id,
 		"chain_name": target["name"], "faction": settlement["owner"],
 		"chance": float(target["chance"]), "success": false, "caught": false, "notices": []}
+	spend_season(agent)
 	if rng.chance(float(target["chance"])):
 		result["success"] = true
 		var tier := int(settlement["buildings"][chain_id]) - 1
@@ -362,8 +378,12 @@ static func in_contact(data: GameData, state: Dictionary, agent_id: String, fact
 
 
 static func factions_in_contact(data: GameData, state: Dictionary, agent_id: String) -> Array:
-	## Every living, negotiable power the envoy could open talks with, sorted.
+	## Every living, negotiable power the envoy could open talks with this
+	## season, sorted. An envoy who has already spoken or travelled his fill
+	## opens no talks until the next.
 	var result: Array = []
+	if not can_act(state["agents"].get(agent_id, {})):
+		return result
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 	for faction_id in faction_ids:
@@ -375,12 +395,13 @@ static func factions_in_contact(data: GameData, state: Dictionary, agent_id: Str
 
 
 static func best_envoy(data: GameData, state: Dictionary, faction_id: String, other: String) -> String:
-	## Our most skilled negotiator in contact with `other`, or "".
+	## Our most skilled negotiator in contact with `other` and free to speak
+	## this season, or "".
 	var best := ""
 	var best_skill := -1
 	for agent_id in agents_of(state, faction_id):
 		var agent: Dictionary = state["agents"][agent_id]
-		if int(agent["skill"]) > best_skill and in_contact(data, state, agent_id, other):
+		if int(agent["skill"]) > best_skill and can_act(agent) and in_contact(data, state, agent_id, other):
 			best = agent_id
 			best_skill = int(agent["skill"])
 	return best
@@ -392,7 +413,7 @@ static func bribe_army_cost(data: GameData, state: Dictionary, agent_id: String,
 	## sell out; only captains and brigands do.
 	var agent: Dictionary = state["agents"].get(agent_id, {})
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if agent.is_empty() or army.is_empty() or not can(data, agent, "bribe"):
+	if agent.is_empty() or army.is_empty() or not can(data, agent, "bribe") or not can_act(agent):
 		return -1
 	if army["region"] != agent["region"] or army["owner"] == agent["owner"] or army["general"] != null:
 		return -1
@@ -419,10 +440,12 @@ static func bribe_army(data: GameData, state: Dictionary, agent_id: String, army
 		result["reason"] = "treasury"
 		return result
 	faction["treasury"] = int(faction["treasury"]) - cost
+	spend_season(agent)
 	var previous_owner: String = army["owner"]
 	army["owner"] = agent["owner"]
 	army["movement_left"] = 0.0
 	army["forced_march"] = false
+	DiplomacyRules.lift_siege_by(state, army_id)
 	if not data.factions.get(previous_owner, {}).get("is_rebel", false):
 		DiplomacyRules.adjust_opinion(data, state, previous_owner, agent["owner"],
 			-float(data.balance["diplomacy"]["bribe_opinion_penalty"]))
@@ -433,7 +456,7 @@ static func bribe_army(data: GameData, state: Dictionary, agent_id: String, army
 static func bribe_settlement_cost(data: GameData, state: Dictionary, agent_id: String) -> int:
 	## Independent towns can be bought outright; -1 for anyone else's.
 	var agent: Dictionary = state["agents"].get(agent_id, {})
-	if agent.is_empty() or not can(data, agent, "bribe"):
+	if agent.is_empty() or not can(data, agent, "bribe") or not can_act(agent):
 		return -1
 	var settlement: Dictionary = state["settlements"].get(agent["region"], {})
 	if settlement.is_empty() or not data.factions.get(settlement["owner"], {}).get("is_rebel", false):
@@ -455,6 +478,7 @@ static func bribe_settlement(data: GameData, state: Dictionary, agent_id: String
 		result["reason"] = "treasury"
 		return result
 	faction["treasury"] = int(faction["treasury"]) - cost
+	spend_season(agent)
 	# A bought town brings its watch along and welcomes its new master.
 	DiplomacyRules.transfer_settlement(data, state, agent["region"], agent["owner"],
 		{"keep_garrison": true, "unrest": 0})
@@ -488,6 +512,14 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				"by": settlement["owner"]})
 			state["agents"].erase(agent_id)
 	return notices
+
+
+static func dismiss(state: Dictionary, agent_id: String) -> bool:
+	## Paid off and sent home; the upkeep stops.
+	if not state["agents"].has(agent_id):
+		return false
+	state["agents"].erase(agent_id)
+	return true
 
 
 static func remove_faction_agents(state: Dictionary, faction_id: String) -> void:

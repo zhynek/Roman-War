@@ -48,8 +48,8 @@ func _build_member(char_id: String, character: Dictionary) -> void:
 
 	if character["role"] in ["leader", "heir", "family"]:
 		var stats := Label.new()
-		stats.text = "    Command %d · Management %d · Influence %d" \
-			% [sheet["command"], sheet["management"], sheet["influence"]]
+		stats.text = "    Command %d · Management %d · Influence %d · Security %.1f" \
+			% [sheet["command"], sheet["management"], sheet["influence"], float(sheet["security"])]
 		stats.add_theme_font_size_override("font_size", 11)
 		_content.add_child(stats)
 

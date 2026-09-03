@@ -131,10 +131,13 @@ func test_assassination(t) -> void:
 	t.check_eq(state["characters"]["heir"]["role"], "leader", "the heir succeeds at once")
 	t.check_near(DiplomacyRules.opinion(state, "blue", "red"), -5.0, 0.001, "suspicion falls on us, lightly")
 
+	t.check(AgentRules.assassinate(data, state, rng, assassin, blue_envoy).is_empty(), "one attempt a season")
+	AgentRules.reset_movement(data, state)
 	result = AgentRules.assassinate(data, state, rng, assassin, blue_envoy)
-	t.check(result["success"], "and the envoy")
+	t.check(result["success"], "next season, the envoy")
 	t.check(not state["agents"].has(blue_envoy), "he is gone")
 	t.check(state["agents"].has(assassin), "our man walks away")
+	AgentRules.reset_movement(data, state)
 	t.check(AgentRules.assassinate(data, state, rng, assassin, "the_wife").is_empty(), "no target, no attempt")
 
 
@@ -175,8 +178,10 @@ func test_sabotage(t) -> void:
 	var result := AgentRules.sabotage(data, state, rng, assassin, "test_walls")
 	t.check(result["success"], "fire in the night")
 	t.check_eq(int(state["settlements"]["alpha"]["buildings"]["test_walls"]), 1, "a tier is lost")
+	t.check(AgentRules.sabotage(data, state, rng, assassin, "test_walls").is_empty(), "not twice in a season")
+	AgentRules.reset_movement(data, state)
 	AgentRules.sabotage(data, state, rng, assassin, "test_walls")
-	t.check(not state["settlements"]["alpha"]["buildings"].has("test_walls"), "and then the palisade itself")
+	t.check(not state["settlements"]["alpha"]["buildings"].has("test_walls"), "and next season the palisade itself")
 
 	var home_assassin := Fixtures.add_agent(state, "red", "assassin", "beta")
 	t.check(AgentRules.sabotage_targets(data, state, home_assassin).is_empty(), "never our own city")
@@ -231,10 +236,46 @@ func test_bribery(t) -> void:
 	state["factions"]["red"]["treasury"] = 10
 	result = AgentRules.bribe_army(data, state, envoy_home, captain)
 	t.check(not result["success"] and result.get("reason", "") == "treasury", "no gold, no deal")
+	t.check(AgentRules.can_act(state["agents"][envoy_home]), "a refused purse costs no time")
 	state["factions"]["red"]["treasury"] = 5000
 	result = AgentRules.bribe_army(data, state, envoy_home, captain)
 	t.check(result["success"] and state["armies"][captain]["owner"] == "red", "paid, the captain turns his coat")
 	t.check_near(DiplomacyRules.opinion(state, "blue", "red"), -15.0, 0.001, "his old masters resent it")
+	t.check(not AgentRules.can_act(state["agents"][envoy_home]), "and the purchase takes the season")
+
+
+func test_an_attempt_spends_the_season(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	_hopeless(data)
+	data.balance["agents"]["caught_on_failure_pct"]["assassinate"] = 0
+	var rng := CampaignRng.seeded(3)
+	Fixtures.add_character(state, "blue", "chief", {"role": "leader", "location": "alpha"})
+	var assassin := Fixtures.add_agent(state, "red", "assassin", "alpha")
+	var result := AgentRules.assassinate(data, state, rng, assassin, "chief")
+	t.check(not result["success"], "the knife misses")
+	t.check(not AgentRules.can_act(state["agents"][assassin]), "and the season is spent regardless")
+	t.check(AgentRules.assassination_targets(data, state, assassin).is_empty(), "no second try until next season")
+	t.check(AgentRules.sabotage_targets(data, state, assassin).is_empty(), "nor another trade")
+	var spy := Fixtures.add_agent(state, "red", "spy", "alpha", 1)
+	state["agents"][spy]["movement_left"] = 0.0
+	t.check(not AgentRules.can_open_gates(data, state, spy), "a spy who walked all day opens nothing tonight")
+	var fresh := AgentRules.recruit(data, state, rng, "beta", "envoy")
+	t.check(not AgentRules.can_act(state["agents"][fresh]), "a freshly trained agent waits for next season")
+	t.check(AgentRules.dismiss(state, fresh), "an agent can be paid off")
+	t.check(not state["agents"].has(fresh), "and is gone")
+
+
+func test_a_bought_besieger_lifts_the_siege(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	var band := Fixtures.add_army(state, "rebels", "beta", ["test_mob"])
+	MovementRules.reset_movement(data, state)
+	t.check(SiegeRules.begin_siege(data, state, band, "alpha"), "brigands invest the blue hold")
+	var envoy := Fixtures.add_agent(state, "red", "envoy", "alpha")
+	t.check(AgentRules.bribe_army(data, state, envoy, band)["success"], "and are bought by red")
+	t.check(state["settlements"]["alpha"]["siege"] == null, "red is at peace with blue, so the siege lifts")
 
 
 func test_buying_an_independent_town(t) -> void:
@@ -261,6 +302,7 @@ func test_covert_agents_risk_detection(t) -> void:
 	var envoy := Fixtures.add_agent(state, "blue", "envoy", "beta")
 	var at_home := Fixtures.add_agent(state, "blue", "spy", "alpha")
 	data.balance["agents"]["detection_base_pct"] = 100
+	data.balance["agents"]["detection_max_pct"] = 100
 	var notices := AgentRules.process_turn(data, state, rng)
 	t.check(not state["agents"].has(spy), "the spy in our city is caught")
 	t.check(state["agents"].has(envoy), "the envoy is untouchable")

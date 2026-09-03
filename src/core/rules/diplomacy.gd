@@ -16,7 +16,13 @@ class_name DiplomacyRules
 ##    envoy: agent_id | ""}
 ## evaluate() never rolls dice: the balance of an offer is a sum the scroll
 ## can show, and the other side accepts exactly when it is not negative.
+## Gold offered and demanded are netted into one figure; region lists are
+## deduplicated; a stance below the current one is a dissolution (free of
+## consent when nothing is demanded, resented, never a lesson for the envoy);
+## a named envoy must be the proposer's, in contact, and free to speak.
 ## Weights live in balance.json → diplomacy.
+
+const STANCE_RANK := {"war": 0, "neutral": 1, "trade": 2, "alliance": 3, "protectorate": 4}
 
 
 ## --- Stances ------------------------------------------------------------------
@@ -62,7 +68,9 @@ static func declare_war(state: Dictionary, a: String, b: String, data: GameData 
 	if data != null:
 		var rules: Dictionary = data.balance["diplomacy"]
 		adjust_opinion(data, state, b, a, -float(rules["war_declaration_opinion_penalty"]))
-		if previous in ["trade", "alliance", "protectorate"]:
+		# Tearing up a treaty, or walking away from a tribute still owed, is
+		# betrayal: the victim resents it and every court hears of it.
+		if previous in ["trade", "alliance", "protectorate"] or _owes_tribute(state, a, b):
 			adjust_opinion(data, state, b, a, -float(rules["betrayal_opinion_penalty"]))
 			var aggressor: Dictionary = state["factions"][a]
 			aggressor["treachery"] = int(aggressor.get("treachery", 0)) + int(rules["treachery_per_betrayal"])
@@ -112,12 +120,14 @@ static func power_ratio(data: GameData, state: Dictionary, a: String, b: String)
 	return maxf(strength(data, state, a), 1.0) / maxf(strength(data, state, b), 1.0)
 
 
-static func shared_enemies(state: Dictionary, a: String, b: String) -> Array:
+static func shared_enemies(data: GameData, state: Dictionary, a: String, b: String) -> Array:
 	var result: Array = []
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 	for other in faction_ids:
-		if other == a or other == b or other == "rebels" or not state["factions"][other]["alive"]:
+		if other == a or other == b or not state["factions"][other]["alive"]:
+			continue
+		if data.factions.get(other, {}).get("is_rebel", false):
 			continue
 		if at_war(state, a, other) and at_war(state, b, other):
 			result.append(other)
@@ -157,7 +167,7 @@ static func attitude_breakdown(data: GameData, state: Dictionary, evaluator: Str
 	var remembered := opinion(state, evaluator, other) * float(rules["attitude_opinion_weight"])
 	if remembered != 0.0:
 		factors.append({"label": "past_dealings", "value": remembered})
-	var enemies := shared_enemies(state, evaluator, other).size()
+	var enemies := shared_enemies(data, state, evaluator, other).size()
 	if enemies > 0:
 		factors.append({"label": "common_enemies", "value": minf(
 			float(enemies) * float(rules["attitude_shared_enemy"]), float(rules["attitude_shared_enemy_cap"]))})
@@ -219,13 +229,39 @@ static func evaluate(data: GameData, state: Dictionary, proposal: Dictionary) ->
 		return _refusal("War is declared, not proposed.")
 	if stance in ["trade", "alliance"] and current == "war":
 		return _refusal("There can be no treaty while we are at war. Make peace first.")
-	var gift := maxi(0, int(proposal.get("gift", 0)))
-	var demand := maxi(0, int(proposal.get("demand", 0)))
+	var power := power_ratio(data, state, from, to)
+	if stance == "protectorate" and power <= 1.0:
+		return _refusal("No court submits to a weaker one.")
+	# A stance below the standing one is a dissolution, not a fresh treaty.
+	var dissolving: bool = stance != "" and current != "war" \
+		and int(STANCE_RANK.get(stance, 0)) < int(STANCE_RANK.get(current, 0))
+	if dissolving and current == "protectorate" and state["factions"][from].get("overlord", null) == to:
+		return _refusal("A protectorate is released by its overlord, not by itself.")
+
+	# Gold each way is one figure: a gift wrapped around a demand is neither.
+	var net_gold := maxi(0, int(proposal.get("gift", 0))) - maxi(0, int(proposal.get("demand", 0)))
+	var gift := maxi(0, net_gold)
+	var demand := maxi(0, -net_gold)
 	if gift > int(state["factions"][from]["treasury"]):
 		return _refusal("We cannot pay what we offer.")
 	if demand > int(state["factions"][to]["treasury"]):
 		return _refusal("They cannot pay what is asked.")
-	var offered: Array = proposal.get("regions_offered", [])
+	var tribute_per_turn := maxi(0, int(proposal.get("tribute_per_turn", 0)))
+	var tribute_turns := maxi(0, int(proposal.get("tribute_turns", 0)))
+	var demanded_per_turn := maxi(0, int(proposal.get("tribute_demanded_per_turn", 0)))
+	var demanded_turns := maxi(0, int(proposal.get("tribute_demanded_turns", 0)))
+	if (tribute_per_turn > 0 and tribute_turns <= 0) or (demanded_per_turn > 0 and demanded_turns <= 0):
+		return _refusal("A tribute needs a term of seasons.")
+	if tribute_per_turn * tribute_turns + gift > int(state["factions"][from]["treasury"]):
+		return _refusal("We cannot promise more than we hold.")
+	if demanded_per_turn + demand > int(state["factions"][to]["treasury"]):
+		return _refusal("They cannot pay what is asked.")
+
+	var offered := _unique(proposal.get("regions_offered", []))
+	var demanded := _unique(proposal.get("regions_demanded", []))
+	if (not offered.is_empty() or not demanded.is_empty()) and current == "war" \
+			and stance not in ["neutral", "protectorate"]:
+		return _refusal("No land changes hands while we are at war, unless this treaty ends it.")
 	for region_id in offered:
 		if state["settlements"].get(region_id, {}).get("owner", "") != from \
 				or state["factions"][from]["capital"] == region_id:
@@ -233,60 +269,62 @@ static func evaluate(data: GameData, state: Dictionary, proposal: Dictionary) ->
 	if not offered.is_empty() and _regions_of(state, from).size() <= offered.size():
 		return _refusal("A house that gives away its last city is no house at all.")
 	var evaluator_regions := _regions_of(state, to)
-	for region_id in proposal.get("regions_demanded", []):
+	for region_id in demanded:
 		if state["settlements"].get(region_id, {}).get("owner", "") != to:
 			return _refusal("They do not hold that land.")
-		if state["factions"][to]["capital"] == region_id or evaluator_regions.size() <= 1:
+		if state["factions"][to]["capital"] == region_id or evaluator_regions.size() <= demanded.size():
 			return _refusal("No power surrenders its capital or its last city at the table.")
+
+	var envoy_id: String = proposal.get("envoy", "")
+	var envoy: Dictionary = state["agents"].get(envoy_id, {})
+	if envoy_id != "" and (envoy.is_empty() or envoy["owner"] != from
+			or not AgentRules.in_contact(data, state, envoy_id, to) or not AgentRules.can_act(envoy)):
+		return _refusal("That envoy cannot speak for us at that court this season.")
 
 	var factors: Array = []
 	# Dissolving a treaty of ours is not a bargain the other side gets to
 	# refuse — unless we try to squeeze them on the way out.
-	var dissolving: bool = stance == "neutral" and current != "war"
-	var demanding: bool = demand > 0 or int(proposal.get("tribute_demanded_per_turn", 0)) > 0 \
-		or not proposal.get("regions_demanded", []).is_empty()
+	var demanding: bool = demand > 0 or demanded_per_turn > 0 or not demanded.is_empty()
 	if dissolving and not demanding:
 		factors.append({"label": "treaty_dissolved", "value": 0.0})
 		return {"accept": true, "score": 0.0, "factors": factors, "reason": ""}
 
 	factors.append({"label": "attitude", "value": attitude(data, state, to, from)})
-	var power := power_ratio(data, state, from, to)
 	var weariness := minf(float(war_turns(state, to, from)) * float(rules["war_weariness_per_turn"]),
 		float(rules["war_weariness_cap"]))
-	match stance:
-		"neutral":
-			if current == "war":
+	if dissolving:
+		factors.append({"label": "treaty_dissolved", "value": 0.0})
+	else:
+		match stance:
+			"neutral":
 				factors.append({"label": "peace", "value": float(rules["peace_base"])})
 				if weariness > 0.0:
 					factors.append({"label": "war_weariness", "value": weariness})
 				factors.append({"label": "relative_power", "value": clampf(
 					(power - 1.0) * float(rules["peace_power_weight"]),
 					-float(rules["peace_power_cap"]), float(rules["peace_power_cap"]))})
-			else:
-				factors.append({"label": "treaty_dissolved", "value": 0.0})
-		"trade":
-			factors.append({"label": "trade_rights", "value": float(rules["trade_base"])})
-		"alliance":
-			factors.append({"label": "alliance", "value": float(rules["alliance_base"])})
-			var enemies := shared_enemies(state, from, to).size()
-			if enemies > 0:
-				factors.append({"label": "common_enemies",
-					"value": float(enemies) * float(rules["alliance_per_shared_enemy"])})
-			factors.append({"label": "relative_power", "value": clampf(
-				(power - 1.0) * float(rules["alliance_power_weight"]),
-				-float(rules["alliance_power_cap"]), float(rules["alliance_power_cap"]))})
-			var allies_fought := _allies_at_war_with(state, to, from)
-			if allies_fought > 0:
-				factors.append({"label": "war_with_our_allies",
-					"value": -float(allies_fought) * float(rules["alliance_enemy_of_ally_penalty"])})
-		"protectorate":
-			factors.append({"label": "submission", "value": float(rules["protectorate_base"])})
-			if power > 1.0:
+			"trade":
+				factors.append({"label": "trade_rights", "value": float(rules["trade_base"])})
+			"alliance":
+				factors.append({"label": "alliance", "value": float(rules["alliance_base"])})
+				var enemies := shared_enemies(data, state, from, to).size()
+				if enemies > 0:
+					factors.append({"label": "common_enemies",
+						"value": float(enemies) * float(rules["alliance_per_shared_enemy"])})
+				factors.append({"label": "relative_power", "value": clampf(
+					(power - 1.0) * float(rules["alliance_power_weight"]),
+					-float(rules["alliance_power_cap"]), float(rules["alliance_power_cap"]))})
+				var allies_fought := _allies_at_war_with(state, to, from)
+				if allies_fought > 0:
+					factors.append({"label": "war_with_our_allies",
+						"value": -float(allies_fought) * float(rules["alliance_enemy_of_ally_penalty"])})
+			"protectorate":
+				factors.append({"label": "submission", "value": float(rules["protectorate_base"])})
 				factors.append({"label": "our_weakness", "value": minf(
 					(power - 1.0) * float(rules["protectorate_weakness_weight"]),
 					float(rules["protectorate_weakness_cap"]))})
-			if current == "war" and weariness > 0.0:
-				factors.append({"label": "war_weariness", "value": weariness})
+				if current == "war" and weariness > 0.0:
+					factors.append({"label": "war_weariness", "value": weariness})
 
 	var gold_per_point := float(rules["offer_gold_per_point"])
 	if gift > 0:
@@ -294,27 +332,25 @@ static func evaluate(data: GameData, state: Dictionary, proposal: Dictionary) ->
 	if demand > 0:
 		factors.append({"label": "gold_demanded",
 			"value": -float(demand) / gold_per_point * float(rules["demand_multiplier"])})
-	var tribute := maxi(0, int(proposal.get("tribute_per_turn", 0))) * maxi(0, int(proposal.get("tribute_turns", 0)))
+	var tribute := tribute_per_turn * tribute_turns
 	if tribute > 0:
 		factors.append({"label": "tribute_offered",
 			"value": float(tribute) / gold_per_point * float(rules["tribute_value_factor"])})
-	var tribute_demanded := maxi(0, int(proposal.get("tribute_demanded_per_turn", 0))) \
-		* maxi(0, int(proposal.get("tribute_demanded_turns", 0)))
+	var tribute_demanded := demanded_per_turn * demanded_turns
 	if tribute_demanded > 0:
 		factors.append({"label": "tribute_demanded",
 			"value": -float(tribute_demanded) / gold_per_point * float(rules["demand_multiplier"])})
 	var offered_value := 0.0
-	for region_id in proposal.get("regions_offered", []):
+	for region_id in offered:
 		offered_value += region_value(data, state, region_id)
 	if offered_value > 0.0:
 		factors.append({"label": "regions_offered", "value": offered_value})
 	var demanded_value := 0.0
-	for region_id in proposal.get("regions_demanded", []):
+	for region_id in demanded:
 		demanded_value += region_value(data, state, region_id)
 	if demanded_value > 0.0:
 		factors.append({"label": "regions_demanded", "value": -demanded_value * float(rules["demand_multiplier"])})
-	var envoy: Dictionary = state["agents"].get(proposal.get("envoy", ""), {})
-	if not envoy.is_empty() and envoy["owner"] == from:
+	if not envoy.is_empty():
 		factors.append({"label": "envoy_skill", "value": float(envoy["skill"]) * float(rules["envoy_skill_per_point"])})
 
 	var score := 0.0
@@ -411,8 +447,12 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 			notices.append({"kind": "tribute_ended", "from": payer, "to": payee, "lapsed": true})
 			continue
 		var amount := int(tribute["per_turn"])
-		state["factions"][payer]["treasury"] = int(state["factions"][payer]["treasury"]) - amount
-		state["factions"][payee]["treasury"] = int(state["factions"][payee]["treasury"]) + amount
+		if int(state["factions"][payer]["treasury"]) < amount:
+			# An empty treasury cannot pay; the promise lapses rather than
+			# driving the payer into debt.
+			notices.append({"kind": "tribute_ended", "from": payer, "to": payee, "lapsed": true})
+			continue
+		_pay(state, payer, payee, amount)
 		tribute["turns_left"] = int(tribute["turns_left"]) - 1
 		notices.append({"kind": "tribute_paid", "from": payer, "to": payee, "amount": amount})
 		if int(tribute["turns_left"]) > 0:
@@ -431,7 +471,10 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 				or not faction["alive"] or stance_between(state, faction_id, overlord) != "protectorate":
 			faction["overlord"] = null
 			continue
-		var income := float(EconomyRules.faction_turn_breakdown(data, state, faction_id)["income"])
+		# The share is taken from what the season actually brought in (the
+		# treasury step records it), not from an estimate.
+		var income := float(faction.get("last_income",
+			EconomyRules.faction_turn_breakdown(data, state, faction_id)["income"]))
 		var amount := int(round(maxf(income, 0.0) * share))
 		if amount <= 0:
 			continue
@@ -449,51 +492,104 @@ static func _apply(data: GameData, state: Dictionary, proposal: Dictionary) -> v
 	var to: String = proposal["to"]
 	var current := stance_between(state, from, to)
 	var stance: String = proposal.get("stance", "")
-	var treaty_changed := false
+	var raised := false
 	if stance != "" and stance != current:
-		treaty_changed = true
+		var dissolving: bool = current != "war" \
+			and int(STANCE_RANK.get(stance, 0)) < int(STANCE_RANK.get(current, 0))
 		set_stance(state, from, to, stance)
 		if current == "war":
 			_set_war_turns(state, from, to, 0)
-		if stance == "neutral" and current != "war":
+			_lift_sieges_between(state, from, to)
+		if dissolving:
 			adjust_opinion(data, state, to, from, -float(rules["treaty_ended_opinion_penalty"]))
 		else:
+			raised = true
 			var bonus := float(rules["treaty_opinion_bonus"].get(stance, 0.0))
 			adjust_opinion(data, state, to, from, bonus)
 			adjust_opinion(data, state, from, to, bonus)
 		if stance == "protectorate":
 			state["factions"][to]["overlord"] = from
 
-	var gift := maxi(0, int(proposal.get("gift", 0)))
-	if gift > 0:
-		state["factions"][from]["treasury"] = int(state["factions"][from]["treasury"]) - gift
-		state["factions"][to]["treasury"] = int(state["factions"][to]["treasury"]) + gift
-		adjust_opinion(data, state, to, from, float(gift) / 100.0 * float(rules["opinion_per_100_gold_gift"]))
-	var demand := maxi(0, int(proposal.get("demand", 0)))
-	if demand > 0:
-		state["factions"][to]["treasury"] = int(state["factions"][to]["treasury"]) - demand
-		state["factions"][from]["treasury"] = int(state["factions"][from]["treasury"]) + demand
-		adjust_opinion(data, state, to, from, -float(demand) / 100.0 * float(rules["opinion_per_100_gold_demanded"]))
+	var net_gold := maxi(0, int(proposal.get("gift", 0))) - maxi(0, int(proposal.get("demand", 0)))
+	if net_gold > 0:
+		_pay(state, from, to, net_gold)
+		adjust_opinion(data, state, to, from, float(net_gold) / 100.0 * float(rules["opinion_per_100_gold_gift"]))
+	elif net_gold < 0:
+		_pay(state, to, from, -net_gold)
+		adjust_opinion(data, state, to, from, float(net_gold) / 100.0 * float(rules["opinion_per_100_gold_demanded"]))
 
-	var per_turn := maxi(0, int(proposal.get("tribute_per_turn", 0)))
-	var turns := maxi(0, int(proposal.get("tribute_turns", 0)))
-	if per_turn > 0 and turns > 0:
-		state["tributes"].append({"from": from, "to": to, "per_turn": per_turn, "turns_left": turns})
-	var demanded_per_turn := maxi(0, int(proposal.get("tribute_demanded_per_turn", 0)))
-	var demanded_turns := maxi(0, int(proposal.get("tribute_demanded_turns", 0)))
-	if demanded_per_turn > 0 and demanded_turns > 0:
-		state["tributes"].append({"from": to, "to": from, "per_turn": demanded_per_turn, "turns_left": demanded_turns})
+	# The first installment of a tribute changes hands with the signatures;
+	# the rest follow at each season's end.
+	_start_tribute(state, from, to, int(proposal.get("tribute_per_turn", 0)), int(proposal.get("tribute_turns", 0)))
+	_start_tribute(state, to, from, int(proposal.get("tribute_demanded_per_turn", 0)),
+		int(proposal.get("tribute_demanded_turns", 0)))
 
-	for region_id in proposal.get("regions_offered", []):
+	for region_id in _unique(proposal.get("regions_offered", [])):
 		transfer_settlement(data, state, region_id, to)
-	for region_id in proposal.get("regions_demanded", []):
+	for region_id in _unique(proposal.get("regions_demanded", [])):
 		transfer_settlement(data, state, region_id, from)
 
-	# A treaty concluded is a lesson learned: the envoy who carried it grows.
-	if treaty_changed:
-		var envoy: Dictionary = state["agents"].get(proposal.get("envoy", ""), {})
-		if not envoy.is_empty() and envoy["owner"] == from:
+	# An accepted offer is the envoy's work for the season; a treaty concluded
+	# (never one dissolved) is a lesson learned, and he grows.
+	var envoy: Dictionary = state["agents"].get(proposal.get("envoy", ""), {})
+	if not envoy.is_empty() and envoy["owner"] == from:
+		AgentRules.spend_season(envoy)
+		if raised:
 			envoy["skill"] = mini(int(envoy["skill"]) + 1, int(data.balance["agents"]["max_skill"]))
+
+
+static func _pay(state: Dictionary, payer: String, payee: String, amount: int) -> void:
+	state["factions"][payer]["treasury"] = int(state["factions"][payer]["treasury"]) - amount
+	state["factions"][payee]["treasury"] = int(state["factions"][payee]["treasury"]) + amount
+
+
+static func _start_tribute(state: Dictionary, payer: String, payee: String, per_turn: int, turns: int) -> void:
+	if per_turn <= 0 or turns <= 0:
+		return
+	_pay(state, payer, payee, per_turn)
+	if turns > 1:
+		state["tributes"].append({"from": payer, "to": payee, "per_turn": per_turn, "turns_left": turns - 1})
+
+
+static func _lift_sieges_between(state: Dictionary, a: String, b: String) -> void:
+	## Peace ends every siege the two were pressing on each other.
+	for settlement in state["settlements"].values():
+		var siege = settlement["siege"]
+		if siege == null:
+			continue
+		var besieger: Dictionary = state["armies"].get(siege["besieger"], {})
+		if besieger.is_empty():
+			continue
+		if (settlement["owner"] == a and besieger["owner"] == b) \
+				or (settlement["owner"] == b and besieger["owner"] == a):
+			settlement["siege"] = null
+
+
+static func lift_siege_by(state: Dictionary, army_id: String) -> void:
+	## An army that changed banners keeps no siege its new master is not at war over.
+	for settlement in state["settlements"].values():
+		var siege = settlement["siege"]
+		if siege != null and siege["besieger"] == army_id:
+			var besieger: Dictionary = state["armies"].get(army_id, {})
+			if besieger.is_empty() or not at_war(state, besieger["owner"], settlement["owner"]):
+				settlement["siege"] = null
+
+
+static func _owes_tribute(state: Dictionary, payer: String, payee: String) -> bool:
+	for tribute in state.get("tributes", []):
+		if tribute["from"] == payer and tribute["to"] == payee:
+			return true
+	return false
+
+
+static func _unique(list: Array) -> Array:
+	var seen := {}
+	var result: Array = []
+	for item in list:
+		if not seen.has(item):
+			seen[item] = true
+			result.append(item)
+	return result
 
 
 static func _refusal(reason: String) -> Dictionary:

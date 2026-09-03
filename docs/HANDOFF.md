@@ -24,9 +24,9 @@ foundation depth, the full character/family layer, and agents & diplomacy),
 the Phase 7 senate foundation loop with four mission kinds, and a playable
 Phase 8 campaign UI including agent orders and a negotiating table.
 
-**Green as of the Phase 5 commit:** 98 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot, and a 120-turn headless probe with agents and envoys
-active. Branch `claude/next-roadmap-phase-rjxwas`, everything pushed. A Mac
+**Green as of the Phase 5 review commit:** 103 tests / 0 failures, validator
+0 errors / 0 warnings, clean boot, and 120-turn headless probes with agents and
+envoys active (including a save mid-campaign replayed in step for 20 turns). Branch `claude/next-roadmap-phase-rjxwas`, everything pushed. A Mac
 build of the Phase 4 state was delivered to the user earlier; the Phase 5
 build has not been produced yet (see `BUILDING.md`).
 
@@ -70,7 +70,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 98 tests, 0 failures (~15s)
+godot --headless --path . --script res://tests/run_tests.gd      # 103 tests, 0 failures (~15s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -165,10 +165,15 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   their capitals, but nothing more. Phase 6.
 - **Envoy bribery is deterministic** (pay the price, the captain turns) and
   family-led armies can never be bought; the research report's "bribe
-  generals" is deliberately not implemented.
+  generals" is deliberately not implemented. Captains are not assassination
+  targets either (only family members and agents are).
 - **Protectorates** are a stance plus an `overlord` field and an income share;
   there is no military access, no dragging vassals into wars, and a vassal can
-  declare war on its overlord at will (which simply ends the protectorate).
+  declare war on its overlord at will (which simply ends the protectorate) —
+  the only way out for a vassal, since it cannot negotiate its release.
+- **Foreign agents are always visible** where the fog is lifted; "covert"
+  only means they can be caught. Hiding them until a spy of ours shares the
+  region would be a small change in `map_view.gd` and `region_panel.gd`.
 - **Alliances carry no obligations** beyond trade and the attitude bonus:
   allies are not called into wars.
 - **Starting families are adult men only**: no spouses, no children, no
@@ -188,10 +193,13 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   or a stop hook flags the commits as unverified and they need re-authoring.
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
-  issues** after Phase 4 that the 60-strong test suite had missed, and another
-  round after Phase 5 caught what the 98-strong suite missed. Give each
-  reviewer the research report plus a specific lens, tell them to run the
-  suite themselves, make them read-only, and require findings-only output.
+  issues** after Phase 4 that the 60-strong test suite had missed, and the same
+  three lenses after Phase 5 found **another 30-odd** the 98-strong suite had
+  missed — among them agents acting without limit in a turn, an envoy trained
+  to skill 10 by churning treaties, tribute promised and never paid, and a
+  bought besieger capturing a city at peace. Give each reviewer the research
+  report plus a specific lens, tell them to run the suite themselves, make
+  them read-only, and require findings-only output.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.

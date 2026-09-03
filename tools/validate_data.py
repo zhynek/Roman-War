@@ -8,6 +8,7 @@ coherence). Exits nonzero on any error. Run from anywhere:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -82,6 +83,7 @@ def load_tables() -> dict[str, dict]:
 
 
 def cross_checks(t: dict[str, dict]) -> None:
+    engine_dir = ROOT / "src" / "core"
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 
@@ -439,7 +441,6 @@ def cross_checks(t: dict[str, dict]) -> None:
     # Trigger kinds the engine actually fires. Anything else is dead content,
     # so a warning names it rather than letting it rot silently.
     fired_kinds = set()
-    engine_dir = ROOT / "src" / "core"
     for source in engine_dir.rglob("*.gd"):
         text = source.read_text()
         for kind in ("turn_end_governing", "turn_end_idle", "turn_end_campaigning",
@@ -465,6 +466,66 @@ def cross_checks(t: dict[str, dict]) -> None:
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+
+    # Every balance constant the engine indexes must exist: a missing or
+    # misspelled key is a runtime crash the schema cannot see (sections are
+    # free-form numeric tables). Scans src/core for direct indexing and for
+    # the `var rules: Dictionary = data.balance["section"]` alias idiom.
+    for section, key, where in balance_keys_used(engine_dir):
+        if section not in balance:
+            err(f"balance: engine indexes unknown section {section} ({where})")
+        elif not isinstance(balance[section], dict) or key not in balance[section]:
+            err(f"balance: engine indexes missing constant {section}.{key} ({where})")
+
+    agents_balance = balance.get("agents", {})
+    diplomacy_balance = balance.get("diplomacy", {})
+    action_vocabulary = {a for k in agent_kinds.values() for a in k["actions"]}
+    for action in agents_balance.get("caught_on_failure_pct", {}):
+        if action not in action_vocabulary:
+            err(f"balance: agents.caught_on_failure_pct names unknown action {action}")
+    stances = {"war", "neutral", "trade", "alliance", "protectorate"}
+    for table in ("attitude_stance", "treaty_opinion_bonus"):
+        for stance in diplomacy_balance.get(table, {}):
+            if stance not in stances:
+                err(f"balance: diplomacy.{table} names unknown stance {stance}")
+    if not diplomacy_balance.get("attitude_labels"):
+        err("balance: diplomacy.attitude_labels must name at least one label")
+    if agents_balance.get("success_min_pct", 0) > agents_balance.get("success_max_pct", 100):
+        err("balance: agents.success_min_pct exceeds success_max_pct")
+    max_skill = agents_balance.get("max_skill", 10)
+    for kind in agent_kinds.values():
+        if kind["base_skill"] > max_skill:
+            err(f"agents: {kind['id']}: base_skill above balance agents.max_skill ({max_skill})")
+    for faction_setup in campaign.get("factions", []):
+        for agent in faction_setup.get("agents", []):
+            if agent.get("skill", 0) > max_skill:
+                err(f"campaign: {faction_setup['id']}: starting agent skill above max_skill ({max_skill})")
+
+
+ALIAS_RE = re.compile(r'var\s+(\w+)\s*(?::\s*Dictionary)?\s*:?=\s*data\.balance\["(\w+)"\]\s*$')
+DIRECT_RE = re.compile(r'data\.balance\["(\w+)"\]\["(\w+)"\]')
+INDEX_RE = re.compile(r'\b(\w+)\["(\w+)"\]')
+FUNC_RE = re.compile(r'^\s*(static\s+)?func\s')
+
+
+def balance_keys_used(engine_dir: Path) -> list[tuple[str, str, str]]:
+    """(section, key, file:line) for every balance constant src/core indexes."""
+    used: list[tuple[str, str, str]] = []
+    for source in sorted(engine_dir.rglob("*.gd")):
+        aliases: dict[str, str] = {}
+        for number, line in enumerate(source.read_text().splitlines(), 1):
+            if FUNC_RE.match(line):
+                aliases = {}  # aliases are local to a function
+            where = f"{source.relative_to(ROOT)}:{number}"
+            alias = ALIAS_RE.search(line)
+            if alias:
+                aliases[alias.group(1)] = alias.group(2)
+            for section, key in DIRECT_RE.findall(line):
+                used.append((section, key, where))
+            for name, key in INDEX_RE.findall(line):
+                if name in aliases:
+                    used.append((aliases[name], key, where))
+    return used
 
 
 def main() -> int:
