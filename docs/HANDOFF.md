@@ -195,6 +195,13 @@ reproduces their exact campaign, which makes any bug directly debuggable.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.
+- **CI can fail without running anything.** The first push of this branch
+  showed both jobs failing within three seconds with `runner_id: 0` and no
+  steps — GitHub never assigned a runner (an Actions minutes/billing condition
+  on the account; six earlier runs hung for six hours each and burned the
+  month's quota). That is not a code failure: the two CI commands are exactly
+  the validator and test commands above, and both were green locally. Re-run
+  the workflow once minutes are available before reading red as a bug.
 - JSON tables are rewritten with `json.dump(..., indent=2, ensure_ascii=False)`
   plus a trailing newline; without `ensure_ascii=False` every em dash in the
   descriptions turns into `—` and the diff is unreadable.
