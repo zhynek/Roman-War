@@ -92,6 +92,16 @@
           "faction": "cornelii",
           "stance": "alliance"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "latium"
+        },
+        {
+          "kind": "spy",
+          "region": "latium"
+        }
       ]
     },
     {
@@ -233,6 +243,16 @@
           "faction": "cornelii",
           "stance": "alliance"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "etruria"
+        },
+        {
+          "kind": "spy",
+          "region": "etruria"
+        }
       ]
     },
     {
@@ -368,6 +388,16 @@
         {
           "faction": "cornelii",
           "stance": "alliance"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "apulia"
+        },
+        {
+          "kind": "spy",
+          "region": "apulia"
         }
       ]
     },
@@ -518,6 +548,16 @@
         {
           "faction": "junii",
           "stance": "alliance"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "campania"
+        },
+        {
+          "kind": "spy",
+          "region": "campania"
         }
       ]
     },
@@ -701,6 +741,16 @@
           "faction": "hispania",
           "stance": "trade"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "africa"
+        },
+        {
+          "kind": "spy",
+          "region": "africa"
+        }
       ]
     },
     {
@@ -865,6 +915,16 @@
           "faction": "egypt",
           "stance": "trade"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "attica"
+        },
+        {
+          "kind": "spy",
+          "region": "attica"
+        }
       ]
     },
     {
@@ -976,6 +1036,16 @@
           "faction": "seleucia",
           "stance": "trade"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "macedonia"
+        },
+        {
+          "kind": "spy",
+          "region": "macedonia"
+        }
       ]
     },
     {
@@ -1044,6 +1114,16 @@
           "management": 2,
           "influence": 2,
           "location": "thracia"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "thracia"
+        },
+        {
+          "kind": "spy",
+          "region": "thracia"
         }
       ]
     },
@@ -1207,6 +1287,16 @@
         {
           "faction": "macedon",
           "stance": "trade"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "syria"
+        },
+        {
+          "kind": "spy",
+          "region": "syria"
         }
       ]
     },
@@ -1385,6 +1475,16 @@
           "faction": "greek_cities",
           "stance": "trade"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "aegyptus"
+        },
+        {
+          "kind": "spy",
+          "region": "aegyptus"
+        }
       ]
     },
     {
@@ -1499,6 +1599,16 @@
           "influence": 2,
           "location": "parthia"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "parthia"
+        },
+        {
+          "kind": "spy",
+          "region": "parthia"
+        }
       ]
     },
     {
@@ -1574,6 +1684,16 @@
           "management": 4,
           "influence": 2,
           "location": "armenia"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "armenia"
+        },
+        {
+          "kind": "spy",
+          "region": "armenia"
         }
       ]
     },
@@ -1675,6 +1795,16 @@
             "steady_governor"
           ],
           "location": "cappadocia"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "pontus"
+        },
+        {
+          "kind": "spy",
+          "region": "pontus"
         }
       ]
     },
@@ -1793,6 +1923,16 @@
           "influence": 3,
           "location": "arvernia"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "arvernia"
+        },
+        {
+          "kind": "spy",
+          "region": "arvernia"
+        }
       ]
     },
     {
@@ -1901,6 +2041,16 @@
           ],
           "location": "cimbria"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "suebia"
+        },
+        {
+          "kind": "spy",
+          "region": "suebia"
+        }
       ]
     },
     {
@@ -1985,6 +2135,16 @@
           ],
           "location": "britannia"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "britannia"
+        },
+        {
+          "kind": "spy",
+          "region": "britannia"
+        }
       ]
     },
     {
@@ -2063,6 +2223,16 @@
             "master_builder"
           ],
           "location": "dacia"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "dacia"
+        },
+        {
+          "kind": "spy",
+          "region": "dacia"
         }
       ]
     },
@@ -2167,6 +2337,16 @@
           "faction": "carthage",
           "stance": "trade"
         }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "celtiberia"
+        },
+        {
+          "kind": "spy",
+          "region": "celtiberia"
+        }
       ]
     },
     {
@@ -2245,6 +2425,16 @@
           "management": 3,
           "influence": 2,
           "location": "scythia"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "scythia"
+        },
+        {
+          "kind": "spy",
+          "region": "scythia"
         }
       ]
     },
@@ -2334,6 +2524,16 @@
         {
           "faction": "carthage",
           "stance": "trade"
+        }
+      ],
+      "agents": [
+        {
+          "kind": "envoy",
+          "region": "numidia"
+        },
+        {
+          "kind": "spy",
+          "region": "numidia"
         }
       ]
     }

@@ -1,0 +1,41 @@
+{
+  "$schema": "../schemas/agents.schema.json",
+  "agents": [
+    {
+      "id": "envoy",
+      "name": "Envoy",
+      "covert": false,
+      "cost": 500,
+      "upkeep": 40,
+      "base_skill": 1,
+      "sight": 0,
+      "requirements": { "building_kind": "government", "building_level": 1 },
+      "actions": ["negotiate", "bribe"],
+      "description": "A speaker for the house, sent to foreign courts with gifts, demands, and a purse for quieter purchases. Envoys travel openly and are never touched, whatever they carry."
+    },
+    {
+      "id": "spy",
+      "name": "Spy",
+      "covert": true,
+      "cost": 400,
+      "upkeep": 30,
+      "base_skill": 1,
+      "sight": 1,
+      "requirements": { "building_kind": "market", "building_level": 1 },
+      "actions": ["watch", "open_gates", "counter_espionage"],
+      "description": "A merchant's clerk, a wandering priest, a woman selling ribbons at the gate. Spies see what garrisons and builders are doing behind foreign walls, guard our own cities against the same, and can open a besieged gate from within."
+    },
+    {
+      "id": "assassin",
+      "name": "Assassin",
+      "covert": true,
+      "cost": 700,
+      "upkeep": 50,
+      "base_skill": 1,
+      "sight": 0,
+      "requirements": { "building_kind": "market", "building_level": 2 },
+      "actions": ["assassinate", "sabotage"],
+      "description": "Poison, a knife in a doorway, a fire in a granary. Assassins remove foreign magistrates and generals and wreck what they cannot kill; their trade improves with every success and ends abruptly with most failures."
+    }
+  ]
+}

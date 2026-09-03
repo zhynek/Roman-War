@@ -73,7 +73,7 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 
 func declare_war(other_faction: String, faction_id: String = "") -> bool:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
-	return DiplomacyRules.declare_war(state, fid, other_faction)
+	return DiplomacyRules.declare_war(state, fid, other_faction, data)
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
@@ -91,6 +91,144 @@ func hire_mercenary(army_id: String, template_id: String) -> bool:
 
 func mercenaries_available(region_id: String) -> Array:
 	return MercenaryRules.available(data, state, region_id)
+
+
+## --- Agents ------------------------------------------------------------------
+
+func agent_kinds_available(region_id: String) -> Array:
+	return AgentRules.kinds_available(data, state, region_id)
+
+
+func recruit_agent(region_id: String, kind_id: String) -> String:
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return ""
+	var rng := _rng()
+	var agent_id := AgentRules.recruit(data, state, rng, region_id, kind_id)
+	state["rng_state"] = rng.state_string()
+	return agent_id
+
+
+func agents_in(region_id: String, owner: String = "") -> Array:
+	return AgentRules.agents_in(state, region_id, owner)
+
+
+func move_agent(agent_id: String, to_region: String) -> bool:
+	if not _own_agent(agent_id):
+		return false
+	return AgentRules.move(data, state, agent_id, to_region)
+
+
+func sea_move_agent(agent_id: String, to_region: String) -> bool:
+	if not _own_agent(agent_id):
+		return false
+	return AgentRules.sea_move(data, state, agent_id, to_region)
+
+
+func can_open_gates(agent_id: String) -> bool:
+	return _own_agent(agent_id) and AgentRules.can_open_gates(data, state, agent_id)
+
+
+func open_gates(agent_id: String) -> Dictionary:
+	if not _own_agent(agent_id):
+		return {}
+	var rng := _rng()
+	var result := AgentRules.open_gates(data, state, rng, agent_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func assassination_targets(agent_id: String) -> Array:
+	return AgentRules.assassination_targets(data, state, agent_id) if _own_agent(agent_id) else []
+
+
+func assassinate(agent_id: String, target_id: String) -> Dictionary:
+	if not _own_agent(agent_id):
+		return {}
+	var rng := _rng()
+	var result := AgentRules.assassinate(data, state, rng, agent_id, target_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func sabotage_targets(agent_id: String) -> Array:
+	return AgentRules.sabotage_targets(data, state, agent_id) if _own_agent(agent_id) else []
+
+
+func sabotage(agent_id: String, chain_id: String) -> Dictionary:
+	if not _own_agent(agent_id):
+		return {}
+	var rng := _rng()
+	var result := AgentRules.sabotage(data, state, rng, agent_id, chain_id)
+	state["rng_state"] = rng.state_string()
+	return result
+
+
+func bribe_army_cost(agent_id: String, army_id: String) -> int:
+	return AgentRules.bribe_army_cost(data, state, agent_id, army_id) if _own_agent(agent_id) else -1
+
+
+func bribe_army(agent_id: String, army_id: String) -> Dictionary:
+	return AgentRules.bribe_army(data, state, agent_id, army_id) if _own_agent(agent_id) else {}
+
+
+func bribe_settlement_cost(agent_id: String) -> int:
+	return AgentRules.bribe_settlement_cost(data, state, agent_id) if _own_agent(agent_id) else -1
+
+
+func bribe_settlement(agent_id: String) -> Dictionary:
+	return AgentRules.bribe_settlement(data, state, agent_id) if _own_agent(agent_id) else {}
+
+
+func factions_in_contact(agent_id: String) -> Array:
+	return AgentRules.factions_in_contact(data, state, agent_id) if _own_agent(agent_id) else []
+
+
+func _own_agent(agent_id: String) -> bool:
+	return state["agents"].get(agent_id, {}).get("owner", "") == state["player_faction"]
+
+
+## --- Diplomacy ------------------------------------------------------------------
+
+func best_envoy(other_faction: String, faction_id: String = "") -> String:
+	## Our most skilled envoy in contact with the other power, or "".
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return AgentRules.best_envoy(data, state, fid, other_faction)
+
+
+func attitude_of(other_faction: String, faction_id: String = "") -> Dictionary:
+	## How the other power regards us: {total, label, factors}.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var factors := DiplomacyRules.attitude_breakdown(data, state, other_faction, fid)
+	var total := 0.0
+	for factor in factors:
+		total += float(factor["value"])
+	return {"total": total, "label": DiplomacyRules.attitude_label(data, total), "factors": factors}
+
+
+func evaluate_proposal(proposal: Dictionary) -> Dictionary:
+	## Preview an offer's balance without making it. Fills in the proposer and
+	## the best envoy in contact when the caller leaves them out.
+	return DiplomacyRules.evaluate(data, state, _complete_proposal(proposal))
+
+
+func propose(proposal: Dictionary) -> Dictionary:
+	## Make an offer through an envoy in contact with the other court. Without
+	## one there are no talks, whatever the terms.
+	var full := _complete_proposal(proposal)
+	if full.get("envoy", "") == "":
+		return {"accepted": false, "score": 0.0, "factors": [],
+			"reason": "No envoy of ours is in contact with that court."}
+	return DiplomacyRules.propose(data, state, full)
+
+
+func _complete_proposal(proposal: Dictionary) -> Dictionary:
+	var full := proposal.duplicate(true)
+	if not full.has("from") or full["from"] == "":
+		full["from"] = state["player_faction"]
+	if not full.has("envoy") or full["envoy"] == "":
+		full["envoy"] = AgentRules.best_envoy(data, state, full["from"], full.get("to", ""))
+	return full
 
 
 ## --- Family & characters --------------------------------------------------
@@ -138,6 +276,7 @@ func character_sheet(char_id: String) -> Dictionary:
 		"traits": traits,
 		"ancillaries": ancillaries,
 		"location": character.get("location", ""),
+		"security": AgentRules.character_security(data, state, char_id),
 	}
 
 

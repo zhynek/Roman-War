@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents.schema.json",
+  "title": "Campaign agent kinds (envoys, spies, assassins)",
+  "type": "object",
+  "required": ["agents"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "covert", "cost", "upkeep", "base_skill", "sight", "requirements", "actions", "description"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "name": { "type": "string", "minLength": 1 },
+          "covert": {
+            "type": "boolean",
+            "description": "Covert agents risk detection each turn they stand in foreign territory; open ones (envoys) never do"
+          },
+          "cost": { "type": "integer", "minimum": 0 },
+          "upkeep": { "type": "integer", "minimum": 0 },
+          "base_skill": { "type": "integer", "minimum": 0, "maximum": 10, "description": "Skill a freshly trained agent starts with" },
+          "sight": { "type": "integer", "minimum": 0, "maximum": 2, "description": "Hops of fog of war the agent lifts around its region" },
+          "requirements": {
+            "type": "object",
+            "required": ["building_kind", "building_level"],
+            "additionalProperties": false,
+            "properties": {
+              "building_kind": {
+                "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
+              },
+              "building_level": { "type": "integer", "minimum": 1, "maximum": 6 }
+            }
+          },
+          "actions": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "enum": ["negotiate", "bribe", "watch", "open_gates", "counter_espionage", "assassinate", "sabotage"] },
+            "description": "Engine action vocabulary this kind may perform"
+          },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

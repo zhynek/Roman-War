@@ -60,6 +60,13 @@ static func data() -> GameData:
 			],
 		},
 		{
+			"id": "test_market", "kind": "market", "cultures": ["roman", "barbarian"], "name": "Market",
+			"levels": [
+				{"id": "market_1", "name": "Stalls", "min_settlement_level": "town", "cost": 300, "build_turns": 1, "effects": {"trade_pct": 5}, "description": ""},
+				{"id": "market_2", "name": "Bazaar", "min_settlement_level": "large_town", "cost": 700, "build_turns": 2, "effects": {"trade_pct": 10}, "description": ""},
+			],
+		},
+		{
 			"id": "test_barracks", "kind": "barracks", "cultures": ["roman"], "name": "Barracks",
 			"levels": [
 				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {}, "description": ""},
@@ -151,6 +158,11 @@ static func data() -> GameData:
 			"levels": [{"name": "Pathfinder", "threshold": 1, "effects": {"movement": 0.5}}],
 			"triggers": [{"when": "turn_end_campaigning", "chance": 0.5, "points": 1}],
 		},
+		"test_wary": {
+			"id": "test_wary", "name": "Wary",
+			"levels": [{"name": "Watchful", "threshold": 1, "effects": {"personal_security": 1}}],
+			"triggers": [{"when": "survived_assassination", "chance": 1.0, "points": 1}],
+		},
 	}
 	game_data.ancillaries = {
 		"test_scribe": {
@@ -164,6 +176,20 @@ static func data() -> GameData:
 	game_data.names = {
 		"roman": {"male": ["Testus", "Probus", "Cassius"], "female": ["Testa", "Proba"], "surnames": ["Fixturus"]},
 		"barbarian": {"male": ["Brox", "Karn"], "female": ["Enna"]},
+	}
+
+	# Agent kinds mirror the shipped table's shape: envoys need a seat of
+	# government, spies a market, assassins a bigger market.
+	game_data.agent_kinds = {
+		"envoy": {"id": "envoy", "name": "Envoy", "covert": false, "cost": 500, "upkeep": 40,
+			"base_skill": 1, "sight": 0, "requirements": {"building_kind": "government", "building_level": 1},
+			"actions": ["negotiate", "bribe"], "description": ""},
+		"spy": {"id": "spy", "name": "Spy", "covert": true, "cost": 400, "upkeep": 30,
+			"base_skill": 1, "sight": 1, "requirements": {"building_kind": "market", "building_level": 1},
+			"actions": ["watch", "open_gates", "counter_espionage"], "description": ""},
+		"assassin": {"id": "assassin", "name": "Assassin", "covert": true, "cost": 700, "upkeep": 50,
+			"base_skill": 1, "sight": 0, "requirements": {"building_kind": "market", "building_level": 2},
+			"actions": ["assassinate", "sabotage"], "description": ""},
 	}
 
 	return game_data
@@ -186,7 +212,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"epsilon": _settlement("red", 6000, {"test_government": 2}),
 			"alpha": _settlement("blue", 1200, {"tribal_government": 1}),
 		},
-		"armies": {}, "fleets": {}, "characters": {},
+		"armies": {}, "fleets": {}, "characters": {}, "agents": {}, "tributes": [],
 		"events_fired": [], "winner": null, "next_id": 1,
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
@@ -227,10 +253,21 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
+static func add_agent(campaign_state: Dictionary, owner: String, kind: String, region: String, skill: int = 1) -> String:
+	var agent_id := "agent_%d" % campaign_state["next_id"]
+	campaign_state["next_id"] += 1
+	campaign_state["agents"][agent_id] = {
+		"owner": owner, "kind": kind, "name": agent_id.capitalize(), "region": region,
+		"skill": skill, "movement_left": 3.0,
+	}
+	return agent_id
+
+
 static func _faction(capital: String) -> Dictionary:
 	return {
 		"treasury": 5000, "capital": capital, "alive": true, "era": "pre_marian",
 		"senate_standing": 5.0, "popular_standing": 0.0, "diplomacy": {},
+		"opinion": {}, "war_turns": {}, "treachery": 0, "overlord": null,
 		"mission": null, "at_civil_war": false,
 	}
 

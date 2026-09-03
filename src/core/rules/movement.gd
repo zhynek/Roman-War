@@ -18,6 +18,7 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base
+	AgentRules.reset_movement(data, state)
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String) -> float:
@@ -73,20 +74,7 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	## sea zone, spending its whole turn. Explicit embark-on-fleet transport
 	## can replace this later without touching callers.
 	var army: Dictionary = state["armies"][army_id]
-	var from_zones: Array = data.regions.get(army["region"], {}).get("sea_zones", [])
-	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
-	if from_zones.is_empty() or to_zones.is_empty() or army["region"] == to_region:
-		return false
-	var connected := false
-	for zone in from_zones:
-		if to_zones.has(zone):
-			connected = true
-			break
-		for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
-			if to_zones.has(adjacent_zone):
-				connected = true
-				break
-	if not connected:
+	if not sea_connected(data, army["region"], to_region):
 		return false
 	var cost := float(data.balance["movement"]["sea_move_cost"])
 	if cost > float(army["movement_left"]) + 0.0001:
@@ -101,6 +89,21 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	army["region"] = to_region
 	sync_general_location(state, army)
 	return true
+
+
+static func sea_connected(data: GameData, from_region: String, to_region: String) -> bool:
+	## Two distinct coastal regions on the same or adjacent sea zones.
+	var from_zones: Array = data.regions.get(from_region, {}).get("sea_zones", [])
+	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
+	if from_zones.is_empty() or to_zones.is_empty() or from_region == to_region:
+		return false
+	for zone in from_zones:
+		if to_zones.has(zone):
+			return true
+		for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
+			if to_zones.has(adjacent_zone):
+				return true
+	return false
 
 
 static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_zone: String) -> bool:

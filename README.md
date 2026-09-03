@@ -27,7 +27,7 @@ schemas/             JSON Schemas — the contract every data table must satisfy
 src/core/            Deterministic campaign simulation (no scene/UI dependencies)
 src/core/rules/      One module per system: growth, order, economy, movement, ...
 src/core/rules/battle/  BattleResolver interface + auto-resolve implementation
-src/ui/              Campaign UI: start menu, map view, settlement/army/family panels
+src/ui/              Campaign UI: start menu, map view, settlement/army/agent panels, family scroll, diplomacy table
 tests/               Headless GDScript test suite (godot --headless --script)
 tools/               validate_data.py — schema + cross-reference validation
 docs/                Design document and research report
@@ -66,14 +66,17 @@ python3 tools/validate_data.py
 
 ## Status
 
-Phases 0–4 of the research report's roadmap are built and tested: campaign
+Phases 0–5 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
-sieges, mercenaries, events, victory checks, and the full character layer
-(traits, retinues, family tree, succession). A playable campaign-map UI sits
-on top: geographic map with fog of war, settlement/army panels driven by the
-engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
-passive stub today), agents & diplomacy negotiation, and senate depth are the
-next phases; their data tables and state hooks already exist.
+sieges, mercenaries, events, victory checks, the full character layer
+(traits, retinues, family tree, succession), and agents & diplomacy — envoys,
+spies and assassins as data-driven campaign agents, and a negotiation model
+with an attitude memory whose every offer is weighed as a named factor list.
+A playable campaign-map UI sits on top: geographic map with fog of war,
+settlement/army/agent panels driven by the engine's breakdowns, family scroll,
+negotiating table, and save/load. Campaign AI (a passive stub today that
+evaluates offers but makes none) and senate depth are the next phases; their
+data tables and state hooks already exist.
 
 ## Clean-room policy
 

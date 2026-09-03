@@ -1,8 +1,9 @@
 # Roman War — Game Design Document
 
 **Status:** living document. Describes both the design intent and what the engine in
-`src/core/` actually implements today — Phases 0–4 of the roadmap, the Phase-7
-senate foundation loop, and the Phase-8 campaign UI. Section 10's status table is
+`src/core/` actually implements today — Phases 0–5 of the roadmap (campaign map
+through agents & diplomacy), the Phase-7 senate foundation loop, and the Phase-8
+campaign UI. Section 10's status table is
 the single source of truth; where a system is planned but not built, this document
 says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
@@ -54,7 +55,8 @@ Two supporting principles enforced throughout:
 The player acts freely during their turn through the `Game` facade
 (`src/core/game.gd`): set taxes, queue buildings and units, demolish, retrain,
 move armies and fleets (each has per-turn movement points), attack, besiege,
-assault, garrison, move the capital. Then they end the turn.
+assault, garrison, move the capital, train and move agents, put spies and
+assassins to work, and make offers through envoys. Then they end the turn.
 
 ### 2.3 End-turn resolution order
 
@@ -66,11 +68,11 @@ the world in a **fixed order** so campaigns are reproducible:
 | 1 | AI turns | Every non-player faction acts (currently `AiStub`: passive settlement management) |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
 | 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
-| 4 | Treasuries resolve | Per faction: income − upkeep; deep debt forces unit disbandment |
+| 4 | Treasuries resolve | Per faction: income − upkeep (armies, fleets, garrisons, agents); deep debt forces unit disbandment. Then diplomacy (`DiplomacyRules.process_turn`): opinions drift toward indifference, wars grow wearier, tributes are paid or lapse, vassals send their overlord a share of income |
 | 5 | Population | Growth applied, plague rolled/progressed, slave & conquest counters tick down |
 | 6 | Public order | Riots damage settlements; sustained collapse triggers revolt to the rebels |
 | 7 | Events | Scripted/date/condition events, disasters, then senate politics |
-| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member |
+| 8 | Character triggers | `CharacterRules.process_turn`: governing / campaigning / idle triggers fire for every living family member. Then `AgentRules.process_turn`: covert agents standing in foreign territory may be caught by the local counter-intelligence |
 | 9 | Date & bookkeeping | Turn/season advance; on a year change `FamilyRules.process_year` runs (aging, deaths, births, succession); movement points reset, victory checked |
 
 Governorship is re-derived from character presence (`SettlementRules.refresh_governors`)
@@ -78,7 +80,8 @@ at the top of the resolution, before anything reads it.
 
 `end_turn` returns a report dictionary (`sieges`, `completed_buildings`,
 `completed_units`, `rioted`, `revolted`, `events`, `senate`, `characters`,
-`winner`) that the UI presents as the start-of-turn event log.
+`agents`, `diplomacy`, `winner`) that the UI presents as the start-of-turn
+event log.
 
 ### 2.4 The map
 
@@ -91,8 +94,9 @@ north→south) placing it at its real geographic location, which is what the cam
 map draws; sea zones carry optional anchor positions reserved for zone labelling.
 `MapRules` provides BFS hop counts (cached per map, used for distance-to-capital and
 corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
-faction sees its own regions and armies plus one hop out, and every coastal region
-of any sea zone one of its fleets occupies.
+faction sees its own regions and armies plus one hop out, every coastal region
+of any sea zone one of its fleets occupies, and the region each of its agents
+stands in (spies also see `sight` hops around them).
 
 ## 3. Settlements
 
@@ -248,8 +252,9 @@ rest to make geography matter.
   capital hops, capped at 30%, then reduced by local Law (×(1 − law ⋅ 0.01)).
   High-law buildings therefore pay for themselves on the frontier.
 - **Upkeep:** every unit costs denarii per turn — field armies, fleets, and
-  garrisons alike. Upkeep is designed to dominate late-game budgets; army size
-  versus treasury is the campaign's central economic tension.
+  garrisons alike — and so does every agent. Upkeep is designed to dominate
+  late-game budgets; army size versus treasury is the campaign's central
+  economic tension.
 - **Construction and recruitment are paid in full at queue time**, so the treasury
   can never be surprised by a backlog.
 - **Debt:** the treasury may go negative. Below **−5,000** the faction is forced to
@@ -307,6 +312,9 @@ A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itsel
   one tier less, sally strength +10%).
 - Assaults resolve through the `BattleResolver` with the settlement's **wall tier**
   multiplying defender strength (×1.0 → ×3.0 across the six wall levels).
+- A **spy inside the city** can try to open a gate for the besieging army
+  (§6.2): success marks the siege `gates_open`, and the assault then needs no
+  equipment and meets no walls.
 - A captured settlement goes through the occupy/enslave/exterminate choice; the
   turn engine's automatic starve-outs default to occupation.
 
@@ -405,18 +413,85 @@ replaced.
 - **Diplomatic stances:** every faction pair holds one of
   `war / neutral / trade / alliance / protectorate`, kept symmetric, seeded from
   `campaign.json`. Stances gate movement, trade routes and grain imports; attacking
-  or besieging declares war, and `DiplomacyRules.set_stance` changes them directly.
+  or besieging declares war. Everything else in diplomacy (§6.3) bolts on to
+  the stance graph rather than replacing it.
 
-### 6.2 Planned (Phase 5)
+### 6.2 Agents (Phase 5)
 
-- **Agents:** envoys, spies, and assassins (infiltration, gate-opening,
-  counter-espionage, sabotage, assassination as skill-vs-security probability).
-  The `personal_security` and `agent_skill` ancillary effects are authored for
-  them and lie dormant until then.
-- **Diplomacy engine:** offer/counter-offer negotiation, tribute, region deals,
-  bribery, and an AI attitude model. Because stances are already the single source
-  of truth, the negotiation layer bolts on without retrofits — today's UI simply
-  sets a stance directly.
+Agents are state entities distinct from family characters
+(`state.agents[id] = {owner, kind, name, region, skill, movement_left}`,
+`AgentRules`). Their kinds live in `data/agents.json` — price, upkeep, training
+requirement (a building *kind* + level, like units), starting skill, sight, and
+the engine actions the kind may perform — and every probability in
+`balance.json → agents`. Every faction starts with an envoy and a spy in its
+capital (`campaign.json`); more are trained in a settlement that has the
+building, appear at once, and step out next season.
+
+- **Movement:** agents walk any road regardless of war (3 points a turn,
+  terrain and road costs as for armies) and take ship coast to coast the same
+  way armies do.
+- **Skill contests** share one shape: success = base + skill·k − difficulty·k,
+  clamped between a floor and a ceiling so nothing is ever certain. Difficulty
+  is a settlement's **counter-intelligence** (base + its owner's spies inside +
+  the governor's `agent_skill` retinue + law) or a character's **personal
+  security** (base + trait/retinue `personal_security` + a bonus for the
+  leader and heir + a bodyguard while leading an army, or a share of the
+  city's watch at home). Success may raise the agent's skill; the failures
+  that expose an agent kill him, and the offended court knows whose man he was.
+- **Envoys** (`negotiate`, `bribe`) are the only channel for offers (§6.3): a
+  court is *in contact* when the envoy stands on or beside its land or with
+  its army. They also buy captain-led and rebel armies outright (family
+  generals never sell out) at a price scaled from the units' cost, and buy
+  independent towns, whose watch keeps its post. Envoys travel openly and are
+  never caught.
+- **Spies** (`watch`, `open_gates`, `counter_espionage`) lift the fog a hop
+  around them and let the settlement panel report a foreign city's garrison,
+  buildings and queues; inside a city their own army is besieging they can
+  unbar a gate (§5.4); at home they are the city's counter-intelligence.
+- **Assassins** (`assassinate`, `sabotage`) kill foreign adult family members
+  (succession settles at once) and foreign agents, or knock a tier off a
+  building as a riot would (never the government seat or the farmland). A
+  target who survives fires the `survived_assassination` trigger, which is
+  how the *Wary* trait is earned.
+- **Detection:** each turn, every covert agent standing in another faction's
+  region is rolled against that settlement's counter-intelligence. A caught
+  agent dies and the report says who caught him.
+
+### 6.3 Diplomacy (Phase 5)
+
+`DiplomacyRules` keeps, per faction, an **opinion** of every other faction
+(−100…100, drifting one point toward indifference each turn), the length of
+each current war, a **treachery** count, and an **overlord** for protectorates.
+Declaring war costs opinion; tearing up a treaty to do it costs more and adds
+treachery, which every court weighs against the aggressor from then on.
+
+**Attitude** is a summed factor list (`attitude_breakdown`): the standing
+stance, remembered dealings, common enemies, shared culture, the friction of a
+shared border, and the other side's treachery. The UI renders it as a word
+(`attitude_labels` in balance) and shows the factors.
+
+**Offers** are plain dictionaries — a stance change (peace, trade rights,
+alliance, submission as our protectorate, or ending a treaty), a gift or a
+demand of gold, tribute per turn either way, and regions offered or demanded —
+carried by an envoy. `evaluate` returns the other side's balance as another
+named factor list: attitude, then the term's own weight (peace depends on
+relative strength and war weariness; alliances on common enemies and strength;
+submission only when crushed), gold at a fixed rate with demands weighed
+heavier than gifts, region values from population and buildings, and the
+envoy's skill. **The evaluation never rolls dice: the other side accepts
+exactly when the balance is not negative**, so the scroll can weigh an offer
+before it is made. Hard refusals sit outside the sum — no treaty while at war,
+no capital or last city ever, no offer to the independents. Dissolving one's
+own treaty needs no consent. Accepted terms apply at once: stances change,
+gold moves, tribute streams are recorded (`state.tributes`) and paid each turn
+until they run out or war ends them, ceded regions change hands peacefully
+(`transfer_settlement`: the garrison marches out as a field army of the old
+owner, family flee as from a fallen city), and a protectorate pays its overlord
+a share of every season's income. An envoy who concludes a treaty grows in
+skill.
+
+The player's AI opponents *evaluate* offers with this model; making offers of
+their own, and using agents, is Phase 6 work.
 
 ## 7. Factions & Cultures
 
@@ -440,9 +515,12 @@ are `unlockable`; the rest (and the senate) are `nonplayable`.
 
 **Senate & civil war (hooks live now, full system Phase 7).** Roman houses carry
 `senate_standing` (starts 5, range −10…10) and `popular_standing` (0.3 per held
-region). Each turn `SenateRules` issues *take_region* missions against rebel
-regions bordering the house, with deadlines, treasury/standing rewards (+1,
-plus unit grants mustered in the capital) and standing penalties (−2). When
+region). Each turn `SenateRules` issues missions drawn from every template the
+house can act on — *take_region* against rebel regions bordering the house,
+*make_alliance* and *reach_trade_agreement* with foreign courts within a few
+hops, and (from the template's `min_year`) *assassinate_leader* against a king
+the house is at war with — with deadlines, treasury/standing rewards (+1, plus
+unit grants mustered in the capital) and standing penalties (−2). When
 popular standing reaches **6** while senate standing
 has sunk to **−5**, the house enters **civil war**: war is declared on the other
 houses and the senate, and the `first_civil_war` event fires. Roman long-campaign
@@ -506,6 +584,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | win_conditions.json | per-faction long/short goals | VictoryRules |
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
+| agents.json | agent kinds: price, upkeep, training requirement, skill, sight, action vocabulary | `AgentRules`, `NewGame` (starting agents come from campaign.json) |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
@@ -524,7 +603,9 @@ take the maximum across chains.
 cannot express — including map-position sanity (no two region tokens closer than
 1.2 world units; a warning when land-adjacent regions sit more than 35 apart) and
 trigger liveness (any trait/ancillary trigger kind no engine call site fires is
-reported as dead content, except the deliberately forward-authored `office_gained`): id references across tables; exactly one rebel and one senate
+reported as dead content, except the deliberately forward-authored `office_gained`);
+agent kinds trainable by every culture and at least one kind able to negotiate;
+starting agents of known kinds standing on their own faction's land: id references across tables; exactly one rebel and one senate
 faction; exactly one government chain per culture with tier count matching the
 culture's cap; monotonic `min_settlement_level` within chains; temple chains carry
 god + archetype; every unit's requirement satisfiable by some chain of its
@@ -544,8 +625,10 @@ and a multi-turn campaign integration run) on every push.
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
   documented at the top of `src/core/new_game.gd`.
 - Saving is `JSON.stringify({version, state})`; loading is the reverse with a
-  version gate (`src/core/save.gd`). Data tables are content, not state, so only
-  the state travels.
+  version gate (`src/core/save.gd`). The format is at version 2 (Phase 5 added
+  agents, tributes and the per-faction diplomatic memory); a version-1 save is
+  upgraded in place with the defaults a new campaign starts from. Data tables
+  are content, not state, so only the state travels.
 - All randomness flows through `CampaignRng`; its integer state is persisted in
   `state.rng_state` and threaded through every resolution step, so identical
   (seed, actions) sequences produce identical campaigns — the property the
@@ -562,10 +645,10 @@ Phases follow the research report (§17). Status as of this document:
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers await Phase 7 offices |
-| 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | Pending; symmetric stances + war declaration live (`DiplomacyRules`), hostile acts auto-declare war |
+| 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Agents as state entities with data-driven kinds (`agents.json`), training, free movement, skill contests against settlement counter-intelligence and personal security, gate-opening, assassination (with succession and the `survived_assassination` trigger), sabotage, bribery of armies and towns, detection; opinion memory, attitude breakdown, deterministic offer evaluation (stance, gold, tribute, land, envoy skill), tribute streams, protectorates, peaceful region transfer, treachery. Remaining for Phase 6: AI making offers and using agents |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
-| 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, civil-war trigger, army reform, wonders, victory checks); missions now come in four kinds (take region, alliance, trade agreement, assassinate a leader); offices, port blockades, the suicide demand and event depth pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), agent orders (train, travel, open gates, assassinate, sabotage, bribe) with a spy's report on foreign cities, the negotiating table (terms, gold, tribute, land, weighed before the offer is made), turn log, save/load. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy

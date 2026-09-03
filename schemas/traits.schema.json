@@ -89,7 +89,8 @@
                     "settlement_exterminated",
                     "settlement_enslaved",
                     "office_gained",
-                    "came_of_age"
+                    "came_of_age",
+                    "survived_assassination"
                   ]
                 },
                 "condition": {

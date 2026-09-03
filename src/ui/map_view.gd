@@ -2,7 +2,7 @@ class_name MapView
 extends Control
 ## The campaign map: regions drawn at their geographic positions as
 ## owner-colored settlement tokens joined by adjacency roads, with army
-## badges, siege rings, and fog of war. Pans (right/middle drag) and zooms
+## badges, agent diamonds, siege rings, and fog of war. Pans (right/middle drag) and zooms
 ## (wheel). Emits region_clicked for the campaign screen to interpret.
 
 signal region_clicked(region_id: String)
@@ -160,6 +160,25 @@ func _draw_region(region_id: String, is_visible: bool) -> void:
 		draw_rect(Rect2(badge_pos, Vector2(8, 10) * _zoom), badge_color)
 		draw_rect(Rect2(badge_pos, Vector2(8, 10) * _zoom), Color(0, 0, 0, 0.6), false, 1.0 * _zoom)
 		badge_offset += 1
+
+	# Agent diamonds: one per owner present, stacked to the left.
+	var agent_owners := {}
+	for agent in game.state.get("agents", {}).values():
+		if agent["region"] == region_id:
+			agent_owners[agent["owner"]] = true
+	var agent_owner_ids: Array = agent_owners.keys()
+	agent_owner_ids.sort()
+	var glyph_offset := 0
+	for agent_owner in agent_owner_ids:
+		var glyph_color := Color.html(game.data.factions.get(agent_owner, {}).get("color", "#808080"))
+		var center := screen + Vector2(-radius - (7.0 + glyph_offset * 11.0) * _zoom, -radius * 0.6 + 5.0 * _zoom)
+		var half := 4.5 * _zoom
+		var diamond := PackedVector2Array([center + Vector2(0, -half), center + Vector2(half, 0),
+			center + Vector2(0, half), center + Vector2(-half, 0)])
+		draw_colored_polygon(diamond, glyph_color)
+		diamond.append(diamond[0])
+		draw_polyline(diamond, Color(0, 0, 0, 0.6), 1.0 * _zoom)
+		glyph_offset += 1
 
 	if _zoom >= 0.55 and _font != null:
 		var label: String = region.get("settlement_name", region_id)

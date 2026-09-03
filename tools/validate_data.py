@@ -39,6 +39,7 @@ TABLES = {
     "win_conditions.json": "win_conditions.schema.json",
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
+    "agents.json": "agents.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -160,6 +161,25 @@ def cross_checks(t: dict[str, dict]) -> None:
                        if faction_id in u["factions"] or "all" in u["factions"]]
         if len(recruitable) < 3:
             err(f"units: faction {faction_id} can recruit only {len(recruitable)} unit types")
+
+    # --- agents -----------------------------------------------------------
+    agent_kinds: dict[str, dict] = {}
+    for kind in t.get("agents.json", {}).get("agents", []):
+        if kind["id"] in agent_kinds:
+            err(f"agents: duplicate agent kind {kind['id']}")
+        agent_kinds[kind["id"]] = kind
+        need = kind["requirements"]
+        for culture in sorted(cultures):
+            if culture == "neutral":
+                continue
+            trainable = any(
+                c["kind"] == need["building_kind"] and len(c["levels"]) >= need["building_level"]
+                and culture in c["cultures"] for c in chains.values())
+            if not trainable:
+                warn(f"agents: {kind['id']}: no {culture} building chain can ever satisfy "
+                     f"{need['building_kind']} L{need['building_level']}")
+    if agent_kinds and not any("negotiate" in k["actions"] for k in agent_kinds.values()):
+        err("agents: no agent kind can negotiate, so diplomacy is unreachable")
 
     # --- regions ----------------------------------------------------------
     regions = {r["id"]: r for r in t.get("regions.json", {}).get("regions", [])}
@@ -340,6 +360,13 @@ def cross_checks(t: dict[str, dict]) -> None:
         for entry in faction_setup.get("diplomacy", []):
             if entry["faction"] not in factions:
                 err(f"campaign: {fid}: diplomacy with unknown faction {entry['faction']}")
+        for agent in faction_setup.get("agents", []):
+            if agent["kind"] not in agent_kinds:
+                err(f"campaign: {fid}: unknown agent kind {agent['kind']}")
+            if agent["region"] not in regions:
+                err(f"campaign: {fid}: agent in unknown region {agent['region']}")
+            elif agent["region"] not in own_regions:
+                warn(f"campaign: {fid}: starting {agent['kind']} stands in foreign region {agent['region']}")
 
     for setup in campaign.get("rebel_settlements", []):
         check_settlement(setup, "rebels")
@@ -418,7 +445,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         for kind in ("turn_end_governing", "turn_end_idle", "turn_end_campaigning",
                      "battle_won", "battle_lost", "siege_won", "settlement_captured",
                      "settlement_exterminated", "settlement_enslaved", "office_gained",
-                     "came_of_age"):
+                     "came_of_age", "survived_assassination"):
             if f'"{kind}"' in text:
                 fired_kinds.add(kind)
     for source_name, key in (("traits.json", "traits"), ("ancillaries.json", "ancillaries")):
@@ -456,8 +483,9 @@ def main() -> int:
 
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
-                "ancillaries", "events", "wonders", "missions", "conditions", "pools"):
-        if key in document:
+                "ancillaries", "events", "wonders", "missions", "conditions", "pools",
+                "agents"):
+        if key in document and isinstance(document[key], list):
             return len(document[key])
     return 0
 

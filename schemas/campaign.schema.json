@@ -100,6 +100,12 @@
                 }
               }
             }
+          },
+          "agents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/agent"
+            }
           }
         }
       }
@@ -309,6 +315,31 @@
             "female"
           ],
           "description": "Defaults by role: spouse female, everyone else male"
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "required": [
+        "kind",
+        "region"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Agent kind id from agents.json"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "skill": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Starting skill; defaults to the kind's base_skill"
         }
       }
     }

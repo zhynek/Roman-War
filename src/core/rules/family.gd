@@ -69,6 +69,11 @@ static func ensure_succession(data: GameData, state: Dictionary, faction_id: Str
 			notices.append({"kind": "new_heir", "character": next_heir, "faction": faction_id})
 
 
+static func leader_of(state: Dictionary, faction_id: String) -> String:
+	## The living leader's id, or "".
+	return _find_role(state, faction_id, "leader")
+
+
 static func set_heir(data: GameData, state: Dictionary, faction_id: String, char_id: String) -> bool:
 	## The player names any adult male family member heir; the displaced heir
 	## returns to the family bench.

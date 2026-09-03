@@ -1,6 +1,7 @@
 class_name VisibilityRules
 ## Fog of war on the region graph: a faction sees its own regions and armies,
-## plus everything one hop out (and coastal regions of sea zones its fleets sit in).
+## plus everything one hop out (and coastal regions of sea zones its fleets sit
+## in). Agents lift the fog where they stand, spies for `sight` hops around.
 
 
 static func visible_regions(data: GameData, state: Dictionary, faction_id: String) -> Dictionary:
@@ -26,5 +27,20 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 		for region_id in data.regions:
 			if data.regions[region_id].get("sea_zones", []).has(fleet["sea_zone"]):
 				visible[region_id] = true
+
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] != faction_id or not data.regions.has(agent["region"]):
+			continue
+		visible[agent["region"]] = true
+		var sight := int(data.agent_kinds.get(agent["kind"], {}).get("sight", 0))
+		var frontier: Array = [agent["region"]]
+		for hop in range(sight):
+			var next_frontier: Array = []
+			for region_id in frontier:
+				for neighbor in data.regions[region_id].get("adjacent", []):
+					if not visible.has(neighbor):
+						visible[neighbor] = true
+						next_frontier.append(neighbor)
+			frontier = next_frontier
 
 	return visible

@@ -13,7 +13,7 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
-	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
+	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"], data)
 	var region: Dictionary = data.regions[defender["region"]]
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
@@ -123,7 +123,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	var taken := displace_characters(data, state, region_id, previous_owner)
 
 	# Losing your last settlement destroys the faction.
-	_check_faction_destroyed(state)
+	check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)
 	return {"loot": loot, "slaves": slaves, "occupation": occupation, "characters_taken": taken}
 
@@ -227,7 +227,9 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 		state["armies"].erase(army_id)
 
 
-static func _check_faction_destroyed(state: Dictionary) -> void:
+static func check_faction_destroyed(state: Dictionary) -> void:
+	## A house with no settlement left is finished: its field armies and fleets
+	## defect to the rebels and its agents scatter.
 	for faction_id in state["factions"]:
 		var faction: Dictionary = state["factions"][faction_id]
 		if not faction["alive"] or faction_id == "rebels":
@@ -246,3 +248,4 @@ static func _check_faction_destroyed(state: Dictionary) -> void:
 			for fleet in state["fleets"].values():
 				if fleet["owner"] == faction_id:
 					fleet["owner"] = "rebels"
+			AgentRules.remove_faction_agents(state, faction_id)

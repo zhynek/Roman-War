@@ -14,7 +14,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
 	# Investing a settlement IS a declaration of war.
-	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
+	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"], data)
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
@@ -53,19 +53,28 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 	return results
 
 
+static func can_assault(siege) -> bool:
+	## Equipment built, or the gates opened from within.
+	return siege != null and (siege.get("equipment_ready", false) or siege.get("gates_open", false))
+
+
 static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, army_id: String, region_id: String, starving: bool = false) -> Dictionary:
 	var army: Dictionary = state["armies"][army_id]
 	var settlement: Dictionary = state["settlements"][region_id]
 	var siege = settlement["siege"]
 	if siege == null or siege["besieger"] != army_id:
 		return {}
-	# Without equipment you can only assault once the garrison is starving.
-	if not siege["equipment_ready"] and not starving:
+	# Without equipment you can only assault once the garrison is starving —
+	# or once a spy inside has unbarred a gate.
+	var gates_open: bool = siege.get("gates_open", false)
+	if not siege["equipment_ready"] and not starving and not gates_open:
 		return {}
 
 	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
 	if starving:
 		wall_level = maxi(0, wall_level - 1)
+	if gates_open:
+		wall_level = 0
 
 	var governor = settlement["governor"]
 	var governor_profile = null

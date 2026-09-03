@@ -7,6 +7,8 @@ class_name NewGame
 ##  player_faction: String
 ##  factions: {fid: {treasury, capital, alive, era, senate_standing,
 ##                   popular_standing, diplomacy: {other_fid: stance},
+##                   opinion: {other_fid: float}, war_turns: {other_fid: int},
+##                   treachery: int, overlord: null|fid,
 ##                   mission: null|{...}, at_civil_war: bool}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
 ##                tax_level, garrison: [unit], construction_queue: [...],
@@ -18,6 +20,8 @@ class_name NewGame
 ##  fleets: {fleet_id: {owner, sea_zone, ships: [unit], movement_left}}
 ##  characters: {char_id: {faction, name, age, role, command, management,
 ##                         influence, traits, ancillaries, location, alive}}
+##  agents: {agent_id: {owner, kind, name, region, skill, movement_left}}
+##  tributes: [{from, to, per_turn, turns_left}]
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##
 ## A "unit" is {template, experience, strength_pct}.
@@ -41,6 +45,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"armies": {},
 		"fleets": {},
 		"characters": {},
+		"agents": {},
+		"tributes": [],
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,
@@ -57,6 +63,10 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 			"senate_standing": senate_start,
 			"popular_standing": 0.0,
 			"diplomacy": {},
+			"opinion": {},
+			"war_turns": {},
+			"treachery": 0,
+			"overlord": null,
 			"mission": null,
 			"at_civil_war": false,
 		}
@@ -76,6 +86,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	state["factions"][rebels] = {
 		"treasury": 0, "capital": "", "alive": true, "era": "pre_marian",
 		"senate_standing": 0.0, "popular_standing": 0.0, "diplomacy": {},
+		"opinion": {}, "war_turns": {}, "treachery": 0, "overlord": null,
 		"mission": null, "at_civil_war": false,
 	}
 	for settlement_setup in data.campaign.get("rebel_settlements", []):
@@ -100,6 +111,13 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 
 	# Governorship is derived from presence, so it is simply computed, never seeded.
 	SettlementRules.refresh_governors(data, state)
+
+	# Starting agents, in campaign order; their names are the first draws of
+	# the campaign RNG.
+	for faction_setup in data.campaign["factions"]:
+		for agent_setup in faction_setup.get("agents", []):
+			AgentRules.spawn(data, state, rng, faction_setup["id"], agent_setup["kind"],
+				agent_setup["region"], int(agent_setup.get("skill", -1)))
 
 	# Mercenary pools start at their initial counts (fractional replenishment
 	# accumulates in the counts, so they are floats).

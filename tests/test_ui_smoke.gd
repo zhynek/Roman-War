@@ -55,6 +55,25 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 					"marching did not declare war on " + String(other_faction))
 		t.check(screen.report_log.get_parsed_text().length() > 0, "orders are logged")
 
+	# An agent is ordered the same way, but walks anywhere.
+	var envoy := ""
+	for agent_id in game.agents_in(capital, "julii"):
+		if game.state["agents"][agent_id]["kind"] == "envoy":
+			envoy = agent_id
+	t.check(envoy != "", "the house starts with an envoy at home")
+	if envoy != "":
+		screen._on_region_clicked(capital)
+		screen._on_agent_selected(envoy)
+		t.check_eq(screen.selected_agent, envoy, "envoy selected")
+		var destination: String = game.data.regions[capital]["adjacent"][0]
+		screen._on_region_clicked(destination)
+		t.check_eq(game.state["agents"][envoy]["region"], destination, "the envoy travelled")
+		t.check_eq(screen.map_view.selected_region, destination, "the map follows him")
+	var trained := game.recruit_agent(capital, "envoy")
+	t.check(trained != "", "a new envoy trains in the capital")
+	screen._on_region_clicked(capital)
+	t.check(screen.region_panel.get_child_count() > 3, "the panel shows the agents at home")
+
 	# A turn resolves through the button path.
 	var turn_before := int(game.state["turn"])
 	screen._end_turn()
@@ -70,6 +89,38 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	t.check(screen.family_panel._content.get_child_count() > 0, "family listed")
 	screen.family_panel.hide()
 
+	screen.free()
+
+
+func test_negotiating_table(t) -> void:
+	## The diplomacy scroll assembles an offer, weighs it on the other side's
+	## scale, and makes it through the envoy in contact.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+
+	var panel := screen.diplomacy_panel
+	panel.open_for(game, "senate")
+	t.check_eq(panel._focus, "senate", "talks open with the Senate")
+	t.check(panel._content.get_child_count() > 5, "the scroll lists the powers and the table")
+	panel._gift.value = 200
+	var proposal := panel.build_proposal()
+	t.check_eq(proposal["to"], "senate", "offer addressed to the Senate")
+	t.check_eq(int(proposal["gift"]), 200, "the gift is read from the scroll")
+	panel._weigh()
+	t.check(panel._verdict.get_child_count() > 1, "the weighing shows its factors")
+
+	var treasury_before := int(game.state["factions"]["julii"]["treasury"])
+	panel._make_offer()
+	t.check_eq(int(game.state["factions"]["julii"]["treasury"]), treasury_before - 200,
+		"an accepted gift leaves the treasury")
+	t.check(screen.report_log.get_parsed_text().contains("accepts"), "the acceptance is logged")
+
+	# War is declared from the scroll through a confirmation, never directly.
+	panel.hide()
+	screen.declare_war_order("gaul")
+	t.check(not DiplomacyRules.at_war(game.state, "julii", "gaul"), "no war before the dialog is confirmed")
 	screen.free()
 
 

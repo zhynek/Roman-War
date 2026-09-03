@@ -3,11 +3,13 @@ class_name TurnEngine
 ##   1. AI stub turns (non-player factions)
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
-##   4. Faction treasuries resolve (income - upkeep, debt disbandment)
+##   4. Faction treasuries resolve (income - upkeep, debt disbandment), then
+##      diplomacy: opinions drift, tributes and protectorate dues are paid
 ##   5. Population growth, slaves, plague
 ##   6. Public order: riots and revolts
 ##   7. Events, disasters, senate politics
-##   8. Date advances (2 turns/year), movement points reset, victory check
+##   8. Character triggers, then covert agents abroad risk detection
+##   9. Date advances (2 turns/year), movement points reset, victory check
 ##
 ## Returns a report dict of everything notable that happened, for the UI's
 ## event scrolls.
@@ -18,7 +20,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "winner": null,
+		"senate": [], "characters": [], "agents": [], "diplomacy": [], "winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -60,6 +62,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	for faction_id in faction_ids:
 		if state["factions"][faction_id]["alive"]:
 			EconomyRules.apply_faction_turn(data, state, faction_id, rng)
+	report["diplomacy"] = DiplomacyRules.process_turn(data, state)
 
 	for region_id in region_ids:
 		GrowthRules.apply_turn(data, state, region_id, rng)
@@ -74,6 +77,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	report["events"] = EventRules.process_turn(data, state, rng)
 	report["senate"] = SenateRules.process_turn(data, state, rng)
 	report["characters"].append_array(CharacterRules.process_turn(data, state, rng))
+	report["agents"] = AgentRules.process_turn(data, state, rng)
 	EventRules.tick_event_happiness(state)
 	MercenaryRules.replenish(data, state)
 

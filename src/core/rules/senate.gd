@@ -26,10 +26,11 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 			var new_mission := _issue_mission(data, state, faction_id, rng)
 			if not new_mission.is_empty():
 				faction["mission"] = new_mission
-				notices.append({"kind": "mission_issued", "faction": faction_id, "mission": new_mission["template"]})
+				notices.append({"kind": "mission_issued", "faction": faction_id,
+					"mission": new_mission["template"], "target": _target_of(new_mission)})
 		else:
 			mission["turns_left"] = int(mission["turns_left"]) - 1
-			if _mission_complete(state, faction_id, mission):
+			if _mission_complete(data, state, faction_id, mission):
 				var template: Dictionary = data.missions[mission["template"]]
 				var reward: Dictionary = template.get("reward", {})
 				faction["treasury"] = int(faction["treasury"]) + int(reward.get("treasury", 0))
@@ -38,7 +39,8 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 						senate_rules["mission_success_standing"])))
 				_grant_reward_units(state, faction_id, reward)
 				faction["mission"] = null
-				notices.append({"kind": "mission_complete", "faction": faction_id, "mission": mission["template"]})
+				notices.append({"kind": "mission_complete", "faction": faction_id,
+					"mission": mission["template"], "target": _target_of(mission)})
 			elif int(mission["turns_left"]) <= 0:
 				var template: Dictionary = data.missions[mission["template"]]
 				var penalty: Dictionary = template.get("penalty", {})
@@ -46,7 +48,8 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 					float(faction["senate_standing"]) + float(penalty.get("senate_standing",
 						senate_rules["mission_fail_standing"])))
 				faction["mission"] = null
-				notices.append({"kind": "mission_failed", "faction": faction_id, "mission": mission["template"]})
+				notices.append({"kind": "mission_failed", "faction": faction_id,
+					"mission": mission["template"], "target": _target_of(mission)})
 
 		# Civil war becomes available (or is forced by outlawing) at the thresholds.
 		if not faction["at_civil_war"] \
@@ -59,18 +62,57 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 
 
 static func _issue_mission(data: GameData, state: Dictionary, faction_id: String, rng: CampaignRng) -> Dictionary:
-	## Foundation scope: take_region missions targeting a nearby rebel region.
-	var candidates: Array = []
-	for mission_id in data.missions:
+	## Every template whose kind the house can act on right now is in the
+	## draw: a rebel border town to take, a foreign court within reach to
+	## court or to open to trade, a hostile king to remove. The template is
+	## drawn first, then its target, so a kind with many targets is no likelier
+	## than one with a single target.
+	var rebel_targets := _rebel_border_regions(data, state, faction_id)
+	var courts := _courts_in_reach(data, state, faction_id)
+	var options := {}  # template id -> [mission dicts]
+	var mission_ids: Array = data.missions.keys()
+	mission_ids.sort()
+	for mission_id in mission_ids:
 		var template: Dictionary = data.missions[mission_id]
-		if template["kind"] != "take_region":
-			continue
 		if template.has("min_year") and int(state["year"]) < int(template["min_year"]):
 			continue
-		candidates.append(mission_id)
-	if candidates.is_empty():
+		var targets: Array = []
+		match template["kind"]:
+			"take_region":
+				for region_id in rebel_targets:
+					targets.append({"target_region": region_id})
+			"make_alliance":
+				for other in courts:
+					if DiplomacyRules.stance_between(state, faction_id, other) not in ["alliance", "war"]:
+						targets.append({"target_faction": other})
+			"reach_trade_agreement":
+				for other in courts:
+					if DiplomacyRules.stance_between(state, faction_id, other) == "neutral":
+						targets.append({"target_faction": other})
+			"assassinate_leader":
+				for other in courts:
+					var leader := FamilyRules.leader_of(state, other)
+					if leader != "" and DiplomacyRules.at_war(state, faction_id, other):
+						targets.append({"target_faction": other, "target_character": leader})
+		if not targets.is_empty():
+			options[mission_id] = targets
+	if options.is_empty():
 		return {}
+	var template_ids: Array = options.keys()
+	template_ids.sort()
+	var template_id: String = rng.pick(template_ids)
+	var mission: Dictionary = rng.pick(options[template_id])
+	mission["template"] = template_id
+	mission["turns_left"] = int(data.missions[template_id]["deadline_turns"])
+	return mission
 
+
+static func _target_of(mission: Dictionary) -> String:
+	## Region or faction id the mission is about, for the notices.
+	return String(mission.get("target_region", mission.get("target_faction", "")))
+
+
+static func _rebel_border_regions(data: GameData, state: Dictionary, faction_id: String) -> Array:
 	var targets: Array = []
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()  # canonical order — targets feed rng.pick
@@ -80,15 +122,36 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 				if state["settlements"].has(neighbor) and state["settlements"][neighbor]["owner"] == faction_id:
 					targets.append(region_id)
 					break
-	if targets.is_empty():
-		return {}
+	return targets
 
-	var template_id: String = rng.pick(candidates)
-	return {
-		"template": template_id,
-		"target_region": rng.pick(targets),
-		"turns_left": int(data.missions[template_id]["deadline_turns"]),
-	}
+
+static func _courts_in_reach(data: GameData, state: Dictionary, faction_id: String) -> Array:
+	## Living foreign powers (not Roman, not the independents) holding a
+	## settlement within a few hops of the house's own — the Senate does not
+	## send anyone to treat with kings it has never heard of.
+	var reach := int(data.balance["senate"].get("mission_court_reach_hops", 4))
+	var near := {}
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		if state["settlements"][region_id]["owner"] != faction_id:
+			continue
+		var hops := MapRules.hops_from(data, region_id)
+		for other_region in hops:
+			if int(hops[other_region]) <= reach and state["settlements"].has(other_region):
+				near[state["settlements"][other_region]["owner"]] = true
+	var courts: Array = []
+	var faction_ids: Array = near.keys()
+	faction_ids.sort()
+	for other in faction_ids:
+		if other == faction_id or not state["factions"][other]["alive"]:
+			continue
+		var faction_def: Dictionary = data.factions.get(other, {})
+		if faction_def.get("is_rebel", false) or faction_def.get("is_roman_house", false) \
+				or faction_def.get("is_senate", false):
+			continue
+		courts.append(other)
+	return courts
 
 
 static func _grant_reward_units(state: Dictionary, faction_id: String, reward: Dictionary) -> void:
@@ -103,10 +166,23 @@ static func _grant_reward_units(state: Dictionary, faction_id: String, reward: D
 			})
 
 
-static func _mission_complete(state: Dictionary, faction_id: String, mission: Dictionary) -> bool:
-	var target: String = mission.get("target_region", "")
-	return target != "" and state["settlements"].has(target) \
-		and state["settlements"][target]["owner"] == faction_id
+static func _mission_complete(data: GameData, state: Dictionary, faction_id: String, mission: Dictionary) -> bool:
+	var region: String = mission.get("target_region", "")
+	if region != "":
+		return state["settlements"].has(region) and state["settlements"][region]["owner"] == faction_id
+	var character: String = mission.get("target_character", "")
+	if character != "":
+		return state["characters"].has(character) and not state["characters"][character]["alive"]
+	var other: String = mission.get("target_faction", "")
+	if other == "" or not state["factions"].has(other):
+		return false
+	var stance := DiplomacyRules.stance_between(state, faction_id, other)
+	match data.missions.get(mission["template"], {}).get("kind", ""):
+		"make_alliance":
+			return stance == "alliance"
+		"reach_trade_agreement":
+			return stance in ["trade", "alliance", "protectorate"]
+	return false
 
 
 static func _region_count(state: Dictionary, faction_id: String) -> int:

@@ -16,6 +16,7 @@ var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_agent := ""
 var _victory_shown := false
 
 
@@ -55,8 +56,11 @@ func _ready() -> void:
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
 	region_panel.army_selected.connect(_on_army_selected)
+	region_panel.agent_selected.connect(_on_agent_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.negotiate_requested.connect(func(faction_id: String): diplomacy_panel.open_for(game, faction_id))
+	region_panel.notice.connect(_log)
 	scroll.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -71,6 +75,8 @@ func _ready() -> void:
 
 	diplomacy_panel = DiplomacyPanel.new()
 	diplomacy_panel.stance_changed.connect(refresh)
+	diplomacy_panel.war_requested.connect(declare_war_order)
+	diplomacy_panel.notice.connect(_log)
 	add_child(diplomacy_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
@@ -124,7 +130,7 @@ func refresh() -> void:
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
 	if map_view.selected_region != "":
-		region_panel.show_region(game, map_view.selected_region, selected_army)
+		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:
@@ -138,15 +144,41 @@ func _on_region_clicked(region_id: String) -> void:
 			and region_id != game.state["armies"][selected_army]["region"]:
 		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
 		return
+	# An agent travels the same way, but crosses any border.
+	if selected_agent != "" and game.state["agents"].has(selected_agent) \
+			and region_id != game.state["agents"][selected_agent]["region"]:
+		_agent_order(region_id)
+		return
 	map_view.selected_region = region_id
 	selected_army = ""
+	selected_agent = ""
 	region_panel.show_region(game, region_id)
 	map_view.queue_redraw()
 
 
 func _on_army_selected(army_id: String) -> void:
 	selected_army = "" if selected_army == army_id else army_id
+	selected_agent = ""
 	region_panel.show_region(game, map_view.selected_region, selected_army)
+
+
+func _on_agent_selected(agent_id: String) -> void:
+	selected_agent = "" if selected_agent == agent_id else agent_id
+	selected_army = ""
+	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+
+
+func _agent_order(target_region: String) -> void:
+	var agent: Dictionary = game.state["agents"][selected_agent]
+	var kind_name: String = String(game.data.agent_kinds.get(agent["kind"], {}).get("name", agent["kind"])).to_lower()
+	var target_name: String = game.data.regions[target_region]["name"]
+	if game.move_agent(selected_agent, target_region):
+		_log("Our %s travels to %s." % [kind_name, target_name])
+	elif game.sea_move_agent(selected_agent, target_region):
+		_log("Our %s takes ship for %s." % [kind_name, target_name])
+	else:
+		_log("Our %s cannot reach %s this season." % [kind_name, target_name])
+	_after_order()
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -250,12 +282,28 @@ func _confirm(text: String, on_accept: Callable) -> void:
 	dialog.popup_centered()
 
 
+func declare_war_order(faction_id: String) -> void:
+	## A declaration from the scroll is confirmed like any other first strike.
+	var faction_name: String = game.data.factions.get(faction_id, {}).get("name", faction_id)
+	_confirm("Declare war on %s? Treaties broken this way are remembered by every court." % faction_name,
+		func():
+			if game.declare_war(faction_id):
+				_log("[color=#e06050]We are at war with %s.[/color]" % faction_name)
+			refresh()
+			if diplomacy_panel.visible:
+				diplomacy_panel.open_for(game, faction_id))
+
+
 func _after_order() -> void:
 	if game.state["armies"].has(selected_army):
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
 	else:
 		selected_army = ""
-	region_panel.show_region(game, map_view.selected_region, selected_army)
+	if game.state["agents"].has(selected_agent):
+		map_view.selected_region = game.state["agents"][selected_agent]["region"]
+	else:
+		selected_agent = ""
+	region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
 	refresh()
 
 
@@ -263,6 +311,7 @@ func _end_turn() -> void:
 	var report := game.end_turn()
 	_log_report(report)
 	selected_army = ""
+	selected_agent = ""
 	refresh()
 
 
@@ -302,8 +351,39 @@ func _log_report(report: Dictionary) -> void:
 		if notice["faction"] == player:
 			var mission_id: String = str(notice.get("mission", ""))
 			var mission_name: String = game.data.missions.get(mission_id, {}).get("name", mission_id)
+			var target: String = str(notice.get("target", ""))
+			var target_name: String = game.data.regions.get(target, {}).get("name",
+				game.data.factions.get(target, {}).get("name", ""))
+			if target_name != "":
+				mission_name += " (%s)" % target_name
 			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
 				"" if mission_name == "" else " — " + mission_name])
+	for notice in report.get("agents", []):
+		var where: String = game.data.regions.get(notice.get("region", ""), {}).get("settlement_name", "")
+		var kind_name: String = String(game.data.agent_kinds.get(notice.get("agent_kind", ""), {}).get("name", "agent")).to_lower()
+		if notice.get("owner", "") == player:
+			_log("[color=#e06050]Our %s %s was caught in %s and killed.[/color]" % [kind_name, notice.get("name", ""), where])
+		elif notice.get("by", "") == player:
+			var owner_name: String = game.data.factions.get(notice.get("owner", ""), {}).get("name", "")
+			_log("[color=#80b080]Our watch in %s caught a %s %s.[/color]" % [where, owner_name, kind_name])
+	for notice in report.get("diplomacy", []):
+		if notice.get("from", "") != player and notice.get("to", "") != player:
+			continue
+		var other: String = notice["to"] if notice.get("from", "") == player else notice["from"]
+		var other_name: String = game.data.factions.get(other, {}).get("name", other)
+		match notice["kind"]:
+			"tribute_paid":
+				if notice["from"] == player:
+					_log("Tribute of %d paid to %s." % [int(notice["amount"]), other_name])
+				else:
+					_log("Tribute of %d received from %s." % [int(notice["amount"]), other_name])
+			"tribute_ended":
+				_log("The tribute agreed with %s has %s." % [other_name, "lapsed" if notice.get("lapsed", false) else "run its course"])
+			"protectorate_tribute":
+				if notice["from"] == player:
+					_log("Our overlord %s takes %d of the season's income." % [other_name, int(notice["amount"])])
+				else:
+					_log("Our protectorate %s sends %d in dues." % [other_name, int(notice["amount"])])
 	for notice in report["characters"]:
 		if notice.get("faction", "") != player and not _is_player_character(notice.get("character", "")):
 			continue
@@ -343,6 +423,7 @@ func _save_game() -> void:
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
 		selected_army = ""
+		selected_agent = ""
 		map_view.selected_region = ""
 		region_panel.clear_panel()
 		_victory_shown = false
