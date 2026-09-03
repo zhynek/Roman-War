@@ -11,15 +11,15 @@ static func pool_for_region(data: GameData, region_id: String) -> Dictionary:
 
 
 static func available(data: GameData, state: Dictionary, region_id: String, faction_id: String = "") -> Array:
-	## Offers in this region; prices reflect the hiring faction's doctrines
-	## (mercenary_cost_pct) when it is named.
+	## Offers in this region; prices reflect the hiring faction's practiced
+	## techniques (mercenary_cost_pct) when it is named.
 	var pool := pool_for_region(data, region_id)
 	if pool.is_empty():
 		return []
 	var counts: Dictionary = state["mercenary_pools"].get(pool["id"], {})
 	var discount := 1.0
 	if faction_id != "" and state["factions"].has(faction_id):
-		discount = maxf(0.0, 1.0 + DoctrineRules.scalar(data, state, faction_id, "mercenary_cost_pct") / 100.0)
+		discount = maxf(0.0, 1.0 + KnowledgeRules.faction_effect_total(data, state, faction_id, "mercenary_cost_pct") / 100.0)
 	var offers: Array = []
 	for entry in pool["units"]:
 		if int(counts.get(entry["template"], 0.0)) < 1:
@@ -36,7 +36,7 @@ static func available(data: GameData, state: Dictionary, region_id: String, fact
 
 static func hire(data: GameData, state: Dictionary, army_id: String, template_id: String) -> bool:
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty() or army["units"].size() >= 20:
+	if army.is_empty() or army["units"].size() >= int(data.balance["recruitment"]["army_unit_cap"]):
 		return false
 	var pool := pool_for_region(data, army["region"])
 	if pool.is_empty():
@@ -50,7 +50,8 @@ static func hire(data: GameData, state: Dictionary, army_id: String, template_id
 		faction["treasury"] = int(faction["treasury"]) - int(offer["cost"])
 		var counts: Dictionary = state["mercenary_pools"][pool["id"]]
 		counts[template_id] = float(counts[template_id]) - 1.0
-		army["units"].append({"template": template_id, "experience": 1, "strength_pct": 100})
+		army["units"].append({"template": template_id, "experience": 1, "strength_pct": 100,
+			"weapon": 0, "armor": 0})
 		return true
 	return false
 

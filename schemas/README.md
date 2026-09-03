@@ -18,12 +18,12 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   entertainment, execution, education, temple`. A chain may carry
   `requires_building: {kind, level}` — buildable only where the settlement
   already holds that kind at that tier (armouries need a barracks).
-- Settlement `effects` keys: `law, happiness, growth, health, trade_pct,
+- Settlement `effects` keys, benefits: `law, happiness, growth, health, trade_pct,
   farm_income, mine_income, recruit_xp, drill, weapon_upgrade, armor_upgrade,
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
   percentage points; `*_income` are denarii per turn; `recruit_xp` is the best
-  tier's value, `weapon_upgrade`/`armor_upgrade` sum across chains up to
-  `balance.recruitment.upgrade_max` plus any cap-raising doctrine, `drill` sums
+  tier's value; `weapon_upgrade`/`armor_upgrade` sum across chains up to
+  `balance.recruitment.upgrade_max` plus any cap-raising technique; `drill` sums
   and feeds garrison policing and softens levy strain).
 - Unit classes: `infantry, spear, pike, missile, cavalry, horse_archer, chariot,
   elephant, siege, ship, general_bodyguard, peasant` — each needs a record in
@@ -31,15 +31,36 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   mass).
 - Unit attributes: `forest_ambusher, war_cry, phalanx, testudo, terrifies_foot,
   terrifies_horse, sapper, hardy, fast_moving, shield_wall` — each needs an
-  effects record in `unit_classes.json` (percentages, additive).
-- Doctrines (`doctrines.json`): `cultures` from the list above except
-  `neutral` (the rebels reform nothing), optional `factions`, `era`, `cost`,
-  `turns`, AND-ed `prerequisites` (`doctrines`,
-  `building {kind, level}`, `resource`, `battles_won`, `battles_lost`,
-  `faced {class, battles}`) and a closed `effects` vocabulary — every key must
-  have an engine reader, which the validator checks.
+  effects record in `unit_classes.json` (percentages, additive), a glossary
+  entry and a `unit_art.json` cue.
+- Techniques (`techniques.json`): flat `effects` keys are summed faction-wide
+  (`KnowledgeRules.faction_effect_total`); military techniques may add a `war`
+  block of per-class tables (`class_stats`, `matchups`, `terrain`, `upkeep_pct`,
+  `recruit_xp`, `fatigue_immune`) and prerequisites drawn from the faction's war
+  record (`era`, `battles_won`, `battles_lost`, `faced {class, battles}`); an
+  optional `factions` list closes a tradition to those courts. Every effect key
+  must have an engine reader, which the validator checks.
+- Settlement `effects` keys, societal costs: `civic, coercion, burden,
+  assimilation_pull, knowledge, martial`. These feed the societal stocks
+  (`docs/DESIGN.md` §4) and are what make a building a decision rather than a
+  free good. **`civic` is the only key that may be negative** — an amphitheatre
+  buys order now and erodes standing slowly. Every one of these keys must have
+  an engine reader; the validator fails the build if one goes dead.
+- Edict `effects` keys: the settlement keys above, which reach every reader
+  through `SettlementRules.effect_total`, plus five that need their own reader —
+  `grievance_relief, elite_pressure, income_pct, clarity_bonus, build_cost_pct`.
+  Every edict must cost something, in denarii or in a societal stock; the
+  validator fails the build on a free one.
+- Office `effects` keys: `command, management, influence` — the character
+  attributes, added to the holder for the year through
+  `CharacterRules.effect_total`. Ranks are unique and contiguous from 1,
+  `requires_prior_rank` is 0 or an existing lower rank, exactly one office is
+  `eponymous`, an office flagged `for_life` is kept until its holder dies, every
+  office buys something, and every office carries a `historical_basis`.
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):
 region ids, faction ids, culture ids, unit template ids, building level ids,
-building chain kinds, sea zone ids, trait/ancillary ids, name pools.
+building chain kinds, sea zone ids, trait/ancillary ids, name pools; map
+geometry ↔ regions (territory per region containing its position, one road per
+land adjacency); balance terrain tables pinned to the terrain enum.

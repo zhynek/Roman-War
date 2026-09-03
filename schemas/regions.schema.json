@@ -81,7 +81,7 @@
               "x": { "type": "number", "minimum": 0, "maximum": 100 },
               "y": { "type": "number", "minimum": 0, "maximum": 100 }
             },
-            "description": "Optional label position for map rendering (computed from coastal members when absent)"
+            "description": "Anchor for the sea's label, fleet tokens, coast carving and click target; a zone without one is unlabelled and unclickable on the map"
           }
         }
       }

@@ -75,12 +75,6 @@
               "$ref": "#/$defs/character"
             }
           },
-          "doctrines": {
-            "type": "array",
-            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-            "uniqueItems": true,
-            "description": "Doctrine ids the faction already practises in 270 BC"
-          },
           "diplomacy": {
             "type": "array",
             "items": {

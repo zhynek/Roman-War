@@ -1,10 +1,11 @@
 # Roman War — a military strategy guide
 
-How investment in barracks, armouries, drill and doctrine becomes victory in the field,
+How investment in barracks, armouries, drill and warcraft becomes victory in the field,
 and what it costs the towns that pay for it. Every number in this guide is read from
-the game's own data tables (`data/unit_classes.json`, `data/doctrines.json`,
+the game's own data tables (`data/unit_classes.json`, `data/techniques.json`,
 `data/buildings.json`, `data/balance.json`), so what you read here is what the engine
-does. The historical notes are the reasons the numbers are what they are.
+does (`tools/military_guide.py` regenerates the tables). The historical notes are the
+reasons the numbers are what they are.
 
 ## 1. How a battle is decided
 
@@ -16,8 +17,10 @@ strength is built unit by unit, in a fixed order that the battle report names fa
    of that class weighs against a foot soldier: a horseman and his horse count as two, a horse
    archer two, a chariot three, an elephant eight, an artillery crew two, a general's escort
    two and a half. Numbers matter, but so does the kind of men — and the kind of beast.
-2. **Kit** — each weapon level adds 1 to attack, each armour level 1 to defence (§4).
-3. **Doctrines** — the faction's reforms (§6): stat bonuses for a class, then side-wide percentages.
+2. **Kit** — each weapon level adds 12% to what a unit deals, each armour level 12% to what it
+   takes (§4); morale and the charge stand outside both.
+3. **Warcraft** — the crafts of war the faction practises (§6): stat bonuses for a class, then
+   side-wide percentages.
 4. **Experience** — +10% per chevron, up to nine.
 5. **Matchups** — the counter table (§2), weighted by what the *enemy* actually brought: a pike
    block facing an army that is one-third cavalry gets one-third of its anti-cavalry edge.
@@ -27,26 +30,31 @@ strength is built unit by unit, in a fixed order that the battle report names fa
    old bonus for having chosen the ground.
 7. **Walls** — in an assault, each class's storming or wall-holding multiplier (§3).
 8. **Attacking** and **fatigue** — war cries fire only when charging; a forced march costs
-   20% unless the men or their doctrine shrug it off.
+   20% unless the men (the hardy) or their warcraft (camp discipline) shrug it off.
 
-Then the general (+5% per point of command, +2% per point of troop morale), **combined arms** (+6% when a line, a shock arm and missiles each hold at least 15% of the cards) and a sally bonus for starving defenders.
+Then the general (+5% per point of command, +2% per point of troop morale), the people's
+**martial ethos** (a society turned toward war fields better soldiers — up to +20% at full
+ethos, against everything that costs elsewhere), **combined arms** (+6% when a line, a shock
+arm and missiles each hold at least 15% of the cards) and a sally bonus for starving defenders.
 
-Both sides then roll fortune, ±15%, and the higher strength wins. The odds the
+Both sides then roll fortune, ±20%, and the higher strength wins. The odds the
 game shows before an attack — *odds 1.42:1 — 78% to win* — are the paper ratio and the exact
 chance that fortune leaves it standing:
 
+<!-- odds:begin -->
 | Paper odds | Chance to win |
 |---|---|
-| 0.8:1 | 3% |
-| 0.9:1 | 21% |
+| 0.8:1 | 10% |
+| 0.9:1 | 27% |
 | 1.0:1 | 50% |
-| 1.1:1 | 77% |
-| 1.2:1 | 92% |
-| 1.3:1 | 99% |
+| 1.1:1 | 71% |
+| 1.2:1 | 85% |
+| 1.3:1 | 94% |
 | 1.5:1 | 100% |
 | 2.0:1 | 100% |
+<!-- odds:end -->
 
-So a 1.3:1 edge is nearly safe and a 1.1:1 edge is a gamble: build the edge before you fight.
+So a 1.5:1 edge is nearly safe and a 1.2:1 edge is a gamble: build the edge before you fight.
 
 **Casualties** come in two parts. The *melee* is set by the odds and shared out so that the
 units the enemy countered bleed more than their share and the units that countered him bleed
@@ -172,14 +180,16 @@ every class storms or holds walls differently:
 | peasant | ×0.90 | ×0.90 |
 
 So an assault is an infantry and artillery affair: bring the engines (a siege workshop), or wait.
-Siege works take 2 turns to build (engineering doctrines shave a turn off; never below 1); defenders starve after 2 / 3 / 4 / 5 / 6 / 8 turns by settlement size and then
+Siege works take 2 turns to build (practiced siegecraft shaves a turn off; never below 1); defenders starve after 2 / 3 / 4 / 5 / 6 / 8 turns by settlement size and then
 sally out with +10% desperation and one wall tier fewer.
 
 ## 4. Men and metal
 
 - **Experience.** Nine chevrons, +10% strength each. Winners gain one per battle (2 for an underdog's win). Drill halls and war temples give recruits a head start (`recruit_xp`, the best tier in the town), veteran cadres add another.
-- **Kit.** Weapon and armour levels, up to 3 each (an armourers' guild allows one more), each worth a point of attack or defence — an armoury is worth roughly a chevron to a legionary or hoplite, nearly two to a levy spearman. They come from
-  the town's forges, summed across chains:
+- **Kit.** Weapon and armour levels, up to 3 each (an armourers' guild allows one more), each
+  worth 12% of a unit's attack or defence — an armoury is worth roughly a chevron. They come
+  from the town's forges, summed across chains, and from practiced metallurgy (mail armour,
+  Noric steel):
 
 | building | tier | weapon | armour |
 |---|---|---|---|
@@ -201,8 +211,8 @@ sally out with +10% desperation and one wall tier fewer.
   (Mars, Ares, Verethragna, Reshef, Horus, Teutates) add to the same pool. Units are issued kit
   when recruited; **Retrain garrison** refits every unit the town could itself recruit to its
   current standard (never taking better kit away) and refills the depleted ones for half price.
-- **Mercenaries** hire in the field at a premium and arrive with one chevron; Punic mercenary
-  contracts cut the price. They need no barracks and no townsmen — and leave no levy strain.
+- **Mercenaries** hire in the field at a premium; Punic mercenary contracts cut the price.
+  They need no barracks and no townsmen — and leave no levy strain.
 
 ## 5. Building for war — and what it costs the town
 
@@ -236,88 +246,107 @@ Three things flow back into the town:
   the town, softened 15% per drill level, capped at 30, fading 2 a turn; each point is −1 order and −0.05% growth.
   Raise a legion from one village and it will riot; spread the levy across drilled cities and it
   will hardly notice. Camp discipline and drill yards soften it; the Egyptian machimoi levy makes it worse.
+  (The society layer keeps its own, slower ledger of conscription; this is the town's.)
 
 Upkeep remains the central squeeze: every unit costs denarii every turn, garrisons included,
 and remount herds, steppe horsemanship, native levies and elephant establishments are the only relief.
 
-## 6. Doctrines — learning from whom you fight
+## 6. Warcraft — learning from whom you fight
 
-Open **Reforms** in the top bar. A house adopts one doctrine at a time, paying up front and waiting
-the turns; the computer houses do the same whenever their treasuries allow. Prerequisites are
-all required at once: earlier doctrines, a building of a given tier in *some* town, a resource
-in *some* region (horses, iron, elephants), the era, battles won or lost — and **arms faced**: Rome
-must have met foot soldiers in two battles before it adopts their sword, and the tribes must
-have met legions before they learn to ambush them. Rome copied the Iberian sword and the Celtic
-mail shirt from the people who used them on her; that is the mechanic.
+The crafts of war live on the **Knowledge** scroll beside every other technique, and they move
+the same way: a court must **hear** of one before it can take it up — by devising it (a people
+of the right tradition meeting the prerequisites has a chance each season), by contact (allies
+and trade partners talk, neighbours are watched, enemies teach hard lessons), by conquest (the
+victor walks the fallen city's archives) or by a spy. Taking it up is the investment: paid up
+front, seasons of drill, one program at a time, dearer where it cuts against your people's
+grain — and cheaper the more defeats have piled up the pressure for reform. The computer courts
+do the same.
 
+Prerequisites are all required at once: earlier crafts, a building of a given tier in *some*
+town, a resource in *some* region (horses, iron, elephants), the era, battles won or lost — and
+**arms faced**: Rome must have met foot soldiers in two battles before it adopts their sword,
+and the tribes must have met legions before they learn to ambush them. Rome copied the Iberian
+sword and the Celtic mail shirt from the people who used them on her; that is the mechanic.
+A few are traditions closed to one people (the Seleucid elephant corps, the chariots of
+Britain): nobody else can devise them, hear of them, or take them up. Each people starts with
+what it practised in 270 BC. Costs are in denarii before culture resistance and reform
+discounts; effects are cumulative with everything else the court practises.
+
+<!-- warcraft:begin -->
 ### Roman
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Manipular Drill** — practised from the start by senate, julii, junii, cornelii | 1200 / 2 | — | infantry morale +1; infantry on hills +5% | Rome abandoned the hoplite phalanx during the Samnite Wars (343-290 BC), whose hill country punished a rigid line. The three-line manipular array of hastati, principes and triarii could open, close and relieve itself in mid-battle. |
+| **Entrenched Marching Camps** | 900 / 4 | barracks tier 2 | march +0.25 | Polybius, who marched with Roman armies, describes with astonishment how each night's halt became a fortified town: identical streets, allotted plots, ditch and palisade thrown up by drill. An army that slept behind works could march deep into hostile country and choose its battles. Pyrrhus is said to have remarked that the barbarians' camps were nothing barbarous. |
+| **Manipular Drill** (practised from the start by cornelii, julii, junii, senate) | 1200 / 2 | nothing | infantry morale +1; infantry on hills +5% | Rome abandoned the hoplite phalanx during the Samnite Wars (343-290 BC), whose hill country punished a rigid line. The three-line manipular array of hastati, principes and triarii could open, close and relieve itself in mid-battle. |
 | **Iberian Sword Pattern** | 1800 / 3 | faced infantry in 2 battles | infantry attack +1 | The gladius hispaniensis, a cut-and-thrust sword copied from Iberian mercenaries and enemies during the Second Punic War, became the legion's standard blade for two centuries. |
+| **Camp Discipline** | 2200 / 3 | 3 battles won | tireless on a forced march; escape +10%; levy strain -20% | Polybius (Book VI) marvelled that a Roman army built the same fortified camp every night of a march. A beaten army had somewhere to rally, a tired one still fought, and citizens under such discipline resented the levy less. |
 | **Pilum Volley** | 2500 / 3 | after manipular drill, barracks tier 3 | infantry vs cavalry +10%; infantry vs infantry +5% | A volley of heavy javelins thrown at twenty paces, bending in the shield it pierced, broke the momentum of a charge before the swords came out; at Telamon (225 BC) and Zama (202 BC) it was the legion's opening argument. |
-| **Engineering Corps** | 3000 / 4 | siege workshop tier 1 | assault +10%; siege works -1 turn | Roman armies dug as much as they fought: the double ring of works around Alesia (52 BC), the circumvallation of Numantia (133 BC), the ramp at Masada. Siege equipment came out of the legion's own ranks. |
-| **Camp Discipline** | 2200 / 3 | 3 battles won | escape +10%; levy strain -20%; immune to forced-march fatigue | Polybius (Book VI) marvelled that a Roman army built the same fortified camp every night of a march. A beaten army had somewhere to rally, a tired one still fought, and citizens under such discipline resented the levy less. |
+| **Engineering Corps** | 3000 / 4 | siege workshop tier 1 | siege works -1 turn; storming walls +10% | Roman armies dug as much as they fought: the double ring of works around Alesia (52 BC), the circumvallation of Numantia (133 BC), the ramp at Masada. Siege equipment came out of the legion's own ranks. |
 | **Cohort Reform** | 4000 / 5 | post-marian era, after manipular drill | infantry attack +1, defense +1; infantry recruits +1 xp | The reforms attributed to Gaius Marius (107 BC): the property qualification dropped, the cohort replacing the maniple, state-issued equipment, and long-service professionals who carried their own kit and called themselves his mules. |
 
 ### Hellenistic (Greek)
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Sarissa Drill** (macedon, seleucia, thracia only) — practised from the start by macedon, thracia, seleucia | 1500 / 2 | — | pike defense +1; pike vs cavalry +5% | Philip II gave Macedon the sarissa, a two-handed pike of five to six metres, and drilled poor farmers until sixteen ranks could move as one. His son took it to the Indus. |
-| **Hoplite Tradition** — practised from the start by greek_cities | 1200 / 2 | — | spear vs cavalry +10%; spear vs infantry +5% | The citizen hoplite with his round aspis and thrusting spear won Marathon (490 BC) and Plataea (479 BC) and defined Greek war for three centuries: a wall of shields that horsemen would not charge. |
-| **Companion Wedge** | 2600 / 3 | stables tier 2, horses region | cavalry charge +2; cavalry vs infantry +10% | Philip's and Alexander's Companion cavalry charged in a wedge, the point aimed at a seam in the enemy line. Gaugamela (331 BC) was decided by it; at Chaeronea (338 BC) the young Alexander led the stroke that broke the Theban line, with the phalanx as the anvil. |
-| **Torsion Artillery** | 3000 / 4 | siege workshop tier 2 | siege missile attack +3; assault +10%; wall defense +10% | Catapults appear under Dionysius I of Syracuse (399 BC); the torsion engine, powered by twisted sinew, under Philip II two generations later. By the siege of Rhodes (305 BC) Hellenistic engineers were building them by the hundred, and every city wall answered with its own. |
+| **Hoplite Tradition** (practised from the start by greek_cities) | 1200 / 2 | nothing | spear vs cavalry +10%; spear vs infantry +5% | The citizen hoplite with his round aspis and thrusting spear won Marathon (490 BC) and Plataea (479 BC) and defined Greek war for three centuries: a wall of shields that horsemen would not charge. |
+| **Sarissa Drill** (macedon, seleucia, thracia only; practised from the start by macedon, seleucia, thracia) | 1500 / 2 | nothing | pike defense +1; pike vs cavalry +5% | Philip II gave Macedon the sarissa, a two-handed pike of five to six metres, and drilled poor farmers until sixteen ranks could move as one. His son took it to the Indus. |
 | **Thureophoroi Reform** (macedon, seleucia, thracia only) | 2000 / 3 | 1 battle lost | infantry on hills +10%; infantry on forest +10%; pike on hills +10% | The thureophoroi, looser-order foot behind the Celtic oval shield, came into Greek armies in the 270s BC after the Galatian invasion; after Magnesia (190 BC) and Pydna (168 BC) had shown what broken ground did to a pike block, the kingdoms went further and paraded whole regiments armed in the Roman fashion (Daphne, 166 BC). Learned from a defeat. |
+| **Companion Wedge** | 2600 / 3 | stables tier 2, horses region | cavalry charge +2; cavalry vs infantry +10% | Philip's and Alexander's Companion cavalry charged in a wedge, the point aimed at a seam in the enemy line. Gaugamela (331 BC) was decided by it; at Chaeronea (338 BC) the young Alexander led the stroke that broke the Theban line, with the phalanx as the anvil. |
 | **Elephant Corps** (seleucia only) | 3500 / 4 | stables tier 3, elephants region | elephant morale +2; elephant vs infantry +10%; elephant upkeep -15% | The Seleucids kept a permanent elephant corps from Indian stock; four hundred beasts screened the flanks at Ipsus (301 BC), and Raphia (217 BC) saw the only recorded battle between African and Indian elephants. |
 
 ### Eastern
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Composite Bow Mastery** (parthia, armenia only) — practised from the start by parthia, armenia | 1500 / 2 | — | horse archer missile attack +1 | The recurved composite bow of horn, wood and sinew, drawn from the saddle, was the weapon of the Iranian plateau and the steppe. At Carrhae (53 BC) Surena's archers emptied their quivers into seven legions and were resupplied by camel. |
-| **Cataphract Armour** | 3200 / 4 | stables tier 3, iron region | cavalry defense +2; cavalry vs infantry +10% | Rider and horse both sheathed in scale, the Parthian and Armenian cataphract charged with a lance held in both hands. It took iron by the ton and broke Roman infantry at Carrhae; at Magnesia (190 BC) the Seleucid version routed a legion before being cut off. |
-| **Parthian Shot** | 2400 / 3 | 2 battles won | horse archer vs infantry +10%; escape +30% | The feigned flight, turning in the saddle to shoot at the pursuer, meant a Parthian army was almost never caught: Crassus lost his at Carrhae (53 BC), Antony lost a third of his in retreat (36 BC), and neither ever brought the enemy to a decisive battle. |
+| **Composite Bow Mastery** (parthia, armenia only; practised from the start by armenia, parthia) | 1500 / 2 | nothing | horse archer missile +1 | The recurved composite bow of horn, wood and sinew, drawn from the saddle, was the weapon of the Iranian plateau and the steppe. At Carrhae (53 BC) Surena's archers emptied their quivers into seven legions and were resupplied by camel. |
 | **Remount Herds** | 2000 / 3 | horses region | cavalry upkeep -15%; horse archer upkeep -15%; march +0.25 | The Nisaean plain of Media bred the great horses of the East; a Parthian noble rode to war with a string of remounts, and an army so mounted moved and fought at a pace no infantry could match. |
+| **Parthian Shot** | 2400 / 3 | 2 battles won | horse archer vs infantry +10%; escape +30% | The feigned flight, turning in the saddle to shoot at the pursuer, meant a Parthian army was almost never caught: Crassus lost his at Carrhae (53 BC), Antony lost a third of his in retreat (36 BC), and neither ever brought the enemy to a decisive battle. |
+| **Cataphract Armour** | 3200 / 4 | stables tier 3, iron region | cavalry defense +2; cavalry vs infantry +10% | Rider and horse both sheathed in scale, the Parthian and Armenian cataphract charged with a lance held in both hands. It took iron by the ton and broke Roman infantry at Carrhae; at Magnesia (190 BC) the Seleucid version routed a legion before being cut off. |
 
 ### Carthaginian
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Mercenary Contracts** — practised from the start by carthage | 1500 / 2 | — | mercenary cost -20% | Carthage fought with hired Libyans, Iberians, Gauls, Balearic slingers and Numidian horse under a small Punic officer corps. The Spartan Xanthippus, hired in 255 BC, beat Regulus outside the city with them. |
+| **Mercenary Contracts** (practised from the start by carthage) | 1500 / 2 | nothing | mercenary cost -20% | Carthage fought with hired Libyans, Iberians, Gauls, Balearic slingers and Numidian horse under a small Punic officer corps. The Spartan Xanthippus, hired in 255 BC, beat Regulus outside the city with them. |
+| **Sacred Band Drill** | 3000 / 4 | barracks tier 3 | spear defense +1, morale +2 | The Sacred Band was Carthage's one standing citizen regiment: sons of the great houses, armoured and drilled as hoplites, who died almost to a man at the Crimissus (341 BC) rather than break. |
 | **War Elephants** | 3500 / 4 | elephants region | elephant morale +2; elephant vs infantry +10%; elephant upkeep -15% | The forest elephants of the Atlas were Carthage's answer to the Hellenistic corps: thirty-seven crossed the Alps with Hannibal in 218 BC, and they scattered the Roman horse at the Trebia that winter. |
-| **Sacred Band Drill** | 3000 / 4 | barracks tier 3 | spear morale +2, defense +1 | The Sacred Band was Carthage's one standing citizen regiment: sons of the great houses, armoured and drilled as hoplites, who died almost to a man at the Crimissus (341 BC) rather than break. |
 
 ### Egyptian
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Ptolemaic Phalanx** — practised from the start by egypt | 1500 / 2 | — | spear defense +1; spear vs cavalry +10% | The Ptolemies settled Macedonian and Greek soldiers on Nile land in return for service, and drilled them in the sarissa; at Raphia (217 BC) that phalanx, stiffened with twenty thousand Egyptians, broke the Seleucid centre. |
 | **Machimoi Levy** | 1500 / 2 | barracks tier 2 | spear upkeep -20%; infantry upkeep -20%; levy strain +40% | Ptolemy IV armed twenty thousand native Egyptians for Raphia and won; within a decade the machimoi who had learned to fight were in revolt, and Upper Egypt was lost to the crown for twenty years. |
-| **Nile Logistics** | 2200 / 3 | port tier 2 | garrison order +10%; march +0.25 | Grain, men and news moved on the river faster than on any road; an Egyptian army marched supplied and its garrisons were never far from relief. |
+| **Ptolemaic Phalanx** (practised from the start by egypt) | 1500 / 2 | nothing | spear defense +1; spear vs cavalry +10% | The Ptolemies settled Macedonian and Greek soldiers on Nile land in return for service, and drilled them in the sarissa; at Raphia (217 BC) that phalanx, stiffened with twenty thousand Egyptians, broke the Seleucid centre. |
+| **Nile Logistics** | 2200 / 3 | port tier 2 | march +0.25; garrison order +10% | Grain, men and news moved on the river faster than on any road; an Egyptian army marched supplied and its garrisons were never far from relief. |
 
 ### Tribal (barbarian)
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Warband Fury** — practised from the start by gaul, germania, britannia, dacia, hispania | 1200 / 2 | — | attacking +8% | The Gallic charge, screaming and half naked, broke the Roman army at the Allia (390 BC) and nearly did so again at Telamon (225 BC): everything staked on the first rush. |
-| **Woodland Ambush** | 1800 / 3 | faced infantry in 2 battles | infantry on forest +15%; spear on forest +15%; missile on forest +15% | The Boii annihilated two legions in the Litana forest (216 BC) by felling half-cut trees onto the column; Arminius did the same to three in the Teutoburg (AD 9). Arminius had served with Rome first and knew how it marched. |
-| **Hill-Fort Engineering** | 2000 / 3 | walls tier 2 | wall defense +15% | The murus gallicus, timber-laced stone that neither ram nor fire could break, ringed the oppida of Gaul; Caesar at Alesia (52 BC) chose to starve Vercingetorix rather than storm it. |
+| **Timber-Laced Ramparts** | 800 / 3 | walls tier 1, timber region | walls +1 tier | Caesar paused his own war narrative to admire the murus gallicus: alternating courses of stone and long timber baulks nailed through with iron, facing the great hillforts of Gaul. The stone would not burn and the lattice would not batter - rams shuddered against a wall that flexed. A wholly native northern engineering, owing nothing to the Mediterranean. |
+| **Mountain Steel** | 1000 / 4 | mines tier 1, iron region | weapons +1 | The Alpine kingdom of Noricum smelted an iron so fine that 'Noric steel' became a byword in Roman verse - Pliny ranks it with the best in the world and credits the ore itself. The Celtic smiths who worked it sold blades southward long before the legions came north for the mines. Metallurgy as a mountain people's export and leverage. |
+| **Warband Fury** (practised from the start by britannia, dacia, gaul, germania, hispania) | 1200 / 2 | nothing | attacking +8% | The Gallic charge, screaming and half naked, broke the Roman army at the Allia (390 BC) and nearly did so again at Telamon (225 BC): everything staked on the first rush. |
+| **Steppe Horsemanship** (scythia only; practised from the start by scythia) | 1500 / 2 | horses region | horse archer on steppe +10%; horse archer upkeep -15% | The Scythians and their Sarmatian successors lived in the saddle; Darius could not catch them in 513 BC and neither could anyone else. Every family bred its own remounts. |
 | **Chariot Tradition** (britannia only) | 1600 / 2 | stables tier 2 | chariot charge +1; chariot vs missile +10% | Caesar found the war chariot still alive in Britain in 55 BC: drivers who could run along the pole at the gallop, warriors who dismounted to fight and remounted to flee, and Roman skirmishers who could not catch them. |
-| **Steppe Horsemanship** (scythia only) — practised from the start by scythia | 1500 / 2 | horses region | horse archer on steppe +10%; horse archer upkeep -15% | The Scythians and their Sarmatian successors lived in the saddle; Darius could not catch them in 513 BC and neither could anyone else. Every family bred its own remounts. |
+| **Woodland Ambush** | 1800 / 3 | faced infantry in 2 battles | infantry on forest +15%; spear on forest +15%; missile on forest +15% | The Boii annihilated two legions in the Litana forest (216 BC) by felling half-cut trees onto the column; Arminius did the same to three in the Teutoburg (AD 9). Arminius had served with Rome first and knew how it marched. |
+| **Hill-Fort Engineering** | 2000 / 3 | walls tier 2 | holding walls +15% | The murus gallicus, timber-laced stone that neither ram nor fire could break, ringed the oppida of Gaul; Caesar at Alesia (52 BC) chose to starve Vercingetorix rather than storm it. |
 
-### Shared between cultures
+### Devised by more than one people
 
-| doctrine | cost / turns | requires | effects | history |
+| technique | cost / turns | requires | effects | history |
 |---|---|---|---|---|
-| **Mail Armour** | 2400 / 4 | iron region | infantry defense +1; spear defense +1 | The riveted mail shirt was a Celtic invention of the third century BC; Rome copied it as the lorica hamata and wore it for the rest of its history. It needs iron, and a great deal of a smith's time. |
-| **Falx Reapers** (thracia, dacia only) | 1600 / 2 | barracks tier 2 | infantry vs spear +10%; infantry vs infantry +5% | The Thracian rhomphaia and the Dacian falx, long curved blades swung two-handed, cut through shields and helmets; Trajan's legions added iron reinforcing bars to their helmets because of them. |
-| **Numidian Horsemanship** (carthage, numidia only) — practised from the start by numidia | 1800 / 2 | horses region | pursuit +20%; escape +20% | Numidian light horse rode without saddle or bridle, harried a marching enemy for days and turned every victory into a massacre: Hannibal's at Cannae (216 BC), and when Masinissa changed sides, Scipio's at Zama (202 BC). |
-| **Veteran Cadres** | 2800 / 4 | 5 battles won | all recruits +1 xp | Rome's evocati, veterans recalled to stiffen new legions, and the Hellenistic habit of brigading old soldiers with new levies show the same idea: seed every new unit with men who have seen a battle. |
-| **Drill Yards** | 2000 / 3 | barracks tier 3 | garrison order +10%; levy strain -15% | A regular dilectus with drill fields in every town turned the levy from an outrage into a habit; a drilled garrison policed the streets it had grown up in. |
-| **Armourers' Guild** | 3000 / 4 | armoury tier 2, iron region | kit cap +1 | State arms works — the Hellenistic royal arsenals and, later, the Roman fabricae — standardised patterns and let a city issue better kit than any private smith could. |
-| **Siege Train** | 2400 / 3 | siege workshop tier 1 | siege works -1 turn | Demetrius the Besieger brought a nine-storey siege tower to Rhodes in 305 BC; a kingdom that kept its engines and engineers together opened a siege in days rather than months. |
+| **Linked-Ring Mail** | 800 / 3 | barracks tier 2, iron region | armour +1 | Varro credits the shirt of interlinked iron rings to the Celts, and the graves of Gaul bear him out. Rome copied what cut her men down: by the time Polybius described the legions, their wealthier ranks wore mail, and the pattern spread wherever Celtic war bands marched or sold their services - a technique that traveled by wound as much as by trade. |
+| **Torsion Artillery** | 1000 / 4 | siege workshop tier 1, iron region | siege works -1 turn | The bow-machine appeared at Syracuse under Dionysius I around 399 BC; within two generations Greek engineers replaced the bow with twisted sinew springs, and the siege trains of Philip II and Demetrius the Besieger made stone-throwers a fixture of Hellenistic war. Rome met the craft at the walls of Greek Sicily and took it wholesale - the engines that battered Syracuse in 212 BC answered Archimedes' own. |
+| **Rolling Siege Towers** | 1200 / 4 | after torsion artillery, siege workshop tier 2, timber region | siege works -1 turn | Demetrius earned the surname 'Besieger' for machines like the helepolis he rolled against Rhodes in 304 BC - an armored tower nine stories tall, packed with artillery, moved on capstans by thousands of men. Diodorus gives its dimensions with an engineer's relish. Cities learned that walls alone no longer settled the question. |
+| **Falx Reapers** (thracia, dacia only; devised by greek, barbarian) | 1600 / 2 | barracks tier 2 | infantry vs spear +10%; infantry vs infantry +5% | The Thracian rhomphaia and the Dacian falx, long curved blades swung two-handed, cut through shields and helmets; Trajan's legions added iron reinforcing bars to their helmets because of them. |
+| **Numidian Horsemanship** (carthage, numidia only; practised from the start by numidia; devised by carthaginian, barbarian) | 1800 / 2 | horses region | pursuit +20%; escape +20% | Numidian light horse rode without saddle or bridle, harried a marching enemy for days and turned every victory into a massacre: Hannibal's at Cannae (216 BC), and when Masinissa changed sides, Scipio's at Zama (202 BC). |
+| **Drill Yards** (devised by roman, greek, eastern, carthaginian, egyptian, barbarian) | 2000 / 3 | barracks tier 3 | garrison order +10%; levy strain -15% | A regular dilectus with drill fields in every town turned the levy from an outrage into a habit; a drilled garrison policed the streets it had grown up in. |
+| **Mail Armour** (devised by roman, barbarian) | 2400 / 4 | iron region | infantry defense +1; spear defense +1 | The riveted mail shirt was a Celtic invention of the third century BC; Rome copied it as the lorica hamata and wore it for the rest of its history. It needs iron, and a great deal of a smith's time. |
+| **Siege Train** (devised by roman, greek, eastern, carthaginian, egyptian) | 2400 / 3 | siege workshop tier 1 | siege works -1 turn | Demetrius the Besieger brought a nine-storey siege tower to Rhodes in 305 BC; a kingdom that kept its engines and engineers together opened a siege in days rather than months. |
+| **Veteran Cadres** (devised by roman, greek, eastern, carthaginian, egyptian, barbarian) | 2800 / 4 | 5 battles won | all recruits +1 xp | Rome's evocati, veterans recalled to stiffen new legions, and the Hellenistic habit of brigading old soldiers with new levies show the same idea: seed every new unit with men who have seen a battle. |
+| **Armourers' Guild** (devised by roman, greek, eastern, carthaginian, egyptian, barbarian) | 3000 / 4 | armoury tier 2, iron region | kit cap +1 | State arms works — the Hellenistic royal arsenals and, later, the Roman fabricae — standardised patterns and let a city issue better kit than any private smith could. |
+<!-- warcraft:end -->
 
 ## 7. War and the home front
 
@@ -328,8 +357,8 @@ mail shirt from the people who used them on her; that is the mechanic.
   battles the reverse, and a captain who wins badly outnumbered may be adopted into the house.
 - **The Senate** (Roman houses) rewards taken regions and resents them; its missions hand out
   units and standing. Victory in the field is also politics.
-- **The war record** — battles won and lost, arms faced — is what your doctrines read (§6); you
-  can see it at the top of the Reforms scroll.
+- **The war record** — battles won and lost, arms faced — is what your warcraft reads (§6); you
+  can see it at the top of the Knowledge scroll, with the realm's mood beneath it.
 
 ## 8. Five armies, and what beats each
 

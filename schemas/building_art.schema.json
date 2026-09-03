@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "building_art.schema.json",
+  "title": "Procedural building art recipes",
+  "description": "The game ships no image files. A recipe is a parts list in a normalised 0..1 stage of aspect 1.6, resolved by BuildingArt and drawn by ArtPainter with Godot CanvasItem primitives. Tiers are cumulative deltas over a base, so tier 5 of a chain is a different building from tier 1 rather than the same shape scaled up.",
+  "type": "object",
+  "required": ["materials", "tracks", "recipes"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "materials": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Named surfaces. lit/mid/shadow are authored; ink, grain and edge decide how rough or crisp the surface reads.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["lit", "mid", "shadow", "ink", "grain", "edge"],
+        "additionalProperties": false,
+        "properties": {
+          "lit": { "$ref": "#/$defs/hex" },
+          "mid": { "$ref": "#/$defs/hex" },
+          "shadow": { "$ref": "#/$defs/hex" },
+          "ink": { "type": "number", "minimum": 0, "maximum": 1 },
+          "grain": { "type": "number", "minimum": 0, "maximum": 1 },
+          "edge": { "type": "number", "minimum": 0, "maximum": 2 },
+          "tint": {
+            "type": "number", "minimum": 0, "maximum": 1,
+            "description": "How much of the owning house's colour bleeds in. Only cloth and gilt are non-zero: architecture keeps its material read."
+          }
+        }
+      }
+    },
+    "tracks": {
+      "type": "object",
+      "description": "culture -> material per tier. This is what makes a tribal market timber at every tier while an Egyptian one runs mudbrick to granite, with no per-culture recipe authored.",
+      "propertyNames": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 6,
+        "maxItems": 6,
+        "items": { "type": "string" }
+      }
+    },
+    "fragments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["parts"],
+        "additionalProperties": false,
+        "properties": {
+          "params": { "type": "object" },
+          "parts": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/part" } }
+        }
+      }
+    },
+    "cults": {
+      "type": "object",
+      "description": "Temple archetype overlays, keyed by the archetype in temples.json.",
+      "propertyNames": { "enum": ["fertility", "law", "fun", "trade", "battle", "naval", "healing", "forge"] },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["add"],
+        "additionalProperties": false,
+        "properties": {
+          "from_tier": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "add": { "type": "array", "items": { "$ref": "#/$defs/part" } }
+        }
+      }
+    },
+    "emblems": {
+      "type": "object",
+      "description": "Per-god devices, keyed by temple chain id.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["emblem"],
+        "additionalProperties": false,
+        "properties": {
+          "emblem": { "$ref": "#/$defs/emblem" },
+          "cloth": { "$ref": "#/$defs/hex" }
+        }
+      }
+    },
+    "recipes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "tiers"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "chains": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "kinds": {
+            "type": "array",
+            "items": { "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "armoury", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"] },
+            "uniqueItems": true
+          },
+          "cultures": {
+            "type": "array",
+            "items": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+            "uniqueItems": true
+          },
+          "scene": { "$ref": "#/$defs/scene" },
+          "base": { "type": "array", "items": { "$ref": "#/$defs/part" } },
+          "tiers": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "material": { "type": "string" },
+                "add": { "type": "array", "items": { "$ref": "#/$defs/part" } },
+                "drop": { "type": "array", "items": { "type": "string" } },
+                "set": { "type": "object", "additionalProperties": { "$ref": "#/$defs/patch" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "hex": { "type": "string", "pattern": "^#[0-9a-f]{6}$" },
+    "emblem": { "enum": ["bolt", "spear", "grain", "caduceus", "vine", "hammer", "sun", "horse", "moon", "eagle", "disc", "wave", "flame", "serpent", "boar", "skull"] },
+    "coord": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "number" } },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ground": { "type": "number", "minimum": 0.4, "maximum": 1.0 },
+        "horizon": { "type": "number", "minimum": 0.1, "maximum": 0.9 },
+        "sky": { "enum": ["clear", "dust", "overcast"] },
+        "water": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "flora": { "enum": ["none", "cypress", "olive", "pine", "palm"] },
+        "ground_mat": { "type": "string" },
+        "figures": { "type": "array", "items": { "$ref": "#/$defs/coord" } }
+      }
+    },
+    "part": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "part": { "$ref": "#/$defs/part_name" },
+        "use": { "type": "string" },
+        "at": { "$ref": "#/$defs/coord" },
+        "size": { "$ref": "#/$defs/coord" },
+        "mat": { "type": "string" },
+        "layer": { "enum": ["back", "main", "front"] },
+        "lod": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "p": { "type": "object" }
+      },
+      "anyOf": [{ "required": ["part"] }, { "required": ["use"] }]
+    },
+    "patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "at": { "$ref": "#/$defs/coord" },
+        "size": { "$ref": "#/$defs/coord" },
+        "mat": { "type": "string" },
+        "layer": { "enum": ["back", "main", "front"] },
+        "lod": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "p": { "type": "object" }
+      }
+    },
+    "part_name": {
+      "description": "Closed: every name needs a branch in ArtPainter._dispatch, so an unimplemented part is a validation error rather than a hole in the picture.",
+      "enum": [
+        "box", "podium", "steps", "column_row", "entablature", "pediment", "roof",
+        "arcade", "crest", "bank", "posts", "mound", "awning", "stall", "vessels",
+        "granary", "forge", "smoke", "well", "statue", "altar", "standard",
+        "emblem", "crowd", "figure", "tree", "beasts", "field_strips", "hull",
+        "quay", "mine_head", "canopy", "obelisk", "pylon", "stones", "trophy",
+        "stele", "rubble", "scaffold"
+      ]
+    }
+  }
+}

@@ -1,0 +1,2770 @@
+{
+  "$schema": "../schemas/techniques.schema.json",
+  "techniques": [
+    {
+      "id": "quinquereme_construction",
+      "name": "Fivefold Warships",
+      "domain": "naval",
+      "historical_basis": "The 'five' - a heavier warship rowed by files of five men to a vertical section - was worked out in the dockyards of Syracuse and Carthage around 400 BC and became the standard capital ship of the age. Polybius tells how Rome, owning nothing like it in 264 BC, copied a Carthaginian quinquereme that ran aground and drilled rowers on benches ashore while the fleet was still being nailed together.",
+      "start_adopted": {
+        "cultures": [
+          "carthaginian",
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "naval",
+        "building_level": 2,
+        "resource": "timber",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1100,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 2.0
+      },
+      "effects": {
+        "naval_movement_pct": 10
+      }
+    },
+    {
+      "id": "corvus_boarding_bridge",
+      "name": "Boarding Bridge",
+      "domain": "naval",
+      "historical_basis": "In 260 BC, freshly humiliated at sea off the Lipari Islands, Rome fitted her new quinqueremes with a spiked gangway - the 'raven' - that nailed enemy hulls in place so legionaries could board and fight a land battle on deck. Polybius records that it won Mylae that same year: a technique born of defeat, not scholarship. It was quietly abandoned within a decade when it made the ships founder in heavy weather.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "naval",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": [
+          "quinquereme_construction"
+        ]
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 2.0
+      },
+      "effects": {
+        "naval_movement_pct": -5
+      }
+    },
+    {
+      "id": "cothon_war_harbor",
+      "name": "Ringed War Harbor",
+      "domain": "naval",
+      "historical_basis": "Carthage dug her fleet a private lagoon: a circular inner harbor ringed with covered slipways for well over a hundred warships, entered through the merchant basin by a channel that could be chained. Appian describes an admiral's island at its center from which signals reached every shed. A navy kept dry, hidden, and ready was itself a weapon.",
+      "start_adopted": {
+        "cultures": [
+          "carthaginian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "carthaginian",
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1300,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.5
+      },
+      "effects": {
+        "naval_movement_pct": 15
+      }
+    },
+    {
+      "id": "lighthouse_seamarks",
+      "name": "Lighthouse Seamarks",
+      "domain": "naval",
+      "historical_basis": "Sostratus of Cnidus raised the great tower on the island of Pharos under the first two Ptolemies, its fire visible far out over the delta's flat and shoal-ridden approach. Lesser lights and daymarks followed at harbors across the sea. A coast that could be read at night was a coast ships dared approach year-round.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "egypt"
+        ]
+      },
+      "origin_cultures": [
+        "greek",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.8
+      },
+      "effects": {
+        "trade_pct": 6
+      }
+    },
+    {
+      "id": "portage_slipway",
+      "name": "Ship Portage Road",
+      "domain": "logistics_trade",
+      "historical_basis": "Across the Isthmus of Corinth ran the diolkos, a grooved stone trackway on which ships and cargoes were winched overland between the two gulfs, sparing the long and deadly rounding of Cape Malea. Thucydides and Strabo both treat it as an old and ordinary marvel; war fleets used it more than once. Geography could be re-engineered.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 700,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 2.0
+      },
+      "effects": {
+        "naval_movement_pct": 8
+      }
+    },
+    {
+      "id": "torsion_artillery",
+      "name": "Torsion Artillery",
+      "domain": "military_engineering",
+      "historical_basis": "The bow-machine appeared at Syracuse under Dionysius I around 399 BC; within two generations Greek engineers replaced the bow with twisted sinew springs, and the siege trains of Philip II and Demetrius the Besieger made stone-throwers a fixture of Hellenistic war. Rome met the craft at the walls of Greek Sicily and took it wholesale - the engines that battered Syracuse in 212 BC answered Archimedes' own.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "siege_workshop",
+        "building_level": 1,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.8,
+        "egyptian": 1.2
+      },
+      "effects": {
+        "siege_equipment_turns_delta": -1
+      }
+    },
+    {
+      "id": "siege_towers",
+      "name": "Rolling Siege Towers",
+      "domain": "military_engineering",
+      "historical_basis": "Demetrius earned the surname 'Besieger' for machines like the helepolis he rolled against Rhodes in 304 BC - an armored tower nine stories tall, packed with artillery, moved on capstans by thousands of men. Diodorus gives its dimensions with an engineer's relish. Cities learned that walls alone no longer settled the question.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "siege_workshop",
+        "building_level": 2,
+        "resource": "timber",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "torsion_artillery"
+        ]
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.6
+      },
+      "effects": {
+        "siege_equipment_turns_delta": -1
+      }
+    },
+    {
+      "id": "marching_camps",
+      "name": "Entrenched Marching Camps",
+      "domain": "military_engineering",
+      "historical_basis": "Polybius, who marched with Roman armies, describes with astonishment how each night's halt became a fortified town: identical streets, allotted plots, ditch and palisade thrown up by drill. An army that slept behind works could march deep into hostile country and choose its battles. Pyrrhus is said to have remarked that the barbarians' camps were nothing barbarous.",
+      "start_adopted": {
+        "cultures": [
+          "roman"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.5,
+        "egyptian": 1.3
+      },
+      "effects": {
+        "movement_points": 0.25
+      }
+    },
+    {
+      "id": "gallic_wall_ramparts",
+      "name": "Timber-Laced Ramparts",
+      "domain": "military_engineering",
+      "historical_basis": "Caesar paused his own war narrative to admire the murus gallicus: alternating courses of stone and long timber baulks nailed through with iron, facing the great hillforts of Gaul. The stone would not burn and the lattice would not batter - rams shuddered against a wall that flexed. A wholly native northern engineering, owing nothing to the Mediterranean.",
+      "start_adopted": {
+        "cultures": [
+          "barbarian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "walls",
+        "building_level": 1,
+        "resource": "timber",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "egyptian": 1.8,
+        "eastern": 1.4
+      },
+      "effects": {
+        "wall_level_bonus": 1
+      }
+    },
+    {
+      "id": "punic_agronomy",
+      "name": "Punic Estate Husbandry",
+      "domain": "agrarian",
+      "historical_basis": "Mago of Carthage set down twenty-eight books on estate farming - oil, vines, cattle, the ordering of labor - that made the Punic countryside the envy of the west. When Carthage burned in 146 BC the Senate, which kept nothing else, ordered Mago translated into Latin; Columella later called him the father of husbandry. Knowledge so valuable it was looted like treasure.",
+      "start_adopted": {
+        "cultures": [
+          "carthaginian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "carthaginian"
+      ],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 700,
+        "turns": 4
+      },
+      "culture_resistance": {},
+      "effects": {
+        "farm_income_pct": 12
+      }
+    },
+    {
+      "id": "basin_reclamation",
+      "name": "Basin Reclamation",
+      "domain": "agrarian",
+      "historical_basis": "Under the second Ptolemy the marshy shore of Lake Moeris was diked, drained and parceled to soldier-settlers; the letters of Zenon, steward of the minister Apollonius, record the Fayum being remade field by field around 256 BC. Flood-basin management was Egypt's oldest craft turned to deliberate state expansion: land itself as a product of administration.",
+      "start_adopted": {
+        "cultures": [
+          "egyptian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 2,
+        "resource": "grain",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.5,
+        "roman": 1.3
+      },
+      "effects": {
+        "growth": 0.4,
+        "farm_income_pct": 8
+      }
+    },
+    {
+      "id": "legume_rotation",
+      "name": "Pulse Rotation",
+      "domain": "agrarian",
+      "historical_basis": "Theophrastus, cataloguing the ways of plants around 300 BC, records what careful farmers knew: beans and their kin do not exhaust a field but seem to feed it, and a pulse crop between grain sowings kept land in heart without resting it idle. The Roman agronomists repeated the rule for centuries. Quiet knowledge that fed more mouths per field.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 500,
+        "turns": 3
+      },
+      "culture_resistance": {},
+      "effects": {
+        "growth": 0.3
+      }
+    },
+    {
+      "id": "water_mill",
+      "name": "Water Mill",
+      "domain": "agrarian",
+      "historical_basis": "Strabo saw a water-driven grain mill standing at Cabeira in Pontus, in the palace grounds of Mithridates; the poet Antipater soon promised the grinding-girls their rest, for the nymphs now leapt upon the wheel. The mill freed a slow daily labor performed in every household since grain was first eaten - power from a stream, put to bread.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek",
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 3,
+        "resource": "grain",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 1.5
+      },
+      "effects": {
+        "farm_income_pct": 8,
+        "growth": 0.2
+      }
+    },
+    {
+      "id": "vine_terracing",
+      "name": "Hillside Terracing",
+      "domain": "agrarian",
+      "historical_basis": "Greek and Levantine farmers walled their hillsides into stairs of held soil, turning slopes too steep for the plough into vineyards and olive orchards. The island poleis lived by it - thin land made rich by stonework and patience, and a wine trade that reached wherever ships did.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 2,
+        "resource": "wine",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 600,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.4
+      },
+      "effects": {
+        "farm_income_pct": 6
+      }
+    },
+    {
+      "id": "urban_drains",
+      "name": "Great Drains",
+      "domain": "hydraulic_civic",
+      "historical_basis": "Rome's cloaca maxima began as an Etruscan king's open channel through the Forum marsh and was vaulted over into a sewer a man could row through, still working centuries later when Agrippa inspected it by boat. Livy counts it among the works that made the city habitable at all. A city that carried away its filth could grow past the size that sickness otherwise set.",
+      "start_adopted": {
+        "cultures": [
+          "roman"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "health",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 2.0
+      },
+      "effects": {
+        "plague_resistance": 2000,
+        "happiness": 1
+      }
+    },
+    {
+      "id": "aqueduct_channels",
+      "name": "Aqueduct Channels",
+      "domain": "hydraulic_civic",
+      "historical_basis": "The censor Appius Claudius brought Rome its first aqueduct in 312 BC, a buried channel falling gently for miles; Greek engineers had already driven the Samos tunnel through a mountain from both ends two centuries before. Clean water carried by gradient alone, measured in the city by the public basin - the difference between a town that drinks its river and one that does not.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "health",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "urban_drains"
+        ]
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.2
+      },
+      "effects": {
+        "plague_resistance": 2000,
+        "happiness": 2
+      }
+    },
+    {
+      "id": "qanat_galleries",
+      "name": "Underground Water Galleries",
+      "domain": "hydraulic_civic",
+      "historical_basis": "Polybius, describing Media, marvels at the invisible rivers: gently sloped tunnels tapping mountain groundwater and leading it for miles beneath the desert, dug and vented shaft by shaft. The Persian kings granted five generations' enjoyment of the water to whoever cut a new channel - an ancient policy of rewarding infrastructure. Dry-country farming lived on it.",
+      "start_adopted": {
+        "cultures": [
+          "eastern"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "farms",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.0,
+        "roman": 1.2
+      },
+      "effects": {
+        "growth": 0.3,
+        "farm_income_pct": 6
+      }
+    },
+    {
+      "id": "roman_concrete",
+      "name": "Pozzolana Concrete",
+      "domain": "hydraulic_civic",
+      "historical_basis": "Builders in Campania found that the volcanic sand of Puteoli, mixed with lime, set into stone - even under water. By the second century BC Rome was raising the great vaulted warehouse works above the Tiber from poured rubble and formwork; Vitruvius later wrote down what the Bay of Naples had taught. A technique literally impossible without the right ground underfoot.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "roads",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "italia",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 1.8
+      },
+      "effects": {
+        "build_cost_pct": -10
+      }
+    },
+    {
+      "id": "archimedean_screw",
+      "name": "Water Screw",
+      "domain": "hydraulic_civic",
+      "historical_basis": "The screw that raises water by turning is tied by every ancient source to Archimedes and his Egyptian sojourn, and Diodorus says the mines of Spain were drained by just such engines, worked in relays where no stream could reach. Water lifted by geometry: irrigation up onto fields, floods down out of shafts.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "mines",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.6
+      },
+      "effects": {
+        "mine_income_pct": 10
+      }
+    },
+    {
+      "id": "mail_armor",
+      "name": "Linked-Ring Mail",
+      "domain": "metallurgy_craft",
+      "historical_basis": "Varro credits the shirt of interlinked iron rings to the Celts, and the graves of Gaul bear him out. Rome copied what cut her men down: by the time Polybius described the legions, their wealthier ranks wore mail, and the pattern spread wherever Celtic war bands marched or sold their services - a technique that traveled by wound as much as by trade.",
+      "start_adopted": {
+        "cultures": [
+          "barbarian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "egyptian": 1.4
+      },
+      "effects": {
+        "armor_upgrade": 1
+      }
+    },
+    {
+      "id": "noric_steel",
+      "name": "Mountain Steel",
+      "domain": "metallurgy_craft",
+      "historical_basis": "The Alpine kingdom of Noricum smelted an iron so fine that 'Noric steel' became a byword in Roman verse - Pliny ranks it with the best in the world and credits the ore itself. The Celtic smiths who worked it sold blades southward long before the legions came north for the mines. Metallurgy as a mountain people's export and leverage.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "mines",
+        "building_level": 1,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "egyptian": 1.5
+      },
+      "effects": {
+        "weapon_upgrade": 1
+      }
+    },
+    {
+      "id": "blown_glass",
+      "name": "Glassblowing",
+      "domain": "metallurgy_craft",
+      "historical_basis": "Somewhere on the Syro-Phoenician coast in the first century BC, a craftsman found that a gob of molten glass on a hollow tube could be blown like a bubble. What had been a slow luxury of molded and core-formed vessels became, within a lifetime, cheap enough for a tavern table. Few inventions ever collapsed a price so completely.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "eastern",
+        "greek",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 2,
+        "resource": "glass",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.8
+      },
+      "effects": {
+        "trade_pct": 5
+      }
+    },
+    {
+      "id": "parchment_craft",
+      "name": "Parchment Craft",
+      "domain": "metallurgy_craft",
+      "historical_basis": "Pliny preserves the story that when the Ptolemies, jealous for their Library, embargoed papyrus, the kings of Pergamon perfected writing-skins instead - charta pergamena, parchment. Whatever the embargo's truth, Pergamon's scraped and limed hides gave the book a material that any country with herds could make, and its library grew to rival Alexandria's.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "education",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 700,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.6
+      },
+      "effects": {
+        "scholarship": 1
+      }
+    },
+    {
+      "id": "hippocratic_regimen",
+      "name": "Hippocratic Regimen",
+      "domain": "medicine",
+      "historical_basis": "The physicians of Cos, writing under Hippocrates' name from the fifth century on, insisted that disease had natural causes, courses, and treatments - airs, waters, places, diet, and the trained observation of the sick. The corpus traveled wherever Greek was read, and with it the idea that a city's health could be reasoned about at all.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "health",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 700,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.5
+      },
+      "effects": {
+        "plague_resistance": 1500
+      }
+    },
+    {
+      "id": "alexandrian_anatomy",
+      "name": "Alexandrian Anatomy",
+      "domain": "medicine",
+      "historical_basis": "In the generation after 300 BC, Herophilus of Chalcedon and Erasistratus of Ceos, salaried by the Ptolemies at Alexandria, opened the human body itself to systematic study - Celsus preserves the scandal and the achievement. It happened there and nowhere else: royal patronage, a great library, and a court willing to shelter what tradition forbade.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "education",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "hippocratic_regimen"
+        ]
+      },
+      "adoption": {
+        "cost": 1100,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "roman": 1.4,
+        "barbarian": 2.0
+      },
+      "effects": {
+        "plague_resistance": 4000,
+        "happiness": 1
+      }
+    },
+    {
+      "id": "military_field_dressing",
+      "name": "Field Surgery",
+      "domain": "medicine",
+      "historical_basis": "Greek armies had carried physicians since Xenophon's day, and the Hellenistic kings kept surgeons with their pay-rolls; the wound-men learned arrow-cutting, ligature and splint on campaign after campaign. An army that could return its wounded to the standards kept its veterans - and it was the veterans who won battles.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek",
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "hippocratic_regimen"
+        ]
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.4
+      },
+      "effects": {
+        "recruit_xp": 1
+      }
+    },
+    {
+      "id": "museum_scholarship",
+      "name": "The Royal Museum",
+      "domain": "scholarship_statecraft",
+      "historical_basis": "Ptolemy I, advised by the exiled Athenian Demetrius of Phalerum, endowed at Alexandria a shrine of the Muses with salaried scholars and a library that set out to hold every book. Strabo describes the covered walks and common table. It was policy, not piety: a state that fed its scholars found that knowledge came to it first.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "egypt"
+        ]
+      },
+      "origin_cultures": [
+        "greek",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "education",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 6
+      },
+      "culture_resistance": {
+        "barbarian": 2.5
+      },
+      "effects": {
+        "scholarship": 1,
+        "happiness": 1
+      }
+    },
+    {
+      "id": "census_registration",
+      "name": "Census Rolls",
+      "domain": "scholarship_statecraft",
+      "historical_basis": "Rome's censors registered every citizen and his property on oath, class by class, every five years; Ptolemaic Egypt surveyed its fields and counted its households with a papyrus bureaucracy centuries deep. A state that knew what it possessed could tax it, levy it, and catch the hands that skimmed it.",
+      "start_adopted": {
+        "cultures": [
+          "egyptian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.2
+      },
+      "effects": {
+        "corruption_reduction_pct": 10
+      }
+    },
+    {
+      "id": "silver_coinage",
+      "name": "Silver Standard Coinage",
+      "domain": "scholarship_statecraft",
+      "historical_basis": "The Greek east had struck silver for centuries, but Rome minted her first silver didrachms by tradition only around 269 BC, and the denarius itself was born of the Hannibalic emergency about 211 BC. Adopting coin was a choice with costs - mints, assayers, the surrender of old bronze reckoning - which is why so practical a device took Rome a generation to embrace.",
+      "start_adopted": {
+        "cultures": [
+          "greek",
+          "carthaginian",
+          "eastern",
+          "egyptian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 2,
+        "resource": "silver",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.6
+      },
+      "effects": {
+        "trade_pct": 10
+      }
+    },
+    {
+      "id": "codified_law_tables",
+      "name": "Published Law Tables",
+      "domain": "scholarship_statecraft",
+      "historical_basis": "Rome set her Twelve Tables in the Forum around 450 BC so that the law could be read and not merely remembered by the few; the great inscription of Gortyn in Crete did the same in stone in the same age. Law that stood in public view bound the judge as well as the judged - and quieted the suspicion that feeds unrest.",
+      "start_adopted": {
+        "cultures": [
+          "roman",
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.4
+      },
+      "effects": {
+        "happiness": 2
+      }
+    },
+    {
+      "id": "diplomatic_archive",
+      "name": "Treaty Archives",
+      "domain": "scholarship_statecraft",
+      "historical_basis": "Rome kept her treaties cut in bronze on the Capitol; Polybius went and read the old Carthaginian agreements there, archaic language and all, when he wrote his history. Kingdoms and cities alike kept registries of oaths, envoys and precedents - the institutional memory that let a state deal in decades while men dealt in years.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "government",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "codified_law_tables"
+        ]
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.8
+      },
+      "effects": {
+        "scholarship": 1
+      }
+    },
+    {
+      "id": "monsoon_navigation",
+      "name": "Monsoon Passage",
+      "domain": "logistics_trade",
+      "historical_basis": "Late in the Ptolemaic age the pilot Hippalus - so the Periplus of the Erythraean Sea names him - showed that the open-ocean monsoon, blowing steady one way in summer and the other in winter, could carry ships straight across to India and back, cutting out the coast-crawl and its middlemen. Season-keeping as a trade secret worth fleets.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "egyptian",
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "resource": "incense",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1400,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "barbarian": 2.5,
+        "roman": 1.3
+      },
+      "effects": {
+        "trade_pct": 12
+      }
+    },
+    {
+      "id": "standard_amphorae",
+      "name": "Stamped Amphorae",
+      "domain": "logistics_trade",
+      "historical_basis": "Rhodes stamped the handles of her wine jars with the maker and the year's priest, and those handles now pave the ancient world's harbors by the hundred thousand. A sealed, standard, stackable jar whose origin could be proven was container, contract and customs record in one - the humble hardware of long-distance trade.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 500,
+        "turns": 2
+      },
+      "culture_resistance": {},
+      "effects": {
+        "trade_pct": 5
+      }
+    },
+    {
+      "id": "road_surveying",
+      "name": "Road Surveying",
+      "domain": "logistics_trade",
+      "historical_basis": "The via Appia of 312 BC ran from Rome to Capua as the surveyors drew it - graded, cambered, drained, and famously straight where the land allowed. The groma and the leveling staff turned road-laying from following paths into imposing lines; Rome's grip on Italy moved at the speed of those roads.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "roads",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1000,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.5
+      },
+      "effects": {
+        "movement_points": 0.25
+      }
+    },
+    {
+      "id": "state_courier_relays",
+      "name": "Courier Relays",
+      "domain": "logistics_trade",
+      "historical_basis": "Herodotus marveled at the Persian king's riders, posted a day's gallop apart, whom neither snow nor night stayed from their appointed rounds; the Seleucids inherited the roads and the system with the empire. A crown that heard from its provinces in days rather than seasons could catch a thieving governor - or a rising - in time.",
+      "start_adopted": {
+        "cultures": [
+          "eastern"
+        ],
+        "factions": [
+          "seleucia"
+        ]
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "roads",
+        "building_level": 1,
+        "resource": "horses",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 800,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 1.5
+      },
+      "effects": {
+        "corruption_reduction_pct": 8
+      }
+    },
+    {
+      "id": "grain_fleet_contracts",
+      "name": "Grain Fleet Contracts",
+      "domain": "logistics_trade",
+      "historical_basis": "Egypt's harvest moved to Alexandria and beyond on contracted bottoms, the papyri recording shippers, guarantors and penalties in a bureaucracy of bread; Rome would later stake her peace on the same seaborne grain. Feeding a great city was not farming but logistics - fleets, schedules, and law.",
+      "start_adopted": {
+        "cultures": [
+          "egyptian"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [
+        "egyptian",
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "resource": "grain",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 900,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 2.0
+      },
+      "effects": {
+        "trade_pct": 8
+      }
+    },
+    {
+      "id": "actuarial_bottomry",
+      "name": "Sea-Loan Underwriting",
+      "domain": "logistics_trade",
+      "historical_basis": "Athenian court speeches preserve the bottomry loan whole: money advanced on ship and cargo at steep interest, forfeit only if the sea took them - the risk of the voyage priced and sold generations before anyone wrote a theory of it. Rhodes codified the customs of the sea so well that Roman law simply deferred to them.",
+      "start_adopted": {
+        "cultures": [
+          "greek"
+        ],
+        "factions": []
+      },
+      "origin_cultures": [],
+      "prerequisites": {
+        "building_kind": "market",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": true,
+        "techniques": [
+          "silver_coinage"
+        ]
+      },
+      "adoption": {
+        "cost": 1100,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "barbarian": 2.5
+      },
+      "effects": {
+        "trade_pct": 8
+      }
+    },
+    {
+      "id": "manipular_drill",
+      "name": "Manipular Drill",
+      "domain": "warcraft",
+      "historical_basis": "Rome abandoned the hoplite phalanx during the Samnite Wars (343-290 BC), whose hill country punished a rigid line. The three-line manipular array of hastati, principes and triarii could open, close and relieve itself in mid-battle.",
+      "description": "Maniples that open and close on command. Infantry stand a little firmer and keep their order on broken ground.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "cornelii",
+          "julii",
+          "junii",
+          "senate"
+        ]
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "infantry",
+            "morale": 1
+          }
+        ],
+        "terrain": [
+          {
+            "class": "infantry",
+            "terrain": "hills",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "iberian_sword",
+      "name": "Iberian Sword Pattern",
+      "domain": "warcraft",
+      "historical_basis": "The gladius hispaniensis, a cut-and-thrust sword copied from Iberian mercenaries and enemies during the Second Punic War, became the legion's standard blade for two centuries.",
+      "description": "Adopt the enemy's better sword: infantry strike harder. Learned only from fighting foot soldiers.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "faced": {
+          "class": "infantry",
+          "battles": 2
+        }
+      },
+      "adoption": {
+        "cost": 1800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "infantry",
+            "attack": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pilum_volley",
+      "name": "Pilum Volley",
+      "domain": "warcraft",
+      "historical_basis": "A volley of heavy javelins thrown at twenty paces, bending in the shield it pierced, broke the momentum of a charge before the swords came out; at Telamon (225 BC) and Zama (202 BC) it was the legion's opening argument.",
+      "description": "Every legionary carries the pilum: a charge, mounted or on foot, is disordered before it lands.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "manipular_drill"
+        ]
+      },
+      "adoption": {
+        "cost": 2500,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "matchups": [
+          {
+            "class": "infantry",
+            "versus": "cavalry",
+            "pct": 10
+          },
+          {
+            "class": "infantry",
+            "versus": "infantry",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "engineering_corps",
+      "name": "Engineering Corps",
+      "domain": "military_engineering",
+      "historical_basis": "Roman armies dug as much as they fought: the double ring of works around Alesia (52 BC), the circumvallation of Numantia (133 BC), the ramp at Masada. Siege equipment came out of the legion's own ranks.",
+      "description": "Siege works go up a turn faster and assaults on prepared walls carry further.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "siege_workshop",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3000,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "siege_equipment_turns_delta": -1,
+        "assault_pct": 10
+      }
+    },
+    {
+      "id": "camp_discipline",
+      "name": "Camp Discipline",
+      "domain": "warcraft",
+      "historical_basis": "Polybius (Book VI) marvelled that a Roman army built the same fortified camp every night of a march. A beaten army had somewhere to rally, a tired one still fought, and citizens under such discipline resented the levy less.",
+      "description": "The nightly camp: forced marches no longer exhaust the men, beaten units rally rather than scatter, and the levy sits lighter on your towns.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "battles_won": 3
+      },
+      "adoption": {
+        "cost": 2200,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "escape_pct": 10,
+        "levy_strain_pct": -20
+      },
+      "war": {
+        "fatigue_immune": true
+      }
+    },
+    {
+      "id": "cohort_reform",
+      "name": "Cohort Reform",
+      "domain": "warcraft",
+      "historical_basis": "The reforms attributed to Gaius Marius (107 BC): the property qualification dropped, the cohort replacing the maniple, state-issued equipment, and long-service professionals who carried their own kit and called themselves his mules.",
+      "description": "Professional cohorts: infantry hit and hold harder and take the field already drilled. Requires the professional-army era.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [
+          "manipular_drill"
+        ],
+        "era": "post_marian"
+      },
+      "adoption": {
+        "cost": 4000,
+        "turns": 5
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "infantry",
+            "attack": 1,
+            "defense": 1
+          }
+        ],
+        "recruit_xp": [
+          {
+            "class": "infantry",
+            "xp": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "celtic_mail",
+      "name": "Mail Armour",
+      "domain": "warcraft",
+      "historical_basis": "The riveted mail shirt was a Celtic invention of the third century BC; Rome copied it as the lorica hamata and wore it for the rest of its history. It needs iron, and a great deal of a smith's time.",
+      "description": "Mail shirts for the line: infantry and spearmen take fewer wounds. Needs a region that yields iron.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2400,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "infantry",
+            "defense": 1
+          },
+          {
+            "class": "spear",
+            "defense": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "sarissa_drill",
+      "name": "Sarissa Drill",
+      "domain": "warcraft",
+      "historical_basis": "Philip II gave Macedon the sarissa, a two-handed pike of five to six metres, and drilled poor farmers until sixteen ranks could move as one. His son took it to the Indus.",
+      "description": "The Macedonian phalanx drilled to move as one: pike blocks hold firmer and horses die on the points.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "macedon",
+          "seleucia",
+          "thracia"
+        ]
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "factions": [
+        "macedon",
+        "seleucia",
+        "thracia"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "pike",
+            "defense": 1
+          }
+        ],
+        "matchups": [
+          {
+            "class": "pike",
+            "versus": "cavalry",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "hoplite_tradition",
+      "name": "Hoplite Tradition",
+      "domain": "warcraft",
+      "historical_basis": "The citizen hoplite with his round aspis and thrusting spear won Marathon (490 BC) and Plataea (479 BC) and defined Greek war for three centuries: a wall of shields that horsemen would not charge.",
+      "description": "Citizen spearmen who have drilled in the shield wall since boyhood: firmer against horse and in the push of spears.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "greek_cities"
+        ]
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "matchups": [
+          {
+            "class": "spear",
+            "versus": "cavalry",
+            "pct": 10
+          },
+          {
+            "class": "spear",
+            "versus": "infantry",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "companion_wedge",
+      "name": "Companion Wedge",
+      "domain": "warcraft",
+      "historical_basis": "Philip's and Alexander's Companion cavalry charged in a wedge, the point aimed at a seam in the enemy line. Gaugamela (331 BC) was decided by it; at Chaeronea (338 BC) the young Alexander led the stroke that broke the Theban line, with the phalanx as the anvil.",
+      "description": "Heavy horse trained to charge in a wedge: harder charges that find the seams in an infantry line.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "prerequisites": {
+        "building_kind": "stables",
+        "building_level": 2,
+        "resource": "horses",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2600,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "cavalry",
+            "charge": 2
+          }
+        ],
+        "matchups": [
+          {
+            "class": "cavalry",
+            "versus": "infantry",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "thureophoroi_reform",
+      "name": "Thureophoroi Reform",
+      "domain": "warcraft",
+      "historical_basis": "The thureophoroi, looser-order foot behind the Celtic oval shield, came into Greek armies in the 270s BC after the Galatian invasion; after Magnesia (190 BC) and Pydna (168 BC) had shown what broken ground did to a pike block, the kingdoms went further and paraded whole regiments armed in the Roman fashion (Daphne, 166 BC). Learned from a defeat.",
+      "description": "Looser order for rough country: infantry and pikes keep their footing on hills and in woods. Available after a defeat.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "factions": [
+        "macedon",
+        "seleucia",
+        "thracia"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "battles_lost": 1
+      },
+      "adoption": {
+        "cost": 2000,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "terrain": [
+          {
+            "class": "infantry",
+            "terrain": "hills",
+            "pct": 10
+          },
+          {
+            "class": "infantry",
+            "terrain": "forest",
+            "pct": 10
+          },
+          {
+            "class": "pike",
+            "terrain": "hills",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "elephant_corps",
+      "name": "Elephant Corps",
+      "domain": "warcraft",
+      "historical_basis": "The Seleucids kept a permanent elephant corps from Indian stock; four hundred beasts screened the flanks at Ipsus (301 BC), and Raphia (217 BC) saw the only recorded battle between African and Indian elephants.",
+      "description": "A standing elephant establishment with mahouts and stables: steadier beasts, deadlier against foot, cheaper to keep.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek"
+      ],
+      "factions": [
+        "seleucia"
+      ],
+      "prerequisites": {
+        "building_kind": "stables",
+        "building_level": 3,
+        "resource": "elephants",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3500,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "elephant",
+            "morale": 2
+          }
+        ],
+        "matchups": [
+          {
+            "class": "elephant",
+            "versus": "infantry",
+            "pct": 10
+          }
+        ],
+        "upkeep_pct": [
+          {
+            "class": "elephant",
+            "pct": -15
+          }
+        ]
+      }
+    },
+    {
+      "id": "falx_reapers",
+      "name": "Falx Reapers",
+      "domain": "warcraft",
+      "historical_basis": "The Thracian rhomphaia and the Dacian falx, long curved blades swung two-handed, cut through shields and helmets; Trajan's legions added iron reinforcing bars to their helmets because of them.",
+      "description": "Two-handed blades that reach over a shield rim: infantry cut through spear and sword lines alike.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "greek",
+        "barbarian"
+      ],
+      "factions": [
+        "thracia",
+        "dacia"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1600,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "matchups": [
+          {
+            "class": "infantry",
+            "versus": "spear",
+            "pct": 10
+          },
+          {
+            "class": "infantry",
+            "versus": "infantry",
+            "pct": 5
+          }
+        ]
+      }
+    },
+    {
+      "id": "composite_bow_mastery",
+      "name": "Composite Bow Mastery",
+      "domain": "warcraft",
+      "historical_basis": "The recurved composite bow of horn, wood and sinew, drawn from the saddle, was the weapon of the Iranian plateau and the steppe. At Carrhae (53 BC) Surena's archers emptied their quivers into seven legions and were resupplied by camel.",
+      "description": "Horse archers who have shot from the saddle since childhood loose heavier, faster volleys.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "armenia",
+          "parthia"
+        ]
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "factions": [
+        "parthia",
+        "armenia"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "horse_archer",
+            "missile_attack": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "cataphract_armour",
+      "name": "Cataphract Armour",
+      "domain": "warcraft",
+      "historical_basis": "Rider and horse both sheathed in scale, the Parthian and Armenian cataphract charged with a lance held in both hands. It took iron by the ton and broke Roman infantry at Carrhae; at Magnesia (190 BC) the Seleucid version routed a legion before being cut off.",
+      "description": "Man and horse in scale: heavy cavalry that shrugs off blows and rides through infantry. Needs iron.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "stables",
+        "building_level": 3,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3200,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "cavalry",
+            "defense": 2
+          }
+        ],
+        "matchups": [
+          {
+            "class": "cavalry",
+            "versus": "infantry",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "parthian_shot",
+      "name": "Parthian Shot",
+      "domain": "warcraft",
+      "historical_basis": "The feigned flight, turning in the saddle to shoot at the pursuer, meant a Parthian army was almost never caught: Crassus lost his at Carrhae (53 BC), Antony lost a third of his in retreat (36 BC), and neither ever brought the enemy to a decisive battle.",
+      "description": "Retreat is a manoeuvre: your beaten armies get away, and horse archers punish anyone who follows.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "battles_won": 2
+      },
+      "adoption": {
+        "cost": 2400,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "escape_pct": 30
+      },
+      "war": {
+        "matchups": [
+          {
+            "class": "horse_archer",
+            "versus": "infantry",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "remount_herds",
+      "name": "Remount Herds",
+      "domain": "warcraft",
+      "historical_basis": "The Nisaean plain of Media bred the great horses of the East; a Parthian noble rode to war with a string of remounts, and an army so mounted moved and fought at a pace no infantry could match.",
+      "description": "State horse herds: mounted units cost less to keep and every army marches a little further. Needs horse country.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "eastern"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "horses",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2000,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "movement_points": 0.25
+      },
+      "war": {
+        "upkeep_pct": [
+          {
+            "class": "cavalry",
+            "pct": -15
+          },
+          {
+            "class": "horse_archer",
+            "pct": -15
+          }
+        ]
+      }
+    },
+    {
+      "id": "mercenary_contracts",
+      "name": "Mercenary Contracts",
+      "domain": "warcraft",
+      "historical_basis": "Carthage fought with hired Libyans, Iberians, Gauls, Balearic slingers and Numidian horse under a small Punic officer corps. The Spartan Xanthippus, hired in 255 BC, beat Regulus outside the city with them.",
+      "description": "A standing network of recruiting agents: mercenaries sign on for less.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "carthage"
+        ]
+      },
+      "origin_cultures": [
+        "carthaginian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "mercenary_cost_pct": -20
+      }
+    },
+    {
+      "id": "numidian_horse",
+      "name": "Numidian Horsemanship",
+      "domain": "warcraft",
+      "historical_basis": "Numidian light horse rode without saddle or bridle, harried a marching enemy for days and turned every victory into a massacre: Hannibal's at Cannae (216 BC), and when Masinissa changed sides, Scipio's at Zama (202 BC).",
+      "description": "Light horse that never stop: your victories become routs and your defeats become escapes. Needs horse country.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "numidia"
+        ]
+      },
+      "origin_cultures": [
+        "carthaginian",
+        "barbarian"
+      ],
+      "factions": [
+        "carthage",
+        "numidia"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "horses",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1800,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {
+        "pursuit_pct": 20,
+        "escape_pct": 20
+      }
+    },
+    {
+      "id": "war_elephants",
+      "name": "War Elephants",
+      "domain": "warcraft",
+      "historical_basis": "The forest elephants of the Atlas were Carthage's answer to the Hellenistic corps: thirty-seven crossed the Alps with Hannibal in 218 BC, and they scattered the Roman horse at the Trebia that winter.",
+      "description": "Stables and mahouts for the Atlas elephants: steadier beasts, deadlier against foot, cheaper to keep.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "carthaginian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "elephants",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3500,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "elephant",
+            "morale": 2
+          }
+        ],
+        "matchups": [
+          {
+            "class": "elephant",
+            "versus": "infantry",
+            "pct": 10
+          }
+        ],
+        "upkeep_pct": [
+          {
+            "class": "elephant",
+            "pct": -15
+          }
+        ]
+      }
+    },
+    {
+      "id": "sacred_band_drill",
+      "name": "Sacred Band Drill",
+      "domain": "warcraft",
+      "historical_basis": "The Sacred Band was Carthage's one standing citizen regiment: sons of the great houses, armoured and drilled as hoplites, who died almost to a man at the Crimissus (341 BC) rather than break.",
+      "description": "Citizen spearmen drilled as a sacred regiment: spear units hold and endure like the Band.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "carthaginian"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3000,
+        "turns": 4
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "egyptian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "spear",
+            "morale": 2,
+            "defense": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "ptolemaic_phalanx",
+      "name": "Ptolemaic Phalanx",
+      "domain": "warcraft",
+      "historical_basis": "The Ptolemies settled Macedonian and Greek soldiers on Nile land in return for service, and drilled them in the sarissa; at Raphia (217 BC) that phalanx, stiffened with twenty thousand Egyptians, broke the Seleucid centre.",
+      "description": "Settler-soldiers drilled in the Macedonian manner: spearmen hold harder and turn back horse.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "egypt"
+        ]
+      },
+      "origin_cultures": [
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "spear",
+            "defense": 1
+          }
+        ],
+        "matchups": [
+          {
+            "class": "spear",
+            "versus": "cavalry",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "machimoi_levy",
+      "name": "Machimoi Levy",
+      "domain": "warcraft",
+      "historical_basis": "Ptolemy IV armed twenty thousand native Egyptians for Raphia and won; within a decade the machimoi who had learned to fight were in revolt, and Upper Egypt was lost to the crown for twenty years.",
+      "description": "Arm the native levy: cheap spears and infantry, but towns that have been drilled to fight remember it. The levy strains order far more.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "levy_strain_pct": 40
+      },
+      "war": {
+        "upkeep_pct": [
+          {
+            "class": "spear",
+            "pct": -20
+          },
+          {
+            "class": "infantry",
+            "pct": -20
+          }
+        ]
+      }
+    },
+    {
+      "id": "nile_logistics",
+      "name": "Nile Logistics",
+      "domain": "warcraft",
+      "historical_basis": "Grain, men and news moved on the river faster than on any road; an Egyptian army marched supplied and its garrisons were never far from relief.",
+      "description": "River supply: armies march a little further and garrisons keep order better, knowing the barges are behind them.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "port",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2200,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "barbarian": 1.5
+      },
+      "effects": {
+        "movement_points": 0.25,
+        "garrison_order_pct": 10
+      }
+    },
+    {
+      "id": "warband_fury",
+      "name": "Warband Fury",
+      "domain": "warcraft",
+      "historical_basis": "The Gallic charge, screaming and half naked, broke the Roman army at the Allia (390 BC) and nearly did so again at Telamon (225 BC): everything staked on the first rush.",
+      "description": "The first rush is everything: your armies hit harder when they attack.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "britannia",
+          "dacia",
+          "gaul",
+          "germania",
+          "hispania"
+        ]
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1200,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {
+        "attacking_pct": 8
+      }
+    },
+    {
+      "id": "woodland_ambush",
+      "name": "Woodland Ambush",
+      "domain": "warcraft",
+      "historical_basis": "The Boii annihilated two legions in the Litana forest (216 BC) by felling half-cut trees onto the column; Arminius did the same to three in the Teutoburg (AD 9). Arminius had served with Rome first and knew how it marched.",
+      "description": "Fight where the trees are: foot soldiers of every kind are deadlier in forest. Learned from facing infantry.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "faced": {
+          "class": "infantry",
+          "battles": 2
+        }
+      },
+      "adoption": {
+        "cost": 1800,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "terrain": [
+          {
+            "class": "infantry",
+            "terrain": "forest",
+            "pct": 15
+          },
+          {
+            "class": "spear",
+            "terrain": "forest",
+            "pct": 15
+          },
+          {
+            "class": "missile",
+            "terrain": "forest",
+            "pct": 15
+          }
+        ]
+      }
+    },
+    {
+      "id": "hill_fort_engineering",
+      "name": "Hill-Fort Engineering",
+      "domain": "military_engineering",
+      "historical_basis": "The murus gallicus, timber-laced stone that neither ram nor fire could break, ringed the oppida of Gaul; Caesar at Alesia (52 BC) chose to starve Vercingetorix rather than storm it.",
+      "description": "Timber-laced walls: your garrisons fight better from them. Needs walls of the second tier.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "walls",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2000,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {
+        "wall_defense_pct": 15
+      }
+    },
+    {
+      "id": "chariot_tradition",
+      "name": "Chariot Tradition",
+      "domain": "warcraft",
+      "historical_basis": "Caesar found the war chariot still alive in Britain in 55 BC: drivers who could run along the pole at the gallop, warriors who dismounted to fight and remounted to flee, and Roman skirmishers who could not catch them.",
+      "description": "Charioteers bred to it: harder charges that run down skirmishers.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "factions": [
+        "britannia"
+      ],
+      "prerequisites": {
+        "building_kind": "stables",
+        "building_level": 2,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1600,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "class_stats": [
+          {
+            "class": "chariot",
+            "charge": 1
+          }
+        ],
+        "matchups": [
+          {
+            "class": "chariot",
+            "versus": "missile",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "horse_lords",
+      "name": "Steppe Horsemanship",
+      "domain": "warcraft",
+      "historical_basis": "The Scythians and their Sarmatian successors lived in the saddle; Darius could not catch them in 513 BC and neither could anyone else. Every family bred its own remounts.",
+      "description": "A people on horseback: horse archers cost less and rule the steppe. Needs horse country.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": [
+          "scythia"
+        ]
+      },
+      "origin_cultures": [
+        "barbarian"
+      ],
+      "factions": [
+        "scythia"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "horses",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 1500,
+        "turns": 2
+      },
+      "culture_resistance": {
+        "roman": 1.5,
+        "greek": 1.5,
+        "eastern": 1.5,
+        "carthaginian": 1.5,
+        "egyptian": 1.5
+      },
+      "effects": {},
+      "war": {
+        "upkeep_pct": [
+          {
+            "class": "horse_archer",
+            "pct": -15
+          }
+        ],
+        "terrain": [
+          {
+            "class": "horse_archer",
+            "terrain": "steppe",
+            "pct": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "veteran_cadres",
+      "name": "Veteran Cadres",
+      "domain": "warcraft",
+      "historical_basis": "Rome's evocati, veterans recalled to stiffen new legions, and the Hellenistic habit of brigading old soldiers with new levies show the same idea: seed every new unit with men who have seen a battle.",
+      "description": "Veterans train the recruits: every new unit starts a chevron wiser. Available after five victories.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek",
+        "eastern",
+        "carthaginian",
+        "egyptian",
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "",
+        "building_level": 0,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": [],
+        "battles_won": 5
+      },
+      "adoption": {
+        "cost": 2800,
+        "turns": 4
+      },
+      "culture_resistance": {},
+      "effects": {},
+      "war": {
+        "recruit_xp": [
+          {
+            "class": "all",
+            "xp": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "drill_yards",
+      "name": "Drill Yards",
+      "domain": "warcraft",
+      "historical_basis": "A regular dilectus with drill fields in every town turned the levy from an outrage into a habit; a drilled garrison policed the streets it had grown up in.",
+      "description": "Regular drill in every town: garrisons keep order better and the levy is resented less. Needs barracks of the third tier.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek",
+        "eastern",
+        "carthaginian",
+        "egyptian",
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "barracks",
+        "building_level": 3,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2000,
+        "turns": 3
+      },
+      "culture_resistance": {},
+      "effects": {
+        "garrison_order_pct": 10,
+        "levy_strain_pct": -15
+      }
+    },
+    {
+      "id": "armourers_guild",
+      "name": "Armourers' Guild",
+      "domain": "warcraft",
+      "historical_basis": "State arms works — the Hellenistic royal arsenals and, later, the Roman fabricae — standardised patterns and let a city issue better kit than any private smith could.",
+      "description": "Standard patterns across the realm: your towns can issue one further level of weapon and armour upgrades. Needs an armoury of the second tier and iron.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek",
+        "eastern",
+        "carthaginian",
+        "egyptian",
+        "barbarian"
+      ],
+      "prerequisites": {
+        "building_kind": "armoury",
+        "building_level": 2,
+        "resource": "iron",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 3000,
+        "turns": 4
+      },
+      "culture_resistance": {},
+      "effects": {
+        "upgrade_cap": 1
+      }
+    },
+    {
+      "id": "siege_train",
+      "name": "Siege Train",
+      "domain": "military_engineering",
+      "historical_basis": "Demetrius the Besieger brought a nine-storey siege tower to Rhodes in 305 BC; a kingdom that kept its engines and engineers together opened a siege in days rather than months.",
+      "description": "Engines and engineers kept together: siege works are ready a turn sooner.",
+      "start_adopted": {
+        "cultures": [],
+        "factions": []
+      },
+      "origin_cultures": [
+        "roman",
+        "greek",
+        "eastern",
+        "carthaginian",
+        "egyptian"
+      ],
+      "prerequisites": {
+        "building_kind": "siege_workshop",
+        "building_level": 1,
+        "resource": "",
+        "hidden_resource": "",
+        "coastal": false,
+        "techniques": []
+      },
+      "adoption": {
+        "cost": 2400,
+        "turns": 3
+      },
+      "culture_resistance": {
+        "barbarian": 1.5
+      },
+      "effects": {
+        "siege_equipment_turns_delta": -1
+      }
+    }
+  ]
+}

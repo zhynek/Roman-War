@@ -12,8 +12,11 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	if attacker["region"] != defender["region"] \
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
-	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
-	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
+	# Attacking IS a declaration of war — alliances end the moment blood is
+	# drawn. A war the Republic forbids (Roman on Roman before the break) is
+	# refused here too, so no blade can start what no herald may.
+	if not DiplomacyRules.declare_war(data, state, attacker["owner"], defender["owner"]):
+		return {}
 
 	var attacker_soldiers := soldiers_in(data, attacker["units"])
 	var defender_soldiers := soldiers_in(data, defender["units"])
@@ -28,6 +31,30 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	record_battle(data, state, attacker["owner"], defender["owner"], attacker_classes, defender_classes,
 		attacker_soldiers + defender_soldiers, result, attacker["units"], defender["units"])
 	_process_general_deaths(data, state, attacker, defender, result)
+	# Defeat teaches: the beaten court accumulates reform pressure (the
+	# boarding-bridge law — see KnowledgeRules).
+	var attacker_won_field: bool = result["winner"] == "attacker"
+	KnowledgeRules.on_battle_lost(data, state,
+		String(defender["owner"] if attacker_won_field else attacker["owner"]))
+	# The annals: one battle entry whoever fought it (player and AI battles
+	# both pass through here), the war ledger's count, the generals' deeds.
+	ChronicleRules.on_battle(state, attacker["owner"], defender["owner"])
+	var battle_subjects := {
+		"faction": attacker["owner"], "other_faction": defender["owner"],
+		"region": defender["region"],
+	}
+	var winner_general = attacker["general"] if attacker_won_field else defender["general"]
+	if winner_general != null:
+		battle_subjects["character"] = winner_general
+	ChronicleRules.record(data, state, "battle", battle_subjects,
+		6 if attacker_soldiers + defender_soldiers >= 1500 else 4, {
+			"winner": String(result["winner"]),
+			"attacker_soldiers": attacker_soldiers,
+			"defender_soldiers": defender_soldiers,
+		})
+	ChronicleRules.add_deed(state, winner_general, "battles_won")
+	ChronicleRules.add_deed(state,
+		defender["general"] if attacker_won_field else attacker["general"], "battles_lost")
 	if result["winner"] == "attacker":
 		attacker["region"] = defender["region"]
 		MovementRules.sync_general_location(state, attacker)
@@ -57,6 +84,12 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 			winner_soldiers, loser_soldiers, notices)
 	result["character_notices"] = notices
 
+	# The trail counts the player's field victories here — every field battle
+	# passes through, so defending against an AI attack counts too. (Siege
+	# battles count in SiegeRules.assault.)
+	if winner_army["owner"] == state.get("player_faction", ""):
+		GuidedRules.bump(state, "battles_won")
+
 	_cleanup_destroyed_army(data, state, attacker_id)
 	_cleanup_destroyed_army(data, state, defender_id)
 	return result
@@ -64,8 +97,9 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 
 static func battle_context(data: GameData, state: Dictionary, attacker: Dictionary, defender: Dictionary) -> Dictionary:
 	## The resolver context for a field battle: the defender's ground, both
-	## generals, fatigue, and each side's doctrine modifiers pre-merged so the
-	## resolver stays state-free. Shared by attack_army and the odds preview.
+	## generals, fatigue, both societies' martial ethos and each side's
+	## practiced warcraft pre-merged so the resolver stays state-free. Shared
+	## by attack_army and the odds preview.
 	var region: Dictionary = data.regions[defender["region"]]
 	return {
 		"terrain": region["terrain"],
@@ -74,19 +108,21 @@ static func battle_context(data: GameData, state: Dictionary, attacker: Dictiona
 		"defender_general": general_profile(data, state, defender),
 		"attacker_fatigued": attacker.get("forced_march", false),
 		"sally": false,
-		"attacker_mods": DoctrineRules.army_mods(data, state, attacker["owner"]),
-		"defender_mods": DoctrineRules.army_mods(data, state, defender["owner"]),
+		"attacker_martial": SocietyRules.faction_stocks_for(data, state, String(attacker["owner"]))["martial_ethos"],
+		"defender_martial": SocietyRules.faction_stocks_for(data, state, String(defender["owner"]))["martial_ethos"],
+		"attacker_mods": KnowledgeRules.army_mods(data, state, String(attacker["owner"])),
+		"defender_mods": KnowledgeRules.army_mods(data, state, String(defender["owner"])),
 	}
 
 
 static func record_battle(data: GameData, state: Dictionary, attacker_owner: String, defender_owner: String, attacker_classes: Array, defender_classes: Array, soldiers_before: int, result: Dictionary, attacker_units_after = null, defender_units_after = null) -> void:
 	## The bookkeeping every battle leaves behind: each faction's war record
-	## (wins, losses, and which arms it has faced — what its doctrines learn
-	## from), and after a decisive field the mood at home: a triumph for the
-	## victor's towns, a shock for the loser's, both fading over a few turns.
-	## A walkover (nobody to fight) teaches and records nothing. When the
-	## resolver does not report destruction, the (in-place mutated) unit
-	## arrays say whether a side has anyone left.
+	## (wins, losses, and which arms it has faced — what its military
+	## techniques learn from), and after a decisive field the mood at home: a
+	## triumph for the victor's towns, a shock for the loser's, both fading
+	## over a few turns. A walkover (nobody to fight) teaches and records
+	## nothing. When the resolver does not report destruction, the (in-place
+	## mutated) unit arrays say whether a side has anyone left.
 	if result.is_empty() or bool(result.get("walkover", false)):
 		return
 	if attacker_units_after is Array and not result.has("attacker_destroyed"):
@@ -202,12 +238,41 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	settlement["tax_level"] = "normal"
 	settlement["recently_conquered"] = int(ceil(float(order_penalty) / float(maxi(decay, 1))))
 
+	# A captured province starts resentful and a stranger to its new masters; the
+	# conqueror gains one more victorious house expecting to be rewarded, and an
+	# atrocity is remembered in every province he holds, not only this one.
+	SocietyRules.record_conquest(data, state, region_id, new_owner, occupation)
+	EdictRules.clear(settlement)
+
 	state["factions"][new_owner]["treasury"] = int(state["factions"][new_owner]["treasury"]) + loot
+	SocietyRules.record_plunder(data, state, new_owner, float(loot))
+
+	# The fall of a city both teaches and warns: the victor gains awareness of
+	# every craft its late owner practiced (with a conquest discount toward
+	# adopting them), and the loser's court accumulates reform pressure.
+	KnowledgeRules.on_settlement_captured(data, state, new_owner, previous_owner)
+	KnowledgeRules.on_settlement_lost(data, state, previous_owner)
+
+	# The annals: every capture path comes through here — occupation decides
+	# whether the scribes write a taking or a sack. The loser's leader carries
+	# the loss BEFORE displacement, which may cost him his life in the fall.
+	ChronicleRules.on_city_taken(state, new_owner, previous_owner)
+	ChronicleRules.record(data, state,
+		"city_taken" if occupation == "occupy" else "city_sacked", {
+			"faction": new_owner, "other_faction": previous_owner, "region": region_id,
+		}, 6 if occupation == "occupy" else 7,
+		{"occupation": occupation, "loot": loot, "population": int(settlement["population"])})
+	ChronicleRules.add_deed(state, ChronicleRules.leader_of(state, previous_owner), "cities_lost")
 
 	var taken := displace_characters(data, state, region_id, previous_owner)
 
+	# Every capture path funnels through here — assault, starve-out, AI or
+	# player — so the trail's capture counter lives here (revolts don't).
+	if new_owner == state.get("player_faction", ""):
+		GuidedRules.bump(state, "regions_captured")
+
 	# Losing your last settlement destroys the faction.
-	_check_faction_destroyed(state)
+	check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)
 	return {"loot": loot, "slaves": slaves, "occupation": occupation, "characters_taken": taken}
 
@@ -217,6 +282,7 @@ static func fire_occupation_triggers(data: GameData, state: Dictionary, rng: Cam
 	## path (assault or starve-out, player or AI) must come through here.
 	if general_id == null or not state["characters"].has(general_id):
 		return
+	ChronicleRules.add_deed(state, general_id, "cities_taken")
 	var context := {"occupation": occupation}
 	CharacterRules.fire_trigger(data, state, general_id, "settlement_captured", context, rng, notices)
 	if occupation == "enslave":
@@ -270,6 +336,96 @@ static func _nearest_owned_settlement(data: GameData, state: Dictionary, from_re
 	return best
 
 
+static func raise_army(data: GameData, state: Dictionary, region_id: String, unit_indices: Array, general_id: Variant = null) -> String:
+	## Split garrison units out into a new field army standing in the settlement's
+	## region — the inverse of garrison_army. unit_indices index into the garrison
+	## array. An optional general must be a living adult male of the owning house
+	## present in the settlement and not already leading an army. Returns the new
+	## army id, or "" if nothing could be raised. The army marches next turn
+	## (movement_left starts at 0).
+	if not state["settlements"].has(region_id):
+		return ""
+	var settlement: Dictionary = state["settlements"][region_id]
+	# A besieged garrison cannot slip out of the gates as a field army — its
+	# way out is the walls' battle (sally or assault), with the walls' odds.
+	if settlement["siege"] != null:
+		return ""
+	var garrison: Array = settlement["garrison"]
+	var picked: Array = []
+	var sorted_indices := _unique_sorted(unit_indices)
+	for i in range(sorted_indices.size() - 1, -1, -1):
+		var index := int(sorted_indices[i])
+		if index >= 0 and index < garrison.size():
+			picked.push_front(garrison[index])
+			garrison.remove_at(index)
+	if picked.is_empty():
+		return ""
+
+	var general = null
+	if general_id != null and state["characters"].has(general_id):
+		var character: Dictionary = state["characters"][general_id]
+		var leads_army := false
+		for army in state["armies"].values():
+			if army["general"] == general_id:
+				leads_army = true
+				break
+		if character["alive"] and character["faction"] == settlement["owner"] \
+				and character.get("gender", "male") == "male" \
+				and not character["role"] in ["spouse", "child"] \
+				and int(character["age"]) >= int(data.balance["characters"]["come_of_age"]) \
+				and character.get("location", "") == region_id and not leads_army:
+			general = general_id
+
+	var army_id := "army_%d" % state["next_id"]
+	state["next_id"] = int(state["next_id"]) + 1
+	state["armies"][army_id] = {
+		"owner": settlement["owner"],
+		"region": region_id,
+		"units": picked,
+		"general": general,
+		"movement_left": 0.0,
+		"forced_march": false,
+	}
+	SettlementRules.refresh_governors(data, state)
+	return army_id
+
+
+static func detach_to_garrison(data: GameData, state: Dictionary, army_id: String, unit_indices: Array) -> bool:
+	## Move some of a field army's units into the friendly settlement it stands
+	## in. Detaching every unit dissolves the army; its general stays in the city.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty() or not state["settlements"].has(army["region"]):
+		return false
+	var settlement: Dictionary = state["settlements"][army["region"]]
+	if settlement["owner"] != army["owner"]:
+		return false
+	var units: Array = army["units"]
+	var sorted_indices := _unique_sorted(unit_indices)
+	var moved := false
+	for i in range(sorted_indices.size() - 1, -1, -1):
+		var index := int(sorted_indices[i])
+		if index >= 0 and index < units.size():
+			settlement["garrison"].append(units[index])
+			units.remove_at(index)
+			moved = true
+	if units.is_empty():
+		state["armies"].erase(army_id)
+	if moved:
+		SettlementRules.refresh_governors(data, state)
+	return moved
+
+
+static func _unique_sorted(indices: Array) -> Array:
+	## Sorted, de-duplicated copy — a repeated index must not remove whichever
+	## unit slid into the position after the first removal.
+	var seen := {}
+	for index in indices:
+		seen[int(index)] = true
+	var unique: Array = seen.keys()
+	unique.sort()
+	return unique
+
+
 static func garrison_army(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
 	## Merge a friendly army standing in its own settlement's region into the garrison.
 	var army: Dictionary = state["armies"][army_id]
@@ -309,6 +465,11 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 		if army["general"] != null:
 			CharacterRules.kill(state, army["general"], data)
 		state["armies"].erase(army_id)
+
+
+static func check_faction_destroyed(state: Dictionary) -> void:
+	## Public entry for other modules that transfer settlements (cessions).
+	_check_faction_destroyed(state)
 
 
 static func _check_faction_destroyed(state: Dictionary) -> void:

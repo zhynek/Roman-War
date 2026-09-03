@@ -1,0 +1,98 @@
+{
+  "$schema": "../schemas/advances.schema.json",
+  "advances": [
+    {
+      "id": "surveyed_roads",
+      "name": "The Surveyor's Chain",
+      "knowledge_threshold": 16,
+      "effects": { "clarity_bonus": 0.10 },
+      "description": "Sighting frames and measured chains turn a track into a route with a known length. A governor who can say how far away a thing is can also say when he will hear about it."
+    },
+    {
+      "id": "bound_mortar",
+      "name": "Bound Mortar",
+      "knowledge_threshold": 24,
+      "effects": { "build_cost_pct": -8 },
+      "description": "Ash, lime and rubble set into a stone that pours. Walls no longer wait on a quarry, and a builder's estimate finally means something."
+    },
+    {
+      "id": "written_census",
+      "name": "The Written Census",
+      "knowledge_threshold": 30,
+      "effects": { "clarity_bonus": 0.12, "corruption_reduction_pct": 10 },
+      "description": "Households counted, land measured, obligations written down. Being legible to the state is the beginning of being governed by it — and the end of a clerk's quiet arithmetic."
+    },
+    {
+      "id": "crop_rotation",
+      "name": "The Fallow Year",
+      "knowledge_threshold": 34,
+      "effects": { "farm_income_pct": 10 },
+      "description": "Land rested and land planted in turn, and a bean crop where the grain stood last. Yields that no longer fall away after a decade of the same furrow."
+    },
+    {
+      "id": "library_of_scholars",
+      "name": "The Assembled Library",
+      "knowledge_threshold": 38,
+      "culture": "greek",
+      "effects": { "knowledge_decay_reduction_pct": 25 },
+      "description": "Copyists paid by the roll, and a catalogue that says where each is kept. What one generation worked out, the next no longer has to."
+    },
+    {
+      "id": "aqueduct_engineering",
+      "name": "The Measured Fall",
+      "knowledge_threshold": 42,
+      "effects": { "health_capacity_pct": 25 },
+      "description": "A channel that drops a hand's breadth in a mile and runs for forty. Water arrives clean at the height it is needed, and the city stops drinking from the river it fouls."
+    },
+    {
+      "id": "legion_engineering",
+      "name": "The Marching Camp",
+      "knowledge_threshold": 44,
+      "culture": "roman",
+      "effects": { "build_turns_reduction": 1 },
+      "description": "Every soldier a labourer, every halt a fortified square dug to the same plan. Men who build a camp nightly can raise anything else in half the time."
+    },
+    {
+      "id": "codified_law",
+      "name": "The Posted Law",
+      "knowledge_threshold": 50,
+      "effects": { "civic_target_bonus": 4, "corruption_reduction_pct": 12 },
+      "description": "Statutes cut in bronze and set up where anyone may read them. A rule a magistrate cannot quietly reinterpret is worth more to the ruled than a generous one he can."
+    },
+    {
+      "id": "harbour_works",
+      "name": "Harbour Works",
+      "knowledge_threshold": 56,
+      "effects": { "trade_pct_bonus": 8, "build_cost_pct": -4 },
+      "description": "Moles thrown out into deep water and a basin that silts slowly. Ships that can be worked in any weather change what a season is worth."
+    },
+    {
+      "id": "standing_archive",
+      "name": "The Standing Archive",
+      "knowledge_threshold": 62,
+      "effects": { "knowledge_decay_reduction_pct": 30 },
+      "description": "Records kept past the death of the man who made them, in a building with a roof and a budget. The difference between a people who know a thing and a people who once knew it."
+    },
+    {
+      "id": "public_baths",
+      "name": "The Public Bath",
+      "knowledge_threshold": 68,
+      "effects": { "health_capacity_pct": 20, "civic_target_bonus": 3 },
+      "description": "Hypocausts, hot rooms and cold plunges, open to anyone with a small coin. A daily proof that the state spends something on people who will never be asked to a banquet."
+    },
+    {
+      "id": "grain_dole",
+      "name": "The Corn Dole",
+      "knowledge_threshold": 74,
+      "effects": { "civic_target_bonus": 7 },
+      "description": "A measured ration against the bad year, distributed by ticket and by name. It is not charity and it is not bribery: it is the state admitting it owes something in return."
+    },
+    {
+      "id": "provincial_administration",
+      "name": "Provincial Administration",
+      "knowledge_threshold": 82,
+      "effects": { "clarity_bonus": 0.15, "corruption_reduction_pct": 15 },
+      "description": "Salaried officials with defined terms, audited accounts, and a road for the report to travel. An empire finally able to see its own edges."
+    }
+  ]
+}

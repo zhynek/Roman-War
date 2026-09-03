@@ -58,6 +58,29 @@ func test_cannot_demolish_farms_or_government(t) -> void:
 	t.check(ConstructionRules.demolish(data, state, "beta", "test_walls"), "walls can be pulled down")
 	t.check(not state["settlements"]["beta"]["buildings"].has("test_walls"), "tier-1 demolition removes the chain")
 
+func test_technique_gates_and_cheapens_building(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	data.chains["test_health"]["levels"][0]["requires_technique"] = "test_letters"
+	state["settlements"]["beta"]["population"] = 3000
+	var chains := []
+	for project in ConstructionRules.available_projects(data, state, "beta"):
+		chains.append(project["chain"])
+	t.check(not chains.has("test_health"), "a building level may require a practiced technique")
+	state["factions"]["red"]["knowledge"]["test_letters"] = {"stage": "adopted", "turn": 0, "progress": 0, "discount_pct": 0.0}
+	var drain_cost := 0
+	for project in ConstructionRules.available_projects(data, state, "beta"):
+		if project["chain"] == "test_health":
+			drain_cost = int(project["cost"])
+	t.check_eq(drain_cost, 400, "adoption unlocks it at full price")
+
+	# A builder's craft cheapens every project (build_cost_pct is authored negative).
+	data.techniques["test_letters"]["effects"] = {"build_cost_pct": -10}
+	for project in ConstructionRules.available_projects(data, state, "beta"):
+		if project["chain"] == "test_health":
+			drain_cost = int(project["cost"])
+	t.check_eq(drain_cost, 360, "ten parts in a hundred off the bill")
+
 
 func test_requires_building_gates_armoury(t) -> void:
 	var data := Fixtures.data()
@@ -66,6 +89,11 @@ func test_requires_building_gates_armoury(t) -> void:
 	for project in ConstructionRules.available_projects(data, state, "beta"):
 		chains.append(project["chain"])
 	t.check(not chains.has("test_armoury"), "no armoury without a drill yard")
+	var blockers := ConstructionRules.blockers_for(data, state, "beta", data.chains["test_armoury"], 1)
+	var kinds := []
+	for blocker in blockers:
+		kinds.append(blocker["kind"])
+	t.check(kinds.has("requires_building"), "and the blocker says why")
 	state["settlements"]["beta"]["buildings"]["test_barracks"] = 2
 	chains = []
 	for project in ConstructionRules.available_projects(data, state, "beta"):

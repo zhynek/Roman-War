@@ -1,16 +1,23 @@
 class_name BattleResolver
 extends RefCounted
-## THE swappable battle interface. Campaign code only ever calls resolve() and
-## consumes the BattleResult dictionary — it never knows whether the battle was
-## auto-resolved or fought in a (future) real-time battle scene.
+## THE swappable battle interface. Campaign code only ever calls resolve() —
+## plus the static, RNG-free estimate() / force_strength() below, which are
+## part of this interface precisely so odds previews and AI assessments stay
+## resolver-agnostic — and consumes the BattleResult dictionary. It never
+## knows whether the battle was auto-resolved or fought in a (future)
+## real-time battle scene.
 ##
 ## Contract:
 ##   resolve(data, rng, attacker_units, defender_units, context) -> BattleResult
 ##
 ##   attacker_units / defender_units: Arrays of unit dicts
 ##     {template: String, experience: int 0-9, strength_pct: int 1-100,
-##      weapon: int (optional), armor: int (optional)}  — 0..recruitment.upgrade_max,
-##      one more with a cap-raising doctrine
+##      weapon: int, armor: int}
+##     weapon/armor are the arming levels stamped at recruitment from the
+##     raising settlement's forges and armouries and the owner's practiced
+##     techniques (0..recruitment.upgrade_max, more with a cap-raising
+##     technique); they travel with the unit. Older units and mercenaries may
+##     omit them, so read them with .get(..., 0).
 ##     Mutated IN PLACE: casualties reduce strength_pct, destroyed units are
 ##     removed, survivors may gain experience.
 ##
@@ -21,7 +28,11 @@ extends RefCounted
 ##     defender_general: Dictionary|null,
 ##     attacker_fatigued: bool,    # forced march
 ##     sally: bool,                # defenders sallying out of a siege
-##     attacker_mods: ArmyMods,    # optional; faction doctrines etc., pre-merged
+##     attacker_martial: float,    # owner's martial ethos 0-100 (SocietyRules)
+##     defender_martial: float,    # a society oriented toward war fields better
+##                                 # soldiers — this is what militarisation BUYS,
+##                                 # against everything it costs elsewhere
+##     attacker_mods: ArmyMods,    # optional; practiced warcraft etc., pre-merged
 ##     defender_mods: ArmyMods,    #   campaign-side so the resolver stays state-free
 ##   }
 ##   ArmyMods: {
@@ -41,6 +52,14 @@ extends RefCounted
 ##     walkover: bool,          # one side had no strength: no fight, no losses, no lesson
 ##     breakdown: {attacker: SideEstimate, defender: SideEstimate, ratio: float,
 ##                 fortune: {attacker: float, defender: float}},
+##     # Optional playback keys — consumers read them with .get and must
+##     # cope with their absence (a resolver may not narrate; a walkover
+##     # has no rounds):
+##     rounds: [{phase: String, attacker_casualty_pct: float,
+##       defender_casualty_pct: float, attacker_morale: float,
+##       defender_morale: float, breaking: ""|"attacker"|"defender"}, ...],
+##     attacker_report / defender_report: per-unit fates in pre-battle
+##       order: [{template, strength_before, strength_after, destroyed}, ...]
 ##   }
 ##   Campaign code treats every key but `winner` as optional (.get with defaults).
 ##
@@ -96,6 +115,36 @@ static func estimate(data: GameData, attacker_units: Array, defender_units: Arra
 	}
 
 
+static func force_strength(data: GameData, units: Array, general: Variant, _experience_pct_per_chevron: float = 0.0) -> float:
+	## One force's strength with no enemy in sight — the AI's yardstick and the
+	## shared "how strong is this army" number: the first four stages of the
+	## per-unit model (men x class mass x quality, the arming stamp, experience)
+	## and the general, without the opponent-, ground- and attribute-dependent
+	## stages. The AI asks this thousands of times a turn, so it stays a tight
+	## loop with no allocations. The experience percentage now comes from
+	## balance like every other constant; the parameter stays for the callers.
+	var battle_rules: Dictionary = data.balance["battle"]
+	var weapon_pct := float(battle_rules["weapon_upgrade_attack_pct"]) / 100.0
+	var armor_pct := float(battle_rules["armor_upgrade_defense_pct"]) / 100.0
+	var experience_pct := float(battle_rules["experience_strength_pct_per_chevron"]) / 100.0
+	var strength := 0.0
+	for unit in units:
+		var template = data.units.get(unit["template"])
+		if template == null:
+			continue
+		var soldiers := float(template["soldiers"]) * float(unit["strength_pct"]) / 100.0
+		var mass := float(data.unit_classes.get(template.get("class", ""), {}).get("mass", 1.0))
+		var quality := _quality(template, {}, float(unit.get("weapon", 0)) * weapon_pct,
+			float(unit.get("armor", 0)) * armor_pct)
+		strength += soldiers * mass * quality * (1.0 + float(unit["experience"]) * experience_pct)
+	if general is Dictionary and not (general as Dictionary).is_empty():
+		var profile := general as Dictionary
+		var character_rules: Dictionary = data.balance["characters"]
+		strength *= (1.0 + float(profile.get("command", 0)) * float(battle_rules["general_command_bonus_pct"]) / 100.0) \
+			* (1.0 + float(profile.get("troop_morale", 0)) * float(character_rules["troop_morale_strength_pct_per_point"]) / 100.0)
+	return strength
+
+
 static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary, context: Dictionary, is_attacker: bool) -> Dictionary:
 	## One side's strength as a chain of named multipliers over the raw
 	## soldiers x quality sum. Per-unit stages come first (so a countered
@@ -108,7 +157,7 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 	var fatigued: bool = is_attacker and bool(context.get("attacker_fatigued", false))
 	var own_shares := ArmyRules.shares(data, units)
 
-	var stages: Array = ["base", "upgrades", "doctrines", "experience", "matchups", "class_terrain",
+	var stages: Array = ["base", "upgrades", "techniques", "experience", "matchups", "class_terrain",
 		"assault" if is_attacker else "wall_defense", "attacking", "fatigue"]
 	var sums: Array = []
 	for stage in stages:
@@ -153,6 +202,14 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 				* float(character_rules["troop_morale_strength_pct_per_point"]) / 100.0)
 		strength = _apply_factor(factors, "general", general_factor, strength)
 
+	# What a martial society actually buys: men who have drilled since boyhood
+	# because that is what their people are for. Everything it costs is paid in
+	# SocietyRules — legitimacy, conscription load, and generals with armies.
+	var martial := float(context.get("attacker_martial" if is_attacker else "defender_martial", 0.0))
+	if martial != 0.0:
+		strength = _apply_factor(factors, "martial",
+			1.0 + martial / 100.0 * float(battle_rules["martial_ethos_strength_pct_at_full"]) / 100.0, strength)
+
 	if not is_attacker:
 		strength = _apply_factor(factors, "terrain",
 			float(battle_rules["terrain_defense_multiplier"].get(terrain, 1.0)), strength)
@@ -162,12 +219,12 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 
 	strength = _apply_factor(factors, "combined_arms", combined_arms_factor(data, units), strength)
 
-	var doctrine_scalar := 1.0 + float(mods.get("strength_pct", 0.0)) / 100.0
+	var technique_scalar := 1.0 + float(mods.get("strength_pct", 0.0)) / 100.0
 	if is_attacker:
-		doctrine_scalar *= 1.0 + float(mods.get("attacking_pct", 0.0)) / 100.0
-	if absf(doctrine_scalar - 1.0) > 0.000001:
-		strength *= doctrine_scalar
-		_merge_factor(factors, "doctrines", doctrine_scalar)
+		technique_scalar *= 1.0 + float(mods.get("attacking_pct", 0.0)) / 100.0
+	if absf(technique_scalar - 1.0) > 0.000001:
+		strength *= technique_scalar
+		_merge_factor(factors, "techniques", technique_scalar)
 
 	if not is_attacker and bool(context.get("sally", false)):
 		strength = _apply_factor(factors, "sally",
@@ -205,13 +262,15 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 
 	# 1. base quality from the template alone.
 	var base_quality := _quality(template, {}, 0.0, 0.0)
-	# 2. weapon / armour upgrades stamped on the unit.
-	var weapon_bonus := float(unit.get("weapon", 0)) * float(battle_rules["weapon_upgrade_attack_per_level"])
-	var armor_bonus := float(unit.get("armor", 0)) * float(battle_rules["armor_upgrade_defense_per_level"])
-	var upgraded_quality := _quality(template, {}, weapon_bonus, armor_bonus)
-	# 3. doctrine stat deltas for this class.
+	# 2. the arming stamp: weapons scale what a unit deals, armour what it
+	#    takes; morale and the charge stand outside both — better armour does
+	#    not make braver men.
+	var weapon_pct := float(unit.get("weapon", 0)) * float(battle_rules["weapon_upgrade_attack_pct"]) / 100.0
+	var armor_pct := float(unit.get("armor", 0)) * float(battle_rules["armor_upgrade_defense_pct"]) / 100.0
+	var upgraded_quality := _quality(template, {}, weapon_pct, armor_pct)
+	# 3. practiced warcraft: stat deltas for this class.
 	var class_stats: Dictionary = mods.get("class_stats", {}).get(unit_class, {})
-	var modded_quality := _quality(template, class_stats, weapon_bonus, armor_bonus)
+	var modded_quality := _quality(template, class_stats, weapon_pct, armor_pct)
 	# 4. experience.
 	var experience_factor := 1.0 + float(unit["experience"]) \
 		* float(battle_rules["experience_strength_pct_per_chevron"]) / 100.0
@@ -234,7 +293,7 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 	var attacking_factor := 1.0
 	if is_attacker:
 		attacking_factor = 1.0 + float(attribute_effects.get("attacking_pct", 0.0)) / 100.0
-	# 9. fatigue, unless the unit or its doctrine shrugs it off.
+	# 9. fatigue, unless the unit or its warcraft shrugs it off.
 	var fatigue_factor := 1.0
 	if fatigued and not bool(mods.get("fatigue_immune", false)) \
 			and not bool(attribute_effects.get("fatigue_immune", false)):
@@ -281,20 +340,20 @@ static func unit_profile(data: GameData, unit: Dictionary, mods: Dictionary, ter
 static func matchup_factor(data: GameData, unit_class: String, attribute_effects: Dictionary, mods: Dictionary, enemy_shares: Dictionary) -> float:
 	## 1 + (Σ enemy share x matrix cell − 1) x matchup_weight. The matrix cell
 	## for a pair is the class table's entry times the unit's attribute and
-	## doctrine percentages against that enemy class.
+	## warcraft percentages against that enemy class.
 	if enemy_shares.is_empty() or unit_class == "":
 		return 1.0
 	var class_record: Dictionary = data.unit_classes.get(unit_class, {})
 	var matrix: Dictionary = class_record.get("matchups", {})
 	var attribute_matchups: Dictionary = attribute_effects.get("matchups", {})
-	var doctrine_matchups: Dictionary = mods.get("matchup_pct", {}).get(unit_class, {})
+	var technique_matchups: Dictionary = mods.get("matchup_pct", {}).get(unit_class, {})
 	var weighted := 0.0
 	for enemy_class in enemy_shares:
 		var cell := 1.0
 		if enemy_class != unit_class:
 			cell = float(matrix.get(enemy_class, 1.0))
 		cell *= 1.0 + float(attribute_matchups.get(enemy_class, 0.0)) / 100.0
-		cell *= 1.0 + float(doctrine_matchups.get(enemy_class, 0.0)) / 100.0
+		cell *= 1.0 + float(technique_matchups.get(enemy_class, 0.0)) / 100.0
 		weighted += float(enemy_shares[enemy_class]) * cell
 	var weight := float(data.balance["battle"]["matchup_weight"])
 	return 1.0 + (weighted - 1.0) * weight
@@ -304,9 +363,9 @@ static func class_terrain_factor(data: GameData, unit_class: String, attribute_e
 	var class_record: Dictionary = data.unit_classes.get(unit_class, {})
 	var raw := float(class_record.get("terrain", {}).get(terrain, 1.0))
 	raw *= 1.0 + float(attribute_effects.get("terrain", {}).get(terrain, 0.0)) / 100.0
-	var doctrine_terrain: Dictionary = mods.get("terrain_pct", {})
-	raw *= 1.0 + float(doctrine_terrain.get(unit_class, {}).get(terrain, 0.0)) / 100.0
-	raw *= 1.0 + float(doctrine_terrain.get("all", {}).get(terrain, 0.0)) / 100.0
+	var technique_terrain: Dictionary = mods.get("terrain_pct", {})
+	raw *= 1.0 + float(technique_terrain.get(unit_class, {}).get(terrain, 0.0)) / 100.0
+	raw *= 1.0 + float(technique_terrain.get("all", {}).get(terrain, 0.0)) / 100.0
 	var weight := float(data.balance["battle"]["terrain_class_weight"])
 	return 1.0 + (raw - 1.0) * weight
 
@@ -346,13 +405,14 @@ static func win_chance(attacker_strength: float, defender_strength: float, rando
 	return clampf(area * width / ((high - low) * (high - low)), 0.0, 1.0)
 
 
-static func _quality(template: Dictionary, class_stats: Dictionary, weapon_bonus: float, armor_bonus: float) -> float:
-	var attack := float(template["attack"]) + weapon_bonus + float(class_stats.get("attack", 0.0))
-	var defense := float(template["defense"]) + armor_bonus + float(class_stats.get("defense", 0.0))
+static func _quality(template: Dictionary, class_stats: Dictionary, weapon_pct: float, armor_pct: float) -> float:
+	var attack := float(template["attack"]) + float(class_stats.get("attack", 0.0))
+	var defense := float(template["defense"]) + float(class_stats.get("defense", 0.0))
 	var morale := float(template["morale"]) + float(class_stats.get("morale", 0.0))
 	var charge := float(template.get("charge", 0)) + float(class_stats.get("charge", 0.0))
 	var missile := float(template.get("missile_attack", 0)) + float(class_stats.get("missile_attack", 0.0))
-	return maxf(attack, 0.0) + maxf(missile, 0.0) * 0.5 + maxf(defense, 0.0) \
+	return (maxf(attack, 0.0) + maxf(missile, 0.0) * 0.5) * (1.0 + weapon_pct) \
+		+ maxf(defense, 0.0) * (1.0 + armor_pct) \
 		+ maxf(morale, 0.0) * 0.5 + maxf(charge, 0.0) * 0.25
 
 

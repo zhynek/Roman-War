@@ -13,8 +13,10 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
-	# Investing a settlement IS a declaration of war.
-	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
+	# Investing a settlement IS a declaration of war — and one the Republic
+	# forbids is refused here, before a single ladder is raised.
+	if not DiplomacyRules.declare_war(data, state, army["owner"], settlement["owner"]):
+		return false
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
@@ -49,6 +51,7 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 		if int(siege["turns"]) >= supplies:
 			results.append({
 				"kind": "starved_out", "region": region_id,
+				"previous_owner": settlement["owner"],
 				"result": assault(data, state, rng, resolver, siege["besieger"], region_id, true),
 			})
 	return results
@@ -56,20 +59,29 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 
 static func equipment_turns_for(data: GameData, state: Dictionary, faction_id: String) -> int:
 	## Turns of investment before an assault can be launched: the base, less
-	## what the besieger's engineering doctrines shave off, never below the floor.
-	var base := int(data.balance["siege"]["equipment_turns"])
-	var delta := int(DoctrineRules.scalar(data, state, faction_id, "siege_equipment_turns"))
-	return maxi(base + delta, int(data.balance["siege"]["min_equipment_turns"]))
+	## what the besieger's practiced siegecraft (torsion engines, rolling
+	## towers) shaves off — never below the floor, one season at the walls.
+	var siege_rules: Dictionary = data.balance["siege"]
+	var delta := int(KnowledgeRules.faction_effect_total(data, state, faction_id, "siege_equipment_turns_delta"))
+	return maxi(int(siege_rules["equipment_turns"]) + delta, int(siege_rules["min_equipment_turns"]))
 
 
 static func assault_context(data: GameData, state: Dictionary, army: Dictionary, region_id: String, starving: bool) -> Dictionary:
 	## The resolver context for storming (or, starving, being sallied from) a
-	## settlement: its wall tier (one less when the defenders are starving),
-	## the governor as the defending general, and both sides' doctrines.
+	## settlement: its wall tier, the governor as the defending general, both
+	## societies' martial ethos and both sides' practiced warcraft, pre-merged
+	## so the resolver stays state-free. Shared by assault and the odds preview.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var wall_level := int(SettlementRules.effect_max(data, settlement, "wall_level"))
+	# The defender's practiced wallcraft (timber-laced ramparts) fights a tier
+	# above the stones themselves; the resolver contract is untouched — only
+	# the wall_level context it receives changes.
+	wall_level += int(KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "wall_level_bonus"))
+	# A spy of the attacker inside the city opens a gate for the storming party.
+	wall_level = maxi(0, wall_level - AgentRules.infiltration_bonus(data, state, region_id, army["owner"]))
 	if starving:
 		wall_level = maxi(0, wall_level - 1)
+
 	var governor = settlement["governor"]
 	var governor_profile = null
 	if governor != null and state["characters"].has(governor):
@@ -81,8 +93,10 @@ static func assault_context(data: GameData, state: Dictionary, army: Dictionary,
 		"defender_general": governor_profile,
 		"attacker_fatigued": false,
 		"sally": starving,
-		"attacker_mods": DoctrineRules.army_mods(data, state, army["owner"]),
-		"defender_mods": DoctrineRules.army_mods(data, state, settlement["owner"]),
+		"attacker_martial": SocietyRules.faction_stocks_for(data, state, String(army["owner"]))["martial_ethos"],
+		"defender_martial": SocietyRules.faction_stocks_for(data, state, String(settlement["owner"]))["martial_ethos"],
+		"attacker_mods": KnowledgeRules.army_mods(data, state, String(army["owner"])),
+		"defender_mods": KnowledgeRules.army_mods(data, state, String(settlement["owner"])),
 	}
 
 
@@ -110,6 +124,27 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	if result.get("defender_general_died", false) and governor != null:
 		CharacterRules.kill(state, governor, data)
 
+	# Siege battles count for the player's trail too: storming a wall or
+	# throwing an assault back is as much a victory as any field battle.
+	var player: String = state.get("player_faction", "")
+	if result["winner"] == "attacker" and army["owner"] == player:
+		GuidedRules.bump(state, "battles_won")
+	elif result["winner"] == "defender" and settlement["owner"] == player:
+		GuidedRules.bump(state, "battles_won")
+	# A bloody repulse at the walls teaches the attacker (the defender's own
+	# reckoning, if the city falls, comes through capture_settlement). Either
+	# way a storming is a battle for the war ledger; a repulse gets its own
+	# annals entry here, while a taken city's entry comes from the capture.
+	ChronicleRules.on_battle(state, String(army["owner"]), String(settlement["owner"]))
+	if result["winner"] != "attacker":
+		KnowledgeRules.on_battle_lost(data, state, String(army["owner"]))
+		ChronicleRules.record(data, state, "battle", {
+			"faction": army["owner"], "other_faction": settlement["owner"],
+			"region": region_id,
+		}, 5, {"winner": "defender", "assault": true})
+		ChronicleRules.add_deed(state, army["general"], "battles_lost")
+		ChronicleRules.add_deed(state, governor, "battles_won")
+
 	# Settle the attacker's fate BEFORE any laurels: an assault that leaves no
 	# man standing takes nothing, and its dead general wins no honours.
 	if army["units"].is_empty():
@@ -127,6 +162,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 		# Caller (Game.assault_settlement / turn engine) applies the
 		# occupy/enslave/exterminate decision via CombatRules.capture_settlement,
 		# and fires the siege_won / settlement_* triggers for the general.
+		ChronicleRules.add_deed(state, army["general"], "sieges_won")
+		ChronicleRules.add_deed(state, army["general"], "battles_won")
 		if army["general"] != null:
 			var notices: Array = []
 			CharacterRules.fire_trigger(data, state, army["general"], "siege_won", {}, rng, notices)

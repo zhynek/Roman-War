@@ -15,12 +15,21 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 	var tax_income := float(settlement["population"]) / 1000.0 \
 		* float(tax_rules["base_income_per_1000_pop"]) \
 		* float(tax_rules["income_multiplier"][settlement["tax_level"]])
+	# Fiscal edicts (tax farming, the census levy, toll charters) move the
+	# take itself — additive on the base component, never compounding.
+	tax_income *= 1.0 + EdictRules.faction_effect_total(data, state, settlement["owner"], "tax_income_pct") / 100.0
 	factors.append({"label": "taxes", "value": tax_income})
 
 	var farm_income := float(region["fertility"]) * float(economy_rules["farm_income_fertility_multiplier"]) \
 		+ SettlementRules.effect_total(data, settlement, "farm_income")
 	farm_income *= 1.0 + SettlementRules.faction_owns_wonder_effect(
 		data, state, settlement["owner"], "farm_income_pct") / 100.0
+	farm_income *= 1.0 + AdvanceRules.effect_total(
+		data, state, String(settlement["owner"]), "farm_income_pct") / 100.0
+	farm_income *= 1.0 + (SettlementRules.faction_owns_wonder_effect(
+			data, state, settlement["owner"], "farm_income_pct")
+		+ KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")
+		+ EdictRules.faction_effect_total(data, state, settlement["owner"], "farm_income_pct")) / 100.0
 	if rng != null:
 		farm_income *= rng.randf_pct(float(economy_rules["harvest_variance_pct"]))
 	factors.append({"label": "farming", "value": farm_income})
@@ -30,6 +39,7 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 		factors.append({"label": "trade", "value": trade})
 
 	var mines := SettlementRules.effect_total(data, settlement, "mine_income")
+	mines *= 1.0 + KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "mine_income_pct") / 100.0
 	if mines > 0.0:
 		factors.append({"label": "mines", "value": mines})
 
@@ -48,6 +58,30 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 	var corruption := corruption_pct(data, state, region_id) / 100.0 * gross
 	if corruption > 0.0:
 		factors.append({"label": "corruption", "value": -corruption})
+
+	# A standing order can turn the province's takings up or down sharply — tax
+	# farmers fill the treasury this year, citizens pay as citizens pay.
+	var income_pct := EdictRules.effect(data, settlement, "income_pct")
+	if income_pct != 0.0:
+		factors.append({"label": "edict", "value": gross * income_pct / 100.0})
+
+	# ...and the generous orders send a bill every turn, scaled by the number of
+	# people being provided for.
+	var edict_upkeep := EdictRules.upkeep(data, settlement)
+	if edict_upkeep > 0.0:
+		factors.append({"label": "edict_upkeep", "value": -edict_upkeep})
+
+	# A province that has stopped cooperating stops paying. Tax farmers need an
+	# escort; markets that do open, open quietly.
+	var society_rules: Dictionary = data.balance["society"]
+	var unrest_state := String(SocietyRules.stocks_of(data, settlement)["unrest_state"])
+	var unrest_pct := 0.0
+	if unrest_state == SocietyRules.UNREST_RESTIVE:
+		unrest_pct = float(society_rules["restive_income_penalty_pct"])
+	elif unrest_state == SocietyRules.UNREST_REBELLIOUS:
+		unrest_pct = float(society_rules["rebellious_income_penalty_pct"])
+	if unrest_pct > 0.0:
+		factors.append({"label": "unrest", "value": -gross * unrest_pct / 100.0})
 
 	return factors
 
@@ -68,7 +102,9 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var economy_rules: Dictionary = data.balance["economy"]
 	var own_resources: Array = data.regions[region_id].get("resources", [])
 	var port_level := int(SettlementRules.effect_max(data, settlement, "port_level"))
-	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct")
+	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct") \
+		+ KnowledgeRules.faction_effect_total(data, state, owner, "trade_pct") \
+		+ EdictRules.faction_effect_total(data, state, owner, "trade_pct")
 	var sea_trade_wonder := SettlementRules.faction_owns_wonder_effect(data, state, owner, "sea_trade_pct")
 
 	var land_total := 0.0
@@ -96,9 +132,14 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var sea_total := 0.0
 	for i in range(mini(port_level * int(economy_rules["sea_routes_per_port_level"]), sea_routes.size())):
 		sea_total += sea_routes[i]
-	sea_total *= 1.0 + sea_trade_wonder / 100.0
 
-	return (land_total + sea_total) * (1.0 + trade_pct / 100.0)
+	var advance_trade := AdvanceRules.effect_total(
+		data, state, String(state["settlements"][region_id]["owner"]), "trade_pct_bonus")
+	return (land_total + sea_total) * (1.0 + (trade_pct + advance_trade) / 100.0)
+	# The sea-trade wonder joins the additive percentage stack for sea routes
+	# — additive on the base component, never compounding (house rule).
+	return land_total * (1.0 + trade_pct / 100.0) \
+		+ sea_total * (1.0 + (trade_pct + sea_trade_wonder) / 100.0)
 
 
 static func corruption_pct(data: GameData, state: Dictionary, region_id: String) -> float:
@@ -116,12 +157,25 @@ static func corruption_pct(data: GameData, state: Dictionary, region_id: String)
 		float(corruption_rules["max_pct"]))
 	var law := PublicOrderRules.law_total(data, state, region_id)
 	corruption *= maxf(0.0, 1.0 - law * float(corruption_rules["law_reduction_factor"]))
+	# An administration living off plunder stops bothering to account for anything.
+	var spoils := float(SocietyRules.faction_stocks_for(
+		data, state, String(settlement["owner"]))["spoils"]) / 100.0
+	corruption *= 1.0 + spoils * float(data.balance["society"]["corruption_spoils_pct"]) / 100.0
+	# Audited accounts and salaried officials are worth more than a stricter law.
+	corruption *= maxf(0.0, 1.0 - AdvanceRules.effect_total(
+		data, state, String(settlement["owner"]), "corruption_reduction_pct") / 100.0)
+	# Archival statecraft audits the far provinces — census rolls and courier
+	# posts as techniques, the census levy and road posts as standing edicts.
+	corruption *= maxf(0.0, 1.0 - (KnowledgeRules.faction_effect_total(
+			data, state, settlement["owner"], "corruption_reduction_pct")
+		+ EdictRules.faction_effect_total(
+			data, state, settlement["owner"], "corruption_reduction_pct")) / 100.0)
 	return corruption
 
 
 static func army_upkeep(data: GameData, units: Array, upkeep_pct_by_class: Dictionary = {}) -> int:
-	## Per-unit upkeep, each class scaled by the owner's doctrines (a remount
-	## herd makes horse cheaper, a native levy makes spears cheaper).
+	## Per-unit upkeep, each class scaled by the owner's practiced warcraft (a
+	## remount herd makes horse cheaper, a native levy makes spears cheaper).
 	var upkeep := 0
 	for unit in units:
 		var template: Dictionary = data.units.get(unit["template"], {})
@@ -132,17 +186,24 @@ static func army_upkeep(data: GameData, units: Array, upkeep_pct_by_class: Dicti
 
 
 static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String) -> int:
-	var pct_by_class := DoctrineRules.upkeep_pct_by_class(data, state, faction_id)
-	var upkeep := 0
+	var pct_by_class := KnowledgeRules.upkeep_pct_by_class(data, state, faction_id)
+	var soldiery := 0
 	for army in state["armies"].values():
 		if army["owner"] == faction_id:
-			upkeep += army_upkeep(data, army["units"], pct_by_class)
+			soldiery += army_upkeep(data, army["units"], pct_by_class)
 	for fleet in state["fleets"].values():
 		if fleet["owner"] == faction_id:
-			upkeep += army_upkeep(data, fleet["ships"], pct_by_class)
+			soldiery += army_upkeep(data, fleet["ships"], pct_by_class)
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
-			upkeep += army_upkeep(data, settlement["garrison"], pct_by_class)
+			soldiery += army_upkeep(data, settlement["garrison"], pct_by_class)
+	# Military edicts (the citizen levy, hired companies) scale the wage bill
+	# of soldiers only — agents are paid from another purse.
+	var upkeep := int(round(soldiery * (1.0 + EdictRules.faction_effect_total(
+		data, state, faction_id, "unit_upkeep_pct") / 100.0)))
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] == faction_id:
+			upkeep += int(data.agent_kinds.get(agent["kind"], {}).get("upkeep", 0))
 	return upkeep
 
 
@@ -160,7 +221,11 @@ static func faction_turn_breakdown(data: GameData, state: Dictionary, faction_id
 		difficulty_multiplier = float(ai_rules["difficulty_income_multiplier"].get(
 			state.get("difficulty", "medium"), 1.0))
 	income *= difficulty_multiplier
+	# Guided-trail boons: a small permanent income edge, granted by rewards.
+	income *= 1.0 + float(state["factions"][faction_id].get("boons", {}).get("income_pct", 0.0)) / 100.0
 
+	# Edict upkeep is charged per province inside settlement_income (main holds
+	# edicts per province, not per house), so it must not be billed again here.
 	var upkeep := faction_upkeep(data, state, faction_id)
 	return {"income": income, "upkeep": upkeep, "net": income - float(upkeep)}
 
@@ -169,6 +234,11 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 	var result := faction_turn_breakdown(data, state, faction_id, rng)
 	var faction: Dictionary = state["factions"][faction_id]
 	faction["treasury"] = int(faction["treasury"]) + int(round(result["net"]))
+	# The AI's statecraft step budgets next turn's edict upkeep against a
+	# share of measured income, and refuses to spend from a measured deficit —
+	# stash both in the ai scratch as the treasury resolves.
+	faction["ai"]["last_income"] = float(result["income"])
+	faction["ai"]["last_net"] = float(result["net"])
 
 	# Sustained deep debt forces disbandment: one costliest field unit per turn.
 	var threshold := int(data.balance["economy"]["debt_disband_threshold"])
@@ -178,21 +248,56 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 
 
 static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_id: String) -> bool:
-	var worst_army: Dictionary = {}
+	## Sorted, because ties are common — most armies field several units of the
+	## same template, so "the costliest" is nearly always a tie and the winner
+	## was whichever the dictionary happened to yield first. A JSON round trip
+	## reorders that, and the loaded campaign then disbanded a DIFFERENT unit
+	## from the live one: same seed, same rng, divergent world. No random draw
+	## is involved, which is why the rng state matched while the armies did not.
+	## (Two branches found this independently; the id-based form is theirs.)
+	var worst_army_id := ""
 	var worst_index := -1
 	var worst_upkeep := 0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
 				worst_upkeep = upkeep
-				worst_army = army
+				worst_army_id = army_id
+				worst_index = i
+	if worst_index >= 0:
+		var worst_army: Dictionary = state["armies"][worst_army_id]
+		worst_army["units"].remove_at(worst_index)
+		if worst_army["units"].is_empty():
+			# The last unit's discharge disbands the standard itself — no empty
+			# husk armies on the map. Its general simply stands where he is.
+			state["armies"].erase(worst_army_id)
+		return true
+
+	# No field army left to thin: a garrison-heavy debtor discharges city
+	# troops instead (never below a last unit — a stripped city just riots,
+	# which pays nobody's debts).
+	var worst_region := ""
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = state["settlements"][region_id]
+		if settlement["owner"] != faction_id or settlement["garrison"].size() <= 1:
+			continue
+		for i in range(settlement["garrison"].size()):
+			var upkeep := int(data.units.get(settlement["garrison"][i]["template"], {}).get("upkeep", 0))
+			if upkeep > worst_upkeep:
+				worst_upkeep = upkeep
+				worst_region = region_id
 				worst_index = i
 	if worst_index < 0:
 		return false
-	worst_army["units"].remove_at(worst_index)
+	state["settlements"][worst_region]["garrison"].remove_at(worst_index)
 	return true
 
 

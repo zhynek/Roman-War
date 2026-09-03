@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agents.schema.json",
+  "title": "Campaign agent kinds",
+  "type": "object",
+  "required": ["agents"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "agents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "name", "cost", "upkeep", "building_kind", "building_level",
+          "base_skill", "movement_points", "description"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["diplomat", "spy", "assassin"] },
+          "name": { "type": "string", "minLength": 1 },
+          "cost": { "type": "integer", "minimum": 0 },
+          "upkeep": { "type": "integer", "minimum": 0 },
+          "building_kind": {
+            "enum": ["government", "walls", "barracks", "stables", "archery_range",
+              "siege_workshop", "naval", "market", "farms", "roads", "port", "mines",
+              "health", "entertainment", "execution", "education", "temple"]
+          },
+          "building_level": { "type": "integer", "minimum": 1 },
+          "base_skill": { "type": "integer", "minimum": 0 },
+          "movement_points": { "type": "number", "exclusiveMinimum": 0 },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

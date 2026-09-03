@@ -71,15 +71,39 @@ func test_revolt_after_streak(t) -> void:
 	t.check_eq(settlement["owner"], "rebels", "settlement secedes to the rebels")
 
 
+func test_revolt_of_last_settlement_destroys_the_faction(t) -> void:
+	## The destruction check must run on revolts exactly as it does on capture
+	## and cession — otherwise a landless zombie faction keeps playing.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var stray := Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
+	PublicOrderRules._revolt(data, state, "alpha")
+	t.check_eq(state["settlements"]["alpha"]["owner"], "rebels", "the city joined the rebels")
+	t.check(not state["factions"]["blue"]["alive"], "and its landless master is destroyed")
+	t.check_eq(state["armies"][stray]["owner"], "rebels", "his field army defects to the rebels")
+
+
 func test_culture_penalty(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
-	# Red (roman) captures alpha, which has only a tribal government building.
+	var rng := CampaignRng.seeded(3)
+	# Blue holds only alpha; a field army will outlive the city.
+	var army_id := Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
 	var settlement: Dictionary = state["settlements"]["alpha"]
-	settlement["owner"] = "red"
-	var penalty := SettlementRules.culture_penalty_pct(data, state, "alpha")
-	var scale := float(data.balance["public_order"]["culture_penalty_scale"])
-	t.check_near(penalty, scale, 0.001, "all-foreign buildings = full culture penalty")
+	settlement["tax_level"] = "very_high"
+	settlement["population"] = 80000
+	var revolted := false
+	for i in range(int(data.balance["public_order"]["revolt_consecutive_turns"]) + 1):
+		settlement["recently_conquered"] = 6
+		settlement["population"] = 80000
+		if PublicOrderRules.apply_turn(data, state, "alpha", rng)["revolted"]:
+			revolted = true
+			break
+	t.check(revolted, "the last city rose")
+	t.check(not state["factions"]["blue"]["alive"],
+		"losing the last settlement to its own people destroys the faction")
+	t.check_eq(state["armies"][army_id]["owner"], "rebels",
+		"the landless army defects to the rebels")
 
 
 ## --- The garrison's quality, the levy's cost, the war's mood ----------------

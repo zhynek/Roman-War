@@ -3,57 +3,201 @@
   "$id": "units.schema.json",
   "title": "Unit templates",
   "type": "object",
-  "required": ["units"],
+  "required": [
+    "units"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "units": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "name", "class", "culture", "factions", "soldiers", "attack", "defense", "morale", "cost", "upkeep", "requirements", "description"],
+        "required": [
+          "id",
+          "name",
+          "class",
+          "culture",
+          "factions",
+          "soldiers",
+          "attack",
+          "defense",
+          "morale",
+          "cost",
+          "upkeep",
+          "requirements",
+          "description"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-          "name": { "type": "string", "minLength": 1 },
-          "class": { "enum": ["infantry", "spear", "pike", "missile", "cavalry", "horse_archer", "chariot", "elephant", "siege", "ship", "general_bodyguard", "peasant"] },
-          "culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "class": {
+            "enum": [
+              "infantry",
+              "spear",
+              "pike",
+              "missile",
+              "cavalry",
+              "horse_archer",
+              "chariot",
+              "elephant",
+              "siege",
+              "ship",
+              "general_bodyguard",
+              "peasant"
+            ]
+          },
+          "culture": {
+            "enum": [
+              "roman",
+              "greek",
+              "eastern",
+              "carthaginian",
+              "egyptian",
+              "barbarian",
+              "neutral"
+            ]
+          },
           "factions": {
             "type": "array",
             "minItems": 1,
-            "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
             "uniqueItems": true,
             "description": "Faction ids that may recruit this unit; ['all'] for any, ['mercenary'] for mercenary-only"
           },
-          "soldiers": { "type": "integer", "minimum": 1, "maximum": 300 },
-          "attack": { "type": "integer", "minimum": 0, "maximum": 25 },
-          "missile_attack": { "type": "integer", "minimum": 0, "maximum": 25, "default": 0 },
-          "charge": { "type": "integer", "minimum": 0, "maximum": 25, "default": 0 },
-          "defense": { "type": "integer", "minimum": 0, "maximum": 30 },
-          "morale": { "type": "integer", "minimum": 1, "maximum": 16 },
-          "speed": { "type": "integer", "minimum": 1, "maximum": 10, "default": 5 },
-          "cost": { "type": "integer", "minimum": 0 },
-          "upkeep": { "type": "integer", "minimum": 0 },
+          "soldiers": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300
+          },
+          "attack": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 25
+          },
+          "missile_attack": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 25,
+            "default": 0
+          },
+          "charge": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 25,
+            "default": 0
+          },
+          "defense": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "morale": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "speed": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upkeep": {
+            "type": "integer",
+            "minimum": 0
+          },
           "requirements": {
             "type": "object",
-            "required": ["building_kind", "building_level"],
+            "required": [
+              "building_kind",
+              "building_level"
+            ],
             "additionalProperties": false,
             "properties": {
               "building_kind": {
-                "enum": ["government", "walls", "barracks", "stables", "archery_range", "siege_workshop", "armoury", "naval", "market", "farms", "roads", "port", "mines", "health", "entertainment", "execution", "education", "temple"]
+                "enum": [
+                  "government",
+                  "walls",
+                  "barracks",
+                  "stables",
+                  "archery_range",
+                  "siege_workshop",
+                  "naval",
+                  "market",
+                  "farms",
+                  "roads",
+                  "port",
+                  "mines",
+                  "health",
+                  "entertainment",
+                  "execution",
+                  "education",
+                  "temple"
+                ]
               },
-              "building_level": { "type": "integer", "minimum": 1, "maximum": 6 },
-              "temple_god": { "type": "string", "description": "Temple-recruited special units: required deity" }
+              "building_level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              },
+              "temple_god": {
+                "type": "string",
+                "description": "Temple-recruited special units: required deity"
+              }
             }
           },
-          "era": { "enum": ["pre_marian", "post_marian", "any"], "default": "any" },
+          "era": {
+            "enum": [
+              "pre_marian",
+              "post_marian",
+              "any"
+            ],
+            "default": "any"
+          },
           "attributes": {
             "type": "array",
-            "items": { "enum": ["forest_ambusher", "war_cry", "phalanx", "testudo", "terrifies_foot", "terrifies_horse", "sapper", "hardy", "fast_moving", "shield_wall"] },
+            "items": {
+              "enum": [
+                "forest_ambusher",
+                "war_cry",
+                "phalanx",
+                "testudo",
+                "terrifies_foot",
+                "terrifies_horse",
+                "sapper",
+                "hardy",
+                "fast_moving",
+                "shield_wall"
+              ]
+            },
             "uniqueItems": true
           },
-          "description": { "type": "string" }
+          "description": {
+            "type": "string"
+          },
+          "requires_technique": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "Technique the recruiting faction must have adopted (in addition to era and building requirements)"
+          }
         }
       }
     }

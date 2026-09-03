@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/annals.schema.json",
+  "templates": {
+    "war_declared": [
+      "{faction} declared war upon {other_faction}.",
+      "The heralds of {faction} carried war to the court of {other_faction}."
+    ],
+    "battle": [
+      "{faction} and {other_faction} met in battle near {region}.",
+      "Blood was shed near {region}, where {faction} came against {other_faction}."
+    ],
+    "city_taken": [
+      "{faction} took {region} from {other_faction}.",
+      "The gates of {region} were opened, and {faction} entered as master."
+    ],
+    "city_sacked": [
+      "{faction} put {region} to the sack; {other_faction} will not forget it.",
+      "Woe to {region}: the soldiers of {faction} were loosed within its walls."
+    ],
+    "city_revolted": [
+      "{region} rose against {faction} and cast out its garrison.",
+      "The people of {region} would bear the rule of {faction} no longer."
+    ],
+    "peace_made": [
+      "Peace was sworn between {faction} and {other_faction}.",
+      "{faction} and {other_faction} laid down their arms and exchanged oaths."
+    ],
+    "office_taken": [
+      "{character} of {faction} was raised to the office of {office}.",
+      "The Senate seated {character} as {office}, to the honor of {faction}."
+    ],
+    "civil_war": [
+      "{faction} broke with the Senate, and the Republic was at war with itself.",
+      "{faction} raised its standards against the Senate; the legions were the answer."
+    ],
+    "alliance_made": [
+      "{faction} and {other_faction} bound their houses in alliance."
+    ],
+    "technique_originated": [
+      "The craftsmen of {faction} devised {technique}.",
+      "In the workshops of {faction}, {technique} was first conceived."
+    ],
+    "technique_adopted": [
+      "{faction} took up the practice of {technique}.",
+      "The court of {faction} made {technique} the custom of the land."
+    ],
+    "edict_enacted": [
+      "{faction} proclaimed {edict}.",
+      "By order of the court of {faction}: {edict}, to be held throughout its lands."
+    ],
+    "edict_lapsed": [
+      "The treasury of {faction} failed, and {edict} lapsed."
+    ],
+    "leader_died": [
+      "{character}, who led {faction}, died aged {age}.",
+      "Death came for {character} of {faction}, having seen {age} years."
+    ],
+    "succession": [
+      "{character} rose to lead {faction}.",
+      "The house of {faction} looked now to {character}."
+    ],
+    "reign_summary": [
+      "So closed the reign of {character} over {faction}: {battles_won} battles won, {cities_taken} cities taken, {edicts_enacted} acts of state.",
+      "The scribes summed the rule of {character}: {battles_won} victories, {cities_taken} cities, {techniques_completed} crafts brought home to {faction}."
+    ],
+    "war_summary": [
+      "The war between {faction} and {other_faction} ran {turns} seasons and cost {battles} battles.",
+      "So ended {turns} seasons of war between {faction} and {other_faction}, after {battles} battles."
+    ],
+    "faction_destroyed": [
+      "{faction} was blotted out from among the powers of the world.",
+      "The last banner of {faction} fell, and its name passed into memory."
+    ],
+    "disaster": [
+      "Calamity visited {region}, and its people mourned.",
+      "The gods sent ruin upon {region}."
+    ],
+    "epithet_earned": [
+      "For his deeds, {character} of {faction} was named {epithet}.",
+      "Men began to call {character} of {faction} \"{epithet}\"."
+    ]
+  }
+}

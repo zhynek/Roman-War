@@ -1,6 +1,12 @@
 class_name PublicOrderRules
 ## Public order = base 100 + a summed list of named factors (Law and Happiness
 ## both feed it; Law additionally suppresses corruption in EconomyRules).
+##
+## Order is now a READOUT of the societal stocks as much as a thing in itself:
+## Standing and Grievance enter as named factors, and coercion buys order
+## without buying consent. That asymmetry is deliberate — a garrisoned province
+## reads calm while its grievance climbs, and riots when the accumulated
+## resentment finally outweighs the force holding it down.
 
 
 static func breakdown(data: GameData, state: Dictionary, region_id: String) -> Array:
@@ -10,7 +16,9 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 
 	factors.append({"label": "base", "value": float(order_rules["base"])})
 
-	var law := law_total(data, state, region_id)
+	# Building law only — edict law arrives via its own edict:<id> factor
+	# below (law_total, which feeds corruption, sums both).
+	var law := SettlementRules.effect_total(data, settlement, "law")
 	if law != 0.0:
 		factors.append({"label": "law", "value": law})
 
@@ -18,12 +26,32 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if happiness != 0.0:
 		factors.append({"label": "happiness_buildings", "value": happiness})
 
+	var knowledge_happiness := KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "happiness")
+	if knowledge_happiness != 0.0:
+		factors.append({"label": "knowledge", "value": knowledge_happiness})
+
+	# Each standing edict shows its hand by name (happiness and law both feed
+	# order one-for-one); decree moods and repeal shocks sum as one factor.
+	# Null-checks over .get defaults: this is the breakdown hot path.
+	var held = state["factions"][settlement["owner"]].get("edicts")
+	if held != null and not (held as Dictionary).is_empty():
+		var edict_ids: Array = (held as Dictionary).keys()
+		edict_ids.sort()
+		for eid in edict_ids:
+			var effects: Dictionary = data.edicts.get(eid, {}).get("effects", {})
+			var value := float(effects.get("happiness", 0.0)) + float(effects.get("law", 0.0))
+			if value != 0.0:
+				factors.append({"label": "edict:" + String(eid), "value": value})
+	var moods := ModifierRules.sum_for(state, settlement["owner"], region_id, "happiness")
+	if moods != 0.0:
+		factors.append({"label": "decrees", "value": moods})
+
 	var tax_happiness: float = order_rules["tax_happiness"][settlement["tax_level"]]
 	if tax_happiness != 0.0:
 		factors.append({"label": "taxes", "value": tax_happiness})
 
 	var garrison := garrison_bonus(data, settlement, SettlementRules.effect_total(data, settlement, "drill"),
-		DoctrineRules.scalar(data, state, settlement["owner"], "garrison_order_pct"))
+		KnowledgeRules.faction_effect_total(data, state, settlement["owner"], "garrison_order_pct"))
 	if garrison > 0.0:
 		factors.append({"label": "garrison", "value": garrison})
 
@@ -60,6 +88,8 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 			float(settlement["recently_conquered"]) * decay)
 		factors.append({"label": "recently_conquered", "value": -penalty})
 
+	# The levy's resentment (RecruitmentRules.add_levy_strain) and the realm's
+	# mood after a decisive field (CombatRules.record_battle), both fading.
 	var strain := float(settlement.get("levy_strain", 0.0))
 	if strain > 0.0:
 		factors.append({"label": "levy_strain", "value": -strain})
@@ -81,6 +111,31 @@ static func breakdown(data: GameData, state: Dictionary, region_id: String) -> A
 	if event_happiness != null and float(event_happiness["value"]) != 0.0:
 		factors.append({"label": "events", "value": float(event_happiness["value"])})
 
+	var society_rules: Dictionary = data.balance["society"]
+	var stocks := SocietyRules.stocks_of(data, settlement)
+
+	var standing := (float(stocks["legitimacy"]) - float(society_rules["order_legitimacy_neutral"])) \
+		* float(society_rules["order_legitimacy_scale"])
+	if standing != 0.0:
+		factors.append({"label": "standing", "value": standing})
+
+	var grievance := float(stocks["grievance"]) * float(society_rules["order_grievance_scale"])
+	if grievance > 0.0:
+		factors.append({"label": "grievance", "value": -grievance})
+
+	# Force keeps order without earning it. Nothing here reduces the load, so
+	# the grievance it is suppressing goes on rising underneath.
+	var coercion := SocietyRules.coercion_total(data, state, region_id) \
+		* float(society_rules["order_coercion_scale"])
+	if coercion > 0.0:
+		factors.append({"label": "coercion", "value": coercion})
+
+	var unrest_state := String(stocks["unrest_state"])
+	if unrest_state == SocietyRules.UNREST_RESTIVE:
+		factors.append({"label": "restive", "value": -float(society_rules["restive_order_penalty"])})
+	elif unrest_state == SocietyRules.UNREST_REBELLIOUS:
+		factors.append({"label": "in_revolt", "value": -float(society_rules["rebellious_order_penalty"])})
+
 	if settlement["owner"] != state.get("player_faction", ""):
 		var ai_bonus := float(data.balance["ai"]["difficulty_order_bonus"].get(
 			state.get("difficulty", "medium"), 0.0))
@@ -98,28 +153,33 @@ static func total(data: GameData, state: Dictionary, region_id: String) -> float
 
 
 static func law_total(data: GameData, state: Dictionary, region_id: String) -> float:
+	## Building law plus standing-edict law — corruption suppression reads this.
 	var settlement: Dictionary = state["settlements"][region_id]
-	return SettlementRules.effect_total(data, settlement, "law")
+	return SettlementRules.effect_total(data, settlement, "law") \
+		+ EdictRules.faction_effect_total(data, state, settlement["owner"], "law")
 
 
-static func garrison_bonus(data: GameData, settlement: Dictionary, drill: float = 0.0, doctrine_pct: float = 0.0) -> float:
+static func garrison_bonus(data: GameData, settlement: Dictionary, drill: float = 0.0, technique_pct: float = 0.0) -> float:
 	## Suppression from the garrison: quality-weighted policing (class weight x
 	## experience, see SettlementRules.garrison_policing), raised by the town's
-	## drill yards and any doctrine bonus, over the population, capped.
+	## drill yards and any practiced technique, over the population, capped.
 	var order_rules: Dictionary = data.balance["public_order"]
 	var policing := SettlementRules.garrison_policing(data, settlement)
 	if policing <= 0.0 or int(settlement["population"]) == 0:
 		return 0.0
 	policing *= 1.0 + drill * float(order_rules["garrison_drill_pct_per_level"]) / 100.0
-	policing *= 1.0 + doctrine_pct / 100.0
+	policing *= 1.0 + technique_pct / 100.0
 	var ratio := policing / float(settlement["population"])
 	return minf(ratio * float(order_rules["garrison_ratio_scale"]), float(order_rules["garrison_max_bonus"]))
 
 
 static func decay_levy_strain(data: GameData, settlement: Dictionary) -> void:
+	## Quantized like every continuous stock in the state: a subtraction can
+	## leave a double a hair off the grid, and a loaded save would not.
 	var strain := float(settlement.get("levy_strain", 0.0))
 	if strain > 0.0:
-		settlement["levy_strain"] = maxf(0.0, strain - float(data.balance["public_order"]["levy_strain_decay_per_turn"]))
+		settlement["levy_strain"] = SocietyRules.quantize(
+			maxf(0.0, strain - float(data.balance["public_order"]["levy_strain_decay_per_turn"])))
 
 
 static func tick_war_mood(state: Dictionary) -> void:
@@ -150,15 +210,24 @@ static func distance_penalty(data: GameData, state: Dictionary, region_id: Strin
 
 
 static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng: CampaignRng) -> Dictionary:
-	## Riots and revolts. Returns {rioted: bool, revolted: bool}.
+	## Riots and revolts. Returns {order: float, rioted: bool, revolted: bool}.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var order_rules: Dictionary = data.balance["public_order"]
 	var order := total(data, state, region_id)
-	var result := {"rioted": false, "revolted": false}
+	var result := {"order": order, "rioted": false, "revolted": false}
 	# This turn's order was judged with the strain still fresh; now it fades.
 	decay_levy_strain(data, settlement)
 
-	if order >= float(order_rules["riot_threshold"]):
+	# A province that has withdrawn its consent entirely is past the point where
+	# the garrison decides the question. Coercion buys time here, not immunity:
+	# it keeps the ORDER number high while grievance climbs, and then this check
+	# fires anyway. That is the whole shape of the trap.
+	var society_rules: Dictionary = data.balance["society"]
+	var stocks := SocietyRules.stocks_of(data, settlement)
+	var in_open_revolt: bool = String(stocks["unrest_state"]) == SocietyRules.UNREST_REBELLIOUS \
+		and int(stocks["unrest_turns"]) >= int(society_rules["rebellious_turns_to_revolt"])
+
+	if order >= float(order_rules["riot_threshold"]) and not in_open_revolt:
 		settlement["low_order_streak"] = 0
 		return result
 
@@ -170,11 +239,15 @@ static func apply_turn(data: GameData, state: Dictionary, region_id: String, rng
 
 	if order < float(order_rules["revolt_threshold"]):
 		settlement["low_order_streak"] = int(settlement["low_order_streak"]) + 1
-		if settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
-			_revolt(data, state, region_id)
-			result["revolted"] = true
 	else:
 		settlement["low_order_streak"] = 0
+
+	# Two roads to secession: an order collapse (as before), or a province that has
+	# been in open revolt long enough to choose its own masters — the second is
+	# the one accumulated grievance drives, and no garrison prevents it.
+	if in_open_revolt or settlement["low_order_streak"] >= int(order_rules["revolt_consecutive_turns"]):
+		_revolt(data, state, region_id)
+		result["revolted"] = true
 	return result
 
 
@@ -197,6 +270,8 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	## flees to the nearest city the house still holds.
 	var settlement: Dictionary = state["settlements"][region_id]
 	var previous_owner: String = settlement["owner"]
+	ChronicleRules.record(data, state, "city_revolted",
+		{"faction": previous_owner, "region": region_id}, 5)
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
 	settlement["construction_queue"] = []
@@ -206,5 +281,15 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	settlement["recently_conquered"] = 0
 	settlement["siege"] = null
 	settlement["tax_level"] = "normal"
+	# The province is governing itself now: the grievance was against the masters
+	# it just threw off, and it belongs to nobody but itself.
+	settlement["society"] = SocietyRules.new_settlement_society(
+		data, true, SocietyRules.provision(data, settlement))
+	EdictRules.clear(settlement)
 	CombatRules.displace_characters(data, state, region_id, previous_owner)
+	# A house can lose its last city to its own people, not just to conquest.
+	# A revolt can take a faction's LAST settlement — the destruction check
+	# must run here just as it does after capture and cession, or a landless
+	# zombie faction keeps playing full turns.
+	CombatRules.check_faction_destroyed(state)
 	SettlementRules.refresh_governors(data, state)

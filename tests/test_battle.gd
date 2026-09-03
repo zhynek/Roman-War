@@ -98,3 +98,22 @@ func test_capture_occupation_choices(t) -> void:
 	t.check_eq(int(state["settlements"]["alpha"]["population"]), 2500, "three quarters put to the sword")
 	t.check(exterminated["loot"] > enslaved["loot"], "extermination loots hardest")
 	t.check(int(state["settlements"]["alpha"]["recently_conquered"]) < 6, "fear keeps the survivors quiet")
+
+func test_weapon_and_armor_stamps_raise_strength(t) -> void:
+	var data := Fixtures.data()
+	var bare := [{"template": "test_spears", "experience": 0, "strength_pct": 100}]
+	var armed := [{"template": "test_spears", "experience": 0, "strength_pct": 100, "weapon": 1, "armor": 1}]
+	var chevron_pct := float(data.balance["battle"]["experience_strength_pct_per_chevron"])
+	var bare_strength := BattleResolver.force_strength(data, bare, null, chevron_pct)
+	var armed_strength := BattleResolver.force_strength(data, armed, null, chevron_pct)
+	t.check(armed_strength > bare_strength,
+		"the resolver counts the recruit-time stamp — 45 authored building effects finally live")
+	# attack 6 and defense 8, each scaled by its own tuning knob, over 80 men.
+	# Read from balance rather than hardcoded: this pins the SHAPE, so a
+	# balance pass can retune the percentages without rewriting the test.
+	var weapon_pct := float(data.balance["battle"]["weapon_upgrade_attack_pct"]) / 100.0
+	var armor_pct := float(data.balance["battle"]["armor_upgrade_defense_pct"]) / 100.0
+	t.check_near(armed_strength - bare_strength, 80.0 * (6.0 * weapon_pct + 8.0 * armor_pct), 0.01,
+		"weapons scale attack, armor scales defense")
+	t.check(AiStrategy.force_strength(data, armed) > AiStrategy.force_strength(data, bare),
+		"and the AI's paper estimate agrees — it will not misjudge an upgraded enemy")

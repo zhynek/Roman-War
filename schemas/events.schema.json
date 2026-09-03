@@ -3,46 +3,194 @@
   "$id": "events.schema.json",
   "title": "Scripted, historical, and disaster events",
   "type": "object",
-  "required": ["events", "disasters"],
+  "required": [
+    "events",
+    "disasters"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "events": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "trigger", "text"],
+        "required": [
+          "id",
+          "name",
+          "trigger",
+          "text"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-          "name": { "type": "string", "minLength": 1 },
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
           "trigger": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "year": { "type": "integer", "description": "Fires at the first turn of this year" },
-              "condition": {
-                "enum": ["huge_city_with_hidden_resource", "faction_destroyed", "first_civil_war"],
-                "description": "Condition-based trigger evaluated each turn"
+              "year": {
+                "type": "integer",
+                "description": "Fires at the first turn of this year"
               },
-              "hidden_resource": { "type": "string" },
-              "exclude_regions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-              "culture": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
-              "faction": { "type": "string" }
+              "condition": {
+                "enum": [
+                  "huge_city_with_hidden_resource",
+                  "faction_destroyed",
+                  "first_civil_war",
+                  "society_stat",
+                  "treasury_above",
+                  "regions_held"
+                ],
+                "description": "Condition-based trigger evaluated each turn. 'society_stat' compares a societal stock against min/max."
+              },
+              "hidden_resource": {
+                "type": "string"
+              },
+              "exclude_regions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              },
+              "culture": {
+                "enum": [
+                  "roman",
+                  "greek",
+                  "eastern",
+                  "carthaginian",
+                  "egyptian",
+                  "barbarian",
+                  "neutral"
+                ]
+              },
+              "faction": {
+                "type": "string"
+              },
+              "stat": {
+                "enum": [
+                  "legitimacy",
+                  "grievance",
+                  "assimilation",
+                  "elite_pressure",
+                  "martial_ethos",
+                  "knowledge",
+                  "expectation",
+                  "spoils"
+                ],
+                "description": "Which societal stock to test. Settlement-scoped stocks are averaged over the faction's provinces."
+              },
+              "min": {
+                "type": "number",
+                "description": "Fires when the stat is at or above this"
+              },
+              "max": {
+                "type": "number",
+                "description": "Fires when the stat is at or below this"
+              },
+              "min_regions": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Only consider factions holding at least this many provinces"
+              },
+              "threshold": {
+                "type": "integer",
+                "description": "treasury_above: denarii the treasury must exceed"
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "regions_held: settlements the faction must hold"
+              }
             }
           },
           "effects": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "marian_reforms": { "type": "boolean", "description": "Switch triggering faction's roman roster to post_marian era" },
-              "treasury": { "type": "integer" },
-              "happiness_all_settlements": { "type": "number" },
-              "happiness_turns": { "type": "integer" }
+              "marian_reforms": {
+                "type": "boolean",
+                "description": "Switch triggering faction's roman roster to post_marian era"
+              },
+              "treasury": {
+                "type": "integer"
+              },
+              "happiness_all_settlements": {
+                "type": "number"
+              },
+              "happiness_turns": {
+                "type": "integer"
+              },
+              "civic_shock": {
+                "type": "number",
+                "description": "Adds to the faction's decaying empire-wide reputation penalty"
+              },
+              "elite_pressure": {
+                "type": "number",
+                "description": "Adds to the faction's Ambition"
+              },
+              "grievance_all_settlements": {
+                "type": "number",
+                "description": "Adds to Grievance in every province the faction holds"
+              },
+              "knowledge": {
+                "type": "number",
+                "description": "Adds to the faction's Craft"
+              },
+              "happiness_faction": {
+                "type": "object",
+                "required": [
+                  "value",
+                  "turns"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "type": "number"
+                  },
+                  "turns": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "description": "A stacking mood on the triggering faction's lands (modifier container)"
+              },
+              "grant_technique": {
+                "type": "string",
+                "description": "Scripted spread: the triggering faction practices this technique outright"
+              }
             }
           },
-          "once": { "type": "boolean", "default": true },
-          "text": { "type": "string" }
+          "once": {
+            "type": "boolean",
+            "default": true
+          },
+          "text": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "id of the historical pattern in society.json this event illustrates"
+          },
+          "per_faction": {
+            "type": "boolean",
+            "default": false,
+            "description": "With once:true, fires at most once PER FACTION rather than once per campaign"
+          },
+          "cooldown_turns": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Repeatable (once:false) events rest this many turns between firings"
+          }
         }
       }
     },
@@ -50,17 +198,59 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "kind", "chance_per_turn", "regions", "text"],
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "chance_per_turn",
+          "regions",
+          "text"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-          "name": { "type": "string", "minLength": 1 },
-          "kind": { "enum": ["earthquake", "flood", "volcano", "storm"] },
-          "chance_per_turn": { "type": "number", "minimum": 0, "maximum": 0.05 },
-          "regions": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }, "uniqueItems": true },
-          "population_loss_pct": { "type": "number", "minimum": 0, "maximum": 50 },
-          "building_damage_chance": { "type": "number", "minimum": 0, "maximum": 1 },
-          "text": { "type": "string" }
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "earthquake",
+              "flood",
+              "volcano",
+              "storm"
+            ]
+          },
+          "chance_per_turn": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 0.05
+          },
+          "regions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "uniqueItems": true
+          },
+          "population_loss_pct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "building_damage_chance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "text": {
+            "type": "string"
+          }
         }
       }
     }

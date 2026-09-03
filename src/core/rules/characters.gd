@@ -36,6 +36,13 @@ static func effect_total(data: GameData, character: Dictionary, effect: String) 
 	for ancillary_id in character.get("ancillaries", []):
 		var ancillary: Dictionary = data.ancillaries.get(ancillary_id, {})
 		total += float(ancillary.get("effects", {}).get(effect, 0.0))
+	# A senate office carries weight of its own (Phase 7). Untyped on
+	# purpose: the key is null between terms and absent on pre-office saves.
+	var office = character.get("office")
+	if office != null and data.offices.has(office):
+		var office_effects = data.offices[office].get("effects")
+		if office_effects != null:
+			total += float(office_effects.get(effect, 0.0))
 	return total
 
 
@@ -50,6 +57,36 @@ static func battle_profile(data: GameData, character: Dictionary) -> Dictionary:
 		"command": effective(data, character, "command"),
 		"troop_morale": effect_total(data, character, "troop_morale"),
 	}
+
+
+static func best_free_general(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> Variant:
+	## The highest-command adult male of the house standing in the settlement
+	## and not already leading an army — the commander a newly raised field
+	## army gets (AI musters and the player's raise-army action alike).
+	## null means a captain takes the column.
+	var leading := {}
+	for army in state["armies"].values():
+		if army["general"] != null:
+			leading[army["general"]] = true
+	var best = null
+	var best_command := -1
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character["alive"] or character["faction"] != faction_id:
+			continue
+		if character.get("location", "") != region_id or leading.has(char_id):
+			continue
+		if character.get("gender", "male") != "male" or character["role"] in ["spouse", "child"]:
+			continue
+		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
+			continue
+		var command := effective(data, character, "command")
+		if command > best_command:
+			best = char_id
+			best_command = command
+	return best
 
 
 ## --- Trait points ---------------------------------------------------------
@@ -166,6 +203,7 @@ static func kill(state: Dictionary, char_id: String, data: GameData = null, noti
 		var character: Dictionary = state["characters"][char_id]
 		character["alive"] = false
 		character["ancillaries"] = []
+		character["office"] = null  # dead men hold no office
 		faction_id = character["faction"]
 	for settlement in state["settlements"].values():
 		if settlement["governor"] == char_id:

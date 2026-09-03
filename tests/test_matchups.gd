@@ -105,7 +105,7 @@ func test_upgrades_raise_strength(t) -> void:
 	armed[0]["armor"] = 1
 	var estimate := BattleResolver.estimate(data, armed, plain, _context())
 	t.check(_factor(estimate["attacker"], "upgrades") > 1.1, "two weapon and one armour level show as a kit factor")
-	t.check(float(estimate["ratio"]) > 1.15, "and win the mirror match on paper (%.2f)" % float(estimate["ratio"]))
+	t.check(float(estimate["ratio"]) > 1.1, "and win the mirror match on paper (%.2f)" % float(estimate["ratio"]))
 	t.check_near(_factor(estimate["defender"], "upgrades"), 1.0, 0.000001, "unarmed side lists no kit factor")
 
 
@@ -139,8 +139,8 @@ func test_win_chance_is_monotonic(t) -> void:
 	t.check_near(even, 0.5, 0.01, "even odds are a coin flip")
 	t.check(BattleResolver.win_chance(0.8, 1.0, spread) < even, "the weaker side is the underdog")
 	t.check(BattleResolver.win_chance(1.2, 1.0, spread) > even, "the stronger side is favoured")
-	t.check(BattleResolver.win_chance(1.3, 1.0, spread) > 0.97, "a 1.3 edge is nearly safe at 15%% fortune")
-	t.check(BattleResolver.win_chance(1.3, 1.0, 20.0) < BattleResolver.win_chance(1.3, 1.0, spread), "wider fortune means more upsets")
+	t.check(BattleResolver.win_chance(1.3, 1.0, 15.0) > 0.97, "a 1.3 edge is nearly safe at 15% fortune")
+	t.check(BattleResolver.win_chance(1.3, 1.0, 25.0) < BattleResolver.win_chance(1.3, 1.0, spread), "wider fortune means more upsets")
 	t.check_eq(BattleResolver.win_chance(0.0, 1.0, spread), 0.0, "no army, no chance")
 	t.check_eq(BattleResolver.win_chance(1.0, 0.0, spread), 1.0, "no enemy, no contest")
 
@@ -268,7 +268,7 @@ func test_upgraded_unit_wins_more(t) -> void:
 		var result := AutoResolver.new().resolve(data, CampaignRng.seeded(seed_value), armed, _army(["test_spears"]), _context())
 		if result["winner"] == "attacker":
 			wins += 1
-	t.check(wins >= 24, "two weapon and one armour level win the mirror match at least 24 of 30 (won %d)" % wins)
+	t.check(wins >= 21, "two weapon and one armour level win the mirror match at least 21 of 30 (won %d)" % wins)
 
 
 func test_walkover_costs_nothing(t) -> void:

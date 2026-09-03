@@ -1,0 +1,311 @@
+{
+  "$schema": "../schemas/glossary.schema.json",
+  "unit_classes": [
+    {
+      "id": "infantry",
+      "name": "Infantry",
+      "blurb": "Close-order foot with blade and shield — the line that takes ground and holds it."
+    },
+    {
+      "id": "spear",
+      "name": "Spearmen",
+      "blurb": "Foot soldiers behind long spears, steadiest of all against a cavalry charge."
+    },
+    {
+      "id": "pike",
+      "name": "Pikemen",
+      "blurb": "A deep phalanx of pikes: nearly unbreakable head-on, slow to wheel and turn."
+    },
+    {
+      "id": "missile",
+      "name": "Missile troops",
+      "blurb": "Bows, slings and javelins that thin the enemy line before the armies meet."
+    },
+    {
+      "id": "cavalry",
+      "name": "Cavalry",
+      "blurb": "Riders for the charge, the flank, and the ruthless pursuit of the broken."
+    },
+    {
+      "id": "horse_archer",
+      "name": "Horse archers",
+      "blurb": "Mounted bowmen who sting, scatter, and are gone before a blow can land."
+    },
+    {
+      "id": "chariot",
+      "name": "Chariots",
+      "blurb": "War-cars that shock loose formations and terrify troops who have never faced them."
+    },
+    {
+      "id": "elephant",
+      "name": "War elephants",
+      "blurb": "Living siege towers that crush ranks; horses will not stand near them."
+    },
+    {
+      "id": "siege",
+      "name": "Siege engines",
+      "blurb": "Rams, towers and engines for tearing down walls from a distance."
+    },
+    {
+      "id": "ship",
+      "name": "Warships",
+      "blurb": "Hulls and crews that carry armies and hold the sea lanes."
+    },
+    {
+      "id": "general_bodyguard",
+      "name": "Bodyguard",
+      "blurb": "The general's own household guard: picked men around the standard."
+    },
+    {
+      "id": "peasant",
+      "name": "Levies",
+      "blurb": "Farm folk pressed into a battle line — many hands, little heart for it."
+    }
+  ],
+  "attributes": [
+    {
+      "id": "phalanx",
+      "name": "Phalanx",
+      "blurb": "Forms a bristling wall of spearpoints, near impenetrable from the front and helpless when flanked."
+    },
+    {
+      "id": "testudo",
+      "name": "Testudo",
+      "blurb": "Locks shields overhead against arrows while closing on walls."
+    },
+    {
+      "id": "shield_wall",
+      "name": "Shield wall",
+      "blurb": "A locked line of shields that blunts the force of a charge."
+    },
+    {
+      "id": "war_cry",
+      "name": "War cry",
+      "blurb": "A roar before contact that shakes the nerve of green defenders."
+    },
+    {
+      "id": "terrifies_horse",
+      "name": "Frightens horses",
+      "blurb": "Horses shy from their smell and noise; enemy cavalry loses its nerve nearby."
+    },
+    {
+      "id": "terrifies_foot",
+      "name": "Frightens foot",
+      "blurb": "Their onset unsettles enemy foot soldiers before the lines even touch."
+    },
+    {
+      "id": "forest_ambusher",
+      "name": "Forest ambusher",
+      "blurb": "Can lie hidden among trees until the moment to strike."
+    },
+    {
+      "id": "sapper",
+      "name": "Sapper",
+      "blurb": "Can undermine enemy walls during a siege."
+    },
+    {
+      "id": "fast_moving",
+      "name": "Fleet-footed",
+      "blurb": "Covers ground on the battlefield faster than most."
+    },
+    {
+      "id": "hardy",
+      "name": "Hardy",
+      "blurb": "Tires slowly, marching and fighting long after others flag."
+    }
+  ],
+  "effects": [
+    {
+      "id": "law",
+      "name": "Law",
+      "blurb": "Public order from authority and justice."
+    },
+    {
+      "id": "happiness",
+      "name": "Happiness",
+      "blurb": "Public order from contentment: games, gods and comforts."
+    },
+    {
+      "id": "growth",
+      "name": "Growth",
+      "blurb": "Population increase in the settlement each turn."
+    },
+    {
+      "id": "health",
+      "name": "Health",
+      "blurb": "Cleanliness that holds back squalor and plague."
+    },
+    {
+      "id": "trade_pct",
+      "name": "Trade",
+      "blurb": "Percent increase to the settlement's trade income."
+    },
+    {
+      "id": "farm_income",
+      "name": "Farm income",
+      "blurb": "Denarii from the fields each turn."
+    },
+    {
+      "id": "mine_income",
+      "name": "Mine income",
+      "blurb": "Denarii from the diggings each turn."
+    },
+    {
+      "id": "recruit_xp",
+      "name": "Recruit training",
+      "blurb": "New units muster already drilled, with starting experience."
+    },
+    {
+      "id": "drill",
+      "name": "Drill grounds",
+      "blurb": "Drilled soldiers police a town better and its levies are borne more lightly."
+    },
+    {
+      "id": "weapon_upgrade",
+      "name": "Weapon upgrades",
+      "blurb": "Sharper arms for every unit trained here."
+    },
+    {
+      "id": "armor_upgrade",
+      "name": "Armor upgrades",
+      "blurb": "Heavier protection for every unit trained here."
+    },
+    {
+      "id": "wall_level",
+      "name": "Walls",
+      "blurb": "The settlement's fortification tier — attackers pay for it in blood and seasons."
+    },
+    {
+      "id": "road_level",
+      "name": "Roads",
+      "blurb": "The region's roads: armies march farther and trade moves freer."
+    },
+    {
+      "id": "port_level",
+      "name": "Port",
+      "blurb": "The harbor's tier: sea trade and the slips that lay down fleets."
+    },
+    {
+      "id": "civic",
+      "name": "Civic Benefit",
+      "blurb": "Public good the city can see delivered, which is what makes rule feel legitimate. Entertainment carries a negative value: spectacle placates, it does not legitimate."
+    },
+    {
+      "id": "burden",
+      "name": "Burden",
+      "blurb": "What a building costs the people living under it. Burden adds to the load a province is made to bear, and grievance is what the load leaves behind."
+    },
+    {
+      "id": "coercion",
+      "name": "Coercion",
+      "blurb": "Order bought with force rather than consent. It works, it keeps working, and a people already turned toward arms enforces it harder."
+    },
+    {
+      "id": "assimilation_pull",
+      "name": "Assimilation",
+      "blurb": "How strongly your own stonework draws a foreign people toward counting itself among yours."
+    },
+    {
+      "id": "martial",
+      "name": "Martial Character",
+      "blurb": "How far a building turns a people toward arms — the halls and grounds that make soldiering look like the natural life."
+    },
+    {
+      "id": "knowledge",
+      "name": "Craft",
+      "blurb": "What a building teaches and keeps alive. Craft is a practice, not a possession: it decays in any year nobody works at it."
+    }
+  ],
+  "building_kinds": [
+    {
+      "id": "government",
+      "name": "Government",
+      "blurb": "The seat of rule. Its tier is the settlement's tier: no city outgrows its hall."
+    },
+    {
+      "id": "walls",
+      "name": "Walls",
+      "blurb": "Fortifications that turn a town into a fastness."
+    },
+    {
+      "id": "barracks",
+      "name": "Barracks",
+      "blurb": "Drills the line: infantry, spearmen and pikemen."
+    },
+    {
+      "id": "stables",
+      "name": "Stables",
+      "blurb": "Raises the mounted arm: cavalry, horse archers, chariots and elephants."
+    },
+    {
+      "id": "archery_range",
+      "name": "Archery range",
+      "blurb": "Trains the skirmish screen: archers, slingers and javelinmen."
+    },
+    {
+      "id": "naval",
+      "name": "Shipwright",
+      "blurb": "Lays down the warships that carry armies and close the sea lanes."
+    },
+    {
+      "id": "siege_workshop",
+      "name": "Siege workshop",
+      "blurb": "Builds the rams and engines that open walled cities."
+    },
+    {
+      "id": "armoury",
+      "name": "Armoury",
+      "blurb": "Forges and mail shops that issue better weapons and armour to every recruit; needs a barracks."
+    },
+    {
+      "id": "temple",
+      "name": "Temple",
+      "blurb": "A god's house: devotion for the people, and for some gods, sacred warriors."
+    },
+    {
+      "id": "farms",
+      "name": "Farms",
+      "blurb": "Feeds the settlement's growth and yields farm income."
+    },
+    {
+      "id": "market",
+      "name": "Market",
+      "blurb": "The bustle of commerce: trade income for the treasury."
+    },
+    {
+      "id": "mines",
+      "name": "Mines",
+      "blurb": "Ore and coin dug from beneath the hills."
+    },
+    {
+      "id": "port",
+      "name": "Port",
+      "blurb": "Quays and warehouses that open the settlement to the sea."
+    },
+    {
+      "id": "roads",
+      "name": "Roads",
+      "blurb": "Cut ways through the region: armies march farther, goods move freer."
+    },
+    {
+      "id": "health",
+      "name": "Health",
+      "blurb": "Baths and drains that hold back squalor and plague."
+    },
+    {
+      "id": "entertainment",
+      "name": "Entertainment",
+      "blurb": "Spectacle and games that keep the people content."
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "blurb": "Academies that sharpen the men who govern."
+    },
+    {
+      "id": "execution",
+      "name": "Execution grounds",
+      "blurb": "Grim justice in public view: order through fear."
+    }
+  ]
+}

@@ -23,6 +23,7 @@
           "is_roman_house": { "type": "boolean", "default": false },
           "is_senate": { "type": "boolean", "default": false },
           "is_rebel": { "type": "boolean", "default": false },
+          "ai_persona": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
           "leader_title": { "type": "string" },
           "description": { "type": "string" }
         }

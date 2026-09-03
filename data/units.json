@@ -1222,7 +1222,7 @@
       "attributes": [
         "fast_moving"
       ],
-      "description": "Riders schooled in the African fashion — no saddle, no rest, no warning. They circle a column for days until it forgets what safety felt like."
+      "description": "Riders schooled in the African fashion \u2014 no saddle, no rest, no warning. They circle a column for days until it forgets what safety felt like."
     },
     {
       "id": "punic_noble_horse",
@@ -2338,6 +2338,33 @@
         "hardy"
       ],
       "description": "Desert horsemen who follow the wars north for silver and remounts. Ask them to skirmish forever; never ask them to hold a line."
+    },
+    {
+      "id": "boarding_marines",
+      "name": "Boarding Marines",
+      "class": "infantry",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 60,
+      "attack": 9,
+      "charge": 3,
+      "defense": 8,
+      "morale": 9,
+      "speed": 5,
+      "cost": 700,
+      "upkeep": 210,
+      "requirements": {
+        "building_kind": "naval",
+        "building_level": 2
+      },
+      "requires_technique": "corvus_boarding_bridge",
+      "era": "any",
+      "description": "Legionaries drilled to cross the raven's bridge with the deck heaving under them. Fighting on land they keep the habit: close fast, grip hard, and give no ground that took blood to win."
     }
   ]
 }

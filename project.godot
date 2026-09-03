@@ -6,6 +6,7 @@ config_version=5
 [application]
 
 config/name="Roman War"
+config/version="0.9.0"
 config/description="An original turn-based grand-strategy game of the ancient Mediterranean. Data-driven campaign engine; battles resolve through a swappable BattleResolver."
 run/main_scene="res://src/ui/main.tscn"
 config/features=PackedStringArray("4.4")
@@ -14,6 +15,13 @@ config/features=PackedStringArray("4.4")
 
 window/size/viewport_width=1280
 window/size/viewport_height=800
+window/size/mode=2
+window/size/window_width_override=1600
+window/size/window_height_override=1000
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/dpi/allow_hidpi=true
 
 [rendering]
 
