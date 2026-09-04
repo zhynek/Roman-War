@@ -13,6 +13,7 @@ var map_view: MapView
 var region_panel: RegionPanel
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
+var offers_panel: OffersPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
@@ -82,6 +83,11 @@ func _ready() -> void:
 	diplomacy_panel.notice.connect(_log)
 	add_child(diplomacy_panel)
 
+	offers_panel = OffersPanel.new()
+	offers_panel.responded.connect(refresh)
+	offers_panel.notice.connect(_log)
+	add_child(offers_panel)
+
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
@@ -110,6 +116,8 @@ func _build_top_bar() -> HBoxContainer:
 	bar.add_child(_spacer())
 	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
 	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	top_labels["offers"] = _bar_button("Offers", func(): offers_panel.open_for(game))
+	bar.add_child(top_labels["offers"])
 	bar.add_child(_bar_button("Save", _save_game))
 	bar.add_child(_bar_button("Load", _load_game))
 	var end_turn := _bar_button("END TURN", _end_turn)
@@ -131,6 +139,9 @@ func refresh() -> void:
 	if not progress.is_empty():
 		top_labels["victory"].text = "Regions %d/%d" \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
+	var waiting := game.pending_offers().size()
+	top_labels["offers"].text = "Offers (%d)" % waiting if waiting > 0 else "Offers"
+	top_labels["offers"].disabled = waiting == 0
 
 	# An army or agent that died or was dismissed leaves no dangling selection.
 	if selected_army != "" and not game.state["armies"].has(selected_army):
@@ -357,6 +368,8 @@ func _end_turn() -> void:
 	selected_army = ""
 	selected_agent = ""
 	refresh()
+	if not game.pending_offers().is_empty():
+		offers_panel.open_for(game)
 
 
 func _log_report(report: Dictionary) -> void:
@@ -402,6 +415,7 @@ func _log_report(report: Dictionary) -> void:
 				mission_name += " (%s)" % target_name
 			_log("[color=#9090d0]Senate: %s%s[/color]" % [String(notice["kind"]).replace("_", " "),
 				"" if mission_name == "" else " — " + mission_name])
+	_log_ai_report(report.get("ai", []))
 	for notice in report.get("agents", []):
 		var where: String = game.data.regions.get(notice.get("region", ""), {}).get("settlement_name", "")
 		var kind_name: String = String(game.data.agent_kinds.get(notice.get("agent_kind", ""), {}).get("name", "agent")).to_lower()
@@ -440,6 +454,74 @@ func _log_report(report: Dictionary) -> void:
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
 		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+
+
+func _log_ai_report(notices: Array) -> void:
+	## What the other courts did this season, as far as it touches us or
+	## lands we can see.
+	var player: String = game.state["player_faction"]
+	var visible_set := game.visible_regions()
+	for notice in notices:
+		var from_name: String = game.data.factions.get(notice.get("from", ""), {}).get("name", "")
+		match notice["kind"]:
+			"war_declared":
+				var target: String = notice["to"]
+				if target == player:
+					_log("[color=#e06050][b]%s declares war on us!%s[/b][/color]" % [from_name,
+						" They have torn up our treaty." if notice.get("broke_treaty", false) else ""])
+				elif _knows(notice["from"], visible_set) or _knows(target, visible_set):
+					_log("%s declares war on %s." % [from_name, game.data.factions.get(target, {}).get("name", target)])
+			"treaty":
+				var other: String = notice["to"]
+				if _knows(notice["from"], visible_set) and _knows(other, visible_set):
+					_log("%s and %s agree to %s." % [from_name, game.data.factions.get(other, {}).get("name", other),
+						OffersPanel.STANCE_TERMS.get(notice.get("stance", ""), "terms")])
+			"offer":
+				_log("[color=#c0b060]An envoy of %s brings an offer.[/color]" % from_name)
+			"siege_laid":
+				if visible_set.has(notice["region"]) or notice.get("owner", "") == player:
+					_log("[color=#e0a060]%s lays siege to %s.[/color]" % [from_name,
+						game.data.regions[notice["region"]]["settlement_name"]])
+			"assault":
+				if visible_set.has(notice["region"]) or notice.get("owner", "") == player:
+					var town: String = game.data.regions[notice["region"]]["settlement_name"]
+					if notice.get("captured", false):
+						_log("[color=#e06050]%s storms %s and %s it.[/color]" % [from_name, town,
+							{"occupy": "occupies", "enslave": "enslaves", "exterminate": "puts it to the sword — "}.get(
+								notice.get("occupation", "occupy"), "occupies")])
+					else:
+						_log("%s assaults %s and is thrown back." % [from_name, town])
+			"battle":
+				if notice.get("defender", "") == player or notice.get("attacker", "") == player \
+						or visible_set.has(notice["region"]):
+					var defender_name: String = game.data.factions.get(notice["defender"], {}).get("name", "")
+					_log("[b]Battle[/b] near %s: %s attack %s; the %s prevail." % [
+						game.data.regions[notice["region"]]["name"], from_name, defender_name,
+						"attackers" if notice["winner"] == "attacker" else "defenders"])
+			"assassination":
+				if notice.get("faction", "") == player:
+					if notice.get("success", false):
+						_log("[color=#e06050]%s has been murdered. The knife was %s's.[/color]" % [notice["target_name"], from_name])
+					else:
+						_log("[color=#e0a060]An attempt on %s failed%s.[/color]" % [notice["target_name"],
+							"; the assassin was caught and named " + from_name if notice.get("caught", false) else ""])
+			"gates":
+				if visible_set.has(notice["region"]):
+					_log("Spies of %s %s the gates of %s." % [from_name,
+						"open" if notice.get("success", false) else "fail to open",
+						game.data.regions[notice["region"]]["settlement_name"]])
+
+
+func _knows(faction_id: String, visible_set: Dictionary) -> bool:
+	## A power we can see the lands of, or are treating with.
+	if faction_id == game.state["player_faction"]:
+		return true
+	if DiplomacyRules.stance_between(game.state, game.state["player_faction"], faction_id) != "neutral":
+		return true
+	for region_id in visible_set:
+		if game.state["settlements"].get(region_id, {}).get("owner", "") == faction_id:
+			return true
+	return false
 
 
 func _is_player_character(char_id: String) -> bool:

@@ -1,9 +1,9 @@
 # Roman War — Game Design Document
 
 **Status:** living document. Describes both the design intent and what the engine in
-`src/core/` actually implements today — Phases 0–5 of the roadmap (campaign map
-through agents & diplomacy), the Phase-7 senate foundation loop, and the Phase-8
-campaign UI. Section 10's status table is
+`src/core/` actually implements today — Phases 0–6 of the roadmap (campaign map
+through agents & diplomacy and the campaign AI), the Phase-7 senate foundation
+loop, and the Phase-8 campaign UI. Section 10's status table is
 the single source of truth; where a system is planned but not built, this document
 says so explicitly. Design rationale and genre research:
 [`docs/research/rtw-research-report.md`](research/rtw-research-report.md).
@@ -65,7 +65,7 @@ the world in a **fixed order** so campaigns are reproducible:
 
 | # | Step | Notes |
 |---|------|-------|
-| 1 | AI turns | Every non-player faction acts (currently `AiStub`: passive settlement management) |
+| 1 | AI turns | Offers the player left unanswered lapse; then every non-player faction plays (`AiController`, §2.5): diplomacy, economy, armies, agents |
 | 2 | Sieges progress | Starve-outs force a final battle through the `BattleResolver`; AI captures default to *occupy* |
 | 3 | Queues advance | Construction and recruitment, per settlement; one head-of-queue job ticks per turn |
 | 4 | Treasuries resolve | Per faction: income − upkeep (armies, fleets, garrisons, agents); deep debt forces unit disbandment. Then diplomacy (`DiplomacyRules.process_turn`): opinions drift toward indifference, wars grow wearier, tributes are paid or lapse, vassals send their overlord a share of income |
@@ -80,8 +80,8 @@ at the top of the resolution, before anything reads it.
 
 `end_turn` returns a report dictionary (`sieges`, `completed_buildings`,
 `completed_units`, `rioted`, `revolted`, `events`, `senate`, `characters`,
-`agents`, `diplomacy`, `winner`) that the UI presents as the start-of-turn
-event log.
+`agents`, `diplomacy`, `ai`, `offers`, `winner`) that the UI presents as the
+start-of-turn event log and the offers scroll.
 
 ### 2.4 The map
 
@@ -97,6 +97,63 @@ corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`Visibi
 faction sees its own regions and armies plus one hop out, every coastal region
 of any sea zone one of its fleets occupies, and the region each of its agents
 stands in (spies also see `sight` hops around them).
+
+### 2.5 The campaign AI (Phase 6)
+
+Every non-player faction plays through exactly the rules and facades the
+player uses — the same recruitment, construction, movement, siege, combat and
+diplomacy calls, the same `BattleResolver` — steered by **personality
+weights** in `data/ai_personalities.json` (aggression, expansion, caution,
+greed, cruelty, diplomacy, espionage, loyalty, `max_wars`, with a default
+entry for any faction without one) and **thresholds** in `balance.json → ai`.
+Decisions are pure functions of the game state, walking sorted ids; the only
+dice are the battles and agent attempts the AI starts, which draw from the
+turn's `CampaignRng`, so a loaded save replays exactly. Each faction's turn
+runs four behaviours in order (`src/core/rules/ai/`):
+
+- **Diplomacy** (`AiDiplomacy`): declares war on a neighbour it does not like
+  when its strength exceeds the target's by a personality-scaled margin
+  (larger across a standing treaty, scaled by loyalty; never between Roman
+  houses and the Senate outside a civil war; at most `max_wars` at once, one
+  declaration every few turns, a minimum treasury); seeks peace when it is
+  outmatched or the war has run long, demands submission from enemies it
+  dwarfs, and offers trade rights to neighbours and alliances against common
+  enemies. Every offer is a proposal dictionary carried by an envoy in contact,
+  under the same rules as the player's scroll: an offer to another AI is
+  weighed at once (sweetened with a gift the purse can spare when the balance
+  falls just short); an offer to the player waits in `state.pending_offers`
+  for the player's answer and lapses at the end of the season.
+- **Economy** (`AiEconomy`): sets each settlement's taxes to the highest rate
+  that keeps order a margin above the riot line (the greedy allow the top
+  rate; debt allows a squeeze and stops all spending); keeps a garrison target
+  per settlement (base, population, threat, caution, and extra where the field
+  army gathers) and recruits the unit with the best strength per denarius
+  toward it; weighs every buildable project by kind, raising order-restoring
+  buildings where order is low, military ones in wartime, walls on a
+  threatened frontier and health under squalor; and trains agents from the
+  capital — an envoy if it talks at all, a spy for the home watch, more for the
+  espionage-minded, an assassin in wartime.
+- **Military** (`AiMilitary`): musters a field army from a city's surplus
+  garrison near the current target (strongest units, led by a family member
+  who is not the governor), merges stacks in one region, and gives each army
+  one order a season: press a siege (storming when its strength clears the
+  walls by the personality's margin), attack the weakest enemy army within
+  reach, run to a threatened city of its own and man the walls, march on the
+  nearest independent town or enemy city within a few hops of its lands and
+  lay siege when strong enough, or go home and stand down when the purse is
+  thin. Captured cities are occupied, enslaved or exterminated by cruelty.
+  Ambition scales with wealth: a rich house fields more armies.
+- **Agents** (`AiAgents`): one spy keeps the home watch; the espionage-minded
+  post the rest in enemy cities, where they open the gates for their own
+  besieging army; envoys walk to whichever court the diplomacy behaviour
+  wants to address; assassins go for the nearest enemy capital and strike when
+  the odds clear the personality's bar.
+
+**Difficulty** now touches the AI three ways, all in `balance.json → ai`: the
+income multiplier and order bonus from the foundation, and an aggression
+multiplier that lowers the strength margin the AI wants before it fights.
+The independents' personality expands nowhere and starts nothing: they
+garrison, build, and hold.
 
 ## 3. Settlements
 
@@ -508,8 +565,8 @@ protectorate pays its overlord a share of what each season actually earned.
 An accepted offer is the envoy's work for the season; a treaty concluded
 raises his skill by one.
 
-The player's AI opponents *evaluate* offers with this model; making offers of
-their own, and using agents, is Phase 6 work.
+The AI evaluates offers with this model and, since Phase 6, makes offers of its
+own with it (§2.5).
 
 ## 7. Factions & Cultures
 
@@ -603,6 +660,7 @@ conventions (ids, enums, effect keys, astronomical years) are specified in
 | names.json | per-culture name pools | Phase 4 character generation |
 | mercenaries.json | regional hire pools | Active — `MercenaryRules` (field hiring, per-pool replenishment) |
 | agents.json | agent kinds: price, upkeep, training requirement, skill, sight, action vocabulary | `AgentRules`, `NewGame` (starting agents come from campaign.json) |
+| ai_personalities.json | per-faction behaviour weights and a default | `AiController` and the four AI behaviours |
 
 Structural rules the schemas enforce: lowercase `snake_case` ids; building *level*
 ids globally unique; units reference building requirements by **kind + level**,
@@ -646,9 +704,10 @@ integration run, and a headless UI smoke test) on every push.
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
   documented at the top of `src/core/new_game.gd`.
 - Saving is `JSON.stringify({version, state})`; loading is the reverse with a
-  version gate (`src/core/save.gd`). The format is at version 2 (Phase 5 added
-  agents, tributes and the per-faction diplomatic memory); a version-1 save is
-  upgraded in place with the defaults a new campaign starts from. Data tables
+  version gate (`src/core/save.gd`). The format is at version 3 (Phase 5 added
+  agents, tributes and the per-faction diplomatic memory; Phase 6 the pending
+  offers table and the AI's per-faction memory); older saves are upgraded in
+  place with the defaults a new campaign starts from. Data tables
   are content, not state, so only the state travels.
 - All randomness flows through `CampaignRng`; its state is persisted as a
   decimal string in `state.rng_state` (JSON numbers are float64 and would
@@ -668,9 +727,9 @@ Phases follow the research report (§17). Status as of this document:
 | 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers await Phase 7 offices |
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Agents as state entities with data-driven kinds (`agents.json`), training, free movement, skill contests against settlement counter-intelligence and personal security, gate-opening, assassination (with succession and the `survived_assassination` trigger), sabotage, bribery of armies and towns, detection; opinion memory, attitude breakdown, deterministic offer evaluation (stance, gold, tribute, land, envoy skill), tribute streams, protectorates, peaceful region transfer, treachery. Remaining for Phase 6: AI making offers and using agents |
-| 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
+| 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done.** `AiController` with economy, military, diplomacy and agent behaviours (§2.5), data-driven personalities, offers to the player answered from a scroll, difficulty aggression multiplier. Remaining: naval movement (AI armies never take ship), no coordination between allies |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, civil-war trigger, army reform, wonders, victory checks); missions now come in four kinds (take region, alliance, trade agreement, assassinate a leader); offices, port blockades, the suicide demand and event depth pending |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, agent diamonds, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), agent orders (train, travel, open gates, assassinate, sabotage, bribe) with a spy's report on foreign cities, the negotiating table (terms, gold, tribute, land, weighed before the offer is made), turn log, save/load. Balancing pass and tutorial pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, agent diamonds, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), agent orders (train, travel, open gates, assassinate, sabotage, bribe) with a spy's report on foreign cities, the negotiating table (terms, gold, tribute, land, weighed before the offer is made), an offers scroll for foreign proposals, a turn log that reports the other courts' wars, sieges, stormings and treaties where they touch the player, save/load. Balancing pass and tutorial pending |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy

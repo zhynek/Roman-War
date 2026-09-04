@@ -21,6 +21,8 @@ var win_conditions: Array = []
 var names: Dictionary = {}             # culture -> {male, female, surnames}
 var mercenary_pools: Array = []
 var agent_kinds: Dictionary = {}       # id -> agent kind dict (envoy, spy, assassin)
+var ai_personalities: Dictionary = {}  # faction id -> personality weights
+var ai_default_personality: Dictionary = {}
 var campaign: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -87,6 +89,10 @@ func _load_all(dir: String) -> void:
 	mercenary_pools = _read_json(dir + "/mercenaries.json").get("pools", [])
 	for kind in _read_json(dir + "/agents.json").get("agents", []):
 		agent_kinds[kind["id"]] = kind
+	var personality_data := _read_json(dir + "/ai_personalities.json")
+	ai_default_personality = personality_data.get("default", {})
+	for entry in personality_data.get("personalities", []):
+		ai_personalities[entry["faction"]] = entry
 
 
 func _read_json(path: String) -> Dictionary:
@@ -105,6 +111,11 @@ func _read_json(path: String) -> Dictionary:
 
 func culture_of_faction(faction_id: String) -> String:
 	return factions.get(faction_id, {}).get("culture", "neutral")
+
+
+func personality_of(faction_id: String) -> Dictionary:
+	## Behaviour weights for a faction, falling back to the default entry.
+	return ai_personalities.get(faction_id, ai_default_personality)
 
 
 func chain_for(culture: String, kind: String) -> Dictionary:

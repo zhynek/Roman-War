@@ -55,6 +55,21 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 	return results
 
 
+static func assault_and_capture(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver, army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	## The whole assault as one act: the battle, then, if the walls fall, the
+	## occupy / enslave / exterminate decision and the general's memory of it.
+	## Player and AI both come through here.
+	var result := assault(data, state, rng, resolver, army_id, region_id)
+	if result.get("captured", false):
+		var general = state["armies"].get(army_id, {}).get("general")
+		result["capture"] = CombatRules.capture_settlement(
+			data, state, rng, region_id, result["capture_pending_owner"], occupation)
+		var notices: Array = result.get("character_notices", [])
+		CombatRules.fire_occupation_triggers(data, state, rng, general, occupation, notices)
+		result["character_notices"] = notices
+	return result
+
+
 static func can_assault(siege) -> bool:
 	## Equipment built, or the gates opened from within.
 	return siege != null and (siege.get("equipment_ready", false) or siege.get("gates_open", false))

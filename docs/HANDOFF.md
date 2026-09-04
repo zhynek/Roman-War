@@ -19,31 +19,30 @@ JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
 
-**Built:** Phases 0–5 (map & turns, settlements & economy, armies & sieges at
-foundation depth, the full character/family layer, and agents & diplomacy),
-the Phase 7 senate foundation loop with four mission kinds, and a playable
-Phase 8 campaign UI including agent orders and a negotiating table.
+**Built:** Phases 0–6 (map & turns, settlements & economy, armies & sieges at
+foundation depth, the full character/family layer, agents & diplomacy, and
+the campaign AI), the Phase 7 senate foundation loop with four mission kinds,
+and a playable Phase 8 campaign UI including agent orders, a negotiating
+table and an offers scroll.
 
-**Green as of the Phase 5 review commit:** 103 tests / 0 failures, validator
-0 errors / 0 warnings, clean boot, and 120-turn headless probes with agents and
-envoys active (including a save mid-campaign replayed in step for 20 turns). Branch `claude/next-roadmap-phase-rjxwas`, everything pushed. A Mac
-build of the Phase 4 state was delivered to the user earlier; the Phase 5
-build has not been produced yet (see `BUILDING.md`).
+**Green as of the Phase 6 commit:** 120 tests / 0 failures, validator 0
+errors / 0 warnings, clean boot, an 80-turn headless campaign in which the
+AI took 30 of 33 independent towns and declared 25 wars, and a save made
+mid-campaign with the AI live replayed in step for 20 turns. Branch
+`claude/next-roadmap-phase-rjxwas`, everything pushed. A Mac build of the
+Phase 4 state was delivered to the user earlier; no build of Phases 5–6 has
+been produced yet (see `BUILDING.md`).
 
-**Phase 5 in one paragraph.** Agents are state entities
-(`state.agents`) with data-driven kinds (`data/agents.json`: envoy, spy,
-assassin), trained where the right building stands, walking any border, and
-resolved by one skill-vs-difficulty contest shape against a settlement's
-counter-intelligence or a character's personal security (`AgentRules`). Spies
-watch, open besieged gates and guard their own cities; assassins kill family
-members and agents or wreck buildings; envoys carry offers and bribe captains,
-brigands and independent towns. `DiplomacyRules` adds an opinion memory,
-treachery, war weariness, an attitude breakdown, and a deterministic offer
-evaluation returning named factors — the other side accepts exactly when the
-balance is not negative, so the scroll weighs an offer before it is made.
-Accepted terms move gold, start tribute streams, cede regions peacefully, and
-create protectorates that pay their overlord a share of income. Saves are at
-version 2; version-1 saves upgrade on load.
+**Phase 6 in one paragraph.** `AiStub` is gone. `AiController`
+(`src/core/rules/ai/`) runs four behaviours per non-player faction each turn
+— diplomacy, economy, military, agents — through exactly the calls the player
+uses, steered by `data/ai_personalities.json` (aggression, expansion,
+caution, greed, cruelty, diplomacy, espionage, loyalty, max_wars) and
+`balance.json → ai`. Decisions are pure functions of the state over sorted
+ids; only the battles and agent attempts it starts roll dice. Offers to the
+player queue in `state.pending_offers`, are shown in the offers scroll after
+end turn, and lapse unanswered at the next end turn. The AI's per-faction
+memory lives in `state.factions[fid].ai`. Saves are at version 3.
 
 ## 2. Get productive in five minutes
 
@@ -70,7 +69,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 103 tests, 0 failures (~15s)
+godot --headless --path . --script res://tests/run_tests.gd      # 120 tests, 0 failures (~45s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -119,50 +118,59 @@ slice before shipping**, or the app will not launch.
 4. **Offer evaluation is deliberately dice-free.** Do not add randomness to
    `DiplomacyRules.evaluate`: the UI promises "they accept exactly when the
    balance is not negative", and the negotiation tests assert on exact sums.
+5. **The AI is dice-free too**, on purpose: every decision is a function of
+   the state over sorted ids, so two runs of the same seed play the same and
+   `test_ai_turn_is_deterministic` holds. Variety comes from battle rolls
+   and personalities, never from `rng` inside `src/core/rules/ai/`.
 
 ## 5. Ways forward
 
-The roadmap (DESIGN.md §10) now has Phase 6 as the only untouched phase.
+Every numbered phase of the roadmap (DESIGN.md §10) now has an engine
+behind it; what remains is depth (Phase 7) and polish (Phase 8).
 
-### Phase 6 — AI opponents (the obvious next step)
-`src/core/rules/ai_stub.gd` is still passive settlement management: nothing
-expands, declares war, defends, sends agents, or makes offers. Everything it
-needs now exists: `DiplomacyRules.evaluate/propose` (an AI can build the same
-proposal dictionaries the scroll does), `attitude`, `power_ratio`,
-`AgentRules` for spies and assassins, and the difficulty multipliers already
-read from `balance.json → ai`.
-
-> Build Phase 6: replace the passive `AiStub` with modular AI behaviours —
-> economy, expansion, war, defence, diplomacy (offers and responses through
-> `DiplomacyRules.propose`), and agents — so factions actually play the game.
-> Keep it deterministic and data-tunable (an `ai_personalities.json` with
-> per-faction aggression/greed/loyalty weights would fit the architecture),
-> wire the existing difficulty constants, and verify with a long headless
-> campaign that the map changes hands and treaties are honored or broken
-> believably.
-
-### Phase 7 — Politics depth
+### Phase 7 — Politics depth (the obvious next step)
 Senate offices (`office_gained` triggers are still forward-authored and
 allowlisted in the validator), the `blockade_port` and `leader_suicide`
 mission kinds (need naval blockades / a leader-suicide action), richer event
-scripting, `faction_destroyed` obituary events.
+scripting, `faction_destroyed` obituary events, and the late-game civil war
+as a real climax (the AI houses should turn on the player when the Senate
+outlaws them; today only the thresholds fire).
+
+> Build Phase 7: senate offices held by family members (elections by
+> influence, office traits, the `office_gained` trigger), the punitive
+> late-game mission ladder ending in the demand for the patriarch's life,
+> port blockades for fleets, and obituary events for destroyed factions.
 
 ### Phase 8 — Balance & polish
-Driven by playtesting. The Phase 5 numbers were sanity-checked, not played:
-a fresh assassin has roughly a 15–25% chance against a leader in his capital
-and 30–40% against a family member at home; a fresh spy in an enemy capital is
-caught about one turn in ten; trade rights are cheap for anyone without a
-border grudge; alliances need common enemies or gold. All of it is in
-`balance.json → agents` and `→ diplomacy`.
+Driven by playtesting. Things the headless probes showed that a playtest
+should confirm or refute:
+
+- **AI treasuries balloon** (hundreds of thousands by 240 BC) even after
+  wealth now buys extra field armies; the economy is generous for everyone
+  and the AI's spending is capped by garrison targets and one queue slot per
+  settlement per turn. Either the income curve or the AI's ambitions need
+  tuning (`ai.field_army_gold_per_extra`, `garrison_units_cap`).
+- **Submission demands** come every few seasons from any enemy that dwarfs a
+  passive player (`ai.submission_demand_strength_ratio`,
+  `offer_interval_turns`); a real player fights back, but the cadence may
+  still annoy.
+- The Phase 5 numbers: a fresh assassin has roughly a 15–25% chance against
+  a leader in his capital and 30–40% against a family member at home; a fresh
+  spy in an enemy capital is caught about one turn in ten; trade rights are
+  cheap for anyone without a border grudge; alliances need common enemies or
+  gold. All in `balance.json → agents` and `→ diplomacy`.
 
 If the user reports a problem, **ask for the world seed** — the same seed
 reproduces their exact campaign, which makes any bug directly debuggable.
 
 ## 6. Known gaps (verified, not guesses)
 
-- **AI factions never initiate diplomacy or use agents.** They evaluate the
-  player's offers with the attitude model and their starting spies guard
-  their capitals, but nothing more. Phase 6.
+- **AI armies never take ship.** `AiMilitary.march_toward` walks land paths
+  only, so island and overseas targets are never attacked by the AI;
+  `MovementRules.sea_move_army` exists for it to use.
+- **Allies do not coordinate** and are not called into wars; the AI's wars are
+  each its own affair. The AI never negotiates land or tribute — its offers
+  are peace, trade, alliance, submission, and gifts to sweeten peace.
 - **Envoy bribery is deterministic** (pay the price, the captain turns) and
   family-led armies can never be bought; the research report's "bribe
   generals" is deliberately not implemented. Captains are not assassination

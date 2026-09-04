@@ -22,6 +22,8 @@ class_name NewGame
 ##                         influence, traits, ancillaries, location, alive}}
 ##  agents: {agent_id: {owner, kind, name, region, skill, movement_left}}
 ##  tributes: [{from, to, per_turn, turns_left}]
+##  pending_offers: [{from, proposal, turn}]   (AI offers awaiting the player)
+##  factions[fid].ai: {offers: {other: turn}, last_war_turn, envoy_target} (AI memory)
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##
 ## A "unit" is {template, experience, strength_pct}.
@@ -47,6 +49,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"characters": {},
 		"agents": {},
 		"tributes": [],
+		"pending_offers": [],
 		"events_fired": [],
 		"winner": null,
 		"next_id": 1,

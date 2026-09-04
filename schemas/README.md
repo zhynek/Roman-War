@@ -29,8 +29,12 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 - Character effect keys read by agents: `personal_security` (harder to
   assassinate) and `agent_skill` (a governor's retinue adds it to his city's
   counter-intelligence).
+- AI personalities (`ai_personalities.json`) are weights in 0–1 plus
+  `max_wars`, one entry per faction id and a `default`; the independents'
+  entry must have zero aggression, expansion and wars.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):
 region ids, faction ids, culture ids, unit template ids, building level ids,
 building chain kinds, sea zone ids, trait/ancillary ids, name pools, agent
-kind ids.
+kind ids, AI personality faction ids, and every balance constant the engine
+indexes.

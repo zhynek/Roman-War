@@ -245,6 +245,28 @@ func _is_dissolution(proposal: Dictionary) -> bool:
 		and proposal.get("regions_demanded", []).is_empty()
 
 
+func pending_offers() -> Array:
+	## Offers foreign courts made to us this season, awaiting an answer.
+	return state.get("pending_offers", [])
+
+
+func respond_to_offer(index: int, accept: bool) -> Dictionary:
+	## Answer one pending offer. Accepting applies its terms as they stand —
+	## the other side already agreed to them — unless the world has moved on
+	## (a city changed hands, a purse emptied), in which case it fails with
+	## the reason. Refusing simply drops it.
+	var offers: Array = state.get("pending_offers", [])
+	if index < 0 or index >= offers.size():
+		return {}
+	var offer: Dictionary = offers[index]
+	offers.remove_at(index)
+	if not accept:
+		return {"accepted": false, "reason": "refused", "from": offer["from"]}
+	var result := DiplomacyRules.accept_offer(data, state, offer["proposal"])
+	result["from"] = offer["from"]
+	return result
+
+
 func _complete_proposal(proposal: Dictionary) -> Dictionary:
 	## The player speaks only for the player's house, whatever the dictionary
 	## says; an AI entry point can supply its own proposer later.
@@ -322,14 +344,7 @@ func besiege(army_id: String, region_id: String) -> bool:
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
 	var rng := _rng()
-	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
-	if result.get("captured", false):
-		var general = state["armies"].get(army_id, {}).get("general")
-		result["capture"] = CombatRules.capture_settlement(
-			data, state, rng, region_id, result["capture_pending_owner"], occupation)
-		var notices: Array = result.get("character_notices", [])
-		CombatRules.fire_occupation_triggers(data, state, rng, general, occupation, notices)
-		result["character_notices"] = notices
+	var result := SiegeRules.assault_and_capture(data, state, rng, resolver, army_id, region_id, occupation)
 	state["rng_state"] = rng.state_string()
 	return result
 

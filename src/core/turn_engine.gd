@@ -1,6 +1,7 @@
 class_name TurnEngine
 ## End-turn resolution, in a fixed order so campaigns are reproducible:
-##   1. AI stub turns (non-player factions)
+##   1. AI turns: every non-player faction plays (AiController); offers
+##      made to the player last season expire first, new ones queue
 ##   2. Sieges progress (starve-outs resolve through the BattleResolver)
 ##   3. Construction and recruitment queues advance
 ##   4. Faction treasuries resolve (income - upkeep, debt disbandment), then
@@ -20,7 +21,8 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var report := {
 		"turn": state["turn"], "sieges": [], "completed_buildings": {},
 		"completed_units": {}, "rioted": [], "revolted": [], "events": [],
-		"senate": [], "characters": [], "agents": [], "diplomacy": [], "winner": null,
+		"senate": [], "characters": [], "agents": [], "diplomacy": [], "ai": [], "offers": [],
+		"winner": null,
 	}
 
 	# World loops iterate in sorted id order so the RNG stream is identical
@@ -31,9 +33,12 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
 
+	# Offers the player left unanswered lapse with the season.
+	state["pending_offers"] = []
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
-			AiStub.take_turn(data, state, faction_id)
+			AiController.take_turn(data, state, rng, resolver, faction_id, report["ai"])
+	report["offers"] = state["pending_offers"].duplicate(true)
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)

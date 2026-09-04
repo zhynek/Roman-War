@@ -192,6 +192,15 @@ static func data() -> GameData:
 			"actions": ["assassinate", "sabotage"], "description": ""},
 	}
 
+	game_data.ai_default_personality = {"aggression": 0.5, "expansion": 0.5, "caution": 0.5, "greed": 0.5,
+		"cruelty": 0.3, "diplomacy": 0.5, "espionage": 0.3, "loyalty": 0.5, "max_wars": 2}
+	game_data.ai_personalities = {
+		"blue": {"faction": "blue", "aggression": 0.7, "expansion": 0.7, "caution": 0.3, "greed": 0.5,
+			"cruelty": 0.3, "diplomacy": 0.5, "espionage": 0.5, "loyalty": 0.5, "max_wars": 2},
+		"rebels": {"faction": "rebels", "aggression": 0.0, "expansion": 0.0, "caution": 0.8, "greed": 0.3,
+			"cruelty": 0.3, "diplomacy": 0.0, "espionage": 0.0, "loyalty": 0.0, "max_wars": 0},
+	}
+
 	return game_data
 
 
@@ -212,7 +221,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"epsilon": _settlement("red", 6000, {"test_government": 2}),
 			"alpha": _settlement("blue", 1200, {"tribal_government": 1}),
 		},
-		"armies": {}, "fleets": {}, "characters": {}, "agents": {}, "tributes": [],
+		"armies": {}, "fleets": {}, "characters": {}, "agents": {}, "tributes": [], "pending_offers": [],
 		"events_fired": [], "winner": null, "next_id": 1,
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}

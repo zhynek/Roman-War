@@ -371,6 +371,20 @@ static func propose(data: GameData, state: Dictionary, proposal: Dictionary) -> 
 	return result
 
 
+static func accept_offer(data: GameData, state: Dictionary, proposal: Dictionary) -> Dictionary:
+	## The recipient takes an offer the proposer already stands behind: the
+	## proposer's scale is not consulted, only whether the terms can still be
+	## carried out. The envoy who brought it need not still be free — the
+	## offer was his season's work when it was made.
+	var probe := proposal.duplicate(true)
+	probe.erase("envoy")
+	var verdict := evaluate(data, state, probe)
+	if verdict["reason"] != "":
+		return {"accepted": false, "score": 0.0, "factors": [], "reason": verdict["reason"]}
+	_apply(data, state, proposal)
+	return {"accepted": true, "score": float(verdict["score"]), "factors": verdict["factors"], "reason": ""}
+
+
 ## --- Transfers and tributes ---------------------------------------------------------
 
 static func transfer_settlement(data: GameData, state: Dictionary, region_id: String, new_owner: String, options: Dictionary = {}) -> void:

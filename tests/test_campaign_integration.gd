@@ -70,6 +70,41 @@ func test_long_campaign_invariants(t) -> void:
 		t.check(int(agent["skill"]) >= 0 and int(agent["skill"]) <= max_skill, "agent skill in range: " + agent_id)
 
 
+func test_the_ai_plays_the_world(t) -> void:
+	## Sixty turns with a passive player: the independents lose towns, powers
+	## go to war, cities are stormed, treaties are struck, and someone comes
+	## to the player's court — none of it at a crawl.
+	var game := Game.new_campaign("macedon", 11)
+	var rebels_at_start := 0
+	for settlement in game.state["settlements"].values():
+		if settlement["owner"] == "rebels":
+			rebels_at_start += 1
+	var kinds := {}
+	var offers := 0
+	var started := Time.get_ticks_msec()
+	for i in range(60):
+		var report := game.end_turn()
+		for notice in report["ai"]:
+			kinds[notice["kind"]] = int(kinds.get(notice["kind"], 0)) + 1
+		offers += report["offers"].size()
+	var elapsed := Time.get_ticks_msec() - started
+	var rebels_now := 0
+	for settlement in game.state["settlements"].values():
+		if settlement["owner"] == "rebels":
+			rebels_now += 1
+	t.check(rebels_now < rebels_at_start - 5, "the independents lose towns to expanding powers (%d -> %d)" % [rebels_at_start, rebels_now])
+	t.check(int(kinds.get("war_declared", 0)) > 0, "wars are declared")
+	t.check(int(kinds.get("siege_laid", 0)) > 0, "sieges are laid")
+	t.check(int(kinds.get("assault", 0)) > 0, "cities are stormed")
+	t.check(int(kinds.get("treaty", 0)) > 0, "treaties are struck between courts")
+	t.check(offers > 0, "a foreign court comes to the player's table")
+	t.check(elapsed < 60000, "sixty AI turns take under a minute (%d ms)" % elapsed)
+	for faction_id in game.state["factions"]:
+		var faction: Dictionary = game.state["factions"][faction_id]
+		if faction["alive"] and faction_id != "rebels":
+			t.check(faction.get("ai", {}) is Dictionary, "the AI keeps its memory in the state for " + faction_id)
+
+
 func test_same_seed_same_world(t) -> void:
 	var first := Game.new_campaign("julii", 1234)
 	var second := Game.new_campaign("julii", 1234)

@@ -12,8 +12,9 @@ You pick three things and press **BEGIN THE CAMPAIGN**:
 - **House** — who you play. The three Roman houses (Julii, Junii, Cornelii) are
   the intended starting choices; the others are listed as unlockable and are
   playable now for testing.
-- **Difficulty** — how much help the computer players get (money, and public
-  order in their cities). It does not make them cleverer.
+- **Difficulty** — how much help the computer players get (money, public
+  order in their cities, and how readily they go to war). It does not make
+  them cleverer.
 - **World seed** — the same number replays exactly the same world. Change it for
   a different run of luck; keep it to compare two attempts fairly.
 
@@ -24,7 +25,8 @@ campaign runs to AD 14.
 
 - **Top bar** — your treasury, the date, your standing with the Senate and with
   the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
+  Buttons: **Family**, **Diplomacy**, **Offers** (lit when a foreign court is
+  waiting for an answer), **Save**, **Load**, and **END TURN**.
 - **The map** — every region is a circle at its real geographic place, coloured
   by who owns it and sized by how big its city is. Lines are roads between
   neighbouring regions; dashed lines are sea routes. Small squares beside a
@@ -165,6 +167,13 @@ tearing up a treaty to do it marks your house as treacherous in every court's
 eyes for the rest of the game. Your fleets are in this window too, because
 they live on the sea rather than in a region.
 
+The other courts come to you as well. When one of their envoys reaches you,
+the **Offers** scroll opens at the start of your turn with the terms — peace,
+trade rights, an alliance, a demand that you submit as their protectorate,
+gold, tribute, land — and you accept or refuse each. They mean what they
+offer: accepting applies the terms at once. An offer you leave unanswered
+lapses when you end the turn.
+
 ## Winning
 
 Check the top bar for your progress. A long campaign wants around 50 regions
@@ -176,10 +185,12 @@ it by AD 14, the age simply closes.
 
 Honest list, so you know what you are looking at:
 
-- **The computer players are deliberately passive.** They manage their cities
-  and build, and they weigh your offers with real opinions of their own, but
-  they do not scheme, invade, send agents, or come to you with proposals. Real
-  opponents are the next phase. Expect a quiet world.
+- **The computer players play, but not at sea.** They tax, build, recruit,
+  expand into independent towns, declare war on weak neighbours, besiege and
+  storm cities, defend their own, make peace when losing, offer and accept
+  treaties, and send spies and assassins — but their armies never take ship,
+  and allies do not coordinate. Each house has its own temperament (the Gauls
+  are quick to war, the Free Cities would rather treat).
 - **Battles resolve on paper.** You see the outcome, not the fight.
 - **The Senate** issues missions (take a town, court an ally, open a market,
   remove a king) and the civil war can trigger, but the full political system

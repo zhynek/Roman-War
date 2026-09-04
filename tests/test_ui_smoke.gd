@@ -232,6 +232,38 @@ func test_agent_orders_through_the_panel(t) -> void:
 	screen.free()
 
 
+func test_offers_scroll(t) -> void:
+	## An offer from a foreign court is shown with its terms and answered
+	## from the scroll; the answer reaches the state.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var rng := CampaignRng.seeded(2)
+	var envoy := AgentRules.spawn(game.data, game.state, rng, "senate", "envoy", "latium")
+	game.state["agents"][envoy]["movement_left"] = 3.0
+	game.state["pending_offers"].append({"from": "senate", "turn": 0,
+		"proposal": {"from": "senate", "to": "julii", "gift": 400, "envoy": envoy}})
+	screen.refresh()
+	t.check(screen.top_labels["offers"].text.contains("1"), "the top bar counts the waiting offer")
+
+	screen.offers_panel.open_for(game)
+	t.check(screen.offers_panel._content.get_child_count() > 2, "the scroll shows the offer")
+	t.check(screen.offers_panel.describe({"stance": "trade", "gift": 400}).contains("trade rights"), "terms are spelled out")
+	var treasury_before := int(game.state["factions"]["julii"]["treasury"])
+	t.check(_press(screen.offers_panel, "Accept"), "Accept is offered")
+	t.check_eq(int(game.state["factions"]["julii"]["treasury"]), treasury_before + 400, "the gift arrives on acceptance")
+	t.check(game.pending_offers().is_empty(), "the offer is answered")
+	t.check(screen.report_log.get_parsed_text().contains("accept"), "and logged")
+
+	game.state["pending_offers"].append({"from": "senate", "turn": 0,
+		"proposal": {"from": "senate", "to": "julii", "stance": "protectorate", "envoy": envoy}})
+	screen.offers_panel.open_for(game)
+	t.check(_press(screen.offers_panel, "Refuse"), "Refuse is offered")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "senate"), "alliance", "refusal changes nothing")
+	screen.free()
+
+
 func _press(root: Node, prefix: String) -> bool:
 	## Presses the first button under `root` whose text starts with `prefix`.
 	for child in root.get_children():

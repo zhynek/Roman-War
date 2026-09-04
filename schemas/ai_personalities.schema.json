@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ai_personalities.schema.json",
+  "title": "Campaign AI personalities (per-faction behaviour weights)",
+  "type": "object",
+  "required": ["default", "personalities"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "default": { "$ref": "#/$defs/weights" },
+    "personalities": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/weights" },
+          {
+            "type": "object",
+            "required": ["faction"],
+            "properties": {
+              "faction": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "description": { "type": "string" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "weights": {
+      "type": "object",
+      "required": ["aggression", "expansion", "caution", "greed", "cruelty", "diplomacy", "espionage", "loyalty", "max_wars"],
+      "properties": {
+        "aggression": { "type": "number", "minimum": 0, "maximum": 1, "description": "Willingness to declare war and to attack at worse odds" },
+        "expansion": { "type": "number", "minimum": 0, "maximum": 1, "description": "Drive to take independent towns and keep armies in the field" },
+        "caution": { "type": "number", "minimum": 0, "maximum": 1, "description": "Margin of strength demanded before a battle or siege; larger garrisons" },
+        "greed": { "type": "number", "minimum": 0, "maximum": 1, "description": "Tax ceiling and appetite for gold in treaties" },
+        "cruelty": { "type": "number", "minimum": 0, "maximum": 1, "description": "How captured cities are treated" },
+        "diplomacy": { "type": "number", "minimum": 0, "maximum": 1, "description": "Propensity to offer trade, alliances and peace" },
+        "espionage": { "type": "number", "minimum": 0, "maximum": 1, "description": "Use of spies and assassins beyond the home watch" },
+        "loyalty": { "type": "number", "minimum": 0, "maximum": 1, "description": "Reluctance to break a standing treaty" },
+        "max_wars": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Wars it will start on its own at once" }
+      }
+    }
+  }
+}

@@ -66,17 +66,18 @@ python3 tools/validate_data.py
 
 ## Status
 
-Phases 0–5 of the research report's roadmap are built and tested: campaign
+Phases 0–6 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
 sieges, mercenaries, events, victory checks, the full character layer
-(traits, retinues, family tree, succession), and agents & diplomacy — envoys,
+(traits, retinues, family tree, succession), agents & diplomacy — envoys,
 spies and assassins as data-driven campaign agents, and a negotiation model
-with an attitude memory whose every offer is weighed as a named factor list.
-A playable campaign-map UI sits on top: geographic map with fog of war,
+with an attitude memory whose every offer is weighed as a named factor list —
+and campaign AI opponents that tax, build, recruit, expand, declare war,
+besiege, defend, negotiate and spy, each with a data-driven personality. A
+playable campaign-map UI sits on top: geographic map with fog of war,
 settlement/army/agent panels driven by the engine's breakdowns, family scroll,
-negotiating table, and save/load. Campaign AI (a passive stub today that
-evaluates offers but makes none) and senate depth are the next phases; their
-data tables and state hooks already exist.
+negotiating table, offers scroll, and save/load. Senate depth and a balancing
+pass are the next phases.
 
 ## Clean-room policy
 

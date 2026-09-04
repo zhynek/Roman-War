@@ -4,8 +4,9 @@ class_name SaveGame
 ## Version history:
 ##   1 — foundation through Phase 4
 ##   2 — Phase 5: agents, tributes, per-faction opinion/war_turns/treachery/overlord
+##   3 — Phase 6: pending_offers (AI offers awaiting the player)
 
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const OLDEST_LOADABLE_VERSION := 1
 
 
@@ -47,6 +48,9 @@ static func upgrade(state: Dictionary, version: int) -> Dictionary:
 				faction["treachery"] = 0
 			if not faction.has("overlord"):
 				faction["overlord"] = null
+	if version < 3:
+		if not state.has("pending_offers"):
+			state["pending_offers"] = []
 	return state
 
 

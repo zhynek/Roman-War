@@ -41,6 +41,7 @@ TABLES = {
     "names.json": "names.schema.json",
     "mercenaries.json": "mercenaries.schema.json",
     "agents.json": "agents.schema.json",
+    "ai_personalities.json": "ai_personalities.schema.json",
 }
 
 LEVELS = ["village", "town", "large_town", "minor_city", "large_city", "huge_city"]
@@ -182,6 +183,23 @@ def cross_checks(t: dict[str, dict]) -> None:
                      f"{need['building_kind']} L{need['building_level']}")
     if agent_kinds and not any("negotiate" in k["actions"] for k in agent_kinds.values()):
         err("agents: no agent kind can negotiate, so diplomacy is unreachable")
+
+    # --- ai personalities -------------------------------------------------
+    personalities = t.get("ai_personalities.json", {})
+    seen_personalities: set[str] = set()
+    for entry in personalities.get("personalities", []):
+        if entry["faction"] not in factions:
+            err(f"ai_personalities: unknown faction {entry['faction']}")
+        if entry["faction"] in seen_personalities:
+            err(f"ai_personalities: duplicate entry for {entry['faction']}")
+        seen_personalities.add(entry["faction"])
+    for faction_id, faction in factions.items():
+        if faction_id not in seen_personalities:
+            warn(f"ai_personalities: {faction_id} falls back to the default personality")
+        if faction.get("is_rebel") and faction_id in seen_personalities:
+            rebel = next(e for e in personalities["personalities"] if e["faction"] == faction_id)
+            if rebel["expansion"] > 0 or rebel["aggression"] > 0 or rebel["max_wars"] > 0:
+                err("ai_personalities: the independents must never expand or start wars")
 
     # --- regions ----------------------------------------------------------
     regions = {r["id"]: r for r in t.get("regions.json", {}).get("regions", [])}
@@ -483,6 +501,12 @@ def cross_checks(t: dict[str, dict]) -> None:
     for action in agents_balance.get("caught_on_failure_pct", {}):
         if action not in action_vocabulary:
             err(f"balance: agents.caught_on_failure_pct names unknown action {action}")
+    for kind in balance.get("ai", {}).get("build_weights", {}):
+        if kind not in {c["kind"] for c in chains.values()} and kind != "naval":
+            warn(f"balance: ai.build_weights names a building kind no chain has: {kind}")
+    for kind in {c["kind"] for c in chains.values()}:
+        if kind not in balance.get("ai", {}).get("build_weights", {}):
+            err(f"balance: ai.build_weights has no weight for building kind {kind}")
     stances = {"war", "neutral", "trade", "alliance", "protectorate"}
     for table in ("attitude_stance", "treaty_opinion_bonus"):
         for stance in diplomacy_balance.get(table, {}):
@@ -545,7 +569,7 @@ def main() -> int:
 def _entity_count(document: dict) -> int:
     for key in ("cultures", "factions", "chains", "units", "regions", "traits",
                 "ancillaries", "events", "wonders", "missions", "conditions", "pools",
-                "agents"):
+                "agents", "personalities"):
         if key in document and isinstance(document[key], list):
             return len(document[key])
     return 0
