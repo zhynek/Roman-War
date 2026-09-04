@@ -101,8 +101,8 @@ func test_the_ai_plays_the_world(t) -> void:
 	t.check(elapsed < 60000, "sixty AI turns take under a minute (%d ms)" % elapsed)
 	for faction_id in game.state["factions"]:
 		var faction: Dictionary = game.state["factions"][faction_id]
-		if faction["alive"] and faction_id != "rebels":
-			t.check(faction.get("ai", {}) is Dictionary, "the AI keeps its memory in the state for " + faction_id)
+		if faction["alive"] and faction_id != "rebels" and faction_id != "macedon":
+			t.check(faction.has("ai") and faction["ai"] is Dictionary, "the AI keeps its memory in the state for " + faction_id)
 
 
 func test_same_seed_same_world(t) -> void:
@@ -129,9 +129,10 @@ func test_save_round_trip(t) -> void:
 	resumed.data = game.data
 	resumed.resolver = AutoResolver.new()
 	resumed.state = restored
-	game.end_turn()
-	resumed.end_turn()
-	t.check_eq(_canonical(game.state), _canonical(resumed.state), "resumed game marches in step")
+	for i in range(3):
+		game.end_turn()
+		resumed.end_turn()
+	t.check_eq(_canonical(game.state), _canonical(resumed.state), "resumed game marches in step for three seasons of AI play")
 
 
 func _canonical(state: Dictionary) -> String:
@@ -145,12 +146,13 @@ func test_old_save_upgrades(t) -> void:
 	var old_state: Dictionary = JSON.parse_string(JSON.stringify(game.state))
 	old_state.erase("agents")
 	old_state.erase("tributes")
+	old_state.erase("pending_offers")
 	for faction in old_state["factions"].values():
 		for key in ["opinion", "war_turns", "treachery", "overlord"]:
 			faction.erase(key)
 	var restored := SaveGame.from_json(JSON.stringify({"version": 1, "state": old_state}))
 	t.check(not restored.is_empty(), "a version-1 save still loads")
-	t.check(restored.has("agents") and restored.has("tributes"), "missing tables are created")
+	t.check(restored.has("agents") and restored.has("tributes") and restored.has("pending_offers"), "missing tables are created")
 	t.check(restored["factions"]["julii"].has("opinion"), "faction memory is created")
 	t.check(SaveGame.from_json(JSON.stringify({"version": 99, "state": old_state})).is_empty(),
 		"a save from the future is refused")

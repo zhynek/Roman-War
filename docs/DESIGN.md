@@ -118,33 +118,41 @@ runs four behaviours in order (`src/core/rules/ai/`):
   treaty younger than `ai.min_treaty_turns_before_betrayal`; never between
   Roman houses and the Senate outside a civil war; not while already in
   `max_wars` wars, one declaration every few turns, a minimum treasury);
-  seeks peace when it is outmatched or the war has run long, demands
-  submission from enemies it dwarfs when it is aggressive enough, and offers
-  trade rights to neighbours and alliances against common enemies. Every offer is a proposal dictionary carried by an envoy in contact,
+  seeks peace when it is
+  outmatched, or when a long war is neither being won nor pressing a siege;
+  keeps a peace it has made for `ai.min_peace_turns_before_war` seasons
+  whatever the odds; demands submission from enemies it dwarfs when it is
+  aggressive enough; and offers trade rights to neighbours and alliances
+  against common enemies. Every offer is a proposal dictionary carried by an envoy in contact,
   under the same rules as the player's scroll: an offer to another AI is
   weighed at once (sweetened with a gift the purse can spare when the balance
   falls just short); an offer to the player waits in `state.pending_offers`
   for the player's answer and lapses at the end of the season.
-- **Economy** (`AiEconomy`): sets each settlement's taxes to the highest rate
-  that keeps order a margin above the riot line (the greedy allow the top
-  rate; debt allows a squeeze and stops all spending); keeps a garrison target
-  per settlement (base, population, threat, caution, and extra where the field
-  army gathers) and recruits the unit with the best strength per denarius
-  toward it; weighs every buildable project by kind, raising order-restoring
-  buildings where order is low, military ones in wartime, walls on a
-  threatened frontier and health under squalor; and trains agents from the
-  capital — an envoy if it talks at all, a spy for the home watch, more for the
-  espionage-minded, an assassin in wartime.
+- **Economy** (`AiEconomy`): moves a lost capital to the largest city still
+  held; sets each settlement's taxes to the highest rate that keeps order a
+  margin above the riot line (the greedy allow the top rate; debt allows the
+  top rate, stops all spending, and sheds each garrison's costliest unit a
+  season down to a floor); keeps a garrison target per settlement (base,
+  population, threat, caution, and extra where the field army gathers),
+  recruits the unit with the best strength per denarius toward it, and
+  retrains depleted garrisons; weighs every buildable project by kind, raising
+  order-restoring buildings where order is low, military ones in wartime,
+  walls on a threatened frontier and health under squalor; and trains agents
+  where the home watch stands — an envoy if it talks at all, a spy for the
+  home watch, a capped few more for the espionage-minded, an assassin in
+  wartime.
 - **Military** (`AiMilitary`): musters a field army from a city's surplus
   garrison near the current target through `CombatRules.raise_army` — the
   same call the player's "Raise a field army" button makes — taking the
-  strongest units, led by a family member present who is not the governor;
-  merges stacks in one region; and gives each army one order a season: press
-  a siege (storming when its strength clears the walls by the personality's
-  margin), attack the weakest enemy army within reach, run to a threatened
-  city of its own and man the walls, march on the nearest independent town or
-  enemy city within a few hops of its lands and lay siege when strong enough,
-  or go home and stand down when the purse is thin. Cities it storms or
+  strongest units, led by a family member present who is not the governor
+  (never from a city under siege, nor from one that cannot hold its own
+  walls); merges a captain's stack into a general's in the same region; and
+  gives each army one order a season: press a siege (storming when its
+  strength clears the walls by the personality's margin), attack the weakest
+  enemy army within reach, run to a threatened city of its own and man the
+  walls, march on the nearest independent town or enemy city within a few hops
+  of its lands that *this army* could take by the siege margin and lay siege
+  on arrival, or go home and stand down when the purse is thin. Cities it storms or
   starves out are occupied, enslaved or exterminated by cruelty (the player's
   starve-outs still default to occupation). Ambition scales with wealth: a
   rich house fields more armies.

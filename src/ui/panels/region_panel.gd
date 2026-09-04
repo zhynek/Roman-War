@@ -129,6 +129,29 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
+		# Raising a field army: the strongest units march out under a family
+		# member present who is not the governor, or a captain.
+		var muster_row := HBoxContainer.new()
+		add_child(muster_row)
+		var count := SpinBox.new()
+		count.min_value = 1
+		count.max_value = garrison.size()
+		count.value = garrison.size()
+		count.custom_minimum_size = Vector2(70, 0)
+		muster_row.add_child(count)
+		var raise := Button.new()
+		raise.text = "Raise a field army (strongest first)"
+		raise.add_theme_font_size_override("font_size", 11)
+		raise.pressed.connect(func():
+			var army_id := game.raise_army(region_id, int(count.value))
+			if army_id != "":
+				var army: Dictionary = game.state["armies"][army_id]
+				var leader_name := "a captain"
+				if army["general"] != null and game.state["characters"].has(army["general"]):
+					leader_name = game.state["characters"][army["general"]]["name"]
+				notice.emit("%d units march out of %s under %s." % [army["units"].size(), settlement_display_name(), leader_name])
+			action_taken.emit())
+		muster_row.add_child(raise)
 
 	# Construction
 	_header("Construction", 12)

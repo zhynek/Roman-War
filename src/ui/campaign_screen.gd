@@ -85,6 +85,7 @@ func _ready() -> void:
 
 	offers_panel = OffersPanel.new()
 	offers_panel.responded.connect(refresh)
+	offers_panel.confirm_requested.connect(func(text: String, on_accept: Callable): _confirm(text, on_accept, offers_panel))
 	offers_panel.notice.connect(_log)
 	add_child(offers_panel)
 
@@ -368,7 +369,9 @@ func _end_turn() -> void:
 	selected_army = ""
 	selected_agent = ""
 	refresh()
-	if not game.pending_offers().is_empty():
+	# The victory banner and the offers scroll cannot both be the root's
+	# exclusive child; on the deciding turn the banner has the floor.
+	if game.state["winner"] == null and not game.pending_offers().is_empty():
 		offers_panel.open_for(game)
 
 
@@ -453,7 +456,35 @@ func _log_report(report: Dictionary) -> void:
 			detail = " — " + String(game.data.ancillaries.get(notice["ancillary"], {}).get("name", notice["ancillary"]))
 		_log("[color=#80b080]%s: %s%s[/color]" % [String(notice["kind"]).replace("_", " "), who, detail])
 	for siege_event in report["sieges"]:
-		_log("The siege of %s is decided." % game.data.regions[siege_event["region"]]["settlement_name"])
+		var town: String = game.data.regions[siege_event["region"]]["settlement_name"]
+		var result: Dictionary = siege_event.get("result", {})
+		var defender: String = siege_event.get("defender_was", "")
+		var besieger: String = siege_event.get("besieger_owner", "")
+		var besieger_name: String = game.data.factions.get(besieger, {}).get("name", besieger)
+		var fate: String = {"occupy": "occupied", "enslave": "enslaved", "exterminate": "put to the sword"}.get(
+			siege_event.get("occupation", "occupy"), "occupied")
+		if result.get("captured", false):
+			if defender == player:
+				_log("[color=#e06050]Our city of %s, starved out, falls to %s and is %s.[/color]" % [town, besieger_name, fate])
+			elif besieger == player:
+				_log("[color=#80b080]The starving garrison of %s sallied and broke; the city is ours.[/color]" % town)
+			elif visible_set_has(siege_event["region"]):
+				_log("%s, starved out, falls to %s." % [town, besieger_name])
+		elif defender == player:
+			_log("[color=#80b080]The starving garrison of %s sallied out and broke the siege.[/color]" % town)
+		elif besieger == player:
+			_log("[color=#e06050]The starving garrison of %s sallied out and broke our siege.[/color]" % town)
+		elif visible_set_has(siege_event["region"]):
+			_log("The garrison of %s breaks its siege." % town)
+
+
+const TREATY_TERMS := {
+	"neutral": "make peace", "trade": "exchange trade rights", "alliance": "swear an alliance",
+}
+
+
+func visible_set_has(region_id: String) -> bool:
+	return game.visible_regions().has(region_id)
 
 
 func _log_ai_report(notices: Array) -> void:
@@ -462,7 +493,7 @@ func _log_ai_report(notices: Array) -> void:
 	var player: String = game.state["player_faction"]
 	var visible_set := game.visible_regions()
 	for notice in notices:
-		var from_name: String = game.data.factions.get(notice.get("from", ""), {}).get("name", "")
+		var from_name: String = game.data.factions.get(notice.get("from", notice.get("attacker", "")), {}).get("name", "")
 		match notice["kind"]:
 			"war_declared":
 				var target: String = notice["to"]
@@ -474,34 +505,47 @@ func _log_ai_report(notices: Array) -> void:
 			"treaty":
 				var other: String = notice["to"]
 				if _knows(notice["from"], visible_set) and _knows(other, visible_set):
-					_log("%s and %s agree to %s." % [from_name, game.data.factions.get(other, {}).get("name", other),
-						OffersPanel.STANCE_TERMS.get(notice.get("stance", ""), "terms")])
+					var other_name: String = game.data.factions.get(other, {}).get("name", other)
+					if notice.get("stance", "") == "protectorate":
+						_log("%s submits to %s as a protectorate." % [other_name, from_name])
+					else:
+						_log("%s and %s %s." % [from_name, other_name,
+							TREATY_TERMS.get(notice.get("stance", ""), "come to terms")])
 			"offer":
 				_log("[color=#c0b060]An envoy of %s brings an offer.[/color]" % from_name)
 			"siege_laid":
-				if visible_set.has(notice["region"]) or notice.get("owner", "") == player:
-					_log("[color=#e0a060]%s lays siege to %s.[/color]" % [from_name,
-						game.data.regions[notice["region"]]["settlement_name"]])
-			"assault":
-				if visible_set.has(notice["region"]) or notice.get("owner", "") == player:
+				var ours: bool = notice.get("owner", "") == player
+				if visible_set.has(notice["region"]) or ours:
 					var town: String = game.data.regions[notice["region"]]["settlement_name"]
+					_log("[color=#e0a060]%s lays siege to %s.[/color]" % [from_name, "our city of " + town if ours else town])
+			"assault":
+				var ours: bool = notice.get("owner", "") == player
+				if visible_set.has(notice["region"]) or ours:
+					var town: String = game.data.regions[notice["region"]]["settlement_name"]
+					var city_text := "our city of " + town if ours else town
 					if notice.get("captured", false):
-						_log("[color=#e06050]%s storms %s and %s it.[/color]" % [from_name, town,
-							{"occupy": "occupies", "enslave": "enslaves", "exterminate": "puts it to the sword — "}.get(
-								notice.get("occupation", "occupy"), "occupies")])
+						var fate: String = {"occupy": "occupies it", "enslave": "sells its people into slavery",
+							"exterminate": "puts it to the sword"}.get(notice.get("occupation", "occupy"), "occupies it")
+						_log("[color=#e06050]%s storms %s and %s.[/color]" % [from_name, city_text, fate])
 					else:
-						_log("%s assaults %s and is thrown back." % [from_name, town])
+						_log("%s assaults %s and is thrown back." % [from_name, city_text])
 			"battle":
-				if notice.get("defender", "") == player or notice.get("attacker", "") == player \
-						or visible_set.has(notice["region"]):
+				var ours: bool = notice.get("defender", "") == player
+				if ours or notice.get("attacker", "") == player or visible_set.has(notice["region"]):
 					var defender_name: String = game.data.factions.get(notice["defender"], {}).get("name", "")
-					_log("[b]Battle[/b] near %s: %s attack %s; the %s prevail." % [
-						game.data.regions[notice["region"]]["name"], from_name, defender_name,
-						"attackers" if notice["winner"] == "attacker" else "defenders"])
+					var line := "[b]Battle[/b] near %s: %s attack %s; the %s prevail." % [
+						game.data.regions[notice["region"]]["name"], from_name,
+						"our army" if ours else defender_name,
+						"attackers" if notice["winner"] == "attacker" else "defenders"]
+					if ours and notice.get("defender_destroyed", false):
+						line += " Our army is destroyed."
+					if ours and notice.get("defender_general_died", false):
+						line += " Our general fell."
+					_log(("[color=#e06050]%s[/color]" % line) if ours else line)
 			"assassination":
 				if notice.get("faction", "") == player:
 					if notice.get("success", false):
-						_log("[color=#e06050]%s has been murdered. The knife was %s's.[/color]" % [notice["target_name"], from_name])
+						_log("[color=#e06050]%s has been murdered. The whispers name %s.[/color]" % [notice["target_name"], from_name])
 					else:
 						_log("[color=#e0a060]An attempt on %s failed%s.[/color]" % [notice["target_name"],
 							"; the assassin was caught and named " + from_name if notice.get("caught", false) else ""])

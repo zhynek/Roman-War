@@ -186,6 +186,84 @@ static func _nearest_owned_settlement(data: GameData, state: Dictionary, from_re
 	return best
 
 
+static func raise_army(data: GameData, state: Dictionary, region_id: String, count: int, general: Variant = null) -> String:
+	## The garrison's `count` strongest units march out as a new field army
+	## with a full season's movement, led by `general` (a character id or
+	## null for a captain). Player and AI raise armies through this alone.
+	## Returns the army id, or "" when nothing could be raised.
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or count <= 0 or settlement["garrison"].is_empty():
+		return ""
+	# Nobody marches out of a city under siege: the walls need every man.
+	if settlement["siege"] != null:
+		return ""
+	var indices := strongest_indices(data, settlement["garrison"], count)
+	if indices.is_empty():
+		return ""
+	if general != null:
+		var character: Dictionary = state["characters"].get(general, {})
+		if character.is_empty() or not character["alive"] or character["faction"] != settlement["owner"] \
+				or character.get("location", "") != region_id or _leads_army(state, general):
+			general = null
+	var units: Array = []
+	for index in indices:
+		units.append(settlement["garrison"][index])
+	var removal := indices.duplicate()
+	removal.sort()
+	removal.reverse()
+	for index in removal:
+		settlement["garrison"].remove_at(index)
+	var army_id := "army_%d" % state["next_id"]
+	state["next_id"] += 1
+	state["armies"][army_id] = {
+		"owner": settlement["owner"], "region": region_id, "units": units, "general": general,
+		"movement_left": float(data.balance["movement"]["base_movement_points"]), "forced_march": false,
+	}
+	SettlementRules.refresh_governors(data, state)
+	return army_id
+
+
+static func strongest_indices(data: GameData, units: Array, count: int) -> Array:
+	## Indices of the `count` strongest units, strongest first.
+	var ranked: Array = []
+	for i in range(units.size()):
+		var experience_pct := float(data.balance["battle"]["experience_strength_pct_per_chevron"])
+		ranked.append([BattleResolver.force_strength(data, [units[i]], null, experience_pct), -i])
+	ranked.sort()
+	ranked.reverse()
+	var result: Array = []
+	for i in range(mini(count, ranked.size())):
+		result.append(-int(ranked[i][1]))
+	return result
+
+
+static func available_general(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> Variant:
+	## An adult family member standing in the city who leads no army and is
+	## not its governor; null when there is nobody to spare.
+	var governor = state["settlements"][region_id]["governor"]
+	var char_ids: Array = state["characters"].keys()
+	char_ids.sort()
+	for char_id in char_ids:
+		var character: Dictionary = state["characters"][char_id]
+		if not character["alive"] or character["faction"] != faction_id or char_id == governor:
+			continue
+		if character["role"] not in ["leader", "heir", "family"] or character.get("gender", "male") != "male":
+			continue
+		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
+			continue
+		if character.get("location", "") != region_id or _leads_army(state, char_id):
+			continue
+		return char_id
+	return null
+
+
+static func _leads_army(state: Dictionary, char_id: String) -> bool:
+	for army in state["armies"].values():
+		if army["general"] == char_id:
+			return true
+	return false
+
+
 static func garrison_army(data: GameData, state: Dictionary, army_id: String, region_id: String) -> bool:
 	## Merge a friendly army standing in its own settlement's region into the garrison.
 	var army: Dictionary = state["armies"][army_id]

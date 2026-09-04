@@ -261,6 +261,13 @@ func respond_to_offer(index: int, accept: bool) -> Dictionary:
 	var offer: Dictionary = offers[index]
 	offers.remove_at(index)
 	if not accept:
+		# A refused court waits longer before it tries again.
+		var memory = state["factions"].get(offer["from"], {}).get("ai", null)
+		if memory is Dictionary:
+			if not memory.has("offers") or not (memory["offers"] is Dictionary):
+				memory["offers"] = {}
+			memory["offers"][state["player_faction"]] = int(state["turn"]) \
+				+ int(data.balance["ai"]["refused_offer_backoff_turns"])
 		return {"accepted": false, "reason": "refused", "from": offer["from"]}
 	var result := DiplomacyRules.accept_offer(data, state, offer["proposal"])
 	result["from"] = offer["from"]
@@ -347,6 +354,16 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 	var result := SiegeRules.assault_and_capture(data, state, rng, resolver, army_id, region_id, occupation)
 	state["rng_state"] = rng.state_string()
 	return result
+
+
+func raise_army(region_id: String, count: int) -> String:
+	## The garrison's strongest units march out as a field army, led by a
+	## family member present who is not the governor (a captain otherwise).
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
+		return ""
+	var general = CombatRules.available_general(data, state, String(state["player_faction"]), region_id)
+	return CombatRules.raise_army(data, state, region_id, count, general)
 
 
 func garrison_army(army_id: String) -> bool:

@@ -49,7 +49,8 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 		var supplies := int(starve_turns[Constants.level_index(level)])
 		if int(siege["turns"]) >= supplies:
 			results.append({
-				"kind": "starved_out", "region": region_id,
+				"kind": "starved_out", "region": region_id, "defender_was": settlement["owner"],
+				"besieger_owner": state["armies"][siege["besieger"]]["owner"],
 				"result": assault(data, state, rng, resolver, siege["besieger"], region_id, true),
 			})
 	return results

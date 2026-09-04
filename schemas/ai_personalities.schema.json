@@ -7,7 +7,10 @@
   "additionalProperties": false,
   "properties": {
     "$schema": { "type": "string" },
-    "default": { "$ref": "#/$defs/weights" },
+    "default": {
+      "$ref": "#/$defs/weights",
+      "unevaluatedProperties": false
+    },
     "personalities": {
       "type": "array",
       "items": {
@@ -21,7 +24,8 @@
               "description": { "type": "string" }
             }
           }
-        ]
+        ],
+        "unevaluatedProperties": false
       }
     }
   },
@@ -30,15 +34,15 @@
       "type": "object",
       "required": ["aggression", "expansion", "caution", "greed", "cruelty", "diplomacy", "espionage", "loyalty", "max_wars"],
       "properties": {
-        "aggression": { "type": "number", "minimum": 0, "maximum": 1, "description": "Willingness to declare war and to attack at worse odds" },
+        "aggression": { "type": "number", "minimum": 0, "maximum": 1, "description": "Willingness to declare war and to fight at worse odds; zero means never" },
         "expansion": { "type": "number", "minimum": 0, "maximum": 1, "description": "Drive to take independent towns and keep armies in the field" },
         "caution": { "type": "number", "minimum": 0, "maximum": 1, "description": "Margin of strength demanded before a battle or siege; larger garrisons" },
-        "greed": { "type": "number", "minimum": 0, "maximum": 1, "description": "Tax ceiling and appetite for gold in treaties" },
+        "greed": { "type": "number", "minimum": 0, "maximum": 1, "description": "Tax ceiling (the greedy allow the top rate) and how small a reserve is kept" },
         "cruelty": { "type": "number", "minimum": 0, "maximum": 1, "description": "How captured cities are treated" },
-        "diplomacy": { "type": "number", "minimum": 0, "maximum": 1, "description": "Propensity to offer trade, alliances and peace" },
+        "diplomacy": { "type": "number", "minimum": 0, "maximum": 1, "description": "Propensity to offer trade rights and alliances; zero means it trains no envoy" },
         "espionage": { "type": "number", "minimum": 0, "maximum": 1, "description": "Use of spies and assassins beyond the home watch" },
         "loyalty": { "type": "number", "minimum": 0, "maximum": 1, "description": "Reluctance to break a standing treaty" },
-        "max_wars": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Wars it will start on its own at once" }
+        "max_wars": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Wars it will be in at once before it starts another; zero means it never declares" }
       }
     }
   }

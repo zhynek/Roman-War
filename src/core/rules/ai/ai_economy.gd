@@ -9,20 +9,63 @@ class_name AiEconomy
 static func act(data: GameData, state: Dictionary, rng: CampaignRng, brain: Dictionary, _notices: Array) -> void:
 	var faction_id: String = brain["id"]
 	var faction: Dictionary = state["factions"][faction_id]
+	relocate_capital(data, state, brain)
 	var owned := AiController.settlements_of(state, faction_id)
 	var in_debt := int(faction["treasury"]) < 0
 	for region_id in owned:
 		set_taxes(data, state, brain, region_id, in_debt)
 	if in_debt:
+		shed_garrisons(data, state, brain)
 		return
 	var reserve := AiController.reserve_for(brain, owned.size())
 	var muster := AiMilitary.muster_city(data, state, brain)
 	for region_id in owned:
 		recruit(data, state, brain, region_id, reserve, region_id == muster)
 	for region_id in owned:
+		if int(faction["treasury"]) > reserve:
+			RecruitmentRules.retrain_garrison(data, state, region_id)
+	for region_id in owned:
 		build(data, state, brain, region_id, reserve)
 	if not brain["is_rebel"]:
 		train_agents(data, state, rng, brain, reserve)
+
+
+static func relocate_capital(data: GameData, state: Dictionary, brain: Dictionary) -> void:
+	## A capital lost to the enemy is replaced by the largest city still held,
+	## so distance and corruption are measured from a seat the house has.
+	var faction: Dictionary = state["factions"][brain["id"]]
+	var capital: String = faction["capital"]
+	if state["settlements"].has(capital) and state["settlements"][capital]["owner"] == brain["id"]:
+		return
+	var best := ""
+	var best_population := -1
+	for region_id in AiController.settlements_of(state, brain["id"]):
+		var population := int(state["settlements"][region_id]["population"])
+		if population > best_population:
+			best = region_id
+			best_population = population
+	if best != "":
+		faction["capital"] = best
+
+
+static func shed_garrisons(data: GameData, state: Dictionary, brain: Dictionary) -> void:
+	## In debt, every settlement above the floor lets its costliest unit go —
+	## one a season each — so upkeep falls until the purse recovers.
+	var rules: Dictionary = brain["rules"]
+	var floor_units := int(rules["debt_garrison_floor"])
+	for region_id in AiController.settlements_of(state, brain["id"]):
+		var garrison: Array = state["settlements"][region_id]["garrison"]
+		if garrison.size() <= floor_units:
+			continue
+		var worst := -1
+		var worst_upkeep := -1
+		for i in range(garrison.size()):
+			var upkeep := int(data.units.get(garrison[i]["template"], {}).get("upkeep", 0))
+			if upkeep > worst_upkeep:
+				worst = i
+				worst_upkeep = upkeep
+		if worst >= 0:
+			garrison.remove_at(worst)
 
 
 ## --- Taxes ---------------------------------------------------------------------
@@ -33,7 +76,7 @@ static func set_taxes(data: GameData, state: Dictionary, brain: Dictionary, regi
 	var rules: Dictionary = brain["rules"]
 	var settlement: Dictionary = state["settlements"][region_id]
 	var max_index := int(rules["max_tax_index_base"])
-	if AiController.weight(brain, "greed") >= 0.5:
+	if AiController.weight(brain, "greed") >= float(rules["greed_top_tax_threshold"]):
 		max_index += int(rules["max_tax_index_greed_bonus"])
 	if in_debt:
 		max_index = maxi(max_index, int(rules["debt_tax_index"]))
@@ -55,7 +98,7 @@ static func desired_garrison(data: GameData, state: Dictionary, brain: Dictionar
 	var settlement: Dictionary = state["settlements"][region_id]
 	var units := int(rules["garrison_units_base"]) \
 		+ int(int(settlement["population"]) / 5000) * int(rules["garrison_units_per_5000_pop"])
-	if AiController.weight(brain, "caution") >= 0.6:
+	if AiController.weight(brain, "caution") >= float(rules["caution_garrison_threshold"]):
 		units += int(rules["garrison_units_caution_bonus"])
 	if AiMilitary.threat_at(data, state, brain["id"], region_id) > 0.0:
 		units += int(rules["garrison_units_threat_bonus"])
@@ -131,8 +174,8 @@ static func build(data: GameData, state: Dictionary, brain: Dictionary, region_i
 		if order < float(rules["build_order_low_threshold"]) \
 				and (float(effects.get("happiness", 0.0)) > 0.0 or float(effects.get("law", 0.0)) > 0.0):
 			weight *= float(rules["build_unrest_multiplier"])
-		if at_war and kind in ["barracks", "walls", "stables", "archery_range", "siege_workshop"]:
-			weight *= float(rules["build_war_military_multiplier"])
+		if at_war:
+			weight *= float(rules["build_war_kind_multipliers"].get(kind, 1.0))
 		if frontier and kind == "walls":
 			weight *= float(rules["build_frontier_walls_multiplier"])
 		if squalor >= float(rules["build_squalor_health_threshold"]) and kind == "health":
@@ -157,12 +200,10 @@ static func train_agents(data: GameData, state: Dictionary, rng: CampaignRng, br
 	var faction: Dictionary = state["factions"][faction_id]
 	if int(faction["treasury"]) < reserve * int(rules["agent_reserve_multiplier"]):
 		return ""
-	var capital: String = faction["capital"]
-	if not state["settlements"].has(capital) or state["settlements"][capital]["owner"] != faction_id:
-		capital = AiController.nearest_own_settlement(data, state, faction_id, capital) \
-			if data.regions.has(capital) else ""
-		if capital == "":
-			return ""
+	# Agents train where the home watch stands, so the two never disagree.
+	var capital := AiAgents.home_region(data, state, faction_id)
+	if capital == "":
+		return ""
 	var available := {}
 	for offer in AgentRules.kinds_available(data, state, capital):
 		available[offer["id"]] = true
@@ -179,7 +220,8 @@ static func train_agents(data: GameData, state: Dictionary, rng: CampaignRng, br
 		wanted = "envoy"
 	elif home_watch == 0 and available.has("spy"):
 		wanted = "spy"
-	elif espionage >= float(rules["spy_abroad_min_espionage"]) and int(counts.get("spy", 0)) < 2 and available.has("spy"):
+	elif espionage >= float(rules["spy_abroad_min_espionage"]) \
+			and int(counts.get("spy", 0)) < int(rules["spies_abroad_max"]) and available.has("spy"):
 		wanted = "spy"
 	elif espionage >= float(rules["assassin_min_espionage"]) and int(counts.get("assassin", 0)) == 0 \
 			and available.has("assassin") and not AiController.enemies_of(data, state, faction_id).is_empty():

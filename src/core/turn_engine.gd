@@ -39,6 +39,15 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		if faction_id != state["player_faction"]:
 			AiController.take_turn(data, state, rng, resolver, faction_id, report["ai"])
 	report["offers"] = state["pending_offers"].duplicate(true)
+	# The AI's battles carry character news (traits, adoptions, successions)
+	# that belongs with the rest of the family report.
+	var ai_notices: Array = []
+	for notice in report["ai"]:
+		if notice.get("kind", "") in ["trait", "ancillary", "man_of_the_hour", "succession", "new_heir"]:
+			report["characters"].append(notice)
+		else:
+			ai_notices.append(notice)
+	report["ai"] = ai_notices
 
 	# Governorship follows presence, so it is re-derived before anything reads it.
 	SettlementRules.refresh_governors(data, state)
@@ -47,14 +56,19 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	for siege_event in report["sieges"]:
 		var result: Dictionary = siege_event.get("result", {})
 		if result.get("captured", false):
-			# Starve-outs default to occupation; the player's own assaults go
-			# through Game.assault_settlement, which asks. Either way the
-			# besieging general answers for how the city was treated.
+			# A starved-out city falls to the player as an occupation (nobody
+			# was asked); to an AI besieger by its personality's cruelty.
+			# Either way the besieging general answers for how it was treated.
 			var besieger = result.get("besieger_general")
-			CombatRules.capture_settlement(data, state, rng,
-				siege_event["region"], result["capture_pending_owner"], "occupy")
+			var new_owner: String = result["capture_pending_owner"]
+			var occupation := "occupy"
+			if new_owner != state["player_faction"]:
+				occupation = AiMilitary.occupation_choice(data, state,
+					AiController.context(data, state, new_owner), siege_event["region"])
+			siege_event["occupation"] = occupation
+			CombatRules.capture_settlement(data, state, rng, siege_event["region"], new_owner, occupation)
 			CombatRules.fire_occupation_triggers(
-				data, state, rng, besieger, "occupy", report["characters"])
+				data, state, rng, besieger, occupation, report["characters"])
 
 	for region_id in region_ids:
 		var completed_buildings := ConstructionRules.advance_queues(data, state, region_id)

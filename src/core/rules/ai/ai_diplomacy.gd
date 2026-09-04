@@ -40,6 +40,10 @@ static func consider_war(data: GameData, state: Dictionary, brain: Dictionary, o
 		return false
 	if int(brain["turn"]) - int(memory.get("last_war_turn", -999)) < int(rules["war_declare_interval_turns"]):
 		return false
+	# A peace just made is kept for a while, whatever the odds.
+	if int(brain["turn"]) - int(state["factions"][faction_id].get("peace_since", {}).get(other, -999)) \
+			< int(rules["min_peace_turns_before_war"]):
+		return false
 	if AiController.enemies_of(data, state, faction_id).size() >= int(brain["p"].get("max_wars", 0)):
 		return false
 	if int(state["factions"][faction_id]["treasury"]) < int(rules["war_declare_min_treasury"]):
@@ -53,6 +57,10 @@ static func consider_war(data: GameData, state: Dictionary, brain: Dictionary, o
 		return false
 	var needed := AiController.needed_ratio(brain, float(rules["war_declare_strength_ratio"]))
 	if stance in ["trade", "alliance", "protectorate"]:
+		# No backstab on a fresh treaty; an old one is broken only for a
+		# margin scaled by loyalty.
+		if DiplomacyRules.treaty_age(state, faction_id, other) < int(rules["min_treaty_turns_before_betrayal"]):
+			return false
 		needed *= 1.0 + AiController.weight(brain, "loyalty") * float(rules["break_treaty_loyalty_weight"])
 	if DiplomacyRules.power_ratio(data, state, faction_id, other) < needed:
 		return false
@@ -82,12 +90,25 @@ static func consider_peace(data: GameData, state: Dictionary, brain: Dictionary,
 	if not offer_due(brain, other):
 		return
 	var ratio := DiplomacyRules.power_ratio(data, state, faction_id, other)
-	if ratio >= float(rules["submission_demand_strength_ratio"]) and AiController.weight(brain, "aggression") >= 0.5:
+	if ratio >= float(rules["submission_demand_strength_ratio"]) \
+			and AiController.weight(brain, "aggression") >= float(rules["submission_demand_min_aggression"]):
 		make_offer(data, state, brain, other, {"stance": "protectorate"}, notices)
 		return
-	var weary := DiplomacyRules.war_turns(state, faction_id, other) >= int(rules["peace_seek_war_turns"])
+	# Weariness ends a war that is not being won and has no siege in hand.
+	var weary := DiplomacyRules.war_turns(state, faction_id, other) >= int(rules["peace_seek_war_turns"]) \
+		and ratio < float(rules["peace_weary_max_ratio"]) and not besieging_any(state, faction_id, other)
 	if ratio < float(rules["peace_seek_strength_ratio"]) or weary:
 		make_offer(data, state, brain, other, {"stance": "neutral"}, notices)
+
+
+static func besieging_any(state: Dictionary, faction_id: String, other: String) -> bool:
+	for settlement in state["settlements"].values():
+		var siege = settlement["siege"]
+		if siege == null or settlement["owner"] != other:
+			continue
+		if state["armies"].get(siege["besieger"], {}).get("owner", "") == faction_id:
+			return true
+	return false
 
 
 ## --- Treaties ---------------------------------------------------------------------
@@ -140,13 +161,16 @@ static func make_offer(data: GameData, state: Dictionary, brain: Dictionary, oth
 			state["pending_offers"] = []
 		state["pending_offers"].append({"from": faction_id, "proposal": proposal, "turn": brain["turn"]})
 		notices.append({"kind": "offer", "from": faction_id, "stance": proposal.get("stance", "")})
+		# Carrying the offer is the envoy's work for the season, answered or not.
+		AgentRules.spend_season(state["agents"][envoy])
 		return true
 
 	var verdict := DiplomacyRules.evaluate(data, state, proposal)
 	if not verdict["accept"] and verdict["reason"] == "" and proposal.get("stance", "") in ["neutral", "trade", "alliance"]:
 		var gold_per_point := float(data.balance["diplomacy"]["offer_gold_per_point"])
+		var rounding := float(rules["gift_rounding"])
 		var shortfall := -float(verdict["score"])
-		var gift := int(ceil(shortfall * gold_per_point / 100.0)) * 100
+		var gift := int(ceil(shortfall * gold_per_point / rounding) * rounding)
 		var treasury := int(state["factions"][faction_id]["treasury"])
 		if gift > 0 and gift <= int(float(treasury) * float(rules["peace_gift_share_of_treasury"])):
 			proposal["gift"] = gift

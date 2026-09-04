@@ -247,21 +247,53 @@ func test_offers_scroll(t) -> void:
 	screen.refresh()
 	t.check(screen.top_labels["offers"].text.contains("1"), "the top bar counts the waiting offer")
 
+	# A second court's offer waits behind the first.
+	var greek_envoy := AgentRules.spawn(game.data, game.state, rng, "greek_cities", "envoy", "etruria")
+	game.state["agents"][greek_envoy]["movement_left"] = 3.0
+	game.state["pending_offers"].append({"from": "greek_cities", "turn": 0,
+		"proposal": {"from": "greek_cities", "to": "julii", "stance": "trade", "envoy": greek_envoy}})
 	screen.offers_panel.open_for(game)
-	t.check(screen.offers_panel._content.get_child_count() > 2, "the scroll shows the offer")
-	t.check(screen.offers_panel.describe({"stance": "trade", "gift": 400}).contains("trade rights"), "terms are spelled out")
+	t.check(screen.offers_panel.visible, "the scroll opens")
+	t.check(screen.offers_panel._content.get_child_count() > 2, "the scroll shows the offers")
+	t.check(_has_label(screen.offers_panel, "    a gift of 400 denarii."), "the terms on screen are the offer's")
 	var treasury_before := int(game.state["factions"]["julii"]["treasury"])
-	t.check(_press(screen.offers_panel, "Accept"), "Accept is offered")
+	var buttons: Array = []
+	_collect_buttons(screen.offers_panel, "Accept", buttons)
+	t.check_eq(buttons.size(), 2, "one Accept per offer")
+	buttons[0].pressed.emit()
+	buttons[0].pressed.emit()  # a double click must not answer the next court's offer
 	t.check_eq(int(game.state["factions"]["julii"]["treasury"]), treasury_before + 400, "the gift arrives on acceptance")
-	t.check(game.pending_offers().is_empty(), "the offer is answered")
-	t.check(screen.report_log.get_parsed_text().contains("accept"), "and logged")
+	t.check_eq(game.pending_offers().size(), 1, "the second offer still waits")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "greek_cities"), "neutral", "and was not answered by the double click")
+	t.check(screen.offers_panel.visible, "the scroll stays open while an offer waits")
+	t.check(screen.report_log.get_parsed_text().contains("accept"), "the acceptance is logged")
+	t.check(_press(screen.offers_panel, "Refuse"), "Refuse is offered for the second")
+	t.check(game.pending_offers().is_empty(), "both are answered")
+	t.check(not screen.offers_panel.visible, "and the scroll closes")
 
+	# A demand for submission asks twice, and spells out the cost. Only a
+	# stronger court may demand it, so the Senate musters a great host first.
+	var host: Array = []
+	for i in range(16):
+		host.append({"template": "roman_principes", "experience": 3, "strength_pct": 100})
+	game.state["armies"]["army_senate_host"] = {"owner": "senate", "region": "latium", "units": host,
+		"general": null, "movement_left": 0.0, "forced_march": false}
 	game.state["pending_offers"].append({"from": "senate", "turn": 0,
 		"proposal": {"from": "senate", "to": "julii", "stance": "protectorate", "envoy": envoy}})
 	screen.offers_panel.open_for(game)
-	t.check(_press(screen.offers_panel, "Refuse"), "Refuse is offered")
-	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "senate"), "alliance", "refusal changes nothing")
+	t.check(_press(screen.offers_panel, "Accept"), "Accept is offered")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "senate"), "alliance", "nothing happens before the confirmation")
+	t.check(_confirm_pending(screen.offers_panel), "a confirmation is raised over the scroll")
+	t.check_eq(DiplomacyRules.stance_between(game.state, "julii", "senate"), "protectorate", "confirmed, we submit")
+	t.check_eq(game.state["factions"]["julii"]["overlord"], "senate", "and the Senate is our overlord")
 	screen.free()
+
+
+func _collect_buttons(root: Node, prefix: String, found: Array) -> void:
+	for child in root.get_children():
+		if child is Button and String(child.text).begins_with(prefix):
+			found.append(child)
+		_collect_buttons(child, prefix, found)
 
 
 func _press(root: Node, prefix: String) -> bool:

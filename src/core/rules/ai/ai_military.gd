@@ -22,9 +22,13 @@ static func act(data: GameData, state: Dictionary, rng: CampaignRng, resolver: B
 ## --- Threats and targets ---------------------------------------------------------
 
 static func threat_at(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> float:
-	## Strength of hostile armies standing in or beside a region.
+	## Strength of hostile armies standing in or beside a region. Summed in
+	## sorted order: the total gates decisions, and float sums depend on order.
 	var total := 0.0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if not DiplomacyRules.at_war(state, faction_id, army["owner"]):
 			continue
 		if army["region"] == region_id or MapRules.are_adjacent(data, army["region"], region_id):
@@ -54,14 +58,16 @@ static func most_threatened(data: GameData, state: Dictionary, brain: Dictionary
 	return best
 
 
-static func expansion_target(data: GameData, state: Dictionary, brain: Dictionary, from_region: String) -> String:
+static func expansion_target(data: GameData, state: Dictionary, brain: Dictionary, from_region: String, strength: float = -1.0) -> String:
 	## The nearest settlement worth marching on: independent towns while the
 	## personality expands, cities of powers we are at war with, all within a
 	## few hops of our own lands and reachable by land. Nearest first, then
-	## the weakest defended.
+	## the weakest defended. Given an army's `strength`, only settlements that
+	## army could take by the personality's siege margin count.
 	var rules: Dictionary = brain["rules"]
 	var faction_id: String = brain["id"]
 	var hops := MapRules.hops_from(data, from_region)
+	var needed := AiController.needed_ratio(brain, float(rules["siege_strength_ratio"]))
 	var best := ""
 	var best_key: Array = []
 	var region_ids: Array = state["settlements"].keys()
@@ -86,7 +92,10 @@ static func expansion_target(data: GameData, state: Dictionary, brain: Dictionar
 		var from_lands := AiController.hops_to_lands(data, state, faction_id, region_id)
 		if from_lands < 0 or from_lands > int(rules["expansion_target_max_hops"]):
 			continue
-		var key := [distance, AiController.settlement_strength(data, state, region_id), region_id]
+		var defence := AiController.settlement_strength(data, state, region_id)
+		if strength >= 0.0 and defence * needed > strength:
+			continue
+		var key := [distance, defence, region_id]
 		if best == "" or key < best_key:
 			best = region_id
 			best_key = key
@@ -130,61 +139,45 @@ static func muster(data: GameData, state: Dictionary, brain: Dictionary) -> Stri
 	var city := muster_city(data, state, brain)
 	if city == "":
 		return ""
+	# A city that cannot hold its own walls keeps every man on them.
+	if most_threatened(data, state, brain, city) == city:
+		return ""
 	var settlement: Dictionary = state["settlements"][city]
 	var keep := AiEconomy.desired_garrison(data, state, brain, city, false)
 	var surplus: int = settlement["garrison"].size() - keep
 	if surplus < int(rules["field_army_min_units"]):
 		return ""
-	var indexed: Array = []
-	for i in range(settlement["garrison"].size()):
-		indexed.append([AiController.strength_of(data, [settlement["garrison"][i]]), i])
-	indexed.sort()
-	indexed.reverse()
-	var taken_indices: Array = []
-	for i in range(mini(surplus, int(rules["field_army_max_units"]))):
-		taken_indices.append(int(indexed[i][1]))
-	taken_indices.sort()
-	taken_indices.reverse()
-	var units: Array = []
-	for index in taken_indices:
-		units.append(settlement["garrison"][index])
-		settlement["garrison"].remove_at(index)
-	units.reverse()
-
-	var army_id := "army_%d" % state["next_id"]
-	state["next_id"] += 1
-	state["armies"][army_id] = {
-		"owner": brain["id"], "region": city, "units": units, "general": _pick_general(data, state, brain["id"], city),
-		"movement_left": float(data.balance["movement"]["base_movement_points"]), "forced_march": false,
-	}
-	SettlementRules.refresh_governors(data, state)
-	return army_id
+	var general = CombatRules.available_general(data, state, brain["id"], city)
+	return CombatRules.raise_army(data, state, city, mini(surplus, int(rules["field_army_max_units"])), general)
 
 
 static func merge_stacks(data: GameData, state: Dictionary, brain: Dictionary) -> void:
 	## Two of our armies sharing a region become one, up to the stack cap,
-	## unless either is pressing a siege.
+	## unless either is pressing a siege. A captain's stack joins a general's;
+	## two generals keep their own commands.
 	var rules: Dictionary = brain["rules"]
 	var army_ids := AiController.armies_of(state, brain["id"])
 	for i in range(army_ids.size()):
-		if not state["armies"].has(army_ids[i]):
-			continue
-		var first: Dictionary = state["armies"][army_ids[i]]
-		if _is_besieging(state, army_ids[i]):
-			continue
 		for j in range(i + 1, army_ids.size()):
-			if not state["armies"].has(army_ids[j]):
+			if not state["armies"].has(army_ids[i]) or not state["armies"].has(army_ids[j]):
 				continue
+			var first: Dictionary = state["armies"][army_ids[i]]
 			var second: Dictionary = state["armies"][army_ids[j]]
-			if second["region"] != first["region"] or _is_besieging(state, army_ids[j]):
+			if second["region"] != first["region"]:
+				continue
+			if _is_besieging(state, army_ids[i]) or _is_besieging(state, army_ids[j]):
+				continue
+			if first["general"] != null and second["general"] != null:
 				continue
 			if first["units"].size() + second["units"].size() > int(rules["merge_stack_max_units"]):
 				continue
-			first["units"].append_array(second["units"])
-			if first["general"] == null and second["general"] != null:
-				first["general"] = second["general"]
-			first["movement_left"] = minf(float(first["movement_left"]), float(second["movement_left"]))
-			state["armies"].erase(army_ids[j])
+			var keeper_id: String = army_ids[i] if second["general"] == null else army_ids[j]
+			var other_id: String = army_ids[j] if keeper_id == army_ids[i] else army_ids[i]
+			var keeper: Dictionary = state["armies"][keeper_id]
+			var other: Dictionary = state["armies"][other_id]
+			keeper["units"].append_array(other["units"])
+			keeper["movement_left"] = minf(float(keeper["movement_left"]), float(other["movement_left"]))
+			state["armies"].erase(other_id)
 
 
 ## --- Orders -----------------------------------------------------------------------------
@@ -206,8 +199,9 @@ static func order_army(data: GameData, state: Dictionary, rng: CampaignRng, reso
 				assault(data, state, rng, resolver, brain, army_id, here, notices)
 		return
 
-	# 2. An enemy army within reach.
-	var prey := weakest_enemy_army_near(data, state, faction_id, here)
+	# 2. An enemy army within reach — never for a house that starts nothing.
+	var prey := weakest_enemy_army_near(data, state, faction_id, here) \
+		if AiController.weight(brain, "aggression") > 0.0 else ""
 	if prey != "":
 		var enemy: Dictionary = state["armies"][prey]
 		var ours := AiController.army_strength(data, state, army)
@@ -219,7 +213,12 @@ static func order_army(data: GameData, state: Dictionary, rng: CampaignRng, reso
 			var result := CombatRules.attack_army(data, state, resolver, rng, army_id, prey)
 			if not result.is_empty():
 				notices.append({"kind": "battle", "attacker": faction_id, "defender": enemy_owner,
-					"region": battlefield, "winner": result["winner"]})
+					"region": battlefield, "winner": result["winner"],
+					"defender_destroyed": not state["armies"].has(prey),
+					"attacker_destroyed": not state["armies"].has(army_id),
+					"defender_general_died": result.get("defender_general_died", false),
+					"attacker_general_died": result.get("attacker_general_died", false)})
+				notices.append_array(result.get("character_notices", []))
 			if not state["armies"].has(army_id) or result.get("winner", "") == "attacker":
 				return
 			army = state["armies"][army_id]
@@ -235,16 +234,14 @@ static func order_army(data: GameData, state: Dictionary, rng: CampaignRng, reso
 				CombatRules.garrison_army(data, state, army_id, threatened)
 			return
 
-		# 4. The nearest town or city worth taking.
-		var target := expansion_target(data, state, brain, here)
+		# 4. The nearest town or city this army could take.
+		var strength := AiController.army_strength(data, state, army)
+		var target := expansion_target(data, state, brain, here, strength)
 		if target != "":
 			if here == target or MapRules.are_adjacent(data, here, target):
-				var ours := AiController.army_strength(data, state, army)
-				var theirs := AiController.settlement_strength(data, state, target)
-				if ours >= theirs * AiController.needed_ratio(brain, float(rules["siege_strength_ratio"])):
-					var owner: String = state["settlements"][target]["owner"]
-					if SiegeRules.begin_siege(data, state, army_id, target):
-						notices.append({"kind": "siege_laid", "from": faction_id, "region": target, "owner": owner})
+				var owner: String = state["settlements"][target]["owner"]
+				if SiegeRules.begin_siege(data, state, army_id, target):
+					notices.append({"kind": "siege_laid", "from": faction_id, "region": target, "owner": owner})
 				return
 			march_toward(data, state, army_id, target, true)
 			return
@@ -268,7 +265,9 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var result := SiegeRules.assault_and_capture(data, state, rng, resolver, army_id, region_id, occupation)
 	if not result.is_empty():
 		notices.append({"kind": "assault", "from": brain["id"], "region": region_id, "owner": previous_owner,
-			"captured": result.get("captured", false), "occupation": occupation})
+			"captured": result.get("captured", false), "occupation": occupation,
+			"defender_general_died": result.get("defender_general_died", false)})
+		notices.append_array(result.get("character_notices", []))
 	return result
 
 
@@ -341,36 +340,4 @@ static func _is_besieging(state: Dictionary, army_id: String) -> bool:
 	return not settlement.is_empty() and settlement["siege"] != null and settlement["siege"]["besieger"] == army_id
 
 
-static func _pick_general(data: GameData, state: Dictionary, faction_id: String, region_id: String) -> Variant:
-	## An adult family member standing in the city who is not its governor;
-	## the governor only if he has a kinsman to leave behind.
-	var governor = state["settlements"][region_id]["governor"]
-	var candidates: Array = []
-	var char_ids: Array = state["characters"].keys()
-	char_ids.sort()
-	for char_id in char_ids:
-		var character: Dictionary = state["characters"][char_id]
-		if not character["alive"] or character["faction"] != faction_id:
-			continue
-		if character["role"] not in ["leader", "heir", "family"] or character.get("gender", "male") != "male":
-			continue
-		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
-			continue
-		if character.get("location", "") != region_id:
-			continue
-		if _leads_army(state, char_id):
-			continue
-		candidates.append(char_id)
-	if candidates.is_empty():
-		return null
-	for char_id in candidates:
-		if char_id != governor:
-			return char_id
-	return candidates[0] if candidates.size() > 1 else null
 
-
-static func _leads_army(state: Dictionary, char_id: String) -> bool:
-	for army in state["armies"].values():
-		if army["general"] == char_id:
-			return true
-	return false

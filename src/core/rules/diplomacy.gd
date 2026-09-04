@@ -43,14 +43,33 @@ static func set_stance(state: Dictionary, a: String, b: String, stance: String) 
 		return false
 	if not state["factions"].has(a) or not state["factions"].has(b):
 		return false
+	var previous := stance_between(state, a, b)
 	state["factions"][a]["diplomacy"][b] = stance
 	state["factions"][b]["diplomacy"][a] = stance
-	if stance != "protectorate":
-		for pair in [[a, b], [b, a]]:
-			var faction: Dictionary = state["factions"][pair[0]]
-			if faction.get("overlord", null) == pair[1]:
-				faction["overlord"] = null
+	# Treaties remember when they were signed, and so does a peace; anything
+	# else forgets.
+	for pair in [[a, b], [b, a]]:
+		var faction: Dictionary = state["factions"][pair[0]]
+		if previous == "war" and stance != "war":
+			_table(faction, "peace_since")[pair[1]] = int(state.get("turn", 0))
+		var since := _table(faction, "treaty_since")
+		if stance in ["trade", "alliance", "protectorate"]:
+			if not since.has(pair[1]):
+				since[pair[1]] = int(state.get("turn", 0))
+		else:
+			since.erase(pair[1])
+		if stance != "protectorate" and faction.get("overlord", null) == pair[1]:
+			faction["overlord"] = null
 	return true
+
+
+static func treaty_age(state: Dictionary, a: String, b: String) -> int:
+	## Seasons since the standing treaty between a and b was signed (0 for a
+	## treaty in force from the campaign's start until it is renewed).
+	var since = state["factions"][a].get("treaty_since", {}).get(b, null)
+	if since == null:
+		return int(state.get("turn", 0))
+	return int(state.get("turn", 0)) - int(since)
 
 
 static func declare_war(state: Dictionary, a: String, b: String, data: GameData = null) -> bool:
@@ -104,12 +123,20 @@ static func war_turns(state: Dictionary, a: String, b: String) -> int:
 static func strength(data: GameData, state: Dictionary, faction_id: String) -> float:
 	## Quality-weighted fighting strength of everything under arms: field
 	## armies and garrisons (no generals — this is the muster, not a battle).
+	## Summed in sorted order: the total gates decisions, and float sums
+	## depend on order.
 	var experience_pct := float(data.balance["battle"]["experience_strength_pct_per_chevron"])
 	var total := 0.0
-	for army in state["armies"].values():
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] == faction_id:
 			total += BattleResolver.force_strength(data, army["units"], null, experience_pct)
-	for settlement in state["settlements"].values():
+	var region_ids: Array = state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = state["settlements"][region_id]
 		if settlement["owner"] == faction_id:
 			total += BattleResolver.force_strength(data, settlement["garrison"], null, experience_pct)
 	return total
@@ -232,6 +259,9 @@ static func evaluate(data: GameData, state: Dictionary, proposal: Dictionary) ->
 	var power := power_ratio(data, state, from, to)
 	if stance == "protectorate" and power <= 1.0:
 		return _refusal("No court submits to a weaker one.")
+	if stance == "protectorate" and state["factions"][to].get("overlord", null) != null \
+			and state["factions"][to]["overlord"] != from:
+		return _refusal("They already answer to an overlord.")
 	# A stance below the standing one is a dissolution, not a fresh treaty.
 	var dissolving: bool = stance != "" and current != "war" \
 		and int(STANCE_RANK.get(stance, 0)) < int(STANCE_RANK.get(current, 0))
@@ -381,7 +411,14 @@ static func accept_offer(data: GameData, state: Dictionary, proposal: Dictionary
 	var verdict := evaluate(data, state, probe)
 	if verdict["reason"] != "":
 		return {"accepted": false, "score": 0.0, "factors": [], "reason": verdict["reason"]}
-	_apply(data, state, proposal)
+	# An offer the world has overtaken — the stance it asks for is already
+	# held, or lower than what stands — is not a downgrade in disguise.
+	var stance: String = proposal.get("stance", "")
+	var current := stance_between(state, proposal["from"], proposal["to"])
+	if stance != "" and (stance == current
+			or (current != "war" and int(STANCE_RANK.get(stance, 0)) < int(STANCE_RANK.get(current, 0)))):
+		return {"accepted": false, "score": 0.0, "factors": [], "reason": "Events have overtaken this offer."}
+	_apply(data, state, proposal, false)
 	return {"accepted": true, "score": float(verdict["score"]), "factors": verdict["factors"], "reason": ""}
 
 
@@ -500,7 +537,10 @@ static func process_turn(data: GameData, state: Dictionary) -> Array:
 
 ## --- Internals -------------------------------------------------------------------------
 
-static func _apply(data: GameData, state: Dictionary, proposal: Dictionary) -> void:
+static func _apply(data: GameData, state: Dictionary, proposal: Dictionary, envoy_effects: bool = true) -> void:
+	## `envoy_effects`: whether carrying this offer spends and trains the
+	## envoy — true when the proposer's own offer is accepted on the spot,
+	## false when the recipient answers an offer already carried and paid for.
 	var rules: Dictionary = data.balance["diplomacy"]
 	var from: String = proposal["from"]
 	var to: String = proposal["to"]
@@ -546,7 +586,7 @@ static func _apply(data: GameData, state: Dictionary, proposal: Dictionary) -> v
 	# An accepted offer is the envoy's work for the season; a treaty concluded
 	# (never one dissolved) is a lesson learned, and he grows.
 	var envoy: Dictionary = state["agents"].get(proposal.get("envoy", ""), {})
-	if not envoy.is_empty() and envoy["owner"] == from:
+	if envoy_effects and not envoy.is_empty() and envoy["owner"] == from:
 		AgentRules.spend_season(envoy)
 		if raised:
 			envoy["skill"] = mini(int(envoy["skill"]) + 1, int(data.balance["agents"]["max_skill"]))
@@ -611,9 +651,13 @@ static func _refusal(reason: String) -> Dictionary:
 
 
 static func _opinions(faction: Dictionary) -> Dictionary:
-	if not faction.has("opinion") or not (faction["opinion"] is Dictionary):
-		faction["opinion"] = {}
-	return faction["opinion"]
+	return _table(faction, "opinion")
+
+
+static func _table(faction: Dictionary, key: String) -> Dictionary:
+	if not faction.has(key) or not (faction[key] is Dictionary):
+		faction[key] = {}
+	return faction[key]
 
 
 static func _war_turn_table(faction: Dictionary) -> Dictionary:

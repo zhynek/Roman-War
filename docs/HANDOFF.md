@@ -25,7 +25,7 @@ the campaign AI), the Phase 7 senate foundation loop with four mission kinds,
 and a playable Phase 8 campaign UI including agent orders, a negotiating
 table and an offers scroll.
 
-**Green as of the Phase 6 commit:** 120 tests / 0 failures, validator 0
+**Green as of the Phase 6 review commit:** 126 tests / 0 failures, validator 0
 errors / 0 warnings, clean boot, an 80-turn headless campaign in which the
 AI took 30 of 33 independent towns and declared 25 wars (about a third of
 them across a treaty, now only ones older than ten seasons), and a save made
@@ -70,7 +70,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 120 tests, 0 failures (~45s)
+godot --headless --path . --script res://tests/run_tests.gd      # 126 tests, 0 failures (~50s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
@@ -215,9 +215,13 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   three lenses after Phase 5 found **another 30-odd** the 98-strong suite had
   missed — among them agents acting without limit in a turn, an envoy trained
   to skill 10 by churning treaties, tribute promised and never paid, and a
-  bought besieger capturing a city at peace. Give each reviewer the research
-  report plus a specific lens, tell them to run the suite themselves, make
-  them read-only, and require findings-only output.
+  bought besieger capturing a city at peace. After Phase 6 the same round
+  found **another 30-odd**: a war-peace-war cycle every nine seasons, armies
+  parked inside enemy regions, unbounded spy training after a lost capital, a
+  debt spiral with no garrison ever shed, a double click answering the next
+  court's offer. Give each reviewer the research report plus a specific lens,
+  tell them to run the suite themselves, make them read-only, and require
+  findings-only output.
 - When adding a rules module, add tests to `tests/` **and** cross-reference
   checks to `tools/validate_data.py` if it introduces a data table. Both gates
   must pass before committing.

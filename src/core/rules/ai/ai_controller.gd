@@ -98,14 +98,14 @@ static func needed_ratio(brain: Dictionary, base: float) -> float:
 	var ratio := base * (1.0 + (weight(brain, "caution") - 0.5) * float(rules["caution_ratio_weight"]))
 	ratio /= 1.0 + (weight(brain, "aggression") - 0.5) * float(rules["aggression_ratio_weight"])
 	ratio /= maxf(float(brain["aggression_multiplier"]), 0.1)
-	return maxf(ratio, 0.5)
+	return maxf(ratio, float(rules["needed_ratio_floor"]))
 
 
 static func reserve_for(brain: Dictionary, settlement_count: int) -> int:
 	## Gold kept back from every purchase; the greedy keep less.
 	var rules: Dictionary = brain["rules"]
 	var reserve := float(rules["treasury_reserve"]) + float(rules["reserve_per_settlement"]) * float(settlement_count)
-	return int(round(reserve * (1.5 - weight(brain, "greed"))))
+	return int(round(reserve * (float(rules["reserve_greed_offset"]) - weight(brain, "greed"))))
 
 
 static func enemies_of(data: GameData, state: Dictionary, faction_id: String) -> Array:

@@ -487,8 +487,9 @@ def cross_checks(t: dict[str, dict]) -> None:
 
     # Every balance constant the engine indexes must exist: a missing or
     # misspelled key is a runtime crash the schema cannot see (sections are
-    # free-form numeric tables). Scans src/core for direct indexing and for
-    # the `var rules: Dictionary = data.balance["section"]` alias idiom.
+    # free-form numeric tables). Scans src/core for direct indexing, for the
+    # `var rules: Dictionary = data.balance["section"]` alias idiom, and for
+    # the AI's `brain["rules"]` alias of the ai section.
     for section, key, where in balance_keys_used(engine_dir):
         if section not in balance:
             err(f"balance: engine indexes unknown section {section} ({where})")
@@ -502,7 +503,7 @@ def cross_checks(t: dict[str, dict]) -> None:
         if action not in action_vocabulary:
             err(f"balance: agents.caught_on_failure_pct names unknown action {action}")
     for kind in balance.get("ai", {}).get("build_weights", {}):
-        if kind not in {c["kind"] for c in chains.values()} and kind != "naval":
+        if kind not in {c["kind"] for c in chains.values()}:
             warn(f"balance: ai.build_weights names a building kind no chain has: {kind}")
     for kind in {c["kind"] for c in chains.values()}:
         if kind not in balance.get("ai", {}).get("build_weights", {}):
@@ -528,6 +529,9 @@ def cross_checks(t: dict[str, dict]) -> None:
 
 ALIAS_RE = re.compile(r'var\s+(\w+)\s*(?::\s*Dictionary)?\s*:?=\s*data\.balance\["(\w+)"\]\s*$')
 DIRECT_RE = re.compile(r'data\.balance\["(\w+)"\]\["(\w+)"\]')
+# The AI behaviours read balance.ai through the brain: brain["rules"].
+BRAIN_ALIAS_RE = re.compile(r'var\s+(\w+)\s*(?::\s*Dictionary)?\s*:?=\s*brain\["rules"\]\s*$')
+BRAIN_DIRECT_RE = re.compile(r'brain\["rules"\]\["(\w+)"\]')
 INDEX_RE = re.compile(r'\b(\w+)\["(\w+)"\]')
 FUNC_RE = re.compile(r'^\s*(static\s+)?func\s')
 
@@ -544,8 +548,13 @@ def balance_keys_used(engine_dir: Path) -> list[tuple[str, str, str]]:
             alias = ALIAS_RE.search(line)
             if alias:
                 aliases[alias.group(1)] = alias.group(2)
+            brain_alias = BRAIN_ALIAS_RE.search(line)
+            if brain_alias:
+                aliases[brain_alias.group(1)] = "ai"
             for section, key in DIRECT_RE.findall(line):
                 used.append((section, key, where))
+            for key in BRAIN_DIRECT_RE.findall(line):
+                used.append(("ai", key, where))
             for name, key in INDEX_RE.findall(line):
                 if name in aliases:
                     used.append((aliases[name], key, where))
