@@ -13,8 +13,9 @@ You pick three things and press **BEGIN THE CAMPAIGN**:
   the intended starting choices; the others are listed as unlockable and are
   playable now for testing.
 - **Difficulty** — how much help the computer players get (money, public
-  order in their cities, and how readily they go to war). It does not make
-  them cleverer.
+  order in their cities, and how readily they fight: the odds they want before
+  declaring war, attacking, besieging or storming). It does not make them
+  cleverer.
 - **World seed** — the same number replays exactly the same world. Change it for
   a different run of luck; keep it to compare two attempts fairly.
 
@@ -54,9 +55,11 @@ doing well or badly:
 - **Income** — taxes, farming, trade, mines, minus corruption.
 
 From the same panel you can set **taxes**, **build**, **recruit**, **retrain**
-a battered garrison, **demolish** a building (the way you work off the unrest a
-conquered city's foreign temples cause), and **make this city your capital**
-(everything far from your capital suffers unrest and corruption).
+a battered garrison, **raise a field army** from the garrison (the strongest
+units first, led by a family member present), **demolish** a building (the
+way you work off the unrest a conquered city's foreign temples cause), and
+**make this city your capital** (everything far from your capital suffers
+unrest and corruption).
 
 A city grows into its next tier when its population passes the threshold **and**
 you have upgraded its government building. Tribal cultures cannot build the top
@@ -169,10 +172,12 @@ they live on the sea rather than in a region.
 
 The other courts come to you as well. When one of their envoys reaches you,
 the **Offers** scroll opens at the start of your turn with the terms — peace,
-trade rights, an alliance, a demand that you submit as their protectorate,
-gold, tribute, land — and you accept or refuse each. They mean what they
-offer: accepting applies the terms at once. An offer you leave unanswered
-lapses when you end the turn.
+trade rights, an alliance, or a demand that you submit as their protectorate —
+and you accept or refuse each. They mean what they offer: accepting applies
+the terms at once. An offer you leave unanswered lapses when you end the
+turn. A Roman house starts allied with its kin and hemmed in by independent
+towns, so foreign courts have little to say to it at first; the offers and
+the wars come as your borders reach theirs.
 
 ## Winning
 
@@ -189,8 +194,9 @@ Honest list, so you know what you are looking at:
   expand into independent towns, declare war on weak neighbours, besiege and
   storm cities, defend their own, make peace when losing, offer and accept
   treaties, and send spies and assassins — but their armies never take ship,
-  and allies do not coordinate. Each house has its own temperament (the Gauls
-  are quick to war, the Free Cities would rather treat).
+  and allies do not coordinate. Each house has its own temperament in what it
+  offers and when it fights (the Gauls are quick to war, the Free Cities would
+  rather treat), though every court weighs *your* offers on the same scale.
 - **Battles resolve on paper.** You see the outcome, not the fight.
 - **The Senate** issues missions (take a town, court an ally, open a market,
   remove a king) and the civil war can trigger, but the full political system

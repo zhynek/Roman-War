@@ -14,7 +14,7 @@ minutes. This deliberately does **not** repeat what the other docs cover:
 ## 1. Where things stand
 
 An original clean-room turn-based grand-strategy game of the 270 BC
-Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 17
+Mediterranean, in Godot 4.4 / GDScript. The campaign engine is data-driven: 18
 JSON tables under `data/` validated by `schemas/`, with a thin deterministic
 rules engine in `src/core/`. Battles resolve behind a swappable
 `BattleResolver` interface.
@@ -27,7 +27,8 @@ table and an offers scroll.
 
 **Green as of the Phase 6 commit:** 120 tests / 0 failures, validator 0
 errors / 0 warnings, clean boot, an 80-turn headless campaign in which the
-AI took 30 of 33 independent towns and declared 25 wars, and a save made
+AI took 30 of 33 independent towns and declared 25 wars (about a third of
+them across a treaty, now only ones older than ten seasons), and a save made
 mid-campaign with the AI live replayed in step for 20 turns. Branch
 `claude/next-roadmap-phase-rjxwas`, everything pushed. A Mac build of the
 Phase 4 state was delivered to the user earlier; no build of Phases 5–6 has
@@ -170,7 +171,16 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   `MovementRules.sea_move_army` exists for it to use.
 - **Allies do not coordinate** and are not called into wars; the AI's wars are
   each its own affair. The AI never negotiates land or tribute — its offers
-  are peace, trade, alliance, submission, and gifts to sweeten peace.
+  are peace, trade, alliance and submission; a gift is added only to sweeten
+  a peace, trade or alliance offer to another AI court, never to the player.
+- **Acceptance is personality-blind.** `DiplomacyRules.evaluate` never reads
+  the personality, so Germania takes trade rights as readily as the Free
+  Cities; temperament shows only in what a court offers and when it fights.
+  A Phase 8 candidate: weight the evaluation by `diplomacy` and `loyalty`.
+- **Roman starts are quiet early.** The houses start allied with their kin,
+  Roman kin never war on each other, and their neighbours are independents,
+  so a Roman player sees few offers or declarations until the borders reach
+  foreign courts (a passive Julii saw none in 60 turns; Macedon saw 15 and 3).
 - **Envoy bribery is deterministic** (pay the price, the captain turns) and
   family-led armies can never be bought; the research report's "bribe
   generals" is deliberately not implemented. Captains are not assassination
