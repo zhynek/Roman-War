@@ -222,9 +222,11 @@ it can do. Now:
 - **Right-click a red-ringed province** to attack the army there or lay siege
   to the city. If you are not already at war, the game asks first — it will
   never start a war by accident. **A battle takes the season**: the men need
-  movement left to attack, and none remains afterwards. Laying siege costs
-  the step to the walls like any march, and a **relief army standing before
-  the walls must be beaten first**. Every battle you order then plays back as
+  movement enough to step into the enemy's province (a battle in your own
+  province costs nothing to start), and none remains afterwards — storming
+  walls is a battle too. Laying siege costs the step to the walls like any
+  march, and a **field army standing before the walls must be beaten first**,
+  whether you are at war with it yet or not. Every battle you order then plays back as
   an animated field: the lines close, grind, and one side breaks and is
   ridden down, with morale bars draining above. It is a replay of the decided
   outcome, and you can skip it at any moment. (A siege you let starve
@@ -265,10 +267,11 @@ it can do. Now:
   home to the fields and swell the population — no money comes back); **give
   command** to a family member standing in the city, or **detach** the general
   to stay behind as governor; **consolidate** depleted units of the same kind
-  into full ones. Units carry their movement with them, so shuffling men
-  between armies never gains a step. An army holds twenty units at most, a
-  general always keeps one under him, and two generals cannot share a camp in
-  the field.
+  into full ones. Units carry their movement and their weariness with them,
+  so shuffling men between armies (or through a garrison) never gains a step
+  or shakes off a forced march; nobody walks into a city under siege. An army
+  holds twenty units at most, a general always keeps one under him, and two
+  generals cannot share a camp in the field.
 - **Search points of interest.** Gold diamonds on the map mark places worth a
   look — ruins, caches, deserters' camps. March an army onto one and press
   **Search** in its panel: you might find treasure, veterans' wisdom, or
@@ -291,8 +294,9 @@ the ships and the seas it can reach, ringed on the map. **Right-click a ringed
 sea** to sail there, or **one of your own ports on this sea** to dock — the
 ships go back into the harbour, where **Retrain** re-arms them and from which
 they can be launched again. Fleets regroup like armies: transfer ticked ships
-between two of your fleets in the same sea, merge, split, or disband ticked
-ships in a sea touching one of your ports. Ships in harbour cost upkeep like
+between two of your fleets in the same sea (or into a harbour, which costs
+them the lane a docking fleet pays), merge, split, or disband ticked ships in
+a sea touching one of your ports. Ships in harbour cost upkeep like
 any unit. Fleets do not fight yet (see the end of this guide), but they watch
 the seas: their own sea and its neighbours are visible to you, foreign sails
 included.

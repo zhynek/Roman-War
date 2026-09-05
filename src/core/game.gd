@@ -134,7 +134,15 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	_cancel_march(attacker_id)
 	if not _owns_army(attacker_id) or not state["armies"].has(defender_id):
 		return {}
-	if float(state["armies"][attacker_id]["movement_left"]) <= 0.0001:
+	var attacker: Dictionary = state["armies"][attacker_id]
+	if float(attacker["movement_left"]) <= 0.0001:
+		return {}
+	# Striking across the border pays the step into the defender's region,
+	# like the march it is (the winner ends up there); a siege laid from next
+	# door pays the same. Fighting in the army's own region costs nothing.
+	var defender_region := String(state["armies"][defender_id]["region"])
+	if defender_region != attacker["region"] \
+			and not MovementRules.can_afford_step(data, state, attacker, defender_region):
 		return {}
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
@@ -616,11 +624,18 @@ func besiege(army_id: String, region_id: String) -> bool:
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	## Storming the walls is a battle like any other: it needs movement left
+	## and takes the rest of the season (the turn engine's starve-outs go
+	## through SiegeRules directly and are not subject to this).
 	_cancel_march(army_id)
 	if not _owns_army(army_id) or not state["settlements"].has(region_id):
 		return {}
+	if float(state["armies"][army_id]["movement_left"]) <= 0.0001:
+		return {}
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
+	if not result.is_empty() and state["armies"].has(army_id):
+		state["armies"][army_id]["movement_left"] = 0.0
 	if result.get("captured", false):
 		var general = state["armies"].get(army_id, {}).get("general")
 		result["capture"] = CombatRules.capture_settlement(
@@ -817,7 +832,7 @@ func reachable_regions(army_id: String) -> Dictionary:
 	## plain budget, where only a forced march reaches, and what bars the way
 	## beside them. Nothing the fog hides ever reports a reason.
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if army.is_empty() or not _owns_army(army_id):
 		return {"reach": {}, "blocked": {}}
 	var owner := String(army["owner"])
 	var visible := visible_regions(owner)
@@ -843,17 +858,26 @@ func reachable_regions(army_id: String) -> Dictionary:
 
 
 func targets_for(army_id: String) -> Dictionary:
-	## {region_id: "attack"|"siege"} an army can strike from where it stands.
+	## {region_id: "attack"|"siege"} one of the player's armies can strike
+	## from where it stands — nothing for a foreign army, whose reach is its
+	## own business behind its own fog.
+	if not _owns_army(army_id):
+		return {}
 	return MovementRules.targets_for(data, state, army_id)
 
 
 func reachable_zones(fleet_id: String) -> Dictionary:
-	## {zone_id: {cost, via}} for the seas a fleet can reach this season.
+	## {zone_id: {cost, via}} for the seas one of the player's fleets can
+	## reach this season.
+	if not _owns_force(fleet_id):
+		return {}
 	return MovementRules.fleet_reachable(data, state, fleet_id)
 
 
 func forces_awaiting_orders(faction_id: String = "") -> Array:
-	## Own armies then fleets, numeric id order, that still have movement.
+	## The player's armies then fleets, numeric id order, that still have
+	## movement (a faction_id is accepted for tests and tools; the UI never
+	## asks about anyone else).
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	var waiting: Array = []
 	var army_ids: Array = state["armies"].keys()
@@ -872,22 +896,22 @@ func forces_awaiting_orders(faction_id: String = "") -> Array:
 
 
 func raise_army(region_id: String) -> String:
-	## The whole garrison marches out as a field army under the best of the
-	## house present (the AI musters through its own path). Returns the new
-	## army id, or "" — the army moves next turn.
+	## The whole garrison (up to the stack cap) marches out as a field army
+	## under the best of the house present — the same rules, the same
+	## movement, as raising ticked units (the AI musters through its own
+	## path). Returns the new army id, or "".
 	var settlement: Dictionary = state["settlements"].get(region_id, {})
 	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
 		return ""
 	if settlement["garrison"].is_empty():
 		return ""
 	var general = CharacterRules.best_free_general(data, state, state["player_faction"], region_id)
-	var cap := int(data.balance["recruitment"]["army_unit_cap"])
-	var army_id := CombatRules.raise_army(data, state, region_id,
-		range(mini(settlement["garrison"].size(), cap)), general)
-	if army_id != "":
-		GuidedRules.bump(state, "armies_raised")
-		_after_relocation()
-	return army_id
+	var general_id := String(general) if general != null else ""
+	if general_id != "" and not candidate_generals(region_id).has(general_id):
+		general_id = ""
+	var indices: Array = range(mini(settlement["garrison"].size(), ForceRules.max_units(data)))
+	var result := raise_units(region_id, indices, general_id)
+	return String(result["army_id"]) if result["ok"] else ""
 
 
 func guided_enabled() -> bool:

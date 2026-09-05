@@ -172,6 +172,7 @@ static func bribe_army(data: GameData, state: Dictionary, agent_id: String, army
 	if int(faction["treasury"]) < cost:
 		return result
 	faction["treasury"] = int(faction["treasury"]) - cost
+	SiegeRules.release(state, army_id)
 	state["armies"].erase(army_id)
 	agent["movement_left"] = 0.0
 	result["success"] = true

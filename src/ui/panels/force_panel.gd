@@ -228,11 +228,10 @@ func _army_actions(summary: Dictionary) -> void:
 	# Standing at a foreign city's walls: lay siege, or press an assault.
 	if not settlement.is_empty() and settlement["owner"] != player:
 		if settlement.get("siege") == null:
-			var siege := _action_button("Lay siege to %s" % _settlement_name(region_id),
+			# Standing at the walls already, the army pays no step to invest
+			# them — only a siege laid from next door does (SiegeRules).
+			_action_button("Lay siege to %s" % _settlement_name(region_id),
 				func(): siege_requested.emit(region_id))
-			if not has_movement:
-				siege.disabled = true
-				siege.tooltip_text = "Investing a city takes the season; the men have marched themselves out."
 		elif settlement["siege"]["besieger"] == army_id:
 			var occupation_options := OptionButton.new()
 			occupation_options.focus_mode = Control.FOCUS_NONE
@@ -251,15 +250,18 @@ func _army_actions(summary: Dictionary) -> void:
 				assault_text += "  " + RegionPanel.odds_text(estimate)
 			var assault := _action_button(assault_text, func():
 				assault_requested.emit(region_id, ["occupy", "enslave", "exterminate"][occupation_options.selected]))
-			assault.disabled = not can_assault
+			assault.disabled = not can_assault or not has_movement
+			if can_assault and not has_movement:
+				assault.tooltip_text = "A storm is a battle: it takes the season's movement, and the men have none left."
 
 	# A point of interest under the army's feet.
 	var site: Dictionary = game.data.sites_by_region.get(region_id, {})
 	if not site.is_empty() and not game.state.get("sites_explored", []).has(site["id"]):
 		_header("Point of interest")
-		_action_button("Search the %s" % site["name"] if has_movement
+		var search := _action_button("Search the %s" % site["name"] if has_movement
 				else "Search the %s (no movement left)" % site["name"],
 			func(): explore_requested.emit(army_id))
+		search.disabled = not has_movement
 
 	_regroup_actions(summary)
 

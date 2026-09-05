@@ -167,8 +167,11 @@ static func split_fleet(data: GameData, state: Dictionary, fleet_id: String, ind
 
 static func normalise(data: GameData, state: Dictionary) -> int:
 	## Load-time repair for states written before harbours existed: any ship
-	## found in a garrison moves to that settlement's harbour, order kept.
-	## Idempotent; returns the number of ships moved.
+	## found in a garrison moves to that settlement's harbour, order kept, and
+	## a ship that marched with a field army (the old raise took the whole
+	## garrison) goes to the harbour of the army's own city if it stands in
+	## one, else to the owner's nearest port by id, else is lost at sea. An
+	## army emptied that way dissolves. Idempotent; returns the ships moved.
 	var moved := 0
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
@@ -183,4 +186,37 @@ static func normalise(data: GameData, state: Dictionary) -> int:
 			else:
 				keep.append(unit)
 		settlement["garrison"] = keep
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort_custom(ForceRules.id_less)
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
+		var keep: Array = []
+		var ships: Array = []
+		for unit in army["units"]:
+			if ForceRules.is_ship(data, unit):
+				ships.append(unit)
+			else:
+				keep.append(unit)
+		if ships.is_empty():
+			continue
+		army["units"] = keep
+		moved += ships.size()
+		var port := _port_for(data, state, String(army["owner"]), String(army["region"]))
+		if port != "":
+			var harbour := harbour_of(state, port)
+			for ship in ships:
+				harbour.append(ship)
+		ForceRules._erase_if_empty(data, state, army_id)
 	return moved
+
+
+static func _port_for(data: GameData, state: Dictionary, owner: String, region_id: String) -> String:
+	var here: Dictionary = state["settlements"].get(region_id, {})
+	if not here.is_empty() and here["owner"] == owner and MapRules.coastal(data, region_id):
+		return region_id
+	var candidates: Array = state["settlements"].keys()
+	candidates.sort()
+	for candidate in candidates:
+		if state["settlements"][candidate]["owner"] == owner and MapRules.coastal(data, candidate):
+			return candidate
+	return ""

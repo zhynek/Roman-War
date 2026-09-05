@@ -404,7 +404,8 @@ func test_a_general_carries_his_march_between_armies(t) -> void:
 
 func test_garrisoning_and_battle_release_a_siege(t) -> void:
 	## Every path that takes the besieger away from the walls lifts the siege
-	## at once: garrisoning, merging away, a lost last unit, a march.
+	## at once: a lost last unit, a march, a garrisoning. A merge into
+	## reinforcements at the same walls hands the siege over instead.
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
 	var besieger := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
@@ -413,9 +414,9 @@ func test_garrisoning_and_battle_release_a_siege(t) -> void:
 	t.check(SiegeRules.begin_siege(data, state, besieger, "alpha"), "siege laid")
 	state["armies"][second]["region"] = "alpha"
 	t.check(ForceRules.merge_armies(data, state, besieger, second)["ok"], "the besieger merges into the newcomer")
-	t.check(state["settlements"]["alpha"]["siege"] == null, "the siege is lifted when the besieger merges away")
+	var siege = state["settlements"]["alpha"]["siege"]
+	t.check(siege != null and siege["besieger"] == second, "the siege passes to the army that stays at the walls")
 	MovementRules.reset_movement(data, state)
-	t.check(SiegeRules.begin_siege(data, state, second, "alpha"), "the merged army invests again")
 	t.check(ForceRules.transfer_units(data, state, second, "garrison:alpha", [0])["error"] != "",
 		"nobody transfers into a foreign city's garrison")
 	state["armies"][second]["units"] = [state["armies"][second]["units"][0]]

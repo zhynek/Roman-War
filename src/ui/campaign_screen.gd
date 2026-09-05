@@ -43,6 +43,8 @@ var force_panel: ForcePanel
 var region_panel: RegionPanel
 var side_scroll: ScrollContainer
 var options_menu: MenuButton
+var _selection_key := ""
+var _selected_region_shown := ""
 var quest_panel: QuestPanel
 var build_drawer: BuildDrawer
 var family_panel: FamilyPanel
@@ -580,6 +582,10 @@ func _drop_stale_selection() -> void:
 		map_view.highlight_zones = {}
 	if selected_agent != "" and game.state["agents"].get(selected_agent, {}).get("owner", "") != player:
 		selected_agent = ""
+	# The province follows a selected army wherever it has got to — a queued
+	# march advances it during End Turn without any order of ours.
+	if selected_army != "":
+		map_view.selected_region = game.state["armies"][selected_army]["region"]
 	map_view.selected_force = selected_force()
 
 
@@ -588,8 +594,16 @@ func _refresh_selection() -> void:
 	## army or fleet, the province panel for the selected region. The scroll
 	## position survives the rebuild, or every action would jump to the top.
 	_drop_stale_selection()
-	var scroll_before := side_scroll.scroll_vertical
 	var force := selected_force()
+	# A new selection starts at the top of the column, so the force card is
+	# actually in view; a refresh of the same selection keeps its place.
+	var selection_key := "%s|%s|%s" % [force, map_view.selected_region, selected_agent]
+	var scroll_before := side_scroll.scroll_vertical if selection_key == _selection_key else 0
+	if map_view.selected_region != _selected_region_shown and drawer_open:
+		drawer_chain = ""
+		drawer_tier = 0
+	_selection_key = selection_key
+	_selected_region_shown = map_view.selected_region
 	if force != "":
 		force_panel.show_force(game, force)
 		force_panel.show()
@@ -654,7 +668,9 @@ func _on_force_clicked(kind: String, force_id: String) -> void:
 	if summary["owner"] == game.state["player_faction"]:
 		select_force(kind, force_id)
 		return
-	# A foreign banner: look, do not command. An army shows through its province.
+	# A foreign banner: look, do not command — not even an agent's walk, so
+	# the agent is stood down first. An army shows through its province.
+	selected_agent = ""
 	if kind == "army":
 		_on_region_clicked(summary["region"])
 	else:
@@ -895,6 +911,14 @@ func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
 			"region":
 				if target_id != game.state["armies"][selected_army]["region"]:
 					_army_order(target_id, forced)
+				elif game.targets_for(selected_army).has(target_id):
+					# A red ring on the army's own province: the enemy who
+					# shares it, or the walls it stands under.
+					var defender := _enemy_army_in(target_id)
+					if defender != "":
+						attack_army_order(defender)
+					else:
+						besiege_order(target_id)
 				else:
 					open_map_menu(target_id)
 			"army":
@@ -976,18 +1000,20 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		besiege_order(target_region)
 		return
 
-	# Otherwise: march (or sail). A destination beyond one step becomes a
-	# queued march that resumes each turn — still nothing but move steps, so
-	# it can never start a war.
+	# Otherwise: march. A destination beyond one step becomes a queued march
+	# that resumes each turn — still nothing but move steps, so it can never
+	# start a war. The road always comes first, because the road is what the
+	# rings and the hover sketch showed; the army takes ship only where no
+	# road exists at all (an island, a far shore).
 	if game.move_army(selected_army, target_region, forced_march):
 		var suffix := " by forced march — the men will be weary." if forced_march else "."
 		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
-	elif game.sea_move_army(selected_army, target_region):
-		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
 	else:
 		var march := game.march_army(selected_army, target_region, forced_march)
 		var target_name: String = game.data.regions[target_region]["name"]
-		if march.is_empty():
+		if march.is_empty() and game.sea_move_army(selected_army, target_region):
+			_log("The army takes ship for %s." % target_name)
+		elif march.is_empty():
 			_log("The army cannot reach %s this season." % target_name)
 		elif march.get("halted", false) and int(march.get("moved", 0)) == 0:
 			_log("[color=#e0a060]The way to %s is barred.[/color]" % target_name)

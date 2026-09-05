@@ -390,10 +390,11 @@ static func raise_army(data: GameData, state: Dictionary, region_id: String, ind
 	var settlement: Dictionary = state["settlements"][region_id]
 	var units := _take_units(settlement["garrison"], indices)
 	var general = general_id if general_id != "" else null
-	var army_id := _new_army(state, settlement["owner"], region_id, units, general, 0.0, false)
+	var army_id := _new_army(state, settlement["owner"], region_id, units, general, 0.0,
+		bool(settlement.get("muster_fatigued", false)))
 	var army: Dictionary = state["armies"][army_id]
-	army["movement_left"] = minf(MovementRules.movement_points_for(data, state, army),
-		float(settlement.get("muster_march_left", INF)))
+	army["movement_left"] = SocietyRules.quantize(minf(MovementRules.movement_points_for(data, state, army),
+		float(settlement.get("muster_march_left", INF))))
 	if general_id != "":
 		army["movement_left"] = minf(float(army["movement_left"]), general_march_cap(state, general_id))
 	SettlementRules.refresh_governors(data, state)
@@ -428,6 +429,11 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 		return ERR_OVER_CAP
 	if from["kind"] == "army" and from["container"]["general"] != null and indices.size() >= from["units"].size():
 		return ERR_LAST_UNIT
+	# Ships making port pay a sea lane exactly as a docking fleet does; a
+	# fleet with no lane left cannot slip its ships into the harbour either.
+	if from["kind"] == "fleet" and to["kind"] == "harbour" \
+			and NavalRules.lane_cost(data) > float(from["container"]["movement_left"]) + 0.0001:
+		return ERR_NO_MOVEMENT
 	return ""
 
 
@@ -472,15 +478,18 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(from["container"]["movement_left"]))
 		to["container"]["forced_march"] = bool(to["container"].get("forced_march", false)) or bool(from["container"].get("forced_march", false))
 	elif from["kind"] == "army" and to["kind"] == "garrison":
-		var settlement: Dictionary = to["container"]
-		settlement["muster_march_left"] = minf(float(settlement.get("muster_march_left", INF)), float(from["container"]["movement_left"]))
+		note_muster(state, to["region"], float(from["container"]["movement_left"]))
+		note_fatigue(state, to["region"], bool(from["container"].get("forced_march", false)))
 	elif from["kind"] == "garrison" and to["kind"] == "army":
 		var settlement: Dictionary = from["container"]
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_march_left", INF)))
+		to["container"]["forced_march"] = bool(to["container"].get("forced_march", false)) or bool(settlement.get("muster_fatigued", false))
 	elif from["kind"] == "fleet" and to["kind"] == "fleet":
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(from["container"]["movement_left"]))
 	elif from["kind"] == "fleet" and to["kind"] == "harbour":
-		note_sail_muster(state, to["region"], float(from["container"]["movement_left"]))
+		# Making port costs the ships a lane (NavalRules.dock_fleet's rule),
+		# so a port on two seas is a crossing, never a free jump.
+		note_sail_muster(state, to["region"], float(from["container"]["movement_left"]) - NavalRules.lane_cost(data))
 	elif from["kind"] == "harbour" and to["kind"] == "fleet":
 		var settlement: Dictionary = from["container"]
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_sail_left", INF)))
@@ -537,7 +546,9 @@ static func merge_armies(data: GameData, state: Dictionary, from_id: String, int
 		note_general_march(state, from["general"], float(from["movement_left"]))
 	into["movement_left"] = minf(float(into["movement_left"]), float(from["movement_left"]))
 	into["forced_march"] = bool(into.get("forced_march", false)) or bool(from.get("forced_march", false))
-	SiegeRules.release(state, from_id)
+	# A besieger that merges into the reinforcements hands the siege — and its
+	# clock — to the army that stays at the walls; it is never lifted by a merge.
+	SiegeRules.hand_over(state, from_id, into_id)
 	state["armies"].erase(from_id)
 	SettlementRules.refresh_governors(data, state)
 	return {"ok": true, "error": ""}
@@ -658,6 +669,14 @@ static func note_muster(state: Dictionary, region_id: String, movement_left: flo
 	_note(state["settlements"].get(region_id, {}), "muster_march_left", movement_left)
 
 
+static func note_fatigue(state: Dictionary, region_id: String, fatigued: bool) -> void:
+	## ... and whether they came in weary: men who forced-marched into the
+	## city march out of it weary too, whoever raises them.
+	var settlement: Dictionary = state["settlements"].get(region_id, {})
+	if fatigued and not settlement.is_empty():
+		settlement["muster_fatigued"] = true
+
+
 static func note_sail_muster(state: Dictionary, region_id: String, movement_left: float) -> void:
 	## The harbour's twin: ships that made port this season leave it no
 	## fresher than they arrived (transfers out of the harbour are capped).
@@ -684,7 +703,9 @@ static func general_march_cap(state: Dictionary, general_id) -> float:
 static func _note(record: Dictionary, key: String, movement_left: float) -> void:
 	if record.is_empty():
 		return
-	record[key] = minf(float(record.get(key, INF)), movement_left)
+	# Quantized like every stored float: a remainder such as 0.6000000000000001
+	# would otherwise reload as 0.6 and make the raised army step differently.
+	record[key] = SocietyRules.quantize(minf(float(record.get(key, INF)), maxf(movement_left, 0.0)))
 
 
 static func clear_musters(state: Dictionary) -> void:
@@ -692,5 +713,6 @@ static func clear_musters(state: Dictionary) -> void:
 	for settlement in state["settlements"].values():
 		settlement.erase("muster_march_left")
 		settlement.erase("muster_sail_left")
+		settlement.erase("muster_fatigued")
 	for character in state["characters"].values():
 		character.erase("march_left")

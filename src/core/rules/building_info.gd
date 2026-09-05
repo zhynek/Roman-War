@@ -241,7 +241,9 @@ static func unlocked_by(data: GameData, state: Dictionary, region_id: String,
 	var era: String = state["factions"][owner].get("era", "pre_marian")
 	var found: Array = []
 	for unit in data.units_for_faction(owner):
-		if unit["factions"].has("mercenary"):
+		# Mercenaries are hired, bodyguards come with the man: neither is
+		# ever trained here, so neither is ever "unlocked".
+		if unit["factions"].has("mercenary") or String(unit["class"]) == "general_bodyguard":
 			continue
 		var requirements: Dictionary = unit["requirements"]
 		if requirements["building_kind"] != chain["kind"]:
@@ -370,7 +372,7 @@ static func unit_list(data: GameData, state: Dictionary, region_id: String) -> A
 	var owner: String = settlement["owner"]
 	var rows: Array = []
 	for unit in data.units_for_faction(owner):
-		if unit["factions"].has("mercenary"):
+		if unit["factions"].has("mercenary") or String(unit["class"]) == "general_bodyguard":
 			continue
 		var sheet := unit_dossier(data, state, region_id, unit["id"])
 		if sheet.is_empty() or (sheet["requires"]["chains"] as Array).is_empty():

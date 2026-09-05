@@ -807,7 +807,10 @@ func banner_tooltip(summary: Dictionary) -> String:
 	if bool(summary["forced_march"]):
 		line += "\nfatigued"
 	if summary["owner"] == game.state["player_faction"]:
-		line += "\n[i]left-click to select, right-click a region to order[/i]"
+		if summary["kind"] == "army":
+			line += "\n[i]left-click to select, right-click a ringed province to order[/i]"
+		else:
+			line += "\n[i]left-click to select, right-click a ringed sea to sail or your port to dock[/i]"
 	return line
 
 
@@ -931,7 +934,9 @@ func _tooltip_text() -> String:
 		for entry in banner_layout():
 			if entry["id"] == hover_force:
 				if entry["kind"] == "more":
-					return "%d more forces here — click for the region's list" % int(entry["summary"]["count"])
+					if game.data.regions.has(entry["anchor"]):
+						return "%d more forces here — click for the province's list" % int(entry["summary"]["count"])
+					return "%d more fleets here — click the sea to take the helm of your next one" % int(entry["summary"]["count"])
 				return banner_tooltip(entry["summary"])
 		return ""
 	if tooltip_provider.is_valid():

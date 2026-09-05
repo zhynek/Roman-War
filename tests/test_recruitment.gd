@@ -125,8 +125,11 @@ func test_raise_army_closes_the_rearming_loop(t) -> void:
 	t.check_eq(state["armies"][army_id]["units"].size(), 1, "as a field army")
 	t.check_eq(int(state["armies"][army_id]["units"][0]["weapon"]), 1, "arms and all")
 	t.check(state["settlements"]["beta"]["garrison"].is_empty(), "leaving the walls bare")
-	t.check_near(float(state["armies"][army_id]["movement_left"]), 0.0, 0.001,
-		"raised this season — it marches next")
+	# Men fresh from the walls keep the season's march (ForceRules.raise_army:
+	# the whole-garrison button follows the same rules as a ticked raise).
+	t.check_near(float(state["armies"][army_id]["movement_left"]),
+		MovementRules.movement_points_for(data, state, state["armies"][army_id]), 0.001,
+		"raised this season with the season's march")
 	t.check_eq(game.raise_army("beta"), "", "nothing left to raise")
 
 

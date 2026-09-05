@@ -1271,8 +1271,11 @@ func test_battle_odds_and_the_storm_through_the_ui(t) -> void:
 		t.check(assault_button.disabled and assault_button.text.contains("engines ready in"),
 			"but not before the engines are built")
 
-	# Engines ready: the button wakes and quotes the odds; pressing it asks first.
+	# Engines ready — and a new season's movement, since laying the siege spent
+	# this one and a storm is a battle: the button wakes and quotes the odds;
+	# pressing it asks first.
 	game.state["settlements"][target]["siege"]["equipment_ready"] = true
+	game.state["armies"][army_id]["movement_left"] = 2.0
 	screen._after_order()
 	assault_button = _panel_button(screen.force_panel, "Assault")
 	t.check(assault_button != null and not assault_button.disabled, "ready engines enable the storm")

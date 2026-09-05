@@ -437,11 +437,22 @@ static func garrison_army(data: GameData, state: Dictionary, army_id: String, re
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] != army["owner"]:
 		return false
+	# Nobody walks into an invested city past the siege lines: the relief
+	# army breaks the siege in the field or stays outside it.
+	if settlement.get("siege") != null:
+		return false
 	for unit in army["units"]:
-		settlement["garrison"].append(unit)
+		# A warship that somehow marched with the column (a pre-harbour save)
+		# goes to the harbour where it belongs, never onto the walls.
+		if ForceRules.is_ship(data, unit):
+			NavalRules.harbour_of(state, region_id).append(unit)
+		else:
+			settlement["garrison"].append(unit)
 	# The men — and their general — remember how far they have marched this
-	# season, so the garrison cannot be raised again as fresh (ForceRules).
+	# season and whether they came in weary, so the garrison cannot be raised
+	# again as fresh (ForceRules).
 	ForceRules.note_muster(state, region_id, float(army["movement_left"]))
+	ForceRules.note_fatigue(state, region_id, bool(army.get("forced_march", false)))
 	ForceRules.note_general_march(state, army["general"], float(army["movement_left"]))
 	if army["general"] != null and state["characters"].has(army["general"]):
 		state["characters"][army["general"]]["location"] = region_id

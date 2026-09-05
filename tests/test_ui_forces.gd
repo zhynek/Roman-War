@@ -416,3 +416,124 @@ func test_fleet_banners_follow_sea_visibility(t) -> void:
 		screen._on_force_clicked("fleet", foreign)
 		t.check_eq(screen.selected_fleet, "", "a foreign banner selects nothing")
 	screen.free()
+
+
+func test_the_province_follows_a_marching_army_across_the_turn(t) -> void:
+	## A queued march advances during End Turn without any order of ours: the
+	## selected province, its panel and the camera must follow the column.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen.playback_enabled = false
+	var army_id := _julii_army(game)
+	var home: String = game.state["armies"][army_id]["region"]
+	screen.select_force("army", army_id)
+	# Somewhere beyond this season's reach: pick the farthest land preview.
+	var far := ""
+	var far_turns := 1
+	var region_ids: Array = game.data.regions.keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var preview := game.army_path_preview(army_id, region_id)
+		if preview.is_empty() or (preview["path"] as Array).is_empty() or preview["blocked_destination"]:
+			continue
+		if int(preview["turns"]) > far_turns:
+			far = region_id
+			far_turns = int(preview["turns"])
+	t.check(far != "", "a multi-turn destination exists")
+	if far == "":
+		screen.free()
+		return
+	screen._on_order_target("region", far, false)
+	var after_order: String = game.state["armies"][army_id]["region"]
+	t.check(after_order != home and game.state["armies"][army_id].has("march_path"), "the army set out with the road queued")
+	screen._end_turn()
+	if not game.state["armies"].has(army_id):
+		screen.free()
+		return
+	var now: String = game.state["armies"][army_id]["region"]
+	t.check_eq(screen.selected_army, army_id, "the army stays selected")
+	t.check_eq(screen.map_view.selected_region, now, "and the selected province followed it")
+	t.check_eq(screen.region_panel.region_id, now, "so does the province panel")
+	screen.free()
+
+
+func test_a_red_ring_on_the_armys_own_province_strikes(t) -> void:
+	## An enemy standing in the same province as our army (a beaten survivor)
+	## is ringed red there; the right-click on that province attacks him
+	## rather than opening the dossier.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	screen.playback_enabled = false
+	var army_id := _julii_army(game)
+	var here: String = game.state["armies"][army_id]["region"]
+	# A rebel band appears where our army stands (rebels are always at war).
+	var band := "army_%d" % int(game.state["next_id"])
+	game.state["next_id"] = int(game.state["next_id"]) + 1
+	game.state["armies"][band] = {"owner": "rebels", "region": here, "general": null,
+		"units": [{"template": "rebel_mob", "experience": 0, "strength_pct": 100, "weapon": 0, "armor": 0}],
+		"movement_left": 0.0, "forced_march": false}
+	if not game.data.units.has("rebel_mob"):
+		var any_id: String = game.data.units.keys()[0]
+		game.state["armies"][band]["units"][0]["template"] = any_id
+	screen.select_force("army", army_id)
+	t.check_eq(String(screen.map_view.highlight_regions.get(here, "")), "attack", "the army's own province rings red")
+	var dialogs_before := 0
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialogs_before += 1
+	screen._on_order_target("region", here, false)
+	var dialogs := 0
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialogs += 1
+	t.check_eq(dialogs, dialogs_before + 1, "the right-click asks to attack, it does not open the dossier")
+	screen.free()
+
+
+func test_a_foreign_banner_never_walks_an_agent(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var home := ""
+	var kind := ""
+	var region_ids: Array = game.state["settlements"].keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		var settlement: Dictionary = game.state["settlements"][region_id]
+		if settlement["owner"] != "julii":
+			continue
+		for candidate in ["diplomat", "spy", "assassin"]:
+			if game.data.agent_kinds.has(candidate) and AgentRules.building_gate_met(game.data, settlement, game.data.agent_kinds[candidate]):
+				home = region_id
+				kind = candidate
+				break
+		if home != "":
+			break
+	t.check(home != "", "some julii town can train an agent")
+	if home == "":
+		screen.free()
+		return
+	var agent_id := game.recruit_agent(home, kind)
+	screen._on_region_clicked(home)
+	screen._on_agent_selected(agent_id)
+	t.check_eq(screen.selected_agent, agent_id, "the agent is selected")
+	# A visible foreign army somewhere else.
+	var foreign := ""
+	var visible := game.visible_regions()
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		var army: Dictionary = game.state["armies"][candidate]
+		if army["owner"] != "julii" and visible.has(army["region"]) and army["region"] != home:
+			foreign = candidate
+			break
+	if foreign != "":
+		screen._on_force_clicked("army", foreign)
+		t.check_eq(game.state["agents"][agent_id]["region"], home, "looking at a foreign banner moves nobody")
+		t.check_eq(screen.selected_agent, "", "and stands the agent down")
+	screen.free()

@@ -106,7 +106,23 @@ Three decisions worth knowing, because the branch decided them differently:
 - **Multi-turn marches are the trunk's** (`PathfindingRules`); the branch's
   one-step `reachable_regions` was rebuilt on top of them
   (`Game.reachable_regions` → `{reach: {id: {cost, forced}}, blocked: {id:
-  reason}}`, seen through the owner's fog).
+  reason}}`, seen through the owner's fog, and answering for the player's
+  own forces only).
+
+The port's own adversarial round (three reviewers, thirty findings, the
+engine's eleven and the UI's ten closed the same day; the engine ones are
+pinned in `tests/test_army_command_review.gd`): fatigue laundered through a
+garrison, ships docking for free by transfer, sieges laid past a not-yet-
+hostile relief army, assaults and cross-border attacks costing no step,
+armies walking into an invested city, legacy ships marching in field armies,
+a merge lifting a siege, a bribe leaving a ghost siege, a ceded port's ships
+changing hands, the two raise buttons granting different movement, the query
+surface answering for foreign forces; and in the UI a right-click that could
+take ship where the rings showed a road, a red ring on the army's own
+province that opened the dossier instead of striking, the selection not
+following a marching army across End Turn, the force card opening off-screen
+under a restored scroll offset, Tab eaten by focused dropdowns, and a yard
+re-rendered for the wrong city.
 
 Its **review report** (`docs/reviews/2026-09-codebase-review.md` on the
 branch: 124 deduplicated findings against `9026730`, 24 verified) was not

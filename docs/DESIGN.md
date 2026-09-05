@@ -612,15 +612,20 @@ Creta and Cyprus among them) could never change hands, and Egypt's long
 campaign could never be won. Landing on any other shore follows the same rules
 as before.
 
-**Attacks cost the season, and generals cannot be stranded.** An attack needs
-movement left and spends all of it (`Game.attack_army`); a siege laid from the
-neighbouring region pays the step to the walls like any march
-(`SiegeRules.begin_siege`), and a relief army standing before the walls must
-be beaten before the city can be invested. The attack rule is enforced in the
-player facade only: `AiMilitary` attacks through `CombatRules.attack_army`
-directly and still pays nothing, a documented asymmetry to close when the AI
-is next tuned. Debt disbandment (`EconomyRules._disband_costliest_unit`) skips
-a general's last unit, so a commander is never left without a single man.
+**Attacks cost the season, and generals cannot be stranded.** An attack across
+a border needs movement enough for the step into the defender's region (the
+winner ends up there) and spends all of it; a storm needs movement and spends
+the season too (`Game.attack_army`, `Game.assault_settlement`). A siege laid
+from the neighbouring region pays the same step (`SiegeRules.begin_siege`),
+and a field army standing before the walls — an enemy's, or the city's own
+owner's, since investing a neutral city is the declaration — must be beaten
+before the city can be invested; a besieger that merges into reinforcements
+at the same walls hands the siege and its clock over rather than lifting it.
+The attack rule is enforced in the player facade only: `AiMilitary` attacks
+through `CombatRules.attack_army` directly and still pays nothing, a
+documented asymmetry to close when the AI is next tuned. Debt disbandment
+(`EconomyRules._disband_costliest_unit`) skips a general's last unit, so a
+commander is never left without a single man.
 
 **Regrouping** (`ForceRules`, behind `Game.raise_units` / `transfer_units` /
 `merge_armies` / `split_army` / `disband_unit` / `attach_general` /
@@ -629,10 +634,13 @@ mirrored by `Game.check(action, args)` for greying buttons): armies are raised
 from ticked garrison units under a captain or an eligible character standing in
 the city; units are transferred between co-located forces of one owner or into
 an own city's garrison; whole armies merge; ticked units split off under a
-chosen leader. Movement is conserved through every transfer — a unit remembers
-the least movement of any force it stood in this season (`muster_march_left`,
-`muster_sail_left`, `general_march_cap`) so shuffling men between stacks can
-never gain a step. Disbanding returns the men to the local population
+chosen leader. Movement — and forced-march fatigue — are conserved through
+every transfer: a unit remembers the least movement of any force it stood in
+this season (`muster_march_left`, `muster_sail_left`, `muster_fatigued`,
+`general_march_cap`; ships making port by transfer pay the lane a docking
+fleet pays), so shuffling men between stacks can never gain a step or shed
+weariness, and nobody walks into an invested city from the field or from
+another stack (`garrison_army`, `transfer_units`). Disbanding returns the men to the local population
 (`balance.forces.disband_population_return_pct`). The stack cap is
 `balance.recruitment.army_unit_cap`; a general keeps at least one unit; two
 generals cannot share a camp in the field. An emptied army dissolves, releasing

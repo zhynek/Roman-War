@@ -14,10 +14,12 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
-	# A relieving field army must be beaten before the walls can be invested,
-	# and marching up to the walls costs the same step as any other march —
-	# a siege is never a free hop.
-	if MovementRules.hostile_army_in(state, army["owner"], region_id):
+	# A relieving field army must be beaten before the walls can be invested —
+	# an enemy's, or the city's own owner's, since the declaration below would
+	# make it an enemy the moment the ladders went up — and marching up to the
+	# walls costs the same step as any other march: a siege is never a free hop.
+	if MovementRules.hostile_army_in(state, army["owner"], region_id) \
+			or _owner_army_in(state, String(settlement["owner"]), region_id):
 		return false
 	if marching_in and MovementRules.step_cost(data, state, region_id) > float(army["movement_left"]) + 0.0001:
 		return false
@@ -31,6 +33,22 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	army["movement_left"] = 0.0
 	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
 	return true
+
+
+static func _owner_army_in(state: Dictionary, owner: String, region_id: String) -> bool:
+	for army in state["armies"].values():
+		if army["owner"] == owner and army["region"] == region_id:
+			return true
+	return false
+
+
+static func hand_over(state: Dictionary, from_army_id: String, to_army_id: String) -> void:
+	## The siege `from` holds passes to `to` (a merge into co-located
+	## reinforcements): the clock and the engines stay, the besieger changes.
+	for region_id in state["settlements"]:
+		var siege = state["settlements"][region_id]["siege"]
+		if siege != null and siege.get("besieger", "") == from_army_id:
+			siege["besieger"] = to_army_id
 
 
 static func release(state: Dictionary, army_id: String) -> void:

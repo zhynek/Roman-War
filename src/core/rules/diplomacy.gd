@@ -360,6 +360,25 @@ static func cede_region(data: GameData, state: Dictionary, region_id: String, ne
 	if refuge != "":
 		for unit in settlement["garrison"]:
 			state["settlements"][refuge]["garrison"].append(unit)
+	# The harbour's ships are the old owner's too: they sail for the refuge
+	# if it is a port, else for the nearest of the old owner's other ports,
+	# and are scuttled only when there is none.
+	var ships: Array = settlement.get("harbour", [])
+	if not ships.is_empty():
+		var port := refuge if refuge != "" and MapRules.coastal(data, refuge) else ""
+		if port == "":
+			var candidates: Array = state["settlements"].keys()
+			candidates.sort()
+			for candidate in candidates:
+				if candidate != region_id and state["settlements"][candidate]["owner"] == previous_owner \
+						and MapRules.coastal(data, candidate):
+					port = candidate
+					break
+		if port != "":
+			var harbour := NavalRules.harbour_of(state, port)
+			for ship in ships:
+				harbour.append(ship)
+	settlement["harbour"] = []
 	settlement["garrison"] = []
 	settlement["construction_queue"] = []
 	settlement["recruitment_queue"] = []

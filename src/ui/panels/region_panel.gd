@@ -472,6 +472,7 @@ func _build_agents_section() -> void:
 		if agent["owner"] == player:
 			var button := Button.new()
 			button.text = ("◆ " if agent_id == selected_agent else "") + title
+			button.focus_mode = Control.FOCUS_NONE
 			button.add_theme_font_size_override("font_size", 11)
 			button.pressed.connect(func(): agent_selected.emit(agent_id))
 			add_child(button)
@@ -502,6 +503,7 @@ func _build_selected_agent_detail(agent_id: String, agent: Dictionary) -> void:
 					targets.append(char_id)
 			if not targets.is_empty():
 				var picker := OptionButton.new()
+				picker.focus_mode = Control.FOCUS_NONE
 				for char_id in targets:
 					var character: Dictionary = game.state["characters"][char_id]
 					var odds := AgentRules.assassination_chance(game.data, game.state, agent, character)
@@ -546,6 +548,7 @@ func _build_steal_options(agent_id: String, agent: Dictionary) -> void:
 		return
 	var odds := AgentRules.steal_chance(game.data, game.state, agent)
 	var picker := OptionButton.new()
+	picker.focus_mode = Control.FOCUS_NONE
 	for tid in stealable:
 		picker.add_item(String(game.data.techniques.get(tid, {}).get("name", tid)))
 	add_child(picker)
@@ -594,6 +597,7 @@ func _edict_section() -> void:
 	row.add_child(caption)
 
 	var options := OptionButton.new()
+	options.focus_mode = Control.FOCUS_NONE   # Tab must always reach the map's force cycling
 	var choices: Array = []
 	if standing:
 		choices.append({"id": status["id"], "name": String(status["name"]), "allowed": true, "reason": ""})

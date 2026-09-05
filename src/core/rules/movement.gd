@@ -32,7 +32,7 @@ static func movement_points_for(data: GameData, state: Dictionary, army: Diction
 	var owner := String(army["owner"])
 	points += float(state["factions"][owner].get("boons", {}).get("movement", 0.0))
 	points += KnowledgeRules.faction_effect_total(data, state, owner, "movement_points")
-	return maxf(points, 0.5)
+	return SocietyRules.quantize(maxf(points, 0.5))
 
 
 static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: Dictionary) -> float:
@@ -81,11 +81,15 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 		budget *= float(data.balance["movement"]["forced_march_multiplier"])
 	if cost > budget + 0.0001:
 		return false
+	# Remainders are quantized like every stored float: 2.0 - 0.5 - 0.9 is
+	# 0.6000000000000001 live and 0.6 after a save, and the next step would
+	# then leave 1e-16 in one game and 0.0 in the other.
 	if forced_march:
 		army["forced_march"] = true
-		army["movement_left"] = maxf(0.0, budget - cost) / float(data.balance["movement"]["forced_march_multiplier"])
+		army["movement_left"] = SocietyRules.quantize(
+			maxf(0.0, budget - cost) / float(data.balance["movement"]["forced_march_multiplier"]))
 	else:
-		army["movement_left"] = budget - cost
+		army["movement_left"] = SocietyRules.quantize(budget - cost)
 	# Marching away lifts a siege at once, not at the end of the turn.
 	SiegeRules.release(state, army_id)
 	army["region"] = to_region
@@ -189,13 +193,25 @@ static func targets_for(data: GameData, state: Dictionary, army_id: String) -> D
 	candidates.append(army["region"])
 	candidates.sort()
 	for region_id in candidates:
+		# Striking into a neighbouring region pays its step like any march
+		# (the winner ends up there); the army's own region costs nothing.
+		if region_id != army["region"] and not can_afford_step(data, state, army, region_id):
+			continue
 		if hostile_army_in(state, owner, region_id):
 			targets[region_id] = "attack"
 		elif state["settlements"].has(region_id):
 			var settlement: Dictionary = state["settlements"][region_id]
-			if _at_war(state, owner, settlement["owner"]) and settlement["siege"] == null:
+			if _at_war(state, owner, settlement["owner"]) and settlement["siege"] == null \
+					and not SiegeRules._owner_army_in(state, String(settlement["owner"]), region_id):
 				targets[region_id] = "siege"
 	return targets
+
+
+static func can_afford_step(data: GameData, state: Dictionary, army: Dictionary, region_id: String) -> bool:
+	## Whether the army's remaining points pay for the step into a region —
+	## the price a siege laid from next door, or an attack across the border,
+	## charges exactly as a march would.
+	return step_cost(data, state, region_id) <= float(army["movement_left"]) + 0.0001
 
 
 static func fleet_reachable(data: GameData, state: Dictionary, fleet_id: String) -> Dictionary:
