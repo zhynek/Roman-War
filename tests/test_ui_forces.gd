@@ -327,6 +327,9 @@ func test_harbour_launch_and_dock_from_the_panels(t) -> void:
 	var dock := _button(screen.force_panel, "Dock at")
 	t.check(dock != null, "Dock at is offered")
 	dock.pressed.emit()
+	t.check(game.state["fleets"].has(fleet_id), "a fleet launched this season has no lane left to make port")
+	game.state["fleets"][fleet_id]["movement_left"] = 2.0   # next season, in effect
+	dock.pressed.emit()
 	t.check(not game.state["fleets"].has(fleet_id), "the fleet docked")
 	t.check_eq(harbour.size(), 2, "both ships are back in the harbour")
 	t.check_eq(screen.selected_fleet, "", "nothing selected after docking")

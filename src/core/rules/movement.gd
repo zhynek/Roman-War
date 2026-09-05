@@ -6,14 +6,20 @@ class_name MovementRules
 
 
 static func reset_movement(data: GameData, state: Dictionary) -> void:
-	var base := float(data.balance["movement"]["base_movement_points"])
 	for army in state["armies"].values():
 		army["movement_left"] = movement_points_for(data, state, army)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
-		var naval_bonus := SettlementRules.faction_owns_wonder_effect(data, state, fleet["owner"], "naval_movement_pct")
-		fleet["movement_left"] = base * (1.0 + naval_bonus / 100.0)
+		fleet["movement_left"] = fleet_movement_points_for(data, state, fleet)
 	ForceRules.clear_musters(state)
+
+
+static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: Dictionary) -> float:
+	## A fleet's budget at the start of a turn: the base, stretched by the
+	## owner's naval wonder (naval_movement_pct) if it holds one.
+	var base := float(data.balance["movement"]["base_movement_points"])
+	var naval_bonus := SettlementRules.faction_owns_wonder_effect(data, state, fleet["owner"], "naval_movement_pct")
+	return base * (1.0 + naval_bonus / 100.0)
 
 
 static func movement_points_for(data: GameData, state: Dictionary, army: Dictionary) -> float:

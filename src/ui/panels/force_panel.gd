@@ -565,6 +565,12 @@ static func _explain(error: String) -> String:
 			return "Nothing to consolidate."
 		"no_zone":
 			return "That port does not touch this sea."
+		"besieged":
+			return "The city is invested — nobody marches out past the siege lines."
+		"no_movement":
+			return "Making port takes a sea lane of movement; the fleet has none left."
+		"bad_args":
+			return "That order is incomplete."
 	return "That cannot be done (%s)." % error
 
 

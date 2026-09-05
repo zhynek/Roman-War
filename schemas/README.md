@@ -26,8 +26,8 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   `garrison` or an army, and only ships appear in a harbour or a fleet's
   `ships`. Sea zones must carry a `position` — it anchors fleet banners.
 - `balance.forces.max_units_per_force` is the one home of the 20-unit stack
-  cap; the validator checks it equals every `maxItems` on army units, fleet
-  ships and harbours in `campaign.schema.json`.
+  cap; the validator checks it equals the `maxItems` on army units and fleet
+  ships in `campaign.schema.json`. Garrisons and harbours are uncapped.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):
 region ids, faction ids, culture ids, unit template ids, building level ids,

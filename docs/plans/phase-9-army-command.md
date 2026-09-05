@@ -33,7 +33,7 @@ model and the engine-first legality oracle were grafted in.
 | Naval combat (inc. 7) | The same `BattleResolver.resolve` seam with additive context keys `naval: true`, `terrain: "sea"`. No second interface. | One seam is the architecture rule; ships are ordinary unit dicts. |
 | Cargo (inc. 6) | Derived: `army.aboard = fleet_id` is the only link; cargo is found by scanning armies in sorted order. | No dual bookkeeping to desync. |
 | Two generals in one stack | `merge_armies(from, into)`: `into` keeps its general; a captain's `into` takes `from`'s general; two led armies merge only inside a city the owner holds (the displaced general stays and governs by presence) and are refused in the field (`two_generals`). `detach_general` is own-city only. | No general is ever left standing in the wilderness; no companion or bodyguard subsystem. |
-| Movement under regrouping | Army → army: receiver keeps the lesser movement. Army → garrison: the settlement remembers, for the rest of the season, the least movement of any army that dropped units into it (`settlement.muster_march_left`, erased at the turn reset); raising or drawing units out of that garrison is capped by it. Splits copy movement. Launching a fleet spends the season. | Closes raise → march → garrison → raise and dock → launch → sail → dock with no per-unit bookkeeping. |
+| Movement under regrouping | Army → army (and fleet → fleet): receiver keeps the lesser movement. Army → garrison: the settlement remembers, for the rest of the season, the least movement of any army that dropped units into it (`settlement.muster_march_left`, erased at the turn reset); raising or drawing units out of that garrison is capped by it. Fleet → harbour (docking or transferring) records `settlement.muster_sail_left` the same way and caps ships drawn from the harbour into a fleet. Making port costs a sea lane, so a port on two seas is a crossing, not a free jump. Splits copy movement. Launching a fleet spends the season. A general who leaves an army this season (steps down, garrisons, is displaced by a merge) remembers its remaining march (`character.march_left`, transient) and any army he takes over is capped by it. Nobody is raised or drawn out of a besieged city. | Closes raise → march → garrison → raise, dock → launch → sail → dock, ship relays through fleets and harbours, and general relays across fresh armies, with no per-unit bookkeeping. |
 | Legality oracle | Every mutating rule has a pure `check_X(...) -> String` sibling returning `""` or a code from a closed vocabulary; `Game.check(action, args)` dispatches. | Buttons grey with a reason, the log explains refusals in the player's words, Phase 6 AI plans with the same predicate. |
 | 20-unit cap | One reader, `ForceRules.max_units(data)` → `balance.forces.max_units_per_force`; the validator ties it to the campaign schema's `maxItems` for armies, fleets and harbours. | `CLAUDE.md`: tunables live in `balance.json`. |
 | Disband | Men go home: population return in an own city (`forces.disband_population_return_pct`), never for mercenaries, never denarii. | Cannot be farmed for cash. |
@@ -121,11 +121,13 @@ for `army_N`, `fleet_N`, `garrison:<r>`, `harbour:<r>`; `armies_in`,
 sibling. Error vocabulary: `not_found, wrong_owner, not_colocated, over_cap,
 empty_selection, bad_index, last_unit, not_eligible_general, has_general,
 no_general, two_generals, no_settlement, foreign_settlement, same_force,
-is_ship, not_ship, not_docked, nothing_to_do, no_zone`.
+is_ship, not_ship, not_docked, nothing_to_do, no_zone, besieged,
+no_movement`; `Game.check` adds `wrong_owner`, `bad_args`, `unknown_action`.
 
 `NavalRules` (`src/core/rules/naval.gd`): `zones_touching`, `harbour_of`,
-`own_ports_on_zone`, `launch_fleet` (movement 0 on launch), `dock_fleet`,
-`merge_fleets`, `split_fleet`, `normalise` (ships out of garrisons on load).
+`own_ports_on_zone`, `launch_fleet` (movement 0 on launch), `dock_fleet`
+(costs a sea lane, records `muster_sail_left`), `merge_fleets`,
+`split_fleet`, `normalise` (ships out of garrisons on load).
 
 `MovementRules`: `movement_points_for` (the per-turn budget, shared),
 `reachable(army, viewer_visible)` (fog-aware Dijkstra returning `reach` and

@@ -202,8 +202,9 @@ static func garrison_army(data: GameData, state: Dictionary, army_id: String, re
 		return false
 	for unit in army["units"]:
 		settlement["garrison"].append(unit)
-	# The men remember how far they have marched this season.
+	# The men — and their general — remember how far they have marched this season.
 	ForceRules.note_muster(state, region_id, float(army["movement_left"]))
+	ForceRules.note_general_march(state, army["general"], float(army["movement_left"]))
 	if army["general"] != null and state["characters"].has(army["general"]):
 		state["characters"][army["general"]]["location"] = region_id
 	SiegeRules.release(state, army_id)

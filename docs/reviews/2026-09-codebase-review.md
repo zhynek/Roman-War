@@ -21,7 +21,7 @@ during the session it is marked *(confirmed by probe)*. Everything in §3 is
 verified.
 
 **Baseline.** Validator 0 errors / 0 warnings; 69 tests / 0 failures; clean
-boot. On this branch: 105 tests / 0 failures, validator clean.
+boot. On this branch: 109 tests / 0 failures, validator clean.
 
 ---
 
@@ -76,6 +76,11 @@ a balance pass driven by §4.2–4.3, then the realism data pass.
 | Sieges continued and captured cities after peace was made (E5) | medium | `advance_sieges` lifts a siege whose factions are no longer at war and `assault` refuses one (fix commit) |
 | Besieged settlements kept recruiting, retraining and completing units and buildings (E7) | medium | `queue_unit` and `retrain_garrison` refuse under siege; recruitment and construction queues freeze until the siege lifts (fix commit) |
 | Loading a save from another house left the top bar showing the previous faction (U1) | low | `CampaignScreen.refresh()` rebuilds the house label, swatch and senate line from state; the map recentres on the loaded capital (fix commit) |
+| *Phase 9 adversarial pass (probe-confirmed):* ships relayed with unlimited range through fleet→fleet and harbour→fleet transfers, and a spent fleet docked and relaunched into the far sea of a two-sea port | high | fleet→fleet keeps the lesser movement; docking costs a sea lane and records `muster_sail_left`, which caps ships drawn from the harbour (fix commit 2) |
+| A besieged city's garrison could be raised and marched out past the besieger | high | `check_raise_army` and garrison transfers return `besieged` while a siege stands (fix commit 2) |
+| Generals relayed across fresh armies at no cost (detach, garrison or merge, then attach) | medium | `character.march_left` (transient) records the army's remaining march when a general leaves it; attach, raise and split cap the receiving army by it (fix commit 2) |
+| Debt disbandment erased a general's last unit and left him standing in the wilderness | medium | the treasury never takes a general's last unit, the same invariant the regroup actions hold (fix commit 2) |
+| `Game.check` indexed missing arguments (runtime error); fleet `movement_max` ignored the naval wonder bonus; validator claimed a harbour cap the engine did not enforce | low | per-action arity → `bad_args`; `MovementRules.fleet_movement_points_for` shared by reset and summary; harbours documented as uncapped, like garrisons (fix commit 2) |
 | No canonical army constructor (`NewGame._add_army` vs `Fixtures.add_army`) | low | partly: `ForceRules._new_army` is the constructor for raised and split armies; `NewGame._add_army` still builds its own literal (see §3.4) |
 
 Reported (unverified by the workflow) findings that this branch also closes,

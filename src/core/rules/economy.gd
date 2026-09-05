@@ -184,6 +184,10 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
+		# A general keeps at least one unit under him (the same invariant the
+		# regroup actions hold): the treasury never strands a man in the field.
+		if army["general"] != null and army["units"].size() <= 1:
+			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
@@ -196,7 +200,7 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 	worst_army["units"].remove_at(worst_index)
 	if worst_army["units"].is_empty():
 		# The last men go home: no ghost army lingers to hold a siege or block
-		# a road. Its general stays where he stood, unattached.
+		# a road (only a captain's army can empty out — see above).
 		SiegeRules.release(state, worst_id)
 		state["armies"].erase(worst_id)
 	return true

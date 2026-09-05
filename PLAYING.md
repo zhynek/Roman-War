@@ -123,7 +123,10 @@ army selected in a city you can also:
 
 Troops remember how far they marched this season: dropping a tired unit into a
 garrison and raising it again does not give it fresh legs, and an army that
-receives tired men marches at their pace.
+receives tired men marches at their pace. Generals remember too: a man who
+steps off a spent army leads a fresh one no further that season. A besieged
+city keeps its garrison behind the walls — nobody marches out past the siege
+lines.
 
 ## Fleets
 
@@ -135,6 +138,8 @@ that sea's anchor, selected, and sails next season.
 - **Right-click a ringed sea** to sail there (**Sail to →** on the card does the
   same). Fleets pass each other at sea; there are no naval battles yet.
 - **Dock at →** one of your ports on the same sea to bring the ships home.
+  Making port takes one lane of movement, so a fleet launched this season
+  waits until the next to dock again.
 - **Transfer ticked →** another of your fleets on the same sea, **Merge into →**
   it, or **Split ticked ships into a new fleet**.
 - A fleet gives you eyes on its sea and the seas beside it, and on every coast

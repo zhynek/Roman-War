@@ -51,7 +51,9 @@ static func check_launch_fleet(data: GameData, state: Dictionary, region_id: Str
 
 static func launch_fleet(data: GameData, state: Dictionary, region_id: String, indices: Array, zone_id: String) -> Dictionary:
 	## Harbour ships put to sea as a new fleet. Launching spends the season:
-	## the fleet moves next turn (so dock/launch cannot relay a fleet along).
+	## the fleet moves next turn (so dock/launch cannot relay a fleet along;
+	## ships drawn straight from the harbour into a fleet are capped by
+	## muster_sail_left instead, see ForceRules.transfer_units).
 	var error := check_launch_fleet(data, state, region_id, indices, zone_id)
 	if error != "":
 		return {"ok": false, "error": error, "fleet_id": ""}
@@ -76,18 +78,28 @@ static func check_dock_fleet(data: GameData, state: Dictionary, fleet_id: String
 		return ForceRules.ERR_FOREIGN_SETTLEMENT
 	if not zones_touching(data, region_id).has(fleet["sea_zone"]):
 		return ForceRules.ERR_NO_ZONE
+	if lane_cost(data) > float(fleet["movement_left"]) + 0.0001:
+		return ForceRules.ERR_NO_MOVEMENT
 	return ""
+
+
+static func lane_cost(data: GameData) -> float:
+	return float(data.balance["movement"]["sea_lane_cost"])
 
 
 static func dock_fleet(data: GameData, state: Dictionary, fleet_id: String, region_id: String) -> Dictionary:
 	## The fleet's ships return to one of the owner's ports on its sea; the
-	## fleet ceases to exist.
+	## fleet ceases to exist. Making port costs a sea lane, like any other
+	## leg, so a port touching two seas is a crossing, never a free jump;
+	## the harbour remembers what the ships had left (muster_sail_left).
 	var error := check_dock_fleet(data, state, fleet_id, region_id)
 	if error != "":
 		return {"ok": false, "error": error}
+	var fleet: Dictionary = state["fleets"][fleet_id]
 	var harbour := harbour_of(state, region_id)
-	for ship in state["fleets"][fleet_id]["ships"]:
+	for ship in fleet["ships"]:
 		harbour.append(ship)
+	ForceRules.note_sail_muster(state, region_id, float(fleet["movement_left"]) - lane_cost(data))
 	state["fleets"].erase(fleet_id)
 	return {"ok": true, "error": ""}
 

@@ -30,6 +30,8 @@ const ERR_NOT_SHIP := "not_ship"
 const ERR_NOT_DOCKED := "not_docked"
 const ERR_NOTHING_TO_DO := "nothing_to_do"
 const ERR_NO_ZONE := "no_zone"
+const ERR_BESIEGED := "besieged"
+const ERR_NO_MOVEMENT := "no_movement"
 
 
 ## --- Resolution -------------------------------------------------------------
@@ -170,7 +172,7 @@ static func summary(data: GameData, state: Dictionary, force_id: String) -> Dict
 			var fleet: Dictionary = state["fleets"][force_id]
 			result["sea_zone"] = fleet["sea_zone"]
 			result["movement_left"] = float(fleet["movement_left"])
-			result["movement_max"] = float(data.balance["movement"]["base_movement_points"])
+			result["movement_max"] = MovementRules.fleet_movement_points_for(data, state, fleet)
 		"garrison":
 			result["region"] = force_id.trim_prefix("garrison:")
 		"harbour":
@@ -274,10 +276,14 @@ static func check_attach_general(data: GameData, state: Dictionary, army_id: Str
 
 
 static func attach_general(data: GameData, state: Dictionary, army_id: String, char_id: String) -> Dictionary:
+	## The man remembers how far he has ridden this season: an army he takes
+	## over marches no further than he could (see note_general_march).
 	var error := check_attach_general(data, state, army_id, char_id)
 	if error != "":
 		return {"ok": false, "error": error}
-	state["armies"][army_id]["general"] = char_id
+	var army: Dictionary = state["armies"][army_id]
+	army["general"] = char_id
+	army["movement_left"] = minf(float(army["movement_left"]), general_march_cap(state, char_id))
 	return {"ok": true, "error": ""}
 
 
@@ -296,7 +302,9 @@ static func detach_general(data: GameData, state: Dictionary, army_id: String) -
 	var error := check_detach_general(data, state, army_id)
 	if error != "":
 		return {"ok": false, "error": error}
-	state["armies"][army_id]["general"] = null
+	var army: Dictionary = state["armies"][army_id]
+	note_general_march(state, army["general"], float(army["movement_left"]))
+	army["general"] = null
 	return {"ok": true, "error": ""}
 
 
@@ -352,6 +360,8 @@ static func check_raise_army(data: GameData, state: Dictionary, region_id: Strin
 	var settlement: Dictionary = state["settlements"].get(region_id, {})
 	if settlement.is_empty():
 		return ERR_NO_SETTLEMENT
+	if settlement.get("siege") != null:
+		return ERR_BESIEGED
 	var error := _check_indices(settlement["garrison"], indices)
 	if error != "":
 		return error
@@ -368,7 +378,9 @@ static func check_raise_army(data: GameData, state: Dictionary, region_id: Strin
 static func raise_army(data: GameData, state: Dictionary, region_id: String, indices: Array, general_id: String = "") -> Dictionary:
 	## Garrison units march out as a new field army, with an optional general
 	## who is standing in the city. Its movement is the full budget, capped by
-	## the least movement of any army that dropped troops here this season.
+	## the least movement of any army that dropped troops here this season and
+	## by how far the general has already ridden. Nobody marches out of an
+	## invested city: the siege lines are broken by a sally, not a parade.
 	var error := check_raise_army(data, state, region_id, indices, general_id)
 	if error != "":
 		return {"ok": false, "error": error, "army_id": ""}
@@ -379,6 +391,8 @@ static func raise_army(data: GameData, state: Dictionary, region_id: String, ind
 	var army: Dictionary = state["armies"][army_id]
 	army["movement_left"] = minf(MovementRules.movement_points_for(data, state, army),
 		float(settlement.get("muster_march_left", INF)))
+	if general_id != "":
+		army["movement_left"] = minf(float(army["movement_left"]), general_march_cap(state, general_id))
 	return {"ok": true, "error": "", "army_id": army_id}
 
 
@@ -393,6 +407,9 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 		return ERR_WRONG_OWNER
 	if not _colocated(data, state, from, to):
 		return ERR_NOT_COLOCATED
+	for force in [from, to]:
+		if force["kind"] == "garrison" and force["container"].get("siege") != null:
+			return ERR_BESIEGED
 	var error := _check_indices(from["units"], indices)
 	if error != "":
 		return error
@@ -435,9 +452,10 @@ static func _colocated(data: GameData, state: Dictionary, a: Dictionary, b: Dict
 
 static func transfer_units(data: GameData, state: Dictionary, from_id: String, to_id: String, indices: Array) -> Dictionary:
 	## Move chosen units between two co-located forces of one owner. Movement
-	## is conserved: an army receiving troops keeps the lesser movement of the
-	## two; a garrison remembers the least movement of any army that dropped
-	## troops into it this season and caps what is raised from it.
+	## is conserved: an army (or fleet) receiving troops keeps the lesser
+	## movement of the two; a garrison (or harbour) remembers the least
+	## movement of any force that dropped units into it this season and caps
+	## what is raised (or put to sea) from it.
 	var error := check_transfer_units(data, state, from_id, to_id, indices)
 	if error != "":
 		return {"ok": false, "error": error}
@@ -455,6 +473,13 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 	elif from["kind"] == "garrison" and to["kind"] == "army":
 		var settlement: Dictionary = from["container"]
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_march_left", INF)))
+	elif from["kind"] == "fleet" and to["kind"] == "fleet":
+		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(from["container"]["movement_left"]))
+	elif from["kind"] == "fleet" and to["kind"] == "harbour":
+		note_sail_muster(state, to["region"], float(from["container"]["movement_left"]))
+	elif from["kind"] == "harbour" and to["kind"] == "fleet":
+		var settlement: Dictionary = from["container"]
+		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_sail_left", INF)))
 	_erase_if_empty(state, from_id)
 	return {"ok": true, "error": ""}
 
@@ -503,6 +528,8 @@ static func merge_armies(data: GameData, state: Dictionary, from_id: String, int
 		into["units"].append(unit)
 	if into["general"] == null and from["general"] != null:
 		into["general"] = from["general"]
+	elif from["general"] != null:
+		note_general_march(state, from["general"], float(from["movement_left"]))
 	into["movement_left"] = minf(float(into["movement_left"]), float(from["movement_left"]))
 	into["forced_march"] = bool(into.get("forced_march", false)) or bool(from.get("forced_march", false))
 	SiegeRules.release(state, from_id)
@@ -542,8 +569,11 @@ static func split_army(data: GameData, state: Dictionary, army_id: String, indic
 		army["general"] = null
 	elif general_choice != "":
 		general = general_choice
+	var movement := float(army["movement_left"])
+	if general_choice != "" and general_choice != "source":
+		movement = minf(movement, general_march_cap(state, general_choice))
 	var new_id := _new_army(state, army["owner"], army["region"], units, general,
-		float(army["movement_left"]), bool(army.get("forced_march", false)))
+		movement, bool(army.get("forced_march", false)))
 	return {"ok": true, "error": "", "army_id": new_id}
 
 
@@ -616,12 +646,42 @@ static func consolidate(data: GameData, state: Dictionary, force_id: String) -> 
 static func note_muster(state: Dictionary, region_id: String, movement_left: float) -> void:
 	## A garrison that received marching troops this season remembers their
 	## remaining march, so the same men cannot be raised again as fresh.
-	var settlement: Dictionary = state["settlements"].get(region_id, {})
-	if settlement.is_empty():
+	_note(state["settlements"].get(region_id, {}), "muster_march_left", movement_left)
+
+
+static func note_sail_muster(state: Dictionary, region_id: String, movement_left: float) -> void:
+	## The harbour's twin: ships that made port this season leave it no
+	## fresher than they arrived (transfers out of the harbour are capped).
+	_note(state["settlements"].get(region_id, {}), "muster_sail_left", movement_left)
+
+
+static func note_general_march(state: Dictionary, general_id, movement_left: float) -> void:
+	## A general who leaves an army this season (steps down, garrisons, is
+	## displaced by a merge, loses his last unit) remembers how far it had
+	## marched, so he cannot relay across fresh armies at no cost.
+	if general_id == null:
 		return
-	settlement["muster_march_left"] = minf(float(settlement.get("muster_march_left", INF)), movement_left)
+	_note(state["characters"].get(general_id, {}), "march_left", movement_left)
+
+
+static func general_march_cap(state: Dictionary, general_id) -> float:
+	## How far an army this man takes over may still march: INF if he has
+	## not ridden with one this season.
+	if general_id == null:
+		return INF
+	return float(state["characters"].get(general_id, {}).get("march_left", INF))
+
+
+static func _note(record: Dictionary, key: String, movement_left: float) -> void:
+	if record.is_empty():
+		return
+	record[key] = minf(float(record.get(key, INF)), movement_left)
 
 
 static func clear_musters(state: Dictionary) -> void:
+	## The season's memory of who marched how far, forgotten at the reset.
 	for settlement in state["settlements"].values():
 		settlement.erase("muster_march_left")
+		settlement.erase("muster_sail_left")
+	for character in state["characters"].values():
+		character.erase("march_left")

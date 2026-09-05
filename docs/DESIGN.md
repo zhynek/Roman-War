@@ -324,9 +324,13 @@ between co-located forces of one owner, armies merge (the receiving army keeps
 its general; two led armies merge only in an own city) and split, units are
 disbanded (men return to an own city's population, never money), generals are
 attached (a family member standing there) or detached (own city only).
-Movement is conserved: a receiving army keeps the lesser movement, and a
-settlement remembers the least movement of any army that dropped units into it
-this season (`muster_march_left`, transient) and caps what is raised from it.
+Movement is conserved: a receiving army (or fleet) keeps the lesser movement;
+a settlement remembers the least movement of any army that dropped units into
+it this season (`muster_march_left`, transient) and caps what is raised from
+it, and its harbour does the same for ships (`muster_sail_left`; making port
+costs a sea lane); a general who leaves an army remembers its remaining march
+(`march_left`, transient) and caps any army he takes over. A besieged city
+raises no army.
 
 ### 5.4 Sieges
 

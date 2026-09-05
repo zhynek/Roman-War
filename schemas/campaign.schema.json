@@ -152,7 +152,6 @@
         },
         "harbour": {
           "type": "array",
-          "maxItems": 20,
           "items": {
             "$ref": "#/$defs/unit_instance"
           },

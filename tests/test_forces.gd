@@ -56,11 +56,14 @@ func test_summary_for_garrison_and_fleet(t) -> void:
 	t.check_eq(garrison["soldiers"], 60, "garrison head count")
 
 	var fleet_id := Fixtures.add_fleet(state, "red", "test_sea", ["test_galley", "test_galley"])
+	MovementRules.reset_movement(data, state)
 	var fleet := ForceRules.summary(data, state, fleet_id)
 	t.check_eq(fleet["kind"], "fleet", "fleet id resolves")
 	t.check_eq(fleet["sea_zone"], "test_sea", "fleet zone")
 	t.check_eq(fleet["units"], 2, "ships counted as units")
 	t.check_eq(fleet["upkeep"], 200, "fleet upkeep")
+	t.check_near(float(fleet["movement_max"]), float(fleet["movement_left"]), 0.0001,
+		"a fresh fleet's budget and its movement left agree (same rule, wonder bonus included)")
 
 	t.check(ForceRules.summary(data, state, "army_999").is_empty(), "unknown ids give an empty summary")
 	t.check(ForceRules.summary(data, state, "nonsense").is_empty(), "garbage ids give an empty summary")
@@ -293,7 +296,8 @@ func test_facade_refuses_foreign_and_unknown_ids(t) -> void:
 	t.check(not game.besiege("army_999", neighbor), "unknown besieger refused")
 	t.check(game.assault_settlement("army_999", "nowhere").is_empty(), "unknown assault refused")
 	t.check(not game.set_tax_level("nowhere", "high"), "unknown region refused")
-	t.check_eq(game.check("split_army", []), "unknown_action", "empty arguments are refused")
+	t.check_eq(game.check("split_army", []), "bad_args", "empty arguments are refused, not crashed")
+	t.check_eq(game.check("transfer_units", ["army_1", "army_2"]), "bad_args", "so are missing ones")
 
 
 func test_facade_check_explains_refusals(t) -> void:
@@ -315,3 +319,64 @@ func test_facade_check_explains_refusals(t) -> void:
 		t.check(raised["ok"], "the facade raises an army from the garrison")
 		t.check_eq(game.state["settlements"][region]["garrison"].size(), garrison_size - 1, "one unit fewer in the garrison")
 		t.check(game.merge_armies(raised["army_id"], army_id)["ok"], "and merges it into the field army")
+
+
+func test_a_besieged_garrison_stays_behind_its_walls(t) -> void:
+	## Nobody marches out past the siege lines: raising an army from an
+	## invested city, or drawing its garrison into the field, is refused
+	## until the siege is lifted.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	state["settlements"]["alpha"]["garrison"].append({"template": "test_mob", "experience": 0, "strength_pct": 100})
+	var before: int = state["settlements"]["alpha"]["garrison"].size()
+	var besieger := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears", "test_spears"])
+	MovementRules.reset_movement(data, state)
+	t.check_eq(ForceRules.check_raise_army(data, state, "alpha", [0]), "", "before the siege the garrison may march out")
+	t.check(SiegeRules.begin_siege(data, state, besieger, "alpha"), "red invests alpha")
+	t.check_eq(ForceRules.check_raise_army(data, state, "alpha", [0]), "besieged", "under siege it stays behind the walls")
+	t.check(not ForceRules.raise_army(data, state, "alpha", [0])["ok"], "raising is refused")
+	t.check_eq(state["settlements"]["alpha"]["garrison"].size(), before, "and the garrison is untouched")
+	SiegeRules.release(state, besieger)
+	t.check_eq(ForceRules.check_raise_army(data, state, "alpha", [0]), "", "once lifted, the garrison marches again")
+
+
+func test_a_general_carries_his_march_between_armies(t) -> void:
+	## A general who leaves a spent army cannot lead a fresh one further this
+	## season: the man remembers how far he has ridden, whether he stepped
+	## down, was displaced by a merge, or is raised again from the garrison.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var marcus := Fixtures.add_character(state, "red", "red_marcus", {"command": 4, "location": "beta"})
+	var titus := Fixtures.add_character(state, "red", "red_titus", {"command": 3, "location": "beta"})
+	state["settlements"]["beta"]["garrison"].append({"template": "test_mob", "experience": 0, "strength_pct": 100})
+	var spent := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
+	var fresh := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	var other := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	state["armies"][spent]["general"] = marcus
+	MovementRules.reset_movement(data, state)
+	state["armies"][spent]["movement_left"] = 0.5
+
+	t.check(ForceRules.detach_general(data, state, spent)["ok"], "Marcus steps down in his city")
+	t.check(ForceRules.attach_general(data, state, fresh, marcus)["ok"], "and takes the fresh army")
+	t.check_near(float(state["armies"][fresh]["movement_left"]), 0.5, 0.0001, "which now marches no further than he already has")
+	t.check_near(float(state["armies"][other]["movement_left"]), 2.0, 0.0001, "an army he does not lead is untouched")
+
+	# Raised from the garrison under him, the new army is capped the same way.
+	var raised := ForceRules.raise_army(data, state, "beta", [0], titus)
+	t.check(raised["ok"], "Titus, who has not ridden today, raises the garrison")
+	t.check_near(float(state["armies"][raised["army_id"]]["movement_left"]), 2.0, 0.0001, "with fresh legs")
+	t.check(ForceRules.detach_general(data, state, fresh)["ok"], "Marcus steps down again")
+	state["settlements"]["beta"]["garrison"].append({"template": "test_mob", "experience": 0, "strength_pct": 100})
+	var raised_tired := ForceRules.raise_army(data, state, "beta", [0], marcus)
+	t.check(raised_tired["ok"], "and raises the rest")
+	t.check_near(float(state["armies"][raised_tired["army_id"]]["movement_left"]), 0.5, 0.0001, "no fresher than he is")
+
+	# Displaced by a merge in the city, Titus remembers the merged army's march.
+	state["armies"][raised["army_id"]]["movement_left"] = 0.25
+	t.check(ForceRules.merge_armies(data, state, raised["army_id"], raised_tired["army_id"])["ok"], "Titus's army joins Marcus's")
+	t.check(ForceRules.attach_general(data, state, other, titus)["ok"], "the displaced Titus takes the other army")
+	t.check_near(float(state["armies"][other]["movement_left"]), 0.25, 0.0001, "which inherits his ride")
+
+	MovementRules.reset_movement(data, state)
+	t.check(not state["characters"][marcus].has("march_left"), "the new season forgets the ride")
+	t.check(not state["characters"][titus].has("march_left"), "for everyone")

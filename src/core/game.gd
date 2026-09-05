@@ -231,9 +231,18 @@ func garrison_army(army_id: String) -> bool:
 ## this be legal?" with the same error vocabulary, for greying buttons and
 ## explaining refusals — see ForceRules.
 
+const _CHECK_ARITY := {
+	"raise_army": 2, "transfer_units": 3, "merge_armies": 2, "split_army": 2,
+	"disband_unit": 2, "attach_general": 2, "detach_general": 1, "consolidate": 1,
+	"launch_fleet": 3, "dock_fleet": 2, "merge_fleets": 2, "split_fleet": 2,
+}
+
+
 func check(action: String, args: Array) -> String:
-	if args.is_empty():
+	if not _CHECK_ARITY.has(action):
 		return "unknown_action"
+	if args.size() < int(_CHECK_ARITY[action]):
+		return "bad_args"
 	var subject := String(args[0])
 	if action in ["raise_army", "launch_fleet"]:
 		if not _owns_settlement(subject):

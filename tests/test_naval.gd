@@ -112,3 +112,35 @@ func test_the_passive_ai_never_queues_ships(t) -> void:
 	t.check(not queued.is_empty(), "the stub recruits for an empty garrison")
 	for job in queued:
 		t.check(job["template"] != "test_galley", "and never a ship it would never launch")
+
+
+func test_ships_never_relay_through_ports_or_fleets(t) -> void:
+	## Movement is conserved at sea as on land: a fleet taking ships aboard
+	## keeps the lesser movement, making port costs a sea lane, and ships that
+	## came in this season leave the harbour no fresher than they arrived.
+	var world := _port_world()
+	var data: GameData = world[0]
+	var state: Dictionary = world[1]
+	var spent := Fixtures.add_fleet(state, "red", "test_sea", ["test_galley", "test_galley", "test_galley"])
+	var fresh := Fixtures.add_fleet(state, "red", "test_sea", ["test_galley"])
+	MovementRules.reset_movement(data, state)
+	state["fleets"][spent]["movement_left"] = 0.0
+
+	t.check(ForceRules.transfer_units(data, state, spent, fresh, [0])["ok"], "a spent ship joins the fresh fleet")
+	t.check_near(float(state["fleets"][fresh]["movement_left"]), 0.0, 0.0001, "which now sails no further than the ship can")
+	t.check_eq(NavalRules.check_dock_fleet(data, state, spent, "epsilon"), "no_movement", "a spent fleet cannot make port")
+	state["fleets"][spent]["movement_left"] = 1.0
+	t.check(NavalRules.dock_fleet(data, state, spent, "epsilon")["ok"], "with a lane left it docks")
+	t.check_near(float(state["settlements"]["epsilon"].get("muster_sail_left", -1.0)), 0.0, 0.0001,
+		"the harbour remembers the ships arrived with nothing left")
+	t.check_eq(state["settlements"]["epsilon"]["harbour"].size(), 2, "two ships are in port")
+	var launched := NavalRules.launch_fleet(data, state, "epsilon", [0], "test_sea")
+	t.check(launched["ok"], "it can still be launched")
+	t.check_near(float(state["fleets"][launched["fleet_id"]]["movement_left"]), 0.0, 0.0001, "but a launched fleet waits for next season anyway")
+	var other := Fixtures.add_fleet(state, "red", "test_sea", ["test_galley"])
+	t.check(ForceRules.transfer_units(data, state, "harbour:epsilon", other, [0])["ok"], "a fresh fleet takes the other arrived ship aboard")
+	t.check_near(float(state["fleets"][other]["movement_left"]), 0.0, 0.0001, "and is capped by what it had left")
+
+	MovementRules.reset_movement(data, state)
+	t.check(not state["settlements"]["epsilon"].has("muster_sail_left"), "the new season clears the harbour's memory")
+	t.check_near(float(state["fleets"][other]["movement_left"]), 2.0, 0.0001, "and every fleet is fresh again")

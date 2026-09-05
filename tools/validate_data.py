@@ -459,7 +459,8 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"balance: forces.{key} missing")
     campaign_schema = json.loads((SCHEMAS / "campaign.schema.json").read_text(encoding="utf-8"))
     defs = campaign_schema.get("$defs", {})
-    for def_name, field in (("army", "units"), ("fleet", "ships"), ("settlement", "harbour")):
+    # Garrisons and harbours are uncapped, like a city's walls.
+    for def_name, field in (("army", "units"), ("fleet", "ships")):
         schema_cap = defs.get(def_name, {}).get("properties", {}).get(field, {}).get("maxItems")
         if schema_cap != forces.get("max_units_per_force"):
             err(f"balance: forces.max_units_per_force ({forces.get('max_units_per_force')}) "
