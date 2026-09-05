@@ -78,6 +78,9 @@ func _ready() -> void:
 	force_panel.march_requested.connect(func(region_id: String, forced: bool): _on_order_target("region", region_id, forced))
 	force_panel.sail_requested.connect(func(zone_id: String): _on_order_target("zone", zone_id, false))
 	force_panel.sheet_requested.connect(func(char_id: String): family_panel.open_for(game, char_id))
+	force_panel.force_replaced.connect(select_force)
+	force_panel.disband_requested.connect(disband_order)
+	force_panel.refused.connect(_on_refused)
 	force_panel.hide()
 	panels.add_child(force_panel)
 
@@ -87,6 +90,11 @@ func _ready() -> void:
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
+	region_panel.army_raised.connect(func(army_id: String):
+		_log("An army musters in %s." % game.data.regions[game.state["armies"][army_id]["region"]]["settlement_name"])
+		select_force("army", army_id))
+	region_panel.disband_requested.connect(disband_order)
+	region_panel.refused.connect(_on_refused)
 	panels.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
@@ -417,6 +425,35 @@ func _resolve_siege(target_region: String) -> void:
 		_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
 	else:
 		_log("No siege can be laid there.")
+	_after_order()
+
+
+func _on_refused(error: String) -> void:
+	_log("[color=#e0a060]%s[/color]" % ForcePanel._explain(error))
+
+
+func disband_order(force_id: String, indices: Array) -> void:
+	## Sending men home is irreversible, so it is confirmed first.
+	_confirm("Disband %d unit%s? The men go home; no money comes back." % [indices.size(), "" if indices.size() == 1 else "s"],
+		func(): _resolve_disband(force_id, indices))
+
+
+func _resolve_disband(force_id: String, indices: Array) -> void:
+	# Highest index first, so the earlier indices stay valid.
+	var order: Array = indices.duplicate()
+	order.sort()
+	order.reverse()
+	var returned := 0
+	var disbanded := 0
+	for index in order:
+		var result := game.disband_unit(force_id, int(index))
+		if result["ok"]:
+			disbanded += 1
+			returned += int(result["returned"])
+		else:
+			_on_refused(result["error"])
+	if disbanded > 0:
+		_log("%d unit%s disbanded; %d men return to the fields." % [disbanded, "" if disbanded == 1 else "s", returned])
 	_after_order()
 
 

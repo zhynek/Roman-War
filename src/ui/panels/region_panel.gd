@@ -9,10 +9,27 @@ signal action_taken
 signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
+signal army_raised(army_id: String)
+signal disband_requested(force_id: String, indices: Array)
+signal refused(error: String)
 
 var game: Game
 var region_id := ""
 var selected_army := ""
+var _garrison_checks: Array = []   # CheckBox per garrison unit, in order
+
+
+func garrison_checked_indices() -> Array:
+	var indices: Array = []
+	for i in range(_garrison_checks.size()):
+		if (_garrison_checks[i] as CheckBox).button_pressed:
+			indices.append(i)
+	return indices
+
+
+func set_garrison_checked(indices: Array) -> void:
+	for i in range(_garrison_checks.size()):
+		(_garrison_checks[i] as CheckBox).button_pressed = indices.has(i)
 
 
 func show_region(current_game: Game, new_region_id: String, army_id: String = "") -> void:
@@ -31,6 +48,7 @@ func clear_panel() -> void:
 func _clear_children() -> void:
 	## remove_child before queue_free: freed rows linger until end of frame
 	## otherwise, doubling the panel for anything reading it the same frame.
+	_garrison_checks.clear()
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -109,12 +127,22 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_breakdown("Income: %d" % int(EconomyRules.settlement_income(game.data, game.state, region_id)),
 		game.income_breakdown(region_id))
 
-	# Garrison
+	# Garrison — tick units to raise an army, move them to an army here, or send them home.
 	var garrison: Array = settlement["garrison"]
 	if not garrison.is_empty():
-		_header("Garrison (%d)" % garrison.size(), 12)
+		_header("Garrison (%d) — tick units to raise or move" % garrison.size(), 12)
 		for unit in garrison:
-			_label("  %s  %d%%" % [_unit_name(unit), int(unit["strength_pct"])])
+			var row := HBoxContainer.new()
+			add_child(row)
+			var check := CheckBox.new()
+			check.custom_minimum_size = Vector2(22, 0)
+			row.add_child(check)
+			_garrison_checks.append(check)
+			var label := Label.new()
+			label.text = "%s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])]
+			label.add_theme_font_size_override("font_size", 11)
+			row.add_child(label)
+		_garrison_actions()
 		_action_button("Retrain garrison", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
@@ -152,6 +180,74 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 			func():
 				game.queue_unit(region_id, unit["id"])
 				action_taken.emit())
+
+
+func _garrison_actions() -> void:
+	var here := region_id
+	var player: String = game.state["player_faction"]
+
+	# Raise an army under ▾
+	var candidates := game.candidate_generals(here)
+	var leaders: Array = [""]
+	var leader_names: Array = ["a captain"]
+	for char_id in candidates:
+		leaders.append(char_id)
+		leader_names.append(game.state["characters"][char_id]["name"])
+	var raise_row := HBoxContainer.new()
+	add_child(raise_row)
+	var leader_options := OptionButton.new()
+	leader_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for leader_name in leader_names:
+		leader_options.add_item(String(leader_name))
+	raise_row.add_child(leader_options)
+	var raise := Button.new()
+	raise.text = "Raise army under"
+	raise.add_theme_font_size_override("font_size", 11)
+	raise.pressed.connect(func():
+		var choice: String = leaders[maxi(leader_options.selected, 0)]
+		var result := game.raise_army(here, garrison_checked_indices(), choice)
+		if result["ok"]:
+			army_raised.emit(result["army_id"])
+		else:
+			refused.emit(result["error"]))
+	raise_row.add_child(raise)
+
+	# Transfer ticked to an army standing here ▾
+	var armies: Array = []
+	for army_id in ForceRules.armies_in(game.state, here):
+		if game.state["armies"][army_id]["owner"] == player:
+			armies.append(army_id)
+	if not armies.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for army_id in armies:
+			var army: Dictionary = game.state["armies"][army_id]
+			var leader := "captain"
+			if army["general"] != null and game.state["characters"].has(army["general"]):
+				leader = game.state["characters"][army["general"]]["name"]
+			options.add_item("%s's army (%d units)" % [leader, army["units"].size()])
+		row.add_child(options)
+		var move := Button.new()
+		move.text = "Transfer ticked to"
+		move.add_theme_font_size_override("font_size", 11)
+		move.pressed.connect(func():
+			if options.selected < 0:
+				return
+			var result := game.transfer_units("garrison:" + here, armies[options.selected], garrison_checked_indices())
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
+		row.add_child(move)
+
+	_action_button("Disband ticked units", func():
+		var indices := garrison_checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit("garrison:" + here, indices))
 
 
 func _build_armies_section() -> void:

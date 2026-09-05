@@ -208,6 +208,85 @@ func test_force_panel_shows_the_roster_and_marches(t) -> void:
 	screen.free()
 
 
+func _button(root: Control, prefix: String) -> Button:
+	for node in root.find_children("*", "Button", true, false):
+		if node is Button and not (node is CheckBox) and not (node is OptionButton) and (node as Button).text.begins_with(prefix):
+			return node
+	return null
+
+
+func test_regrouping_from_the_panels(t) -> void:
+	## Raise a detachment from a garrison, merge it into the field army, split
+	## it off again, transfer it back and disband it — all through the panels.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var army_id := _julii_army(game)
+	var home: String = game.state["armies"][army_id]["region"]
+	# March the field army into a Julii city with a garrison, if it is not in one.
+	var city := home
+	if game.state["settlements"].get(home, {}).get("owner", "") != "julii":
+		for region_id in game.reachable_regions(army_id)["reach"]:
+			if game.state["settlements"].get(region_id, {}).get("owner", "") == "julii":
+				city = region_id
+				break
+		game.march_army(army_id, city)
+	var garrison: Array = game.state["settlements"][city]["garrison"]
+	t.check(garrison.size() >= 1, "the city has a garrison to draw on")
+	var garrison_before := garrison.size()
+
+	# Raise: tick the first garrison unit, raise it under a captain.
+	screen._on_region_clicked(city)
+	screen.region_panel.set_garrison_checked([0])
+	var raise := _button(screen.region_panel, "Raise army")
+	t.check(raise != null, "the garrison offers Raise army")
+	raise.pressed.emit()
+	var raised := screen.selected_army
+	t.check(raised != "" and raised != army_id and game.state["armies"].has(raised), "a new army is raised and selected")
+	t.check_eq(game.state["settlements"][city]["garrison"].size(), garrison_before - 1, "the garrison shrank by one")
+	t.check(screen.force_panel.visible, "the force card shows the new army")
+
+	# Merge it into the field army: the selection moves to the survivor.
+	var merge := _button(screen.force_panel, "Merge into")
+	t.check(merge != null, "Merge into is offered")
+	var units_before: int = game.state["armies"][army_id]["units"].size()
+	merge.pressed.emit()
+	t.check(not game.state["armies"].has(raised), "the raised army merged away")
+	t.check_eq(game.state["armies"][army_id]["units"].size(), units_before + 1, "the field army grew")
+	t.check_eq(screen.selected_army, army_id, "the selection follows the merged army")
+
+	# Split the last unit off again under a captain.
+	screen.force_panel.set_checked([units_before])
+	var split := _button(screen.force_panel, "Split ticked")
+	t.check(split != null, "Split is offered")
+	split.pressed.emit()
+	var detachment := screen.selected_army
+	t.check(detachment != army_id and game.state["armies"].has(detachment), "a detachment exists and is selected")
+	t.check_eq(game.state["armies"][detachment]["units"].size(), 1, "with the one ticked unit")
+
+	# A refused order explains itself in the log instead of doing nothing.
+	var log_before: int = screen.report_log.get_parsed_text().length()
+	screen.force_panel.set_checked([])
+	split.pressed.emit()  # stale button of the previous card: it still refuses cleanly
+	t.check(screen.report_log.get_parsed_text().length() > log_before, "a refusal is logged")
+
+	# Transfer the detachment's unit into the garrison: the empty army dissolves.
+	screen.force_panel.set_checked([0])
+	var transfer := _button(screen.force_panel, "Transfer ticked")
+	t.check(transfer != null, "Transfer is offered in an own city")
+	transfer.pressed.emit()
+	t.check(not game.state["armies"].has(detachment), "the emptied detachment is gone")
+	t.check_eq(game.state["settlements"][city]["garrison"].size(), garrison_before, "the garrison is whole again")
+
+	# Disband a garrison unit through the confirmed path.
+	var population_before: int = game.state["settlements"][city]["population"]
+	screen._resolve_disband("garrison:" + city, [0])
+	t.check_eq(game.state["settlements"][city]["garrison"].size(), garrison_before - 1, "one unit sent home")
+	t.check(int(game.state["settlements"][city]["population"]) > population_before, "the men rejoin the population")
+	screen.free()
+
+
 func test_fleet_banners_follow_sea_visibility(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)

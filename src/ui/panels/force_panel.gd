@@ -3,9 +3,11 @@ extends VBoxContainer
 ## The force card: everything about the selected army or fleet — who leads
 ## it, how many men it has and how many are standing, what it costs, how far
 ## it can still go, and every unit in it with its strength and experience —
-## plus the orders that need no map click (garrison, siege, assault,
-## mercenaries, a "March to" list for trackpads). Reads only through the
-## Game facade; every action goes back through it.
+## plus the orders that need no map click: garrison, siege, assault,
+## mercenaries, "March to" for trackpads, and the regrouping toolbox
+## (transfer, merge, split, disband, generals, consolidate). Reads only
+## through the Game facade; every action goes back through it, and a
+## refused action reports its error code rather than doing nothing.
 
 signal action_taken
 signal attack_requested(defender_army_id: String)
@@ -13,12 +15,16 @@ signal siege_requested(region_id: String)
 signal march_requested(region_id: String, forced: bool)
 signal sail_requested(zone_id: String)
 signal sheet_requested(char_id: String)
+signal force_replaced(kind: String, id: String)     # the selection should move to this force
+signal disband_requested(force_id: String, indices: Array)
+signal refused(error: String)
 
 const HEADER_COLOR := Color(0.95, 0.9, 0.75)
 const HINT_COLOR := Color(0.7, 0.8, 0.9)
 
 var game: Game
 var force_id := ""
+var _checks: Array = []   # CheckBox per roster row, in unit order
 
 
 func show_force(current_game: Game, new_force_id: String) -> void:
@@ -32,7 +38,21 @@ func clear_panel() -> void:
 	_clear_children()
 
 
+func checked_indices() -> Array:
+	var indices: Array = []
+	for i in range(_checks.size()):
+		if (_checks[i] as CheckBox).button_pressed:
+			indices.append(i)
+	return indices
+
+
+func set_checked(indices: Array) -> void:
+	for i in range(_checks.size()):
+		(_checks[i] as CheckBox).button_pressed = indices.has(i)
+
+
 func _clear_children() -> void:
+	_checks.clear()
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -80,12 +100,11 @@ func _rebuild() -> void:
 		header_row.add_child(sheet)
 
 	# The stats line.
-	var men_word := "men" if summary["kind"] == "army" else "crews"
-	var stats := "Units %d/%d · %s %d/%d (%d%%) · Upkeep %d/turn · Movement %.2f/%.2f" % [
-		int(summary["units"]), int(summary["max_units"]), men_word.capitalize(),
+	var men_word := "Men" if summary["kind"] == "army" else "Crews"
+	_label("Units %d/%d · %s %d/%d (%d%%) · Upkeep %d/turn · Movement %.2f/%.2f" % [
+		int(summary["units"]), int(summary["max_units"]), men_word,
 		int(summary["soldiers"]), int(summary["max_soldiers"]), int(summary["strength_pct"]),
-		int(summary["upkeep"]), float(summary["movement_left"]), float(summary["movement_max"])]
-	_label(stats)
+		int(summary["upkeep"]), float(summary["movement_left"]), float(summary["movement_max"])])
 	if summary["general"] != null:
 		_label("General: %s — command %d" % [summary["general"]["name"], int(summary["general"]["command"])])
 	if bool(summary["forced_march"]):
@@ -94,10 +113,11 @@ func _rebuild() -> void:
 		_label("BESIEGING %s" % game.data.regions.get(summary["besieging"], {}).get("settlement_name", summary["besieging"]),
 			Color(1, 0.5, 0.4))
 
-	# The roster.
+	# The roster, one row per unit with a checkbox for the regrouping orders.
 	add_child(HSeparator.new())
-	for unit in ForceRules.units_of(game.state, force_id):
-		_unit_row(unit)
+	var units := ForceRules.units_of(game.state, force_id)
+	for i in range(units.size()):
+		_unit_row(units[i])
 
 	add_child(HSeparator.new())
 	if summary["kind"] == "army":
@@ -110,12 +130,17 @@ func _unit_row(unit: Dictionary) -> void:
 	var template: Dictionary = game.data.units.get(unit["template"], {})
 	var row := HBoxContainer.new()
 	add_child(row)
+	var check := CheckBox.new()
+	check.custom_minimum_size = Vector2(22, 0)
+	row.add_child(check)
+	_checks.append(check)
+
 	var name_label := Label.new()
 	name_label.text = String(template.get("name", unit["template"]))
 	if template.get("factions", []).has("mercenary"):
 		name_label.text += " (m)"
 	name_label.add_theme_font_size_override("font_size", 11)
-	name_label.custom_minimum_size = Vector2(150, 0)
+	name_label.custom_minimum_size = Vector2(130, 0)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
 
@@ -145,9 +170,10 @@ func _army_actions(summary: Dictionary) -> void:
 	var region_id: String = summary["region"]
 	var player: String = game.state["player_faction"]
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+	var at_home: bool = not settlement.is_empty() and settlement["owner"] == player
 
 	# Standing in our own city: the army can join its garrison.
-	if not settlement.is_empty() and settlement["owner"] == player:
+	if at_home:
 		_action_button("Garrison the army in the city", func():
 			game.garrison_army(army_id)
 			action_taken.emit())
@@ -178,6 +204,8 @@ func _army_actions(summary: Dictionary) -> void:
 				var choice: String = ["occupy", "enslave", "exterminate"][occupation_options.selected]
 				game.assault_settlement(army_id, region_id, choice)
 				action_taken.emit())
+
+	_regroup_actions(summary)
 
 	# Mercenaries for hire in this region.
 	var offers := game.mercenaries_available(region_id)
@@ -215,6 +243,147 @@ func _army_actions(summary: Dictionary) -> void:
 	_label("Right-click a ringed region to march (Shift: forced march), an enemy to attack, a hostile city to besiege.", HINT_COLOR)
 
 
+func _regroup_actions(summary: Dictionary) -> void:
+	## Transfer, merge, split, disband, generals, consolidate. Buttons whose
+	## legality does not depend on the ticked units are greyed with the error
+	## code as their tooltip; the others explain themselves when refused.
+	var army_id := force_id
+	var region_id: String = summary["region"]
+	var player: String = game.state["player_faction"]
+	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+	var at_home: bool = not settlement.is_empty() and settlement["owner"] == player
+	var others: Array = []
+	for other_id in ForceRules.armies_in(game.state, region_id):
+		if other_id != army_id and game.state["armies"][other_id]["owner"] == player:
+			others.append(other_id)
+
+	_header("Regroup (tick units above)")
+
+	# Transfer ticked units to ▾
+	var targets: Array = []
+	var target_names: Array = []
+	if at_home:
+		targets.append("garrison:" + region_id)
+		target_names.append("the garrison")
+	for other_id in others:
+		targets.append(other_id)
+		target_names.append(_force_name(other_id))
+	if not targets.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for target_name in target_names:
+			options.add_item(String(target_name))
+		row.add_child(options)
+		var move := Button.new()
+		move.text = "Transfer ticked to"
+		move.add_theme_font_size_override("font_size", 11)
+		move.pressed.connect(func():
+			if options.selected < 0:
+				return
+			var result := game.transfer_units(army_id, targets[options.selected], checked_indices())
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
+		row.add_child(move)
+
+	# Merge into ▾ (whole army)
+	if not others.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for other_id in others:
+			options.add_item(_force_name(other_id))
+		row.add_child(options)
+		var merge := Button.new()
+		merge.text = "Merge into"
+		merge.add_theme_font_size_override("font_size", 11)
+		merge.pressed.connect(func():
+			if options.selected < 0:
+				return
+			var into: String = others[options.selected]
+			var result := game.merge_armies(army_id, into)
+			if result["ok"]:
+				force_replaced.emit("army", into)
+			else:
+				refused.emit(result["error"]))
+		row.add_child(merge)
+
+	# Split ticked units into a new army under ▾
+	var candidates := game.candidate_generals(region_id)
+	var leaders: Array = [""]
+	var leader_names: Array = ["a captain"]
+	if summary["general"] != null:
+		leaders.append("source")
+		leader_names.append("%s (takes the general)" % summary["general"]["name"])
+	for char_id in candidates:
+		leaders.append(char_id)
+		leader_names.append(game.state["characters"][char_id]["name"])
+	var split_row := HBoxContainer.new()
+	add_child(split_row)
+	var leader_options := OptionButton.new()
+	leader_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for leader_name in leader_names:
+		leader_options.add_item(String(leader_name))
+	split_row.add_child(leader_options)
+	var split := Button.new()
+	split.text = "Split ticked under"
+	split.add_theme_font_size_override("font_size", 11)
+	split.pressed.connect(func():
+		var choice: String = leaders[maxi(leader_options.selected, 0)]
+		var result := game.split_army(army_id, checked_indices(), choice)
+		if result["ok"]:
+			force_replaced.emit("army", result["army_id"])
+		else:
+			refused.emit(result["error"]))
+	split_row.add_child(split)
+
+	# Disband ticked (the screen confirms).
+	_action_button("Disband ticked units", func():
+		var indices := checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit(army_id, indices))
+
+	# Generals: attach one standing here, or step down at home.
+	if summary["general"] == null:
+		for char_id in candidates:
+			var name: String = game.state["characters"][char_id]["name"]
+			_action_button("Give command to %s" % name, func():
+				var result := game.attach_general(army_id, char_id)
+				if result["ok"]:
+					action_taken.emit()
+				else:
+					refused.emit(result["error"]))
+	else:
+		var detach_error := game.check("detach_general", [army_id])
+		var detach := _action_button("Detach %s (he stays in the city)" % summary["general"]["name"], func():
+			var result := game.detach_general(army_id)
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
+		if detach_error != "":
+			detach.disabled = true
+			detach.tooltip_text = _explain(detach_error)
+
+	# Consolidate depleted units.
+	var consolidate_error := game.check("consolidate", [army_id])
+	var consolidate := _action_button("Consolidate depleted units", func():
+		var result := game.consolidate_units(army_id)
+		if result["ok"]:
+			action_taken.emit()
+		else:
+			refused.emit(result["error"]))
+	if consolidate_error != "":
+		consolidate.disabled = true
+		consolidate.tooltip_text = _explain(consolidate_error)
+
+
 func _fleet_actions(summary: Dictionary) -> void:
 	var fleet_id := force_id
 	var reach := game.reachable_zones(fleet_id)
@@ -236,13 +405,95 @@ func _fleet_actions(summary: Dictionary) -> void:
 			if options.selected >= 0:
 				sail_requested.emit(zones[options.selected]))
 		row.add_child(go)
+
+	# Other fleets of ours in the same sea: transfer ships between them.
+	var others: Array = []
+	for other_id in ForceRules.fleets_in(game.state, summary["sea_zone"]):
+		if other_id != fleet_id and game.state["fleets"][other_id]["owner"] == game.state["player_faction"]:
+			others.append(other_id)
+	if not others.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for other_id in others:
+			options.add_item("Fleet %s (%d ships)" % [other_id.trim_prefix("fleet_"), game.state["fleets"][other_id]["ships"].size()])
+		row.add_child(options)
+		var move := Button.new()
+		move.text = "Transfer ticked to"
+		move.add_theme_font_size_override("font_size", 11)
+		move.pressed.connect(func():
+			if options.selected < 0:
+				return
+			var result := game.transfer_units(fleet_id, others[options.selected], checked_indices())
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
+		row.add_child(move)
+	_action_button("Disband ticked ships", func():
+		var indices := checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit(fleet_id, indices))
 	_label("Right-click a ringed sea to sail there.", HINT_COLOR)
 
 
 ## --- Small builders -------------------------------------------------------
 
+func _force_name(army_id: String) -> String:
+	var army: Dictionary = game.state["armies"][army_id]
+	var leader := "captain"
+	if army["general"] != null and game.state["characters"].has(army["general"]):
+		leader = game.state["characters"][army["general"]]["name"]
+	return "%s's army (%d units)" % [leader, army["units"].size()]
+
+
 func _settlement_name(region_id: String) -> String:
 	return game.data.regions.get(region_id, {}).get("settlement_name", region_id)
+
+
+static func _explain(error: String) -> String:
+	## The error vocabulary of ForceRules in the player's words.
+	match error:
+		"not_found":
+			return "That force is no longer there."
+		"wrong_owner":
+			return "Those are not our men."
+		"not_colocated":
+			return "They are not in the same place."
+		"over_cap":
+			return "An army holds twenty units at most."
+		"empty_selection":
+			return "Tick the units first."
+		"bad_index":
+			return "The roster changed — look again."
+		"last_unit":
+			return "A general keeps at least one unit under him."
+		"not_eligible_general":
+			return "That man cannot take command here."
+		"has_general":
+			return "The army already has a general."
+		"no_general":
+			return "There is no general to detach."
+		"two_generals":
+			return "Two generals cannot share a camp in the field — transfer units instead, or merge in one of your cities."
+		"no_settlement":
+			return "Only in one of our cities."
+		"foreign_settlement":
+			return "Not in a foreign city."
+		"same_force":
+			return "That is the same force."
+		"is_ship":
+			return "Ships do not march."
+		"not_ship":
+			return "Only ships join a fleet."
+		"not_docked":
+			return "Ships are paid off only in a sea touching one of our ports."
+		"nothing_to_do":
+			return "Nothing to consolidate."
+	return "That cannot be done (%s)." % error
 
 
 func _header(text: String) -> void:
@@ -262,12 +513,13 @@ func _label(text: String, color: Color = Color(0.85, 0.85, 0.85)) -> void:
 	add_child(label)
 
 
-func _action_button(text: String, handler: Callable) -> void:
+func _action_button(text: String, handler: Callable) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.add_theme_font_size_override("font_size", 11)
 	button.pressed.connect(handler)
 	add_child(button)
+	return button
 
 
 class StrengthBar:
