@@ -160,6 +160,54 @@ func test_multi_step_order_from_the_map(t) -> void:
 	screen.free()
 
 
+func test_force_panel_shows_the_roster_and_marches(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	t.check(not screen.force_panel.visible, "no force selected, no force card")
+
+	var army_id := _julii_army(game)
+	var army: Dictionary = game.state["armies"][army_id]
+	screen.select_force("army", army_id)
+	t.check(screen.force_panel.visible, "selecting shows the force card")
+	var text := ""
+	for node in screen.force_panel.find_children("*", "Label", true, false):
+		text += (node as Label).text + "\n"
+	for unit in army["units"]:
+		t.check(text.contains(game.data.units[unit["template"]]["name"]), "roster lists " + unit["template"])
+	t.check(text.contains("Units %d/20" % army["units"].size()), "stats line counts the units")
+	t.check(text.contains("Upkeep"), "stats line shows upkeep")
+	if army["general"] != null:
+		t.check(text.contains(game.state["characters"][army["general"]]["name"]), "the general is named")
+
+	# The March-to list is the trackpad route: pick its first entry and go.
+	var options: OptionButton = null
+	var go: Button = null
+	for node in screen.force_panel.find_children("*", "OptionButton", true, false):
+		options = node
+	for node in screen.force_panel.find_children("*", "Button", true, false):
+		if (node as Button).text == "Go":
+			go = node
+	t.check(options != null and go != null and options.item_count > 0, "March to offers reachable regions")
+	if options != null and go != null and options.item_count > 0:
+		options.selected = 0
+		var home: String = army["region"]
+		go.pressed.emit()
+		t.check(game.state["armies"][army_id]["region"] != home, "Go marches the army")
+		t.check_eq(screen.selected_army, army_id, "the card follows the army")
+
+	# Garrisoning from the card dissolves the army and clears the card.
+	if game.state["settlements"].get(game.state["armies"][army_id]["region"], {}).get("owner", "") == "julii":
+		for node in screen.force_panel.find_children("*", "Button", true, false):
+			if (node as Button).text.begins_with("Garrison"):
+				(node as Button).pressed.emit()
+		t.check(not game.state["armies"].has(army_id), "the army joined the garrison")
+		t.check_eq(screen.selected_army, "", "and the selection is dropped")
+		t.check(not screen.force_panel.visible, "the card hides with nothing selected")
+	screen.free()
+
+
 func test_fleet_banners_follow_sea_visibility(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)
@@ -205,5 +253,5 @@ func test_fleet_banners_follow_sea_visibility(t) -> void:
 	var next_zone: String = view.highlight_zones.keys()[0]
 	screen._on_order_target("zone", next_zone, false)
 	t.check_eq(game.state["fleets"][fleet_id]["sea_zone"], next_zone, "the fleet sailed")
-	t.check(screen.region_panel.get_child_count() > 0, "the panel describes the fleet")
+	t.check(screen.force_panel.visible and screen.force_panel.get_child_count() > 0, "the force card describes the fleet")
 	screen.free()

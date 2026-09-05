@@ -8,6 +8,7 @@ signal family_changed
 
 var game: Game
 var _content: VBoxContainer
+var _focus := ""
 
 
 func _init() -> void:
@@ -21,8 +22,10 @@ func _init() -> void:
 	add_child(scroll)
 
 
-func open_for(current_game: Game) -> void:
+func open_for(current_game: Game, focus_char_id: String = "") -> void:
+	## Optionally opens on one member (the general behind a force card).
 	game = current_game
+	_focus = focus_char_id
 	_rebuild()
 	popup_centered()
 
@@ -43,7 +46,9 @@ func _build_member(char_id: String, character: Dictionary) -> void:
 		"child": "Child", "spouse": "Spouse"}.get(character["role"], "")
 	header.text = "%s — %s, age %d" % [sheet["name"], role_tag, int(sheet["age"])]
 	header.add_theme_font_size_override("font_size", 14)
-	header.add_theme_color_override("font_color", Color(0.95, 0.9, 0.75))
+	header.add_theme_color_override("font_color", Color.WHITE if char_id == _focus else Color(0.95, 0.9, 0.75))
+	if char_id == _focus:
+		header.text = "▶ " + header.text
 	_content.add_child(header)
 
 	if character["role"] in ["leader", "heir", "family"]:

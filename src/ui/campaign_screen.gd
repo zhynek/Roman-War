@@ -14,7 +14,9 @@ const SAVE_PATH := "user://roman_war_save.json"
 var game: Game
 
 var map_view: MapView
+var force_panel: ForcePanel
 var region_panel: RegionPanel
+var side_scroll: ScrollContainer
 var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
@@ -57,16 +59,32 @@ func _ready() -> void:
 	side.custom_minimum_size = Vector2(360, 0)
 	split.add_child(side)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	side.add_child(scroll)
+	side_scroll = ScrollContainer.new()
+	side_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side.add_child(side_scroll)
+	var panels := VBoxContainer.new()
+	panels.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_scroll.add_child(panels)
+
+	# The force card sits above the region scroll; hidden when nothing is selected.
+	force_panel = ForcePanel.new()
+	force_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	force_panel.action_taken.connect(_after_order)
+	force_panel.attack_requested.connect(attack_army_order)
+	force_panel.siege_requested.connect(besiege_order)
+	force_panel.march_requested.connect(func(region_id: String, forced: bool): _on_order_target("region", region_id, forced))
+	force_panel.sail_requested.connect(func(zone_id: String): _on_order_target("zone", zone_id, false))
+	force_panel.sheet_requested.connect(func(char_id: String): family_panel.open_for(game, char_id))
+	force_panel.hide()
+	panels.add_child(force_panel)
+
 	region_panel = RegionPanel.new()
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.attack_requested.connect(attack_army_order)
 	region_panel.siege_requested.connect(besiege_order)
-	scroll.add_child(region_panel)
+	panels.add_child(region_panel)
 
 	report_log = RichTextLabel.new()
 	report_log.custom_minimum_size = Vector2(0, 160)
@@ -135,10 +153,18 @@ func refresh() -> void:
 
 	_drop_stale_selection()
 	_refresh_highlights()
+	var scroll_before := side_scroll.scroll_vertical
+	if selected_force() != "":
+		force_panel.show_force(game, selected_force())
+		force_panel.show()
+	else:
+		force_panel.clear_panel()
+		force_panel.hide()
 	if selected_fleet != "":
-		region_panel.show_fleet(game, selected_fleet)
+		region_panel.clear_panel()
 	elif map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
+	side_scroll.set_deferred("scroll_vertical", scroll_before)
 	map_view.queue_redraw()
 
 	if game.state["winner"] != null and not _victory_shown:

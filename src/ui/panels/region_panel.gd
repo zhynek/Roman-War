@@ -2,7 +2,8 @@ class_name RegionPanel
 extends VBoxContainer
 ## The right-hand context panel: everything about the selected region — the
 ## settlement (with the factor breakdowns the engine exposes), the armies
-## standing there, and every action the player can take from here.
+## standing there, and every settlement action the player can take from
+## here. The selected force itself is described by the ForcePanel above.
 
 signal action_taken
 signal army_selected(army_id: String)
@@ -25,26 +26,6 @@ func clear_panel() -> void:
 	region_id = ""
 	selected_army = ""
 	_clear_children()
-
-
-func show_fleet(current_game: Game, fleet_id: String) -> void:
-	## Fleets live at sea, not in a region: the panel shows the ships and how
-	## far they can sail; the order itself is a right-click on a sea anchor.
-	game = current_game
-	region_id = ""
-	selected_army = ""
-	_clear_children()
-	var summary := game.force_summary(fleet_id)
-	if summary.is_empty():
-		return
-	var zone: Dictionary = game.data.sea_zones.get(summary["sea_zone"], {})
-	_header("Fleet — %s" % zone.get("name", summary["sea_zone"]), 16)
-	_label("%d ships · %d crews (%d%%) · upkeep %d/turn · movement %.1f/%.1f" % [
-		int(summary["units"]), int(summary["soldiers"]), int(summary["strength_pct"]),
-		int(summary["upkeep"]), float(summary["movement_left"]), float(summary["movement_max"])])
-	for ship in game.state["fleets"][fleet_id]["ships"]:
-		_label("  %s  %d%%  xp%d" % [_unit_name(ship), int(ship["strength_pct"]), int(ship["experience"])])
-	_label("Right-click a neighbouring sea to sail there.", Color(0.7, 0.8, 0.9))
 
 
 func _clear_children() -> void:
@@ -198,8 +179,6 @@ func _build_armies_section() -> void:
 			button.text = ("▶ " if army_id == selected_army else "") + title
 			button.pressed.connect(func(): army_selected.emit(army_id))
 			add_child(button)
-			if army_id == selected_army:
-				_build_selected_army_detail(army_id, army)
 		else:
 			_label(title, Color.html(faction.get("color", "#808080")))
 			# A beaten enemy can be stacked in our own region; the map click
@@ -208,44 +187,6 @@ func _build_armies_section() -> void:
 					and game.state["armies"][selected_army]["region"] == region_id:
 				_action_button("Attack the %s" % faction.get("name", army["owner"]),
 					func(): attack_requested.emit(army_id))
-
-
-func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
-	_label("Movement left: %.1f" % float(army["movement_left"]))
-	for unit in army["units"]:
-		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
-	_label("Right-click a ringed region to march, attack, or besiege. Shift for a forced march.", Color(0.7, 0.8, 0.9))
-
-	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
-	if not settlement.is_empty() and settlement["owner"] == game.state["player_faction"]:
-		_action_button("Garrison the army in the city", func():
-			game.garrison_army(army_id)
-			action_taken.emit())
-	elif not settlement.is_empty() and settlement.get("siege") == null:
-		# Standing in a hostile settlement's region: the siege starts from here.
-		_action_button("Lay siege to %s" % settlement_display_name(),
-			func(): siege_requested.emit(region_id))
-
-	if not settlement.is_empty() and settlement.get("siege") != null \
-			and settlement["siege"]["besieger"] == army_id:
-		var occupation_options := OptionButton.new()
-		for choice in ["occupy", "enslave", "exterminate"]:
-			occupation_options.add_item(choice.capitalize())
-		add_child(occupation_options)
-		var can_assault: bool = settlement["siege"].get("equipment_ready", false)
-		_action_button("Assault the walls!" if can_assault else "Assault (equipment not ready)", func():
-			var choice: String = ["occupy", "enslave", "exterminate"][occupation_options.selected]
-			game.assault_settlement(army_id, region_id, choice)
-			action_taken.emit())
-
-	var offers := game.mercenaries_available(region_id)
-	if not offers.is_empty():
-		_header("Mercenaries for hire", 12)
-		for offer in offers:
-			_action_button("Hire %s (%d)" % [_template_name(offer["template"]), int(offer["cost"])],
-				func():
-					game.hire_mercenary(army_id, offer["template"])
-					action_taken.emit())
 
 
 ## --- Small builders -------------------------------------------------------
