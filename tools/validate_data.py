@@ -442,7 +442,7 @@ def cross_checks(t: dict[str, dict]) -> None:
     # The force cap has one home (balance.forces) and the campaign schema's
     # maxItems must agree with it, or authored armies could exceed the rule.
     forces = balance.get("forces", {})
-    for key in ("max_units_per_force", "raised_army_movement_points", "disband_population_return_pct"):
+    for key in ("max_units_per_force", "disband_population_return_pct"):
         if key not in forces:
             err(f"balance: forces.{key} missing")
     campaign_schema = json.loads((SCHEMAS / "campaign.schema.json").read_text(encoding="utf-8"))

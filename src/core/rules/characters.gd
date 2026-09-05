@@ -44,6 +44,15 @@ static func effective(data: GameData, character: Dictionary, attribute: String) 
 	return maxi(0, int(character.get(attribute, 0)) + int(effect_total(data, character, attribute)))
 
 
+static func can_command(data: GameData, character: Dictionary) -> bool:
+	## Who may govern a city or lead an army: a living adult man of the family.
+	if not character.get("alive", false) or character.get("role", "") in ["spouse", "child"]:
+		return false
+	if character.get("gender", "male") != "male":
+		return false
+	return int(character.get("age", 0)) >= int(data.balance["characters"]["come_of_age"])
+
+
 static func battle_profile(data: GameData, character: Dictionary) -> Dictionary:
 	## What the BattleResolver needs to know about a general.
 	return {

@@ -12,6 +12,7 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base
+	ForceRules.clear_musters(state)
 
 
 static func movement_points_for(data: GameData, state: Dictionary, army: Dictionary) -> float:

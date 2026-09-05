@@ -243,6 +243,20 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
+static func round_trip_equal(t, game_data: GameData, campaign_state: Dictionary, apply: Callable, label: String) -> void:
+	## Determinism gate for a mutating action: apply it to the live state and
+	## to a JSON round-trip of the same state, play one turn on both, and
+	## demand identical worlds (canonical JSON, so 2 and 2.0 agree).
+	var loaded: Dictionary = SaveGame.from_json(SaveGame.to_json(campaign_state))
+	apply.call(campaign_state)
+	apply.call(loaded)
+	TurnEngine.end_turn(game_data, campaign_state, AutoResolver.new())
+	TurnEngine.end_turn(game_data, loaded, AutoResolver.new())
+	var live_json: String = JSON.stringify(JSON.parse_string(JSON.stringify(campaign_state)))
+	var loaded_json: String = JSON.stringify(JSON.parse_string(JSON.stringify(loaded)))
+	t.check_eq(live_json, loaded_json, label)
+
+
 static func add_fleet(campaign_state: Dictionary, owner: String, zone: String, templates: Array) -> String:
 	var fleet_id := "fleet_%d" % campaign_state["next_id"]
 	campaign_state["next_id"] += 1

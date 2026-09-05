@@ -200,6 +200,90 @@ func garrison_army(army_id: String) -> bool:
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
+## --- Regrouping (raise, transfer, merge, split, disband, generals) -----------
+## Every action returns {ok, error, ...}; check(action, args) answers "would
+## this be legal?" with the same error vocabulary, for greying buttons and
+## explaining refusals — see ForceRules.
+
+func check(action: String, args: Array) -> String:
+	match action:
+		"raise_army":
+			return ForceRules.check_raise_army(data, state, args[0], args[1], args[2] if args.size() > 2 else "")
+		"transfer_units":
+			return ForceRules.check_transfer_units(data, state, args[0], args[1], args[2])
+		"merge_armies":
+			return ForceRules.check_merge_armies(data, state, args[0], args[1])
+		"split_army":
+			return ForceRules.check_split_army(data, state, args[0], args[1], args[2] if args.size() > 2 else "")
+		"disband_unit":
+			return ForceRules.check_disband_unit(data, state, args[0], int(args[1]))
+		"attach_general":
+			return ForceRules.check_attach_general(data, state, args[0], args[1])
+		"detach_general":
+			return ForceRules.check_detach_general(data, state, args[0])
+		"consolidate":
+			return ForceRules.check_consolidate(data, state, args[0])
+	return "unknown_action"
+
+
+func candidate_generals(region_id: String, faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return ForceRules.candidate_generals(data, state, region_id, fid)
+
+
+func raise_army(region_id: String, indices: Array, general_id: String = "") -> Dictionary:
+	var result := ForceRules.raise_army(data, state, region_id, indices, general_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionary:
+	var result := ForceRules.transfer_units(data, state, from_id, to_id, indices)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func merge_armies(from_id: String, into_id: String) -> Dictionary:
+	var result := ForceRules.merge_armies(data, state, from_id, into_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func split_army(army_id: String, indices: Array, general_choice: String = "") -> Dictionary:
+	var result := ForceRules.split_army(data, state, army_id, indices, general_choice)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func disband_unit(force_id: String, index: int) -> Dictionary:
+	var result := ForceRules.disband_unit(data, state, force_id, index)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func attach_general(army_id: String, char_id: String) -> Dictionary:
+	var result := ForceRules.attach_general(data, state, army_id, char_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func detach_general(army_id: String) -> Dictionary:
+	var result := ForceRules.detach_general(data, state, army_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func consolidate_units(force_id: String) -> Dictionary:
+	return ForceRules.consolidate(data, state, force_id)
+
+
 ## --- Queries (for UI scrolls) --------------------------------------------
 
 func force_summary(force_id: String) -> Dictionary:

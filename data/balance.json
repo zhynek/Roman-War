@@ -158,7 +158,6 @@
   },
   "forces": {
     "max_units_per_force": 20,
-    "raised_army_movement_points": 1.0,
     "disband_population_return_pct": 100
   },
   "battle": {
