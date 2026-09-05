@@ -21,7 +21,7 @@ during the session it is marked *(confirmed by probe)*. Everything in §3 is
 verified.
 
 **Baseline.** Validator 0 errors / 0 warnings; 69 tests / 0 failures; clean
-boot. On this branch: 100 tests / 0 failures, validator clean.
+boot. On this branch: 105 tests / 0 failures, validator clean.
 
 ---
 
@@ -38,8 +38,9 @@ iteration where it matters). The defects cluster in four places:
 2. **A handful of rules leak state across a turn or a save**: debt
    disbandment picked its victim by dictionary order, siege records went
    stale, governorship lagged a general's march, the save version was never
-   bumped, mercenary pools drift through a JSON round trip, sieges outlive
-   peace. Most are fixed here; the open ones are small (§3.1).
+   bumped, mercenary pools drift through a JSON round trip, sieges outlived
+   peace. All but the mercenary drift are fixed here; the open ones are
+   small (§3.1).
 3. **The economy and public order do not bite.** Income snowballs, order
    sits at 150–220 % in core cities, extermination strictly dominates,
    plague is endemic and invisible, huge cities (and with them the Marian
@@ -69,6 +70,12 @@ a balance pass driven by §4.2–4.3, then the realism data pass.
 | Governorship was stale for the rest of the turn after a general marched | medium | `Game._after_relocation` refreshes governors after every move (inc. 2) |
 | `SAVE_VERSION` never bumped across state-shape changes | medium | version 2 with a version-1 upgrade path; newer saves refused (inc. 5) |
 | The 20-unit stack cap was a literal in mercenary hiring only | medium | `balance.forces.max_units_per_force`, read by every path, validator-tied to the schema (inc. 0) |
+| The `Game` facade never checked ownership and crashed on unknown or stale ids (E1, E8 in the first draft of this report) | high | `_owns_force` / `_owns_settlement` guards on every player action; `check()` reports `wrong_owner` and `unknown_action`; one facade test with foreign and bogus ids (fix commit) |
+| `AutoResolver` charged 25 % casualties and awarded experience for attacking an empty garrison (E2) | medium | an empty side is a walkover: no casualties, no experience, no general roll; noted in the `BattleResolver` contract (fix commit) |
+| Village and town starve-outs resolved on the same end turn the siege equipment became ready, so no assault window ever opened (E4) | medium | `starve_at = max(supplies, equipment_turns + 1)` in `SiegeRules.advance_sieges`, independent of the data table (fix commit) |
+| Sieges continued and captured cities after peace was made (E5) | medium | `advance_sieges` lifts a siege whose factions are no longer at war and `assault` refuses one (fix commit) |
+| Besieged settlements kept recruiting, retraining and completing units and buildings (E7) | medium | `queue_unit` and `retrain_garrison` refuse under siege; recruitment and construction queues freeze until the siege lifts (fix commit) |
+| Loading a save from another house left the top bar showing the previous faction (U1) | low | `CampaignScreen.refresh()` rebuilds the house label, swatch and senate line from state; the map recentres on the loaded capital (fix commit) |
 | No canonical army constructor (`NewGame._add_army` vs `Fixtures.add_army`) | low | partly: `ForceRules._new_army` is the constructor for raised and split armies; `NewGame._add_army` still builds its own literal (see §3.4) |
 
 Reported (unverified by the workflow) findings that this branch also closes,
@@ -89,16 +96,13 @@ finding: `set_anchors_preset` without offsets).
 
 ### 3.1 Engine
 
+Ids are stable across revisions of this report: E1, E2, E4, E5, E7 and E8
+were fixed after the first draft and now appear in §2.
+
 | # | Finding | File | Effort | Fix |
 |---|---|---|---|---|
-| E1 | **The `Game` facade never checks ownership**: `set_tax_level`, `queue_building`, `queue_unit`, `move_army`, `attack_army`, `besiege`, `garrison_army` … accept any id, so a caller can command enemy armies and tax enemy cities. The UI only ever offers own forces (banners and buttons are filtered), so the player cannot reach it today, but every new UI path must re-implement the guard. | `src/core/game.gd` | S | Add `_own_army/_own_fleet/_own_settlement` helpers and return `false`/`{}` early in every player action, as `move_capital` and `transfer_ancillary` already do; keep the rules modules caller-agnostic for the Phase 6 AI; one facade test that each action refuses a foreign id. |
-| E2 | **`AutoResolver` charges 25 % casualties for attacking an empty garrison** and awards victory experience for a fight that never happened; empty garrisons occur after every capture and revolt. | `src/core/rules/battle/auto_resolver.gd:34` | S | Short-circuit in `resolve` when either side is empty: the other side wins, no casualties, no experience, no general-death roll; document it in the contract. |
 | E3 | **Faction destruction is half-handled**: defecting armies keep their family general (his bonuses and campaigning triggers keep firing for a dead house) and the *player's* defeat is never reported — they can keep ending turns. | `src/core/rules/combat.gd:230` | S | On faction death null the generals (or kill/retire the house); have `VictoryRules.check` return `"defeat"` when the player faction is dead and the screen show it. |
-| E4 | **Village and town starve-outs resolve on the same end turn the siege equipment becomes ready**, so the player never gets a turn in which an assault (and the occupation choice) is possible. | `data/balance.json` siege, `siege.gd:41` | S | Raise the low starve thresholds (e.g. `[4,5,6,7,8,10]`) and add a validator check that each exceeds `equipment_turns`. |
-| E5 | **Sieges continue and capture cities after peace is made.** | `src/core/rules/siege.gd:25` | S | Lift a siege in `advance_sieges` (and refuse `assault`) when the two factions are no longer at war; or lift in `set_stance`. |
 | E6 | **Conquered cities carry a permanent culture penalty**: the old owner's government chain can never be demolished and always counts as foreign, contrary to DESIGN.md's "until the new owner outgrows it". | `construction.gd:78`, `settlements.gd:93` | S | Erase a foreign government chain once the owner's own chain reaches its tier, or exclude government/indestructible chains from the penalty ratio. |
-| E7 | **Besieged settlements keep recruiting, retraining and completing units** into the garrison every turn (the AI stub does it automatically). | `turn_engine.gd:52`, `recruitment.gd` | S | Refuse `queue_unit`/`retrain` while besieged and pause queue progress. |
-| E8 | **Legacy facade actions crash with a script error on unknown or stale ids** (`set_tax_level`, `move_army`, `besiege`, `attack_army`, `queue_building`, `queue_unit`, `move_fleet`) instead of refusing; the Phase 9 actions use `.get()` and refuse cleanly. | `game.gd`, several rules | S | Give the legacy entry points the same contract (`.get()`, return `false`/`{}`); one facade test with bogus ids. |
 | E9 | **Mercenary pool counts are float accumulators**: ten replenishes of 0.1 reach 0.999… (unit re-hireable on turn 11, not 10) and a JSON round trip rounds the accumulator, so a loaded save offers the unit a turn earlier than the live game — a determinism violation. | `mercenaries.gd:58` | S | Store pool counts as integer hundredths (or `snappedf(x, 0.01)` on store and before the gate); add a replay-with-save test. |
 | E10 | **Succession notices are dropped when a leader dies in battle** (`CharacterRules.kill` writes them into a throwaway array at every combat call site) and battle `character_notices` are never logged by the UI. | `characters.gd:160`, `campaign_screen.gd` | S | Thread the caller's notices array through the kill sites and log `result["character_notices"]` after battles and assaults. |
 | E11 | **Unmarried adult daughters stay role `child` forever** (37 women aged 16–29 labelled Child by turn 60 in a probe). | `family.gd:26` | S | Promote daughters at coming of age and roll suitors for any adult unmarried woman. |
@@ -113,7 +117,6 @@ finding: `set_anchors_preset` without offsets).
 
 | # | Finding | Fix |
 |---|---|---|
-| U1 | Loading a save from another house leaves the top bar showing the previous faction's name, colour and senate standings. | Rebuild the top bar in `refresh()` from the current `player_faction`; recentre on the loaded capital. |
 | T1 | The save round-trip test compares canonical JSON, which collapses `1.9999999999999998` and `2.0`, so it cannot detect the divergence class it guards (the mercenary-pool drift above is masked on the very turn it runs); it also plays one action-free turn. | An exact recursive diff helper, a scripted action list on both sides, and the mercenary fix. `Fixtures.round_trip_equal` (added on this branch) does the scripted half for the Phase 9 actions. |
 
 ### 3.4 Code quality (verified)
@@ -295,13 +298,11 @@ session.
 1. **Finish Phase 9** (embark/disembark, naval combat through the resolver
    seam, explicit blockades, docs closure) — the spec is in
    `docs/plans/phase-9-army-command.md` §5–7.
-2. **Close the open verified bugs** (§3.1, all effort S): facade ownership
-   and id guards (E1, E8), the empty-garrison resolver case (E2), faction
-   death and player defeat (E3), starve-out overlap and sieges after peace
-   (E4, E5), the permanent culture penalty (E6), besieged recruiting (E7),
-   the mercenary float drift with a real replay test (E9, T1), succession
-   notices (E10), daughters (E11), the top bar after load (U1), the island
-   capital distance (G1).
+2. **Close the open verified bugs** (§3.1, all effort S): faction death
+   and player defeat (E3), the permanent culture penalty (E6), the mercenary
+   float drift with a real replay test (E9, T1), succession notices (E10),
+   daughters (E11), the island capital distance (G1), the duplicate army
+   literal (Q1).
 3. **Balance pass** from §4.2: economy tension, public order, occupy vs
    exterminate, plague and the reachability of huge cities, the six insolvent
    starts, the resolver's class multipliers, the Senate. Verify each lead with

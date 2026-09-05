@@ -30,7 +30,7 @@ merge and split, save v2). The phase spec and the remaining increments
 `docs/plans/phase-9-army-command.md`; the codebase review that preceded it is
 in `docs/reviews/2026-09-codebase-review.md`.
 
-**Green as of this branch:** 100 tests / 0 failures, validator 0 errors /
+**Green as of this branch:** 105 tests / 0 failures, validator 0 errors /
 0 warnings, clean boot. A Mac build of the earlier commit `97cabfd` has been
 delivered to the user, who is playtesting.
 
@@ -59,7 +59,7 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 100 tests, 0 failures (~20s)
+godot --headless --path . --script res://tests/run_tests.gd      # 105 tests, 0 failures (~20s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
