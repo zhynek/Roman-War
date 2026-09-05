@@ -4,6 +4,10 @@ extends Control
 ## map in the middle, the region context panel and turn log on the right.
 ## All rules go through the Game facade — this screen never touches state
 ## except to read it for display.
+##
+## Selection and orders: a LEFT click selects (a banner selects its force, a
+## token its region); a RIGHT click, with a force selected, is an order for
+## it — march, sail, attack, besiege. Shift makes a march a forced march.
 
 const SAVE_PATH := "user://roman_war_save.json"
 
@@ -16,6 +20,7 @@ var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
 var selected_army := ""
+var selected_fleet := ""
 var _victory_shown := false
 
 
@@ -42,6 +47,10 @@ func _ready() -> void:
 	map_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	map_view.custom_minimum_size = Vector2(600, 400)
 	map_view.region_clicked.connect(_on_region_clicked)
+	map_view.force_clicked.connect(_on_force_clicked)
+	map_view.zone_clicked.connect(_on_zone_clicked)
+	map_view.background_clicked.connect(_on_background_clicked)
+	map_view.order_target.connect(_on_order_target)
 	split.add_child(map_view)
 
 	var side := VBoxContainer.new()
@@ -74,6 +83,7 @@ func _ready() -> void:
 	add_child(diplomacy_panel)
 
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
+	_log("Left-click a banner to select an army; right-click a region to march it there.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
 	var capital: String = game.state["factions"][game.state["player_faction"]]["capital"]
@@ -123,7 +133,11 @@ func refresh() -> void:
 		top_labels["victory"].text = "Regions %d/%d" \
 			% [int(progress["regions_held"]), int(progress["regions_needed"])]
 
-	if map_view.selected_region != "":
+	_drop_stale_selection()
+	_refresh_highlights()
+	if selected_fleet != "":
+		region_panel.show_fleet(game, selected_fleet)
+	elif map_view.selected_region != "":
 		region_panel.show_region(game, map_view.selected_region, selected_army)
 	map_view.queue_redraw()
 
@@ -131,22 +145,146 @@ func refresh() -> void:
 		_show_victory_banner(String(game.state["winner"]))
 
 
-func _on_region_clicked(region_id: String) -> void:
-	# With one of our armies selected, a click on another region is an order.
-	# Shift makes it a forced march: double range, weary men.
-	if selected_army != "" and game.state["armies"].has(selected_army) \
-			and region_id != game.state["armies"][selected_army]["region"]:
-		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
-		return
-	map_view.selected_region = region_id
+## --- Selection ----------------------------------------------------------------
+
+func selected_force() -> String:
+	return selected_army if selected_army != "" else selected_fleet
+
+
+func select_force(kind: String, force_id: String) -> void:
+	## The one entry point for selecting one of our forces: banner click,
+	## panel button, keyboard cycling.
+	_clear_force_selection()
+	if kind == "army" and game.state["armies"].has(force_id):
+		selected_army = force_id
+		map_view.selected_region = game.state["armies"][force_id]["region"]
+	elif kind == "fleet" and game.state["fleets"].has(force_id):
+		selected_fleet = force_id
+	map_view.selected_force = selected_force()
+	refresh()
+
+
+func _clear_force_selection() -> void:
 	selected_army = ""
-	region_panel.show_region(game, region_id)
-	map_view.queue_redraw()
+	selected_fleet = ""
+	map_view.selected_force = ""
+	map_view.highlight_regions = {}
+	map_view.highlight_zones = {}
+
+
+func _drop_stale_selection() -> void:
+	## A selected force that was destroyed, garrisoned or lost stops being selected.
+	var player: String = game.state["player_faction"]
+	if selected_army != "" and game.state["armies"].get(selected_army, {}).get("owner", "") != player:
+		selected_army = ""
+	if selected_fleet != "" and game.state["fleets"].get(selected_fleet, {}).get("owner", "") != player:
+		selected_fleet = ""
+	map_view.selected_force = selected_force()
+
+
+func _on_region_clicked(region_id: String) -> void:
+	# A left click inspects: it never moves anyone.
+	_clear_force_selection()
+	map_view.selected_region = region_id
+	refresh()
+
+
+func _on_zone_clicked(_zone_id: String) -> void:
+	_clear_force_selection()
+	refresh()
+
+
+func _on_background_clicked() -> void:
+	_clear_force_selection()
+	refresh()
+
+
+func _on_force_clicked(kind: String, force_id: String) -> void:
+	var player: String = game.state["player_faction"]
+	var summary := game.force_summary(force_id)
+	if summary.is_empty():
+		return
+	if summary["owner"] == player:
+		select_force(kind, force_id)
+		return
+	# A foreign banner: look, do not command. Armies show through their region.
+	if kind == "army":
+		_on_region_clicked(summary["region"])
+	else:
+		_clear_force_selection()
+		refresh()
+	_log(map_view.banner_tooltip(summary))
 
 
 func _on_army_selected(army_id: String) -> void:
-	selected_army = "" if selected_army == army_id else army_id
-	region_panel.show_region(game, map_view.selected_region, selected_army)
+	# The panel's army buttons toggle.
+	if selected_army == army_id:
+		_clear_force_selection()
+		refresh()
+	else:
+		select_force("army", army_id)
+
+
+func _refresh_highlights() -> void:
+	## Rings around what the selected force can do from where it stands.
+	map_view.highlight_regions = {}
+	map_view.highlight_zones = {}
+	if selected_army != "":
+		map_view.highlight_regions = _army_options(selected_army)
+	elif selected_fleet != "":
+		var fleet: Dictionary = game.state["fleets"][selected_fleet]
+		if float(fleet["movement_left"]) >= float(game.data.balance["movement"]["sea_lane_cost"]) - 0.0001:
+			for zone_id in game.data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
+				map_view.highlight_zones[zone_id] = "sail"
+
+
+func _army_options(army_id: String) -> Dictionary:
+	## {region_id: "march"|"forced"|"attack"|"siege"} for the neighbours of an
+	## army's region, seen through our own fog.
+	var options := {}
+	var army: Dictionary = game.state["armies"][army_id]
+	var player: String = game.state["player_faction"]
+	var visible := game.visible_regions()
+	var budget := float(army["movement_left"])
+	var forced_budget := budget * float(game.data.balance["movement"]["forced_march_multiplier"])
+	for neighbor in game.data.regions[army["region"]].get("adjacent", []):
+		if not visible.has(neighbor):
+			continue
+		if _enemy_army_in(neighbor) != "":
+			if budget > 0.0001:
+				options[neighbor] = "attack"
+			continue
+		var settlement: Dictionary = game.state["settlements"].get(neighbor, {})
+		if not settlement.is_empty() and DiplomacyRules.at_war(game.state, player, settlement["owner"]):
+			if budget > 0.0001:
+				options[neighbor] = "siege"
+			continue
+		if not MovementRules.can_enter(game.data, game.state, army_id, neighbor):
+			continue
+		var cost := MovementRules.step_cost(game.data, game.state, neighbor)
+		if cost <= budget + 0.0001:
+			options[neighbor] = "march"
+		elif cost <= forced_budget + 0.0001:
+			options[neighbor] = "forced"
+	return options
+
+
+## --- Orders -----------------------------------------------------------------------
+
+func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
+	## A right click on the map with one of our forces selected.
+	if selected_army != "" and game.state["armies"].has(selected_army):
+		match kind:
+			"region":
+				if target_id != game.state["armies"][selected_army]["region"]:
+					_army_order(target_id, forced)
+			"army":
+				var other: Dictionary = game.state["armies"].get(target_id, {})
+				if not other.is_empty() and other["owner"] != game.state["player_faction"]:
+					attack_army_order(target_id)
+	elif selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		if kind == "zone":
+			_fleet_order(target_id)
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -180,6 +318,15 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 	_after_order()
 
 
+func _fleet_order(zone_id: String) -> void:
+	var zone_name: String = game.data.sea_zones.get(zone_id, {}).get("name", zone_id)
+	if game.move_fleet(selected_fleet, zone_id):
+		_log("The fleet sails for the %s." % zone_name)
+	else:
+		_log("The fleet cannot reach the %s this season." % zone_name)
+	_after_order()
+
+
 func _enemy_army_in(region_id: String) -> String:
 	## An at-war army we can actually see. Invisible armies must not influence
 	## orders at all, or the log itself leaks their presence.
@@ -199,7 +346,7 @@ func attack_army_order(defender_id: String) -> void:
 	## Attacking a faction we are not yet at war with is a decision, not a
 	## mis-click, so it is confirmed first.
 	var defender: Dictionary = game.state["armies"].get(defender_id, {})
-	if defender.is_empty():
+	if defender.is_empty() or selected_army == "":
 		return
 	var player: String = game.state["player_faction"]
 	if not DiplomacyRules.at_war(game.state, player, defender["owner"]):
@@ -221,7 +368,7 @@ func _resolve_attack(defender_id: String) -> void:
 
 func besiege_order(target_region: String) -> void:
 	var settlement: Dictionary = game.state["settlements"].get(target_region, {})
-	if settlement.is_empty():
+	if settlement.is_empty() or selected_army == "":
 		return
 	var player: String = game.state["player_faction"]
 	if not DiplomacyRules.at_war(game.state, player, settlement["owner"]):
@@ -251,18 +398,76 @@ func _confirm(text: String, on_accept: Callable) -> void:
 
 
 func _after_order() -> void:
-	if game.state["armies"].has(selected_army):
+	## The selection follows a surviving force; a force that is gone (beaten,
+	## garrisoned, merged away) leaves its region selected instead.
+	_drop_stale_selection()
+	if selected_army != "":
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
-	else:
-		selected_army = ""
-	region_panel.show_region(game, map_view.selected_region, selected_army)
 	refresh()
 
+
+## --- Keyboard ---------------------------------------------------------------------
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not (event is InputEventKey) or not event.is_pressed() or event.is_echo():
+		return
+	match (event as InputEventKey).keycode:
+		KEY_ESCAPE:
+			deselect()
+		KEY_TAB, KEY_N:
+			cycle_selection()
+
+
+func deselect() -> void:
+	## Esc: first the force, then the region.
+	if selected_force() != "":
+		_clear_force_selection()
+	else:
+		map_view.selected_region = ""
+		region_panel.clear_panel()
+	refresh()
+
+
+func cycle_selection() -> void:
+	## Tab / N: the next of our forces that still has orders to give.
+	var player: String = game.state["player_faction"]
+	var candidates: Array = []
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort_custom(ForceRules.id_less)
+	for army_id in army_ids:
+		var army: Dictionary = game.state["armies"][army_id]
+		if army["owner"] == player and float(army["movement_left"]) > 0.0001:
+			candidates.append(["army", army_id])
+	var fleet_ids: Array = game.state["fleets"].keys()
+	fleet_ids.sort_custom(ForceRules.id_less)
+	for fleet_id in fleet_ids:
+		var fleet: Dictionary = game.state["fleets"][fleet_id]
+		if fleet["owner"] == player and float(fleet["movement_left"]) > 0.0001:
+			candidates.append(["fleet", fleet_id])
+	if candidates.is_empty():
+		_log("Every force has its orders.")
+		return
+	var current := selected_force()
+	var next_index := 0
+	for i in range(candidates.size()):
+		if candidates[i][1] == current:
+			next_index = (i + 1) % candidates.size()
+			break
+	var pick: Array = candidates[next_index]
+	select_force(pick[0], pick[1])
+	if pick[0] == "army":
+		map_view.center_on(game.state["armies"][pick[1]]["region"])
+	else:
+		map_view.center_on_zone(game.state["fleets"][pick[1]]["sea_zone"])
+
+
+## --- Turn, save, log ------------------------------------------------------------------
 
 func _end_turn() -> void:
 	var report := game.end_turn()
 	_log_report(report)
-	selected_army = ""
+	# The selection survives the turn if the force does; its rings are
+	# recomputed because movement points are back.
 	refresh()
 
 
@@ -342,7 +547,7 @@ func _save_game() -> void:
 
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
-		selected_army = ""
+		_clear_force_selection()
 		map_view.selected_region = ""
 		region_panel.clear_panel()
 		_victory_shown = false

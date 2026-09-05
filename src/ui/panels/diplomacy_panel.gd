@@ -3,8 +3,6 @@ extends AcceptDialog
 ## The stances scroll: where every house stands with us, and the blunt
 ## instruments available before the Phase 5 negotiation engine exists —
 ## declare war, or offer terms the other side simply accepts.
-## Fleets share this window: they live in sea zones, not regions, so the map
-## click cannot reach them.
 
 signal stance_changed
 
@@ -18,7 +16,7 @@ const STANCE_NAMES := {
 
 
 func _init() -> void:
-	title = "Diplomacy & Fleets"
+	title = "Diplomacy"
 	min_size = Vector2i(520, 560)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(490, 500)
@@ -50,20 +48,6 @@ func _rebuild() -> void:
 			continue
 		_build_faction_row(player, faction_id)
 
-	_content.add_child(HSeparator.new())
-	_header("Fleets")
-	var fleet_ids: Array = game.state["fleets"].keys()
-	fleet_ids.sort()
-	var any_fleet := false
-	for fleet_id in fleet_ids:
-		var fleet: Dictionary = game.state["fleets"][fleet_id]
-		if fleet["owner"] != player:
-			continue
-		any_fleet = true
-		_build_fleet_row(fleet_id, fleet)
-	if not any_fleet:
-		_label("We keep no ships at sea.")
-
 
 func _build_faction_row(player: String, faction_id: String) -> void:
 	var faction: Dictionary = game.data.factions[faction_id]
@@ -93,35 +77,6 @@ func _build_faction_row(player: String, faction_id: String) -> void:
 			stance_changed.emit()
 			_rebuild())
 		row.add_child(button)
-	_content.add_child(row)
-
-
-func _build_fleet_row(fleet_id: String, fleet: Dictionary) -> void:
-	var zone: Dictionary = game.data.sea_zones.get(fleet["sea_zone"], {})
-	var row := HBoxContainer.new()
-	var label := Label.new()
-	label.text = "%s — %d ships (move %.0f)" \
-		% [zone.get("name", fleet["sea_zone"]), fleet["ships"].size(), float(fleet["movement_left"])]
-	label.add_theme_font_size_override("font_size", 12)
-	label.custom_minimum_size = Vector2(280, 0)
-	row.add_child(label)
-
-	var destinations := OptionButton.new()
-	var adjacent: Array = zone.get("adjacent", []).duplicate()
-	adjacent.sort()
-	for zone_id in adjacent:
-		destinations.add_item(game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
-	row.add_child(destinations)
-
-	var sail := Button.new()
-	sail.text = "Sail"
-	sail.add_theme_font_size_override("font_size", 11)
-	sail.pressed.connect(func():
-		if destinations.selected >= 0:
-			game.move_fleet(fleet_id, adjacent[destinations.selected])
-			stance_changed.emit()
-			_rebuild())
-	row.add_child(sail)
 	_content.add_child(row)
 
 

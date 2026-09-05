@@ -211,6 +211,11 @@ func visible_regions(faction_id: String = "") -> Dictionary:
 	return VisibilityRules.visible_regions(data, state, fid)
 
 
+func visible_sea_zones(faction_id: String = "") -> Dictionary:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return VisibilityRules.visible_sea_zones(data, state, fid)
+
+
 func victory_progress(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VictoryRules.progress(data, state, fid)

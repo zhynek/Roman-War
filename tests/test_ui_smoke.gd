@@ -47,7 +47,14 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 				target = neighbor
 				break
 		if target != "":
+			# A LEFT click on the neighbour only inspects it — the army stays put
+			# and is no longer selected...
 			screen._on_region_clicked(target)
+			t.check_eq(game.state["armies"][army_id]["region"], from_region, "a left click never marches")
+			t.check_eq(screen.selected_army, "", "a left click on a token clears the force selection")
+			# ...a RIGHT click with the army selected is the order.
+			screen.select_force("army", army_id)
+			screen._on_order_target("region", target, false)
 			t.check_eq(game.state["armies"][army_id]["region"], target, "the army actually marched")
 		for other_faction in stances_before:
 			if stances_before[other_faction] != "war":

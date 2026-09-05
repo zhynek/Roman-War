@@ -28,3 +28,25 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 				visible[region_id] = true
 
 	return visible
+
+
+static func visible_sea_zones(data: GameData, state: Dictionary, faction_id: String) -> Dictionary:
+	## The seas a faction has eyes on, as a set {zone_id: true}: every zone one
+	## of its fleets sails (and the zones beyond it), plus every zone touching
+	## a region it owns or has an army in. Fleets elsewhere are unseen.
+	var visible := {}
+	for fleet in state["fleets"].values():
+		if fleet["owner"] != faction_id:
+			continue
+		visible[fleet["sea_zone"]] = true
+		for adjacent in data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
+			visible[adjacent] = true
+	for region_id in state["settlements"]:
+		if state["settlements"][region_id]["owner"] == faction_id:
+			for zone in data.regions.get(region_id, {}).get("sea_zones", []):
+				visible[zone] = true
+	for army in state["armies"].values():
+		if army["owner"] == faction_id:
+			for zone in data.regions.get(army["region"], {}).get("sea_zones", []):
+				visible[zone] = true
+	return visible

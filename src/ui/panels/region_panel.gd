@@ -27,6 +27,26 @@ func clear_panel() -> void:
 	_clear_children()
 
 
+func show_fleet(current_game: Game, fleet_id: String) -> void:
+	## Fleets live at sea, not in a region: the panel shows the ships and how
+	## far they can sail; the order itself is a right-click on a sea anchor.
+	game = current_game
+	region_id = ""
+	selected_army = ""
+	_clear_children()
+	var summary := game.force_summary(fleet_id)
+	if summary.is_empty():
+		return
+	var zone: Dictionary = game.data.sea_zones.get(summary["sea_zone"], {})
+	_header("Fleet — %s" % zone.get("name", summary["sea_zone"]), 16)
+	_label("%d ships · %d crews (%d%%) · upkeep %d/turn · movement %.1f/%.1f" % [
+		int(summary["units"]), int(summary["soldiers"]), int(summary["strength_pct"]),
+		int(summary["upkeep"]), float(summary["movement_left"]), float(summary["movement_max"])])
+	for ship in game.state["fleets"][fleet_id]["ships"]:
+		_label("  %s  %d%%  xp%d" % [_unit_name(ship), int(ship["strength_pct"]), int(ship["experience"])])
+	_label("Right-click a neighbouring sea to sail there.", Color(0.7, 0.8, 0.9))
+
+
 func _clear_children() -> void:
 	## remove_child before queue_free: freed rows linger until end of frame
 	## otherwise, doubling the panel for anything reading it the same frame.
@@ -194,7 +214,7 @@ func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
 	_label("Movement left: %.1f" % float(army["movement_left"]))
 	for unit in army["units"]:
 		_label("  %s  %d%%  xp%d" % [_unit_name(unit), int(unit["strength_pct"]), int(unit["experience"])])
-	_label("Click an adjacent region to march, attack, or besiege.", Color(0.7, 0.8, 0.9))
+	_label("Right-click a ringed region to march, attack, or besiege. Shift for a forced march.", Color(0.7, 0.8, 0.9))
 
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty() and settlement["owner"] == game.state["player_faction"]:
