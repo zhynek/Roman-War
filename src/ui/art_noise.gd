@@ -3,7 +3,7 @@ extends RefCounted
 ## The map's hash, lifted out of MapGeometry so the landmass and the building
 ## art wobble by one rule. Never randf(): a given building must look identical
 ## every frame, every session and in every screenshot, which is the same
-## replay-determinism promise CLAUDE.md makes about the campaign itself.
+## replay-determinism promise AGENTS.md makes about the campaign itself.
 
 
 static func hash01(key: String, salt: int) -> float:

@@ -1,0 +1,56 @@
+name: Idea or design proposal
+description: Propose a mechanic, a system, or a change to how something works
+labels: ["design"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Roman War has an opinionated design — read
+        [`docs/DESIGN.md`](https://github.com/zhynek/Roman-War/blob/main/docs/DESIGN.md)
+        first. The most useful proposals argue from the design's own terms.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem
+      description: |
+        What does the game do badly today, or what decision does the player
+        currently make without weighing anything?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+      description: The mechanic or change itself, in as much detail as you have.
+    validations:
+      required: true
+
+  - type: textarea
+    id: cost
+    attributes:
+      label: What it costs the player
+      description: |
+        In this design every lever buys something and costs something. What does
+        the player give up by using this? A proposal that is purely good for the
+        player is usually a proposal that removes a decision rather than adding one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: data-shape
+    attributes:
+      label: What data it would need
+      description: |
+        Content lives in `data/*.json`, tunable constants in `data/balance.json`,
+        and the engine stays thin. Roughly what tables and fields would this add
+        or change? A guess is fine.
+
+  - type: checkboxes
+    id: cleanroom
+    attributes:
+      label: Clean-room
+      options:
+        - label: This proposal is described in my own words and does not reproduce text, values or data from any commercial game.
+          required: true

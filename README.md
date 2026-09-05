@@ -1,5 +1,8 @@
 # Roman War
 
+[![CI](https://github.com/zhynek/Roman-War/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/zhynek/Roman-War/actions/workflows/ci.yml)
+[![Licence: source-available](https://img.shields.io/badge/licence-source--available-blue)](LICENSE)
+
 An original, clean-room turn-based grand-strategy game of the ancient Mediterranean,
 inspired by the *mechanics* (never the assets, text, or data) of classic 2004-era
 campaign strategy games. Built with Godot 4 for macOS (and anywhere else Godot runs).
@@ -145,6 +148,36 @@ when a house grows too great, and a civil war in which the other houses pick
 sides, that no envoy can end, and that ends only when the Senate falls. Naval
 combat and a real-time battle scene are the next phases; their data tables and
 state hooks already exist.
+
+## Contributing
+
+The source is public to read. Changes are not open to the public: every pull
+request — including the maintainer's own — is reviewed and merged by
+[@zhynek](https://github.com/zhynek), and `main` takes no direct pushes.
+
+- **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — setup, the two gates every change
+  must pass, what makes a good pull request here.
+- **[`AGENTS.md`](AGENTS.md)** — the architecture rules, in full. Read by Claude
+  Code (via [`CLAUDE.md`](CLAUDE.md)), by OpenAI Codex, and by any other coding
+  agent that follows the `AGENTS.md` convention. One file, so the rules cannot
+  drift between tools.
+- **[`SECURITY.md`](SECURITY.md)** — report security issues privately, not as an
+  issue.
+
+The two gates, which CI also runs on every pull request:
+
+```sh
+python3 tools/validate_data.py
+godot --headless --path . --script res://tests/run_tests.gd
+```
+
+## Licence
+
+Source-available, **not** open source — see [`LICENSE`](LICENSE). You may read
+this code, fork it to prepare a contribution, and build it locally to evaluate
+one. Redistributing it, or reusing any part of it in another project, needs
+written permission. Opening a pull request grants the project the right to use
+and relicense your contribution.
 
 ## Clean-room policy
 

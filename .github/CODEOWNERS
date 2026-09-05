@@ -1,0 +1,10 @@
+# Every file in this repository is owned by @zhynek.
+#
+# With "Require review from Code Owners" enabled on the `main` branch ruleset,
+# this single line is what makes every pull request — from any account, human
+# or agent — wait for @zhynek's approval before it can be merged.
+#
+# The last matching pattern wins, so keep the catch-all first and add
+# narrower rules below it only if ownership is ever genuinely shared.
+
+* @zhynek

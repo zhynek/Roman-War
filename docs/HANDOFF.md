@@ -5,7 +5,7 @@ minutes. It deliberately does **not** repeat the other docs:
 
 | For | Read |
 |---|---|
-| Architecture rules you must not violate, conventions, clean-room policy | [`CLAUDE.md`](../CLAUDE.md) (auto-loaded by Claude Code — read it first) |
+| Architecture rules you must not violate, conventions, clean-room policy | [`AGENTS.md`](../AGENTS.md) (read by Codex directly and by Claude Code via `CLAUDE.md` — read it first) |
 | What every system does, and the phase-by-phase status table | [`docs/DESIGN.md`](DESIGN.md) — §13's table is authoritative |
 | What the game is like to play | [`PLAYING.md`](../PLAYING.md) |
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
@@ -306,7 +306,7 @@ Balance complaints want a soak before and after, not just the suite (§2).
 
 ## 5. Determinism and GDScript traps (all bitten in practice)
 
-`CLAUDE.md` states the standing architecture rules — the four effect
+`AGENTS.md` states the standing architecture rules — the four effect
 accessors and their hot-path discipline, the additive save-compat rule, the
 chronicle choke-point rule, and the `--import` trap. Those are not repeated
 here. What follows is the rest:

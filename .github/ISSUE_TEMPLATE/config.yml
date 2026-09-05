@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/zhynek/Roman-War/security/advisories/new
+    about: Please report security issues privately, never as a public issue. See SECURITY.md.
+  - name: How to contribute
+    url: https://github.com/zhynek/Roman-War/blob/main/CONTRIBUTING.md
+    about: Setup, the two gates every change must pass, and the clean-room policy.

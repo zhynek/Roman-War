@@ -1,0 +1,71 @@
+name: Bug report
+description: Something in the game or the tooling behaves wrongly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. If this is a **security** issue, close this and
+        follow [`SECURITY.md`](https://github.com/zhynek/Roman-War/blob/main/SECURITY.md)
+        instead — please do not describe it in a public issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: |
+        Steps, ideally from a new campaign. Because the whole simulation is
+        deterministic from one seed, a save file or a seed plus a turn number
+        usually reproduces a campaign bug exactly — that is by far the most
+        useful thing you can give.
+      placeholder: |
+        1. New campaign, faction ..., seed ...
+        2. End turn until turn ...
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does it live
+      options:
+        - Campaign simulation (src/core)
+        - User interface (src/ui)
+        - Data tables (data/*.json)
+        - Validator or tooling (tools/)
+        - Tests
+        - Build or export
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: godot
+    attributes:
+      label: Godot version
+      placeholder: "4.4.1"
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15.3 / Ubuntu 24.04 / Windows 11"
+
+  - type: textarea
+    id: gates
+    attributes:
+      label: Gate output
+      description: |
+        If either gate fails, paste the output.
+        `python3 tools/validate_data.py` and
+        `godot --headless --path . --script res://tests/run_tests.gd`
+      render: shell

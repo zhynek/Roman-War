@@ -1,0 +1,62 @@
+Roman War — Source-Available Licence
+Copyright (c) 2025-2026 zhynek. All rights reserved.
+
+This source code is published so that it can be read, studied and discussed,
+and so that invited collaborators can contribute to it. It is NOT open source.
+Publication here grants no licence to use, copy, modify, merge, publish,
+distribute, sublicense or sell this software or any part of it.
+
+
+WHAT YOU MAY DO WITHOUT ASKING
+
+  1. Read, browse and search this repository.
+  2. Fork it on GitHub and clone it locally for the sole purpose of preparing a
+     contribution back to this repository through a pull request.
+  3. Build and run it locally, modified or unmodified, to evaluate a
+     contribution you are preparing or to review one someone else proposed.
+  4. Quote short excerpts for commentary, criticism, teaching, or review.
+
+
+WHAT REQUIRES WRITTEN PERMISSION FROM THE COPYRIGHT HOLDER
+
+  1. Redistributing this software, or any work derived from it, in source or
+     binary form, to anyone.
+  2. Using it, or any part of it, in another project, product or service —
+     commercial or non-commercial.
+  3. Publishing builds of it, or hosting it for others to play.
+  4. Removing or altering this notice.
+
+  To request permission beyond this notice, open an issue on the repository.
+
+
+CONTRIBUTIONS
+
+  By opening a pull request against this repository you confirm that your
+  contribution is your own original work, or that you otherwise have the right
+  to submit it; and you grant the copyright holder a perpetual, worldwide,
+  non-exclusive, irrevocable, royalty-free licence to use, reproduce, modify,
+  relicense and distribute your contribution as part of this project, under any
+  terms, including terms different from this notice. You keep the copyright in
+  your own contribution.
+
+  This matters: it is what lets this project be released under a different
+  licence later without having to track down every past contributor.
+
+
+THIRD-PARTY COMPONENTS
+
+  This repository contains no third-party source, assets, text or data. It is
+  original clean-room work; see the clean-room policy in README.md. The game
+  runs on the Godot Engine, which is licensed separately by its own authors and
+  is not distributed in this repository.
+
+
+NO WARRANTY
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
