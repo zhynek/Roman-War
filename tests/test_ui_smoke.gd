@@ -12,6 +12,9 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 	tree.root.add_child(screen)
 
 	t.check(screen.map_view != null and screen.region_panel != null, "screen assembled")
+	# The screen must fill the window it is given, not sit at minimum size.
+	t.check(screen.size.x >= tree.root.size.x - 1 and screen.size.y >= tree.root.size.y - 1,
+		"the campaign screen fills the window (got %s of %s)" % [screen.size, tree.root.size])
 	t.check(screen.top_labels["treasury"].text.contains("Treasury"), "treasury shown")
 	t.check(screen.top_labels["senate"].text.contains("Senate"), "roman house sees standings")
 

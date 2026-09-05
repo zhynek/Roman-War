@@ -33,9 +33,12 @@ static func create(new_game: Game) -> CampaignScreen:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Anchors AND offsets: a preset on anchors alone keeps the zero-size rect
+	# this control was created with, and the whole screen then lays out at
+	# its minimum size in a corner of the window.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var root := VBoxContainer.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(root)
 
 	root.add_child(_build_top_bar())
