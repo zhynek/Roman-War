@@ -187,7 +187,7 @@ func test_force_panel_shows_the_roster_and_marches(t) -> void:
 	for node in screen.force_panel.find_children("*", "OptionButton", true, false):
 		options = node
 	for node in screen.force_panel.find_children("*", "Button", true, false):
-		if (node as Button).text == "Go":
+		if (node as Button).text.begins_with("March"):
 			go = node
 	t.check(options != null and go != null and options.item_count > 0, "March to offers reachable regions")
 	if options != null and go != null and options.item_count > 0:

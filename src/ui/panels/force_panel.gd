@@ -140,7 +140,7 @@ func _unit_row(unit: Dictionary) -> void:
 	if template.get("factions", []).has("mercenary"):
 		name_label.text += " (m)"
 	name_label.add_theme_font_size_override("font_size", 11)
-	name_label.custom_minimum_size = Vector2(130, 0)
+	name_label.custom_minimum_size = Vector2(110, 0)
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(name_label)
 
@@ -227,19 +227,22 @@ func _army_actions(summary: Dictionary) -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for destination in destinations:
 			var entry: Dictionary = plan["reach"][destination]
 			var suffix := " (forced march)" if entry["forced"] else ""
 			options.add_item("%s%s" % [game.data.regions[destination]["name"], suffix])
 		row.add_child(options)
 		var go := Button.new()
-		go.text = "Go"
+		go.text = "March →"
 		go.add_theme_font_size_override("font_size", 11)
 		go.pressed.connect(func():
 			if options.selected >= 0:
 				var destination: String = destinations[options.selected]
 				march_requested.emit(destination, bool(plan["reach"][destination]["forced"])))
 		row.add_child(go)
+		row.move_child(go, 0)
 	_label("Right-click a ringed region to march (Shift: forced march), an enemy to attack, a hostile city to besiege.", HINT_COLOR)
 
 
@@ -273,11 +276,13 @@ func _regroup_actions(summary: Dictionary) -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for target_name in target_names:
 			options.add_item(String(target_name))
 		row.add_child(options)
 		var move := Button.new()
-		move.text = "Transfer ticked to"
+		move.text = "Transfer ticked →"
 		move.add_theme_font_size_override("font_size", 11)
 		move.pressed.connect(func():
 			if options.selected < 0:
@@ -288,6 +293,7 @@ func _regroup_actions(summary: Dictionary) -> void:
 			else:
 				refused.emit(result["error"]))
 		row.add_child(move)
+		row.move_child(move, 0)
 
 	# Merge into ▾ (whole army)
 	if not others.is_empty():
@@ -295,11 +301,13 @@ func _regroup_actions(summary: Dictionary) -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for other_id in others:
 			options.add_item(_force_name(other_id))
 		row.add_child(options)
 		var merge := Button.new()
-		merge.text = "Merge into"
+		merge.text = "Merge into →"
 		merge.add_theme_font_size_override("font_size", 11)
 		merge.pressed.connect(func():
 			if options.selected < 0:
@@ -311,6 +319,7 @@ func _regroup_actions(summary: Dictionary) -> void:
 			else:
 				refused.emit(result["error"]))
 		row.add_child(merge)
+		row.move_child(merge, 0)
 
 	# Split ticked units into a new army under ▾
 	var candidates := game.candidate_generals(region_id)
@@ -326,11 +335,13 @@ func _regroup_actions(summary: Dictionary) -> void:
 	add_child(split_row)
 	var leader_options := OptionButton.new()
 	leader_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	leader_options.clip_text = true
+	leader_options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	for leader_name in leader_names:
 		leader_options.add_item(String(leader_name))
 	split_row.add_child(leader_options)
 	var split := Button.new()
-	split.text = "Split ticked under"
+	split.text = "Split ticked under →"
 	split.add_theme_font_size_override("font_size", 11)
 	split.pressed.connect(func():
 		var choice: String = leaders[maxi(leader_options.selected, 0)]
@@ -340,6 +351,7 @@ func _regroup_actions(summary: Dictionary) -> void:
 		else:
 			refused.emit(result["error"]))
 	split_row.add_child(split)
+	split_row.move_child(split, 0)
 
 	# Disband ticked (the screen confirms).
 	_action_button("Disband ticked units", func():
@@ -395,16 +407,19 @@ func _fleet_actions(summary: Dictionary) -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for zone_id in zones:
 			options.add_item(String(game.data.sea_zones.get(zone_id, {}).get("name", zone_id)))
 		row.add_child(options)
 		var go := Button.new()
-		go.text = "Sail"
+		go.text = "Sail →"
 		go.add_theme_font_size_override("font_size", 11)
 		go.pressed.connect(func():
 			if options.selected >= 0:
 				sail_requested.emit(zones[options.selected]))
 		row.add_child(go)
+		row.move_child(go, 0)
 
 	# Other fleets of ours in the same sea: transfer ships between them.
 	var others: Array = []
@@ -416,11 +431,13 @@ func _fleet_actions(summary: Dictionary) -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for other_id in others:
 			options.add_item("Fleet %s (%d ships)" % [other_id.trim_prefix("fleet_"), game.state["fleets"][other_id]["ships"].size()])
 		row.add_child(options)
 		var move := Button.new()
-		move.text = "Transfer ticked to"
+		move.text = "Transfer ticked →"
 		move.add_theme_font_size_override("font_size", 11)
 		move.pressed.connect(func():
 			if options.selected < 0:
@@ -431,6 +448,7 @@ func _fleet_actions(summary: Dictionary) -> void:
 			else:
 				refused.emit(result["error"]))
 		row.add_child(move)
+		row.move_child(move, 0)
 	_action_button("Disband ticked ships", func():
 		var indices := checked_indices()
 		if indices.is_empty():

@@ -59,7 +59,7 @@ func _ready() -> void:
 	split.add_child(map_view)
 
 	var side := VBoxContainer.new()
-	side.custom_minimum_size = Vector2(360, 0)
+	side.custom_minimum_size = Vector2(420, 0)
 	split.add_child(side)
 
 	side_scroll = ScrollContainer.new()

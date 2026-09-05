@@ -197,11 +197,13 @@ func _garrison_actions() -> void:
 	add_child(raise_row)
 	var leader_options := OptionButton.new()
 	leader_options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	leader_options.clip_text = true
+	leader_options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	for leader_name in leader_names:
 		leader_options.add_item(String(leader_name))
 	raise_row.add_child(leader_options)
 	var raise := Button.new()
-	raise.text = "Raise army under"
+	raise.text = "Raise army under →"
 	raise.add_theme_font_size_override("font_size", 11)
 	raise.pressed.connect(func():
 		var choice: String = leaders[maxi(leader_options.selected, 0)]
@@ -211,6 +213,7 @@ func _garrison_actions() -> void:
 		else:
 			refused.emit(result["error"]))
 	raise_row.add_child(raise)
+	raise_row.move_child(raise, 0)
 
 	# Transfer ticked to an army standing here ▾
 	var armies: Array = []
@@ -222,6 +225,8 @@ func _garrison_actions() -> void:
 		add_child(row)
 		var options := OptionButton.new()
 		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		for army_id in armies:
 			var army: Dictionary = game.state["armies"][army_id]
 			var leader := "captain"
@@ -230,7 +235,7 @@ func _garrison_actions() -> void:
 			options.add_item("%s's army (%d units)" % [leader, army["units"].size()])
 		row.add_child(options)
 		var move := Button.new()
-		move.text = "Transfer ticked to"
+		move.text = "Transfer ticked →"
 		move.add_theme_font_size_override("font_size", 11)
 		move.pressed.connect(func():
 			if options.selected < 0:
@@ -241,6 +246,7 @@ func _garrison_actions() -> void:
 			else:
 				refused.emit(result["error"]))
 		row.add_child(move)
+		row.move_child(move, 0)
 
 	_action_button("Disband ticked units", func():
 		var indices := garrison_checked_indices()

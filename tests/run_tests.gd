@@ -25,7 +25,8 @@ func _run_suite() -> void:
 	scripts.sort()
 	for script_path in scripts:
 		var script: GDScript = load(script_path)
-		if script == null:
+		if script == null or not script.can_instantiate():
+			# A parse error in a test file is a failed test, not a hung run.
 			push_error("could not load " + script_path)
 			failures += 1
 			continue
