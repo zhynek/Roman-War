@@ -449,6 +449,58 @@ func _fleet_actions(summary: Dictionary) -> void:
 				refused.emit(result["error"]))
 		row.add_child(move)
 		row.move_child(move, 0)
+	if not others.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var merge := Button.new()
+		merge.text = "Merge into →"
+		merge.add_theme_font_size_override("font_size", 11)
+		row.add_child(merge)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		for other_id in others:
+			options.add_item("Fleet %s (%d ships)" % [other_id.trim_prefix("fleet_"), game.state["fleets"][other_id]["ships"].size()])
+		row.add_child(options)
+		merge.pressed.connect(func():
+			var into: String = others[maxi(options.selected, 0)]
+			var result := game.merge_fleets(fleet_id, into)
+			if result["ok"]:
+				force_replaced.emit("fleet", into)
+			else:
+				refused.emit(result["error"]))
+	_action_button("Split ticked ships into a new fleet", func():
+		var result := game.split_fleet(fleet_id, checked_indices())
+		if result["ok"]:
+			force_replaced.emit("fleet", result["fleet_id"])
+		else:
+			refused.emit(result["error"]))
+
+	# Dock at one of our ports on this sea.
+	var ports := game.own_ports_on_zone(summary["sea_zone"])
+	if not ports.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var dock := Button.new()
+		dock.text = "Dock at →"
+		dock.add_theme_font_size_override("font_size", 11)
+		row.add_child(dock)
+		var options := OptionButton.new()
+		options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		options.clip_text = true
+		options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		for port in ports:
+			options.add_item(_settlement_name(port))
+		row.add_child(options)
+		dock.pressed.connect(func():
+			var port: String = ports[maxi(options.selected, 0)]
+			var result := game.dock_fleet(fleet_id, port)
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
+
 	_action_button("Disband ticked ships", func():
 		var indices := checked_indices()
 		if indices.is_empty():
@@ -511,6 +563,8 @@ static func _explain(error: String) -> String:
 			return "Ships are paid off only in a sea touching one of our ports."
 		"nothing_to_do":
 			return "Nothing to consolidate."
+		"no_zone":
+			return "That port does not touch this sea."
 	return "That cannot be done (%s)." % error
 
 

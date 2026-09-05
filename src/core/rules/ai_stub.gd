@@ -19,6 +19,8 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String) -> 
 		if settlement["garrison"].size() < 2 and settlement["recruitment_queue"].is_empty():
 			var cheapest := {}
 			for unit in RecruitmentRules.available_units(data, state, region_id):
+				if unit.get("class", "") == "ship":
+					continue  # a garrison wants men; ships are a fleet's business
 				if cheapest.is_empty() or int(unit["cost"]) < int(cheapest["cost"]):
 					cheapest = unit
 			if not cheapest.is_empty() and int(faction["treasury"]) > int(cheapest["cost"]) + 2000:

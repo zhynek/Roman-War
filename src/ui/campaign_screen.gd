@@ -93,6 +93,9 @@ func _ready() -> void:
 	region_panel.army_raised.connect(func(army_id: String):
 		_log("An army musters in %s." % game.data.regions[game.state["armies"][army_id]["region"]]["settlement_name"])
 		select_force("army", army_id))
+	region_panel.fleet_launched.connect(func(fleet_id: String):
+		_log("A fleet puts to sea; it sails next season.")
+		select_force("fleet", fleet_id))
 	region_panel.disband_requested.connect(disband_order)
 	region_panel.refused.connect(_on_refused)
 	panels.add_child(region_panel)

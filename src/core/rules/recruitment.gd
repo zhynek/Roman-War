@@ -65,11 +65,12 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 			first = false
 		if int(job["turns_left"]) <= 0:
 			var experience := int(SettlementRules.effect_max(data, settlement, "recruit_xp"))
-			settlement["garrison"].append({
-				"template": job["template"],
-				"experience": experience,
-				"strength_pct": 100,
-			})
+			var unit := {"template": job["template"], "experience": experience, "strength_pct": 100}
+			# A finished warship waits in the harbour, never on the walls.
+			if data.units.get(job["template"], {}).get("class", "") == "ship":
+				NavalRules.harbour_of(state, region_id).append(unit)
+			else:
+				settlement["garrison"].append(unit)
 			completed.append(job["template"])
 		else:
 			remaining.append(job)
@@ -82,7 +83,8 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 	var settlement: Dictionary = state["settlements"][region_id]
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var healed := 0
-	for unit in settlement["garrison"]:
+	var in_port: Array = settlement["garrison"] + NavalRules.harbour_of(state, region_id)
+	for unit in in_port:
 		var strength := int(unit["strength_pct"])
 		if strength >= 100:
 			continue

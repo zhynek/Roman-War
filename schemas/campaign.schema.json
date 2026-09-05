@@ -150,6 +150,14 @@
             "$ref": "#/$defs/unit_instance"
           }
         },
+        "harbour": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/unit_instance"
+          },
+          "description": "Ships waiting in port (class ship only); coastal regions only"
+        },
         "tax_level": {
           "enum": [
             "very_low",

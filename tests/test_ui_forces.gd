@@ -287,6 +287,52 @@ func test_regrouping_from_the_panels(t) -> void:
 	screen.free()
 
 
+func test_harbour_launch_and_dock_from_the_panels(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var port := ""
+	for region_id in game.state["settlements"]:
+		if game.state["settlements"][region_id]["owner"] == "julii" and MapRules.coastal(game.data, region_id):
+			port = region_id
+			break
+	t.check(port != "", "the Julii hold a port")
+	var harbour: Array = NavalRules.harbour_of(game.state, port)
+	for i in range(2):
+		harbour.append({"template": "coastal_galley", "experience": 0, "strength_pct": 100})
+
+	screen._on_region_clicked(port)
+	screen.region_panel.set_harbour_checked([0, 1])
+	var launch := _button(screen.region_panel, "Launch fleet")
+	t.check(launch != null, "the harbour offers Launch fleet")
+	launch.pressed.emit()
+	var fleet_id := screen.selected_fleet
+	t.check(fleet_id != "" and game.state["fleets"].has(fleet_id), "a fleet is launched and selected")
+	t.check_eq(game.state["fleets"][fleet_id]["ships"].size(), 2, "with both ships")
+	t.check_eq(harbour.size(), 0, "the harbour is empty")
+	t.check(screen.force_panel.visible, "the fleet card is shown")
+
+	# Split one ship off, then merge it back, then dock.
+	screen.force_panel.set_checked([1])
+	var split := _button(screen.force_panel, "Split ticked ships")
+	t.check(split != null, "Split is offered")
+	split.pressed.emit()
+	var detached := screen.selected_fleet
+	t.check(detached != fleet_id and game.state["fleets"].has(detached), "a one-ship fleet is selected")
+	var merge := _button(screen.force_panel, "Merge into")
+	t.check(merge != null, "Merge into is offered")
+	merge.pressed.emit()
+	t.check(not game.state["fleets"].has(detached) and screen.selected_fleet == fleet_id, "merged back, selection on the survivor")
+	var dock := _button(screen.force_panel, "Dock at")
+	t.check(dock != null, "Dock at is offered")
+	dock.pressed.emit()
+	t.check(not game.state["fleets"].has(fleet_id), "the fleet docked")
+	t.check_eq(harbour.size(), 2, "both ships are back in the harbour")
+	t.check_eq(screen.selected_fleet, "", "nothing selected after docking")
+	screen.free()
+
+
 func test_fleet_banners_follow_sea_visibility(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)

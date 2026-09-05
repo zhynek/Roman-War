@@ -163,6 +163,7 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 	var previous_owner: String = settlement["owner"]
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
+	settlement["harbour"] = []
 	settlement["construction_queue"] = []
 	settlement["recruitment_queue"] = []
 	settlement["governor"] = null

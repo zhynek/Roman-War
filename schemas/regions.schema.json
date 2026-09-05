@@ -62,7 +62,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "adjacent"],
+        "required": ["id", "name", "adjacent", "position"],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
@@ -81,7 +81,7 @@
               "x": { "type": "number", "minimum": 0, "maximum": 100 },
               "y": { "type": "number", "minimum": 0, "maximum": 100 }
             },
-            "description": "Optional label position for map rendering (computed from coastal members when absent)"
+            "description": "Anchor position for map rendering: fleet banners and the zone mark are drawn here"
           }
         }
       }

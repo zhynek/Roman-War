@@ -29,6 +29,7 @@ const ERR_IS_SHIP := "is_ship"
 const ERR_NOT_SHIP := "not_ship"
 const ERR_NOT_DOCKED := "not_docked"
 const ERR_NOTHING_TO_DO := "nothing_to_do"
+const ERR_NO_ZONE := "no_zone"
 
 
 ## --- Resolution -------------------------------------------------------------
@@ -44,6 +45,8 @@ static func kind_of(force_id: String) -> String:
 		return "fleet"
 	if force_id.begins_with("garrison:"):
 		return "garrison"
+	if force_id.begins_with("harbour:"):
+		return "harbour"
 	return ""
 
 
@@ -55,6 +58,8 @@ static func exists(state: Dictionary, force_id: String) -> bool:
 			return state["fleets"].has(force_id)
 		"garrison":
 			return state["settlements"].has(force_id.trim_prefix("garrison:"))
+		"harbour":
+			return state["settlements"].has(force_id.trim_prefix("harbour:"))
 	return false
 
 
@@ -80,6 +85,13 @@ static func resolve(state: Dictionary, force_id: String) -> Dictionary:
 			var settlement: Dictionary = state["settlements"][region_id]
 			return {"kind": "garrison", "id": force_id, "owner": settlement["owner"], "region": region_id,
 				"sea_zone": "", "units": settlement["garrison"], "container": settlement}
+		"harbour":
+			var region_id := force_id.trim_prefix("harbour:")
+			if not state["settlements"].has(region_id):
+				return {}
+			var settlement: Dictionary = state["settlements"][region_id]
+			return {"kind": "harbour", "id": force_id, "owner": settlement["owner"], "region": region_id,
+				"sea_zone": "", "units": NavalRules.harbour_of(state, region_id), "container": settlement}
 	return {}
 
 
@@ -161,6 +173,8 @@ static func summary(data: GameData, state: Dictionary, force_id: String) -> Dict
 			result["movement_max"] = float(data.balance["movement"]["base_movement_points"])
 		"garrison":
 			result["region"] = force_id.trim_prefix("garrison:")
+		"harbour":
+			result["region"] = force_id.trim_prefix("harbour:")
 	result["strength"] = BattleResolver.force_strength(data, units, general_profile,
 		float(data.balance["battle"]["experience_strength_pct_per_chevron"]))
 	return result
@@ -377,29 +391,39 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 		return ERR_NOT_FOUND
 	if from["owner"] != to["owner"]:
 		return ERR_WRONG_OWNER
-	if not _colocated(state, from, to):
+	if not _colocated(data, state, from, to):
 		return ERR_NOT_COLOCATED
 	var error := _check_indices(from["units"], indices)
 	if error != "":
 		return error
-	var to_holds_ships: bool = to["kind"] == "fleet"
+	var to_holds_ships: bool = to["kind"] in ["fleet", "harbour"]
 	for index in indices:
 		var ship := is_ship(data, from["units"][int(index)])
 		if ship and not to_holds_ships:
 			return ERR_IS_SHIP
 		if not ship and to_holds_ships:
 			return ERR_NOT_SHIP
-	if to["kind"] != "garrison" and to["units"].size() + indices.size() > max_units(data):
+	if to["kind"] not in ["garrison", "harbour"] and to["units"].size() + indices.size() > max_units(data):
 		return ERR_OVER_CAP
 	if from["kind"] == "army" and from["container"]["general"] != null and indices.size() >= from["units"].size():
 		return ERR_LAST_UNIT
 	return ""
 
 
-static func _colocated(state: Dictionary, a: Dictionary, b: Dictionary) -> bool:
+static func _colocated(data: GameData, state: Dictionary, a: Dictionary, b: Dictionary) -> bool:
 	## Armies share a region; a garrison meets armies in its region when the
-	## owner holds the city; fleets share a sea zone.
-	if a["kind"] == "fleet" or b["kind"] == "fleet":
+	## owner holds the city; fleets share a sea zone; a harbour meets fleets
+	## in a sea its port touches (and is never reachable from land forces).
+	var kinds := [a["kind"], b["kind"]]
+	if kinds.has("harbour"):
+		var harbour: Dictionary = a if a["kind"] == "harbour" else b
+		var other: Dictionary = b if a["kind"] == "harbour" else a
+		if other["kind"] != "fleet":
+			return false
+		if state["settlements"][harbour["region"]]["owner"] != other["owner"]:
+			return false
+		return data.regions.get(harbour["region"], {}).get("sea_zones", []).has(other["sea_zone"])
+	if kinds.has("fleet"):
 		return a["kind"] == "fleet" and b["kind"] == "fleet" and a["sea_zone"] == b["sea_zone"]
 	if a["region"] == "" or a["region"] != b["region"]:
 		return false
@@ -438,7 +462,7 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 static func _erase_if_empty(state: Dictionary, force_id: String) -> void:
 	## A captain's army or a fleet with nothing left in it ceases to exist.
 	var force := resolve(state, force_id)
-	if force.is_empty() or force["kind"] == "garrison" or not force["units"].is_empty():
+	if force.is_empty() or force["kind"] in ["garrison", "harbour"] or not force["units"].is_empty():
 		return
 	if force["kind"] == "army":
 		SiegeRules.release(state, force_id)

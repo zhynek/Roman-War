@@ -36,7 +36,7 @@ static func process_turn(data: GameData, state: Dictionary, rng: CampaignRng) ->
 				faction["senate_standing"] = minf(float(senate_rules["max_standing"]),
 					float(faction["senate_standing"]) + float(reward.get("senate_standing",
 						senate_rules["mission_success_standing"])))
-				_grant_reward_units(state, faction_id, reward)
+				_grant_reward_units(data, state, faction_id, reward)
 				faction["mission"] = null
 				notices.append({"kind": "mission_complete", "faction": faction_id, "mission": mission["template"]})
 			elif int(mission["turns_left"]) <= 0:
@@ -91,16 +91,19 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 	}
 
 
-static func _grant_reward_units(state: Dictionary, faction_id: String, reward: Dictionary) -> void:
-	## Granted units muster in the capital's garrison.
+static func _grant_reward_units(data: GameData, state: Dictionary, faction_id: String, reward: Dictionary) -> void:
+	## Granted units muster in the capital's garrison (ships in its harbour).
 	var capital: String = state["factions"][faction_id]["capital"]
 	if not state["settlements"].has(capital) or state["settlements"][capital]["owner"] != faction_id:
 		return
 	for grant in reward.get("units", []):
+		var is_ship: bool = data.units.get(grant["template"], {}).get("class", "") == "ship"
 		for i in range(int(grant["count"])):
-			state["settlements"][capital]["garrison"].append({
-				"template": grant["template"], "experience": 0, "strength_pct": 100,
-			})
+			var unit := {"template": grant["template"], "experience": 0, "strength_pct": 100}
+			if is_ship:
+				NavalRules.harbour_of(state, capital).append(unit)
+			else:
+				state["settlements"][capital]["garrison"].append(unit)
 
 
 static func _mission_complete(state: Dictionary, faction_id: String, mission: Dictionary) -> bool:

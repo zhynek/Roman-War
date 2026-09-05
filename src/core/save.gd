@@ -2,7 +2,8 @@ class_name SaveGame
 ## Save/load is nothing more than JSON round-tripping the GameState dict —
 ## by design. Data tables are content, not state, so only the state travels.
 
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
+const OLDEST_LOADABLE := 1
 
 
 static func to_json(state: Dictionary) -> String:
@@ -16,10 +17,24 @@ static func from_json(text: String) -> Dictionary:
 	var parsed = JSON.parse_string(text)
 	if parsed == null or not (parsed is Dictionary):
 		return {}
-	if int(parsed.get("version", 0)) != SAVE_VERSION:
+	var version := int(parsed.get("version", 0))
+	if version < OLDEST_LOADABLE or version > SAVE_VERSION:
 		return {}
 	var state = parsed.get("state", {})
-	return state if state is Dictionary else {}
+	if not (state is Dictionary):
+		return {}
+	if version < 2:
+		_upgrade_v1(state)
+	return state
+
+
+static func _upgrade_v1(state: Dictionary) -> void:
+	## Version 1 knew no harbours: every settlement gets an empty one. Ships
+	## that were recruited into garrisons are moved by NavalRules.normalise
+	## once the game data is at hand (Game.load_from).
+	for settlement in state.get("settlements", {}).values():
+		if not settlement.has("harbour"):
+			settlement["harbour"] = []
 
 
 static func write_file(state: Dictionary, path: String) -> bool:

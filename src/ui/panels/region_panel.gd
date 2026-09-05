@@ -10,6 +10,7 @@ signal army_selected(army_id: String)
 signal attack_requested(defender_army_id: String)
 signal siege_requested(region_id: String)
 signal army_raised(army_id: String)
+signal fleet_launched(fleet_id: String)
 signal disband_requested(force_id: String, indices: Array)
 signal refused(error: String)
 
@@ -17,6 +18,20 @@ var game: Game
 var region_id := ""
 var selected_army := ""
 var _garrison_checks: Array = []   # CheckBox per garrison unit, in order
+var _harbour_checks: Array = []    # CheckBox per harbour ship, in order
+
+
+func harbour_checked_indices() -> Array:
+	var indices: Array = []
+	for i in range(_harbour_checks.size()):
+		if (_harbour_checks[i] as CheckBox).button_pressed:
+			indices.append(i)
+	return indices
+
+
+func set_harbour_checked(indices: Array) -> void:
+	for i in range(_harbour_checks.size()):
+		(_harbour_checks[i] as CheckBox).button_pressed = indices.has(i)
 
 
 func garrison_checked_indices() -> Array:
@@ -49,6 +64,7 @@ func _clear_children() -> void:
 	## remove_child before queue_free: freed rows linger until end of frame
 	## otherwise, doubling the panel for anything reading it the same frame.
 	_garrison_checks.clear()
+	_harbour_checks.clear()
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -143,7 +159,24 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 			label.add_theme_font_size_override("font_size", 11)
 			row.add_child(label)
 		_garrison_actions()
-		_action_button("Retrain garrison", func():
+	# Harbour — ships waiting in port; launch them as a fleet into a touching sea.
+	var harbour: Array = settlement.get("harbour", [])
+	if not harbour.is_empty():
+		_header("Harbour (%d) — tick ships to launch" % harbour.size(), 12)
+		for ship in harbour:
+			var row := HBoxContainer.new()
+			add_child(row)
+			var check := CheckBox.new()
+			check.custom_minimum_size = Vector2(22, 0)
+			row.add_child(check)
+			_harbour_checks.append(check)
+			var label := Label.new()
+			label.text = "%s  %d%%  xp%d" % [_unit_name(ship), int(ship["strength_pct"]), int(ship["experience"])]
+			label.add_theme_font_size_override("font_size", 11)
+			row.add_child(label)
+		_harbour_actions()
+	if not garrison.is_empty() or not harbour.is_empty():
+		_action_button("Retrain garrison and harbour", func():
 			game.retrain_garrison(region_id)
 			action_taken.emit())
 
@@ -254,6 +287,39 @@ func _garrison_actions() -> void:
 			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
 		else:
 			disband_requested.emit("garrison:" + here, indices))
+
+
+func _harbour_actions() -> void:
+	var here := region_id
+	var zones: Array = NavalRules.zones_touching(game.data, here)
+	if zones.is_empty():
+		return
+	var row := HBoxContainer.new()
+	add_child(row)
+	var launch := Button.new()
+	launch.text = "Launch fleet into →"
+	launch.add_theme_font_size_override("font_size", 11)
+	row.add_child(launch)
+	var options := OptionButton.new()
+	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	options.clip_text = true
+	options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	for zone_id in zones:
+		options.add_item(String(game.data.sea_zones.get(zone_id, {}).get("name", zone_id)))
+	row.add_child(options)
+	launch.pressed.connect(func():
+		var zone: String = zones[maxi(options.selected, 0)]
+		var result := game.launch_fleet(here, harbour_checked_indices(), zone)
+		if result["ok"]:
+			fleet_launched.emit(result["fleet_id"])
+		else:
+			refused.emit(result["error"]))
+	_action_button("Disband ticked ships", func():
+		var indices := harbour_checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit("harbour:" + here, indices))
 
 
 func _build_armies_section() -> void:

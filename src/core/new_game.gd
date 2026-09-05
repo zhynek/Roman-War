@@ -9,7 +9,8 @@ class_name NewGame
 ##                   popular_standing, diplomacy: {other_fid: stance},
 ##                   mission: null|{...}, at_civil_war: bool}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
-##                tax_level, garrison: [unit], construction_queue: [...],
+##                tax_level, garrison: [unit], harbour: [unit (ships only)],
+##                construction_queue: [...],
 ##                recruitment_queue: [...], governor: char_id|null,
 ##                slave_bonus_turns, plague_turns, recently_conquered,
 ##                low_order_streak, siege: null|{besieger, turns, equipment_ready}}}
@@ -131,6 +132,7 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 		"buildings": buildings,
 		"tax_level": setup.get("tax_level", "normal"),
 		"garrison": _units(setup.get("garrison", [])),
+		"harbour": _units(setup.get("harbour", [])),
 		"construction_queue": [],
 		"recruitment_queue": [],
 		"governor": null,

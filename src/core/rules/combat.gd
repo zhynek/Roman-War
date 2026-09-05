@@ -115,6 +115,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	settlement["owner"] = new_owner
 	settlement["population"] = maxi(population, 400)
 	settlement["garrison"] = []
+	settlement["harbour"] = []
 	settlement["construction_queue"] = []
 	settlement["recruitment_queue"] = []
 	settlement["governor"] = null

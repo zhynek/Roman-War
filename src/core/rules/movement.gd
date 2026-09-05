@@ -11,7 +11,8 @@ static func reset_movement(data: GameData, state: Dictionary) -> void:
 		army["movement_left"] = movement_points_for(data, state, army)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
-		fleet["movement_left"] = base
+		var naval_bonus := SettlementRules.faction_owns_wonder_effect(data, state, fleet["owner"], "naval_movement_pct")
+		fleet["movement_left"] = base * (1.0 + naval_bonus / 100.0)
 	ForceRules.clear_musters(state)
 
 

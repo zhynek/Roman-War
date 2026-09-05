@@ -60,6 +60,12 @@ static func data() -> GameData:
 			],
 		},
 		{
+			"id": "test_naval", "kind": "naval", "cultures": ["roman"], "name": "Shipyard", "requires_coastal": true,
+			"levels": [
+				{"id": "yard_1", "name": "Boat Sheds", "min_settlement_level": "village", "cost": 500, "build_turns": 1, "effects": {}, "description": ""},
+			],
+		},
+		{
 			"id": "test_barracks", "kind": "barracks", "cultures": ["roman"], "name": "Barracks",
 			"levels": [
 				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {}, "description": ""},
@@ -280,7 +286,7 @@ static func _faction(capital: String) -> Dictionary:
 static func _settlement(owner: String, population: int, buildings: Dictionary) -> Dictionary:
 	return {
 		"owner": owner, "population": population, "buildings": buildings,
-		"tax_level": "normal", "garrison": [], "construction_queue": [],
+		"tax_level": "normal", "garrison": [], "harbour": [], "construction_queue": [],
 		"recruitment_queue": [], "governor": null, "slave_bonus_turns": 0,
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
 		"siege": null,

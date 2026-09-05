@@ -223,7 +223,38 @@ func check(action: String, args: Array) -> String:
 			return ForceRules.check_detach_general(data, state, args[0])
 		"consolidate":
 			return ForceRules.check_consolidate(data, state, args[0])
+		"launch_fleet":
+			return NavalRules.check_launch_fleet(data, state, args[0], args[1], args[2])
+		"dock_fleet":
+			return NavalRules.check_dock_fleet(data, state, args[0], args[1])
+		"merge_fleets":
+			return NavalRules.check_merge_fleets(data, state, args[0], args[1])
+		"split_fleet":
+			return NavalRules.check_split_fleet(data, state, args[0], args[1])
 	return "unknown_action"
+
+
+## --- Fleets (launch, dock, merge, split) --------------------------------------
+
+func launch_fleet(region_id: String, indices: Array, zone_id: String) -> Dictionary:
+	return NavalRules.launch_fleet(data, state, region_id, indices, zone_id)
+
+
+func dock_fleet(fleet_id: String, region_id: String) -> Dictionary:
+	return NavalRules.dock_fleet(data, state, fleet_id, region_id)
+
+
+func merge_fleets(from_id: String, into_id: String) -> Dictionary:
+	return NavalRules.merge_fleets(data, state, from_id, into_id)
+
+
+func split_fleet(fleet_id: String, indices: Array) -> Dictionary:
+	return NavalRules.split_fleet(data, state, fleet_id, indices)
+
+
+func own_ports_on_zone(zone_id: String, faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return NavalRules.own_ports_on_zone(state, data, fid, zone_id)
 
 
 func candidate_generals(region_id: String, faction_id: String = "") -> Array:
@@ -373,6 +404,7 @@ func load_from(path: String) -> bool:
 	if loaded.is_empty():
 		return false
 	state = loaded
+	NavalRules.normalise(data, state)
 	return true
 
 
