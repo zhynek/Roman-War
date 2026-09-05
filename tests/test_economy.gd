@@ -56,3 +56,28 @@ func test_trade_needs_peace_or_ownership(t) -> void:
 	state["factions"]["red"]["diplomacy"]["blue"] = "trade"
 	state["factions"]["blue"]["diplomacy"]["red"] = "trade"
 	t.check(EconomyRules.trade_income(data, state, "beta") > 0.0, "trade rights open the route")
+
+
+func test_debt_never_strands_a_general(t) -> void:
+	## Deep debt sends the costliest unit home, but never a general's last
+	## one: no man is left alone in the wilderness without a banner.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rng := CampaignRng.seeded(11)
+	var general := Fixtures.add_character(state, "red", "red_marcus", {"command": 4, "location": "gamma"})
+	var led := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	state["armies"][led]["general"] = general
+	var captain := Fixtures.add_army(state, "red", "beta", ["test_mob"])
+	state["factions"]["red"]["treasury"] = int(data.balance["economy"]["debt_disband_threshold"]) - 10000
+	t.check(EconomyRules.apply_faction_turn(data, state, "red", rng).get("disbanded", false), "deep debt still disbands")
+	t.check(state["armies"].has(led), "the general's army stands")
+	t.check_eq(state["armies"][led]["units"].size(), 1, "with his last unit, though it is the costliest")
+	t.check(not state["armies"].has(captain), "the captain's cheaper mob went home instead")
+
+
+func test_harbour_ships_are_paid_for(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var before := EconomyRules.faction_upkeep(data, state, "red")
+	state["settlements"]["epsilon"]["harbour"].append({"template": "test_galley", "experience": 0, "strength_pct": 100})
+	t.check_eq(EconomyRules.faction_upkeep(data, state, "red"), before + 100, "a ship in port costs its upkeep")

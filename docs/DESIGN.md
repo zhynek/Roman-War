@@ -553,6 +553,17 @@ armouries and forge temples plus practiced metallurgy, capped by
 `balance.recruitment.upgrade_max` (§6.7). The region panel shows what recruits
 will receive before you pay.
 
+**Harbours.** A ship finishes in its port's `harbour`, a second unit list on
+the settlement beside the garrison (`RecruitmentRules.deliver_unit` routes by
+class; `NewGame` and `ensure_state_keys` create the key, so a pre-harbour save
+loads). Harbour ships pay upkeep like any unit and are re-armed by retraining.
+`NavalRules` launches ticked ships as a fleet into a sea the port touches
+(the fleet sails from the next season), docks a fleet at one of its owner's
+ports on its sea for one lane of movement, and merges or splits fleets;
+`NavalRules.normalise` on load sends any ship that somehow stands in a land
+garrison back to the harbour. The AI never queues a ship and never uses a
+harbour — the sea is still the player's alone (§13, Phase 3).
+
 ### 6.2 Experience, retraining, merging
 
 - Units carry **experience 0–9** (chevrons); each grants +10% effective strength.
@@ -601,6 +612,33 @@ Creta and Cyprus among them) could never change hands, and Egypt's long
 campaign could never be won. Landing on any other shore follows the same rules
 as before.
 
+**Attacks cost the season, and generals cannot be stranded.** An attack needs
+movement left and spends all of it (`Game.attack_army`); a siege laid from the
+neighbouring region pays the step to the walls like any march
+(`SiegeRules.begin_siege`), and a relief army standing before the walls must
+be beaten before the city can be invested. The attack rule is enforced in the
+player facade only: `AiMilitary` attacks through `CombatRules.attack_army`
+directly and still pays nothing, a documented asymmetry to close when the AI
+is next tuned. Debt disbandment (`EconomyRules._disband_costliest_unit`) skips
+a general's last unit, so a commander is never left without a single man.
+
+**Regrouping** (`ForceRules`, behind `Game.raise_units` / `transfer_units` /
+`merge_armies` / `split_army` / `disband_unit` / `attach_general` /
+`detach_general` / `consolidate_units`, each returning `{ok, error, …}` and
+mirrored by `Game.check(action, args)` for greying buttons): armies are raised
+from ticked garrison units under a captain or an eligible character standing in
+the city; units are transferred between co-located forces of one owner or into
+an own city's garrison; whole armies merge; ticked units split off under a
+chosen leader. Movement is conserved through every transfer — a unit remembers
+the least movement of any force it stood in this season (`muster_march_left`,
+`muster_sail_left`, `general_march_cap`) so shuffling men between stacks can
+never gain a step. Disbanding returns the men to the local population
+(`balance.forces.disband_population_return_pct`). The stack cap is
+`balance.recruitment.army_unit_cap`; a general keeps at least one unit; two
+generals cannot share a camp in the field. An emptied army dissolves, releasing
+its siege and refreshing governorships. Every rule module here draws no
+randomness and iterates sorted ids.
+
 ### 6.4 Sieges
 
 A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itself:
@@ -616,6 +654,13 @@ A besieging army invests a hostile settlement (`SiegeRules`), immobilizing itsel
   multiplying defender strength (×1.0 → ×3.0 across the six wall levels).
 - A captured settlement goes through the occupy/enslave/exterminate choice; the
   turn engine's automatic starve-outs default to occupation.
+- The besieger always gets one full turn with the engines ready before the
+  garrison's supplies decide the matter (`starve_at = max(supplies,
+  equipment_turns + 1)`); peace lifts a siege the next turn; every path that
+  moves, garrisons, merges, dissolves or destroys the besieger calls
+  `SiegeRules.release`, so no settlement is marked invested by an army that is
+  no longer at its walls. A besieged city neither recruits, retrains nor
+  builds, and raises no army — nobody marches out past the siege lines.
 
 ### 6.5 The BattleResolver contract
 
@@ -1414,7 +1459,8 @@ streams each called their own layer "Phase 9". Status as of this document:
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Attitude factor model with decaying memory; offers priced in denarii (payments, tribute schedules, region cessions, stance changes) with live appraisal in the negotiation dialog; AI→player envoys with expiry; diplomats/spies/assassins on the map reading the two formerly-dormant effects (`personal_security`, `agent_skill`); senate courtship & assassination missions. Deferred: AI agent use, sabotage |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done** (§9). Persona-driven (`data/ai.json`) modular AI: economy, objectives/muster, armies (raise/merge/attack/besiege/assault/defend, land & sea movement), war-and-peace initiative with war hunger and a war ledger; difficulty wired as income/order bonuses plus player-attitude bias. Verified by a 60-turn harness (map changes hands, byte-identical replay, save/resume lockstep) and 100-turn soaks. Deferred: AI use of agents, AI retinue management, fleet operations, invading a hostile island (§9) |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Done** (§8.1). Standings and charges (take a region, win an alliance, open a market, remove a rival king, the Senate's demand for the patriarch's life); the cursus honorum — six magistracies in `data/offices.json` (the pontificate held for life), summer elections by standing and influence with the ladder's prerequisites, no stepping down, and lean-year seats out of turn, office effects through `effect_total`, seats that absorb Ambition; compliance or outlawry; a civil war in which the other houses pick sides, that can never be talked away, and that ends when the Senate falls; the Senate scroll, five journal beats, a trail stage; wonders, victory checks. Deferred: canvassing, a player-declared civil war, joining a rebellion by choice, AI defiance, proscriptions, offices for other cultures |
-| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed/trail); a geographic terrain map generated from the region graph (`data/map_geometry.json` — coastlines, province polygons, meandering roads) rendered in retained layers with terrain fills and topography glyphs, culture- and wall-tier-styled settlement icons, army roundels with counts, agent diamonds, fleets at sea-zone anchors, fog veil, hover tooltips, movement-range overlay and terrain-priced path previews with multi-turn march orders; camera by drag, wheel, trackpad, on-map buttons and keyboard; settlement panel with live factor breakdowns/taxes/queues/edicts; army orders (march, sail/land, attack and assault confirmed with their paper odds, besiege, occupation choice, mercenaries, garrison, raise), unit rows with class, chevrons and kit, a battle report naming the deciding factors; agent orders (travel, scout, assassinate with live odds, bribe, steal); diplomacy, knowledge, annals and family scrolls; world-news turn log; save/load; unified dark theme, responsive window. Balancing pass and tutorial pending |
+| 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed/guided mode); a geographic terrain map generated from the region graph (`data/map_geometry.json` — coastlines, province polygons, meandering roads) rendered in retained layers with terrain fills and topography glyphs, culture- and wall-tier-styled settlement icons, army and fleet banners (owner badges when zoomed out), agent diamonds, fog veil, hover tooltips, reach/forced/strike rings and terrain-priced path previews with multi-turn march orders; camera by drag, wheel, trackpad, on-map buttons and keyboard; a two-row header that wraps to the 1280×800 design canvas; settlement panel with live factor breakdowns/taxes/queues/edicts; army orders by right-click and from the force card (march, sail/land, attack and assault confirmed with their paper odds, besiege, occupation choice, mercenaries, garrison, raise), unit rows with class, chevrons and kit, a battle report naming the deciding factors; agent orders (travel, scout, assassinate with live odds, bribe, steal); diplomacy, knowledge, annals and family scrolls; an Options menu (day playback, guided mode, controls); world-news turn log; save/load; unified dark theme, responsive window. Balancing pass and tutorial pending |
+| Army command ("Phase 9") | Banners, the force card, regrouping, harbours and fleets on the map | **Done** (§6.1 harbours, §6.3 regrouping). Left-click selects a banner or province, right-click orders; `ForceRules` (raise under a chosen leader, transfer, merge, split, disband, attach/detach generals, consolidate) and `NavalRules` (launch, dock, merge, split) with movement conserved through transfers; attacks and sieges pay the season; besieged cities raise nothing; a keyboard cycle through forces awaiting orders. Ported by hand from `roman-war-gameplay-review-ou72vk` onto the trunk's renderer and facade. Remaining: the AI's attacks still pay no movement and it builds no ships |
 | Society & consequence | Eight societal stocks, the coercion asymmetry, the euergetism ratchet, elite overproduction, plunder's share, belonging as diffusion, craft and advances, legibility, authored crises naming their historical pattern, and a real trade-off on all 81 building chains | **Done** (§4), including provincial edicts (§4.10) as the player's fast lever. Remaining: an AI that understands any of it, and an empire-wide policy slot alongside the provincial one |
 | Visual & command layer | Building/unit art, right-click detail and garrison views, troop classes tied to their buildings, click-to-attack with animated battle playback | **Done.** Procedural illustrations, unit/building info cards, right-click map dossiers over rebound left/middle-drag panning, the building yard and muster hall, and an animated battle playback driven by AutoResolver's additive round log |
 | The day at court | A watchable end turn: a deterministic turn journal, fog-filtered, played out over the map | **Done** (§2.3.2). Content-free beats in `state.journal`, prose in `data/dispatch.json`, dawn-to-dusk playback with speed and skip, a treasury ticker, the Senate's standing charge in the top bar, and the Daily Dispatch recap |

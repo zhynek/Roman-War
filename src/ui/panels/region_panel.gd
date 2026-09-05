@@ -1,18 +1,19 @@
 class_name RegionPanel
 extends VBoxContainer
 ## The right-hand context panel: everything about the selected region — the
-## settlement (with the factor breakdowns the engine exposes), the armies
-## standing there, and every action the player can take from here.
+## settlement (with the factor breakdowns the engine exposes), its garrison
+## and harbour with the regrouping orders (raise, transfer, launch, disband),
+## the armies and agents standing there, and every settlement action. The
+## selected force itself is described by the ForcePanel above this one.
 
 signal action_taken
 signal army_selected(army_id: String)
-signal attack_requested(defender_army_id: String)
-signal siege_requested(region_id: String)
-signal assault_requested(region_id: String, occupation: String)
+signal army_raised(army_id: String)
+signal fleet_launched(fleet_id: String)
+signal disband_requested(force_id: String, indices: Array)
+signal refused(error: String)
 signal unit_info_requested(template_id: String)
 signal building_info_requested(chain_id: String)
-signal battle_fought(result: Dictionary, defender_name: String)
-signal explore_requested(army_id: String)
 signal drawer_requested(tab: String, chain_id: String)
 signal agent_selected(agent_id: String)
 signal scout_requested(agent_id: String)
@@ -24,6 +25,34 @@ var game: Game
 var region_id := ""
 var selected_army := ""
 var selected_agent := ""
+var _garrison_checks: Array = []   # CheckBox per garrison unit, in order
+var _harbour_checks: Array = []    # CheckBox per harbour ship, in order
+
+
+func garrison_checked_indices() -> Array:
+	var indices: Array = []
+	for i in range(_garrison_checks.size()):
+		if (_garrison_checks[i] as CheckBox).button_pressed:
+			indices.append(i)
+	return indices
+
+
+func set_garrison_checked(indices: Array) -> void:
+	for i in range(_garrison_checks.size()):
+		(_garrison_checks[i] as CheckBox).button_pressed = indices.has(i)
+
+
+func harbour_checked_indices() -> Array:
+	var indices: Array = []
+	for i in range(_harbour_checks.size()):
+		if (_harbour_checks[i] as CheckBox).button_pressed:
+			indices.append(i)
+	return indices
+
+
+func set_harbour_checked(indices: Array) -> void:
+	for i in range(_harbour_checks.size()):
+		(_harbour_checks[i] as CheckBox).button_pressed = indices.has(i)
 
 
 func show_region(current_game: Game, new_region_id: String, army_id: String = "", agent_id: String = "") -> void:
@@ -41,9 +70,26 @@ func clear_panel() -> void:
 	_clear_children()
 
 
+func show_idle_hint(current_game: Game) -> void:
+	## Nothing selected: instead of an empty column, the three things a new
+	## player needs to know, and the count of forces still awaiting orders.
+	game = current_game
+	clear_panel()
+	_header("Nothing selected", 13)
+	_label("Left-click a province for its city, or a banner for the army or fleet under it.", Color(0.7, 0.8, 0.9))
+	_label("With a force selected, right-click a ringed province or sea to send it there: gold = march, orange = forced march (or hold Shift), red = attack or besiege.", Color(0.7, 0.8, 0.9))
+	_label("Esc deselects; Tab or N jumps to the next force awaiting orders. Options ▾ (top bar) lists every control and the mode switches.", Color(0.7, 0.8, 0.9))
+	var waiting := game.forces_awaiting_orders()
+	if not waiting.is_empty():
+		_label("%d force%s still ha%s orders to give this season." % [waiting.size(),
+			"" if waiting.size() == 1 else "s", "s" if waiting.size() == 1 else "ve"], UiStyle.PARCHMENT)
+
+
 func _clear_children() -> void:
 	## remove_child before queue_free: freed rows linger until end of frame
 	## otherwise, doubling the panel for anything reading it the same frame.
+	_garrison_checks.clear()
+	_harbour_checks.clear()
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
@@ -130,25 +176,24 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	_breakdown("Income: %d" % int(EconomyRules.settlement_income(game.data, game.state, region_id)),
 		game.income_breakdown(region_id))
 
-	# Garrison
+	# Garrison — tick units to raise them as an army, move them into an army
+	# standing here, or send them home; right-click a row for the unit's card.
 	var garrison: Array = settlement["garrison"]
+	var harbour: Array = settlement.get("harbour", [])
 	if not garrison.is_empty():
-		_header("Garrison (%d)" % garrison.size(), 12)
+		_header("Garrison (%d) — tick units to raise or move" % garrison.size(), 12)
 		for unit in garrison:
-			_info_label("  " + _unit_line(unit), String(unit["template"]))
-		_action_button("Retrain garrison", func():
+			_garrison_checks.append(_unit_check_row(unit))
+		_garrison_actions(settlement)
+	# Harbour — ships waiting in port; tick them to put a fleet to sea.
+	if not harbour.is_empty():
+		_header("Harbour (%d) — tick ships to launch" % harbour.size(), 12)
+		for ship in harbour:
+			_harbour_checks.append(_unit_check_row(ship))
+		_harbour_actions()
+	if not garrison.is_empty() or not harbour.is_empty():
+		_action_button("Retrain garrison%s" % (" and harbour" if not harbour.is_empty() else ""), func():
 			game.retrain_garrison(region_id)
-			action_taken.emit())
-		if settlement["siege"] == null:
-			_action_button("Raise a field army (the garrison marches out)", func():
-				game.raise_army(region_id)
-				action_taken.emit())
-
-	# Construction. The wall of unexplained "Build X (5000, 4t)" buttons is now
-	# one door into the building yard, plus a short cheap-and-ready list so the
-	# one-click route (and the trail's "queue a building" step) still works.
-		_action_button("Raise the garrison into the field", func():
-			game.raise_army(region_id)
 			action_taken.emit())
 
 	# Construction. Unaffordable actions render disabled instead of silently
@@ -256,98 +301,152 @@ func _build_armies_section() -> void:
 			general_name = game.state["characters"][army["general"]]["name"]
 		var title := "%s — %d units (%s)" % [faction.get("name", army["owner"]), army["units"].size(), general_name]
 		if army["owner"] == player:
+			# Toggles the selection; the roster and every order — attack,
+			# siege, march, regroup — live on the force card above.
 			var button := Button.new()
 			button.text = ("▶ " if army_id == selected_army else "") + title
 			button.focus_mode = Control.FOCUS_NONE
 			button.pressed.connect(func(): army_selected.emit(army_id))
 			add_child(button)
-			if army_id == selected_army:
-				_build_selected_army_detail(army_id, army)
 		else:
 			_label(title, Color.html(faction.get("color", "#808080")))
-			# A beaten enemy can be stacked in our own region; the map click
-			# cannot reach him there, so the order lives here.
-			if selected_army != "" and game.state["armies"].has(selected_army) \
-					and game.state["armies"][selected_army]["region"] == region_id:
-				_action_button("Attack the %s" % faction.get("name", army["owner"]),
-					func(): attack_requested.emit(army_id))
-				var estimate := game.battle_estimate(selected_army, army_id)
-				if not estimate.is_empty():
-					_label("    " + odds_text(estimate), Color(0.9, 0.85, 0.6))
 
 
-func _build_selected_army_detail(army_id: String, army: Dictionary) -> void:
-	_label("Movement left: %.1f" % float(army["movement_left"]))
-	var summary := game.army_summary(army_id)
-	if not summary.is_empty() and int(summary["units"]) > 0:
-		var parts: Array = []
-		for unit_class in summary["by_class"]:
-			parts.append("%d %s" % [int(summary["by_class"][unit_class]["cards"]), String(unit_class).replace("_", " ")])
-		_label("%d men · %s · avg xp %.1f" % [int(summary["soldiers"]), ", ".join(parts), float(summary["avg_experience"])],
-			Color(0.9, 0.85, 0.6))
-	if army.has("march_path") and not (army["march_path"] as Array).is_empty():
-		var destination := String((army["march_path"] as Array).back())
-		var destination_name: String = game.data.regions.get(
-			destination, {}).get("settlement_name", destination)
-		_label("Marching to %s — %d steps to go" % [destination_name, army["march_path"].size()],
-			Color(0.85, 0.92, 0.75))
-		_action_button("Halt the march", func():
-			game.halt_march(army_id)
+func _unit_check_row(unit: Dictionary) -> CheckBox:
+	## A garrison or harbour row: a tick box for the regrouping orders and the
+	## unit line, which answers a right-click with the unit's card.
+	var row := HBoxContainer.new()
+	add_child(row)
+	var check := CheckBox.new()
+	check.focus_mode = Control.FOCUS_NONE
+	check.custom_minimum_size = Vector2(22, 0)
+	row.add_child(check)
+	var label := Label.new()
+	label.text = _unit_line(unit)
+	label.add_theme_font_size_override("font_size", 11)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var template_id := String(unit["template"])
+	_info_on_rightclick(label, func(): unit_info_requested.emit(template_id))
+	row.add_child(label)
+	return check
+
+
+func _garrison_actions(settlement: Dictionary) -> void:
+	var here := region_id
+	var player: String = game.state["player_faction"]
+	if settlement["siege"] != null:
+		_label("    the city is invested — nobody marches out past the siege lines", Color(1, 0.5, 0.4))
+		return
+
+	# Raise the ticked units as an army under ▾
+	var candidates := game.candidate_generals(here)
+	var leaders: Array = [""]
+	var leader_names: Array = ["a captain"]
+	for char_id in candidates:
+		leaders.append(char_id)
+		leader_names.append(game.state["characters"][char_id]["name"])
+	var raise_row := HBoxContainer.new()
+	add_child(raise_row)
+	var raise := Button.new()
+	raise.text = "Raise army under →"
+	raise.focus_mode = Control.FOCUS_NONE
+	raise.add_theme_font_size_override("font_size", 11)
+	raise_row.add_child(raise)
+	var leader_options := _dropdown(raise_row)
+	for leader_name in leader_names:
+		leader_options.add_item(String(leader_name))
+	raise.pressed.connect(func():
+		var choice: String = leaders[maxi(leader_options.selected, 0)]
+		var result := game.raise_units(here, garrison_checked_indices(), choice)
+		if result["ok"]:
+			army_raised.emit(result["army_id"])
+		else:
+			refused.emit(result["error"]))
+	_action_button("Raise the whole garrison into the field", func():
+		var army_id := game.raise_army(here)
+		if army_id != "":
+			army_raised.emit(army_id)
+		else:
 			action_taken.emit())
-	for unit in army["units"]:
-		_info_label("  " + _unit_line(unit), String(unit["template"]))
-	_label("Click anywhere in reach to march (hover shows the route and cost).\nShift-click for forced march.", Color(0.7, 0.8, 0.9))
 
-	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
-	if not settlement.is_empty() and settlement["owner"] == game.state["player_faction"]:
-		_action_button("Garrison the army in the city", func():
-			game.garrison_army(army_id)
-			action_taken.emit())
-	elif not settlement.is_empty() and settlement.get("siege") == null:
-		# Standing in a hostile settlement's region: the siege starts from here.
-		_action_button("Lay siege to %s" % settlement_display_name(),
-			func(): siege_requested.emit(region_id))
+	# Transfer the ticked units into an army standing here ▾
+	var armies: Array = []
+	for army_id in ForceRules.armies_in(game.state, here):
+		if game.state["armies"][army_id]["owner"] == player:
+			armies.append(army_id)
+	if not armies.is_empty():
+		var row := HBoxContainer.new()
+		add_child(row)
+		var move := Button.new()
+		move.text = "Transfer ticked →"
+		move.focus_mode = Control.FOCUS_NONE
+		move.add_theme_font_size_override("font_size", 11)
+		row.add_child(move)
+		var options := _dropdown(row)
+		for army_id in armies:
+			var army: Dictionary = game.state["armies"][army_id]
+			var leader := "captain"
+			if army["general"] != null and game.state["characters"].has(army["general"]):
+				leader = game.state["characters"][army["general"]]["name"]
+			options.add_item("%s's army (%d units)" % [leader, army["units"].size()])
+		move.pressed.connect(func():
+			if options.selected < 0:
+				return
+			var result := game.transfer_units("garrison:" + here, armies[options.selected], garrison_checked_indices())
+			if result["ok"]:
+				action_taken.emit()
+			else:
+				refused.emit(result["error"]))
 
-	if not settlement.is_empty() and settlement.get("siege") != null \
-			and settlement["siege"]["besieger"] == army_id:
-		var occupation_options := OptionButton.new()
-		occupation_options.focus_mode = Control.FOCUS_NONE
-		for choice in ["occupy", "enslave", "exterminate"]:
-			occupation_options.add_item(choice.capitalize())
-		add_child(occupation_options)
-		# The storm is confirmed by the campaign screen (with its odds and the
-		# fate chosen for the townsfolk); the button only says when and how likely.
-		var siege: Dictionary = settlement["siege"]
-		var can_assault: bool = siege.get("equipment_ready", false)
-		var ready_in := SiegeRules.equipment_turns_for(game.data, game.state, army["owner"]) - int(siege["turns"])
-		var assault_text := "Assault the walls!" if can_assault \
-			else "Assault (engines ready in %d turn%s)" % [maxi(ready_in, 1), "" if ready_in == 1 else "s"]
-		var estimate := game.assault_estimate(army_id, region_id)
-		if not estimate.is_empty():
-			assault_text += "  " + odds_text(estimate)
-		_action_button(assault_text, func():
-			assault_requested.emit(region_id, ["occupy", "enslave", "exterminate"][occupation_options.selected]),
-			Callable(), not can_assault)
+	_action_button("Disband ticked units", func():
+		var indices := garrison_checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit("garrison:" + here, indices))
 
-	var site := _unexplored_site()
-	if not site.is_empty():
-		_header("Point of interest", 12)
-		var can_search: bool = float(army["movement_left"]) > 0.0
-		_action_button("Search the %s" % site["name"] if can_search
-				else "Search the %s (no movement left)" % site["name"],
-			func(): explore_requested.emit(army_id))
 
-	var offers := game.mercenaries_available(region_id)
-	if not offers.is_empty():
-		var treasury := int(game.state["factions"][game.state["player_faction"]]["treasury"])
-		_header("Mercenaries for hire", 12)
-		for offer in offers:
-			var offer_template: String = offer["template"]
-			_action_button("Hire %s (%d)" % [_template_name(offer_template), int(offer["cost"])],
-				func():
-					game.hire_mercenary(army_id, offer_template)
-					action_taken.emit(),
-				func(): unit_info_requested.emit(offer_template))
+func _harbour_actions() -> void:
+	var here := region_id
+	var zones: Array = NavalRules.zones_touching(game.data, here)
+	if zones.is_empty():
+		return
+	var row := HBoxContainer.new()
+	add_child(row)
+	var launch := Button.new()
+	launch.text = "Launch fleet into →"
+	launch.focus_mode = Control.FOCUS_NONE
+	launch.add_theme_font_size_override("font_size", 11)
+	row.add_child(launch)
+	var options := _dropdown(row)
+	for zone_id in zones:
+		options.add_item(String(game.data.sea_zones.get(zone_id, {}).get("name", zone_id)))
+	launch.pressed.connect(func():
+		var zone: String = zones[maxi(options.selected, 0)]
+		var result := game.launch_fleet(here, harbour_checked_indices(), zone)
+		if result["ok"]:
+			fleet_launched.emit(result["fleet_id"])
+		else:
+			refused.emit(result["error"]))
+	_action_button("Disband ticked ships", func():
+		var indices := harbour_checked_indices()
+		if indices.is_empty():
+			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
+		else:
+			disband_requested.emit("harbour:" + here, indices))
+
+
+func _dropdown(row: HBoxContainer) -> OptionButton:
+	var options := OptionButton.new()
+	options.focus_mode = Control.FOCUS_NONE
+	options.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	options.clip_text = true
+	options.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	options.add_theme_font_size_override("font_size", 11)
+	row.add_child(options)
+	return options
 
 
 func _unexplored_site() -> Dictionary:

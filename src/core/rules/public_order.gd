@@ -274,6 +274,7 @@ static func _revolt(data: GameData, state: Dictionary, region_id: String) -> voi
 		{"faction": previous_owner, "region": region_id}, 5)
 	settlement["owner"] = "rebels"
 	settlement["garrison"] = []
+	settlement["harbour"] = []
 	settlement["construction_queue"] = []
 	settlement["recruitment_queue"] = []
 	settlement["governor"] = null

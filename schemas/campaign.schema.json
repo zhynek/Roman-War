@@ -150,6 +150,13 @@
             "$ref": "#/$defs/unit_instance"
           }
         },
+        "harbour": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/unit_instance"
+          },
+          "description": "Ships waiting in port (class ship only; coastal regions only). Optional: a settlement without the key starts with an empty harbour"
+        },
         "tax_level": {
           "enum": [
             "very_low",

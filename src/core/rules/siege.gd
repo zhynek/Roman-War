@@ -8,20 +8,39 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	var army: Dictionary = state["armies"][army_id]
 	if not state["settlements"].has(region_id):
 		return false
-	if not MapRules.are_adjacent(data, army["region"], region_id) and army["region"] != region_id:
+	var marching_in: bool = army["region"] != region_id
+	if marching_in and not MapRules.are_adjacent(data, army["region"], region_id):
 		return false
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
+		return false
+	# A relieving field army must be beaten before the walls can be invested,
+	# and marching up to the walls costs the same step as any other march —
+	# a siege is never a free hop.
+	if MovementRules.hostile_army_in(state, army["owner"], region_id):
+		return false
+	if marching_in and MovementRules.step_cost(data, state, region_id) > float(army["movement_left"]) + 0.0001:
 		return false
 	# Investing a settlement IS a declaration of war — and one the Republic
 	# forbids is refused here, before a single ladder is raised.
 	if not DiplomacyRules.declare_war(data, state, army["owner"], settlement["owner"]):
 		return false
+	release(state, army_id)
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
 	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
 	return true
+
+
+static func release(state: Dictionary, army_id: String) -> void:
+	## Lift whatever siege this army holds. Every path that moves, garrisons,
+	## merges, dissolves or destroys an army calls this, so a settlement is
+	## never marked as invested by an army that is no longer at its walls.
+	for region_id in state["settlements"]:
+		var siege = state["settlements"][region_id]["siege"]
+		if siege != null and siege.get("besieger", "") == army_id:
+			state["settlements"][region_id]["siege"] = null
 
 
 static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver) -> Array:
@@ -40,15 +59,23 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 				or state["armies"][siege["besieger"]]["region"] != region_id:
 			settlement["siege"] = null
 			continue
-		siege["turns"] = int(siege["turns"]) + 1
 		var besieger_owner: String = state["armies"][siege["besieger"]]["owner"]
-		if int(siege["turns"]) >= equipment_turns_for(data, state, besieger_owner):
+		# Peace lifts a siege: nobody starves a city they are not at war with.
+		if not DiplomacyRules.at_war(state, besieger_owner, settlement["owner"]):
+			settlement["siege"] = null
+			continue
+		siege["turns"] = int(siege["turns"]) + 1
+		var equipment_turns := equipment_turns_for(data, state, besieger_owner)
+		if int(siege["turns"]) >= equipment_turns:
 			siege["equipment_ready"] = true
 
 		var level := SettlementRules.settlement_level(data, settlement)
 		var starve_turns: Array = siege_rules["starve_turns_per_settlement_level"]
 		var supplies := int(starve_turns[Constants.level_index(level)])
-		if int(siege["turns"]) >= supplies:
+		# The besieger always gets one full turn with the engines ready to
+		# choose an assault before the garrison's supplies decide the matter.
+		var starve_at := maxi(supplies, equipment_turns + 1)
+		if int(siege["turns"]) >= starve_at:
 			results.append({
 				"kind": "starved_out", "region": region_id,
 				"previous_owner": settlement["owner"],
@@ -105,6 +132,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var settlement: Dictionary = state["settlements"][region_id]
 	var siege = settlement["siege"]
 	if siege == null or siege["besieger"] != army_id:
+		return {}
+	if not DiplomacyRules.at_war(state, army["owner"], settlement["owner"]):
 		return {}
 	# Without equipment you can only assault once the garrison is starving.
 	if not siege["equipment_ready"] and not starving:

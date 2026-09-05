@@ -202,6 +202,8 @@ func test_explicit_orders_cancel_a_queued_march(t) -> void:
 	var outcome := game.march_army(army_id, "epsilon")
 	t.check_eq(int(outcome["moved"]), 0, "no points today — the whole road is queued")
 	t.check(game.state["armies"][army_id].has("march_path"), "the march is queued")
+	# A siege from next door pays the step like any march, so the points come back first.
+	game.state["armies"][army_id]["movement_left"] = 2.0
 	t.check(game.besiege(army_id, "alpha"), "the army can lay siege from here")
 	t.check(not game.state["armies"][army_id].has("march_path"),
 		"laying siege cancels the queued march")

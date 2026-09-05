@@ -52,8 +52,15 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 			if holder == "julii" or holder == "":
 				target = neighbor
 				break
+		t.check(screen.force_panel.visible, "the force card shows the selected army")
 		if target != "":
+			# A left click on the province only inspects it; the order is the
+			# right button's (or the card's March-to list, which says the same).
 			screen._on_region_clicked(target)
+			t.check_eq(game.state["armies"][army_id]["region"], from_region, "a left click never marches")
+			t.check_eq(screen.selected_army, "", "it inspects the province instead")
+			screen._on_army_selected(army_id)
+			screen._on_order_target("region", target, false)
 			t.check_eq(game.state["armies"][army_id]["region"], target, "the army actually marched")
 		for other_faction in stances_before:
 			if stances_before[other_faction] != "war":
@@ -402,7 +409,7 @@ func test_movement_ux_paths(t) -> void:
 		"the sketch has per-leg costs")
 
 	var stances_before: Dictionary = game.state["factions"]["julii"]["diplomacy"].duplicate()
-	screen._on_region_clicked(target)
+	screen._on_order_target("region", target, false)
 	var army: Dictionary = game.state["armies"][army_id]
 	t.check(army["region"] != home, "the multi-leg order moved the army at once")
 	t.check(army["region"] == target or army.has("march_path"),
@@ -469,9 +476,14 @@ func test_fleet_orders_from_the_map(t) -> void:
 		t.check(not screen.map_view.highlight_zones.is_empty(), "the open lanes light up")
 		var lanes: Array = screen.map_view.highlight_zones.keys()
 		lanes.sort()
+		# A left click on the lane only looks at it; the order is the right button's.
 		screen._on_sea_zone_clicked(String(lanes[0]))
+		t.check_eq(game.state["fleets"][fleet_id]["sea_zone"], zone, "a left click never sails")
+		screen._on_sea_zone_clicked(zone)
+		screen._on_order_target("zone", String(lanes[0]), false)
 		t.check_eq(game.state["fleets"][fleet_id]["sea_zone"], String(lanes[0]),
 			"the fleet sailed down the lane")
+		t.check_eq(screen.selected_fleet, fleet_id, "and stays selected")
 		t.check_eq(screen.map_view.selected_sea_zone, String(lanes[0]),
 			"the selection ring follows the fleet")
 		# Any refresh re-derives the overlay from live state — no stale lanes.
@@ -780,6 +792,70 @@ func test_agent_orders_through_the_ui(t) -> void:
 		screen._on_army_selected(army_id)
 		t.check_eq(screen.selected_agent, "", "army selection clears the agent")
 
+	screen.free()
+
+
+func test_the_top_bar_fits_a_narrow_window(t) -> void:
+	## The header once set the screen's minimum width past 2000 px: on a
+	## laptop the last buttons — END TURN among them — and the whole side
+	## column were simply off-screen. The bar wraps now, and the screen's own
+	## minimum is the map's plus the side column's.
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var host := Control.new()
+	tree.root.add_child(host)
+	host.size = Vector2(1100, 700)
+	var screen := CampaignScreen.create(game)
+	host.add_child(screen)
+	var root: VBoxContainer = null
+	for child in screen.get_children():
+		if child is VBoxContainer:
+			root = child
+	t.check(root != null, "the screen has its root column")
+	if root != null:
+		var minimum := root.get_combined_minimum_size()
+		t.check(minimum.x <= 1000.0, "the screen's minimum width fits a laptop window (%d px)" % int(minimum.x))
+	var end_turn: Button = null
+	var options: MenuButton = null
+	for node in screen.find_children("*", "Button", true, false):
+		if node is MenuButton:
+			options = node
+		elif (node as Button).text == "END TURN":
+			end_turn = node
+	t.check(end_turn != null, "END TURN is on the bar")
+	t.check(options != null and options == screen.options_menu, "the Options menu is on the bar")
+	t.check(screen.options_menu.get_popup().item_count >= 3, "with the playback and guided switches and the controls")
+	host.free()
+
+
+func test_options_switch_playback_and_guided_mode(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	t.check(game.guided_enabled(), "a new campaign starts guided")
+	screen._on_option_pressed(CampaignScreen.OPTION_GUIDED)
+	t.check(not game.guided_enabled(), "the switch turns the guided mode off")
+	t.check(not GuidedRules.overview(game.data, game.state)["enabled"], "and the trail stands down")
+	screen._save_game()
+	screen._on_option_pressed(CampaignScreen.OPTION_GUIDED)
+	t.check(game.guided_enabled(), "and on again")
+	screen._load_game()
+	t.check(not game.guided_enabled(), "the setting travels with the save")
+	screen.set_playback(false)
+	t.check(not screen.playback_enabled, "the day can be told at once instead of played")
+	var popup := screen.options_menu.get_popup()
+	screen._sync_options()
+	t.check(not popup.is_item_checked(popup.get_item_index(CampaignScreen.OPTION_PLAYBACK)), "the menu shows the switch off")
+	screen.set_playback(true)
+	screen._sync_options()
+	t.check(popup.is_item_checked(popup.get_item_index(CampaignScreen.OPTION_PLAYBACK)), "and on")
+	screen.show_controls()
+	var found := false
+	for child in screen.get_children():
+		if child is AcceptDialog and (child as AcceptDialog).title == "Controls":
+			found = true
+	t.check(found, "the controls sheet opens")
 	screen.free()
 
 
@@ -1171,6 +1247,9 @@ func test_battle_odds_and_the_storm_through_the_ui(t) -> void:
 			if holder == "" or holder == "julii" or holder == "senate" \
 					or game.data.factions.get(holder, {}).get("is_roman_house", false):
 				continue
+			# A field army before the walls must be beaten before a siege.
+			if MovementRules.hostile_army_in(game.state, "julii", neighbor):
+				continue
 			army_id = candidate
 			target = neighbor
 			break
@@ -1185,7 +1264,8 @@ func test_battle_odds_and_the_storm_through_the_ui(t) -> void:
 	screen._on_army_selected(army_id)
 	t.check(game.besiege(army_id, target), "the siege is laid")
 	screen._after_order()
-	var assault_button := _panel_button(screen.region_panel, "Assault")
+	t.check(screen.force_panel.visible, "the force card stays on the besieging army")
+	var assault_button := _panel_button(screen.force_panel, "Assault")
 	t.check(assault_button != null, "the panel offers the assault")
 	if assault_button != null:
 		t.check(assault_button.disabled and assault_button.text.contains("engines ready in"),
@@ -1194,7 +1274,7 @@ func test_battle_odds_and_the_storm_through_the_ui(t) -> void:
 	# Engines ready: the button wakes and quotes the odds; pressing it asks first.
 	game.state["settlements"][target]["siege"]["equipment_ready"] = true
 	screen._after_order()
-	assault_button = _panel_button(screen.region_panel, "Assault")
+	assault_button = _panel_button(screen.force_panel, "Assault")
 	t.check(assault_button != null and not assault_button.disabled, "ready engines enable the storm")
 	if assault_button != null:
 		t.check(assault_button.text.contains("odds") or assault_button.text.contains("undefended"),

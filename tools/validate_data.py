@@ -683,15 +683,27 @@ def cross_checks(t: dict[str, dict]) -> None:
                 err(f"campaign: {region_id}: population {setup['population']} below its tier "
                     f"threshold {needed}")
         for unit in setup.get("garrison", []):
-            check_unit_instance(unit, owner, region_id)
+            check_unit_instance(unit, owner, region_id, "garrison")
+        harbour = setup.get("harbour", [])
+        if harbour and not regions[region_id].get("sea_zones"):
+            err(f"campaign: {region_id}: a harbour on a landlocked region")
+        for unit in harbour:
+            check_unit_instance(unit, owner, region_id, "harbour")
 
-    def check_unit_instance(instance: dict, owner: str, where: str) -> None:
+    def check_unit_instance(instance: dict, owner: str, where: str, slot: str = "army") -> None:
         template = units.get(instance["template"])
         if template is None:
             err(f"campaign: {where}: unknown unit template {instance['template']}")
             return
         if owner != "rebels" and owner not in template["factions"] and "all" not in template["factions"]:
             warn(f"campaign: {where}: {owner} holds foreign unit {instance['template']}")
+        # Ships wait in harbours and sail in fleets; they never stand on walls
+        # or march in a column (ForceRules refuses the transfers at runtime).
+        is_ship = template.get("class") == "ship"
+        if slot in ("garrison", "army") and is_ship:
+            err(f"campaign: {where}: ship {instance['template']} in a {slot} — ships belong in a harbour or a fleet")
+        if slot in ("harbour", "fleet") and not is_ship:
+            err(f"campaign: {where}: {instance['template']} is not a ship and cannot be in a {slot}")
 
     for faction_setup in campaign.get("factions", []):
         fid = faction_setup["id"]
@@ -704,12 +716,14 @@ def cross_checks(t: dict[str, dict]) -> None:
             if army["region"] not in regions:
                 err(f"campaign: {fid}: army in unknown region {army['region']}")
             for unit in army["units"]:
-                check_unit_instance(unit, fid, army["region"])
+                check_unit_instance(unit, fid, army["region"], "army")
         for fleet in faction_setup.get("fleets", []):
             if fleet["sea_zone"] not in zones:
                 err(f"campaign: {fid}: fleet in unknown sea zone {fleet['sea_zone']}")
+            elif not any(fleet["sea_zone"] in r.get("sea_zones", []) for r in regions.values()):
+                err(f"campaign: {fid}: fleet in sea zone {fleet['sea_zone']} that touches no coast")
             for ship in fleet["ships"]:
-                check_unit_instance(ship, fid, fleet["sea_zone"])
+                check_unit_instance(ship, fid, fleet["sea_zone"], "fleet")
         roles = [c["role"] for c in faction_setup.get("characters", [])]
         if factions.get(fid, {}).get("is_rebel") is not True and roles.count("leader") != 1:
             err(f"campaign: {fid}: needs exactly one leader, has {roles.count('leader')}")
@@ -1310,6 +1324,26 @@ def cross_checks(t: dict[str, dict]) -> None:
     ordered = [e["min_population"] for e in balance.get("settlement_levels", [])]
     if ordered != sorted(ordered):
         err("balance: settlement level thresholds must be ascending")
+
+    # The stack cap has one home (balance.recruitment.army_unit_cap) and the
+    # campaign schema's maxItems must agree with it, or authored armies and
+    # fleets could exceed the rule the engine enforces. Garrisons and harbours
+    # are uncapped, like a city's walls.
+    army_cap = balance.get("recruitment", {}).get("army_unit_cap")
+    if army_cap is None:
+        err("balance: recruitment.army_unit_cap missing")
+    campaign_schema = json.loads((SCHEMAS / "campaign.schema.json").read_text(encoding="utf-8"))
+    defs = campaign_schema.get("$defs", {})
+    for def_name, field in (("army", "units"), ("fleet", "ships")):
+        schema_cap = defs.get(def_name, {}).get("properties", {}).get(field, {}).get("maxItems")
+        if schema_cap != army_cap:
+            err(f"balance: recruitment.army_unit_cap ({army_cap}) disagrees with "
+                f"campaign.schema.json $defs.{def_name}.{field}.maxItems ({schema_cap})")
+    forces = balance.get("forces", {})
+    if "disband_population_return_pct" not in forces:
+        err("balance: forces.disband_population_return_pct missing")
+    elif not 0 <= float(forces["disband_population_return_pct"]) <= 100:
+        err("balance: forces.disband_population_return_pct must be within 0-100")
     for table_name in ("build_priority", "frontier_build_bonus"):
         for kind in balance.get("ai", {}).get(table_name, {}):
             if kind not in built_kinds:

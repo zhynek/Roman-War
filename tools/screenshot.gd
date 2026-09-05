@@ -80,8 +80,12 @@ func _select_army_with_preview() -> void:
 
 
 func _process(_delta: float) -> bool:
-	# The window reaches its real size only after startup: track it.
-	_holder.size = root.size
+	# The window reaches its real size only after startup: track it — in
+	# CANVAS units. The project stretches a 1280x800 canvas to the window
+	# (canvas_items / expand), so root.size (window pixels) is the wrong
+	# number: a holder sized in pixels left a grey margin on small windows
+	# and pushed the side column off a large one, which the game never does.
+	_holder.size = root.get_visible_rect().size
 	_frame += 1
 	if _frame < 20:
 		return false

@@ -169,6 +169,10 @@ static func _recruit(data: GameData, state: Dictionary, faction_id: String, regi
 	for unit in RecruitmentRules.available_units(data, state, region_id):
 		if int(unit["cost"]) > budget:
 			continue
+		# Warships finish in the harbour, and the AI has no admiral yet: a
+		# fleet it would never launch is upkeep for nothing.
+		if String(unit.get("class", "")) == "ship":
+			continue
 		# Recruiting into the red is for settlements under the gun, cities on
 		# the edge of riot, and treasuries deep enough to bleed a while.
 		if threat != "threatened" and not unrest and not rich \

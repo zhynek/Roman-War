@@ -56,6 +56,8 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	ChronicleRules.add_deed(state,
 		defender["general"] if attacker_won_field else attacker["general"], "battles_lost")
 	if result["winner"] == "attacker":
+		if attacker["region"] != defender["region"]:
+			SiegeRules.release(state, attacker_id)
 		attacker["region"] = defender["region"]
 		MovementRules.sync_general_location(state, attacker)
 		attacker["movement_left"] = 0.0
@@ -230,6 +232,7 @@ static func capture_settlement(data: GameData, state: Dictionary, rng: CampaignR
 	settlement["owner"] = new_owner
 	settlement["population"] = maxi(population, 400)
 	settlement["garrison"] = []
+	settlement["harbour"] = []
 	settlement["construction_queue"] = []
 	settlement["recruitment_queue"] = []
 	settlement["governor"] = null
@@ -436,8 +439,13 @@ static func garrison_army(data: GameData, state: Dictionary, army_id: String, re
 		return false
 	for unit in army["units"]:
 		settlement["garrison"].append(unit)
+	# The men — and their general — remember how far they have marched this
+	# season, so the garrison cannot be raised again as fresh (ForceRules).
+	ForceRules.note_muster(state, region_id, float(army["movement_left"]))
+	ForceRules.note_general_march(state, army["general"], float(army["movement_left"]))
 	if army["general"] != null and state["characters"].has(army["general"]):
 		state["characters"][army["general"]]["location"] = region_id
+	SiegeRules.release(state, army_id)
 	state["armies"].erase(army_id)
 	SettlementRules.refresh_governors(data, state)
 	return true
@@ -464,6 +472,7 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 	if army["units"].is_empty():
 		if army["general"] != null:
 			CharacterRules.kill(state, army["general"], data)
+		SiegeRules.release(state, army_id)
 		state["armies"].erase(army_id)
 
 

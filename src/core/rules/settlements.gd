@@ -76,11 +76,7 @@ static func refresh_governors(data: GameData, state: Dictionary) -> void:
 	char_ids.sort()
 	for char_id in char_ids:
 		var character: Dictionary = state["characters"][char_id]
-		if not character["alive"] or character["role"] in ["spouse", "child"]:
-			continue
-		if character.get("gender", "male") != "male":
-			continue
-		if int(character["age"]) < int(data.balance["characters"]["come_of_age"]):
+		if not CharacterRules.can_command(data, character):
 			continue
 		var location: String = character.get("location", "")
 		if location == "" or not state["settlements"].has(location):

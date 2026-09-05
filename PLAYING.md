@@ -16,23 +16,26 @@ You pick a few things and press **BEGIN THE CAMPAIGN**:
   order in their cities). It does not make them cleverer.
 - **World seed** — the same number replays exactly the same world. Change it for
   a different run of luck; keep it to compare two attempts fairly.
-- **Guided trail** — on by default. A running list of objectives that walks you
+- **Guided mode** — on by default. A running list of objectives that walks you
   through the game and reacts to what happens to you, paying rewards along the
-  way. Veterans can switch it off. It changes no rule of the world — but its
-  rewards are real gold and troops, so a guided run of a seed plays out
-  differently from an unguided one.
+  way. Veterans can switch it off here, and anyone can switch it on or off
+  mid-campaign under **Options ▾** in the top bar. It changes no rule of the
+  world — but its rewards are real gold and troops, so a guided run of a seed
+  plays out differently from an unguided one.
 
 The year is 270 BC. Each turn is half a year (summer, then winter), and the
 campaign runs to AD 14.
 
 ## The screen
 
-- **Top bar** — your treasury, the date, your standing with the Senate and with
-  the people (Roman houses only), and how many regions you hold toward victory.
-  Buttons: **Dispatch**, **Family**, **Diplomacy**, **Senate** (Roman houses
-  only), **Knowledge**, **Annals**, **Save**, **Load**, and **END TURN**.
-  (Edicts are issued per province, so they live on the city panel rather than
-  up here.)
+- **Top bar** — two rows. The first: your treasury, the date, your people's
+  three readings, your standing with the Senate and with the people (Roman
+  houses only), how many regions you hold toward victory, and **END TURN** at
+  the far right. The second: **Dispatch**, **Family**, **Diplomacy**, **Senate**
+  (Roman houses only), **Knowledge**, **Annals**, **Save**, **Load**, and
+  **Options ▾** — the mode switches and a **Controls** sheet. Both rows wrap on
+  a narrow window instead of running off its edge. (Edicts are issued per
+  province, so they live on the city panel rather than up here.)
 - **The map** — a terrain map of the whole world: coastlines, province
   borders, and the lie of the land (mountain ridges, forests, hills, marsh,
   desert). Every province is tinted by its terrain and washed with its
@@ -41,37 +44,51 @@ campaign runs to AD 14.
   wall tier in their culture's style (Roman circuits, round Mediterranean
   enceintes, tribal stockades), a banner flies the owner's colour, a gold
   laurel marks your capital, quays mark a port, and siege ladders and red
-  ramparts mark a city under attack. Armies are shield roundels showing
-  their unit count and a star when a general leads; your fleets ride at
-  anchor in their named seas.
+  ramparts mark a city under attack. Every army and fleet you can see flies
+  a **banner** beside its city or in its sea: a tall flag in its owner's
+  colour, filled from the bottom by how many units it holds, with a strength
+  bar beneath; a gold finial when a general leads (ringed for a faction
+  leader), a white sail for a fleet, a red border for a besieger, an orange
+  one for weary men, and dimmed once its movement for the season is spent.
+  More than four in one place fold into a "+N" chip. Zoom far out and the
+  banners give way to small owner badges.
   - **Drag with the left or middle mouse button** (or **WASD/arrows**) to
     move the map; **scroll** (or a trackpad pinch, or the **+ / −** keys) to
     zoom; **double-click** to center on a province.
   - Prefer buttons? **+**, **−** and **Home** sit in the map's bottom-right
     corner. **Home** (or the Home key) returns you to your capital at a
     readable zoom whenever you get lost.
-  - **Left-click** a province to select it — a click only counts if the
-    mouse does not travel, so dragging never mis-clicks; **hover** for its
-    details.
-  - **Right-click** a province for its dossier: your garrison and buildings
-    there, and the armies present — your own troops with their skills at a
-    glance, while a foreign stack shows only its size.
-    Click any row for its full illustrated card — the unit's stats, skills
-    explained, and the building that trains it; a building's card lists
-    each level's effects and the troops it unlocks. The same right-click
-    answers on the right panel's build, recruit, hire, and unit rows.
-  - With an army selected, its **reach this turn glows gold**; hovering a
-    destination sketches the route with each leg's cost in movement points
-    and when the army will arrive. **Click to march** — a destination
-    beyond this turn's reach becomes a standing order the army resumes
-    each turn (halt it from the army panel). **Shift-click** forces the
-    march: double the ground, weary men. Terrain is strategy now: plains
-    and roads are fast, mountains and marsh cost double, and the shortest
-    road on the map is not always the quickest.
-  - **Click a sea** holding one of your fleets to take the helm, then click
-    a highlighted neighbouring sea to sail.
-- **Right panel** — everything about the region you clicked, and every action
-  you can take there.
+  - **Left-click selects, right-click orders.** Left-click a province to
+    select it (its city fills the right panel); left-click a **banner** to
+    select that army or fleet — its **force card** opens above the city
+    panel, and the map rings everything it can do: **gold** for provinces it
+    can reach this season, **orange** for those only a forced march reaches,
+    **red** for an enemy army or city it can strike from where it stands. A
+    click only counts if the mouse does not travel, so dragging never
+    mis-clicks; **hover** a province for its details, or a ringed one for
+    the route, its cost in movement points and when the army arrives.
+  - **Right-click a ringed province** to march there (an orange one forces
+    the pace — or hold **Shift**), a red one to attack the army or lay siege
+    to the city, a ringed sea to sail a fleet, one of your own ports to dock
+    it. A destination beyond this turn's reach becomes a standing order the
+    army resumes each turn (halt it from the force card). Terrain is
+    strategy: plains and roads are fast, mountains and marsh cost double,
+    and the shortest road on the map is not always the quickest.
+  - **Right-click with nothing selected** for a province's dossier: the
+    garrison and buildings there, and the armies present — your own troops
+    with their skills at a glance, while a foreign stack shows only its
+    size. Click any row for its full illustrated card — the unit's stats,
+    skills explained, and the building that trains it; a building's card
+    lists each level's effects and the troops it unlocks. The same
+    right-click answers on the right panel's build, recruit, hire and unit
+    rows.
+  - **Esc** deselects (the force first, then the province); **Tab** or **N**
+    jumps to the next force that still has orders to give. **Options ▾ →
+    Controls** lists all of this inside the game.
+- **Right panel** — the force card for the selected army or fleet (its roster,
+  its orders and the regrouping toolbox), then everything about the province
+  you clicked and every action you can take there; with nothing selected, a
+  reminder of the controls and how many of your forces still await orders.
 - **Bottom right** — the turn log: every report of the day just closed, in one
   list, coloured by whether it was good news.
 
@@ -104,6 +121,19 @@ including wars that have nothing to do with you.
 
 The **Dispatch** button in the top bar reopens the last day's recap at any time,
 and it survives a save: load a campaign and the dispatch you left is still there.
+
+## Options
+
+**Options ▾** in the top bar holds the two switches people ask for most:
+
+- **Play the day out over the map after End Turn** — on, END TURN plays the
+  day as described above; off, the turn resolves at once and the Dispatch and
+  the log tell it. The game remembers your choice between sessions.
+- **Guided mode** — the trail's objectives, rewards and helping hand, on or
+  off at any point of a campaign. Off, no objectives are issued and no rewards
+  paid; on again, the trail resumes where it was. The setting travels with
+  the save.
+- **Controls…** — the whole command grammar on one sheet.
 
 ## Running a city
 
@@ -172,26 +202,33 @@ tiers at all — that is deliberate.
 
 ## Armies
 
-Click a region holding one of your armies, then click the army in the right
-panel to select it. Now:
+**Left-click an army's banner** (or click the army in the province panel's
+list) to select it. Its **force card** opens on the right — who leads it, how
+many men stand and what they cost, how far it can still go this season, and
+every unit with its strength bar, experience and kit — and the map rings what
+it can do. Now:
 
-- **Click another region** to march there. Roads make it cheaper; rough terrain
-  costs more.
-- **Shift-click** to force march — roughly double the range, but the men arrive
-  tired and fight worse.
-- **Click a coastal region across a sea** to sail there (it takes the whole
-  turn). Sailing onto the shore of a faction you are **at war** with is an
-  amphibious landing: allowed as long as no enemy field army holds the beach —
-  the garrison waits behind its walls, and you besiege it next turn. This is
-  how islands are taken.
-- **Click an enemy region** to attack the army there or lay siege to the city.
-  If you are not already at war, the game asks first — it will never start a
-  war by accident. Every battle you order — an attack or an assault — then
-  plays back as an animated field: the lines close, grind, and one side
-  breaks and is ridden down, with morale bars draining above. It is a
-  replay of the decided outcome, and you can skip it at any moment. (A
-  siege you let starve resolves during END TURN and reports in the log
-  instead.)
+- **Right-click a gold-ringed province** to march there. Roads make it
+  cheaper; rough terrain costs more. An **orange** ring means only a forced
+  march reaches it — right-click it, or hold **Shift**, and the men arrive
+  tired and fight worse. A destination beyond this turn's reach becomes a
+  standing order the army resumes each turn; the card shows it and can halt
+  it. The card's **March to** list gives the same orders for trackpads.
+- **Right-click a coastal province across a sea** to sail there (it takes the
+  whole turn). Sailing onto the shore of a faction you are **at war** with is
+  an amphibious landing: allowed as long as no enemy field army holds the
+  beach — the garrison waits behind its walls, and you besiege it next turn.
+  This is how islands are taken.
+- **Right-click a red-ringed province** to attack the army there or lay siege
+  to the city. If you are not already at war, the game asks first — it will
+  never start a war by accident. **A battle takes the season**: the men need
+  movement left to attack, and none remains afterwards. Laying siege costs
+  the step to the walls like any march, and a **relief army standing before
+  the walls must be beaten first**. Every battle you order then plays back as
+  an animated field: the lines close, grind, and one side breaks and is
+  ridden down, with morale bars draining above. It is a replay of the decided
+  outcome, and you can skip it at any moment. (A siege you let starve
+  resolves during END TURN and reports in the log instead.)
 - **Before every attack the game shows the paper odds** — *odds 1.42:1 — 78% to
   win* — under the Attack button and again in the dialog that asks. Afterwards
   the log says who prevailed, what each side lost, and the three factors that
@@ -204,17 +241,34 @@ panel to select it. Now:
   missiles shred elephants and chariots, horse archers rule open plains and
   lose in hills and woods, and cavalry is useless in an assault.
 - Standing at a besieged city, you can **assault the walls** once your siege
-  equipment is ready (two turns; the button counts them down and quotes the
-  odds), or wait and starve them out. When you take a
+  equipment is ready (two turns; the card counts them down and quotes the
+  odds), or wait and starve them out — you always get one full season with
+  the engines ready to choose before hunger decides it. Peace lifts a siege.
+  When you take a
   city you choose to **occupy** (keeps the people, worst unrest), **enslave**
   (half the people, some loot, and the slaves boost your other cities), or
   **exterminate** (most of the people, most loot, quietest afterwards, but you
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
-- **Raise a field army** from any of your garrisons (button on the city panel):
-  the whole garrison marches out under the best commander standing in the city.
-  Mind the empty walls you leave behind — garrisons also keep order.
+- **Raise an army** from any of your garrisons: on the city panel, tick the
+  units you want and **Raise army under** a captain or one of your family
+  standing in the city — or raise the whole garrison in one go. Units fresh
+  from a garrison keep the movement they had, so an army raised this season
+  can march at once. A besieged city raises nothing: nobody marches out past
+  the siege lines. Mind the empty walls you leave behind — garrisons also keep
+  order.
+- **Regroup** from the force card (tick units first): **transfer** ticked
+  units into another army standing here, or into the garrison of your own
+  city; **merge** the whole army into another; **split** ticked units off
+  under a captain or a family member; **disband** ticked units (the men go
+  home to the fields and swell the population — no money comes back); **give
+  command** to a family member standing in the city, or **detach** the general
+  to stay behind as governor; **consolidate** depleted units of the same kind
+  into full ones. Units carry their movement with them, so shuffling men
+  between armies never gains a step. An army holds twenty units at most, a
+  general always keeps one under him, and two generals cannot share a camp in
+  the field.
 - **Search points of interest.** Gold diamonds on the map mark places worth a
   look — ruins, caches, deserters' camps. March an army onto one and press
   **Search** in its panel: you might find treasure, veterans' wisdom, or
@@ -223,7 +277,25 @@ panel to select it. Now:
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.
-Deep enough debt disbands units for you, starting with the expensive ones.
+Deep enough debt disbands units for you, starting with the expensive ones
+(never a general's last unit).
+
+## Fleets
+
+Ships are built in a port city's shipyard and wait in its **harbour** — a
+second list on the city panel, beside the garrison. Tick ships and **Launch
+fleet into** one of the seas the port touches; the new fleet flies its banner
+at that sea's anchor and sails from next season. Select a fleet by its banner
+(or by clicking the sea's anchor when the map is zoomed out): its card lists
+the ships and the seas it can reach, ringed on the map. **Right-click a ringed
+sea** to sail there, or **one of your own ports on this sea** to dock — the
+ships go back into the harbour, where **Retrain** re-arms them and from which
+they can be launched again. Fleets regroup like armies: transfer ticked ships
+between two of your fleets in the same sea, merge, split, or disband ticked
+ships in a sea touching one of your ports. Ships in harbour cost upkeep like
+any unit. Fleets do not fight yet (see the end of this guide), but they watch
+the seas: their own sea and its neighbours are visible to you, foreign sails
+included.
 
 ## Your family
 
@@ -263,9 +335,6 @@ Envoys from other powers appear at the top of the scroll with their offers;
 accept or decline at your leisure, but they lapse after a few seasons. The
 other powers negotiate among themselves too — the turn log carries the world's
 wars, peaces and pacts.
-
-Your fleets are in this window too, because they live on the sea rather than
-in a region.
 
 ## Agents
 
@@ -445,9 +514,10 @@ Honest list, so you know what you are looking at:
 - **The computer players do not use agents against you.** Spies, blades and
   envoys are a player's edge this build; the AI's counter-intelligence still
   works, so your own agents can still fail.
-- **Naval combat.** Fleets move and watch the coasts, but they do not fight,
-  and there are no port blockades yet. (Armies still cross the sea, and an
-  amphibious landing on an enemy shore already works.)
+- **Naval combat.** Fleets move, dock, regroup and watch the coasts, but they
+  do not fight, carry no armies, and there are no port blockades yet. (Armies
+  still cross the sea on their own, and an amphibious landing on an enemy
+  shore already works.) The computer players build no ships at all.
 - **Buying elections, and the aftermath of a civil war.** You cannot canvass
   for a seat with silver, cannot declare on the Senate yourself or join another
   house's rebellion before the Senate demands your life or your ambitious sons

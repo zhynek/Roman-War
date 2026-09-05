@@ -5,6 +5,11 @@ extends Control
 ## All rules go through the Game facade — this screen never touches state
 ## except to read it for display.
 ##
+## Selection and orders: a LEFT click selects (a banner selects its force, a
+## token its province); a RIGHT click, with one of our forces selected, is an
+## order for it — march, sail, attack, besiege, dock. Shift makes a march a
+## forced march; Esc deselects; Tab or N cycles the forces awaiting orders.
+##
 ## Ending a turn is a DAY: the engine resolves the whole turn in one call, then
 ## TurnSequence replays the journal over the map from dawn to dusk and the
 ## Daily Dispatch closes it. Playback is presentation only — set
@@ -12,11 +17,32 @@ extends Control
 ## what the headless suite does when it drives twenty-five turns in a loop.
 
 const SAVE_PATH := "user://roman_war_save.json"
+const OPTIONS_PATH := "user://roman_war_options.json"
+
+const OPTION_PLAYBACK := 1
+const OPTION_GUIDED := 2
+const OPTION_CONTROLS := 3
+
+const CONTROLS_TEXT := """SELECT — left-click a banner (an army or a fleet) or a province.
+ORDER — with a force selected, right-click a ringed province or sea:
+    gold ring = march this season, orange = forced march (or hold Shift),
+    red = attack the army or besiege the city standing there.
+    Right-click one of your own ports to dock a selected fleet.
+INSPECT — right-click a province with nothing selected for its dossier;
+    right-click a unit row in a panel for the unit's card.
+KEYS — Esc deselects (and shuts the building yard); Tab or N cycles the
+    forces still awaiting orders; arrows / WASD pan, + and - zoom,
+    Home recentres on the capital; double-click centres on a spot.
+MODES — Options ▾: play the day out after End Turn (or resolve it at once
+    and read the Dispatch); guided mode with objectives and rewards."""
 
 var game: Game
 
 var map_view: MapView
+var force_panel: ForcePanel
 var region_panel: RegionPanel
+var side_scroll: ScrollContainer
+var options_menu: MenuButton
 var quest_panel: QuestPanel
 var build_drawer: BuildDrawer
 var family_panel: FamilyPanel
@@ -98,6 +124,9 @@ func _ready() -> void:
 	map_view.region_hovered.connect(_on_region_hovered)
 	map_view.sea_zone_clicked.connect(_on_sea_zone_clicked)
 	map_view.region_context_requested.connect(open_map_menu)
+	map_view.force_clicked.connect(_on_force_clicked)
+	map_view.background_clicked.connect(_on_background_clicked)
+	map_view.order_target.connect(_on_order_target)
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
 
@@ -118,27 +147,52 @@ func _ready() -> void:
 	side.custom_minimum_size = Vector2(360, 0)
 	split.add_child(side)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	side.add_child(scroll)
+	side_scroll = ScrollContainer.new()
+	side_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side.add_child(side_scroll)
+	var panels := VBoxContainer.new()
+	panels.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	side_scroll.add_child(panels)
+
+	# The force card sits above the province panel; hidden when no force is
+	# selected. Its orders go through the same handlers as the map's.
+	force_panel = ForcePanel.new()
+	force_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	force_panel.action_taken.connect(_after_order)
+	force_panel.attack_requested.connect(attack_army_order)
+	force_panel.siege_requested.connect(besiege_order)
+	force_panel.assault_requested.connect(assault_order)
+	force_panel.explore_requested.connect(_explore_order)
+	force_panel.march_requested.connect(func(region_id: String, forced: bool):
+		_on_order_target("region", region_id, forced))
+	force_panel.sail_requested.connect(func(zone_id: String):
+		_on_order_target("zone", zone_id, false))
+	force_panel.sheet_requested.connect(func(char_id: String):
+		family_panel.open_for(game, char_id))
+	force_panel.unit_info_requested.connect(open_unit_card)
+	force_panel.force_replaced.connect(select_force)
+	force_panel.disband_requested.connect(disband_order)
+	force_panel.refused.connect(_on_refused)
+	force_panel.hide()
+	panels.add_child(force_panel)
+
 	region_panel = RegionPanel.new()
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
 	region_panel.army_selected.connect(_on_army_selected)
-	region_panel.attack_requested.connect(attack_army_order)
-	region_panel.assault_requested.connect(assault_order)
-	region_panel.siege_requested.connect(besiege_order)
+	region_panel.army_raised.connect(_on_army_raised)
+	region_panel.fleet_launched.connect(_on_fleet_launched)
+	region_panel.disband_requested.connect(disband_order)
+	region_panel.refused.connect(_on_refused)
 	region_panel.unit_info_requested.connect(open_unit_card)
 	region_panel.building_info_requested.connect(open_building_card)
-	region_panel.battle_fought.connect(_on_battle_fought)
-	region_panel.explore_requested.connect(_explore_order)
 	region_panel.drawer_requested.connect(open_drawer)
 	region_panel.agent_selected.connect(_on_agent_selected)
 	region_panel.scout_requested.connect(_scout_order)
 	region_panel.assassinate_requested.connect(_assassinate_order)
 	region_panel.bribe_requested.connect(_bribe_order)
 	region_panel.steal_requested.connect(_steal_order)
-	scroll.add_child(region_panel)
+	panels.add_child(region_panel)
 
 	quest_panel = QuestPanel.new()
 	side.add_child(quest_panel)
@@ -179,7 +233,9 @@ func _ready() -> void:
 	senate_panel.senate_changed.connect(refresh)
 	add_child(senate_panel)
 
+	_load_options()
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
+	_log("Left-click a banner to select an army or fleet; right-click a ringed province or sea to send it there. Options ▾ holds the controls and the mode switches.")
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
 	var capital: String = game.state["factions"][game.state["player_faction"]]["capital"]
@@ -188,21 +244,34 @@ func _ready() -> void:
 
 
 func _build_top_bar() -> PanelContainer:
+	## Two rows that WRAP instead of overflowing: the readings, with END TURN
+	## pinned at the right, and the scrolls. One HBox once set the screen's
+	## minimum width past 2000 px, and on any smaller window the last buttons
+	## and the whole side column were simply off-screen.
 	var chrome := PanelContainer.new()
-	var bar := HBoxContainer.new()
-	bar.custom_minimum_size = Vector2(0, 30)
-	bar.add_theme_constant_override("separation", 8)
-	chrome.add_child(bar)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 2)
+	chrome.add_child(rows)
 
+	var readings := HBoxContainer.new()
+	readings.add_theme_constant_override("separation", 8)
+	rows.add_child(readings)
 	var faction: Dictionary = game.data.factions[game.state["player_faction"]]
 	var swatch := ColorRect.new()
 	swatch.color = Color.html(faction.get("color", "#808080"))
 	swatch.custom_minimum_size = Vector2(6, 0)
-	bar.add_child(swatch)
+	readings.add_child(swatch)
 	top_swatch = ColorRect.new()
 	top_swatch.custom_minimum_size = Vector2(18, 18)
-	bar.add_child(top_swatch)
+	top_swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	readings.add_child(top_swatch)
 
+	var labels := HFlowContainer.new()
+	labels.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	labels.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	labels.add_theme_constant_override("h_separation", 4)
+	labels.add_theme_constant_override("v_separation", 0)
+	readings.add_child(labels)
 	for key in ["faction", "treasury", "date", "society", "senate", "victory", "mission"]:
 		var label := Label.new()
 		label.add_theme_font_size_override("font_size", 13)
@@ -210,28 +279,53 @@ func _build_top_bar() -> PanelContainer:
 			label.add_theme_color_override("font_color", UiStyle.PARCHMENT)
 		else:
 			label.add_theme_color_override("font_color", UiStyle.TEXT)
-		bar.add_child(label)
+		labels.add_child(label)
 		top_labels[key] = label
 
-	bar.add_child(_spacer())
-	bar.add_child(_bar_button("Dispatch", _show_dispatch))
-	bar.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
-	bar.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
+	var end_turn := _bar_button("END TURN", _end_turn)
+	end_turn.theme_type_variation = &"EndTurnButton"
+	end_turn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	readings.add_child(end_turn)
+
+	var scrolls := HFlowContainer.new()
+	scrolls.add_theme_constant_override("h_separation", 4)
+	scrolls.add_theme_constant_override("v_separation", 2)
+	rows.add_child(scrolls)
+	scrolls.add_child(_bar_button("Dispatch", _show_dispatch))
+	scrolls.add_child(_bar_button("Family", func(): family_panel.open_for(game)))
+	scrolls.add_child(_bar_button("Diplomacy", func(): diplomacy_panel.open_for(game)))
 	# Roman houses only — refresh() re-derives that, since a loaded save may
 	# belong to another house.
 	senate_button = _bar_button("Senate", func(): senate_panel.open_for(game))
-	bar.add_child(senate_button)
-	bar.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
+	scrolls.add_child(senate_button)
+	scrolls.add_child(_bar_button("Knowledge", func(): knowledge_panel.open_for(game)))
 	# The house-wide Book of Policies lived here. main holds edicts PER
 	# PROVINCE, so they are issued and revoked from the region panel, where the
 	# province they bind is the thing you are already looking at.
-	bar.add_child(_bar_button("Annals", func(): annals_panel.open_for(game)))
-	bar.add_child(_bar_button("Save", _save_game))
-	bar.add_child(_bar_button("Load", _load_game))
-	var end_turn := _bar_button("END TURN", _end_turn)
-	end_turn.theme_type_variation = &"EndTurnButton"
-	bar.add_child(end_turn)
+	scrolls.add_child(_bar_button("Annals", func(): annals_panel.open_for(game)))
+	scrolls.add_child(_bar_button("Save", _save_game))
+	scrolls.add_child(_bar_button("Load", _load_game))
+	options_menu = _build_options_menu()
+	scrolls.add_child(options_menu)
 	return chrome
+
+
+func _build_options_menu() -> MenuButton:
+	## The switches players kept asking for: whether the day plays out over
+	## the map after End Turn, and whether the guided trail is on. Both can
+	## be flipped at any point of a campaign; the first is remembered between
+	## sessions, the second travels with the save.
+	var menu := MenuButton.new()
+	menu.text = "Options ▾"
+	menu.focus_mode = Control.FOCUS_NONE
+	var popup := menu.get_popup()
+	popup.add_check_item("Play the day out over the map after End Turn", OPTION_PLAYBACK)
+	popup.add_check_item("Guided mode — objectives, rewards and a helping hand", OPTION_GUIDED)
+	popup.add_separator()
+	popup.add_item("Controls…", OPTION_CONTROLS)
+	popup.id_pressed.connect(_on_option_pressed)
+	popup.about_to_popup.connect(_sync_options)
+	return menu
 
 
 func _process(delta: float) -> void:
@@ -310,21 +404,14 @@ func refresh() -> void:
 			game.data.missions.get(String(mission["template"]), {}).get("name", mission["template"]),
 			int(mission["turns_left"])]
 
-	if map_view.selected_region != "":
-		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
-	_refresh_range_overlay()
-	_refresh_fleet_overlay()
+	_refresh_selection()
 	_render_drawer()
 
 	# The trail's checklist and its map guidance travel together: every
 	# active stage with a target lights that region up.
 	var overview := GuidedRules.overview(game.data, game.state)
 	quest_panel.render(game, overview)
-	var highlights := {}
-	for stage in overview["active"]:
-		if stage["target_region"] != "":
-			highlights[stage["target_region"]] = true
-	map_view.highlight_regions = highlights
+	_refresh_highlights(overview)
 	# Ownership or fog may have moved: rebake the cached land layer. Selection
 	# clicks deliberately skip this — they change nothing the land shows.
 	map_view.refresh_state()
@@ -345,10 +432,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if not key.pressed:
 		return
-	# Escape closes the drawer before anything else looks at the key. Only this
-	# one binding, so the existing arrow/WASD camera contract is untouched.
-	if key.keycode == KEY_ESCAPE and drawer_open:
-		close_drawer()
+	# Escape shuts what is open, then deselects: the yard, a card, the force,
+	# the province. Tab (or N) walks the forces still awaiting orders. The
+	# arrow/WASD camera contract below is untouched.
+	if key.keycode == KEY_ESCAPE:
+		deselect()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_TAB or key.keycode == KEY_N:
+		cycle_selection()
 		get_viewport().set_input_as_handled()
 		return
 	var handled := true
@@ -414,22 +506,19 @@ func _on_drawer_tab(tab: String) -> void:
 
 
 func _on_region_clicked(region_id: String) -> void:
-	# With one of our armies (or agents) selected, a click on another region is
-	# an order. Shift makes an army's march forced: double range, weary men.
-	if selected_army != "" and game.state["armies"].has(selected_army) \
-			and region_id != game.state["armies"][selected_army]["region"]:
-		_army_order(region_id, Input.is_key_pressed(KEY_SHIFT))
-		return
+	## A left click inspects: it never marches an army — orders are the right
+	## button's, on a ringed province, with the force selected. The one
+	## exception is an agent, who has no banner: a click on another region
+	## walks him there (an agent can never start a war).
 	if selected_agent != "" and game.state["agents"].has(selected_agent) \
 			and region_id != game.state["agents"][selected_agent]["region"]:
 		_agent_order(region_id)
 		return
-	map_view.selected_region = region_id
-	selected_army = ""
-	_deselect_fleet()
+	_clear_force_selection()
 	selected_agent = ""
-	region_panel.show_region(game, region_id)
-	_refresh_range_overlay()
+	map_view.selected_region = region_id
+	_refresh_selection()
+	_refresh_highlights()
 	# This path does not go through refresh(), so without this the drawer would
 	# keep showing the previous city's ladder after a click on the map.
 	if drawer_open:
@@ -440,28 +529,178 @@ func _on_region_clicked(region_id: String) -> void:
 
 
 func _on_army_selected(army_id: String) -> void:
-	selected_army = "" if selected_army == army_id else army_id
-	selected_agent = ""
-	region_panel.show_region(game, map_view.selected_region, selected_army)
-	_refresh_range_overlay()
-
-
-func _refresh_range_overlay() -> void:
-	## The gold wash of regions this turn's points can reach — stretched by
-	## Shift, the same way the click that follows would be.
-	if selected_army != "" and game.state["armies"].has(selected_army):
-		map_view.highlight_regions = game.army_reachable(
-			selected_army, Input.is_key_pressed(KEY_SHIFT))
+	## The province panel's army buttons toggle the selection.
+	if selected_army == army_id:
+		_clear_force_selection()
+		_refresh_selection()
+		_refresh_highlights()
+		map_view.queue_redraw()
 	else:
-		map_view.highlight_regions = {}
+		select_force("army", army_id)
+
+
+## --- Selection ----------------------------------------------------------------
+
+func selected_force() -> String:
+	return selected_army if selected_army != "" else selected_fleet
+
+
+func select_force(kind: String, force_id: String) -> void:
+	## The one entry point for selecting one of our forces: banner click,
+	## panel button, keyboard cycling, a freshly raised or split-off force.
+	_clear_force_selection()
+	selected_agent = ""
+	if kind == "army" and game.state["armies"].has(force_id):
+		selected_army = force_id
+		map_view.selected_region = game.state["armies"][force_id]["region"]
+	elif kind == "fleet" and game.state["fleets"].has(force_id):
+		selected_fleet = force_id
+	map_view.selected_force = selected_force()
+	refresh()
+
+
+func _clear_force_selection() -> void:
+	selected_army = ""
+	selected_fleet = ""
+	map_view.selected_force = ""
+	map_view.selected_sea_zone = ""
+	map_view.highlight_zones = {}
+	map_view.path_preview = {}
+
+
+func _drop_stale_selection() -> void:
+	## A selected force that was destroyed, garrisoned, merged away, docked
+	## or lost stops being selected; the province it stood in stays.
+	var player: String = game.state["player_faction"]
+	if selected_army != "" and game.state["armies"].get(selected_army, {}).get("owner", "") != player:
+		selected_army = ""
+	if selected_fleet != "" and game.state["fleets"].get(selected_fleet, {}).get("owner", "") != player:
+		selected_fleet = ""
+		map_view.selected_sea_zone = ""
+		map_view.highlight_zones = {}
+	if selected_agent != "" and game.state["agents"].get(selected_agent, {}).get("owner", "") != player:
+		selected_agent = ""
+	map_view.selected_force = selected_force()
+
+
+func _refresh_selection() -> void:
+	## The side column follows the selection: the force card for a selected
+	## army or fleet, the province panel for the selected region. The scroll
+	## position survives the rebuild, or every action would jump to the top.
+	_drop_stale_selection()
+	var scroll_before := side_scroll.scroll_vertical
+	var force := selected_force()
+	if force != "":
+		force_panel.show_force(game, force)
+		force_panel.show()
+	else:
+		force_panel.clear_panel()
+		force_panel.hide()
+	if map_view.selected_region != "":
+		region_panel.show_region(game, map_view.selected_region, selected_army, selected_agent)
+	elif force == "":
+		region_panel.show_idle_hint(game)
+	else:
+		region_panel.clear_panel()
+	side_scroll.set_deferred("scroll_vertical", scroll_before)
+
+
+func _refresh_highlights(overview: Dictionary = {}) -> void:
+	## The rings: the trail's target provinces, and over them everything the
+	## selected force can do from where it stands — computed once per
+	## selection or order, never per draw.
+	var highlights := {}
+	if overview.is_empty():
+		overview = GuidedRules.overview(game.data, game.state)
+	for stage in overview["active"]:
+		if stage["target_region"] != "":
+			highlights[stage["target_region"]] = "trail"
+	if selected_army != "" and game.state["armies"].has(selected_army):
+		highlights.merge(_army_options(selected_army), true)
+	else:
 		map_view.path_preview = {}
+	map_view.highlight_regions = highlights
+	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		map_view.selected_sea_zone = game.state["fleets"][selected_fleet]["sea_zone"]
+		var lanes := {}
+		for zone_id in game.reachable_zones(selected_fleet):
+			lanes[zone_id] = "sail"
+		map_view.highlight_zones = lanes
+	else:
+		map_view.highlight_zones = {}
+
+
+func _army_options(army_id: String) -> Dictionary:
+	## {region_id: "march"|"forced"|"attack"|"siege"}: everywhere the army can
+	## reach this season (gold), by forced march only (orange), and the
+	## visible enemies it can strike from where it stands (red). Fog is
+	## respected: nothing hidden ever changes a ring.
+	var options := {}
+	var plan := game.reachable_regions(army_id)
+	for region_id in plan["reach"]:
+		options[region_id] = "forced" if plan["reach"][region_id]["forced"] else "march"
+	var visible := game.visible_regions()
+	var targets := game.targets_for(army_id)
+	for region_id in targets:
+		if visible.has(region_id):
+			options[region_id] = targets[region_id]
+	return options
+
+
+func _on_force_clicked(kind: String, force_id: String) -> void:
+	var summary := game.force_summary(force_id)
+	if summary.is_empty():
+		return
+	if summary["owner"] == game.state["player_faction"]:
+		select_force(kind, force_id)
+		return
+	# A foreign banner: look, do not command. An army shows through its province.
+	if kind == "army":
+		_on_region_clicked(summary["region"])
+	else:
+		_clear_force_selection()
+		selected_agent = ""
+		_refresh_selection()
+		_refresh_highlights()
+		map_view.queue_redraw()
+	_log(map_view.banner_tooltip(summary))
+
+
+func _on_background_clicked() -> void:
+	## Open sea with nothing under it: the force is dropped, the province stays.
+	_clear_force_selection()
+	_refresh_selection()
+	_refresh_highlights()
+	map_view.queue_redraw()
+
+
+func _on_sea_zone_clicked(zone_id: String) -> void:
+	## A left click on a sea's anchor takes the helm of one of our fleets
+	## there — the next one on a second click, and the only route when the
+	## map is zoomed out and the banners have given way to badges. An empty
+	## sea just drops the force.
+	var ours: Array = []
+	for fleet_id in ForceRules.fleets_in(game.state, zone_id):
+		if game.state["fleets"][fleet_id]["owner"] == game.state["player_faction"]:
+			ours.append(fleet_id)
+	if ours.is_empty():
+		_clear_force_selection()
+		map_view.selected_sea_zone = zone_id
+		_refresh_selection()
+		_refresh_highlights()
+		map_view.queue_redraw()
+		return
+	var next_index := 0
+	var current := ours.find(selected_fleet)
+	if current >= 0:
+		next_index = (current + 1) % ours.size()
+	select_force("fleet", ours[next_index])
 
 
 func _on_region_hovered(region_id: String) -> void:
 	## With an army selected, hovering sketches the march: route, per-leg
-	## cost, turns to arrive. Re-fired on Shift changes, so the range wash
-	## stays in step with the forced-march toggle too.
-	_refresh_range_overlay()
+	## cost, turns to arrive. Re-fired on Shift changes, so the sketch always
+	## matches the order a right-click would give.
 	if region_id == "" or selected_army == "" or not game.state["armies"].has(selected_army) \
 			or region_id == game.state["armies"][selected_army]["region"]:
 		map_view.path_preview = {}
@@ -480,53 +719,42 @@ func _on_region_hovered(region_id: String) -> void:
 	}
 
 
-func _on_sea_zone_clicked(zone_id: String) -> void:
-	## Fleets live on the map now: click a sea with one of our fleets to take
-	## the helm, click a highlighted neighboring sea to sail.
-	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
-		var fleet: Dictionary = game.state["fleets"][selected_fleet]
-		if zone_id != fleet["sea_zone"]:
-			if game.move_fleet(selected_fleet, zone_id):
-				_log("The fleet sails for %s." %
-					game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
-				_refresh_fleet_overlay()
-				refresh()
-			else:
-				_log("The fleet cannot make %s this season." %
-					game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
-			return
-	var fleet_here := ""
-	var fleet_ids: Array = game.state["fleets"].keys()
-	fleet_ids.sort()
-	for fleet_id in fleet_ids:
-		var fleet: Dictionary = game.state["fleets"][fleet_id]
-		if fleet["owner"] == game.state["player_faction"] and fleet["sea_zone"] == zone_id:
-			fleet_here = fleet_id
-			break
-	if fleet_here != "" and fleet_here != selected_fleet:
-		selected_fleet = fleet_here
+func deselect() -> void:
+	## Esc: the yard first, then an open card, then the force, then the province.
+	if drawer_open:
+		close_drawer()
+		return
+	if _card_catcher != null and _card_catcher.visible:
+		close_info_card()
+		return
+	if selected_force() != "" or selected_agent != "":
+		_clear_force_selection()
+		selected_agent = ""
 	else:
-		selected_fleet = ""
-	_refresh_fleet_overlay()
+		map_view.selected_region = ""
+		map_view.selected_sea_zone = ""
+	_refresh_selection()
+	_refresh_highlights()
+	map_view.queue_redraw()
 
 
-func _refresh_fleet_overlay() -> void:
-	if selected_fleet != "" and game.state["fleets"].has(selected_fleet):
-		var fleet: Dictionary = game.state["fleets"][selected_fleet]
-		map_view.selected_sea_zone = fleet["sea_zone"]
-		var lanes := {}
-		if float(fleet["movement_left"]) >= float(game.data.balance["movement"]["sea_lane_cost"]):
-			for zone_id in game.data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
-				lanes[zone_id] = true
-		map_view.highlight_zones = lanes
+func cycle_selection() -> void:
+	## Tab / N: the next of our forces that still has orders to give.
+	var candidates := game.forces_awaiting_orders()
+	if candidates.is_empty():
+		_log("Every force has its orders for the season.")
+		return
+	var next_index := 0
+	var current := candidates.find(selected_force())
+	if current >= 0:
+		next_index = (current + 1) % candidates.size()
+	var pick: String = candidates[next_index]
+	var kind := ForceRules.kind_of(pick)
+	select_force(kind, pick)
+	if kind == "army":
+		map_view.center_on(game.state["armies"][pick]["region"])
 	else:
-		_deselect_fleet()
-
-
-func _deselect_fleet() -> void:
-	selected_fleet = ""
-	map_view.selected_sea_zone = ""
-	map_view.highlight_zones = {}
+		map_view.center_on_zone(game.state["fleets"][pick]["sea_zone"])
 
 
 func _tooltip_for(region_id: String) -> String:
@@ -569,8 +797,10 @@ func _tooltip_for(region_id: String) -> String:
 
 func _on_agent_selected(agent_id: String) -> void:
 	selected_agent = "" if selected_agent == agent_id else agent_id
-	selected_army = ""
-	region_panel.show_region(game, map_view.selected_region, "", selected_agent)
+	_clear_force_selection()
+	_refresh_selection()
+	_refresh_highlights()
+	map_view.queue_redraw()
 
 
 func _agent_order(target_region: String) -> void:
@@ -652,6 +882,76 @@ func _bribe_order(agent_id: String, army_id: String) -> void:
 		else:
 			_log("Our purse cannot meet their price.")
 		refresh())
+
+
+## --- Orders ---------------------------------------------------------------------
+
+func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
+	## A right click on the map with one of our forces selected — and the
+	## force card's "March to" and "Sail to" dropdowns, which say the same.
+	var player: String = game.state["player_faction"]
+	if selected_army != "" and game.state["armies"].has(selected_army):
+		match kind:
+			"region":
+				if target_id != game.state["armies"][selected_army]["region"]:
+					_army_order(target_id, forced)
+				else:
+					open_map_menu(target_id)
+			"army":
+				var other: Dictionary = game.state["armies"].get(target_id, {})
+				if other.is_empty():
+					return
+				if other["owner"] == player:
+					select_force("army", target_id)
+				elif game.visible_regions().has(other["region"]):
+					attack_army_order(target_id)
+			"fleet":
+				if game.state["fleets"].get(target_id, {}).get("owner", "") == player:
+					select_force("fleet", target_id)
+	elif selected_fleet != "" and game.state["fleets"].has(selected_fleet):
+		match kind:
+			"zone":
+				if target_id != game.state["fleets"][selected_fleet]["sea_zone"]:
+					_fleet_order(target_id)
+			"region":
+				_dock_order(target_id)
+			"fleet":
+				if game.state["fleets"].get(target_id, {}).get("owner", "") == player:
+					select_force("fleet", target_id)
+			"army":
+				if game.state["armies"].get(target_id, {}).get("owner", "") == player:
+					select_force("army", target_id)
+
+
+func _fleet_order(zone_id: String) -> void:
+	var zone_name: String = game.data.sea_zones.get(zone_id, {}).get("name", zone_id)
+	var result := game.sail_fleet(selected_fleet, zone_id)
+	if result.get("arrived", false):
+		_log("The fleet sails for the %s." % zone_name)
+	elif result.get("ok", false):
+		var halt: String = String(result.get("stopped_at", ""))
+		_log("The fleet makes for the %s and halts in the %s — no lanes left this season."
+			% [zone_name, game.data.sea_zones.get(halt, {}).get("name", halt)])
+	else:
+		_log("The fleet cannot reach the %s this season." % zone_name)
+	_after_order()
+
+
+func _dock_order(region_id: String) -> void:
+	## A right click on one of our ports with a fleet selected makes port:
+	## the ships wait in the harbour until launched again.
+	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+	if settlement.is_empty() or settlement["owner"] != game.state["player_faction"]:
+		_log("A fleet makes port only in one of our own harbours.")
+		return
+	var result := game.dock_fleet(selected_fleet, region_id)
+	if result["ok"]:
+		_log("The fleet makes port at %s; its ships wait in the harbour."
+			% game.data.regions[region_id]["settlement_name"])
+		map_view.selected_region = region_id
+	else:
+		_on_refused(result["error"])
+	_after_order()
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
@@ -749,6 +1049,10 @@ func _resolve_attack(defender_id: String, expected_owner: String) -> void:
 			or not game.state["armies"].has(defender_id) \
 			or String(game.state["armies"][defender_id]["owner"]) != expected_owner:
 		_log("The moment has passed.")
+		_after_order()
+		return
+	if float(game.state["armies"][selected_army]["movement_left"]) <= 0.0001:
+		_log("[color=#e0a060]The men have marched themselves out — the battle waits for next season.[/color]")
 		_after_order()
 		return
 	var result := game.attack_army(selected_army, defender_id)
@@ -891,6 +1195,10 @@ func _resolve_siege(target_region: String, expected_owner: String) -> void:
 		return
 	if game.besiege(selected_army, target_region):
 		_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
+	elif MovementRules.hostile_army_in(game.state, game.state["player_faction"], target_region):
+		_log("[color=#e0a060]A field army stands before the walls — it must be beaten before the city can be invested.[/color]")
+	elif float(game.state["armies"][selected_army]["movement_left"]) <= 0.0001:
+		_log("[color=#e0a060]Investing a city takes the season; the men have marched themselves out.[/color]")
 	else:
 		_log("No siege can be laid there.")
 	_after_order()
@@ -925,12 +1233,12 @@ func _confirm(text: String, on_accept: Callable) -> void:
 
 
 func _after_order() -> void:
-	if game.state["armies"].has(selected_army):
+	## The selection follows a surviving force; a force that is gone (beaten,
+	## garrisoned, merged away, docked) leaves its province selected instead.
+	_drop_stale_selection()
+	if selected_army != "":
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
-	else:
-		selected_army = ""
 	map_view.path_preview = {}
-	region_panel.show_region(game, map_view.selected_region, selected_army)
 	refresh()
 
 
@@ -949,7 +1257,8 @@ func _end_turn() -> void:
 	_treasury_delta = int(faction["treasury"]) - treasury_before
 	_treasury_shown = float(treasury_before)
 	_treasury_ticking = _treasury_delta != 0
-	selected_army = ""
+	# The selection survives the turn if the force does; its rings are
+	# recomputed by the refresh because the movement points are back.
 	_log_day()
 	refresh()
 
@@ -1167,13 +1476,12 @@ func _save_game() -> void:
 
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
-		selected_army = ""
-		_deselect_fleet()
+		_clear_force_selection()
 		selected_agent = ""
 		map_view.selected_region = ""
-		map_view.path_preview = {}
 		region_panel.clear_panel()
 		_victory_shown = false
+		map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
 		# The loaded campaign brings its own day with it: the journal travels in
 		# the save, so the Dispatch reopens on the turn that was actually last
 		# resolved rather than on whatever this session happened to play.
@@ -1202,3 +1510,111 @@ func _bar_button(text: String, handler: Callable) -> Button:
 	button.focus_mode = Control.FOCUS_NONE
 	button.pressed.connect(handler)
 	return button
+
+
+## --- Regrouping, refusals, options -----------------------------------------------
+
+func _on_army_raised(army_id: String) -> void:
+	var region_id: String = game.state["armies"][army_id]["region"]
+	_log("An army musters in %s." % game.data.regions[region_id]["settlement_name"])
+	select_force("army", army_id)
+
+
+func _on_fleet_launched(fleet_id: String) -> void:
+	var zone_id: String = game.state["fleets"][fleet_id]["sea_zone"]
+	_log("A fleet puts to sea into the %s; it sails next season."
+		% game.data.sea_zones.get(zone_id, {}).get("name", zone_id))
+	select_force("fleet", fleet_id)
+
+
+func _on_refused(error: String) -> void:
+	_log("[color=#e0a060]%s[/color]" % ForcePanel.explain(error))
+
+
+func disband_order(force_id: String, indices: Array) -> void:
+	## Sending men home is irreversible, so it is confirmed first.
+	_confirm("Disband %d unit%s? The men go back to the fields; no money comes back."
+		% [indices.size(), "" if indices.size() == 1 else "s"],
+		func(): _resolve_disband(force_id, indices))
+
+
+func _resolve_disband(force_id: String, indices: Array) -> void:
+	# Highest index first, so the earlier indices stay valid.
+	var order: Array = indices.duplicate()
+	order.sort()
+	order.reverse()
+	var returned := 0
+	var disbanded := 0
+	for index in order:
+		var result := game.disband_unit(force_id, int(index))
+		if result["ok"]:
+			disbanded += 1
+			returned += int(result["returned"])
+		else:
+			_on_refused(result["error"])
+	if disbanded > 0:
+		_log("%d unit%s disbanded; %d men return to the fields."
+			% [disbanded, "" if disbanded == 1 else "s", returned])
+	_after_order()
+
+
+func _sync_options() -> void:
+	if options_menu == null:
+		return
+	var popup := options_menu.get_popup()
+	popup.set_item_checked(popup.get_item_index(OPTION_PLAYBACK), playback_enabled)
+	popup.set_item_checked(popup.get_item_index(OPTION_GUIDED), game.guided_enabled())
+
+
+func _on_option_pressed(id: int) -> void:
+	match id:
+		OPTION_PLAYBACK:
+			set_playback(not playback_enabled)
+		OPTION_GUIDED:
+			set_guided(not game.guided_enabled())
+		OPTION_CONTROLS:
+			show_controls()
+
+
+func set_playback(enabled: bool) -> void:
+	## Whether End Turn plays the day out over the map or resolves it at once
+	## (the Dispatch and the log tell the same day either way).
+	playback_enabled = enabled
+	_sync_options()
+	_save_options()
+	_log("End Turn will %s." % ("play the day out over the map" if enabled
+		else "resolve the day at once — read it in the Dispatch"))
+
+
+func set_guided(enabled: bool) -> void:
+	## The guided mode, switchable mid-campaign: off, the trail stops issuing
+	## objectives and rewards; on again, it resumes where it was.
+	game.set_guided(enabled)
+	_sync_options()
+	_log("Guided mode %s." % ("on: the trail's objectives are back on the map" if enabled
+		else "off: no objectives, no rewards, no helping hand"))
+	refresh()
+
+
+func show_controls() -> void:
+	var dialog := AcceptDialog.new()
+	dialog.title = "Controls"
+	dialog.dialog_text = CONTROLS_TEXT
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
+	add_child(dialog)
+	dialog.popup_centered()
+
+
+func _save_options() -> void:
+	var file := FileAccess.open(OPTIONS_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify({"playback": playback_enabled}))
+
+
+func _load_options() -> void:
+	if not FileAccess.file_exists(OPTIONS_PATH):
+		return
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(OPTIONS_PATH))
+	if parsed is Dictionary and parsed.has("playback"):
+		playback_enabled = bool(parsed["playback"])

@@ -15,7 +15,8 @@ class_name NewGame
 ##                   war_record: {battles_won, battles_lost, faced: {class: battles}},
 ##                   war_mood: null|{label, value, turns}}}
 ##  settlements: {region_id: {owner, population, buildings: {chain_id: level_index},
-##                tax_level, garrison: [unit], construction_queue: [...],
+##                tax_level, garrison: [unit], harbour: [unit (ships only)],
+##                construction_queue: [...],
 ##                recruitment_queue: [...], governor: char_id|null,
 ##                slave_bonus_turns, plague_turns, recently_conquered,
 ##                low_order_streak, siege: null|{besieger, turns, equipment_ready},
@@ -217,6 +218,11 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	for settlement in state["settlements"].values():  # pure key-add — order-free
 		if not settlement.has("levy_strain"):
 			settlement["levy_strain"] = 0.0
+		if not settlement.has("harbour"):
+			# Saves from before harbours existed: the port is empty, and any
+			# ship recruited into the garrison is moved by NavalRules.normalise
+			# once the game data is at hand (Game.load_from).
+			settlement["harbour"] = []
 	if not state.has("modifiers"):
 		state["modifiers"] = []
 	if not state.has("chronicle"):
@@ -258,6 +264,7 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		_ensure_unit_arms(fleet["ships"])
 	for settlement in state["settlements"].values():
 		_ensure_unit_arms(settlement["garrison"])
+		_ensure_unit_arms(settlement["harbour"])
 	if not state.has("tributes"):
 		state["tributes"] = []
 	if not state.has("pending_offers"):
@@ -309,6 +316,7 @@ static func _settlement(data: GameData, setup: Dictionary, owner: String) -> Dic
 		"buildings": buildings,
 		"tax_level": setup.get("tax_level", "normal"),
 		"garrison": _units(setup.get("garrison", [])),
+		"harbour": _units(setup.get("harbour", [])),
 		"construction_queue": [],
 		"recruitment_queue": [],
 		"governor": null,

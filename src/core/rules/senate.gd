@@ -124,7 +124,7 @@ static func _run_charge(data: GameData, state: Dictionary, faction_id: String, r
 			minf(float(senate_rules["max_standing"]),
 				float(faction["senate_standing"]) + float(reward.get("senate_standing",
 					senate_rules["mission_success_standing"]))))
-		_grant_reward_units(state, faction_id, reward)
+		_grant_reward_units(data, state, faction_id, reward)
 		notices.append(_notice("mission_complete", faction_id, mission))
 		faction["mission"] = null
 		if faction_id == state.get("player_faction", ""):
@@ -458,14 +458,14 @@ static func _issue_mission(data: GameData, state: Dictionary, faction_id: String
 	return mission
 
 
-static func _grant_reward_units(state: Dictionary, faction_id: String, reward: Dictionary) -> void:
-	## Granted units muster in the capital's garrison.
+static func _grant_reward_units(data: GameData, state: Dictionary, faction_id: String, reward: Dictionary) -> void:
+	## Granted units muster in the capital's garrison (ships in its harbour).
 	var capital: String = state["factions"][faction_id]["capital"]
 	if not state["settlements"].has(capital) or state["settlements"][capital]["owner"] != faction_id:
 		return
 	for grant in reward.get("units", []):
 		for i in range(int(grant["count"])):
-			state["settlements"][capital]["garrison"].append({
+			RecruitmentRules.deliver_unit(data, state, capital, {
 				"template": grant["template"], "experience": 0, "strength_pct": 100,
 				"weapon": 0, "armor": 0,
 			})

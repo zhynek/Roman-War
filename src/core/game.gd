@@ -57,16 +57,15 @@ func edict_status(region_id: String) -> Dictionary:
 
 
 func queue_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	var queued := ConstructionRules.queue_project(data, state, region_id, chain_id)
-	if queued and state["settlements"][region_id]["owner"] == state["player_faction"]:
+	if queued:
 		GuidedRules.bump(state, "buildings_queued")
 		var kind: String = data.chains.get(chain_id, {}).get("kind", "")
 		if kind != "":
 			GuidedRules.bump(state, "buildings_queued:%s" % kind)
 	return queued
-	if not _owns_settlement(region_id):
-		return false
-	return ConstructionRules.queue_project(data, state, region_id, chain_id)
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
@@ -76,13 +75,12 @@ func demolish_building(region_id: String, chain_id: String) -> bool:
 
 
 func queue_unit(region_id: String, template_id: String) -> bool:
-	var queued := RecruitmentRules.queue_unit(data, state, region_id, template_id)
-	if queued and state["settlements"][region_id]["owner"] == state["player_faction"]:
-		GuidedRules.bump(state, "units_recruited")
-	return queued
 	if not _owns_settlement(region_id):
 		return false
-	return RecruitmentRules.queue_unit(data, state, region_id, template_id)
+	var queued := RecruitmentRules.queue_unit(data, state, region_id, template_id)
+	if queued:
+		GuidedRules.bump(state, "units_recruited")
+	return queued
 
 
 func retrain_garrison(region_id: String) -> int:
@@ -100,31 +98,50 @@ func move_capital(region_id: String) -> bool:
 
 
 ## --- Army actions --------------------------------------------------------
+## Every relocating order refreshes governorship at once (_after_relocation):
+## a general who marches out of his city stops governing it this turn, not
+## at the next end of turn.
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
 	_cancel_march(army_id)
 	if not _owns_army(army_id):
 		return false
-	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
 	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
-	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
+	if moved:
 		GuidedRules.bump(state, "army_moves")
+		_after_relocation()
 	return moved
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
-	if state["fleets"].get(fleet_id, {}).get("owner", "") != state["player_faction"]:
+	if not _owns_force(fleet_id):
 		return false
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
+func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
+	## Multi-lane voyage along the cheapest route (see MovementRules.sail).
+	if not _owns_force(fleet_id):
+		return {"ok": false, "arrived": false, "path": [], "stopped_at": ""}
+	return MovementRules.sail(data, state, fleet_id, to_zone)
+
+
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	## A battle takes the rest of the season: an army that has marched itself
+	## out cannot attack, and no army fights twice in one turn. This is the
+	## player's rule; the AI's own path (CombatRules.attack_army) sequences its
+	## marches and battles itself — DESIGN §6.3.
 	_cancel_march(attacker_id)
-	if not _owns_army(attacker_id):
+	if not _owns_army(attacker_id) or not state["armies"].has(defender_id):
+		return {}
+	if float(state["armies"][attacker_id]["movement_left"]) <= 0.0001:
 		return {}
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
+	if not result.is_empty() and state["armies"].has(attacker_id):
+		state["armies"][attacker_id]["movement_left"] = 0.0
+	_after_relocation()
 	return result
 
 
@@ -287,10 +304,10 @@ func sea_move_army(army_id: String, to_region: String) -> bool:
 	_cancel_march(army_id)
 	if not _owns_army(army_id):
 		return false
-	return MovementRules.sea_move_army(data, state, army_id, to_region)
 	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
-	if moved and state["armies"][army_id]["owner"] == state["player_faction"]:
+	if moved:
 		GuidedRules.bump(state, "army_moves")
+		_after_relocation()
 	return moved
 
 
@@ -302,7 +319,7 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 	## -> advance_march's outcome plus cost/turns/blocked_destination; {} when
 	## nothing leads toward the destination.
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if army.is_empty() or not _owns_army(army_id):
 		return {}
 	var found := PathfindingRules.best_path(
 		data, state, army_id, to_region, visible_regions(String(army["owner"])), forced_march)
@@ -321,6 +338,9 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 	outcome["cost"] = found["cost"]
 	outcome["turns"] = found["turns"]
 	outcome["blocked_destination"] = found["blocked_destination"]
+	if int(outcome.get("moved", 0)) > 0:
+		GuidedRules.bump(state, "army_moves")
+		_after_relocation()
 	return outcome
 
 
@@ -354,13 +374,12 @@ func army_path_preview(army_id: String, to_region: String, forced_march: bool = 
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
-	var hired := MercenaryRules.hire(data, state, army_id, template_id)
-	if hired and state["armies"][army_id]["owner"] == state["player_faction"]:
-		GuidedRules.bump(state, "mercs_hired")
-	return hired
 	if not _owns_army(army_id):
 		return false
-	return MercenaryRules.hire(data, state, army_id, template_id)
+	var hired := MercenaryRules.hire(data, state, army_id, template_id)
+	if hired:
+		GuidedRules.bump(state, "mercs_hired")
+	return hired
 
 
 func mercenaries_available(region_id: String) -> Array:
@@ -588,14 +607,17 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 func besiege(army_id: String, region_id: String) -> bool:
 	_cancel_march(army_id)
-	if not _owns_army(army_id):
+	if not _owns_army(army_id) or not state["settlements"].has(region_id):
 		return false
-	return SiegeRules.begin_siege(data, state, army_id, region_id)
+	var laid := SiegeRules.begin_siege(data, state, army_id, region_id)
+	if laid:
+		_after_relocation()
+	return laid
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
 	_cancel_march(army_id)
-	if not _owns_army(army_id):
+	if not _owns_army(army_id) or not state["settlements"].has(region_id):
 		return {}
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
@@ -618,6 +640,237 @@ func garrison_army(army_id: String) -> bool:
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
 
+## --- Regrouping (raise, transfer, merge, split, disband, generals) -----------
+## Every action returns {ok, error, ...}; check(action, args) answers "would
+## this be legal?" with the same error vocabulary, for greying buttons and
+## explaining refusals — see ForceRules and NavalRules.
+
+const _CHECK_ARITY := {
+	"raise_army": 2, "transfer_units": 3, "merge_armies": 2, "split_army": 2,
+	"disband_unit": 2, "attach_general": 2, "detach_general": 1, "consolidate": 1,
+	"launch_fleet": 3, "dock_fleet": 2, "merge_fleets": 2, "split_fleet": 2,
+}
+
+
+func check(action: String, args: Array) -> String:
+	## "" when the order would be taken; else an error code (ForceRules.ERR_*,
+	## plus wrong_owner / bad_args / unknown_action from the facade itself).
+	if not _CHECK_ARITY.has(action):
+		return "unknown_action"
+	if args.size() < int(_CHECK_ARITY[action]):
+		return "bad_args"
+	var subject := String(args[0])
+	if action in ["raise_army", "launch_fleet"]:
+		if not _owns_settlement(subject):
+			return ForceRules.ERR_WRONG_OWNER
+	elif not _owns_force(subject):
+		return ForceRules.ERR_WRONG_OWNER
+	match action:
+		"raise_army":
+			return ForceRules.check_raise_army(data, state, args[0], args[1], args[2] if args.size() > 2 else "")
+		"transfer_units":
+			return ForceRules.check_transfer_units(data, state, args[0], args[1], args[2])
+		"merge_armies":
+			return ForceRules.check_merge_armies(data, state, args[0], args[1])
+		"split_army":
+			return ForceRules.check_split_army(data, state, args[0], args[1], args[2] if args.size() > 2 else "")
+		"disband_unit":
+			return ForceRules.check_disband_unit(data, state, args[0], int(args[1]))
+		"attach_general":
+			return ForceRules.check_attach_general(data, state, args[0], args[1])
+		"detach_general":
+			return ForceRules.check_detach_general(data, state, args[0])
+		"consolidate":
+			return ForceRules.check_consolidate(data, state, args[0])
+		"launch_fleet":
+			return NavalRules.check_launch_fleet(data, state, args[0], args[1], args[2])
+		"dock_fleet":
+			return NavalRules.check_dock_fleet(data, state, args[0], args[1])
+		"merge_fleets":
+			return NavalRules.check_merge_fleets(data, state, args[0], args[1])
+		"split_fleet":
+			return NavalRules.check_split_fleet(data, state, args[0], args[1])
+	return "unknown_action"
+
+
+func raise_units(region_id: String, indices: Array, general_id: String = "") -> Dictionary:
+	## The ticked garrison units march out as a new army under a captain or a
+	## man standing in the city (raise_army below takes the whole garrison).
+	if not _owns_settlement(region_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "army_id": ""}
+	var result := ForceRules.raise_army(data, state, region_id, indices, general_id)
+	if result["ok"]:
+		GuidedRules.bump(state, "armies_raised")
+		_after_relocation()
+	return result
+
+
+func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	var result := ForceRules.transfer_units(data, state, from_id, to_id, indices)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func merge_armies(from_id: String, into_id: String) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	_cancel_march(from_id)
+	var result := ForceRules.merge_armies(data, state, from_id, into_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func split_army(army_id: String, indices: Array, general_choice: String = "") -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "army_id": ""}
+	var result := ForceRules.split_army(data, state, army_id, indices, general_choice)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func disband_unit(force_id: String, index: int) -> Dictionary:
+	if not _owns_force(force_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "returned": 0}
+	var result := ForceRules.disband_unit(data, state, force_id, index)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func attach_general(army_id: String, char_id: String) -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	var result := ForceRules.attach_general(data, state, army_id, char_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func detach_general(army_id: String) -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	var result := ForceRules.detach_general(data, state, army_id)
+	if result["ok"]:
+		_after_relocation()
+	return result
+
+
+func consolidate_units(force_id: String) -> Dictionary:
+	if not _owns_force(force_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	return ForceRules.consolidate(data, state, force_id)
+
+
+## --- Fleets (launch, dock, merge, split) --------------------------------------
+
+func launch_fleet(region_id: String, indices: Array, zone_id: String) -> Dictionary:
+	if not _owns_settlement(region_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
+	return NavalRules.launch_fleet(data, state, region_id, indices, zone_id)
+
+
+func dock_fleet(fleet_id: String, region_id: String) -> Dictionary:
+	if not _owns_force(fleet_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	return NavalRules.dock_fleet(data, state, fleet_id, region_id)
+
+
+func merge_fleets(from_id: String, into_id: String) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
+	return NavalRules.merge_fleets(data, state, from_id, into_id)
+
+
+func split_fleet(fleet_id: String, indices: Array) -> Dictionary:
+	if not _owns_force(fleet_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
+	return NavalRules.split_fleet(data, state, fleet_id, indices)
+
+
+func own_ports_on_zone(zone_id: String, faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return NavalRules.own_ports_on_zone(state, data, fid, zone_id)
+
+
+func candidate_generals(region_id: String, faction_id: String = "") -> Array:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return ForceRules.candidate_generals(data, state, region_id, fid)
+
+
+## --- Force queries (banners, the force card, keyboard cycling) ----------------
+
+func force_summary(force_id: String) -> Dictionary:
+	## One dictionary describing an army ("army_N"), a fleet ("fleet_N"), a
+	## garrison ("garrison:<region>") or a harbour ("harbour:<region>") — see
+	## ForceRules.summary.
+	return ForceRules.summary(data, state, force_id)
+
+
+func reachable_regions(army_id: String) -> Dictionary:
+	## {reach: {region_id: {cost, forced}}, blocked: {region_id: reason}} for an
+	## army, seen through its owner's fog: where it can get this season on its
+	## plain budget, where only a forced march reaches, and what bars the way
+	## beside them. Nothing the fog hides ever reports a reason.
+	var army: Dictionary = state["armies"].get(army_id, {})
+	if army.is_empty():
+		return {"reach": {}, "blocked": {}}
+	var owner := String(army["owner"])
+	var visible := visible_regions(owner)
+	var plain := PathfindingRules.reachable(data, state, army_id, -1.0, false, visible)
+	var forced := PathfindingRules.reachable(data, state, army_id, -1.0, true, visible)
+	var reach := {}
+	var region_ids: Array = forced.keys()
+	region_ids.sort()
+	for region_id in region_ids:
+		reach[region_id] = {"cost": float(forced[region_id]), "forced": not plain.has(region_id)}
+	var blocked := {}
+	var frontier: Array = reach.keys()
+	frontier.append(army["region"])
+	frontier.sort()
+	for region_id in frontier:
+		for neighbor in data.regions.get(region_id, {}).get("adjacent", []):
+			if reach.has(neighbor) or blocked.has(neighbor):
+				continue
+			var reason := MovementRules.block_reason(state, owner, String(neighbor), visible.has(neighbor))
+			if reason != "":
+				blocked[neighbor] = reason
+	return {"reach": reach, "blocked": blocked}
+
+
+func targets_for(army_id: String) -> Dictionary:
+	## {region_id: "attack"|"siege"} an army can strike from where it stands.
+	return MovementRules.targets_for(data, state, army_id)
+
+
+func reachable_zones(fleet_id: String) -> Dictionary:
+	## {zone_id: {cost, via}} for the seas a fleet can reach this season.
+	return MovementRules.fleet_reachable(data, state, fleet_id)
+
+
+func forces_awaiting_orders(faction_id: String = "") -> Array:
+	## Own armies then fleets, numeric id order, that still have movement.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var waiting: Array = []
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort_custom(ForceRules.id_less)
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
+		if army["owner"] == fid and float(army["movement_left"]) > 0.0001:
+			waiting.append(army_id)
+	var fleet_ids: Array = state["fleets"].keys()
+	fleet_ids.sort_custom(ForceRules.id_less)
+	for fleet_id in fleet_ids:
+		var fleet: Dictionary = state["fleets"][fleet_id]
+		if fleet["owner"] == fid and float(fleet["movement_left"]) > 0.0001:
+			waiting.append(fleet_id)
+	return waiting
+
+
 func raise_army(region_id: String) -> String:
 	## The whole garrison marches out as a field army under the best of the
 	## house present (the AI musters through its own path). Returns the new
@@ -633,7 +886,22 @@ func raise_army(region_id: String) -> String:
 		range(mini(settlement["garrison"].size(), cap)), general)
 	if army_id != "":
 		GuidedRules.bump(state, "armies_raised")
+		_after_relocation()
 	return army_id
+
+
+func guided_enabled() -> bool:
+	var guided = state.get("guided")
+	return guided is Dictionary and bool(guided.get("enabled", false))
+
+
+func set_guided(enabled: bool) -> void:
+	## The guided mode is a switch, not a campaign setting: off, the trail
+	## stops issuing objectives and rewards; on again, it resumes from the
+	## stage it had reached. Travels with the save like the rest of the trail.
+	if not (state.get("guided") is Dictionary):
+		state["guided"] = {"enabled": enabled, "counters": {}, "stages": {}}
+	state["guided"]["enabled"] = enabled
 
 
 func explore_site(army_id: String) -> Dictionary:
@@ -682,7 +950,7 @@ func explore_site(army_id: String) -> Dictionary:
 			else:
 				overflow.append({"template": grant["template"], "count": 1})
 	if not overflow.is_empty():
-		GuidedRules.grant_units_to_capital(state, army["owner"], overflow)
+		GuidedRules.grant_units_to_capital(data, state, army["owner"], overflow)
 	var experience := int(reward.get("experience", 0))
 	if experience > 0:
 		var experience_max := int(data.balance["recruitment"]["experience_max"])
@@ -885,6 +1153,9 @@ func _units_unlocked_at(chain: Dictionary, tier: int) -> Array:
 			continue
 		if template["factions"] == ["mercenary"]:
 			continue
+		# A general's bodyguard is never trained either: it comes with the man.
+		if String(template["class"]) == "general_bodyguard":
+			continue
 		if not chain.get("cultures", []).has(template["culture"]):
 			continue
 		var god_needed := String(need.get("temple_god", ""))
@@ -931,6 +1202,11 @@ func visible_regions(faction_id: String = "") -> Dictionary:
 	return VisibilityRules.visible_regions(data, state, fid)
 
 
+func visible_sea_zones(faction_id: String = "") -> Dictionary:
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	return VisibilityRules.visible_sea_zones(data, state, fid)
+
+
 func victory_progress(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VictoryRules.progress(data, state, fid)
@@ -947,6 +1223,9 @@ func load_from(path: String) -> bool:
 	if loaded.is_empty():
 		return false
 	NewGame.ensure_state_keys(loaded, data)
+	# Saves from before harbours existed keep their warships in the garrison;
+	# they move to the port now that the unit table is at hand.
+	NavalRules.normalise(data, loaded)
 	state = loaded
 	return true
 
@@ -963,6 +1242,20 @@ func _cancel_march(army_id: String) -> void:
 	army.erase("march_forced")
 func _owns_army(army_id: String) -> bool:
 	return state["armies"].get(army_id, {}).get("owner", "") == state["player_faction"]
+
+
+func _owns_force(force_id: String) -> bool:
+	## Armies, fleets, garrisons and harbours alike: an unknown or foreign id
+	## is refused (false / {} / wrong_owner), never a script error.
+	return ForceRules.exists(state, force_id) \
+		and ForceRules.owner_of(state, force_id) == String(state["player_faction"])
+
+
+func _after_relocation() -> void:
+	## Governorship follows presence: a general who marches out of his city
+	## stops governing it this turn, not at the next end of turn. Derived
+	## value, no randomness involved.
+	SettlementRules.refresh_governors(data, state)
 
 
 func _owns_settlement(region_id: String) -> bool:

@@ -41,6 +41,7 @@ of every session is `git fetch origin main && git checkout -B <branch> origin/ma
 | `project-handoff-familiarization` | Campaign agents and a real negotiation model, the knowledge/technique engine, the chronicle and epithets, AI personas |
 | `roman-war-next-phase` (2026-09-02) | Phase 7, the cursus honorum: Senate offices and elections, seats that absorb Ambition, the Senate's demand, outlawry, a civil war with sides and an end, the Senate scroll, journal beats, a trail stage; the world seed persisted, the version stamp, the duplicate `class_name` removed |
 | `military-strategy-gameplay` (2026-09-05, PR #2) | The military strategy layer: unit-class counters, the RNG-free battle estimator with odds and named factors, kit from armouries and drill, the casualty and rout model, garrison quality / levy strain / war mood in public order, warcraft techniques folded into the knowledge engine; `docs/MILITARY_STRATEGY.md` |
+| `roman-war-gameplay-review-ou72vk` (2026-09-05, **ported by hand**, not merged) | Phase 9, army command: `ForceRules` (raise under a chosen leader, transfer, merge, split, disband, attach/detach generals, consolidate — movement conserved through transfers), `NavalRules` and harbours (ships finish in port; launch, dock, merge, split), attacks and sieges that cost the season, banners on the map with left-click select / right-click order, the force card, garrison and harbour tick rows. Rewritten against the trunk's retained-layer renderer, `PathfindingRules` and facade; plus the two-row header that ended the cut-off screen and the Options menu |
 
 **Deleted, not merged: `handoff-repo-familiarization-jgqty6`** (head
 `bd8be2549e9a39dafe496f1cb97cd6237ace10a9`, deleted 2026-09-01 after review).
@@ -83,44 +84,37 @@ never park under walls they cannot storm, debt shedding the costliest unit down
 to a floor — and each is worth checking against `main`'s AI as an idea, not as
 a file. Nothing else to take.
 
-**Superseded in part, worth mining: `roman-war-gameplay-review-ou72vk`**
-(fourteen commits, 2026-09-05, forked from `9026730`; head `4293616`). It did
-not know `main` existed: its `docs/reviews/2026-09-codebase-review.md` reviews
-"the whole repository at commit `9026730`", and its Phase 9 — army command —
-is written against the old map renderer and the old facade. A dry-run merge
-onto the trunk conflicts in 81 paths (`map_view.gd`, `campaign_screen.gd`,
-`game.gd`, `combat.gd`, `movement.gd`, `siege.gd`, `senate.gd` among them), so
-it cannot be merged; but it is the only branch that holds these, and `main`
-has none of them:
+**Ported, not merged: `roman-war-gameplay-review-ou72vk`** (fourteen commits,
+2026-09-05, forked from `9026730`; head `4293616`). It did not know `main`
+existed — its Phase 9, army command, was written against the old map renderer
+and the old facade, and a dry-run merge conflicted in 81 paths — so on
+2026-09-05 its rules were re-implemented on the trunk by hand
+(`src/core/rules/forces.gd`, `src/core/rules/naval.gd`, the facade's regroup
+block, `src/ui/panels/force_panel.gd`, the banner layer in `map_view.gd`, the
+tick rows in `region_panel.gd`; `tests/test_forces.gd`, `tests/test_naval.gd`,
+`tests/test_ui_forces.gd`). DESIGN §6.1, §6.3 and §6.4 describe what landed.
+Three decisions worth knowing, because the branch decided them differently:
 
-- **`ForceRules`** (`src/core/rules/forces.gd` there, behind
-  `Game.raise_army(region, indices, general)`, `transfer_units`, `merge_armies`,
-  `split_army`, `disband_unit`, `attach_general`, `detach_general`) with a
-  **force card** and regroup rows in the panels. `main` raises an army whole
-  (`Game.raise_army(region)`), garrisons it (`garrison_army`), detaches units
-  engine-side (`CombatRules.detach_to_garrison`) and merges co-located stacks
-  for the AI only (`AiMilitary._merge_colocated`); the player has no transfer,
-  merge, split, disband, attach or detach. Port the rules onto `main`'s facade
-  and the card onto `main`'s side panel; do not port its `map_view.gd`.
-- **Harbours**: ships finish in port instead of the land garrison, with
-  `launch_fleet` / `dock_fleet` / `merge_fleets` / `split_fleet` and movement
-  conserved through transfers (its adversarial round closed the relays). On
-  `main` the only fleets are the campaign's starting ones (`NewGame._add_fleet`),
-  ordered from the diplomacy scroll; `recruitment.gd` never mentions a ship.
-- **Movement paid by attacks and sieges**, sieges released from every path that
-  moves or erases the besieger, besieged cities that neither recruit nor build,
-  and a facade that refuses orders for forces the player does not own
-  (`wrong_owner`, `unknown_action`). Check each against `main` before assuming
-  it is missing — `main`'s `AiMilitary` and `SiegeRules` were written later and
-  may already hold the rule.
-- Its **review report**: 124 deduplicated findings against `9026730`, 24
-  verified. Most engine findings predate `main`'s rewrites; the balance
-  findings (income snowballs, order at 150–220 % in core cities, extermination
-  dominating, huge cities unreachable) may or may not survive the society layer
-  — re-probe on `main` before acting on any of them.
+- **The stack cap stays `balance.recruitment.army_unit_cap`** (`ForceRules.
+  max_units`); the branch had its own `forces.max_units`. The only new balance
+  key is `forces.disband_population_return_pct`.
+- **"An attack costs the season" lives in `Game.attack_army` only.** The AI
+  attacks through `CombatRules.attack_army` and pays nothing — deliberately,
+  so the 60-turn campaign harness and the AI's tuning were left untouched.
+  Close the asymmetry in `AiMilitary` when the AI is next worked on; it is a
+  known gap (§7).
+- **Multi-turn marches are the trunk's** (`PathfindingRules`); the branch's
+  one-step `reachable_regions` was rebuilt on top of them
+  (`Game.reachable_regions` → `{reach: {id: {cost, forced}}, blocked: {id:
+  reason}}`, seen through the owner's fog).
 
-`git fetch origin claude/roman-war-gameplay-review-ou72vk` gets it while the
-branch exists; `docs/plans/phase-9-army-command.md` there is the spec.
+Its **review report** (`docs/reviews/2026-09-codebase-review.md` on the
+branch: 124 deduplicated findings against `9026730`, 24 verified) was not
+ported. Most engine findings predate `main`'s rewrites; the balance findings
+(income snowballs, order at 150–220 % in core cities, extermination
+dominating, huge cities unreachable) may or may not survive the society
+layer — re-probe on `main` before acting on any of them. The branch can be
+deleted once nobody needs the report.
 
 **The military strategy layer** (from `claude/military-strategy-gameplay-ecnngs`,
 reconciled onto the trunk on 2026-09-03 as PR #2, but only fast-forwarded into
@@ -135,9 +129,10 @@ records with a `war` block and war-record prerequisites, so there is one
 research model, not two. `docs/MILITARY_STRATEGY.md` is the player-facing guide;
 DESIGN §6.5–6.8 the spec.
 
-**Green on `main`:** 414 tests across 42 test files, validator 0 errors /
-0 warnings across 33 data tables, clean boot — re-run on 2026-09-05 before the
-fast-forward. One assertion is machine-bound: `test_ai_campaign.gd`'s 600 ms
+**Green on `main`:** 454 tests across 45 test files (0.11.0 — the Phase 9
+port added `test_forces`, `test_naval`, `test_ui_forces` and thirty
+assertions elsewhere), validator 0 errors / 0 warnings across 33 data tables,
+clean boot — re-run on 2026-09-05 before the fast-forward. One assertion is machine-bound: `test_ai_campaign.gd`'s 600 ms
 per-turn guard (§5.12). PR #2's author measured 514 ms on the merge against
 476 ms for the trunk before it; the 2026-09-05 container measured 606 ms quiet
 (748 ms slowest turn) against 538 ms for `d98484d`, and 676 ms with a download
@@ -192,7 +187,7 @@ The two gates that must stay green — the same two CI runs on every push and PR
 
 ```sh
 python3 tools/validate_data.py                                # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd   # 414 tests, 0 failures
+godot --headless --path . --script res://tests/run_tests.gd   # 454 tests, 0 failures
 godot --headless --path . --quit-after 5                      # boots clean: no errors after the version banner
 ```
 
@@ -240,9 +235,10 @@ behind `rules/battle/battle_resolver.gd`.
 
 | Panel | Facade methods |
 |---|---|
-| `campaign_screen.gd` (the shell) | `end_turn`, `day_beats`, `move_army`, `sea_move_army`, `attack_army`, `besiege`, `move_agent`, `agent_scout/_assassinate/_bribe/_steal_technique`, `visible_regions`, `victory_progress`, `save_to`, `load_from` |
-| `panels/region_panel.gd` (the biggest) | `growth/order/income_breakdown`, `available_buildings/units`, `queue_building/unit`, `demolish_building`, `set_tax_level`, `retrain_garrison`, `garrison_army`, `raise_army`, `move_capital`, `assault_settlement`, `hire_mercenary`, `mercenaries_available`, `recruit_agent`, `agents_in`, `set_edict`, `revoke_edict`, `available_edicts`, `edict_status` |
-| `panels/diplomacy_panel.gd` | `pending_offers`, `respond_offer`, `declare_war`, `move_fleet` — **fleets live here, not on the map** |
+| `campaign_screen.gd` (the shell) | `end_turn`, `day_beats`, `move_army`, `march_army`, `sea_move_army`, `sail_fleet`, `dock_fleet`, `attack_army`, `besiege`, `assault_settlement`, `disband_unit`, `force_summary`, `reachable_regions`, `targets_for`, `reachable_zones`, `forces_awaiting_orders`, `guided_enabled`/`set_guided`, `move_agent`, `agent_scout/_assassinate/_bribe/_steal_technique`, `visible_regions`, `victory_progress`, `save_to`, `load_from`. Selection is hoisted here (`selected_army`, `selected_fleet`, `selected_agent`; `select_force`, `deselect`, `cycle_selection`); a LEFT click selects, a RIGHT click with a force selected is `_on_order_target` |
+| `panels/force_panel.gd` (the force card) | `force_summary`, `check`, `transfer_units`, `merge_armies`, `split_army`, `attach_general`, `detach_general`, `consolidate_units`, `merge_fleets`, `split_fleet`, `dock_fleet`, `own_ports_on_zone`, `candidate_generals`, `reachable_regions`, `reachable_zones`, `garrison_army`, `halt_march`, `battle_estimate`, `assault_estimate`, `mercenaries_available`, `hire_mercenary`; every refusal comes back as an error code the screen explains through `ForcePanel.explain` |
+| `panels/region_panel.gd` (the biggest) | `growth/order/income_breakdown`, `available_buildings/units`, `queue_building/unit`, `demolish_building`, `set_tax_level`, `retrain_garrison`, `raise_units`, `raise_army`, `transfer_units`, `launch_fleet`, `candidate_generals`, `move_capital`, `recruit_agent`, `agents_in`, `set_edict`, `revoke_edict`, `available_edicts`, `edict_status` — the garrison and harbour are tick rows |
+| `panels/diplomacy_panel.gd` | `pending_offers`, `respond_offer`, `declare_war` — fleets left this scroll for the map |
 | `panels/negotiation_dialog.gd` | `preview_offer`, `propose_offer` |
 | `panels/family_panel.gd` | `family_of`, `character_sheet`, `set_heir`, `transfer_ancillary` |
 | `panels/senate_panel.gd` | `senate_overview`, `comply_senate_demand` — the one act the scroll takes |
@@ -253,18 +249,21 @@ behind `rules/battle/battle_resolver.gd`.
 | `panels/build_drawer.gd`, `panels/info_card.gd`, `panels/map_context_menu.gd` | the building yard / muster hall, the illustrated cards, the right-click dossier |
 | `turn_sequence.gd` + `dispatch_panel.gd` | the day's playback and its recap, over `day_beats` |
 
-**Tests** (`tests/`, 38 files over `tests/fixtures.gd`, a synthetic world that
+**Tests** (`tests/`, 45 files over `tests/fixtures.gd`, a synthetic world that
 loads the real `balance.json`). Formula units: `growth`, `economy`,
 `public_order`, `construction`, `recruitment`, `battle`, `battle_log`,
-`movement_visibility`, `pathfinding`, `characters`. Systems: `agents`, `senate_politics`,
+`movement_visibility`, `pathfinding`, `characters`, `forces` (regrouping and
+movement conservation), `naval` (harbours, launch/dock). Systems: `agents`, `senate_politics`,
 `diplomacy_offers`, `diplomacy_war`, `ai`, `knowledge`, `edicts`, `chronicle`,
 `society`, `legibility`, `advances`, `guided`, `turn_journal`, `dispatch`,
 `events_vocabulary`. Presentation: `map_geometry`, `map_menu`, `illustrations`,
 `building_art`, `unit_art`, `info_cards`, `battle_screen`, `profiles`,
 `building_info`. Integration: **`test_ai_campaign.gd` is the tripwire** —
 60 AI-driven turns asserting the map changes hands, byte-identical replay from
-one seed, and save-at-20/resume-in-lockstep. `test_ui_smoke.gd` drives the real
-screen headless; `test_society_longrun.gd` is the slow shape check.
+one seed, and save-at-20/resume-in-lockstep. `test_ui_smoke.gd` and
+`test_ui_forces.gd` drive the real screen headless (banners, picking, the
+left-select / right-order grammar, the force card and the regroup rows);
+`test_society_longrun.gd` is the slow shape check.
 
 ## 4. Turning a playtest report into work
 
@@ -417,6 +416,23 @@ here. What follows is the rest:
     any campaign a playtester will finish. The greatness gate
     (`leader_suicide_standing` / `leader_suicide_popular_min`) replaced the
     calendar gate; do not put the year back.
+24. **The UI's whole world is a 1280×800 canvas.** `project.godot` stretches
+    that canvas to the window (`stretch/mode=canvas_items`, `aspect=expand`),
+    so a 1440×900 laptop shows exactly 1280×800 canvas pixels and a 1920×1080
+    one 1422×800. Any control tree whose *minimum* width exceeds that overflows
+    the window — no scrollbar, no clipping, the right-hand part is simply gone.
+    The old one-row top bar had a minimum of ~2000 px, which is why the 0.10.0
+    build showed the bar cut off after "Diplomacy" and the side column
+    off-screen. The header is two wrapping `HFlowContainer` rows now, and
+    `test_the_top_bar_fits_a_narrow_window` pins the root's minimum width
+    under 1000 px. Anything added to the header must wrap or stay short.
+25. **`tools/screenshot.gd` sizes its holder in canvas units**
+    (`root.get_visible_rect().size`), not `root.size` (window pixels). With
+    the pixel size it drew a grey margin on small windows and pushed the side
+    column off large ones — an artefact the game never shows. Read a shot
+    against that before diagnosing a layout bug from it.
+26. **Godot 4.4 GDScript refuses `Rect2 + Vector2`** at parse time (and the
+    whole class with it — see 7). Offset a rect by writing its `position`.
 
 ### The building yard, and the rules it added
 
@@ -485,10 +501,14 @@ What costs time to rediscover:
   campaign, ends five turns, round-trips a save and checks the loaded game
   marches in lockstep with the live one, exiting nonzero on failure.
 - **Builds delivered so far:** `97cabfd` — the old `9026730` line, Phases 0–4
-  and the first campaign UI, no version stamp — on 2026-08-23; and **`0.10.0`,
+  and the first campaign UI, no version stamp — on 2026-08-23; **`0.10.0`,
   the first build of `main`** (the integrated trunk plus the military layer),
-  on 2026-09-05. Every playtest report from before that date is about the old
-  line, not about anything in the table above.
+  on 2026-09-05; and **`0.11.0`** the same day — army command (banners, the
+  force card, regrouping, harbours), the header that fits the window, and the
+  Options menu. Every playtest report from before 2026-09-05 is about the old
+  line, not about anything in the table above. The first feedback on 0.10.0
+  was the cut-off screen (§5.24) and "how do I switch the mode" — both fixed
+  in 0.11.0.
 
 ## 7. Known gaps (verified, not guesses)
 
@@ -517,7 +537,16 @@ What costs time to rediscover:
   deliberately refuses to route through a hostile shore (DESIGN §9 explains
   what that fixed). Island factions therefore expand only if war finds them.
 - **Sea-zone `position` values** in `regions.json` are used only to anchor
-  fleet icons and sea labels; no zone is a first-class map object.
+  fleet banners, the sea-zone click target and sea labels; no zone is a
+  first-class map object.
+- **The AI's attacks pay no movement.** `Game.attack_army` (the player) needs
+  movement left and spends it all; `AiMilitary` goes through
+  `CombatRules.attack_army` and does not. Decided deliberately when Phase 9
+  was ported (§1) so the AI harness stayed untouched; close it in `AiMilitary`
+  and re-run `test_ai_campaign` (the 600 ms guard) when the AI is next tuned.
+- **The AI builds no ships and uses no harbour.** `AiEconomy._recruit` skips
+  the `ship` class; the only AI fleets are the campaign's starting ones.
+  Harbours, launching and docking are player-only until the sea phase.
 - **One mission kind is still forward content**: `blockade_port` needs port
   blockades (Phase 3 remainder). `SenateRules.LIVE_KINDS` names what is judged,
   `FORWARD_MISSION_KINDS` in the validator allowlists the rest, and
@@ -622,10 +651,11 @@ gated on `popular_standing`, setting `at_civil_war` and then
 rebellion by choice — the player's counterpart of `house_joins_rebellion`. Then
 proscriptions and army defections once a war is on, and AI canvassing.
 
-**Phase 3 remainder — the sea.** Fleets move and watch but never fight;
-`blockade_port` missions are authored and allowlisted. The corvus technique and
-its **Boarding Marines** (the first `requires_technique` unit) were written as
-the hook for exactly this slice.
+**Phase 3 remainder — the sea.** Fleets move, dock, launch and regroup now
+(harbours, `NavalRules`) but never fight and carry no armies; `blockade_port`
+missions are authored and allowlisted. The corvus technique and its **Boarding
+Marines** (the first `requires_technique` unit) were written as the hook for
+exactly this slice, and the harbour is where an embarked army would board.
 
 **The optional online narrator.** The chronicle is already the
 machine-readable feed (`schemas/chronicle_entry.schema.json`,

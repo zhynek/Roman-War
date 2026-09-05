@@ -17,6 +17,7 @@
     "plague",
     "movement",
     "recruitment",
+    "forces",
     "battle",
     "siege",
     "senate",
@@ -115,6 +116,9 @@
       "$ref": "#/$defs/numeric_section"
     },
     "recruitment": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "forces": {
       "$ref": "#/$defs/numeric_section"
     },
     "battle": {

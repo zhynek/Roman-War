@@ -22,6 +22,10 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 			continue
 		if unit["factions"].has("mercenary"):
 			continue
+		# A general's escort exists only around a general: it is never mustered
+		# from the barracks (its cost is 0, so it would be everyone's favourite).
+		if String(unit.get("class", "")) == "general_bodyguard":
+			continue
 		if not _requirements_met(data, settlement, unit):
 			continue
 		available.append(unit)
@@ -30,6 +34,8 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 
 static func queue_unit(data: GameData, state: Dictionary, region_id: String, template_id: String) -> bool:
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return false  # nobody musters under siege
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var template: Dictionary = data.units.get(template_id, {})
 	if template.is_empty():
@@ -111,7 +117,10 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 	## the garrison with the settlement's recruit profile: experience from
 	## drill-style buildings, techniques, edicts and boons; kit from forges
 	## and armouries — the weapons/armor stamp travels with the unit for life.
+	## A besieged city's queues stand still until the siege is lifted.
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return []
 	var completed: Array = []
 	var remaining: Array = []
 	var first := true
@@ -129,7 +138,7 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 				"strength_pct": 100,
 			}
 			stamp_upgrades(unit, profile)
-			settlement["garrison"].append(unit)
+			deliver_unit(data, state, region_id, unit)
 			completed.append(job["template"])
 		else:
 			remaining.append(job)
@@ -138,16 +147,20 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 
 
 static func retrain_garrison(data: GameData, state: Dictionary, region_id: String) -> int:
-	## Refill depleted garrison units, paying cost proportional to missing men.
-	## Retraining is also RE-ARMING: every unit the city could recruit afresh is
-	## brought up to the current weapons/armor standard, free — the forges and
-	## techniques were the investment. Marching veterans home to re-arm is the
-	## strategic move this buys.
+	## Refill depleted garrison units (and repair the ships in the harbour),
+	## paying cost proportional to missing men. Retraining is also RE-ARMING:
+	## every unit the city could recruit afresh is brought up to the current
+	## weapons/armor standard, free — the forges and techniques were the
+	## investment. Marching veterans home to re-arm is the strategic move this
+	## buys. Nothing is retrained under siege.
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return 0
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var kit := recruit_profile(data, state, region_id)
 	var healed := 0
-	for unit in settlement["garrison"]:
+	var in_port: Array = settlement["garrison"] + settlement.get("harbour", [])
+	for unit in in_port:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if not _requirements_met(data, settlement, template):
 			continue
@@ -170,6 +183,16 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 		unit["strength_pct"] = 100
 		healed += 1
 	return healed
+
+
+static func deliver_unit(data: GameData, state: Dictionary, region_id: String, unit: Dictionary) -> void:
+	## Where a unit that finishes (or is granted) in a settlement waits: a
+	## warship in the harbour, never on the walls; everything else in the
+	## garrison. Every path that puts a new unit into a city comes through here.
+	if String(data.units.get(unit["template"], {}).get("class", "")) == "ship":
+		NavalRules.harbour_of(state, region_id).append(unit)
+	else:
+		state["settlements"][region_id]["garrison"].append(unit)
 
 
 static func add_levy_strain(data: GameData, state: Dictionary, region_id: String, soldiers: int) -> void:

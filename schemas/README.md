@@ -28,7 +28,10 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
 - Unit classes: `infantry, spear, pike, missile, cavalry, horse_archer, chariot,
   elephant, siege, ship, general_bodyguard, peasant` — each needs a record in
   `unit_classes.json` (matchups, terrain, assault, wall_defense, garrison_weight,
-  mass).
+  mass). A `ship` may only stand in a settlement's `harbour` (coastal regions
+  only) or in a fleet; any other class may only stand in a `garrison` or an
+  army; `general_bodyguard` is never recruitable — it comes with the man.
+  Armies and fleets hold at most `balance.recruitment.army_unit_cap` units.
 - Unit attributes: `forest_ambusher, war_cry, phalanx, testudo, terrifies_foot,
   terrifies_horse, sapper, hardy, fast_moving, shield_wall` — each needs an
   effects record in `unit_classes.json` (percentages, additive), a glossary

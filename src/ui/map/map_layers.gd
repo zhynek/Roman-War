@@ -6,7 +6,7 @@ class_name MapLayers
 ## when MapView.refresh_state() diffs new campaign state, never per frame.
 ##
 ## Draw order (tree order): Terrain, Political, Fog, Units, Overlay — then
-## LabelLayer on top in screen space.
+## LabelLayer and BannerLayer on top in screen space.
 
 
 class TerrainLayer:
@@ -142,7 +142,8 @@ class FogLayer:
 
 class UnitsLayer:
 	extends Node2D
-	## Settlements, armies, sieges, the capital mark — the living map.
+	## Settlements, the capital mark — and, zoomed far out, the owner badges
+	## that stand in for the banners BannerLayer draws at readable zooms.
 
 	var view: MapView
 
@@ -150,6 +151,7 @@ class UnitsLayer:
 		var game: Game = view.game
 		if game == null:
 			return
+		var compact: bool = view._zoom < MapView.COMPACT_ZOOM
 		var region_ids: Array = game.data.regions.keys()
 		region_ids.sort()
 		for region_id in region_ids:
@@ -163,8 +165,10 @@ class UnitsLayer:
 					draw_arc(anchor, 9.0, 0, TAU, 24, Color(0.28, 0.28, 0.30), 1.5)
 				continue
 			_draw_settlement(region_id, anchor)
-			_draw_armies(region_id, anchor)
-		_draw_fleets()
+			if compact:
+				_draw_armies(region_id, anchor)
+		if compact:
+			_draw_fleets()
 
 	func _draw_settlement(region_id: String, anchor: Vector2) -> void:
 		var game: Game = view.game
@@ -192,20 +196,37 @@ class UnitsLayer:
 
 	func _draw_fleets() -> void:
 		var game: Game = view.game
-		var player_color := Color.html(game.data.factions.get(
-			String(game.state["player_faction"]), {}).get("color", "#808080"))
+		var player := String(game.state["player_faction"])
 		for zone_id in view.fleet_groups:
 			var anchor_data: Dictionary = game.data.sea_zones.get(zone_id, {}).get("position", {})
 			if anchor_data.is_empty():
 				continue
+			# The badge wears our colour when one of our fleets is here, else
+			# the first fleet's owner — a foreign sail is news worth a colour.
+			var owner := player
+			var fleets: Array = ForceRules.fleets_in(game.state, String(zone_id))
+			if not fleets.is_empty():
+				owner = ForceRules.owner_of(game.state, fleets[0])
+				for fleet_id in fleets:
+					if ForceRules.owner_of(game.state, fleet_id) == player:
+						owner = player
+						break
+			var color := Color.html(game.data.factions.get(owner, {}).get("color", "#808080"))
 			var at := Vector2(float(anchor_data["x"]), float(anchor_data["y"])) * MapView.WORLD_SCALE
-			SettlementIcons.draw_fleet_token(self, at, player_color,
+			SettlementIcons.draw_fleet_token(self, at, color,
 				int(view.fleet_groups[zone_id]), view.map_font)
 
 
 class OverlayLayer:
 	extends Node2D
-	## Selection emphasis and the movement-range tint (highlight_regions).
+	## Selection emphasis and the rings of what the selected force can do:
+	## highlight_regions maps region -> kind. "march" (and the trail's plain
+	## `true`) is the gold reach wash, "forced" the orange forced-march reach,
+	## "attack" / "siege" the red strike ring.
+
+	const FORCED_TINT := Color(1.0, 0.62, 0.22, 0.16)
+	const FORCED_EDGE := Color(1.0, 0.62, 0.22, 0.8)
+	const STRIKE_TINT := Color(0.9, 0.25, 0.15, 0.10)
 
 	var view: MapView
 
@@ -214,7 +235,13 @@ class OverlayLayer:
 		if game == null:
 			return
 		for region_id in view.highlight_regions:
-			_paint_region(region_id, UiStyle.RANGE_TINT, UiStyle.RANGE_EDGE, 1.2)
+			match String(view.highlight_regions[region_id]):
+				"forced":
+					_paint_region(region_id, FORCED_TINT, FORCED_EDGE, 1.2)
+				"attack", "siege":
+					_paint_region(region_id, STRIKE_TINT, UiStyle.SIEGE_RED, 2.2)
+				_:
+					_paint_region(region_id, UiStyle.RANGE_TINT, UiStyle.RANGE_EDGE, 1.2)
 		if view.hover_region != "" and view.hover_region != view.selected_region:
 			_paint_region(view.hover_region, Color(1, 1, 1, 0.04), Color(1, 1, 1, 0.55), 1.4)
 		if view.selected_region != "":
@@ -365,3 +392,22 @@ class LabelLayer:
 			3: return 0.55
 			2: return 0.7
 			_: return 0.85
+
+
+class BannerLayer:
+	extends Control
+	## Screen-space banners for every visible army and fleet. The layout comes
+	## from MapView.banner_layout(), which also serves picking, so a banner is
+	## always exactly where its click lands — through any zoom or pan.
+
+	var view: MapView
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	func _draw() -> void:
+		if view.game == null:
+			return
+		for entry in view.banner_layout():
+			view.draw_banner(self, entry)

@@ -287,7 +287,7 @@ static func _grant_reward(data: GameData, state: Dictionary, reward: Dictionary)
 	var player: String = state["player_faction"]
 	var faction: Dictionary = state["factions"][player]
 	faction["treasury"] = int(faction["treasury"]) + int(reward.get("treasury", 0))
-	grant_units_to_capital(state, player, reward.get("units", []))
+	grant_units_to_capital(data, state, player, reward.get("units", []))
 
 	var experience := int(reward.get("experience", 0))
 	if experience > 0:
@@ -311,14 +311,14 @@ static func _grant_reward(data: GameData, state: Dictionary, reward: Dictionary)
 			faction["boons"][key] = float(faction["boons"].get(key, 0.0)) + float(boon[key])
 
 
-static func grant_units_to_capital(state: Dictionary, faction_id: String, grants: Array) -> void:
+static func grant_units_to_capital(data: GameData, state: Dictionary, faction_id: String, grants: Array) -> void:
 	## The senate-mission pattern: granted units muster in the capital's
-	## garrison, silently lost if the capital is not held.
+	## garrison (ships in its harbour), silently lost if the capital is not held.
 	var capital: String = state["factions"][faction_id]["capital"]
 	if not state["settlements"].has(capital) or state["settlements"][capital]["owner"] != faction_id:
 		return
 	for grant in grants:
 		for i in range(int(grant["count"])):
-			state["settlements"][capital]["garrison"].append({
+			RecruitmentRules.deliver_unit(data, state, capital, {
 				"template": grant["template"], "experience": 0, "strength_pct": 100,
 			})

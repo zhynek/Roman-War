@@ -220,8 +220,5 @@ static func _step_ceiling(data: GameData, state: Dictionary, army: Dictionary,
 
 
 static func _full_points(data: GameData, state: Dictionary, army: Dictionary) -> float:
-	## A fresh turn's budget for this army — mirrors MovementRules.reset_movement.
-	var points := float(data.balance["movement"]["base_movement_points"])
-	if army["general"] != null and state["characters"].has(army["general"]):
-		points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
-	return maxf(points, 0.5)
+	## A fresh turn's budget for this army — the one rule the reset uses too.
+	return MovementRules.movement_points_for(data, state, army)

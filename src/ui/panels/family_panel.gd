@@ -21,10 +21,16 @@ func _init() -> void:
 	add_child(scroll)
 
 
-func open_for(current_game: Game) -> void:
+func open_for(current_game: Game, focus_char_id: String = "") -> void:
+	## Opened from the top bar, or from a force card on its general: the
+	## named member is marked so the eye lands on him.
 	game = current_game
+	_focus = focus_char_id
 	_rebuild()
 	popup_centered()
+
+
+var _focus := ""
 
 
 func _rebuild() -> void:
@@ -39,6 +45,8 @@ func _rebuild() -> void:
 func _build_member(char_id: String, character: Dictionary) -> void:
 	var sheet := game.character_sheet(char_id)
 	var header := Label.new()
+	if char_id == _focus:
+		header.add_theme_color_override("font_color", UiStyle.CAPITAL_GOLD)
 	var role_tag: String = {"leader": "★ Leader", "heir": "◆ Heir", "family": "Family",
 		"child": "Child", "spouse": "Spouse"}.get(character["role"], "")
 	var called := ""
@@ -47,9 +55,10 @@ func _build_member(char_id: String, character: Dictionary) -> void:
 	var office_tag := ""
 	if String(sheet.get("office", "")) != "":
 		office_tag = " · %s" % sheet["office"]
-	header.text = "%s%s — %s%s, age %d" % [sheet["name"], called, role_tag, office_tag, int(sheet["age"])]
+	header.text = "%s%s%s — %s%s, age %d" % ["▶ " if char_id == _focus else "", sheet["name"], called, role_tag, office_tag, int(sheet["age"])]
 	header.add_theme_font_size_override("font_size", 14)
-	header.add_theme_color_override("font_color", UiStyle.PARCHMENT)
+	if char_id != _focus:
+		header.add_theme_color_override("font_color", UiStyle.PARCHMENT)
 	_content.add_child(header)
 
 	if character["role"] in ["leader", "heir", "family"]:

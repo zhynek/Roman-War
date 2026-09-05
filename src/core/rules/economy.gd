@@ -197,6 +197,8 @@ static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
 			soldiery += army_upkeep(data, settlement["garrison"], pct_by_class)
+			# Ships waiting in the harbour are paid for like ships at sea.
+			soldiery += army_upkeep(data, settlement.get("harbour", []), pct_by_class)
 	# Military edicts (the citizen levy, hired companies) scale the wage bill
 	# of soldiers only — agents are paid from another purse.
 	var upkeep := int(round(soldiery * (1.0 + EdictRules.faction_effect_total(
@@ -264,6 +266,11 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
+		# A general keeps at least one unit under him (the invariant the
+		# regroup actions hold too): the treasury never strands a man in the
+		# field without a banner.
+		if army["general"] != null and army["units"].size() <= 1:
+			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
@@ -275,7 +282,8 @@ static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_i
 		worst_army["units"].remove_at(worst_index)
 		if worst_army["units"].is_empty():
 			# The last unit's discharge disbands the standard itself — no empty
-			# husk armies on the map. Its general simply stands where he is.
+			# husk armies on the map, and no siege held by nobody.
+			SiegeRules.release(state, worst_army_id)
 			state["armies"].erase(worst_army_id)
 		return true
 

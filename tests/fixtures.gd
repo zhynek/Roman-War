@@ -118,6 +118,12 @@ static func data() -> GameData:
 			],
 		},
 		{
+			"id": "test_naval", "kind": "naval", "cultures": ["roman"], "name": "Shipyard", "requires_coastal": true,
+			"levels": [
+				{"id": "yard_1", "name": "Boat Sheds", "min_settlement_level": "village", "cost": 500, "build_turns": 1, "effects": {}, "description": ""},
+			],
+		},
+		{
 			"id": "test_barracks", "kind": "barracks", "cultures": ["roman"], "name": "Barracks",
 			"levels": [
 				{"id": "barracks_1", "name": "Mustering Field", "min_settlement_level": "village", "cost": 400, "build_turns": 1, "effects": {"martial": 2, "civic": -1, "burden": 0.5}, "description": ""},
@@ -217,7 +223,13 @@ static func data() -> GameData:
 	game_data.regions["alpha"]["sea_zones"] = ["test_sea"]
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
-	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+	# Three seas in a line, so fleets can sail more than one lane and a
+	# harbour can be asked to launch into a sea its port does not touch.
+	game_data.sea_zones = {
+		"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": ["test_sea_2"]},
+		"test_sea_2": {"id": "test_sea_2", "name": "Second Sea", "adjacent": ["test_sea", "test_sea_3"]},
+		"test_sea_3": {"id": "test_sea_3", "name": "Third Sea", "adjacent": ["test_sea_2"]},
+	}
 	game_data.index_grain_regions()
 
 	# A mountain pass arcs over the plains line: alpha-zeta-eta-epsilon is one
@@ -249,6 +261,18 @@ static func data() -> GameData:
 		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",
 		"factions": ["mercenary"], "soldiers": 60, "attack": 7, "defense": 7, "morale": 7,
 		"cost": 500, "upkeep": 150, "requirements": {"building_kind": "government", "building_level": 1},
+		"era": "any", "description": "",
+	}
+	game_data.units["test_galley"] = {
+		"id": "test_galley", "name": "Galley", "class": "ship", "culture": "roman",
+		"factions": ["red"], "soldiers": 60, "attack": 5, "defense": 5, "morale": 6,
+		"cost": 400, "upkeep": 100, "requirements": {"building_kind": "naval", "building_level": 1},
+		"era": "any", "description": "",
+	}
+	game_data.units["test_guard"] = {
+		"id": "test_guard", "name": "Guard", "class": "general_bodyguard", "culture": "roman",
+		"factions": ["red"], "soldiers": 40, "attack": 9, "defense": 10, "morale": 9,
+		"cost": 0, "upkeep": 150, "requirements": {"building_kind": "government", "building_level": 1},
 		"era": "any", "description": "",
 	}
 	game_data.mercenary_pools = [{
@@ -504,6 +528,32 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 	return army_id
 
 
+static func add_fleet(campaign_state: Dictionary, owner: String, zone: String, templates: Array) -> String:
+	var fleet_id := "fleet_%d" % campaign_state["next_id"]
+	campaign_state["next_id"] += 1
+	var ships: Array = []
+	for template in templates:
+		ships.append({"template": template, "experience": 0, "strength_pct": 100})
+	campaign_state["fleets"][fleet_id] = {
+		"owner": owner, "sea_zone": zone, "ships": ships, "movement_left": 2.0,
+	}
+	return fleet_id
+
+
+static func round_trip_equal(t, game_data: GameData, campaign_state: Dictionary, apply: Callable, label: String) -> void:
+	## Determinism gate for a mutating action: apply it to the live state and
+	## to a JSON round-trip of the same state, play one turn on both, and
+	## demand identical worlds (canonical JSON, so 2 and 2.0 agree).
+	var loaded: Dictionary = SaveGame.from_json(SaveGame.to_json(campaign_state))
+	apply.call(campaign_state)
+	apply.call(loaded)
+	TurnEngine.end_turn(game_data, campaign_state, AutoResolver.new())
+	TurnEngine.end_turn(game_data, loaded, AutoResolver.new())
+	var live_json: String = JSON.stringify(JSON.parse_string(JSON.stringify(campaign_state)))
+	var loaded_json: String = JSON.stringify(JSON.parse_string(JSON.stringify(loaded)))
+	t.check_eq(live_json, loaded_json, label)
+
+
 static func enable_guided(campaign_state: Dictionary) -> void:
 	## The fixture state ships without the trail (like a pre-trail save);
 	## guided tests opt in explicitly.
@@ -565,7 +615,7 @@ static func adopt_technique(campaign_state: Dictionary, faction_id: String, tech
 static func _settlement(game_data: GameData, owner: String, population: int, buildings: Dictionary) -> Dictionary:
 	return {
 		"owner": owner, "population": population, "buildings": buildings,
-		"tax_level": "normal", "garrison": [], "construction_queue": [],
+		"tax_level": "normal", "garrison": [], "harbour": [], "construction_queue": [],
 		"recruitment_queue": [], "governor": null, "slave_bonus_turns": 0,
 		"plague_turns": 0, "recently_conquered": 0, "low_order_streak": 0,
 		"siege": null, "levy_strain": 0.0,

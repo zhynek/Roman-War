@@ -74,13 +74,16 @@ func test_ai_besieges_and_captures_weak_enemy(t) -> void:
 func test_ai_defends_besieged_settlement(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
-	# Red (the player) besieges blue's home with a token force; a blue army
-	# stands in the region and should destroy it rather than starve.
-	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears"])
+	# Red (the player) besieges blue's home with a token force; a blue relief
+	# army then reaches the region and should destroy it rather than let the
+	# city starve. (The walls can only be invested once no field army stands
+	# in the way, so the relief force arrives after the siege is laid.)
 	var red_army := Fixtures.add_army(state, "red", "beta", ["test_mob"])
 	MovementRules.reset_movement(data, state)
 	var game := _game(data, state)
 	t.check(SiegeRules.begin_siege(data, state, red_army, "alpha"), "the player invests alpha")
+	var blue_army := Fixtures.add_army(state, "blue", "alpha", ["test_spears", "test_spears"])
+	MovementRules.reset_movement(data, state)
 
 	game.end_turn()
 	t.check_eq(state["settlements"]["alpha"]["owner"], "blue", "alpha holds")
