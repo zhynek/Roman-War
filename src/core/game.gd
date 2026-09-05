@@ -24,25 +24,33 @@ func end_turn() -> Dictionary:
 ## --- Settlement actions --------------------------------------------------
 
 func set_tax_level(region_id: String, tax_level: String) -> bool:
-	if not Constants.TAX_LEVELS.has(tax_level):
+	if not _owns_settlement(region_id) or not Constants.TAX_LEVELS.has(tax_level):
 		return false
 	state["settlements"][region_id]["tax_level"] = tax_level
 	return true
 
 
 func queue_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return ConstructionRules.queue_project(data, state, region_id, chain_id)
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return ConstructionRules.demolish(data, state, region_id, chain_id)
 
 
 func queue_unit(region_id: String, template_id: String) -> bool:
+	if not _owns_settlement(region_id):
+		return false
 	return RecruitmentRules.queue_unit(data, state, region_id, template_id)
 
 
 func retrain_garrison(region_id: String) -> int:
+	if not _owns_settlement(region_id):
+		return 0
 	return RecruitmentRules.retrain_garrison(data, state, region_id)
 
 
@@ -57,6 +65,8 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
+	if not _owns_force(army_id):
+		return false
 	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
 	if moved:
 		_after_relocation()
@@ -65,6 +75,8 @@ func move_army(army_id: String, to_region: String, forced_march: bool = false) -
 
 func march_army(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
 	## Multi-step march along the cheapest path (see MovementRules.march).
+	if not _owns_force(army_id):
+		return {"ok": false, "arrived": false, "path": [], "stopped_at": "", "reason": ForceRules.ERR_WRONG_OWNER}
 	var result := MovementRules.march(data, state, army_id, to_region, forced_march)
 	if not result["path"].is_empty():
 		_after_relocation()
@@ -72,14 +84,20 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
+	if not _owns_force(fleet_id):
+		return false
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
 func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
+	if not _owns_force(fleet_id):
+		return {"ok": false, "arrived": false, "path": [], "stopped_at": ""}
 	return MovementRules.sail(data, state, fleet_id, to_zone)
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	if not _owns_force(attacker_id) or not state["armies"].has(defender_id):
+		return {}
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
@@ -98,6 +116,8 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
+	if not _owns_force(army_id):
+		return false
 	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
 	if moved:
 		_after_relocation()
@@ -105,6 +125,8 @@ func sea_move_army(army_id: String, to_region: String) -> bool:
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
+	if not _owns_force(army_id):
+		return false
 	return MercenaryRules.hire(data, state, army_id, template_id)
 
 
@@ -173,6 +195,8 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
+	if not _owns_force(army_id) or not state["settlements"].has(region_id):
+		return false
 	var laid := SiegeRules.begin_siege(data, state, army_id, region_id)
 	if laid:
 		_after_relocation()
@@ -180,6 +204,8 @@ func besiege(army_id: String, region_id: String) -> bool:
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	if not _owns_force(army_id) or not state["settlements"].has(region_id):
+		return {}
 	var rng := _rng()
 	var result := SiegeRules.assault(data, state, rng, resolver, army_id, region_id)
 	if result.get("captured", false):
@@ -195,7 +221,7 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 
 func garrison_army(army_id: String) -> bool:
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if army.is_empty() or not _owns_force(army_id):
 		return false
 	return CombatRules.garrison_army(data, state, army_id, army["region"])
 
@@ -206,6 +232,14 @@ func garrison_army(army_id: String) -> bool:
 ## explaining refusals — see ForceRules.
 
 func check(action: String, args: Array) -> String:
+	if args.is_empty():
+		return "unknown_action"
+	var subject := String(args[0])
+	if action in ["raise_army", "launch_fleet"]:
+		if not _owns_settlement(subject):
+			return ForceRules.ERR_WRONG_OWNER
+	elif not _owns_force(subject):
+		return ForceRules.ERR_WRONG_OWNER
 	match action:
 		"raise_army":
 			return ForceRules.check_raise_army(data, state, args[0], args[1], args[2] if args.size() > 2 else "")
@@ -237,18 +271,26 @@ func check(action: String, args: Array) -> String:
 ## --- Fleets (launch, dock, merge, split) --------------------------------------
 
 func launch_fleet(region_id: String, indices: Array, zone_id: String) -> Dictionary:
+	if not _owns_settlement(region_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
 	return NavalRules.launch_fleet(data, state, region_id, indices, zone_id)
 
 
 func dock_fleet(fleet_id: String, region_id: String) -> Dictionary:
+	if not _owns_force(fleet_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return NavalRules.dock_fleet(data, state, fleet_id, region_id)
 
 
 func merge_fleets(from_id: String, into_id: String) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return NavalRules.merge_fleets(data, state, from_id, into_id)
 
 
 func split_fleet(fleet_id: String, indices: Array) -> Dictionary:
+	if not _owns_force(fleet_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
 	return NavalRules.split_fleet(data, state, fleet_id, indices)
 
 
@@ -263,6 +305,8 @@ func candidate_generals(region_id: String, faction_id: String = "") -> Array:
 
 
 func raise_army(region_id: String, indices: Array, general_id: String = "") -> Dictionary:
+	if not _owns_settlement(region_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "army_id": ""}
 	var result := ForceRules.raise_army(data, state, region_id, indices, general_id)
 	if result["ok"]:
 		_after_relocation()
@@ -270,6 +314,8 @@ func raise_army(region_id: String, indices: Array, general_id: String = "") -> D
 
 
 func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.transfer_units(data, state, from_id, to_id, indices)
 	if result["ok"]:
 		_after_relocation()
@@ -277,6 +323,8 @@ func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionar
 
 
 func merge_armies(from_id: String, into_id: String) -> Dictionary:
+	if not _owns_force(from_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.merge_armies(data, state, from_id, into_id)
 	if result["ok"]:
 		_after_relocation()
@@ -284,6 +332,8 @@ func merge_armies(from_id: String, into_id: String) -> Dictionary:
 
 
 func split_army(army_id: String, indices: Array, general_choice: String = "") -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "army_id": ""}
 	var result := ForceRules.split_army(data, state, army_id, indices, general_choice)
 	if result["ok"]:
 		_after_relocation()
@@ -291,6 +341,8 @@ func split_army(army_id: String, indices: Array, general_choice: String = "") ->
 
 
 func disband_unit(force_id: String, index: int) -> Dictionary:
+	if not _owns_force(force_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "returned": 0}
 	var result := ForceRules.disband_unit(data, state, force_id, index)
 	if result["ok"]:
 		_after_relocation()
@@ -298,6 +350,8 @@ func disband_unit(force_id: String, index: int) -> Dictionary:
 
 
 func attach_general(army_id: String, char_id: String) -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.attach_general(data, state, army_id, char_id)
 	if result["ok"]:
 		_after_relocation()
@@ -305,6 +359,8 @@ func attach_general(army_id: String, char_id: String) -> Dictionary:
 
 
 func detach_general(army_id: String) -> Dictionary:
+	if not _owns_force(army_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.detach_general(data, state, army_id)
 	if result["ok"]:
 		_after_relocation()
@@ -312,6 +368,8 @@ func detach_general(army_id: String) -> Dictionary:
 
 
 func consolidate_units(force_id: String) -> Dictionary:
+	if not _owns_force(force_id):
+		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return ForceRules.consolidate(data, state, force_id)
 
 
@@ -406,6 +464,20 @@ func load_from(path: String) -> bool:
 	state = loaded
 	NavalRules.normalise(data, state)
 	return true
+
+
+## --- Ownership guards ------------------------------------------------------
+## Player actions act only on what the player owns. An unknown or foreign id
+## is refused (false / {} / wrong_owner), never a script error. The rules
+## modules stay caller-agnostic, so the Phase 6 AI can drive its own forces.
+
+func _owns_force(force_id: String) -> bool:
+	return ForceRules.exists(state, force_id) \
+		and ForceRules.owner_of(state, force_id) == String(state["player_faction"])
+
+
+func _owns_settlement(region_id: String) -> bool:
+	return state["settlements"].get(region_id, {}).get("owner", "") == state["player_faction"]
 
 
 func _after_relocation() -> void:

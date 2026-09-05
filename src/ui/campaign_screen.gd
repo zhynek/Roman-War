@@ -21,6 +21,7 @@ var family_panel: FamilyPanel
 var diplomacy_panel: DiplomacyPanel
 var report_log: RichTextLabel
 var top_labels := {}
+var _swatch: ColorRect
 var selected_army := ""
 var selected_fleet := ""
 var _victory_shown := false
@@ -128,10 +129,10 @@ func _build_top_bar() -> HBoxContainer:
 	bar.custom_minimum_size = Vector2(0, 34)
 
 	var faction: Dictionary = game.data.factions[game.state["player_faction"]]
-	var swatch := ColorRect.new()
-	swatch.color = Color.html(faction.get("color", "#808080"))
-	swatch.custom_minimum_size = Vector2(18, 18)
-	bar.add_child(swatch)
+	_swatch = ColorRect.new()
+	_swatch.color = Color.html(faction.get("color", "#808080"))
+	_swatch.custom_minimum_size = Vector2(18, 18)
+	bar.add_child(_swatch)
 
 	for key in ["faction", "treasury", "date", "senate", "victory"]:
 		var label := Label.new()
@@ -153,13 +154,20 @@ func _build_top_bar() -> HBoxContainer:
 
 func refresh() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
+	# The house can change under us (a save from another campaign), so the
+	# whole bar reads from the state every time.
+	var faction_def: Dictionary = game.data.factions[game.state["player_faction"]]
+	_swatch.color = Color.html(faction_def.get("color", "#808080"))
+	top_labels["faction"].text = " %s   " % faction_def["name"]
 	top_labels["treasury"].text = "Treasury: %d   " % int(faction["treasury"])
 	var year := int(game.state["year"])
 	var year_text := "%d BC" % -year if year < 0 else "AD %d" % year
 	top_labels["date"].text = "%s, %s   " % [year_text, String(game.state["season"]).capitalize()]
-	if game.data.factions[game.state["player_faction"]].get("is_roman_house", false):
+	if faction_def.get("is_roman_house", false):
 		top_labels["senate"].text = "Senate %.0f · People %.0f   " \
 			% [float(faction["senate_standing"]), float(faction["popular_standing"])]
+	else:
+		top_labels["senate"].text = ""
 	var progress := game.victory_progress()
 	if not progress.is_empty():
 		top_labels["victory"].text = "Regions %d/%d" \
@@ -613,6 +621,7 @@ func _load_game() -> void:
 		region_panel.clear_panel()
 		_victory_shown = false
 		_log("Game loaded.")
+		map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
 		refresh()
 	else:
 		_log("No saved game to load.")

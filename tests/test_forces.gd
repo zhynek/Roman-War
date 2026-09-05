@@ -268,6 +268,34 @@ func test_regrouping_replays_identically_after_a_save(t) -> void:
 		"raise, transfer, merge, split and disband replay identically from a save")
 
 
+func test_facade_refuses_foreign_and_unknown_ids(t) -> void:
+	## The map now feeds ids straight into the facade, so the facade itself
+	## must refuse anything the player does not own — and never crash.
+	var game := Game.new_campaign("julii", 42)
+	var foreign := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for army_id in army_ids:
+		if game.state["armies"][army_id]["owner"] == "carthage":
+			foreign = army_id
+	var foreign_region: String = game.state["armies"][foreign]["region"]
+	var neighbor: String = game.data.regions[foreign_region]["adjacent"][0]
+	t.check(not game.move_army(foreign, neighbor), "cannot march another house's army")
+	t.check_eq(game.march_army(foreign, neighbor)["reason"], "wrong_owner", "nor order it on the road")
+	t.check(not game.set_tax_level(foreign_region, "very_high"), "cannot tax another house's city")
+	t.check(not game.queue_unit(foreign_region, "rural_levies"), "nor recruit there")
+	t.check_eq(game.retrain_garrison(foreign_region), 0, "nor retrain there")
+	t.check(not game.garrison_army(foreign), "nor garrison their army")
+	t.check(game.attack_army(foreign, foreign).is_empty(), "nor attack with it")
+	t.check_eq(game.check("merge_armies", [foreign, foreign]), "wrong_owner", "the oracle names the reason")
+	t.check_eq(game.raise_army(foreign_region, [0])["error"], "wrong_owner", "no raising from their garrison")
+	t.check(not game.move_army("army_999", neighbor), "unknown army refused, not crashed")
+	t.check(not game.besiege("army_999", neighbor), "unknown besieger refused")
+	t.check(game.assault_settlement("army_999", "nowhere").is_empty(), "unknown assault refused")
+	t.check(not game.set_tax_level("nowhere", "high"), "unknown region refused")
+	t.check_eq(game.check("split_army", []), "unknown_action", "empty arguments are refused")
+
+
 func test_facade_check_explains_refusals(t) -> void:
 	var game := Game.new_campaign("julii", 42)
 	var army_id := ""

@@ -138,6 +138,20 @@ func test_many_turns_through_the_ui(t) -> void:
 	screen.free()
 
 
+func test_top_bar_follows_a_loaded_house(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var screen := CampaignScreen.create(Game.new_campaign("julii", 42))
+	tree.root.add_child(screen)
+	t.check(screen.top_labels["faction"].text.contains("Julii"), "starts as the Julii")
+	var other := Game.new_campaign("carthage", 3)
+	t.check(other.save_to(CampaignScreen.SAVE_PATH), "a Carthaginian save is written")
+	screen._load_game()
+	t.check_eq(screen.game.state["player_faction"], "carthage", "the save loaded")
+	t.check(screen.top_labels["faction"].text.contains("Carthage"), "the top bar names the loaded house")
+	t.check_eq(screen.top_labels["senate"].text, "", "no senate standings for a house that has no Senate")
+	screen.free()
+
+
 func test_start_menu_scene_loads(t) -> void:
 	var scene: PackedScene = load("res://src/ui/main.tscn")
 	t.check(scene != null, "main scene parses")

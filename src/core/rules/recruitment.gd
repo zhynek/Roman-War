@@ -25,6 +25,8 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 
 static func queue_unit(data: GameData, state: Dictionary, region_id: String, template_id: String) -> bool:
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return false  # nobody musters under siege
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var template: Dictionary = data.units.get(template_id, {})
 	if template.is_empty():
@@ -55,7 +57,10 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 static func advance_queues(data: GameData, state: Dictionary, region_id: String) -> Array:
 	## One unit finishes per turn (the head of the queue). Finished units join
 	## the garrison with experience from blacksmith-style recruit_xp bonuses.
+	## A besieged city's queues stand still until the siege is lifted.
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return []
 	var completed: Array = []
 	var remaining: Array = []
 	var first := true
@@ -81,6 +86,8 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 static func retrain_garrison(data: GameData, state: Dictionary, region_id: String) -> int:
 	## Refill depleted garrison units, paying cost proportional to missing men.
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return 0
 	var faction: Dictionary = state["factions"][settlement["owner"]]
 	var healed := 0
 	var in_port: Array = settlement["garrison"] + NavalRules.harbour_of(state, region_id)

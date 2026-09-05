@@ -70,6 +70,23 @@ func test_casualties_applied_in_place(t) -> void:
 		"somebody bled")
 
 
+func test_an_empty_side_is_a_walkover(t) -> void:
+	## Assaulting an empty city (every capture and revolt leaves one) used to
+	## cost the attacker a quarter of his men for a fight nobody fought.
+	var data := Fixtures.data()
+	var resolver := AutoResolver.new()
+	var rng := CampaignRng.seeded(5)
+	var attacker := _army(["test_spears", "test_spears"])
+	var result := resolver.resolve(data, rng, attacker, [], {"terrain": "plains", "wall_level": 3})
+	t.check_eq(result["winner"], "attacker", "nobody home: the attacker walks in")
+	t.check_near(float(result["attacker_casualty_pct"]), 0.0, 0.0001, "and loses nobody")
+	t.check_eq(int(attacker[0]["strength_pct"]), 100, "units untouched")
+	t.check_eq(int(attacker[0]["experience"]), 0, "no experience for a fight that never happened")
+	t.check(not result["defender_general_died"], "no general died")
+	var empty_attack := resolver.resolve(data, rng, [], _army(["test_mob"]), {"terrain": "plains", "wall_level": 0})
+	t.check_eq(empty_attack["winner"], "defender", "an empty attacker loses without a fight")
+
+
 func test_field_battle_moves_winner(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

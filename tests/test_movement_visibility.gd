@@ -220,6 +220,31 @@ func test_governorship_follows_the_general_within_the_turn(t) -> void:
 	t.check(game.state["settlements"][home]["governor"] != army["general"], "and the seat falls vacant this turn")
 
 
+func test_peace_lifts_a_siege_and_starving_waits_for_an_assault_window(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var resolver := AutoResolver.new()
+	var rng := CampaignRng.seeded(9)
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears", "test_spears"])
+	MovementRules.reset_movement(data, state)
+	t.check(SiegeRules.begin_siege(data, state, army_id, "alpha"), "siege laid")
+
+	# A village holds two turns and equipment takes two: the second end turn
+	# readies the equipment but must NOT starve the city yet.
+	SiegeRules.advance_sieges(data, state, rng, resolver)
+	var events := SiegeRules.advance_sieges(data, state, rng, resolver)
+	t.check(state["settlements"]["alpha"]["siege"] != null, "the siege stands after two turns")
+	t.check(state["settlements"]["alpha"]["siege"]["equipment_ready"], "equipment is ready")
+	t.check(events.is_empty(), "no starve-out on the turn the equipment came ready")
+	t.check_eq(state["settlements"]["alpha"]["owner"], "blue", "the city is still theirs — the besieger gets his assault turn")
+
+	# Peace lifts the siege before it can be decided.
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	t.check(SiegeRules.assault(data, state, rng, resolver, army_id, "alpha").is_empty(), "no assault on a city we are at peace with")
+	SiegeRules.advance_sieges(data, state, rng, resolver)
+	t.check(state["settlements"]["alpha"]["siege"] == null, "peace lifts the siege")
+
+
 func test_fog_on_fixture_map(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

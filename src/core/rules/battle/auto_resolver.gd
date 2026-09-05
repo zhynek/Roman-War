@@ -7,6 +7,15 @@ extends BattleResolver
 
 
 func resolve(data: GameData, rng: CampaignRng, attacker_units: Array, defender_units: Array, context: Dictionary) -> Dictionary:
+	# A fight with nobody on one side is a walk-over: the other side wins,
+	# nobody bleeds, nobody learns, and no general is at risk.
+	if attacker_units.is_empty() or defender_units.is_empty():
+		return {
+			"winner": "defender" if attacker_units.is_empty() else "attacker",
+			"attacker_casualty_pct": 0.0, "defender_casualty_pct": 0.0,
+			"attacker_general_died": false, "defender_general_died": false,
+			"experience_gained": 0,
+		}
 	var battle_rules: Dictionary = data.balance["battle"]
 	var experience_pct := float(battle_rules["experience_strength_pct_per_chevron"])
 

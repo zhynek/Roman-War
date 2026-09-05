@@ -88,8 +88,11 @@ static func demolish(data: GameData, state: Dictionary, region_id: String, chain
 
 
 static func advance_queues(data: GameData, state: Dictionary, region_id: String) -> Array:
-	## Progress construction one turn; returns completed level ids.
+	## Progress construction one turn; returns completed level ids. Work
+	## stops while the city is besieged.
 	var settlement: Dictionary = state["settlements"][region_id]
+	if settlement["siege"] != null:
+		return []
 	var completed: Array = []
 	var remaining: Array = []
 	var first := true

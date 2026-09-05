@@ -49,6 +49,21 @@ func test_bodyguards_are_not_recruitable(t) -> void:
 	t.check(not RecruitmentRules.queue_unit(data, state, "beta", "test_guard"), "nor can it be queued")
 
 
+func test_a_besieged_city_neither_recruits_nor_builds(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	t.check(RecruitmentRules.queue_unit(data, state, "beta", "test_spears"), "peacetime muster accepted")
+	state["settlements"]["beta"]["construction_queue"].append({"chain": "test_health", "turns_left": 1})
+	state["settlements"]["beta"]["siege"] = {"besieger": "army_99", "turns": 1, "equipment_ready": false}
+	t.check(not RecruitmentRules.queue_unit(data, state, "beta", "test_spears"), "nobody musters under siege")
+	state["settlements"]["beta"]["garrison"].append({"template": "test_spears", "experience": 0, "strength_pct": 50})
+	t.check_eq(RecruitmentRules.retrain_garrison(data, state, "beta"), 0, "no retraining under siege")
+	t.check(RecruitmentRules.advance_queues(data, state, "beta").is_empty(), "the muster stands still")
+	t.check(ConstructionRules.advance_queues(data, state, "beta").is_empty(), "so does the building work")
+	state["settlements"]["beta"]["siege"] = null
+	t.check_eq(RecruitmentRules.advance_queues(data, state, "beta"), ["test_spears"], "work resumes when the siege lifts")
+
+
 func test_cannot_drain_village_dry(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

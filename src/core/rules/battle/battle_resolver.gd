@@ -21,6 +21,9 @@ extends RefCounted
 ##     sally: bool,                # defenders sallying out of a siege
 ##   }
 ##
+##   An empty side loses without a fight: no casualties, no experience, no
+##   general at risk (an assault on an empty city is a walk-in).
+##
 ##   BattleResult: {
 ##     winner: "attacker"|"defender",
 ##     attacker_casualty_pct: float, defender_casualty_pct: float,

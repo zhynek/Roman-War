@@ -57,14 +57,22 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 				or state["armies"][siege["besieger"]]["region"] != region_id:
 			settlement["siege"] = null
 			continue
+		# Peace lifts a siege: nobody starves a city they are not at war with.
+		if not DiplomacyRules.at_war(state, state["armies"][siege["besieger"]]["owner"], settlement["owner"]):
+			settlement["siege"] = null
+			continue
 		siege["turns"] = int(siege["turns"]) + 1
-		if int(siege["turns"]) >= int(siege_rules["equipment_turns"]):
+		var equipment_turns := int(siege_rules["equipment_turns"])
+		if int(siege["turns"]) >= equipment_turns:
 			siege["equipment_ready"] = true
 
 		var level := SettlementRules.settlement_level(data, settlement)
 		var starve_turns: Array = siege_rules["starve_turns_per_settlement_level"]
 		var supplies := int(starve_turns[Constants.level_index(level)])
-		if int(siege["turns"]) >= supplies:
+		# The besieger always gets one full turn with the equipment ready to
+		# choose an assault before the garrison's supplies decide the matter.
+		var starve_at := maxi(supplies, equipment_turns + 1)
+		if int(siege["turns"]) >= starve_at:
 			results.append({
 				"kind": "starved_out", "region": region_id,
 				"result": assault(data, state, rng, resolver, siege["besieger"], region_id, true),
@@ -77,6 +85,8 @@ static func assault(data: GameData, state: Dictionary, rng: CampaignRng, resolve
 	var settlement: Dictionary = state["settlements"][region_id]
 	var siege = settlement["siege"]
 	if siege == null or siege["besieger"] != army_id:
+		return {}
+	if not DiplomacyRules.at_war(state, army["owner"], settlement["owner"]):
 		return {}
 	# Without equipment you can only assault once the garrison is starving.
 	if not siege["equipment_ready"] and not starving:
