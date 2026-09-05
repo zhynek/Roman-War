@@ -112,7 +112,11 @@ static func data() -> GameData:
 	game_data.regions["alpha"]["sea_zones"] = ["test_sea"]
 	game_data.regions["alpha"]["resources"] = ["grain"]
 	game_data.regions["epsilon"]["sea_zones"] = ["test_sea"]
-	game_data.sea_zones = {"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": []}}
+	game_data.sea_zones = {
+		"test_sea": {"id": "test_sea", "name": "Test Sea", "adjacent": ["test_sea_2"]},
+		"test_sea_2": {"id": "test_sea_2", "name": "Second Sea", "adjacent": ["test_sea", "test_sea_3"]},
+		"test_sea_3": {"id": "test_sea_3", "name": "Third Sea", "adjacent": ["test_sea_2"]},
+	}
 
 	game_data.units["test_merc"] = {
 		"id": "test_merc", "name": "Sellswords", "class": "infantry", "culture": "neutral",

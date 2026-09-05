@@ -136,6 +136,30 @@ func test_left_click_selects_and_right_click_orders(t) -> void:
 	screen.free()
 
 
+func test_multi_step_order_from_the_map(t) -> void:
+	var tree := Engine.get_main_loop() as SceneTree
+	var game := Game.new_campaign("julii", 42)
+	var screen := CampaignScreen.create(game)
+	tree.root.add_child(screen)
+	var army_id := _julii_army(game)
+	var home: String = game.state["armies"][army_id]["region"]
+	screen.select_force("army", army_id)
+
+	# Pick a ringed region that is NOT adjacent: a real multi-step march.
+	var far := ""
+	for region_id in screen.map_view.highlight_regions:
+		if screen.map_view.highlight_regions[region_id] == "march" \
+				and not MapRules.are_adjacent(game.data, home, region_id):
+			far = region_id
+			break
+	t.check(far != "", "somewhere two steps away is within reach (rings show it)")
+	if far != "":
+		screen._on_order_target("region", far, false)
+		t.check_eq(game.state["armies"][army_id]["region"], far, "the army marched there in one order")
+		t.check(screen.report_log.get_parsed_text().contains("marches to"), "the log says so")
+	screen.free()
+
+
 func test_fleet_banners_follow_sea_visibility(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)

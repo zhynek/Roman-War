@@ -226,46 +226,30 @@ func _on_army_selected(army_id: String) -> void:
 
 
 func _refresh_highlights() -> void:
-	## Rings around what the selected force can do from where it stands.
+	## Rings around what the selected force can do from where it stands —
+	## computed once per selection or order, never per draw.
 	map_view.highlight_regions = {}
 	map_view.highlight_zones = {}
 	if selected_army != "":
 		map_view.highlight_regions = _army_options(selected_army)
 	elif selected_fleet != "":
-		var fleet: Dictionary = game.state["fleets"][selected_fleet]
-		if float(fleet["movement_left"]) >= float(game.data.balance["movement"]["sea_lane_cost"]) - 0.0001:
-			for zone_id in game.data.sea_zones.get(fleet["sea_zone"], {}).get("adjacent", []):
-				map_view.highlight_zones[zone_id] = "sail"
+		for zone_id in game.reachable_zones(selected_fleet):
+			map_view.highlight_zones[zone_id] = "sail"
 
 
 func _army_options(army_id: String) -> Dictionary:
-	## {region_id: "march"|"forced"|"attack"|"siege"} for the neighbours of an
-	## army's region, seen through our own fog.
+	## {region_id: "march"|"forced"|"attack"|"siege"}: everywhere the army can
+	## reach this season (yellow), by forced march only (orange), and the
+	## visible enemies it can strike from where it stands (red). Fog is
+	## respected: nothing hidden ever changes a ring.
 	var options := {}
-	var army: Dictionary = game.state["armies"][army_id]
-	var player: String = game.state["player_faction"]
 	var visible := game.visible_regions()
-	var budget := float(army["movement_left"])
-	var forced_budget := budget * float(game.data.balance["movement"]["forced_march_multiplier"])
-	for neighbor in game.data.regions[army["region"]].get("adjacent", []):
-		if not visible.has(neighbor):
-			continue
-		if _enemy_army_in(neighbor) != "":
-			if budget > 0.0001:
-				options[neighbor] = "attack"
-			continue
-		var settlement: Dictionary = game.state["settlements"].get(neighbor, {})
-		if not settlement.is_empty() and DiplomacyRules.at_war(game.state, player, settlement["owner"]):
-			if budget > 0.0001:
-				options[neighbor] = "siege"
-			continue
-		if not MovementRules.can_enter(game.data, game.state, army_id, neighbor):
-			continue
-		var cost := MovementRules.step_cost(game.data, game.state, neighbor)
-		if cost <= budget + 0.0001:
-			options[neighbor] = "march"
-		elif cost <= forced_budget + 0.0001:
-			options[neighbor] = "forced"
+	var plan := game.reachable_regions(army_id)
+	for region_id in plan["reach"]:
+		options[region_id] = "forced" if plan["reach"][region_id]["forced"] else "march"
+	for region_id in game.targets_for(army_id):
+		if visible.has(region_id):
+			options[region_id] = game.targets_for(army_id)[region_id]
 	return options
 
 
@@ -307,20 +291,40 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		besiege_order(target_region)
 		return
 
-	# Otherwise: march (or sail).
-	if game.move_army(selected_army, target_region, forced_march):
-		var suffix := " by forced march — the men will be weary." if forced_march else "."
-		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
+	# Otherwise: march along the cheapest road (or sail).
+	var target_name: String = game.data.regions[target_region]["name"]
+	var result := game.march_army(selected_army, target_region, forced_march)
+	if result["arrived"]:
+		var weary: bool = game.state["armies"][selected_army].get("forced_march", false)
+		_log("The army marches to %s%s" % [target_name, " by forced march — the men will be weary." if weary else "."])
+	elif result["ok"]:
+		var halt_name: String = game.data.regions[result["stopped_at"]]["name"]
+		_log("The column halts at %s — %s." % [halt_name, _halt_reason(result["reason"])])
+	elif result["reason"] == "needs_forced_march":
+		_log("%s is beyond a day's march — hold Shift to force the pace." % target_name)
+	elif result["reason"] in ["hostile_army", "hostile_settlement"]:
+		_log("The road to %s is barred — %s." % [target_name, _halt_reason(result["reason"])])
 	elif game.sea_move_army(selected_army, target_region):
-		_log("The army takes ship for %s." % game.data.regions[target_region]["name"])
+		_log("The army takes ship for %s." % target_name)
 	else:
-		_log("The army cannot reach %s this season." % game.data.regions[target_region]["name"])
+		_log("The army cannot reach %s this season." % target_name)
 	_after_order()
+
+
+func _halt_reason(reason: String) -> String:
+	match reason:
+		"hostile_army":
+			return "enemy in sight"
+		"hostile_settlement":
+			return "hostile walls ahead"
+		"no_movement":
+			return "the men can go no further"
+	return "the way is closed"
 
 
 func _fleet_order(zone_id: String) -> void:
 	var zone_name: String = game.data.sea_zones.get(zone_id, {}).get("name", zone_id)
-	if game.move_fleet(selected_fleet, zone_id):
+	if game.sail_fleet(selected_fleet, zone_id)["arrived"]:
 		_log("The fleet sails for the %s." % zone_name)
 	else:
 		_log("The fleet cannot reach the %s this season." % zone_name)
@@ -430,35 +434,23 @@ func deselect() -> void:
 
 func cycle_selection() -> void:
 	## Tab / N: the next of our forces that still has orders to give.
-	var player: String = game.state["player_faction"]
-	var candidates: Array = []
-	var army_ids: Array = game.state["armies"].keys()
-	army_ids.sort_custom(ForceRules.id_less)
-	for army_id in army_ids:
-		var army: Dictionary = game.state["armies"][army_id]
-		if army["owner"] == player and float(army["movement_left"]) > 0.0001:
-			candidates.append(["army", army_id])
-	var fleet_ids: Array = game.state["fleets"].keys()
-	fleet_ids.sort_custom(ForceRules.id_less)
-	for fleet_id in fleet_ids:
-		var fleet: Dictionary = game.state["fleets"][fleet_id]
-		if fleet["owner"] == player and float(fleet["movement_left"]) > 0.0001:
-			candidates.append(["fleet", fleet_id])
+	var candidates := game.forces_awaiting_orders()
 	if candidates.is_empty():
 		_log("Every force has its orders.")
 		return
 	var current := selected_force()
 	var next_index := 0
 	for i in range(candidates.size()):
-		if candidates[i][1] == current:
+		if candidates[i] == current:
 			next_index = (i + 1) % candidates.size()
 			break
-	var pick: Array = candidates[next_index]
-	select_force(pick[0], pick[1])
-	if pick[0] == "army":
-		map_view.center_on(game.state["armies"][pick[1]]["region"])
+	var pick: String = candidates[next_index]
+	var kind := ForceRules.kind_of(pick)
+	select_force(kind, pick)
+	if kind == "army":
+		map_view.center_on(game.state["armies"][pick]["region"])
 	else:
-		map_view.center_on_zone(game.state["fleets"][pick[1]]["sea_zone"])
+		map_view.center_on_zone(game.state["fleets"][pick]["sea_zone"])
 
 
 ## --- Turn, save, log ------------------------------------------------------------------

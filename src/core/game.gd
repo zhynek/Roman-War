@@ -57,17 +57,33 @@ func move_capital(region_id: String) -> bool:
 ## --- Army actions --------------------------------------------------------
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
-	return MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
+	if moved:
+		_after_relocation()
+	return moved
+
+
+func march_army(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
+	## Multi-step march along the cheapest path (see MovementRules.march).
+	var result := MovementRules.march(data, state, army_id, to_region, forced_march)
+	if not result["path"].is_empty():
+		_after_relocation()
+	return result
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
+func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
+	return MovementRules.sail(data, state, fleet_id, to_zone)
+
+
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	var rng := _rng()
 	var result := CombatRules.attack_army(data, state, resolver, rng, attacker_id, defender_id)
 	state["rng_state"] = rng.state_string()
+	_after_relocation()
 	return result
 
 
@@ -82,7 +98,10 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
-	return MovementRules.sea_move_army(data, state, army_id, to_region)
+	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
+	if moved:
+		_after_relocation()
+	return moved
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
@@ -154,7 +173,10 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
-	return SiegeRules.begin_siege(data, state, army_id, region_id)
+	var laid := SiegeRules.begin_siege(data, state, army_id, region_id)
+	if laid:
+		_after_relocation()
+	return laid
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
@@ -184,6 +206,41 @@ func force_summary(force_id: String) -> Dictionary:
 	## One dictionary describing an army ("army_N"), a fleet ("fleet_N") or a
 	## garrison ("garrison:<region>") — see ForceRules.summary.
 	return ForceRules.summary(data, state, force_id)
+
+
+func reachable_regions(army_id: String) -> Dictionary:
+	## {reach, blocked} for an army, seen through its owner's fog.
+	var owner: String = state["armies"].get(army_id, {}).get("owner", "")
+	if owner == "":
+		return {"reach": {}, "blocked": {}}
+	return MovementRules.reachable(data, state, army_id, VisibilityRules.visible_regions(data, state, owner))
+
+
+func targets_for(army_id: String) -> Dictionary:
+	return MovementRules.targets_for(data, state, army_id)
+
+
+func reachable_zones(fleet_id: String) -> Dictionary:
+	return MovementRules.fleet_reachable(data, state, fleet_id)
+
+
+func forces_awaiting_orders(faction_id: String = "") -> Array:
+	## Own armies then fleets, numeric id order, that still have movement.
+	var fid := faction_id if faction_id != "" else String(state["player_faction"])
+	var waiting: Array = []
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort_custom(ForceRules.id_less)
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
+		if army["owner"] == fid and float(army["movement_left"]) > 0.0001:
+			waiting.append(army_id)
+	var fleet_ids: Array = state["fleets"].keys()
+	fleet_ids.sort_custom(ForceRules.id_less)
+	for fleet_id in fleet_ids:
+		var fleet: Dictionary = state["fleets"][fleet_id]
+		if fleet["owner"] == fid and float(fleet["movement_left"]) > 0.0001:
+			waiting.append(fleet_id)
+	return waiting
 
 
 func growth_breakdown(region_id: String) -> Array:
@@ -233,6 +290,13 @@ func load_from(path: String) -> bool:
 		return false
 	state = loaded
 	return true
+
+
+func _after_relocation() -> void:
+	## Governorship follows presence: a general who marches out of his city
+	## stops governing it this turn, not at the next end of turn. Derived
+	## value, no randomness involved.
+	SettlementRules.refresh_governors(data, state)
 
 
 func _rng() -> CampaignRng:

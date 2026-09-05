@@ -103,6 +103,123 @@ func test_siege_costs_movement_and_respects_relief_armies(t) -> void:
 	t.check(state["settlements"]["alpha"]["siege"] == null, "the siege is released immediately")
 
 
+func test_reachable_and_multi_step_march(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	MovementRules.reset_movement(data, state)
+
+	var plan := MovementRules.reachable(data, state, army_id)
+	t.check(plan["reach"].has("delta") and plan["reach"].has("epsilon"), "two plains steps within two points")
+	t.check_near(float(plan["reach"]["epsilon"]["cost"]), 2.0, 0.0001, "cost accumulates along the path")
+	t.check_eq(plan["reach"]["epsilon"]["via"], "delta", "the path is remembered")
+	t.check(not plan["reach"]["epsilon"]["forced"], "within the plain budget")
+	t.check(plan["reach"].has("beta"), "our own city is reachable")
+	t.check_eq(plan["blocked"].get("alpha", ""), "hostile_settlement", "the enemy city blocks and is reported")
+	t.check(not plan["reach"].has("alpha"), "a blocked region is never reachable")
+
+	var result := MovementRules.march(data, state, army_id, "epsilon")
+	t.check(result["arrived"], "the column arrives")
+	t.check_eq(result["path"], ["delta", "epsilon"], "two steps walked")
+	t.check_eq(state["armies"][army_id]["region"], "epsilon", "army stands at the destination")
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 0.0, 0.0001, "budget spent")
+
+
+func test_forced_march_is_taken_only_where_needed(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	MovementRules.reset_movement(data, state)
+	# beta -> gamma -> delta -> epsilon costs 3.0: beyond two points, within a forced four.
+	var plan := MovementRules.reachable(data, state, army_id)
+	t.check(plan["reach"]["epsilon"]["forced"], "three steps need a forced march")
+	var refused := MovementRules.march(data, state, army_id, "epsilon")
+	t.check_eq(refused["reason"], "needs_forced_march", "without Shift the march is refused, not shortened")
+	t.check_eq(state["armies"][army_id]["region"], "beta", "and nobody moved")
+	var forced := MovementRules.march(data, state, army_id, "epsilon", true)
+	t.check(forced["arrived"], "forced, it arrives")
+	t.check(state["armies"][army_id]["forced_march"], "and the men are weary")
+
+	# A destination within the plain budget never tires the men, Shift or not.
+	MovementRules.reset_movement(data, state)
+	MovementRules.march(data, state, army_id, "delta", true)
+	t.check(not state["armies"][army_id]["forced_march"], "a short march with Shift held is still a plain march")
+
+
+func test_march_halts_on_an_army_the_fog_hid(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	# Take epsilon from red: with the army at beta, delta is two hops out and
+	# beyond red's sight.
+	state["settlements"]["epsilon"]["owner"] = "rebels"
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	Fixtures.add_army(state, "blue", "delta", ["test_mob"])
+	MovementRules.reset_movement(data, state)
+	var visible := VisibilityRules.visible_regions(data, state, "red")
+	t.check(not visible.has("delta"), "delta is beyond red's sight")
+
+	var plan := MovementRules.reachable(data, state, army_id, visible)
+	t.check(plan["reach"].has("delta"), "a fogged region is planned as passable — highlights leak nothing")
+	var omniscient := MovementRules.reachable(data, state, army_id)
+	t.check_eq(omniscient["blocked"].get("delta", ""), "hostile_army", "omniscient planning sees the ambush")
+
+	var result := MovementRules.march(data, state, army_id, "delta")
+	t.check(not result["arrived"], "the column never reaches delta")
+	t.check_eq(result["path"], ["gamma"], "it walked as far as gamma")
+	t.check_eq(result["stopped_at"], "gamma", "and halted there on contact")
+	t.check_eq(result["reason"], "hostile_army", "saying why")
+	t.check_eq(state["armies"][army_id]["region"], "gamma", "the army stands at gamma")
+
+
+func test_targets_and_fleet_sailing(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	Fixtures.add_army(state, "blue", "gamma", ["test_mob"])
+	MovementRules.reset_movement(data, state)
+	var targets := MovementRules.targets_for(data, state, army_id)
+	t.check_eq(targets.get("gamma", ""), "attack", "an adjacent hostile army is a target")
+	t.check_eq(targets.get("alpha", ""), "siege", "an adjacent at-war city can be invested")
+	state["armies"][army_id]["movement_left"] = 0.0
+	t.check(MovementRules.targets_for(data, state, army_id).is_empty(), "no movement, no targets")
+
+	var fleet_id := Fixtures.add_fleet(state, "red", "test_sea", ["test_galley"])
+	var reach := MovementRules.fleet_reachable(data, state, fleet_id)
+	t.check(reach.has("test_sea_2") and reach.has("test_sea_3"), "two lanes on two points")
+	t.check_eq(reach["test_sea_3"]["via"], "test_sea_2", "the route is remembered")
+	var voyage := MovementRules.sail(data, state, fleet_id, "test_sea_3")
+	t.check(voyage["arrived"], "the fleet arrives two seas over")
+	t.check_eq(state["fleets"][fleet_id]["sea_zone"], "test_sea_3", "fleet zone updated")
+	t.check_near(float(state["fleets"][fleet_id]["movement_left"]), 0.0, 0.0001, "both lanes paid")
+
+
+func test_governorship_follows_the_general_within_the_turn(t) -> void:
+	## A general who marches out of his city stops governing it at once —
+	## the panel must not show a governor who has left.
+	var game := Game.new_campaign("julii", 42)
+	var army_id := ""
+	var army_ids: Array = game.state["armies"].keys()
+	army_ids.sort()
+	for candidate in army_ids:
+		var army: Dictionary = game.state["armies"][candidate]
+		if army["owner"] == "julii" and army["general"] != null:
+			army_id = candidate
+			break
+	t.check(army_id != "", "the Julii field a led army")
+	if army_id == "":
+		return
+	var army: Dictionary = game.state["armies"][army_id]
+	var home: String = army["region"]
+	t.check_eq(game.state["settlements"][home]["governor"], army["general"], "the general governs where he stands")
+	var destination := ""
+	for neighbor in game.data.regions[home].get("adjacent", []):
+		if MovementRules.can_enter(game.data, game.state, army_id, neighbor):
+			destination = neighbor
+			break
+	t.check(game.march_army(army_id, destination)["arrived"], "he marches out")
+	t.check(game.state["settlements"][home]["governor"] != army["general"], "and the seat falls vacant this turn")
+
+
 func test_fog_on_fixture_map(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)
