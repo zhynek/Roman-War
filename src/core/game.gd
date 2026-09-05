@@ -180,6 +180,12 @@ func garrison_army(army_id: String) -> bool:
 
 ## --- Queries (for UI scrolls) --------------------------------------------
 
+func force_summary(force_id: String) -> Dictionary:
+	## One dictionary describing an army ("army_N"), a fleet ("fleet_N") or a
+	## garrison ("garrison:<region>") — see ForceRules.summary.
+	return ForceRules.summary(data, state, force_id)
+
+
 func growth_breakdown(region_id: String) -> Array:
 	return GrowthRules.breakdown(data, state, region_id)
 

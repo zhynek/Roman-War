@@ -13,6 +13,10 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 			continue
 		if unit["factions"].has("mercenary"):
 			continue
+		# A general's escort exists only around a general: it is never mustered
+		# from the barracks (its cost is 0, so it would be the AI's favourite).
+		if unit.get("class", "") == "general_bodyguard":
+			continue
 		if not _requirements_met(data, settlement, unit):
 			continue
 		available.append(unit)

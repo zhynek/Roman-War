@@ -8,18 +8,37 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	var army: Dictionary = state["armies"][army_id]
 	if not state["settlements"].has(region_id):
 		return false
-	if not MapRules.are_adjacent(data, army["region"], region_id) and army["region"] != region_id:
+	var marching_in: bool = army["region"] != region_id
+	if marching_in and not MapRules.are_adjacent(data, army["region"], region_id):
 		return false
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
 		return false
+	# A relieving field army must be beaten before the walls can be invested,
+	# and marching up to the walls costs the same step as any other march —
+	# a siege is never a free hop.
+	if MovementRules.hostile_army_in(state, army["owner"], region_id):
+		return false
+	if marching_in and MovementRules.step_cost(data, state, region_id) > float(army["movement_left"]) + 0.0001:
+		return false
 	# Investing a settlement IS a declaration of war.
 	DiplomacyRules.declare_war(state, army["owner"], settlement["owner"])
+	release(state, army_id)
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0
 	settlement["siege"] = {"besieger": army_id, "turns": 0, "equipment_ready": false}
 	return true
+
+
+static func release(state: Dictionary, army_id: String) -> void:
+	## Lift whatever siege this army holds. Every path that moves, garrisons,
+	## dissolves or destroys an army calls this, so a settlement is never
+	## marked as invested by an army that is no longer at its walls.
+	for region_id in state["settlements"]:
+		var siege = state["settlements"][region_id]["siege"]
+		if siege != null and siege.get("besieger", "") == army_id:
+			state["settlements"][region_id]["siege"] = null
 
 
 static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, resolver: BattleResolver) -> Array:

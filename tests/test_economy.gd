@@ -48,6 +48,26 @@ func test_upkeep_and_debt_disband(t) -> void:
 	t.check_eq(remaining, 2, "one unit disbanded per turn")
 
 
+func test_debt_disband_is_deterministic_and_erases_empty_armies(t) -> void:
+	## Two armies with an identical costliest unit: whichever the live game
+	## disbands, a loaded save (whose dictionaries come back re-ordered) must
+	## disband the same one — and an army whose last unit goes home vanishes
+	## instead of lingering as a ghost.
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var rng := CampaignRng.seeded(11)
+	var first := Fixtures.add_army(state, "red", "beta", ["test_spears"])
+	var second := Fixtures.add_army(state, "red", "gamma", ["test_spears"])
+	# Re-insert in reverse so dictionary order disagrees with id order.
+	var reordered := {second: state["armies"][second], first: state["armies"][first]}
+	state["armies"] = reordered
+	state["factions"]["red"]["treasury"] = int(data.balance["economy"]["debt_disband_threshold"]) - 10000
+	EconomyRules.apply_faction_turn(data, state, "red", rng)
+	t.check(not state["armies"].has(first), "the lowest id is disbanded regardless of dictionary order")
+	t.check(state["armies"].has(second), "the other army stands")
+	t.check_eq(state["armies"][second]["units"].size(), 1, "one unit disbanded per turn")
+
+
 func test_trade_needs_peace_or_ownership(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

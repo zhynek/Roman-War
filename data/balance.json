@@ -156,6 +156,11 @@
     "experience_max": 9,
     "retrain_cost_factor": 0.5
   },
+  "forces": {
+    "max_units_per_force": 20,
+    "raised_army_movement_points": 1.0,
+    "disband_population_return_pct": 100
+  },
   "battle": {
     "experience_strength_pct_per_chevron": 10,
     "wall_defense_multiplier": [

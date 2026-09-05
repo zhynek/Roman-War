@@ -31,7 +31,7 @@ static func available(data: GameData, state: Dictionary, region_id: String) -> A
 
 static func hire(data: GameData, state: Dictionary, army_id: String, template_id: String) -> bool:
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty() or army["units"].size() >= 20:
+	if army.is_empty() or army["units"].size() >= ForceRules.max_units(data):
 		return false
 	var pool := pool_for_region(data, army["region"])
 	if pool.is_empty():

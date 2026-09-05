@@ -8,16 +8,21 @@ class_name MovementRules
 static func reset_movement(data: GameData, state: Dictionary) -> void:
 	var base := float(data.balance["movement"]["base_movement_points"])
 	for army in state["armies"].values():
-		var points := base
-		if army["general"] != null and state["characters"].has(army["general"]):
-			# Logistics-minded generals stretch the column's daily march. The
-			# "movement" effect is a flat bonus in movement points (base 2.0),
-			# so a Quartermaster's +0.25 is a real quarter-step, not a rounding.
-			points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
-		army["movement_left"] = maxf(points, 0.5)
+		army["movement_left"] = movement_points_for(data, state, army)
 		army["forced_march"] = false
 	for fleet in state["fleets"].values():
 		fleet["movement_left"] = base
+
+
+static func movement_points_for(data: GameData, state: Dictionary, army: Dictionary) -> float:
+	## The budget an army is granted at the start of a turn. Logistics-minded
+	## generals stretch the column's daily march: the "movement" effect is a
+	## flat bonus in movement points (base 2.0), so a Quartermaster's +0.25 is
+	## a real quarter-step, not a rounding. Never below half a point.
+	var points := float(data.balance["movement"]["base_movement_points"])
+	if army["general"] != null and state["characters"].has(army["general"]):
+		points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
+	return maxf(points, 0.5)
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String) -> float:
@@ -38,7 +43,7 @@ static func can_enter(data: GameData, state: Dictionary, army_id: String, to_reg
 	if not MapRules.are_adjacent(data, army["region"], to_region):
 		return false
 	var owner: String = army["owner"]
-	if _hostile_army_in(state, owner, to_region):
+	if hostile_army_in(state, owner, to_region):
 		return false
 	if state["settlements"].has(to_region):
 		var holder: String = state["settlements"][to_region]["owner"]
@@ -62,6 +67,8 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 		army["movement_left"] = maxf(0.0, budget - cost) / float(data.balance["movement"]["forced_march_multiplier"])
 	else:
 		army["movement_left"] = budget - cost
+	# Marching away lifts the siege at once, not at the end of the turn.
+	SiegeRules.release(state, army_id)
 	army["region"] = to_region
 	sync_general_location(state, army)
 	return true
@@ -91,13 +98,14 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	var cost := float(data.balance["movement"]["sea_move_cost"])
 	if cost > float(army["movement_left"]) + 0.0001:
 		return false
-	if _hostile_army_in(state, army["owner"], to_region):
+	if hostile_army_in(state, army["owner"], to_region):
 		return false
 	if state["settlements"].has(to_region):
 		var holder: String = state["settlements"][to_region]["owner"]
 		if _at_war(state, army["owner"], holder):
 			return false
 	army["movement_left"] = 0.0
+	SiegeRules.release(state, army_id)
 	army["region"] = to_region
 	sync_general_location(state, army)
 	return true
@@ -117,7 +125,8 @@ static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_z
 	return true
 
 
-static func _hostile_army_in(state: Dictionary, faction_id: String, region_id: String) -> bool:
+static func hostile_army_in(state: Dictionary, faction_id: String, region_id: String) -> bool:
+	## True when an army of a faction at war with faction_id stands in the region.
 	for army in state["armies"].values():
 		if army["region"] == region_id and _at_war(state, faction_id, army["owner"]):
 			return true
@@ -125,9 +134,7 @@ static func _hostile_army_in(state: Dictionary, faction_id: String, region_id: S
 
 
 static func _at_war(state: Dictionary, a: String, b: String) -> bool:
-	if a == b:
-		return false
-	return state["factions"][a]["diplomacy"].get(b, "neutral") == "war"
+	return DiplomacyRules.at_war(state, a, b)
 
 
 static func sync_general_location(state: Dictionary, army: Dictionary) -> void:

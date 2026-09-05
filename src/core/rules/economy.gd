@@ -172,21 +172,32 @@ static func apply_faction_turn(data: GameData, state: Dictionary, faction_id: St
 
 
 static func _disband_costliest_unit(data: GameData, state: Dictionary, faction_id: String) -> bool:
-	var worst_army: Dictionary = {}
+	# Armies are walked in sorted id order: ties on upkeep must resolve the
+	# same way in a loaded save as in the live game (JSON re-orders keys).
+	var army_ids: Array = state["armies"].keys()
+	army_ids.sort()
+	var worst_id := ""
 	var worst_index := -1
 	var worst_upkeep := 0
-	for army in state["armies"].values():
+	for army_id in army_ids:
+		var army: Dictionary = state["armies"][army_id]
 		if army["owner"] != faction_id:
 			continue
 		for i in range(army["units"].size()):
 			var upkeep := int(data.units.get(army["units"][i]["template"], {}).get("upkeep", 0))
 			if upkeep > worst_upkeep:
 				worst_upkeep = upkeep
-				worst_army = army
+				worst_id = army_id
 				worst_index = i
 	if worst_index < 0:
 		return false
+	var worst_army: Dictionary = state["armies"][worst_id]
 	worst_army["units"].remove_at(worst_index)
+	if worst_army["units"].is_empty():
+		# The last men go home: no ghost army lingers to hold a siege or block
+		# a road. Its general stays where he stood, unattached.
+		SiegeRules.release(state, worst_id)
+		state["armies"].erase(worst_id)
 	return true
 
 

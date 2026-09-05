@@ -63,6 +63,46 @@ func test_siege_and_starve(t) -> void:
 			"starving garrison falls to the surviving besieger")
 
 
+func test_attack_needs_movement_and_ends_the_turn(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var resolver := AutoResolver.new()
+	var rng := CampaignRng.seeded(3)
+	var attacker := Fixtures.add_army(state, "red", "beta",
+		["test_spears", "test_spears", "test_spears", "test_spears"])
+	var defender := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	state["armies"][attacker]["movement_left"] = 0.0
+	t.check(CombatRules.attack_army(data, state, resolver, rng, attacker, defender).is_empty(),
+		"an army that has marched itself out cannot attack")
+	state["armies"][attacker]["movement_left"] = 2.0
+	var result := CombatRules.attack_army(data, state, resolver, rng, attacker, defender)
+	t.check(not result.is_empty(), "with movement the attack resolves")
+	t.check_near(float(state["armies"][attacker]["movement_left"]), 0.0, 0.0001,
+		"a battle takes the rest of the season, won or lost")
+	var second := Fixtures.add_army(state, "blue", "beta", ["test_mob"])
+	t.check(CombatRules.attack_army(data, state, resolver, rng, attacker, second).is_empty(),
+		"no army fights twice in one turn")
+
+
+func test_siege_costs_movement_and_respects_relief_armies(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var army_id := Fixtures.add_army(state, "red", "beta", ["test_spears", "test_spears"])
+	state["armies"][army_id]["movement_left"] = 0.0
+	t.check(not SiegeRules.begin_siege(data, state, army_id, "alpha"), "no movement, no siege — never a free hop")
+	MovementRules.reset_movement(data, state)
+	var relief := Fixtures.add_army(state, "blue", "alpha", ["test_mob"])
+	t.check(not SiegeRules.begin_siege(data, state, army_id, "alpha"), "a relieving army must be beaten first")
+	state["armies"].erase(relief)
+	t.check(SiegeRules.begin_siege(data, state, army_id, "alpha"), "siege laid once the road is clear")
+	t.check_near(float(state["armies"][army_id]["movement_left"]), 0.0, 0.0001, "investing takes the turn")
+
+	# Marching away lifts the siege at once, not at the end of the turn.
+	MovementRules.reset_movement(data, state)
+	t.check(MovementRules.move_army(data, state, army_id, "beta"), "the besieger marches off")
+	t.check(state["settlements"]["alpha"]["siege"] == null, "the siege is released immediately")
+
+
 func test_fog_on_fixture_map(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

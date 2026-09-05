@@ -12,6 +12,10 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	if attacker["region"] != defender["region"] \
 			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
 		return {}
+	# A battle takes the rest of the season: an army that has marched itself
+	# out cannot attack, and no army fights twice in one turn.
+	if float(attacker["movement_left"]) <= 0.0001:
+		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is drawn.
 	DiplomacyRules.declare_war(state, attacker["owner"], defender["owner"])
 	var region: Dictionary = data.regions[defender["region"]]
@@ -31,10 +35,11 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	})
 
 	_process_general_deaths(data, state, attacker, defender, result)
-	if result["winner"] == "attacker":
+	attacker["movement_left"] = 0.0
+	if result["winner"] == "attacker" and attacker["region"] != defender["region"]:
+		SiegeRules.release(state, attacker_id)
 		attacker["region"] = defender["region"]
 		MovementRules.sync_general_location(state, attacker)
-		attacker["movement_left"] = 0.0
 
 	# Battle records shape the victors and the beaten (surviving generals only),
 	# and a captain's unlikely victory can earn him adoption into the family.
@@ -198,6 +203,7 @@ static func garrison_army(data: GameData, state: Dictionary, army_id: String, re
 		settlement["garrison"].append(unit)
 	if army["general"] != null and state["characters"].has(army["general"]):
 		state["characters"][army["general"]]["location"] = region_id
+	SiegeRules.release(state, army_id)
 	state["armies"].erase(army_id)
 	SettlementRules.refresh_governors(data, state)
 	return true
@@ -224,6 +230,7 @@ static func _cleanup_destroyed_army(data: GameData, state: Dictionary, army_id: 
 	if army["units"].is_empty():
 		if army["general"] != null:
 			CharacterRules.kill(state, army["general"], data)
+		SiegeRules.release(state, army_id)
 		state["armies"].erase(army_id)
 
 

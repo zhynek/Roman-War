@@ -39,6 +39,16 @@ func test_recruiting_costs_money_and_people(t) -> void:
 	t.check_eq(state["settlements"]["beta"]["garrison"].size(), 1, "unit joins garrison")
 
 
+func test_bodyguards_are_not_recruitable(t) -> void:
+	var data := Fixtures.data()
+	var state := Fixtures.state(data)
+	var ids := []
+	for unit in RecruitmentRules.available_units(data, state, "beta"):
+		ids.append(unit["id"])
+	t.check(not ids.has("test_guard"), "a general's escort is never a barracks product")
+	t.check(not RecruitmentRules.queue_unit(data, state, "beta", "test_guard"), "nor can it be queued")
+
+
 func test_cannot_drain_village_dry(t) -> void:
 	var data := Fixtures.data()
 	var state := Fixtures.state(data)

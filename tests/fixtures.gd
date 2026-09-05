@@ -120,6 +120,18 @@ static func data() -> GameData:
 		"cost": 500, "upkeep": 150, "requirements": {"building_kind": "government", "building_level": 1},
 		"era": "any", "description": "",
 	}
+	game_data.units["test_galley"] = {
+		"id": "test_galley", "name": "Galley", "class": "ship", "culture": "roman",
+		"factions": ["red"], "soldiers": 60, "attack": 5, "defense": 5, "morale": 6,
+		"cost": 400, "upkeep": 100, "requirements": {"building_kind": "naval", "building_level": 1},
+		"era": "any", "description": "",
+	}
+	game_data.units["test_guard"] = {
+		"id": "test_guard", "name": "Guard", "class": "general_bodyguard", "culture": "roman",
+		"factions": ["red"], "soldiers": 40, "attack": 9, "defense": 10, "morale": 9,
+		"cost": 0, "upkeep": 150, "requirements": {"building_kind": "government", "building_level": 1},
+		"era": "any", "description": "",
+	}
 	game_data.mercenary_pools = [{
 		"id": "test_pool", "regions": ["gamma", "delta"],
 		"units": [{"template": "test_merc", "max": 2, "initial": 1, "replenish_per_turn": 0.5, "cost_multiplier": 1.5}],
@@ -225,6 +237,18 @@ static func add_army(campaign_state: Dictionary, owner: String, region: String, 
 		"movement_left": 2.0, "forced_march": false,
 	}
 	return army_id
+
+
+static func add_fleet(campaign_state: Dictionary, owner: String, zone: String, templates: Array) -> String:
+	var fleet_id := "fleet_%d" % campaign_state["next_id"]
+	campaign_state["next_id"] += 1
+	var ships: Array = []
+	for template in templates:
+		ships.append({"template": template, "experience": 0, "strength_pct": 100})
+	campaign_state["fleets"][fleet_id] = {
+		"owner": owner, "sea_zone": zone, "ships": ships, "movement_left": 2.0,
+	}
+	return fleet_id
 
 
 static func _faction(capital: String) -> Dictionary:
