@@ -17,8 +17,18 @@ minutes. It deliberately does **not** repeat the other docs:
 at all: eight sessions each branched off `9026730` and none merged back, so
 every build contained only that session's work and nothing else. That is why a
 build could ship without the map you remembered writing. `main` now carries the
-integration of five of those branches, and Phase 7 on top of them, and is the
-only branch worth building.
+integration of five of those branches, Phase 7 on top of them, and the military
+strategy layer on top of that (PR #2, fast-forwarded into `main` on 2026-09-05),
+and is the only branch worth building.
+
+**Why sessions keep forking the wrong commit:** GitHub's *default branch* for
+this repository is still `claude/new-session-3g3s4m` — the old `9026730` — so
+every new Claude Code session is cloned and branched from it unless somebody
+switches. Two more sessions did exactly that after `main` existed (the two
+"also superseded" branches below), and so did the session that wrote this
+paragraph. The fix is a repository setting only the owner can make:
+**Settings → General → Default branch → `main`**. Until then, the first command
+of every session is `git fetch origin main && git checkout -B <branch> origin/main`.
 
 **Merged into `main`, in this order:**
 
@@ -30,6 +40,7 @@ only branch worth building.
 | `building-details-upgrades` (contains `ai-opponents`) | The modular AI, the guided campaign trail, the building yard and muster hall, 312 procedural building illustrations, the no-mouse camera |
 | `project-handoff-familiarization` | Campaign agents and a real negotiation model, the knowledge/technique engine, the chronicle and epithets, AI personas |
 | `roman-war-next-phase` (2026-09-02) | Phase 7, the cursus honorum: Senate offices and elections, seats that absorb Ambition, the Senate's demand, outlawry, a civil war with sides and an end, the Senate scroll, journal beats, a trail stage; the world seed persisted, the version stamp, the duplicate `class_name` removed |
+| `military-strategy-gameplay` (2026-09-05, PR #2) | The military strategy layer: unit-class counters, the RNG-free battle estimator with odds and named factors, kit from armouries and drill, the casualty and rout model, garrison quality / levy strain / war mood in public order, warcraft techniques folded into the knowledge engine; `docs/MILITARY_STRATEGY.md` |
 
 **Deleted, not merged: `handoff-repo-familiarization-jgqty6`** (head
 `bd8be2549e9a39dafe496f1cb97cd6237ace10a9`, deleted 2026-09-01 after review).
@@ -60,8 +71,61 @@ by absorption, not loss — `test_pathfinding.gd` and `test_ui_smoke.gd` cover
 march orders across turns and saves, halts, order supersession, sieges, fog,
 polygon picking and fleet orders. Nothing to take from it.
 
+**Also superseded: `next-roadmap-phase-rjxwas`** (six commits, 2026-09-03/04,
+forked from `9026730`). A *fourth* implementation of Phases 5 and 6 — its own
+`AiController` and four behaviours, `data/ai_personalities.json`, its own
+agents table and negotiation model — written after `main` already carried the
+modular AI, the agents and the negotiation scroll. A dry-run merge onto the
+trunk conflicts in 125 paths (`git merge-tree --write-tree origin/main
+origin/claude/next-roadmap-phase-rjxwas`). Its review commits did find real
+rules — a peace kept for `min_peace_turns_before_war` seasons, armies that
+never park under walls they cannot storm, debt shedding the costliest unit down
+to a floor — and each is worth checking against `main`'s AI as an idea, not as
+a file. Nothing else to take.
+
+**Superseded in part, worth mining: `roman-war-gameplay-review-ou72vk`**
+(fourteen commits, 2026-09-05, forked from `9026730`; head `4293616`). It did
+not know `main` existed: its `docs/reviews/2026-09-codebase-review.md` reviews
+"the whole repository at commit `9026730`", and its Phase 9 — army command —
+is written against the old map renderer and the old facade. A dry-run merge
+onto the trunk conflicts in 81 paths (`map_view.gd`, `campaign_screen.gd`,
+`game.gd`, `combat.gd`, `movement.gd`, `siege.gd`, `senate.gd` among them), so
+it cannot be merged; but it is the only branch that holds these, and `main`
+has none of them:
+
+- **`ForceRules`** (`src/core/rules/forces.gd` there, behind
+  `Game.raise_army(region, indices, general)`, `transfer_units`, `merge_armies`,
+  `split_army`, `disband_unit`, `attach_general`, `detach_general`) with a
+  **force card** and regroup rows in the panels. `main` raises an army whole
+  (`Game.raise_army(region)`), garrisons it (`garrison_army`), detaches units
+  engine-side (`CombatRules.detach_to_garrison`) and merges co-located stacks
+  for the AI only (`AiMilitary._merge_colocated`); the player has no transfer,
+  merge, split, disband, attach or detach. Port the rules onto `main`'s facade
+  and the card onto `main`'s side panel; do not port its `map_view.gd`.
+- **Harbours**: ships finish in port instead of the land garrison, with
+  `launch_fleet` / `dock_fleet` / `merge_fleets` / `split_fleet` and movement
+  conserved through transfers (its adversarial round closed the relays). On
+  `main` the only fleets are the campaign's starting ones (`NewGame._add_fleet`),
+  ordered from the diplomacy scroll; `recruitment.gd` never mentions a ship.
+- **Movement paid by attacks and sieges**, sieges released from every path that
+  moves or erases the besieger, besieged cities that neither recruit nor build,
+  and a facade that refuses orders for forces the player does not own
+  (`wrong_owner`, `unknown_action`). Check each against `main` before assuming
+  it is missing — `main`'s `AiMilitary` and `SiegeRules` were written later and
+  may already hold the rule.
+- Its **review report**: 124 deduplicated findings against `9026730`, 24
+  verified. Most engine findings predate `main`'s rewrites; the balance
+  findings (income snowballs, order at 150–220 % in core cities, extermination
+  dominating, huge cities unreachable) may or may not survive the society layer
+  — re-probe on `main` before acting on any of them.
+
+`git fetch origin claude/roman-war-gameplay-review-ou72vk` gets it while the
+branch exists; `docs/plans/phase-9-army-command.md` there is the spec.
+
 **The military strategy layer** (from `claude/military-strategy-gameplay-ecnngs`,
-merged 2026-09-03) sits on top of all of it: unit-class counters and per-class
+reconciled onto the trunk on 2026-09-03 as PR #2, but only fast-forwarded into
+`main` on 2026-09-05 — for two days `main` sat one merge behind the branch that
+described itself as merged) sits on top of all of it: unit-class counters and per-class
 terrain/walls in the RNG-free `BattleResolver.estimate()` (odds before every
 attack, a battle report naming the deciding factors), weapon/armour kit from
 armouries and drill, the casualty and rout model, garrison quality / levy strain /
@@ -71,10 +135,17 @@ records with a `war` block and war-record prerequisites, so there is one
 research model, not two. `docs/MILITARY_STRATEGY.md` is the player-facing guide;
 DESIGN §6.5–6.8 the spec.
 
-**Green on `main`:** 414 tests / 0 failures across 42 test
-files, validator 0 errors / 0 warnings across 33 data tables, clean boot. A turn
-costs ~400 ms on the soak machine — the figure that machine gave for the trunk
-before Phase 7 too.
+**Green on `main`:** 414 tests across 42 test files, validator 0 errors /
+0 warnings across 33 data tables, clean boot — re-run on 2026-09-05 before the
+fast-forward. One assertion is machine-bound: `test_ai_campaign.gd`'s 600 ms
+per-turn guard (§5.12). PR #2's author measured 514 ms on the merge against
+476 ms for the trunk before it; the 2026-09-05 container measured 606 ms quiet
+(748 ms slowest turn) against 538 ms for `d98484d`, and 676 ms with a download
+competing for CPU — so the suite there reported 414 tests / 1 failure with
+every functional assertion passing, and that line is the whole failure. The
+exported release build's first turns run at ~390 ms. If the guard trips on
+GitHub's runners once Actions executes again, make it relative to a
+calibration loop rather than raising the number.
 
 **Phase 7 — the cursus honorum — was merged into `main` on 2026-09-02** (from
 `claude/roman-war-next-phase-8ef54h`, branched at `2c9b602` per §9, six commits).
@@ -121,13 +192,21 @@ The two gates that must stay green — the same two CI runs on every push and PR
 
 ```sh
 python3 tools/validate_data.py                                # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd   # 366 tests, 0 failures
+godot --headless --path . --script res://tests/run_tests.gd   # 414 tests, 0 failures
 godot --headless --path . --quit-after 5                      # boots clean: no errors after the version banner
 ```
 
 The suite takes several minutes — `test_ai_campaign` (60 AI turns, replayed,
 then save-and-resumed) and `test_society_longrun` dominate it, and it prints
 nothing until it finishes, so a quiet terminal is not a hang.
+
+> **GitHub Actions has executed nothing since 2026-09-03 01:16 UTC.** Every run
+> since — on every branch, PR #2 included — fails two seconds after creation
+> with no runner assigned and no logs (`runner_id: 0`, no steps). The workflow
+> is unchanged; that is the account's Actions availability (a spending limit or
+> a billing problem), which only the owner can fix in GitHub's billing settings.
+> Until a run actually executes again, the gates are local-only and a red check
+> on GitHub means nothing either way.
 
 `pip install jsonschema` if the validator can't import. **There is no
 single-file test filter** — `tests/run_tests.gd` globs `res://tests/test_*.gd`
@@ -395,14 +474,21 @@ What costs time to rediscover:
   because thinning needs Apple's `lipo`, absent on Linux.
 - **Ad-hoc signing is mandatory for Apple Silicon** (`codesign/codesign=1`) —
   arm64 macOS refuses to launch a fully unsigned binary outright.
-- **Delivery caps at 30 MiB**, so extract the arm64 slice from the Mach-O fat
-  binary in Python (fat magic `0xCAFEBABE`, `cputype 0x0100000c`), overwrite the
-  executable, re-zip preserving the original entry modes. **Verify
-  `LC_CODE_SIGNATURE` (cmd `0x1d`) survives in the thinned slice**, or the app
-  will not launch.
+- **Delivery caps at 30 MiB**, so `tools/thin_macos_arm64.py` extracts the
+  arm64 slice from the Mach-O fat binary (fat magic `0xCAFEBABE`, `cputype
+  0x0100000c`), refuses to write unless `LC_CODE_SIGNATURE` (cmd `0x1d`)
+  survives in the slice — without it the app will not launch — and re-zips
+  preserving the original entry modes.
 - **Verify the package plays** before sending: the Linux export shares the same
-  `.pck`, so run it headless with a probe script that starts a campaign, counts
-  the packaged data tables, and ends a few turns.
+  `.pck`, so `./RomanWar.x86_64 --headless --script res://tools/build_probe.gd`
+  (the probe is packed with the game) counts the data tables, starts a
+  campaign, ends five turns, round-trips a save and checks the loaded game
+  marches in lockstep with the live one, exiting nonzero on failure.
+- **Builds delivered so far:** `97cabfd` — the old `9026730` line, Phases 0–4
+  and the first campaign UI, no version stamp — on 2026-08-23; and **`0.10.0`,
+  the first build of `main`** (the integrated trunk plus the military layer),
+  on 2026-09-05. Every playtest report from before that date is about the old
+  line, not about anything in the table above.
 
 ## 7. Known gaps (verified, not guesses)
 
@@ -558,8 +644,11 @@ already reads the round log it would produce.
   the same commit, none merged, and every build shipped one session's work
   while the owner reasonably assumed it shipped all of it. Before starting,
   `git fetch origin main && git checkout -b <branch> origin/main` — never fork
-  whatever the container happened to clone. Before finishing, merge to `main`
-  and push it. A branch that outlives its merge is sprawl.
+  whatever the container happened to clone (it clones GitHub's *default
+  branch*, which is the old `9026730` line until the owner switches it to
+  `main`; §1). Before finishing, merge to `main` and push it — and check that
+  `main` actually moved: the military layer sat two days in an open PR whose
+  own handoff said "merged". A branch that outlives its merge is sprawl.
 - **Check for forks before you build anything.**
   `git branch -r` plus `git rev-list --count origin/main..<branch>` for each
   takes ten seconds and tells you whether someone else has already built what

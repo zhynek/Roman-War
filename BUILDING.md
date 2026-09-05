@@ -31,8 +31,26 @@ that cost time to learn:
   refuses with a configuration error.
 - Verify a build without owning every platform: the Linux export shares the
   same `.pck`, so
-  `./RomanWar.x86_64 --headless --script <a probe script that runs Game.new_campaign and end_turn>`
-  proves the package is complete and playable.
+  `../build/RomanWar-Linux/RomanWar.x86_64 --headless --script res://tools/build_probe.gd`
+  proves the package is complete and playable: 34 data tables packed, a
+  campaign starts, five turns end, a save round-trips and the loaded game
+  marches in lockstep with the live one; nonzero exit otherwise.
+
+## Delivering to a playtester
+
+The universal macOS zip is ~56 MiB. Where a delivery channel caps at 30 MiB,
+thin it to the Apple Silicon slice — what `lipo -thin arm64` would do, without
+needing a Mac:
+
+```sh
+python3 tools/thin_macos_arm64.py ../build/RomanWar-macOS.zip ../build/RomanWar-macOS-arm64.zip
+```
+
+The script refuses to write a slice that lost its ad-hoc code signature, and
+keeps every other zip entry and its unix mode exactly as exported. The result
+runs on Apple Silicon only; an Intel Mac needs the universal zip. Bump
+`application/config/version` in `project.godot` before exporting — it is the
+number on the start menu, and the first thing to ask for in a playtest report.
 
 ## No-build alternative (good for playtesters)
 
