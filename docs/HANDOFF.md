@@ -21,11 +21,18 @@ rules engine in `src/core/`. Battles resolve behind a swappable
 
 **Built:** Phases 0–4 (map & turns, settlements & economy, armies & sieges at
 foundation depth, the full character/family layer), the Phase 7 senate
-foundation loop, and a playable Phase 8 campaign UI.
+foundation loop, a playable Phase 8 campaign UI, and **Phase 9 increments 0–5**
+(army and fleet banners, left-click select / right-click order, fog-aware
+reachability and multi-step marching, the force card, raise / transfer /
+merge / split / disband / generals, harbours with fleets that launch, dock,
+merge and split, save v2). The phase spec and the remaining increments
+(embark/disembark, naval battles and blockades, docs closure) are in
+`docs/plans/phase-9-army-command.md`; the codebase review that preceded it is
+in `docs/reviews/2026-09-codebase-review.md`.
 
-**Green as of commit `97cabfd`:** 69 tests / 0 failures, validator 0 errors /
-0 warnings, clean boot. Branch `claude/new-session-3g3s4m`, working tree clean,
-everything pushed. A Mac build has been delivered to the user, who is playtesting.
+**Green as of this branch:** 100 tests / 0 failures, validator 0 errors /
+0 warnings, clean boot. A Mac build of the earlier commit `97cabfd` has been
+delivered to the user, who is playtesting.
 
 ## 2. Get productive in five minutes
 
@@ -52,11 +59,18 @@ Then the three commands that must stay green:
 
 ```sh
 python3 tools/validate_data.py                                   # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd      # 69 tests, 0 failures (~10s)
+godot --headless --path . --script res://tests/run_tests.gd      # 100 tests, 0 failures (~20s)
 godot --headless --path . --quit-after 5                         # clean boot, no output = good
 ```
 
 `pip install jsonschema` if the validator complains about the import.
+
+**Seeing the UI without a screen.** `Xvfb` is usually installed in the
+container; a `SceneTree` script that adds `CampaignScreen.create(game)` to the
+root, waits a dozen frames and calls
+`root.get_viewport().get_texture().get_image().save_png(path)`, run as
+`xvfb-run -a -s "-screen 0 1280x800x24" godot --path . --rendering-driver opengl3 --script /abs/shot.gd`,
+gives a real screenshot to look at. Every Phase 9 increment was checked that way.
 
 ## 3. Building a playable app
 
@@ -90,10 +104,22 @@ slice before shipping**, or the app will not launch.
    float64 and silently round a 64-bit RNG state to a multiple of ~1024,
    producing a different random stream after loading.
 
-## 5. Three ways forward
+## 5. Ways forward
 
-The user has not committed to a direction. Each is self-contained; pick one and
-paste its prompt.
+The owner chose the army-command overhaul (Phase 9) as the next project; its
+remaining increments are specified in `docs/plans/phase-9-army-command.md`
+§5–7 (embark/disembark, naval combat and blockade, docs closure) and are the
+first thing to pick up:
+
+> Finish Phase 9: build increments 6 and 7 from `docs/plans/phase-9-army-command.md`
+> (embark/disembark on fleets with `army.aboard`, naval battles through the
+> `BattleResolver` seam with `naval: true`, explicit port-gated blockades that cut
+> sea trade and grain), keeping every increment green and screenshot-checked,
+> then the docs closure of increment 8.
+
+The review report (`docs/reviews/2026-09-codebase-review.md`) lists the
+verified defects and improvements outside the phase, prioritised. After that,
+the earlier options still stand:
 
 ### Phase 6 — AI opponents
 The world currently feels empty: `src/core/rules/ai_stub.gd` is **33 lines** of
@@ -131,21 +157,22 @@ reproduces their exact campaign, which makes any bug directly debuggable.
   **no spouses, no children, no `gender` field set** in `campaign.json`. The
   marriage path only opens once in-game births produce daughters, so the family
   tree bootstraps slowly. Seeding real households would fix it.
-- **Sea-zone anchor positions** in `regions.json` are unused — `map_view.gd`
-  draws sea lanes from shared-zone membership and never renders zone labels.
+- **Sea-zone anchor positions** in `regions.json` are now the fleet-banner
+  anchors and zone marks (`map_view.gd`), and the schema requires them.
 - **`office_gained` triggers are dead** until Phase 7 offices exist. The
   validator knows: `FORWARD_TRIGGERS` in `tools/validate_data.py` allowlists
   them, and warns about any *other* trigger kind no engine call site fires.
-- **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
-  abstracted crossing today), naval battles, port blockades, forts and
-  watchtowers, ambush.
+- **Phase 9 remainder**: embark-on-fleet transport (sea movement is still the
+  abstracted crossing; fleets exist, sail and are launched/docked but carry
+  nothing yet), naval battles, port blockades. Forts, watchtowers and ambush
+  stay in the Phase 3 remainder.
 - **Art is placeholder** — coloured circles on a geographic map.
 
 ## 7. Process notes
 
 - **Git identity must be `noreply@anthropic.com` / `Claude`** before committing,
   or a stop hook flags the commits as unverified and they need re-authoring.
-  Develop on `claude/new-session-3g3s4m`.
+  Develop on `claude/roman-war-gameplay-review-ou72vk` (this branch).
 - **Run adversarial review agents after building anything substantial.** Three
   reviewers (engine correctness, UI behaviour, data/doc fidelity) found **37 real
   issues** the 60-strong test suite had missed — including armies declaring war

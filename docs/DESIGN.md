@@ -53,8 +53,13 @@ Two supporting principles enforced throughout:
 
 The player acts freely during their turn through the `Game` facade
 (`src/core/game.gd`): set taxes, queue buildings and units, demolish, retrain,
-move armies and fleets (each has per-turn movement points), attack, besiege,
-assault, garrison, move the capital. Then they end the turn.
+march armies and sail fleets (each has per-turn movement points; marches are
+multi-step along the cheapest road), attack, besiege, assault, raise armies
+from garrisons and regroup them (transfer, merge, split, disband, give or take
+a general), launch fleets from harbours and dock them, move the capital. Then
+they end the turn. Every regrouping action has a pure `check_*` sibling and
+`Game.check(action, args)` answers "would this be legal?" with a closed error
+vocabulary (`ForceRules`), so the UI can grey buttons and explain refusals.
 
 ### 2.3 End-turn resolution order
 
@@ -92,7 +97,11 @@ map draws; sea zones carry optional anchor positions reserved for zone labelling
 `MapRules` provides BFS hop counts (cached per map, used for distance-to-capital and
 corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
 faction sees its own regions and armies plus one hop out, and every coastal region
-of any sea zone one of its fleets occupies.
+of any sea zone one of its fleets occupies; at sea it has eyes on the zones its
+fleets sail and their neighbours, plus every zone touching a region it owns or
+occupies (`visible_sea_zones`). The campaign map draws every army and fleet as a
+banner (fill = units out of the cap, a strength bar beneath, a finial for a
+general) at its region token or sea-zone anchor, and hides banners the fog covers.
 
 ## 3. Settlements
 
@@ -289,13 +298,35 @@ forge-type `recruit_xp` building effects.
 
 ### 5.3 Movement and forced march
 
-Armies get **2 movement points** per turn. Entering a region costs its terrain
+Armies get **2 movement points** per turn (plus a general's logistics traits,
+`MovementRules.movement_points_for`). Entering a region costs its terrain
 rate (plains/steppe 1.0; forest/hills/desert 1.5; mountains/marsh 2.0) reduced by
 the destination's road tier (×1.0 / 0.75 / 0.6 / 0.5). **Forced march** doubles
 the budget but marks the army fatigued — a −20% battle strength malus until next
 turn. An army cannot *move* into a region containing a hostile army or a hostile
 settlement: that is an attack or a siege, taken as an explicit action. Fleets move
-between adjacent sea zones at 1 point per lane.
+between adjacent sea zones at 1 point per lane (the Pharos wonder's
+`naval_movement_pct` stretches it).
+
+**Reach and marches.** `MovementRules.reachable(army, viewer_visible)` is a
+Dijkstra over the region graph with the forced-march budget as its horizon,
+returning every region in reach (cost, whether a forced march is needed, the
+previous step) and the regions that block, with the reason. Hostiles block only
+where the viewer can see them, so the map's rings never leak what the fog hides;
+`march` then walks the cheapest path one step at a time and halts on contact.
+A march is forced as a whole only when the destination lies beyond the plain
+budget. Marching never attacks or besieges. An attack requires movement and
+ends the attacker's turn; a siege laid from an adjacent region pays the step
+and is refused while a hostile field army stands at the walls.
+
+**Regrouping** (`ForceRules`): armies are raised from garrisons, units move
+between co-located forces of one owner, armies merge (the receiving army keeps
+its general; two led armies merge only in an own city) and split, units are
+disbanded (men return to an own city's population, never money), generals are
+attached (a family member standing there) or detached (own city only).
+Movement is conserved: a receiving army keeps the lesser movement, and a
+settlement remembers the least movement of any army that dropped units into it
+this season (`muster_march_left`, transient) and caps what is raised from it.
 
 ### 5.4 Sieges
 
@@ -544,8 +575,10 @@ and a multi-turn campaign integration run) on every push.
   Dictionary** — JSON-serializable and deep-comparable — whose full shape is
   documented at the top of `src/core/new_game.gd`.
 - Saving is `JSON.stringify({version, state})`; loading is the reverse with a
-  version gate (`src/core/save.gd`). Data tables are content, not state, so only
-  the state travels.
+  version gate (`src/core/save.gd`): the current version is 2 (harbours);
+  version-1 saves are upgraded on load (empty harbours, ships moved out of
+  garrisons by `NavalRules.normalise`); newer saves are refused. Data tables
+  are content, not state, so only the state travels.
 - All randomness flows through `CampaignRng`; its integer state is persisted in
   `state.rng_state` and threaded through every resolution step, so identical
   (seed, actions) sequences produce identical campaigns — the property the
@@ -560,12 +593,13 @@ Phases follow the research report (§17). Status as of this document:
 | 0 — Design & setup | Schemas for all 16 tables, repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
-| 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
+| 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth.** Remaining: forts/watchtowers, ambush (embark-on-fleet transport, naval battles and blockades moved to Phase 9) |
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers await Phase 7 offices |
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | Pending; symmetric stances + war declaration live (`DiplomacyRules`), hostile acts auto-declare war |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | Pending; `AiStub` manages settlements passively, difficulty constants live in balance.json |
 | 7 — Politics, events, victory | Full senate offices & mission variety, civil war depth, richer event scripting | **Foundation loop built** (standings, take-region missions, civil-war trigger, army reform, wonders, victory checks); depth pending |
 | 8 — Polish | Campaign UI, balancing pass, tutorial, save robustness | **Campaign UI playable**: start menu (house/difficulty/seed), pannable geographic map (owner tokens, adjacency roads & sea lanes, army badges, siege rings, fog), settlement panel with live factor breakdowns/taxes/queues, army orders (march, sail, attack, besiege, assault with occupation choice, mercenaries, garrison), family scroll (heir, retinue transfer), turn log, save/load. Balancing pass and tutorial pending |
+| 9 — Army command | Banners for every army and fleet (fill = stack size, strength bar, general finial), left-click select / right-click order, fog-aware reachability and multi-step marching, the force card (roster, stats, orders), raising armies from garrisons, transfer/merge/split/disband/generals, harbours and fleets that can be launched, docked, merged and split, save v2 | **Increments 0–5 built** (`docs/plans/phase-9-army-command.md`). Pending: embark/disembark on fleets, naval battles through the resolver seam, explicit port blockades, docs closure |
 | Future — Real-time battles | A battle scene implementing `BattleResolver` | By design, a drop-in |
 
 ## 11. Clean-Room Policy

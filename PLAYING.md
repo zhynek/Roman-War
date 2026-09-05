@@ -27,14 +27,23 @@ campaign runs to AD 14.
   Buttons: **Family**, **Diplomacy**, **Save**, **Load**, and **END TURN**.
 - **The map** — every region is a circle at its real geographic place, coloured
   by who owns it and sized by how big its city is. Lines are roads between
-  neighbouring regions; dashed lines are sea routes. Small squares beside a
-  city are armies. A red ring means the city is under siege. Grey circles are
-  land you have not scouted.
-  - **Drag with the right mouse button** to move the map.
-  - **Scroll** to zoom in and out.
-  - **Left-click** a region to select it.
-- **Right panel** — everything about the region you clicked, and every action
-  you can take there.
+  neighbouring regions; dashed lines are sea routes. A red ring means the city
+  is under siege. Grey circles are land you have not scouted. Small rings on
+  the sea are the seas themselves, named when you zoom in.
+  - **Banners** beside a city are armies; banners on a sea are fleets. The
+    banner's fill is how many units are in it (a full banner is twenty), the
+    bar under it is how many of the men are still standing, a gold disc above
+    it means a family member leads it, a white sail means a fleet. Your own
+    banners stand nearest the city.
+  - **Drag with the right mouse button** (or the middle one) to move the map.
+  - **Scroll** to zoom in and out. Zoomed far out, banners become small
+    squares again.
+  - **Left-click** a banner to select that army or fleet, a city to select the
+    region, open sea to clear the selection. Hover a banner for a summary.
+  - **Right-click** somewhere to order the selected army or fleet there.
+- **Right panel** — the force card for the selected army or fleet (its men,
+  its orders), then everything about the selected region and every action you
+  can take there.
 - **Bottom right** — the turn log: what happened while you were away.
 
 ## Running a city
@@ -62,18 +71,25 @@ tiers at all — that is deliberate.
 
 ## Armies
 
-Click a region holding one of your armies, then click the army in the right
-panel to select it. Now:
+**Left-click an army's banner** to select it. Rings appear on the map: yellow
+regions are within a season's march, orange ones only by forced march, red ones
+hold an enemy you can strike. The force card on the right lists every unit
+with its strength, experience chevrons and upkeep, the general's name (click
+*sheet* for his page), and how far the army can still go this season.
 
-- **Click another region** to march there. Roads make it cheaper; rough terrain
-  costs more.
-- **Shift-click** to force march — roughly double the range, but the men arrive
-  tired and fight worse.
-- **Click a coastal region across a sea** to sail there (it takes the whole
-  turn).
-- **Click an enemy region** to attack the army there or lay siege to the city.
-  If you are not already at war, the game asks first — it will never start a
-  war by accident.
+- **Right-click a ringed region** to march there. The army takes the cheapest
+  road, several regions in one order if it has the legs; roads make it cheaper,
+  rough terrain costs more. If the column runs into an enemy the fog was hiding,
+  it halts and the log says so.
+- **Shift + right-click** an orange region to force march — roughly double the
+  range, but the men arrive tired and fight worse.
+- **March to →** on the card does the same from a list, for trackpads.
+- **Right-click a red region** to attack the army there or lay siege to the
+  city. If you are not already at war, the game asks first — it will never start
+  a war by accident, and marching or sailing never starts one either.
+- **Click a coastal region across a sea** with the army selected to sail there
+  the old way (it takes the whole turn). Real fleets can carry armies too
+  (see *Fleets*).
 - Standing at a besieged city, you can **assault the walls** once your siege
   equipment is ready (two turns), or wait and starve them out. When you take a
   city you choose to **occupy** (keeps the people, worst unrest), **enslave**
@@ -82,6 +98,49 @@ panel to select it. Now:
   have burned your own future tax base).
 - **Hire mercenaries** if the region has a pool — they cost more than your own
   troops but need no barracks and no population.
+- **Esc** clears the selection; **Tab** or **N** jumps to the next army or
+  fleet that still has orders to give.
+
+### Raising, merging and splitting
+
+Armies are made from garrisons. In one of your cities, tick units in the
+**Garrison** list and press **Raise army under →** a captain or any family
+member standing there — the new army appears beside the city, selected. With an
+army selected in a city you can also:
+
+- **Transfer ticked →** the garrison or another of your armies standing there.
+- **Merge into →** another army here. The receiving army keeps its general (a
+  captain's army takes the joining general). Two generals cannot share a camp
+  in the field; merge them in one of your cities and the displaced man stays
+  there as governor.
+- **Split ticked under →** a captain, the army's own general, or a family
+  member standing here: the ticked units become a new army.
+- **Disband ticked units**: the men go home to the city's population (nothing
+  comes back for mercenaries, and no money ever does).
+- **Give command to …** a family member present, or **Detach** the general in
+  one of your own cities. Nobody is ever left standing in the wilderness.
+- **Consolidate depleted units** folds battered units of the same kind together.
+
+Troops remember how far they marched this season: dropping a tired unit into a
+garrison and raising it again does not give it fresh legs, and an army that
+receives tired men marches at their pace.
+
+## Fleets
+
+Ships are built in a port with a shipyard and wait in the city's **Harbour**
+(they cost upkeep there, but never fight on the walls). Tick ships and press
+**Launch fleet into →** one of the seas the port touches: the fleet appears on
+that sea's anchor, selected, and sails next season.
+
+- **Right-click a ringed sea** to sail there (**Sail to →** on the card does the
+  same). Fleets pass each other at sea; there are no naval battles yet.
+- **Dock at →** one of your ports on the same sea to bring the ships home.
+- **Transfer ticked →** another of your fleets on the same sea, **Merge into →**
+  it, or **Split ticked ships into a new fleet**.
+- A fleet gives you eyes on its sea and the seas beside it, and on every coast
+  it touches.
+- Carrying armies aboard fleets, fighting at sea and blockading ports are the
+  next steps of this phase (see `docs/plans/phase-9-army-command.md`).
 
 Armies cost upkeep every single turn. That is the central squeeze of the game:
 your army is the thing that wins you regions and the thing that bankrupts you.

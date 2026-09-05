@@ -70,10 +70,14 @@ Phases 0–4 of the research report's roadmap are built and tested: campaign
 map, turn loop, settlements, economy, recruitment, auto-resolved battles,
 sieges, mercenaries, events, victory checks, and the full character layer
 (traits, retinues, family tree, succession). A playable campaign-map UI sits
-on top: geographic map with fog of war, settlement/army panels driven by the
-engine's factor breakdowns, family scroll, and save/load. Campaign AI (a
-passive stub today), agents & diplomacy negotiation, and senate depth are the
-next phases; their data tables and state hooks already exist.
+on top: geographic map with fog of war, a banner for every army and fleet
+(left-click to select, right-click to order, fog-aware reach rings), a force
+card with the roster, raising armies from garrisons and regrouping them
+(transfer, merge, split, disband, generals), harbours and fleets, settlement
+panels driven by the engine's factor breakdowns, family scroll, and save/load
+(Phase 9, increments 0–5 — see `docs/plans/phase-9-army-command.md`).
+Campaign AI (a passive stub today), agents & diplomacy negotiation, and senate
+depth are the phases after that; their data tables and state hooks already exist.
 
 ## Clean-room policy
 

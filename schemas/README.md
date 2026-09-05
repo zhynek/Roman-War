@@ -21,6 +21,13 @@ Shared conventions (enforced by the schemas and `tools/validate_data.py`):
   wall_level, road_level, port_level` (`law`/`happiness`/`growth`/`health` are
   percentage points; `*_income` are denarii per turn).
 - Years are astronomical integers: 270 BC = `-270`, AD 14 = `14`.
+- Campaign settlements may author a `harbour` (ships waiting in port): only
+  units of class `ship`, only on coastal regions. Ships never appear in a
+  `garrison` or an army, and only ships appear in a harbour or a fleet's
+  `ships`. Sea zones must carry a `position` — it anchors fleet banners.
+- `balance.forces.max_units_per_force` is the one home of the 20-unit stack
+  cap; the validator checks it equals every `maxItems` on army units, fleet
+  ships and harbours in `campaign.schema.json`.
 
 Cross-file references (checked by `tools/validate_data.py`, not by JSON Schema):
 region ids, faction ids, culture ids, unit template ids, building level ids,
