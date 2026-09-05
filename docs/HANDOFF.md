@@ -145,10 +145,11 @@ records with a `war` block and war-record prerequisites, so there is one
 research model, not two. `docs/MILITARY_STRATEGY.md` is the player-facing guide;
 DESIGN §6.5–6.8 the spec.
 
-**Green on `main`:** 454 tests across 45 test files (0.11.0 — the Phase 9
-port added `test_forces`, `test_naval`, `test_ui_forces` and thirty
-assertions elsewhere), validator 0 errors / 0 warnings across 33 data tables,
-clean boot — re-run on 2026-09-05 before the fast-forward. One assertion is machine-bound: `test_ai_campaign.gd`'s 600 ms
+**Green on `main`:** 469 tests across 46 test files (0.11.0 — the Phase 9
+port added `test_forces`, `test_naval`, `test_ui_forces`,
+`test_army_command_review` and thirty assertions elsewhere), validator
+0 errors / 0 warnings across 33 data tables, clean boot — re-run on
+2026-09-05 before the fast-forward. One assertion is machine-bound: `test_ai_campaign.gd`'s 600 ms
 per-turn guard (§5.12). PR #2's author measured 514 ms on the merge against
 476 ms for the trunk before it; the 2026-09-05 container measured 606 ms quiet
 (748 ms slowest turn) against 538 ms for `d98484d`, and 676 ms with a download
@@ -203,7 +204,7 @@ The two gates that must stay green — the same two CI runs on every push and PR
 
 ```sh
 python3 tools/validate_data.py                                # 0 errors, 0 warnings
-godot --headless --path . --script res://tests/run_tests.gd   # 454 tests, 0 failures
+godot --headless --path . --script res://tests/run_tests.gd   # 469 tests, 0 failures
 godot --headless --path . --quit-after 5                      # boots clean: no errors after the version banner
 ```
 
@@ -265,7 +266,7 @@ behind `rules/battle/battle_resolver.gd`.
 | `panels/build_drawer.gd`, `panels/info_card.gd`, `panels/map_context_menu.gd` | the building yard / muster hall, the illustrated cards, the right-click dossier |
 | `turn_sequence.gd` + `dispatch_panel.gd` | the day's playback and its recap, over `day_beats` |
 
-**Tests** (`tests/`, 45 files over `tests/fixtures.gd`, a synthetic world that
+**Tests** (`tests/`, 46 files over `tests/fixtures.gd`, a synthetic world that
 loads the real `balance.json`). Formula units: `growth`, `economy`,
 `public_order`, `construction`, `recruitment`, `battle`, `battle_log`,
 `movement_visibility`, `pathfinding`, `characters`, `forces` (regrouping and
