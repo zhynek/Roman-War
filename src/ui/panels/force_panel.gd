@@ -83,9 +83,16 @@ func _rebuild() -> void:
 		where = String(game.data.sea_zones.get(summary["sea_zone"], {}).get("name", summary["sea_zone"]))
 	var header_row := HBoxContainer.new()
 	add_child(header_row)
+	if summary["kind"] == "army":
+		var portrait := Control.new()
+		portrait.custom_minimum_size = Vector2(76,76)
+		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var style := CommanderArt.profile(game.data, summary["owner"], summary["general"], force_id)
+		portrait.draw.connect(func(): CommanderArt.portrait(portrait, Rect2(Vector2.ZERO, Vector2(76,76)), style, true))
+		header_row.add_child(portrait)
 	var swatch := ColorRect.new()
 	swatch.color = owner_color
-	swatch.custom_minimum_size = Vector2(12, 12)
+	swatch.custom_minimum_size = Vector2(4, 12)
 	header_row.add_child(swatch)
 	var header := Label.new()
 	header.text = " %s — %s" % [title, where]
@@ -111,7 +118,7 @@ func _rebuild() -> void:
 		int(summary["soldiers"]), int(summary["max_soldiers"]), int(summary["strength_pct"]),
 		int(summary["upkeep"]), float(summary["movement_left"]), float(summary["movement_max"])])
 	if summary["general"] != null:
-		_label("General: %s — command %d" % [summary["general"]["name"], int(summary["general"]["command"])])
+		_label(String(game.data.effects_glossary["map_commands"]["commander_identity"]).format(summary["general"]))
 	if bool(summary["forced_march"]):
 		_label("FATIGUED — the men marched hard and will fight worse.", Color(0.95, 0.6, 0.2))
 	if summary["besieging"] != null:
@@ -175,7 +182,8 @@ func _unit_row(unit: Dictionary) -> void:
 
 	var bar := StrengthBar.new()
 	bar.fraction = clampf(float(unit["strength_pct"]) / 100.0, 0.0, 1.0)
-	bar.custom_minimum_size = Vector2(56, 8)
+	bar.custom_minimum_size = Vector2(48, 6)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	bar.tooltip_text = "%d of %d men" % [
 		int(ceil(int(template.get("soldiers", 0)) * int(unit["strength_pct"]) / 100.0)), int(template.get("soldiers", 0))]
 	row.add_child(bar)
@@ -662,6 +670,6 @@ class StrengthBar:
 	func _draw() -> void:
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0.2, 0.2, 0.22))
 		var low := Color(0.85, 0.25, 0.20)
-		var full := Color(0.35, 0.80, 0.35)
+		var full := Color(0.47, 0.65, 0.46)
 		draw_rect(Rect2(Vector2.ZERO, Vector2(size.x * fraction, size.y)), low.lerp(full, fraction))
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.6), false, 1.0)

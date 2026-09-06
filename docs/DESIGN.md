@@ -150,8 +150,40 @@ north→south) placing it at its real geographic location, which is what the cam
 map draws; sea zones carry anchor positions the map uses for its sea labels.
 `MapRules` provides BFS hop counts (cached per map, used for distance-to-capital and
 corruption), adjacency, shared-sea-zone and coastal queries. Fog of war (`VisibilityRules`): a
-faction sees its own regions and armies plus one hop out, and every coastal region
-of any sea zone one of its fleets occupies.
+faction sees its towns and ordinary armies plus one hop out; pure mounted
+columns and spies see two hops. Watchtowers see two and fortified posts three.
+Fleets reveal the coastal regions of their current sea zone. These radii live
+in `balance.reconnaissance`.
+
+The 0.12 presentation keeps that graph and adds three map scales. At close
+zoom (1.8×–5.5×), original procedural miniatures show settlement wards, fields,
+camps, troop ranks and mounted commanders; territory view retains aggregate
+markers. `MapOrderRules` provides a read-only order intent with season-labelled
+legs and fog-aware costs. The map order strip can pin that intent before
+execution, while conventional right-click orders remain available. March
+animation consumes the execution's traversed ids, never advances the engine,
+and shares its displayed positions with hit testing. Retained detail chunks
+are culled outside the viewport; only the small army layer animates. See
+`docs/reviews/2026-09-map-experience.md` and PLAYING's 0.12 controls.
+
+The 0.13 layer adds `ReconRules`, additive `watchposts` and `recon` state,
+slowest-unit movement budgets, explicit observation posts, and field-fort
+strength through the existing BattleResolver context. Watchposts require
+friendly provincial ownership; losing it disables the post. `MovementRules`,
+field-battle advances and siege entry record observed enemy steps at the
+moment of relocation. The journal's `army_sighted` payload contains only
+public counts, commander identity and observed endpoints. A later visibility
+change cannot disclose a hidden endpoint; replay works even if the force has
+since merged or disappeared. Last-known contacts expire after three seasons.
+
+`CommanderArt` resolves stable cosmetic character features and the 21 faction
+styles in `unit_art.commanders`. Owned troop miniatures use the existing unit
+kits and overrides; rivals use cultural dress without inspecting their hidden
+roster. Portrait layout and miniature picking share displayed coordinates.
+Direct army clicking and army dragging order travel, empty-land/Space/middle
+dragging pan, and a distant journey is pinned for review before it is queued.
+See `docs/reviews/2026-09-v13-map-overhaul.md` for implementation boundaries and
+release verification.
 
 ## 3. Settlements
 
@@ -1492,3 +1524,26 @@ Roman War is a spiritual successor at the *mechanics* level only.
   tuned constants in `balance.json`.
 - Working title "Roman War"; original visual identity to come. If open-sourced:
   permissive license for code, CC-BY/CC0 for original assets.
+
+
+## Campaign terrain and cartography revision — September 2026
+
+`TerrainRules` adds physical land connectivity to the region graph without
+changing political adjacency. Data-authored crossings distinguish bridges,
+causeways, passes, unbridged rivers, unbroken ridges and open-water borders.
+Movement, path previews, field attacks, siege entry, agents, land trade/grain
+routes and AI traversal consult this seam. Bridge/pass defense is passed through
+`CombatRules.battle_context` to the shared `BattleResolver` factor list; existing
+terrain/class advantages remain in effect.
+
+`CartographyRules` maintains additive `cartography` and directional `map_access`
+state. Geographic reports persist. Visibility remains a separate live-observation
+query. Accepted diplomacy terms grant map access; a war revokes future updates.
+No query or rendering frame writes reports, movement, combat, or RNG state.
+Older saves initialize geographic knowledge from their current observers.
+
+`CampaignLandscape` is the normal rendered map. It uses the retained map geometry,
+terrain profiles and route table, and consumes only filtered force presentation
+caches. Detailed troops follow already-resolved march positions. The camera and
+picking use the same terrain mesh; the classic view remains available for review.
+The visual target is realism; current assets remain original procedural geometry.

@@ -19,6 +19,7 @@ var classes := {}
 var kits := {}
 var overrides := {}
 var attributes := {}
+var commanders := {}
 var load_errors: PackedStringArray = []
 
 var _plates := {}
@@ -50,6 +51,8 @@ func load_from(path: String) -> void:
 	for row in parsed.get("units", []):
 		overrides[String(row["id"])] = row
 	attributes = parsed.get("attributes", {})
+	for row in parsed.get("commanders", []):
+		commanders[String(row["id"])] = row
 
 
 static func files_for(soldiers: int) -> int:
@@ -150,6 +153,7 @@ func unit_plate(data, template_id: String, ctx: Dictionary) -> Dictionary:
 
 	var plate := {
 		"key": key, "kind": "unit", "title": String(unit["name"]),
+		"unit_class": unit["class"], "look": look.duplicate(true),
 		"scene": scene, "lod": int(ctx.get("lod", 2)), "parts": parts, "cues": cues,
 	}
 	if _plates.size() >= MAX_PLATE_CACHE:

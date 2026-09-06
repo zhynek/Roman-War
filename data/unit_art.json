@@ -317,5 +317,175 @@
       "dust": 0.8,
       "note": "quick over the ground"
     }
-  }
+  },
+  "commanders": [
+    {
+      "id": "julii",
+      "helmet": "crest",
+      "armour": "mail",
+      "cape": "#a43e28",
+      "accent": "#e4bd60",
+      "beard": false
+    },
+    {
+      "id": "junii",
+      "helmet": "crest",
+      "armour": "mail",
+      "cape": "#7a1f2b",
+      "accent": "#f0d49d",
+      "beard": false
+    },
+    {
+      "id": "cornelii",
+      "helmet": "crest",
+      "armour": "scale",
+      "cape": "#1f6e5e",
+      "accent": "#d8c1a0",
+      "beard": false
+    },
+    {
+      "id": "senate",
+      "helmet": "diadem",
+      "armour": "mail",
+      "cape": "#6a5acd",
+      "accent": "#f2d381",
+      "beard": false
+    },
+    {
+      "id": "macedon",
+      "helmet": "plume",
+      "armour": "linen",
+      "cape": "#234e64",
+      "accent": "#d8b25a",
+      "beard": true
+    },
+    {
+      "id": "greek_cities",
+      "helmet": "plume",
+      "armour": "linen",
+      "cape": "#e0d5b8",
+      "accent": "#34788b",
+      "beard": true
+    },
+    {
+      "id": "thracia",
+      "helmet": "cap",
+      "armour": "scale",
+      "cape": "#9c4d32",
+      "accent": "#d7b66b",
+      "beard": true
+    },
+    {
+      "id": "seleucia",
+      "helmet": "diadem",
+      "armour": "scale",
+      "cape": "#693660",
+      "accent": "#e9cc94",
+      "beard": true
+    },
+    {
+      "id": "parthia",
+      "helmet": "conical",
+      "armour": "scale",
+      "cape": "#863d32",
+      "accent": "#dcae58",
+      "beard": true
+    },
+    {
+      "id": "armenia",
+      "helmet": "conical",
+      "armour": "scale",
+      "cape": "#4e567d",
+      "accent": "#cdb8a3",
+      "beard": true
+    },
+    {
+      "id": "pontus",
+      "helmet": "cap",
+      "armour": "scale",
+      "cape": "#285a56",
+      "accent": "#d3b158",
+      "beard": true
+    },
+    {
+      "id": "carthage",
+      "helmet": "plume",
+      "armour": "linen",
+      "cape": "#493968",
+      "accent": "#e4cfaa",
+      "beard": true
+    },
+    {
+      "id": "numidia",
+      "helmet": "headcloth",
+      "armour": "tunic",
+      "cape": "#ae7b47",
+      "accent": "#ede0bc",
+      "beard": true
+    },
+    {
+      "id": "egypt",
+      "helmet": "diadem",
+      "armour": "linen",
+      "cape": "#e1c87c",
+      "accent": "#347d89",
+      "beard": false
+    },
+    {
+      "id": "gaul",
+      "helmet": "cap",
+      "armour": "mail",
+      "cape": "#426845",
+      "accent": "#e3ac53",
+      "beard": true
+    },
+    {
+      "id": "germania",
+      "helmet": "none",
+      "armour": "tunic",
+      "cape": "#594234",
+      "accent": "#bbac82",
+      "beard": true
+    },
+    {
+      "id": "britannia",
+      "helmet": "none",
+      "armour": "tunic",
+      "cape": "#377184",
+      "accent": "#d5b97d",
+      "beard": true
+    },
+    {
+      "id": "dacia",
+      "helmet": "cap",
+      "armour": "mail",
+      "cape": "#973a37",
+      "accent": "#e1b46b",
+      "beard": true
+    },
+    {
+      "id": "hispania",
+      "helmet": "cap",
+      "armour": "linen",
+      "cape": "#7c4738",
+      "accent": "#c8b884",
+      "beard": true
+    },
+    {
+      "id": "scythia",
+      "helmet": "conical",
+      "armour": "tunic",
+      "cape": "#836134",
+      "accent": "#dabd85",
+      "beard": true
+    },
+    {
+      "id": "rebels",
+      "helmet": "cap",
+      "armour": "tunic",
+      "cape": "#6a6251",
+      "accent": "#b6a384",
+      "beard": true
+    }
+  ]
 }

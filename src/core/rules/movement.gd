@@ -26,13 +26,36 @@ static func movement_points_for(data: GameData, state: Dictionary, army: Diction
 	## Guided-trail boons march the whole faction a little harder, and practiced
 	## logistics (marching camps, surveyed roads) speed every column. Never
 	## below half a point.
-	var points := float(data.balance["movement"]["base_movement_points"])
+	var points := float(data.balance["movement"]["base_movement_points"]) + float(mobility_profile(data, army)["bonus"])
 	if army["general"] != null and state["characters"].has(army["general"]):
 		points += CharacterRules.effect_total(data, state["characters"][army["general"]], "movement")
 	var owner := String(army["owner"])
 	points += float(state["factions"][owner].get("boons", {}).get("movement", 0.0))
 	points += KnowledgeRules.faction_effect_total(data, state, owner, "movement_points")
 	return SocietyRules.quantize(maxf(points, 0.5))
+
+
+static func mobility_profile(data: GameData, army: Dictionary) -> Dictionary:
+	## The slowest company sets the column's pace. Empty general escorts ride.
+	var bonuses: Dictionary = data.balance["movement"].get("class_movement_bonus", {})
+	var slowest := "general_bodyguard" if army.get("general") != null else "infantry"
+	var bonus := INF
+	var mounted: bool = army.get("general") != null or not army.get("units", []).is_empty()
+	for unit in army.get("units", []):
+		var kind := String(data.units.get(unit["template"], {}).get("class", "infantry"))
+		var value := float(bonuses.get(kind, 0.0))
+		if value < bonus:
+			bonus = value
+			slowest = kind
+		mounted = mounted and kind in ["cavalry", "horse_archer", "general_bodyguard", "chariot"]
+	if is_inf(bonus):
+		bonus = float(bonuses.get(slowest, 0.0))
+	return {"class": slowest, "bonus": bonus, "mounted": mounted}
+
+
+static func cap_movement(data: GameData, state: Dictionary, army: Dictionary) -> void:
+	## Roster changes may slow a column, but never refund this season's march.
+	army["movement_left"] = minf(float(army["movement_left"]), movement_points_for(data, state, army))
 
 
 static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: Dictionary) -> float:
@@ -44,7 +67,9 @@ static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: 
 	return float(data.balance["movement"]["base_movement_points"]) * (1.0 + naval_pct / 100.0)
 
 
-static func step_cost(data: GameData, state: Dictionary, to_region: String) -> float:
+static func step_cost(data: GameData, state: Dictionary, to_region: String, from_region: String = "") -> float:
+	if from_region != "" and not TerrainRules.land_connection(data, from_region, to_region):
+		return INF
 	var movement_rules: Dictionary = data.balance["movement"]
 	var terrain: String = data.regions[to_region]["terrain"]
 	var cost := float(movement_rules["terrain_cost"][terrain])
@@ -52,14 +77,14 @@ static func step_cost(data: GameData, state: Dictionary, to_region: String) -> f
 		var road_level := int(SettlementRules.effect_max(data, state["settlements"][to_region], "road_level"))
 		var multipliers: Array = movement_rules["road_cost_multiplier"]
 		cost *= float(multipliers[mini(road_level, multipliers.size() - 1)])
-	return cost
+	return cost + TerrainRules.crossing_cost(data, from_region, to_region)
 
 
 static func can_enter(data: GameData, state: Dictionary, army_id: String, to_region: String) -> bool:
 	## Entering a region held by a faction you are at war with is an attack or a
 	## siege, not a move — those go through Game.attack/besiege actions.
 	var army: Dictionary = state["armies"][army_id]
-	if not MapRules.are_adjacent(data, army["region"], to_region):
+	if not TerrainRules.land_connection(data, army["region"], to_region):
 		return false
 	var owner: String = army["owner"]
 	if hostile_army_in(state, owner, to_region):
@@ -75,7 +100,7 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 	var army: Dictionary = state["armies"][army_id]
 	if not can_enter(data, state, army_id, to_region):
 		return false
-	var cost := step_cost(data, state, to_region)
+	var cost := step_cost(data, state, to_region, army["region"])
 	var budget := float(army["movement_left"])
 	if forced_march:
 		budget *= float(data.balance["movement"]["forced_march_multiplier"])
@@ -92,7 +117,10 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 		army["movement_left"] = SocietyRules.quantize(budget - cost)
 	# Marching away lifts a siege at once, not at the end of the turn.
 	SiegeRules.release(state, army_id)
+	ReconRules.record_move(data, state, army_id, to_region)
+	CartographyRules.record_reports(data, state)
 	army["region"] = to_region
+	CartographyRules.record_reports(data, state)
 	sync_general_location(state, army)
 	return true
 
@@ -133,7 +161,10 @@ static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to
 	army["movement_left"] = 0.0
 	# Marching away lifts a siege at once, not at the end of the turn.
 	SiegeRules.release(state, army_id)
+	ReconRules.record_move(data, state, army_id, to_region)
+	CartographyRules.record_reports(data, state)
 	army["region"] = to_region
+	CartographyRules.record_reports(data, state)
 	sync_general_location(state, army)
 	return true
 
@@ -148,7 +179,9 @@ static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_z
 	if cost > float(fleet["movement_left"]) + 0.0001:
 		return false
 	fleet["movement_left"] = float(fleet["movement_left"]) - cost
+	CartographyRules.record_reports(data, state)
 	fleet["sea_zone"] = to_zone
+	CartographyRules.record_reports(data, state)
 	return true
 
 
@@ -211,7 +244,7 @@ static func can_afford_step(data: GameData, state: Dictionary, army: Dictionary,
 	## Whether the army's remaining points pay for the step into a region —
 	## the price a siege laid from next door, or an attack across the border,
 	## charges exactly as a march would.
-	return step_cost(data, state, region_id) <= float(army["movement_left"]) + 0.0001
+	return step_cost(data, state, region_id, army["region"]) <= float(army["movement_left"]) + 0.0001
 
 
 static func fleet_reachable(data: GameData, state: Dictionary, fleet_id: String) -> Dictionary:

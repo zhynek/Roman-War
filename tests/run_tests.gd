@@ -10,6 +10,10 @@ var _ran := false
 
 
 func _init() -> void:
+	# Test/QA scripts must never read or overwrite a player's campaign slot.
+	ProjectSettings.set_setting("application/config/use_custom_user_dir", true)
+	ProjectSettings.set_setting("application/config/custom_user_dir_name", "Roman War Tests/%d" % OS.get_process_id())
+	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir())
 	# Wait for the first frame: by then the engine has registered this tree as
 	# the main loop, so UI tests can reach the root via Engine.get_main_loop().
 	process_frame.connect(_run_suite)
@@ -25,7 +29,7 @@ func _run_suite() -> void:
 	scripts.sort()
 	for script_path in scripts:
 		var script: GDScript = load(script_path)
-		if script == null:
+		if script == null or not script.can_instantiate():
 			push_error("could not load " + script_path)
 			failures += 1
 			continue
@@ -64,6 +68,10 @@ func _run_suite() -> void:
 
 func _find_test_scripts() -> Array:
 	var found: Array = []
+	var filters: PackedStringArray = []
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("suite="):
+			filters = arg.trim_prefix("suite=").split(",", false)
 	var dir := DirAccess.open(TEST_DIR)
 	if dir == null:
 		return found
@@ -71,7 +79,8 @@ func _find_test_scripts() -> Array:
 	var file_name := dir.get_next()
 	while file_name != "":
 		if file_name.begins_with("test_") and file_name.ends_with(".gd"):
-			found.append(TEST_DIR + "/" + file_name)
+			if filters.is_empty() or filters.has(file_name.trim_prefix("test_").trim_suffix(".gd")):
+				found.append(TEST_DIR + "/" + file_name)
 		file_name = dir.get_next()
 	return found
 

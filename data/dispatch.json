@@ -788,6 +788,18 @@
       "in_dispatch": true,
       "headline": "Word of {subject} reaches our court",
       "body": "It came from {other_faction}, as most things do — by a merchant, a deserter, or a captured engineer who preferred talking to the alternative."
+    },
+    {
+      "id": "army_sighted",
+      "chapter": "world",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "warning",
+      "icon": "spear",
+      "in_sequence": true,
+      "in_dispatch": true,
+      "headline": "{faction}: a column sighted near {settlement}",
+      "body": "Our lookouts counted {value} soldiers on the move. Only the stretch of road within our sight is shown."
     }
   ]
 }

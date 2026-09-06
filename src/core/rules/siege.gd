@@ -9,7 +9,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if not state["settlements"].has(region_id):
 		return false
 	var marching_in: bool = army["region"] != region_id
-	if marching_in and not MapRules.are_adjacent(data, army["region"], region_id):
+	if marching_in and not TerrainRules.land_connection(data, army["region"], region_id):
 		return false
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:
@@ -21,13 +21,15 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if MovementRules.hostile_army_in(state, army["owner"], region_id) \
 			or _owner_army_in(state, String(settlement["owner"]), region_id):
 		return false
-	if marching_in and MovementRules.step_cost(data, state, region_id) > float(army["movement_left"]) + 0.0001:
+	if marching_in and MovementRules.step_cost(data, state, region_id, army["region"]) > float(army["movement_left"]) + 0.0001:
 		return false
 	# Investing a settlement IS a declaration of war — and one the Republic
 	# forbids is refused here, before a single ladder is raised.
 	if not DiplomacyRules.declare_war(data, state, army["owner"], settlement["owner"]):
 		return false
 	release(state, army_id)
+	if marching_in:
+		ReconRules.record_move(data, state, army_id, region_id)
 	army["region"] = region_id
 	MovementRules.sync_general_location(state, army)
 	army["movement_left"] = 0.0

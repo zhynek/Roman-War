@@ -21,6 +21,8 @@ var _ask_tribute_amount: SpinBox
 var _ask_tribute_turns: SpinBox
 var _give_region: OptionButton
 var _ask_region: OptionButton
+var _give_map: CheckBox
+var _ask_map: CheckBox
 var _hint: RichTextLabel
 var _stance_values: Array = []
 var _give_region_ids: Array = []
@@ -90,6 +92,17 @@ func _build_form() -> void:
 	_ask_region = _region_row(content, "Their region: ", other_id, _ask_region_ids, false)
 
 	content.add_child(HSeparator.new())
+	_give_map = CheckBox.new()
+	_give_map.text = String(game.data.effects_glossary["map_commands"]["give_maps"])
+	_give_map.disabled = game.state.get("map_access", {}).get(player, []).has(other_id)
+	_give_map.toggled.connect(func(_pressed): _refresh_hint())
+	content.add_child(_give_map)
+	_ask_map = CheckBox.new()
+	_ask_map.text = String(game.data.effects_glossary["map_commands"]["ask_maps"])
+	_ask_map.disabled = game.state.get("map_access", {}).get(other_id, []).has(player)
+	_ask_map.toggled.connect(func(_pressed): _refresh_hint())
+	content.add_child(_ask_map)
+	_label(content, String(game.data.effects_glossary["map_commands"]["map_access_help"]), 11)
 	_hint = RichTextLabel.new()
 	_hint.bbcode_enabled = true
 	_hint.fit_content = true
@@ -105,6 +118,8 @@ func _build_form() -> void:
 func build_offer() -> Dictionary:
 	var offer := {
 		"to": other_id,
+		"give_map_access": _give_map != null and _give_map.button_pressed and not _give_map.disabled,
+		"ask_map_access": _ask_map != null and _ask_map.button_pressed and not _ask_map.disabled,
 		"stance": _stance_values[maxi(_stance.selected, 0)],
 		"give_payment": int(_give_payment.value),
 		"give_tribute": null,

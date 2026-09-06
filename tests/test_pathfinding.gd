@@ -281,6 +281,9 @@ func test_halt_march_clears_the_queue(t) -> void:
 
 func test_marches_resume_across_turns_and_saves(t) -> void:
 	var game := Game.new_campaign("julii", 42)
+	# This exercises marching over an already acquired atlas.
+	for region in game.data.regions:
+		game.state["cartography"]["julii"][region] = 0
 	var army_id := ""
 	var army_ids: Array = game.state["armies"].keys()
 	army_ids.sort()
@@ -290,6 +293,8 @@ func test_marches_resume_across_turns_and_saves(t) -> void:
 			break
 	t.check(army_id != "", "julii fields an army")
 
+	# Spend part of the first day so a reachable Italian route spans seasons.
+	game.state["armies"][army_id]["movement_left"] = 1.5
 	# The nearest destination that takes more than one turn to reach.
 	var target := ""
 	var region_ids: Array = game.data.regions.keys()

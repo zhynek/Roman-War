@@ -24,6 +24,8 @@ SCHEMAS = ROOT / "schemas"
 
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
+    "campaign_terrain.json": "campaign_terrain.schema.json",
+    "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
     "ai.json": "ai.schema.json",
     "agents.json": "agents.schema.json",
@@ -1064,6 +1066,33 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"missions: {mission['id']}: kind {kind} is neither judged by "
                 f"SenateRules nor listed in FORWARD_MISSION_KINDS as content "
                 f"authored ahead of the system that will resolve it")
+    # Development art references are public templates, never live enemy rosters.
+    terrain_routes = t.get("campaign_terrain.json", {})
+    region_defs = {r["id"]: r for r in t["regions.json"]["regions"]}
+    seen_crossings = set()
+    for crossing in terrain_routes.get("crossings", []):
+        a, b = crossing["a"], crossing["b"]
+        key = tuple(sorted((a, b)))
+        if key in seen_crossings:
+            err(f"campaign_terrain: duplicate crossing {a}/{b}")
+        seen_crossings.add(key)
+        if a not in region_defs or b not in region_defs or b not in region_defs.get(a, {}).get("adjacent", []):
+            err(f"campaign_terrain: crossing must join adjacent regions: {a}/{b}")
+    study = t.get("realism_study.json", {})
+    if study.get("friendly_template") not in units:
+        err("realism_study: unknown friendly template")
+    culture_ids = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
+    if study.get("opposing_culture") not in culture_ids:
+        err("realism_study: unknown opposing culture")
+    camera_ids = [c["id"] for c in study.get("cameras", [])]
+    if set(camera_ids) != {"overview", "column", "woods", "pass"} or len(camera_ids) != 4:
+        err("realism_study: camera presets must each occur once")
+    half_extent = study.get("extent", 0) / 2
+    for route in ["route", "flank_route"]:
+        for point in study.get(route, []):
+            if any(abs(value) > half_extent for value in point):
+                err(f"realism_study: {route} leaves the terrain extent")
+
     # --- sites ------------------------------------------------------------
     built_kinds = {c["kind"] for c in chains.values()}
     all_faction_templates = {u["id"] for u in t.get("units.json", {}).get("units", [])
@@ -1300,6 +1329,9 @@ def cross_checks(t: dict[str, dict]) -> None:
     # Class and culture are orthogonal, so the roster is covered by two small
     # tables. Anything they miss would draw nothing at all.
     unit_art = t.get("unit_art.json", {})
+    commander_ids = [c["id"] for c in unit_art.get("commanders", [])]
+    if set(commander_ids) != set(factions) or len(commander_ids) != len(set(commander_ids)):
+        errors.append("unit_art.json: commanders must dress every faction exactly once")
     class_ids = {c["id"] for c in unit_art.get("classes", [])}
     kit_ids = {k["id"] for k in unit_art.get("kits", [])}
     cue_ids = set(unit_art.get("attributes", {}))

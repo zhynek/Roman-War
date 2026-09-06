@@ -22,19 +22,12 @@ const OPTIONS_PATH := "user://roman_war_options.json"
 const OPTION_PLAYBACK := 1
 const OPTION_GUIDED := 2
 const OPTION_CONTROLS := 3
+const OPTION_MOTION := 4
+const OPTION_REALISM := 5
+const OPTION_LANDSCAPE := 6
 
-const CONTROLS_TEXT := """SELECT — left-click a banner (an army or a fleet) or a province.
-ORDER — with a force selected, right-click a ringed province or sea:
-    gold ring = march this season, orange = forced march (or hold Shift),
-    red = attack the army or besiege the city standing there.
-    Right-click one of your own ports to dock a selected fleet.
-INSPECT — right-click a province with nothing selected for its dossier;
-    right-click a unit row in a panel for the unit's card.
-KEYS — Esc deselects (and shuts the building yard); Tab or N cycles the
-    forces still awaiting orders; arrows / WASD pan, + and - zoom,
-    Home recentres on the capital; double-click centres on a spot.
-MODES — Options ▾: play the day out after End Turn (or resolve it at once
-    and read the Dispatch); guided mode with objectives and rewards."""
+var realism_development_enabled := false
+var realism_study: RealismStudy
 
 var game: Game
 
@@ -43,6 +36,11 @@ var force_panel: ForcePanel
 var region_panel: RegionPanel
 var side_scroll: ScrollContainer
 var options_menu: MenuButton
+var command_bar: MapCommandBar
+var _planning_order := false
+var _pinned_target := ""
+var _order_preview: Dictionary = {}
+var _forced_order := false
 var _selection_key := ""
 var _selected_region_shown := ""
 var quest_panel: QuestPanel
@@ -131,6 +129,7 @@ func _ready() -> void:
 	map_view.order_target.connect(_on_order_target)
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
+	_build_command_bar()
 
 	# The drawer is a child of MapView so it stops exactly at the right column's
 	# edge however the user drags the splitter. An overlay on this screen with a
@@ -237,7 +236,7 @@ func _ready() -> void:
 
 	_load_options()
 	_log("[b]The year is 270 BC.[/b] Your house awaits its orders.")
-	_log("Left-click a banner to select an army or fleet; right-click a ringed province or sea to send it there. Options ▾ holds the controls and the mode switches.")
+	_log(String(game.data.effects_glossary["map_commands"]["welcome_controls"]))
 	# Centering must wait for the first layout, or it centers on the map's
 	# minimum size rather than the window it actually gets.
 	var capital: String = game.state["factions"][game.state["player_faction"]]["capital"]
@@ -323,8 +322,13 @@ func _build_options_menu() -> MenuButton:
 	var popup := menu.get_popup()
 	popup.add_check_item("Play the day out over the map after End Turn", OPTION_PLAYBACK)
 	popup.add_check_item("Guided mode — objectives, rewards and a helping hand", OPTION_GUIDED)
+	popup.add_check_item(String(game.data.effects_glossary.get("map_commands", {}).get("motion", "")), OPTION_MOTION)
 	popup.add_separator()
 	popup.add_item("Controls…", OPTION_CONTROLS)
+	popup.add_check_item(String(game.data.effects_glossary["map_commands"]["realism_toggle"]), OPTION_LANDSCAPE)
+	if realism_development_enabled or OS.get_cmdline_user_args().has("realism-preview"):
+		popup.add_separator()
+		popup.add_item(String(RealismStudy.read_settings().copy.menu), OPTION_REALISM)
 	popup.id_pressed.connect(_on_option_pressed)
 	popup.about_to_popup.connect(_sync_options)
 	return menu
@@ -333,6 +337,15 @@ func _build_options_menu() -> MenuButton:
 func _process(delta: float) -> void:
 	## The coffers count up (or down) to the day's new figure, so the player
 	## watches the money move instead of reading a number that has changed.
+	map_view.camera_input_enabled = not (turn_sequence.is_playing() or dispatch_panel.visible or drawer_open
+		or family_panel.visible or diplomacy_panel.visible or senate_panel.visible or knowledge_panel.visible or annals_panel.visible
+		or (realism_study != null and realism_study.visible)
+		or (battle_screen != null and battle_screen.visible) or (_card_catcher != null and _card_catcher.visible))
+	for child in get_children():
+		if child is Window and child.visible:
+			map_view.camera_input_enabled = false
+	if command_bar.visible:
+		command_bar.fit_to(map_view.size)
 	if not _treasury_ticking:
 		return
 	var target := float(game.state["factions"][game.state["player_faction"]]["treasury"])
@@ -418,6 +431,7 @@ func refresh() -> void:
 	# clicks deliberately skip this — they change nothing the land shows.
 	map_view.refresh_state()
 	map_view.queue_redraw()
+	_update_command_bar()
 
 	# The banner waits for the day to finish: an age that ends mid-sequence
 	# should still get its dawn-to-dusk telling before the campaign is called.
@@ -427,12 +441,14 @@ func refresh() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if realism_study != null and realism_study.visible:
+		return
 	## Keyboard camera: the whole map is reachable without a mouse. Arrows or
 	## WASD walk the view, +/- zoom, Home returns to the capital.
 	if map_view == null or not (event is InputEventKey):
 		return
 	var key := event as InputEventKey
-	if not key.pressed:
+	if not key.pressed or key.echo:
 		return
 	# Escape shuts what is open, then deselects: the yard, a card, the force,
 	# the province. Tab (or N) walks the forces still awaiting orders. The
@@ -445,8 +461,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		cycle_selection()
 		get_viewport().set_input_as_handled()
 		return
+	if not map_view.camera_input_enabled:
+		return
 	var handled := true
 	match key.keycode:
+		KEY_M:
+			_begin_map_order()
+		KEY_F:
+			map_view.focus_force()
+		KEY_V:
+			map_view.set_zoom_level(1.2 if map_view._zoom >= MapView.DETAIL_ZOOM else 3.5)
+			map_view.focus_force()
 		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
 			map_view.zoom_by(MapView.ZOOM_STEP)
 		KEY_MINUS, KEY_KP_SUBTRACT:
@@ -508,10 +533,14 @@ func _on_drawer_tab(tab: String) -> void:
 
 
 func _on_region_clicked(region_id: String) -> void:
-	## A left click inspects: it never marches an army — orders are the right
-	## button's, on a ringed province, with the force selected. The one
-	## exception is an agent, who has no banner: a click on another region
-	## walks him there (an agent can never start a war).
+	## Selecting a column arms direct orders; Alt-click remains inspection.
+	if _planning_order and selected_army != "":
+		_pinned_target = region_id
+		_preview_destination(region_id)
+		return
+	if selected_army != "" and game.state["armies"].has(selected_army) and not Input.is_key_pressed(KEY_ALT):
+		_on_order_target("region", region_id, Input.is_key_pressed(KEY_SHIFT))
+		return
 	if selected_agent != "" and game.state["agents"].has(selected_agent) \
 			and region_id != game.state["agents"][selected_agent]["region"]:
 		_agent_order(region_id)
@@ -559,9 +588,11 @@ func select_force(kind: String, force_id: String) -> void:
 		selected_fleet = force_id
 	map_view.selected_force = selected_force()
 	refresh()
+	_show_queued_route()
 
 
 func _clear_force_selection() -> void:
+	_cancel_map_order()
 	selected_army = ""
 	selected_fleet = ""
 	map_view.selected_force = ""
@@ -587,6 +618,8 @@ func _drop_stale_selection() -> void:
 	if selected_army != "":
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
 	map_view.selected_force = selected_force()
+	if selected_army == "":
+		_cancel_map_order()
 
 
 func _refresh_selection() -> void:
@@ -668,6 +701,12 @@ func _on_force_clicked(kind: String, force_id: String) -> void:
 	if summary["owner"] == game.state["player_faction"]:
 		select_force(kind, force_id)
 		return
+	if _planning_order and kind == "army":
+		_on_region_clicked(summary["region"])
+		return
+	if kind == "army" and selected_army != "" and not Input.is_key_pressed(KEY_ALT):
+		_on_order_target("army", force_id, Input.is_key_pressed(KEY_SHIFT))
+		return
 	# A foreign banner: look, do not command — not even an agent's walk, so
 	# the agent is stood down first. An army shows through its province.
 	selected_agent = ""
@@ -714,28 +753,21 @@ func _on_sea_zone_clicked(zone_id: String) -> void:
 
 
 func _on_region_hovered(region_id: String) -> void:
-	## With an army selected, hovering sketches the march: route, per-leg
-	## cost, turns to arrive. Re-fired on Shift changes, so the sketch always
-	## matches the order a right-click would give.
-	if region_id == "" or selected_army == "" or not game.state["armies"].has(selected_army) \
-			or region_id == game.state["armies"][selected_army]["region"]:
-		map_view.path_preview = {}
+	if _pinned_target != "":
 		return
-	var preview := game.army_path_preview(
-		selected_army, region_id, Input.is_key_pressed(KEY_SHIFT))
-	if preview.is_empty() or (preview["path"] as Array).is_empty():
-		map_view.path_preview = {}
+	if region_id == "":
+		_order_preview = {}
+		_show_queued_route()
+		_update_command_bar()
 		return
-	map_view.path_preview = {
-		"from": game.state["armies"][selected_army]["region"],
-		"legs": preview["legs"],
-		"turns": preview["turns"],
-		"blocked": preview["blocked_destination"],
-		"target": region_id,
-	}
+	_preview_destination(region_id)
 
 
 func deselect() -> void:
+	if _planning_order:
+		_cancel_map_order()
+		_show_queued_route()
+		return
 	## Esc: the yard first, then an open card, then the force, then the province.
 	if drawer_open:
 		close_drawer()
@@ -903,6 +935,7 @@ func _bribe_order(agent_id: String, army_id: String) -> void:
 ## --- Orders ---------------------------------------------------------------------
 
 func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
+	forced = forced or _forced_order
 	## A right click on the map with one of our forces selected — and the
 	## force card's "March to" and "Sail to" dropdowns, which say the same.
 	var player: String = game.state["player_faction"]
@@ -910,15 +943,15 @@ func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
 		match kind:
 			"region":
 				if target_id != game.state["armies"][selected_army]["region"]:
-					_army_order(target_id, forced)
-				elif game.targets_for(selected_army).has(target_id):
-					# A red ring on the army's own province: the enemy who
-					# shares it, or the walls it stands under.
-					var defender := _enemy_army_in(target_id)
-					if defender != "":
-						attack_army_order(defender)
+					var preview := game.army_order_preview(selected_army, target_id, forced)
+					if preview.get("action", "") == "march" and int(preview.get("turns", 0)) > 1:
+						_begin_map_order()
+						_pinned_target = target_id
+						_preview_destination(target_id)
 					else:
-						besiege_order(target_id)
+						_army_order(target_id, forced)
+				elif game.targets_for(selected_army).has(target_id) or game.force_summary(selected_army).get("besieging") == target_id:
+					_army_order(target_id, forced)
 				else:
 					open_map_menu(target_id)
 			"army":
@@ -979,56 +1012,53 @@ func _dock_order(region_id: String) -> void:
 
 
 func _army_order(target_region: String, forced_march: bool = false) -> void:
-	var army: Dictionary = game.state["armies"][selected_army]
-	var player: String = game.state["player_faction"]
-
-	# Only an ADJACENT army we are ALREADY at war with is a target — marching
-	# past a neutral must never start a war by accident, and a distant enemy
-	# is marched toward (the path halts beside him), not attacked into thin
-	# air. Deliberate first strikes go through the explicit Attack button.
-	var defender := _enemy_army_in(target_region)
-	if defender != "" and (army["region"] == target_region
-			or MapRules.are_adjacent(game.data, army["region"], target_region)):
-		attack_army_order(defender)
+	var army_id := selected_army
+	var preview := game.army_order_preview(army_id, target_region, forced_march)
+	if preview.is_empty():
 		return
-
-	# A settlement of a faction we are at war with can be invested.
-	var settlement: Dictionary = game.state["settlements"].get(target_region, {})
-	if not settlement.is_empty() and settlement["owner"] != player \
-			and DiplomacyRules.at_war(game.state, player, settlement["owner"]) \
-			and MapRules.are_adjacent(game.data, army["region"], target_region):
-		besiege_order(target_region)
+	var action := String(preview["action"])
+	var reason := String(preview["reason"])
+	if reason != "" and reason != "unreachable":
+		_log(command_bar.words(reason))
 		return
-
-	# Otherwise: march. A destination beyond one step becomes a queued march
-	# that resumes each turn — still nothing but move steps, so it can never
-	# start a war. The road always comes first, because the road is what the
-	# rings and the hover sketch showed; the army takes ship only where no
-	# road exists at all (an island, a far shore).
-	if game.move_army(selected_army, target_region, forced_march):
-		var suffix := " by forced march — the men will be weary." if forced_march else "."
-		_log("The army marches to %s%s" % [game.data.regions[target_region]["name"], suffix])
+	match action:
+		"attack":
+			attack_army_order(preview["defender"])
+			return
+		"siege":
+			besiege_order(target_region)
+			return
+		"assault":
+			assault_order(target_region, "occupy")
+			return
+		"inspect":
+			open_map_menu(target_region)
+			return
+	var from := String(preview["from"])
+	var target_name: String = game.data.regions[target_region]["name"]
+	var march: Dictionary = {}
+	if action == "withdraw":
+		if game.move_army(army_id, target_region, forced_march):
+			march = {"moved": 1, "arrived": true, "traversed": [target_region]}
 	else:
-		var march := game.march_army(selected_army, target_region, forced_march)
-		var target_name: String = game.data.regions[target_region]["name"]
-		if march.is_empty() and game.sea_move_army(selected_army, target_region):
-			_log("The army takes ship for %s." % target_name)
-		elif march.is_empty():
-			_log("The army cannot reach %s this season." % target_name)
-		elif march.get("halted", false) and int(march.get("moved", 0)) == 0:
-			_log("[color=#e0a060]The way to %s is barred.[/color]" % target_name)
-		elif march.get("halted", false):
-			_log("[color=#e0a060]The army marches, but the road on to %s is barred.[/color]"
-				% target_name)
-		elif march.get("arrived", false) and march.get("blocked_destination", false):
-			_log("The army halts before %s — the way in is barred." % target_name)
-		elif march.get("arrived", false):
-			_log("The army marches through to %s." % target_name)
-		else:
-			var turns := int(march.get("turns", 2))
-			var warning := " It will halt before the walls." \
-				if march.get("blocked_destination", false) else ""
-			_log("The army sets out for %s — %d turns' march.%s" % [target_name, turns, warning])
+		# Use one route execution result for immediate and queued movement,
+		# including the actual legs the presentation should animate.
+		march = game.march_army(army_id, target_region, forced_march)
+	if march.is_empty() and game.sea_move_army(army_id, target_region):
+		_log("The army takes ship for %s." % target_name)
+	elif march.is_empty():
+		_log(command_bar.words("unreachable"))
+	elif march.get("halted", false):
+		_log(command_bar.words("barred"))
+	elif march.get("arrived", false):
+		_log("The army marches to %s." % target_name)
+		if preview["blocked"]:
+			_log(command_bar.words("approach_warning"))
+	else:
+		_log(command_bar.words("queued", {"town": target_name, "steps": game.state["armies"][army_id].get("march_path", []).size()}))
+	if forced_march and int(march.get("moved", 0)) > 0:
+		_log(command_bar.words("forced_warning"))
+	map_view.play_march(army_id, from, march.get("traversed", []))
 	_after_order()
 
 
@@ -1065,10 +1095,13 @@ func attack_army_order(defender_id: String) -> void:
 	if not DiplomacyRules.at_war(game.state, player, owner_at_order):
 		text = "This will declare war on %s. " % faction_name + text
 	text += "\n" + RegionPanel.odds_text(estimate)
-	_confirm(text, func(): _resolve_attack(defender_id, owner_at_order))
+	var attacker_at_order := selected_army
+	_confirm(text, func(): _resolve_attack(defender_id, owner_at_order, attacker_at_order))
 
 
-func _resolve_attack(defender_id: String, expected_owner: String) -> void:
+func _resolve_attack(defender_id: String, expected_owner: String, expected_attacker: String = "") -> void:
+	if expected_attacker != "" and selected_army != expected_attacker:
+		return
 	# The world can move between the dialog and the OK: re-validate, so a
 	# stale confirmation can never attack a different foe than it named.
 	if not game.state["armies"].has(selected_army) \
@@ -1101,10 +1134,13 @@ func assault_order(region_id: String, occupation: String) -> void:
 	var estimate := game.assault_estimate(selected_army, region_id)
 	if not estimate.is_empty():
 		text += "\n" + RegionPanel.odds_text(estimate)
-	_confirm(text, func(): _resolve_assault(region_id, occupation, holder_at_order))
+	var attacker_at_order := selected_army
+	_confirm(text, func(): _resolve_assault(region_id, occupation, holder_at_order, attacker_at_order))
 
 
-func _resolve_assault(region_id: String, occupation: String, expected_owner: String) -> void:
+func _resolve_assault(region_id: String, occupation: String, expected_owner: String, expected_attacker: String = "") -> void:
+	if expected_attacker != "" and selected_army != expected_attacker:
+		return
 	# The same stale-confirmation guard as _resolve_attack: the city must still
 	# be the one the dialog named, under our own siege.
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
@@ -1219,7 +1255,10 @@ func _resolve_siege(target_region: String, expected_owner: String) -> void:
 		_log("The moment has passed.")
 		_after_order()
 		return
+	var from := String(game.state["armies"][selected_army]["region"])
 	if game.besiege(selected_army, target_region):
+		if from != target_region:
+			map_view.play_march(selected_army, from, [target_region])
 		_log("Siege laid to %s." % game.data.regions[target_region]["settlement_name"])
 	elif MovementRules.hostile_army_in(game.state, game.state["player_faction"], target_region):
 		_log("[color=#e0a060]A field army stands before the walls — it must be beaten before the city can be invested.[/color]")
@@ -1251,6 +1290,7 @@ func _explore_order(army_id: String) -> void:
 func _confirm(text: String, on_accept: Callable) -> void:
 	var dialog := ConfirmationDialog.new()
 	dialog.dialog_text = text
+	dialog.confirmed.connect(dialog.hide)
 	dialog.confirmed.connect(on_accept)
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
@@ -1259,6 +1299,7 @@ func _confirm(text: String, on_accept: Callable) -> void:
 
 
 func _after_order() -> void:
+	_cancel_map_order()
 	## The selection follows a surviving force; a force that is gone (beaten,
 	## garrisoned, merged away, docked) leaves its province selected instead.
 	_drop_stale_selection()
@@ -1266,6 +1307,7 @@ func _after_order() -> void:
 		map_view.selected_region = game.state["armies"][selected_army]["region"]
 	map_view.path_preview = {}
 	refresh()
+	_show_queued_route()
 
 
 func _end_turn() -> void:
@@ -1277,6 +1319,8 @@ func _end_turn() -> void:
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
 	var treasury_before := int(faction["treasury"])
 
+	_cancel_map_order()
+	map_view.finish_marches()
 	game.end_turn()
 
 	_day_beats = game.day_beats()
@@ -1502,6 +1546,7 @@ func _save_game() -> void:
 
 func _load_game() -> void:
 	if game.load_from(SAVE_PATH):
+		map_view.finish_marches()
 		_clear_force_selection()
 		selected_agent = ""
 		map_view.selected_region = ""
@@ -1590,6 +1635,8 @@ func _sync_options() -> void:
 	var popup := options_menu.get_popup()
 	popup.set_item_checked(popup.get_item_index(OPTION_PLAYBACK), playback_enabled)
 	popup.set_item_checked(popup.get_item_index(OPTION_GUIDED), game.guided_enabled())
+	popup.set_item_checked(popup.get_item_index(OPTION_MOTION), map_view.motion_enabled)
+	popup.set_item_checked(popup.get_item_index(OPTION_LANDSCAPE), map_view.realism_enabled)
 
 
 func _on_option_pressed(id: int) -> void:
@@ -1598,8 +1645,16 @@ func _on_option_pressed(id: int) -> void:
 			set_playback(not playback_enabled)
 		OPTION_GUIDED:
 			set_guided(not game.guided_enabled())
+		OPTION_MOTION:
+			map_view.motion_enabled = not map_view.motion_enabled
+			map_view.finish_marches()
+			_save_options()
 		OPTION_CONTROLS:
 			show_controls()
+		OPTION_LANDSCAPE:
+			map_view.set_realism_enabled(not map_view.realism_enabled)
+		OPTION_REALISM:
+			open_realism_study()
 
 
 func set_playback(enabled: bool) -> void:
@@ -1625,7 +1680,7 @@ func set_guided(enabled: bool) -> void:
 func show_controls() -> void:
 	var dialog := AcceptDialog.new()
 	dialog.title = "Controls"
-	dialog.dialog_text = CONTROLS_TEXT
+	dialog.dialog_text = command_bar.words("controls_help")
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
 	add_child(dialog)
@@ -1635,12 +1690,122 @@ func show_controls() -> void:
 func _save_options() -> void:
 	var file := FileAccess.open(OPTIONS_PATH, FileAccess.WRITE)
 	if file != null:
-		file.store_string(JSON.stringify({"playback": playback_enabled}))
+		file.store_string(JSON.stringify({"playback": playback_enabled, "march_motion": map_view.motion_enabled}))
 
 
 func _load_options() -> void:
 	if not FileAccess.file_exists(OPTIONS_PATH):
 		return
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(OPTIONS_PATH))
-	if parsed is Dictionary and parsed.has("playback"):
-		playback_enabled = bool(parsed["playback"])
+	if parsed is Dictionary:
+		playback_enabled = bool(parsed.get("playback", true))
+		map_view.motion_enabled = bool(parsed.get("march_motion", true))
+
+
+func _build_command_bar() -> void:
+	command_bar = MapCommandBar.new()
+	command_bar.game = game
+	map_view.add_child(command_bar)
+	command_bar.hide()
+	command_bar.planning_requested.connect(_begin_map_order)
+	command_bar.cancel_requested.connect(_cancel_map_order)
+	command_bar.issue_requested.connect(_issue_map_order)
+	command_bar.halt_requested.connect(func():
+		game.halt_march(selected_army)
+		_after_order())
+	command_bar.focus_requested.connect(map_view.focus_force)
+	command_bar.post_requested.connect(func():
+		var result := game.build_watchpost(selected_army)
+		if result["ok"]:
+			_log(command_bar.words("post_built", {"sight": result["sight"]}))
+			_after_order()
+		else:
+			_log(command_bar.words(result["reason"])))
+	command_bar.sight_changed.connect(func(enabled: bool):
+		map_view.show_sight = enabled
+		map_view._overlay_layer.queue_redraw())
+	command_bar.follow_changed.connect(func(enabled: bool):
+		map_view.follow_marches = enabled
+		if not enabled:
+			map_view._follow_force = "")
+	command_bar.forced_changed.connect(func(enabled: bool):
+		_forced_order = enabled
+		var target := _pinned_target if _pinned_target != "" else String(_order_preview.get("target", ""))
+		if target != "":
+			_preview_destination(target))
+
+
+func _begin_map_order() -> void:
+	if selected_army == "":
+		return
+	close_drawer()
+	_planning_order = true
+	_pinned_target = ""
+	_order_preview = {}
+	map_view.path_preview = {}
+	_update_command_bar()
+
+
+func _cancel_map_order() -> void:
+	_planning_order = false
+	_pinned_target = ""
+	_order_preview = {}
+	if map_view != null:
+		map_view.path_preview = {}
+	_update_command_bar()
+
+
+func _preview_destination(target: String) -> void:
+	if selected_army == "":
+		return
+	var forced := _forced_order or Input.is_key_pressed(KEY_SHIFT)
+	_order_preview = game.army_order_preview(selected_army, target, forced)
+	map_view.path_preview = _order_preview
+	_update_command_bar()
+
+
+func _issue_map_order() -> void:
+	if not _planning_order or _pinned_target == "" or selected_army == "":
+		return
+	# Requote against current state; a pinned destination is not authority
+	# to act using the old movement, siege or ownership values.
+	var target := _pinned_target
+	var forced := bool(_order_preview.get("forced", _forced_order))
+	var fresh := game.army_order_preview(selected_army, target, forced)
+	if fresh.is_empty() or fresh["reason"] != "":
+		_preview_destination(target)
+		return
+	if fresh != _order_preview:
+		_order_preview = fresh
+		map_view.path_preview = fresh
+		_update_command_bar()
+		return
+	_cancel_map_order()
+	_army_order(target, forced)
+
+
+func _show_queued_route() -> void:
+	map_view.path_preview = {}
+	if selected_army == "" or not game.state["armies"].has(selected_army):
+		return
+	map_view.path_preview = game.queued_march_preview(selected_army)
+
+
+func _update_command_bar() -> void:
+	if command_bar != null:
+		command_bar.render(selected_army, _order_preview, _planning_order, _pinned_target != "")
+		command_bar.fit_to(map_view.size)
+
+
+func open_realism_study() -> void:
+	if not (realism_development_enabled or OS.get_cmdline_user_args().has("realism-preview")):
+		return
+	if turn_sequence.is_playing() or (battle_screen != null and battle_screen.visible):
+		return
+	map_view.camera_input_enabled = false
+	if realism_study == null:
+		realism_study = RealismStudy.new()
+		add_child(realism_study)
+	else:
+		realism_study.show()
+	move_child(realism_study,-1)

@@ -4,28 +4,74 @@
   "title": "Procedural unit art: class templates, culture kits, overrides",
   "description": "Class sets pose, weapon, mount and formation; culture sets shield, helmet, armour and standard. The two are orthogonal, so 12 classes plus 7 kits cover 91 units without a picture per unit.",
   "type": "object",
-  "required": ["classes", "kits"],
+  "required": [
+    "classes",
+    "kits"
+  ],
   "additionalProperties": false,
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "classes": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "stance", "ranks", "files", "formation", "mount"],
+        "required": [
+          "id",
+          "stance",
+          "ranks",
+          "files",
+          "formation",
+          "mount"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "enum": ["peasant", "spear", "infantry", "pike", "missile", "cavalry",
-            "horse_archer", "general_bodyguard", "chariot", "elephant", "siege", "ship"] },
-          "stance": { "$ref": "#/$defs/stance" },
-          "ranks": { "type": "integer", "minimum": 1, "maximum": 5 },
-          "files": { "type": "integer", "minimum": 1, "maximum": 8 },
-          "formation": { "$ref": "#/$defs/formation" },
-          "weapon": { "$ref": "#/$defs/weapon" },
-          "mount": { "$ref": "#/$defs/mount" },
-          "standard": { "type": "boolean" },
-          "scene": { "type": "object" }
+          "id": {
+            "enum": [
+              "peasant",
+              "spear",
+              "infantry",
+              "pike",
+              "missile",
+              "cavalry",
+              "horse_archer",
+              "general_bodyguard",
+              "chariot",
+              "elephant",
+              "siege",
+              "ship"
+            ]
+          },
+          "stance": {
+            "$ref": "#/$defs/stance"
+          },
+          "ranks": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "files": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "formation": {
+            "$ref": "#/$defs/formation"
+          },
+          "weapon": {
+            "$ref": "#/$defs/weapon"
+          },
+          "mount": {
+            "$ref": "#/$defs/mount"
+          },
+          "standard": {
+            "type": "boolean"
+          },
+          "scene": {
+            "type": "object"
+          }
         }
       }
     },
@@ -34,15 +80,43 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "shield", "helmet", "armour", "tunic", "standard"],
+        "required": [
+          "id",
+          "shield",
+          "helmet",
+          "armour",
+          "tunic",
+          "standard"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "enum": ["roman", "greek", "eastern", "carthaginian", "egyptian", "barbarian", "neutral"] },
-          "shield": { "$ref": "#/$defs/shield" },
-          "helmet": { "$ref": "#/$defs/helmet" },
-          "armour": { "$ref": "#/$defs/armour" },
-          "tunic": { "type": "string", "pattern": "^#[0-9a-f]{6}$" },
-          "standard": { "type": "string" }
+          "id": {
+            "enum": [
+              "roman",
+              "greek",
+              "eastern",
+              "carthaginian",
+              "egyptian",
+              "barbarian",
+              "neutral"
+            ]
+          },
+          "shield": {
+            "$ref": "#/$defs/shield"
+          },
+          "helmet": {
+            "$ref": "#/$defs/helmet"
+          },
+          "armour": {
+            "$ref": "#/$defs/armour"
+          },
+          "tunic": {
+            "type": "string",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "standard": {
+            "type": "string"
+          }
         }
       }
     },
@@ -51,15 +125,29 @@
       "description": "Per-unit signatures. Optional: any unit without one wears its culture's kit.",
       "items": {
         "type": "object",
-        "required": ["id"],
+        "required": [
+          "id"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string" },
-          "shield": { "$ref": "#/$defs/shield" },
-          "helmet": { "$ref": "#/$defs/helmet" },
-          "armour": { "$ref": "#/$defs/armour" },
-          "weapon": { "$ref": "#/$defs/weapon" },
-          "stance": { "$ref": "#/$defs/stance" }
+          "id": {
+            "type": "string"
+          },
+          "shield": {
+            "$ref": "#/$defs/shield"
+          },
+          "helmet": {
+            "$ref": "#/$defs/helmet"
+          },
+          "armour": {
+            "$ref": "#/$defs/armour"
+          },
+          "weapon": {
+            "$ref": "#/$defs/weapon"
+          },
+          "stance": {
+            "$ref": "#/$defs/stance"
+          }
         }
       }
     },
@@ -68,28 +156,181 @@
       "description": "One visual cue per attributes value in units.json, so new data cannot render as nothing.",
       "additionalProperties": {
         "type": "object",
-        "required": ["note"],
+        "required": [
+          "note"
+        ],
         "additionalProperties": false,
         "properties": {
-          "formation": { "$ref": "#/$defs/formation" },
-          "stance": { "$ref": "#/$defs/stance" },
-          "flora": { "enum": ["none", "cypress", "olive", "pine", "palm"] },
-          "sky": { "enum": ["clear", "dust", "overcast"] },
-          "standard": { "type": "string" },
-          "spoil": { "type": "boolean" },
-          "dust": { "type": "number", "minimum": 0, "maximum": 1 },
-          "note": { "type": "string", "minLength": 1 }
+          "formation": {
+            "$ref": "#/$defs/formation"
+          },
+          "stance": {
+            "$ref": "#/$defs/stance"
+          },
+          "flora": {
+            "enum": [
+              "none",
+              "cypress",
+              "olive",
+              "pine",
+              "palm"
+            ]
+          },
+          "sky": {
+            "enum": [
+              "clear",
+              "dust",
+              "overcast"
+            ]
+          },
+          "standard": {
+            "type": "string"
+          },
+          "spoil": {
+            "type": "boolean"
+          },
+          "dust": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "commanders": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "helmet",
+          "armour",
+          "cape",
+          "accent",
+          "beard"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "helmet": {
+            "enum": [
+              "crest",
+              "plume",
+              "conical",
+              "cap",
+              "none",
+              "diadem",
+              "headcloth"
+            ]
+          },
+          "armour": {
+            "enum": [
+              "tunic",
+              "linen",
+              "mail",
+              "scale",
+              "segmented",
+              "naked"
+            ]
+          },
+          "cape": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "accent": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          "beard": {
+            "type": "boolean"
+          }
         }
       }
     }
   },
   "$defs": {
-    "stance": { "enum": ["guard", "march", "thrust", "brace", "shoot", "ride", "drive", "mahout"] },
-    "formation": { "enum": ["line", "loose", "hedge", "wall", "roof", "mounted", "beast", "crewed", "single"] },
-    "weapon": { "enum": ["spear", "pike", "sword", "javelin", "bow", "sling", "axe", "none"] },
-    "shield": { "enum": ["none", "round", "oval", "scutum", "tower"] },
-    "helmet": { "enum": ["none", "cap", "crest", "plume", "conical", "horned"] },
-    "armour": { "enum": ["tunic", "linen", "mail", "scale", "segmented", "naked"] },
-    "mount": { "enum": ["none", "horse", "elephant", "chariot", "ship"] }
+    "stance": {
+      "enum": [
+        "guard",
+        "march",
+        "thrust",
+        "brace",
+        "shoot",
+        "ride",
+        "drive",
+        "mahout"
+      ]
+    },
+    "formation": {
+      "enum": [
+        "line",
+        "loose",
+        "hedge",
+        "wall",
+        "roof",
+        "mounted",
+        "beast",
+        "crewed",
+        "single"
+      ]
+    },
+    "weapon": {
+      "enum": [
+        "spear",
+        "pike",
+        "sword",
+        "javelin",
+        "bow",
+        "sling",
+        "axe",
+        "none"
+      ]
+    },
+    "shield": {
+      "enum": [
+        "none",
+        "round",
+        "oval",
+        "scutum",
+        "tower"
+      ]
+    },
+    "helmet": {
+      "enum": [
+        "none",
+        "cap",
+        "crest",
+        "plume",
+        "conical",
+        "horned"
+      ]
+    },
+    "armour": {
+      "enum": [
+        "tunic",
+        "linen",
+        "mail",
+        "scale",
+        "segmented",
+        "naked"
+      ]
+    },
+    "mount": {
+      "enum": [
+        "none",
+        "horse",
+        "elephant",
+        "chariot",
+        "ship"
+      ]
+    }
   }
 }

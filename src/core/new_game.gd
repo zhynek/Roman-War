@@ -30,6 +30,9 @@ class_name NewGame
 ##                         management, influence, trait_points, ancillaries,
 ##                         location, alive, deeds, epithet,
 ##                         office: office_id|null, offices_held: [office_id]}}
+##  watchposts: {region: {owner, level}} — 1 = watchtower, 2 = fortified post
+##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
+##      — public identity/count snapshots and only the endpoints seen at the time
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
 ##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
@@ -83,6 +86,10 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"tributes": [],
 		"pending_offers": [],
 		"agents": {},
+		"watchposts": {},
+		"recon": {"contacts": {}, "movements": []},
+		"cartography": {},
+		"map_access": {},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -181,6 +188,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	# deeds done before the first end-turn already count toward them.
 	GuidedRules.process_turn(data, state)
 
+	ReconRules.refresh_contacts(data, state)
 	state["rng_state"] = rng.state_string()
 	return state
 
@@ -192,6 +200,17 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	var new_cartography := not state.has("cartography")
+	if new_cartography:
+		state["cartography"] = {}
+	if not state.has("map_access"):
+		state["map_access"] = {}
+	if new_cartography and data != null:
+		CartographyRules.record_reports(data, state)
+	if not state.has("watchposts"):
+		state["watchposts"] = {}
+	if not state.has("recon"):
+		state["recon"] = {"contacts": {}, "movements": []}
 	var faction_ids: Array = state["factions"].keys()
 	faction_ids.sort()
 	for faction_id in faction_ids:

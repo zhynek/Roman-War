@@ -76,8 +76,8 @@ func show_idle_hint(current_game: Game) -> void:
 	game = current_game
 	clear_panel()
 	_header("Nothing selected", 13)
-	_label("Left-click a province for its city, or a banner for the army or fleet under it.", Color(0.7, 0.8, 0.9))
-	_label("With a force selected, right-click a ringed province or sea to send it there: gold = march, orange = forced march (or hold Shift), red = attack or besiege.", Color(0.7, 0.8, 0.9))
+	_label(String(game.data.effects_glossary["map_commands"]["map_intro"]), Color(0.7, 0.8, 0.9))
+	_label(String(game.data.effects_glossary["map_commands"]["idle_controls"]), Color(0.7, 0.8, 0.9))
 	_label("Esc deselects; Tab or N jumps to the next force awaiting orders. Options ▾ (top bar) lists every control and the mode switches.", Color(0.7, 0.8, 0.9))
 	var waiting := game.forces_awaiting_orders()
 	if not waiting.is_empty():
@@ -103,13 +103,19 @@ func _rebuild() -> void:
 	var visible_set := game.visible_regions()
 	var is_visible := visible_set.has(region_id)
 
+	var words: Dictionary = game.data.effects_glossary["map_commands"]
+	if not game.known_regions().has(region_id):
+		_header(words["chart_unknown"], 16)
+		_label(words["uncharted"])
+		return
 	if not is_visible:
 		_header(region["name"], 16)
-		_label("Beyond our maps: no reports come from this land.")
+		_label(words["chart_known"])
+		_terrain_details(region)
 		return
 
 	_header("%s — %s" % [region["name"], region["settlement_name"]], 16)
-	_label("Terrain: %s   Fertility: %.1f" % [region["terrain"], float(region["fertility"])])
+	_terrain_details(region)
 	var resources: Array = region.get("resources", [])
 	if not resources.is_empty():
 		_label("Goods: " + ", ".join(resources))
@@ -124,6 +130,24 @@ func _rebuild() -> void:
 	_build_agents_section()
 
 
+func _terrain_details(region: Dictionary) -> void:
+	var words: Dictionary = game.data.effects_glossary["map_commands"]
+	var report := game.terrain_report(region_id)
+	var profile: Dictionary = game.data.terrain_content.get("terrains", {}).get(region["terrain"], {})
+	_label(String(words["ground_report"]).format({"name": profile.get("name", region["terrain"]),
+		"cost": String.num(report.get("movement", 0.0), 2), "defense": roundi((float(report.get("defense", 1.0)) - 1.0) * 100)}))
+	_label(profile.get("description", ""), UiStyle.TEXT_DIM)
+	for neighbor in region.get("adjacent", []):
+		if not game.known_regions().has(neighbor):
+			continue
+		var kind := TerrainRules.crossing_kind(game.data, region_id, neighbor)
+		if kind == "":
+			continue
+		var crossing: Dictionary = game.data.terrain_content["crossing_types"][kind]
+		_label("%s · %s" % [game.data.regions[neighbor]["name"], crossing["name"]], UiStyle.PARCHMENT)
+		_label(crossing["description"], UiStyle.TEXT_DIM)
+
+
 func _build_settlement_section(settlement: Dictionary) -> void:
 	var owner: String = settlement["owner"]
 	var faction: Dictionary = game.data.factions.get(owner, {})
@@ -136,6 +160,9 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 		_label("UNDER SIEGE — turn %d" % int(settlement["siege"]["turns"]), Color(1, 0.5, 0.4))
 
 	if owner != player:
+		var words: Dictionary = game.data.effects_glossary.get("map_commands", {})
+		_label(String(words.get("garrison_map", "{men} / {walls}")).format({"men": CombatRules.soldiers_in(game.data, settlement["garrison"]),
+			"walls": int(SettlementRules.effect_max(game.data, settlement, "wall_level"))}), UiStyle.PARCHMENT)
 		return
 
 	if settlement["governor"] != null:

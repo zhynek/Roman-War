@@ -1,0 +1,464 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "realism_study.schema.json",
+  "title": "Development-only procedural terrain and motion study",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "woodland_lake_study"
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "extent": {
+      "type": "number",
+      "minimum": 100,
+      "maximum": 250
+    },
+    "grid": {
+      "type": "integer",
+      "minimum": 64,
+      "maximum": 256
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 10,
+      "maximum": 60
+    },
+    "friendly_template": {
+      "type": "string"
+    },
+    "opposing_culture": {
+      "type": "string"
+    },
+    "lake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "center": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "radii": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "level": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "center",
+        "radii",
+        "level"
+      ]
+    },
+    "woods": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "center": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "radii": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "trees": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 600
+        }
+      },
+      "required": [
+        "center",
+        "radii",
+        "trees"
+      ]
+    },
+    "marsh": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "center": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "radii": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "center",
+        "radii"
+      ]
+    },
+    "mountains": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 4,
+        "maxItems": 4
+      },
+      "minItems": 1
+    },
+    "route": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 2
+    },
+    "flank_route": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 2
+    },
+    "cameras": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "overview",
+              "column",
+              "woods",
+              "pass"
+            ]
+          },
+          "target": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "distance": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 180
+          },
+          "yaw": {
+            "type": "number"
+          },
+          "pitch": {
+            "type": "number",
+            "minimum": 0.15,
+            "maximum": 1.5
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "distance",
+          "yaw",
+          "pitch"
+        ]
+      }
+    },
+    "copy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "menu": {
+          "type": "string",
+          "minLength": 1
+        },
+        "eyebrow": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "study": {
+          "type": "string",
+          "minLength": 1
+        },
+        "classic": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compare": {
+          "type": "string",
+          "minLength": 1
+        },
+        "close": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prototype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controls": {
+          "type": "string",
+          "minLength": 1
+        },
+        "overview": {
+          "type": "string",
+          "minLength": 1
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1
+        },
+        "woods": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "play": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pause": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replay": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ambush": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_toggle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "labels_toggle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timeline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marching": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arrival": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planning_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marching_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arrival_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lake": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lake_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marsh": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marsh_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mountain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mountain_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unit_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "comparison_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reopen": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fps": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "menu",
+        "eyebrow",
+        "name",
+        "subtitle",
+        "study",
+        "classic",
+        "compare",
+        "close",
+        "prototype",
+        "scope",
+        "controls",
+        "overview",
+        "column",
+        "woods",
+        "pass",
+        "play",
+        "pause",
+        "replay",
+        "ambush",
+        "reset",
+        "route_toggle",
+        "labels_toggle",
+        "timeline",
+        "planning",
+        "marching",
+        "contact",
+        "arrival",
+        "planning_note",
+        "marching_note",
+        "contact_note",
+        "arrival_note",
+        "lake",
+        "lake_note",
+        "marsh",
+        "marsh_note",
+        "forest",
+        "forest_note",
+        "mountain",
+        "mountain_note",
+        "unit_title",
+        "unit_note",
+        "comparison_note",
+        "reopen",
+        "fps",
+        "ready"
+      ]
+    }
+  },
+  "required": [
+    "$schema",
+    "id",
+    "seed",
+    "extent",
+    "grid",
+    "duration",
+    "friendly_template",
+    "opposing_culture",
+    "lake",
+    "woods",
+    "marsh",
+    "mountains",
+    "route",
+    "flank_route",
+    "cameras",
+    "copy"
+  ]
+}

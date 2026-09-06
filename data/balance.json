@@ -162,7 +162,21 @@
       0.5
     ],
     "sea_lane_cost": 1.0,
-    "sea_move_cost": 2
+    "sea_move_cost": 2,
+    "class_movement_bonus": {
+      "infantry": 0.5,
+      "spear": 0,
+      "pike": 0,
+      "missile": 0.5,
+      "peasant": 0,
+      "siege": 0,
+      "elephant": 0,
+      "chariot": 1,
+      "cavalry": 1.5,
+      "horse_archer": 2,
+      "general_bodyguard": 1.5,
+      "ship": 0
+    }
   },
   "recruitment": {
     "experience_max": 9,
@@ -640,5 +654,33 @@
     "reform_origination_bonus_at_max": 0.1,
     "max_concurrent_adoptions": 1,
     "steal_caught_memory": -15
+  },
+  "reconnaissance": {
+    "settlement_sight": 1,
+    "army_sight": 1,
+    "mounted_sight": 2,
+    "agent_sight": 1,
+    "spy_sight": 2,
+    "watchtower_sight": 2,
+    "fort_sight": 3,
+    "watchtower_cost": 600,
+    "fort_cost": 1200,
+    "build_movement_cost": 1,
+    "fort_defense_pct": 20,
+    "contact_memory_turns": 3
+  },
+  "terrain_routes": {
+    "crossing_cost": {
+      "bridge": 0.25,
+      "causeway": 0.0,
+      "pass": 0.0
+    },
+    "crossing_defense_pct": {
+      "bridge": 20,
+      "causeway": 10,
+      "pass": 10
+    },
+    "map_access_value_per_region": 30,
+    "map_access_base_value": 120
   }
 }

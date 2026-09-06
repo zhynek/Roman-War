@@ -1,0 +1,235 @@
+{
+  "$schema": "../schemas/realism_study.schema.json",
+  "id": "woodland_lake_study",
+  "seed": 7119,
+  "extent": 150,
+  "grid": 220,
+  "duration": 24.0,
+  "friendly_template": "roman_hastati",
+  "opposing_culture": "barbarian",
+  "lake": {
+    "center": [
+      -20,
+      -3
+    ],
+    "radii": [
+      23,
+      16
+    ],
+    "level": 0.8
+  },
+  "woods": {
+    "center": [
+      23,
+      -20
+    ],
+    "radii": [
+      23,
+      18
+    ],
+    "trees": 250
+  },
+  "marsh": {
+    "center": [
+      -19,
+      16
+    ],
+    "radii": [
+      19,
+      9
+    ]
+  },
+  "mountains": [
+    [
+      -43,
+      -49,
+      23,
+      19
+    ],
+    [
+      1,
+      -64,
+      29,
+      21
+    ],
+    [
+      41,
+      -58,
+      26,
+      17
+    ],
+    [
+      64,
+      -39,
+      19,
+      15
+    ],
+    [
+      -67,
+      -33,
+      18,
+      13
+    ]
+  ],
+  "route": [
+    [
+      -51,
+      33
+    ],
+    [
+      -37,
+      27
+    ],
+    [
+      -22,
+      24
+    ],
+    [
+      -8,
+      20
+    ],
+    [
+      3,
+      14
+    ],
+    [
+      9,
+      5
+    ],
+    [
+      12,
+      -6
+    ],
+    [
+      9,
+      -17
+    ],
+    [
+      1,
+      -29
+    ],
+    [
+      -8,
+      -38
+    ]
+  ],
+  "flank_route": [
+    [
+      30,
+      -25
+    ],
+    [
+      27,
+      -18
+    ],
+    [
+      23,
+      -11
+    ],
+    [
+      19,
+      -4
+    ],
+    [
+      14,
+      4
+    ],
+    [
+      10,
+      8
+    ]
+  ],
+  "cameras": [
+    {
+      "id": "overview",
+      "target": [
+        0,
+        0,
+        -8
+      ],
+      "distance": 99,
+      "yaw": 0.26,
+      "pitch": 0.67
+    },
+    {
+      "id": "column",
+      "target": [
+        -18,
+        1,
+        24
+      ],
+      "distance": 25,
+      "yaw": -0.65,
+      "pitch": 0.35
+    },
+    {
+      "id": "woods",
+      "target": [
+        14,
+        1,
+        2
+      ],
+      "distance": 43,
+      "yaw": -0.68,
+      "pitch": 0.49
+    },
+    {
+      "id": "pass",
+      "target": [
+        2,
+        4,
+        -33
+      ],
+      "distance": 63,
+      "yaw": 0.7,
+      "pitch": 0.48
+    }
+  ],
+  "copy": {
+    "menu": "Realism study \u00b7 development",
+    "eyebrow": "ROMAN WAR   /   VISUAL DEVELOPMENT   01",
+    "name": "The wooded approach",
+    "subtitle": "Campaign-scale terrain & army motion",
+    "study": "3D terrain study",
+    "classic": "Existing campaign",
+    "compare": "Compare views",
+    "close": "Return to campaign",
+    "prototype": "ART & MOTION PROTOTYPE",
+    "scope": "A staged landscape for comparing the visual direction. Route following and woodland emergence are illustrative; your campaign is unchanged.",
+    "controls": "Drag to orbit \u00b7 Scroll / pinch to zoom \u00b7 Shift-drag to pan \u00b7 Space to pause \u00b7 Esc to return",
+    "overview": "Landscape",
+    "column": "At the column",
+    "woods": "Wooded flank",
+    "pass": "Mountain pass",
+    "play": "Play approach",
+    "pause": "Pause",
+    "replay": "Replay approach",
+    "ambush": "Woods emergence",
+    "reset": "Reset view",
+    "route_toggle": "Show route",
+    "labels_toggle": "Terrain notes",
+    "timeline": "APPROACH SEQUENCE",
+    "planning": "01  /  Planning the approach",
+    "marching": "02  /  Following the dry ground",
+    "contact": "03  /  A force emerges from the trees",
+    "arrival": "04  /  Formations meet at the woodland edge",
+    "planning_note": "The lake closes the direct line. The column takes the dry track between wet ground and the wooded slope.",
+    "marching_note": "The formation narrows along the bends. Soldiers follow the same ground profile as the road.",
+    "contact_note": "An illustrative opposing formation leaves cover and advances onto the flank. Pause or scrub to inspect the movement.",
+    "arrival_note": "The preview stops at contact. Individual battles and new ambush rules are outside this study.",
+    "lake": "01  /  OPEN WATER",
+    "lake_note": "The route follows the shoreline; the column stays on land.",
+    "marsh": "02  /  SATURATED GROUND",
+    "marsh_note": "Pools, reeds and mud distinguish the marsh from the dry road.",
+    "forest": "03  /  WOODED FLANK",
+    "forest_note": "Dense canopy obscures the staged opposing formation until it reaches the edge.",
+    "mountain": "04  /  RIDGELINE",
+    "mountain_note": "Exposed rock and elevation frame the narrow approach.",
+    "unit_title": "FORMATION STUDY",
+    "unit_note": "Illustrative Roman infantry, shield bearers and a mounted commander. Figure count is representational.",
+    "comparison_note": "The existing campaign remains playable. Reopen the 3D study with the button below.",
+    "reopen": "Open 3D study",
+    "fps": "{fps} FPS  \u00b7  PROCEDURAL 3D",
+    "ready": "Paused \u00b7 drag the timeline to inspect"
+  }
+}

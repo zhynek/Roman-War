@@ -69,7 +69,7 @@ static func field_defense_power(data: GameData, state: Dictionary, army: Diction
 	## An army's power when defending its current region (terrain multiplier in).
 	var battle_rules: Dictionary = data.balance["battle"]
 	return army_power(data, state, army) * float(battle_rules["terrain_defense_multiplier"].get(
-		data.regions[army["region"]]["terrain"], 1.0))
+		data.regions[army["region"]]["terrain"], 1.0)) * (1.0 + ReconRules.fort_defense(data, state, army) / 100.0)
 
 
 static func faction_power(data: GameData, state: Dictionary, faction_id: String) -> float:
@@ -161,7 +161,7 @@ static func _traversal_table(data: GameData) -> Dictionary:
 	for region_id in region_ids:
 		var steps: Array = []
 		for neighbor in data.regions[region_id].get("adjacent", []):
-			if data.regions.has(neighbor):
+			if data.regions.has(neighbor) and TerrainRules.land_connection(data, region_id, neighbor):
 				steps.append({"region": neighbor, "cost": 1, "sea": false})
 		var zones: Array = data.regions[region_id].get("sea_zones", [])
 		if not zones.is_empty():
@@ -293,7 +293,7 @@ static func approach_cost(data: GameData, state: Dictionary, faction_id: String,
 		return int(reach.get(goal, unreachable))
 	var best := unreachable
 	for neighbor in data.regions.get(goal, {}).get("adjacent", []):
-		if not data.regions.has(neighbor) or not passable(state, faction_id, neighbor):
+		if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, goal, neighbor) or not passable(state, faction_id, neighbor):
 			continue
 		var cost := int(reach.get(neighbor, unreachable))
 		if cost < unreachable:

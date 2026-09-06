@@ -221,6 +221,8 @@ func _show_bookend(chapter_id: String, rules: Dictionary) -> void:
 
 
 func _show_beat(beat: Dictionary, rules: Dictionary) -> void:
+	if map_view != null:
+		map_view.finish_marches()
 	_hold = float(rules["beat_seconds"])
 	var chapter_id := DispatchRules.chapter_of(game.data, beat)
 	if chapter_id != _chapter:
@@ -235,10 +237,28 @@ func _show_beat(beat: Dictionary, rules: Dictionary) -> void:
 	_headline_label.add_theme_color_override("font_color", DispatchFormat.color_of(game.data, beat))
 	_body_label.text = DispatchFormat.body(game.data, game.state, beat)
 
+	if beat["kind"] == "army_sighted" and map_view != null:
+		_hold = maxf(_hold, map_view.play_sighting(beat["extra"]))
+		return
 	var region_id: String = String(beat["region"])
+	if String(beat["kind"]) in ["march_arrived", "march_onward", "march_halted"]:
+		region_id = String(beat.get("extra", {}).get("standing_at", region_id))
 	if map_view != null and region_id != "" and game.data.regions.has(region_id):
 		map_view.pan_to(region_id, float(rules["camera_pan_seconds"]))
 		map_view.highlight_regions = {region_id: true}
+		if String(beat["kind"]) in ["march_arrived", "march_onward", "march_halted"]:
+			var extra: Dictionary = beat.get("extra", {})
+			var traversed: Array = extra.get("traversed", [])
+			var army_id := String(beat.get("subject", ""))
+			# Old saves have no route payload. Hidden or destroyed forces never
+			# become replay ghosts; presentation consumes only our filtered news.
+			if not traversed.is_empty() and map_view.army_visuals.has(army_id) \
+					and game.state["armies"][army_id]["owner"] == game.state["player_faction"]:
+				map_view.play_march(army_id, String(extra.get("from", "")), traversed)
+				if map_view._marches.has(army_id):
+					var march: Dictionary = map_view._marches[army_id]
+					_hold = maxf(_hold, float(march["length"]) / float(march["speed"]))
+					march["speed"] *= _speed
 
 
 func _finish() -> void:
@@ -246,6 +266,7 @@ func _finish() -> void:
 	set_process(false)
 	visible = false
 	if map_view != null:
+		map_view.finish_marches()
 		map_view.highlight_regions = {}
 		map_view.queue_redraw()
 	finished.emit()

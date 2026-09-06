@@ -30,7 +30,12 @@ static func of(data, level_id: String, ctx: Dictionary, min_size: Vector2) -> Ar
 
 
 func _draw() -> void:
-	ArtPainter.paint(self, plate, Rect2(Vector2.ZERO, size), _font)
+	var texture := RealismPlateCache.request(self, plate)
+	if texture != null:
+		draw_texture_rect(texture, Rect2(Vector2.ZERO, size), false)
+		draw_rect(Rect2(Vector2.ZERO, size), UiStyle.EDGE, false, 1)
+	else:
+		ArtPainter.paint(self, plate, Rect2(Vector2.ZERO, size), _font)
 
 
 static func house_key(c: Color) -> Color:

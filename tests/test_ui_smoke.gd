@@ -54,14 +54,10 @@ func test_campaign_screen_boots_and_plays(t) -> void:
 				break
 		t.check(screen.force_panel.visible, "the force card shows the selected army")
 		if target != "":
-			# A left click on the province only inspects it; the order is the
-			# right button's (or the card's March-to list, which says the same).
+			# Selecting an army arms the next single click as a destination.
 			screen._on_region_clicked(target)
-			t.check_eq(game.state["armies"][army_id]["region"], from_region, "a left click never marches")
-			t.check_eq(screen.selected_army, "", "it inspects the province instead")
-			screen._on_army_selected(army_id)
-			screen._on_order_target("region", target, false)
-			t.check_eq(game.state["armies"][army_id]["region"], target, "the army actually marched")
+			t.check_eq(game.state["armies"][army_id]["region"], target, "a single click marches the selected army")
+			t.check_eq(screen.selected_army, army_id, "the commander remains selected after marching")
 		for other_faction in stances_before:
 			if stances_before[other_faction] != "war":
 				t.check(game.state["factions"]["julii"]["diplomacy"][other_faction] != "war",

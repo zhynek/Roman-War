@@ -32,7 +32,7 @@ that cost time to learn:
 - Verify a build without owning every platform: the Linux export shares the
   same `.pck`, so
   `../build/RomanWar-Linux/RomanWar.x86_64 --headless --script res://tools/build_probe.gd`
-  proves the package is complete and playable: 34 data tables packed, a
+  proves the package is complete and playable: 36 data tables packed, a
   campaign starts, five turns end, a save round-trips and the loaded game
   marches in lockstep with the live one; nonzero exit otherwise.
 

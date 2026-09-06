@@ -49,6 +49,7 @@ const KINDS: Array[String] = [
 	"trade_agreed",
 	"faction_destroyed",
 	"army_march",
+	"army_sighted",
 	"march_arrived",
 	"march_halted",
 	"march_onward",

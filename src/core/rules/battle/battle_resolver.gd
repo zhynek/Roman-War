@@ -213,6 +213,10 @@ static func side_estimate(data: GameData, units: Array, enemy_shares: Dictionary
 	if not is_attacker:
 		strength = _apply_factor(factors, "terrain",
 			float(battle_rules["terrain_defense_multiplier"].get(terrain, 1.0)), strength)
+		strength = _apply_factor(factors, "crossing",
+			1.0 + float(context.get("crossing_defense_pct", 0.0)) / 100.0, strength)
+		strength = _apply_factor(factors, "fortification",
+			1.0 + float(context.get("fort_defense_pct", 0.0)) / 100.0, strength)
 		var wall_multipliers: Array = battle_rules["wall_defense_multiplier"]
 		strength = _apply_factor(factors, "walls",
 			float(wall_multipliers[clampi(wall_level, 0, wall_multipliers.size() - 1)]), strength)

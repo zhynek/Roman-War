@@ -192,6 +192,7 @@ static func general_summary(data: GameData, state: Dictionary, general_id) -> Va
 	return {
 		"id": general_id,
 		"name": character["name"],
+		"age": character.get("age", 30),
 		"role": character["role"],
 		"command": CharacterRules.effective(data, character, "command"),
 		"is_leader": character["role"] == "leader",
@@ -287,6 +288,7 @@ static func attach_general(data: GameData, state: Dictionary, army_id: String, c
 	var army: Dictionary = state["armies"][army_id]
 	army["general"] = char_id
 	army["movement_left"] = minf(float(army["movement_left"]), general_march_cap(state, char_id))
+	MovementRules.cap_movement(data, state, army)
 	return {"ok": true, "error": ""}
 
 
@@ -308,6 +310,7 @@ static func detach_general(data: GameData, state: Dictionary, army_id: String) -
 	var army: Dictionary = state["armies"][army_id]
 	note_general_march(state, army["general"], float(army["movement_left"]))
 	army["general"] = null
+	MovementRules.cap_movement(data, state, army)
 	return {"ok": true, "error": ""}
 
 
@@ -493,6 +496,8 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 	elif from["kind"] == "harbour" and to["kind"] == "fleet":
 		var settlement: Dictionary = from["container"]
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_sail_left", INF)))
+	if to["kind"] == "army":
+		MovementRules.cap_movement(data, state, to["container"])
 	_erase_if_empty(data, state, from_id)
 	return {"ok": true, "error": ""}
 
@@ -545,6 +550,7 @@ static func merge_armies(data: GameData, state: Dictionary, from_id: String, int
 	elif from["general"] != null:
 		note_general_march(state, from["general"], float(from["movement_left"]))
 	into["movement_left"] = minf(float(into["movement_left"]), float(from["movement_left"]))
+	MovementRules.cap_movement(data, state, into)
 	into["forced_march"] = bool(into.get("forced_march", false)) or bool(from.get("forced_march", false))
 	# A besieger that merges into the reinforcements hands the siege — and its
 	# clock — to the army that stays at the walls; it is never lifted by a merge.
@@ -592,6 +598,8 @@ static func split_army(data: GameData, state: Dictionary, army_id: String, indic
 	var new_id := _new_army(state, army["owner"], army["region"], units, general,
 		movement, bool(army.get("forced_march", false)))
 	SettlementRules.refresh_governors(data, state)
+	MovementRules.cap_movement(data, state, army)
+	MovementRules.cap_movement(data, state, state["armies"][new_id])
 	return {"ok": true, "error": "", "army_id": new_id}
 
 

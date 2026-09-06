@@ -29,7 +29,9 @@
     "agents",
     "knowledge",
     "edicts",
-    "chronicle"
+    "chronicle",
+    "reconnaissance",
+    "terrain_routes"
   ],
   "additionalProperties": false,
   "properties": {
@@ -129,14 +131,22 @@
     },
     "senate": {
       "allOf": [
-        { "$ref": "#/$defs/numeric_section" },
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
         {
           "required": [
-            "start_standing", "max_standing", "min_standing",
-            "mission_success_standing", "mission_fail_standing",
-            "popular_standing_per_region", "popular_drift_factor",
-            "election_standing_weight", "annals_office_min_rank",
-            "leader_suicide_standing", "leader_suicide_popular_min",
+            "start_standing",
+            "max_standing",
+            "min_standing",
+            "mission_success_standing",
+            "mission_fail_standing",
+            "popular_standing_per_region",
+            "popular_drift_factor",
+            "election_standing_weight",
+            "annals_office_min_rank",
+            "leader_suicide_standing",
+            "leader_suicide_popular_min",
             "civil_war_join_standing"
           ]
         }
@@ -336,6 +346,81 @@
             "steal_per_skill"
           ]
         }
+      ]
+    },
+    "reconnaissance": {
+      "$ref": "#/$defs/numeric_section"
+    },
+    "terrain_routes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "crossing_cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bridge": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "causeway": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "pass": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "bridge",
+            "causeway",
+            "pass"
+          ]
+        },
+        "crossing_defense_pct": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bridge": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "causeway": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "pass": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "bridge",
+            "causeway",
+            "pass"
+          ]
+        },
+        "map_access_value_per_region": {
+          "type": "number",
+          "minimum": 0
+        },
+        "map_access_base_value": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "crossing_cost",
+        "crossing_defense_pct",
+        "map_access_value_per_region",
+        "map_access_base_value"
       ]
     }
   },

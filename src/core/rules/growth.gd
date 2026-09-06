@@ -169,7 +169,7 @@ static func _grain_routes(data: GameData, state: Dictionary, region_id: String) 
 			continue
 		if not _trades_with(state, owner, (other as Dictionary)["owner"]):
 			continue
-		var land := MapRules.are_adjacent(data, region_id, other_id)
+		var land := TerrainRules.land_connection(data, region_id, other_id)
 		var sea: bool = has_port and MapRules.shared_sea_zone(data, region_id, other_id)
 		if land or sea:
 			routes += 1

@@ -8,7 +8,8 @@
     "headings",
     "effects",
     "blockers",
-    "captions"
+    "captions",
+    "map_commands"
   ],
   "additionalProperties": false,
   "properties": {
@@ -304,6 +305,461 @@
             "type": "string",
             "minLength": 1
           }
+        }
+      }
+    },
+    "map_commands": {
+      "type": "object",
+      "required": [
+        "choose",
+        "issue",
+        "cancel",
+        "halt",
+        "focus",
+        "follow",
+        "forced",
+        "idle",
+        "selected",
+        "planning",
+        "pinned",
+        "march",
+        "attack",
+        "siege",
+        "assault",
+        "inspect",
+        "route",
+        "arrival_now",
+        "arrival_later",
+        "forced_warning",
+        "combat_warning",
+        "siege_warning",
+        "approach_warning",
+        "fog_warning",
+        "no_movement",
+        "engines",
+        "invested",
+        "relief_army",
+        "unreachable",
+        "holding_siege",
+        "barred",
+        "queued",
+        "ready",
+        "marching",
+        "territory",
+        "campaign",
+        "detail",
+        "legend",
+        "motion",
+        "reduced_motion",
+        "withdraw",
+        "withdraw_warning",
+        "landed",
+        "waiting",
+        "column",
+        "captain",
+        "season_chip",
+        "zoom_help",
+        "siege_status",
+        "commander",
+        "commands",
+        "combat_cost",
+        "mobility",
+        "sight",
+        "post_tower",
+        "post_fort",
+        "post_need_army",
+        "post_complete",
+        "post_own_land",
+        "post_under_siege",
+        "post_no_movement",
+        "post_no_money",
+        "post_help",
+        "post_built",
+        "post_label",
+        "fort_label",
+        "garrison_map",
+        "last_seen",
+        "sight_legend",
+        "unavailable_route",
+        "mounted",
+        "fortification",
+        "commander_identity",
+        "captain_identity",
+        "current_sight",
+        "scouts_summary",
+        "controls_help",
+        "welcome_controls",
+        "idle_controls",
+        "post_detail",
+        "map_intro"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "choose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issue": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cancel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "halt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "focus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "follow": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forced": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selected": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pinned": {
+          "type": "string",
+          "minLength": 1
+        },
+        "march": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attack": {
+          "type": "string",
+          "minLength": 1
+        },
+        "siege": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assault": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inspect": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arrival_now": {
+          "type": "string",
+          "minLength": 1
+        },
+        "arrival_later": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forced_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "combat_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "siege_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approach_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fog_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_movement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engines": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invested": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relief_army": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unreachable": {
+          "type": "string",
+          "minLength": 1
+        },
+        "holding_siege": {
+          "type": "string",
+          "minLength": 1
+        },
+        "barred": {
+          "type": "string",
+          "minLength": 1
+        },
+        "queued": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marching": {
+          "type": "string",
+          "minLength": 1
+        },
+        "territory": {
+          "type": "string",
+          "minLength": 1
+        },
+        "campaign": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legend": {
+          "type": "string",
+          "minLength": 1
+        },
+        "motion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reduced_motion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "withdraw": {
+          "type": "string",
+          "minLength": 1
+        },
+        "withdraw_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "landed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "waiting": {
+          "type": "string",
+          "minLength": 1
+        },
+        "column": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "season_chip": {
+          "type": "string",
+          "minLength": 1
+        },
+        "zoom_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "siege_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commander": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commands": {
+          "type": "string",
+          "minLength": 1
+        },
+        "combat_cost": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mobility": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sight": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_tower": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_fort": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_need_army": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_complete": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_own_land": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_under_siege": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_no_movement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_no_money": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_built": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fort_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "garrison_map": {
+          "type": "string",
+          "minLength": 1
+        },
+        "last_seen": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sight_legend": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unavailable_route": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mounted": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fortification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commander_identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "captain_identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_sight": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scouts_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "controls_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "welcome_controls": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idle_controls": {
+          "type": "string",
+          "minLength": 1
+        },
+        "post_detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "map_intro": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncharted": {
+          "type": "string"
+        },
+        "give_maps": {
+          "type": "string"
+        },
+        "ask_maps": {
+          "type": "string"
+        },
+        "map_access_help": {
+          "type": "string"
+        },
+        "chart_known": {
+          "type": "string"
+        },
+        "chart_unknown": {
+          "type": "string"
+        },
+        "ground_report": {
+          "type": "string"
+        },
+        "ground_supply": {
+          "type": "string"
+        },
+        "supply_connected": {
+          "type": "string"
+        },
+        "supply_cut": {
+          "type": "string"
+        },
+        "crossing_report": {
+          "type": "string"
+        },
+        "realism_toggle": {
+          "type": "string"
+        },
+        "cartography_status": {
+          "type": "string"
+        },
+        "frontier_help": {
+          "type": "string"
         }
       }
     }

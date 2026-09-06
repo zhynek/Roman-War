@@ -57,7 +57,7 @@ static func best_path(data: GameData, state: Dictionary, army_id: String,
 		var approaches: Array = data.regions[to_region].get("adjacent", []).duplicate()
 		approaches.sort()
 		for neighbor in approaches:
-			if dist.has(neighbor) and float(dist[neighbor]) < beside_cost - 0.000001:
+			if TerrainRules.land_connection(data, neighbor, to_region) and dist.has(neighbor) and float(dist[neighbor]) < beside_cost - 0.000001:
 				beside_cost = float(dist[neighbor])
 				beside = String(neighbor)
 		if beside == "":
@@ -71,8 +71,10 @@ static func best_path(data: GameData, state: Dictionary, army_id: String,
 		path.push_front(walk)
 		walk = String(found["prev"][walk])
 	var legs: Array = []
+	var previous := String(army["region"])
 	for step in path:
-		legs.append({"region": step, "cost": MovementRules.step_cost(data, state, String(step))})
+		legs.append({"region": step, "cost": known_step_cost(data, state, String(step), visible, previous), "crossing": TerrainRules.crossing_kind(data, previous, step)})
+		previous = step
 	var total := float(dist[target])
 	return {"path": path, "legs": legs, "cost": total,
 		"turns": estimated_turns(data, state, army_id, legs, forced),
@@ -121,12 +123,14 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 	var path: Array = army.get("march_path", [])
 	var forced := bool(army.get("march_forced", false))
 	var moved := 0
+	var traversed: Array = []
 	var halted := false
 	while not path.is_empty():
 		var next := String(path[0])
 		if MovementRules.move_army(data, state, army_id, next, forced):
 			path.pop_front()
 			moved += 1
+			traversed.append(next)
 			continue
 		if not MovementRules.can_enter(data, state, army_id, next):
 			halted = true
@@ -137,7 +141,7 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 		var full_budget := _full_points(data, state, army)
 		if forced:
 			full_budget *= float(data.balance["movement"]["forced_march_multiplier"])
-		if MovementRules.step_cost(data, state, next) > full_budget + 0.0001:
+		if MovementRules.step_cost(data, state, next, army["region"]) > full_budget + 0.0001:
 			halted = true
 		break
 	var arrived := not halted and path.is_empty()
@@ -146,7 +150,7 @@ static func advance_march(data: GameData, state: Dictionary, army_id: String) ->
 		army.erase("march_forced")
 	else:
 		army["march_path"] = path
-	return {"moved": moved, "arrived": arrived, "halted": halted}
+	return {"moved": moved, "arrived": arrived, "halted": halted, "traversed": traversed}
 
 
 static func _search(data: GameData, state: Dictionary, army: Dictionary,
@@ -157,6 +161,7 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 	var dist := {origin: 0.0}
 	var prev := {}
 	var done := {}
+	var known := CartographyRules.known_regions(data, state, owner)
 	while true:
 		var current := ""
 		var best := INF
@@ -174,11 +179,13 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 		var neighbors: Array = data.regions.get(current, {}).get("adjacent", []).duplicate()
 		neighbors.sort()
 		for neighbor in neighbors:
-			if not data.regions.has(neighbor):
+			if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, current, neighbor):
+				continue
+			if not visible.is_empty() and state.get("cartography", {}).has(owner) and not known.has(neighbor):
 				continue
 			if _blocked(data, state, owner, String(neighbor), visible):
 				continue
-			var step := MovementRules.step_cost(data, state, String(neighbor))
+			var step := known_step_cost(data, state, String(neighbor), visible, current)
 			if step > step_limit + 0.0001:
 				continue
 			var cost := best + step
@@ -188,6 +195,15 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 				dist[neighbor] = cost
 				prev[neighbor] = current
 	return {"dist": dist, "prev": prev}
+
+
+static func known_step_cost(data: GameData, state: Dictionary, region_id: String,
+		visible: Dictionary, from_region: String = "") -> float:
+	## Unreported roads cannot change route, range or ETA through the fog.
+	## Geography is public; roads become known once the province is scouted.
+	if not visible.is_empty() and not visible.has(region_id):
+		return float(data.balance["movement"]["terrain_cost"][data.regions[region_id]["terrain"]]) + TerrainRules.crossing_cost(data, from_region, region_id)
+	return MovementRules.step_cost(data, state, region_id, from_region)
 
 
 static func _blocked(data: GameData, state: Dictionary, owner: String,

@@ -3,6 +3,8 @@ extends RefCounted
 ## Immutable game content loaded from data/*.json. The engine never mutates
 ## anything held here; all mutable campaign state lives in the GameState dict.
 
+var terrain_content: Dictionary = {}
+var terrain_crossings: Dictionary = {}
 var balance: Dictionary = {}
 var cultures: Dictionary = {}          # id -> culture dict
 var factions: Dictionary = {}          # id -> faction dict
@@ -58,6 +60,9 @@ func ok() -> bool:
 func _load_all(dir: String) -> void:
 	balance = _read_json(dir + "/balance.json")
 	campaign = _read_json(dir + "/campaign.json")
+	terrain_content = _read_json(dir + "/campaign_terrain.json")
+	for crossing in terrain_content.get("crossings", []):
+		terrain_crossings[TerrainRules.edge_key(crossing["a"], crossing["b"])] = crossing
 
 	for culture in _read_json(dir + "/cultures.json").get("cultures", []):
 		cultures[culture["id"]] = culture

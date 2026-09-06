@@ -485,6 +485,9 @@ static func state(game_data: GameData) -> Dictionary:
 		"armies": {}, "fleets": {}, "characters": {},
 		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
 		"tributes": [], "pending_offers": [], "agents": {},
+		"watchposts": {}, "recon": {"contacts": {}, "movements": []},
+		"cartography": {},
+		"map_access": {},
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}

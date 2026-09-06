@@ -145,6 +145,9 @@ func test_left_click_selects_and_right_click_orders(t) -> void:
 func test_multi_step_order_from_the_map(t) -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)
+	# This exercises marching over an already acquired atlas.
+	for region in game.data.regions:
+		game.state["cartography"]["julii"][region] = 0
 	var screen := CampaignScreen.create(game)
 	tree.root.add_child(screen)
 	var army_id := _julii_army(game)
@@ -423,12 +426,17 @@ func test_the_province_follows_a_marching_army_across_the_turn(t) -> void:
 	## selected province, its panel and the camera must follow the column.
 	var tree := Engine.get_main_loop() as SceneTree
 	var game := Game.new_campaign("julii", 42)
+	# This exercises marching over an already acquired atlas.
+	for region in game.data.regions:
+		game.state["cartography"]["julii"][region] = 0
 	var screen := CampaignScreen.create(game)
 	tree.root.add_child(screen)
 	screen.playback_enabled = false
 	var army_id := _julii_army(game)
 	var home: String = game.state["armies"][army_id]["region"]
 	screen.select_force("army", army_id)
+	# Spend part of the first day so a reachable Italian route spans seasons.
+	game.state["armies"][army_id]["movement_left"] = 1.5
 	# Somewhere beyond this season's reach: pick the farthest land preview.
 	var far := ""
 	var far_turns := 1
@@ -446,6 +454,8 @@ func test_the_province_follows_a_marching_army_across_the_turn(t) -> void:
 		screen.free()
 		return
 	screen._on_order_target("region", far, false)
+	t.check(screen._planning_order, "a distant destination asks for a journey order")
+	screen.command_bar.issue.pressed.emit()
 	var after_order: String = game.state["armies"][army_id]["region"]
 	t.check(after_order != home and game.state["armies"][army_id].has("march_path"), "the army set out with the road queued")
 	screen._end_turn()

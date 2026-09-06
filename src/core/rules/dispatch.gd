@@ -27,6 +27,8 @@ static func _may_know(data: GameData, beat: Dictionary, faction_id: String, seen
 		# The validator makes this impossible at build time; at runtime, keeping
 		# quiet beats a line of prose nobody wrote.
 		return false
+	if beat["kind"] == "army_sighted":
+		return String(beat["other"]) == faction_id
 	var rule: String = String(template["visibility"])
 	# A war or an alliance is proclaimed, not discovered — and the player asked
 	# to be told when factions go to war, including ones that are not theirs.

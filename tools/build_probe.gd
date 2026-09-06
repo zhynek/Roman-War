@@ -10,11 +10,15 @@ extends SceneTree
 ## JSON round-trip, because JSON numbers come back as floats and the writer
 ## sorts keys — neither is a difference in the world.
 
-const EXPECTED_TABLES := 34
+const EXPECTED_TABLES := 36
 const TURNS := 5
 
 
 func _init() -> void:
+	# Test/QA scripts must never read or overwrite a player's campaign slot.
+	ProjectSettings.set_setting("application/config/use_custom_user_dir", true)
+	ProjectSettings.set_setting("application/config/custom_user_dir_name", "Roman War Package Probe/%d" % OS.get_process_id())
+	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir())
 	var failures := 0
 	var version := str(ProjectSettings.get_setting("application/config/version", "dev"))
 	print("probe: build version %s" % version)

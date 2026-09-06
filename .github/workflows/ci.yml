@@ -39,6 +39,12 @@ jobs:
           mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
           chmod +x ~/godot/godot
       - name: Import project (builds the global class cache)
-        run: ~/godot/godot --headless --path . --import || true
+        run: |
+          set -o pipefail
+          ~/godot/godot --headless --path . --import 2>&1 | tee /tmp/godot-import.log
+          ! grep -E 'SCRIPT ERROR:|ERROR:' /tmp/godot-import.log
       - name: Run test suite
-        run: ~/godot/godot --headless --path . --script res://tests/run_tests.gd
+        run: |
+          set -o pipefail
+          ~/godot/godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee /tmp/godot-tests.log
+          ! grep -E 'SCRIPT ERROR:|ERROR:' /tmp/godot-tests.log

@@ -93,6 +93,12 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   the faction's `war_record`. Every effect key needs an engine reader.
 - **Player-facing sentences are content**: they live in `data/effects_glossary.json`,
   not in GDScript. `src/core/` returns `{kind, params}` and never authors English.
+- **The realistic procedural 3D direction is the visual standard.** The live
+  campaign uses `CampaignLandscape`; characters and art plates use the shared
+  procedural model/cache pipeline. Terrain visuals read the same
+  `campaign_terrain.json` crossings as the engine. Keep the classic map as a
+  comparison option. The separate `RealismStudy` remains a staged art example,
+  never a source of campaign rules or hidden force information.
 - **There are no image files and none may be added.** Buildings and units are
   drawn at runtime from `data/building_art.json` and `data/unit_art.json` by
   `BuildingArt`/`UnitArt` (resolve) and `ArtPainter` (draw). Never `randf()` in

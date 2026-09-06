@@ -36,10 +36,11 @@ campaign runs to AD 14.
   **Options ▾** — the mode switches and a **Controls** sheet. Both rows wrap on
   a narrow window instead of running off its edge. (Edicts are issued per
   province, so they live on the city panel rather than up here.)
-- **The map** — a terrain map of the whole world: coastlines, province
+- **The map** — a 3D terrain map of your known world: coastlines, province
   borders, and the lie of the land (mountain ridges, forests, hills, marsh,
-  desert). Every province is tinted by its terrain and washed with its
-  owner's colour; unexplored provinces lie under a dark veil. Cities are
+  desert). Uncharted provinces are absent until your observers report them
+  or you negotiate access to another faction's maps. Previously charted
+  ground stays visible under a dark veil when current reports lapse. Cities are
   drawn as they are: they grow with their level, their walls show their
   wall tier in their culture's style (Roman circuits, round Mediterranean
   enceintes, tribal stockades), a banner flies the owner's colour, a gold
@@ -52,28 +53,23 @@ campaign runs to AD 14.
   one for weary men, and dimmed once its movement for the season is spent.
   More than four in one place fold into a "+N" chip. Zoom far out and the
   banners give way to small owner badges.
-  - **Drag with the left or middle mouse button** (or **WASD/arrows**) to
+  - **Drag empty land, middle-drag, or Space-drag** (or **WASD/arrows**) to
     move the map; **scroll** (or a trackpad pinch, or the **+ / −** keys) to
     zoom; **double-click** to center on a province.
   - Prefer buttons? **+**, **−** and **Home** sit in the map's bottom-right
     corner. **Home** (or the Home key) returns you to your capital at a
     readable zoom whenever you get lost.
-  - **Left-click selects, right-click orders.** Left-click a province to
-    select it (its city fills the right panel); left-click a **banner** to
-    select that army or fleet — its **force card** opens above the city
-    panel, and the map rings everything it can do: **gold** for provinces it
-    can reach this season, **orange** for those only a forced march reaches,
-    **red** for an enemy army or city it can strike from where it stands. A
-    click only counts if the mouse does not travel, so dragging never
-    mis-clicks; **hover** a province for its details, or a ringed one for
-    the route, its cost in movement points and when the army arrives.
-  - **Right-click a ringed province** to march there (an orange one forces
-    the pace — or hold **Shift**), a red one to attack the army or lay siege
-    to the city, a ringed sea to sail a fleet, one of your own ports to dock
-    it. A destination beyond this turn's reach becomes a standing order the
-    army resumes each turn (halt it from the force card). Terrain is
-    strategy: plains and roads are fast, mountains and marsh cost double,
-    and the shortest road on the map is not always the quickest.
+  - **Click an army, then click its destination.** Select a banner, commander
+    portrait, or formation. Gold marks ordinary movement, orange requires
+    **Forced march** or **Shift**, and red offers an attack or siege. Hovering
+    previews the route. **Drag the army** to preview a destination and release
+    to order it; dragging empty land pans. **Alt-click** inspects a province
+    while you have a force selected.
+  - A destination beyond this season opens a journey plan. Review its cost and
+    arrival season, then press **Issue orders** to queue the journey. **M**
+    opens planning explicitly; **Esc** cancels a draft. Right-click remains
+    an alternative army order, and sails a selected fleet or docks it at your
+    port. Mountains and marsh cost more than plains; roads reduce the cost.
   - **Right-click with nothing selected** for a province's dossier: the
     garrison and buildings there, and the armies present — your own troops
     with their skills at a glance, while a foreign stack shows only its
@@ -91,6 +87,72 @@ campaign runs to AD 14.
   reminder of the controls and how many of your forces still await orders.
 - **Bottom right** — the turn log: every report of the day just closed, in one
   list, coloured by whether it was good news.
+
+## Commanding armies directly on the map (0.13)
+
+Select an army's standard, or its formation in **Close view**. Your commander
+appears at the head of the men; **F** finds him and **V** switches between
+campaign and close view. Use the map's **Territories / Campaign / Close view**
+buttons, scroll or pinch, and the geographic inset to find your way.
+
+For an immediate order, **click your army, then click a reachable province or
+town**. You can instead drag the army, review the live road preview, and
+release over the destination. Dropping over a panel or outside the map cancels
+the drag. Empty-land dragging, middle-dragging and Space-dragging pan the map.
+
+For a longer journey, press **M / Plan journey**, click a destination, and
+press **Issue orders**. Clicking a destination beyond the army's current range
+opens this plan automatically. **Esc** cancels it without dropping the army.
+
+**Forced march** in the
+strip, or holding **Shift**, extends the march and tires the men. Orange
+territory shows the additional forced range; it does not silently turn that
+mode on. Route labels use **S1** for this season, **S2** for next season, and
+so on. Gold road segments are affordable now; pale dashed segments wait.
+Unknown roads and resistance can change an unscouted journey.
+
+A nearby enemy field army is an **attack**, an enemy town is a **siege**, and
+a town under your own ready siege offers an **assault**. Combat still requires
+its normal confirmation. Marches toward distant enemies stop at an approach;
+you must order the attack separately. Withdrawing from a siege lifts it.
+
+The army visibly follows the roads with its commander. **Follow march** keeps
+it in view; manually panning or zooming gives you the camera back. The route
+remaining for future turns stays visible and can be cancelled with **Halt
+march**. Under **Options**, turn off **Animate marching armies** for reduced
+motion. The simulation resolves the same way with animation off.
+
+Close view shows distinct commander portraits and mounted figures, faction
+helmets, cloaks, shields and armor, plus cavalry, elephants, chariots and
+artillery in your formations. The same general keeps the same face, hair,
+horse and equipment; age affects the portrait. Enemy miniatures use their
+faction's public style and do not disclose their private unit roster.
+
+**Composition sets the pace.** The slowest company governs the whole army.
+Before general or faction bonuses, heavy spear/pike formations and artillery
+have 2 movement, infantry and missiles 2.5, chariots 3, cavalry 3.5, and horse
+archers 4. The command strip reports the limiting class and the actual budget.
+Adding slower troops caps movement immediately; splitting them off never
+refunds points already spent that season. Fresh movement arrives next season.
+
+**Scouting has a purpose.** Towns and ordinary armies see one land step away.
+Pure mounted columns and spies see two. Positioning those scouts extends the
+provinces you observe. With an army in your own territory, build a
+**Watchtower** for 600 denarii and 1 movement, then **Fortify post** for another
+1,200 denarii and 1 movement. Towers watch two steps; forts watch three and
+provide defending field armies in that province with +20% strength. They keep
+watch after the army leaves; losing the province cuts off their coverage.
+**Scouting coverage** shows the territory currently observed.
+
+Visible towns show their garrison headcount and wall tier. Observed enemy
+marches appear in the turn sequence and Dispatch, using snapshots taken when
+they moved. A hidden start or destination is never exposed by the replay.
+When sight is lost, a dated last-known contact can remain for up to three
+seasons; it is not a live enemy location.
+
+Movement and sight remain province-based, within the existing seasonal
+campaign. The miniature soldiers illustrate the stack and its actual march;
+they do not run a separate real-time simulation.
 
 ## Ending a turn: the day
 
@@ -208,12 +270,12 @@ many men stand and what they cost, how far it can still go this season, and
 every unit with its strength bar, experience and kit — and the map rings what
 it can do. Now:
 
-- **Right-click a gold-ringed province** to march there. Roads make it
+- **Click a gold-ringed province** to march there. Roads make it
   cheaper; rough terrain costs more. An **orange** ring means only a forced
-  march reaches it — right-click it, or hold **Shift**, and the men arrive
-  tired and fight worse. A destination beyond this turn's reach becomes a
-  standing order the army resumes each turn; the card shows it and can halt
-  it. The card's **March to** list gives the same orders for trackpads.
+  march reaches it — enable **Forced march** or hold **Shift**, and the men arrive
+  tired and fight worse. A destination beyond this turn's reach opens a plan;
+  **Issue orders** makes it a standing journey the army resumes each turn.
+  The card shows it and can halt it. The card's **March to** list gives the same orders for trackpads.
 - **Right-click a coastal province across a sea** to sail there (it takes the
   whole turn). Sailing onto the shore of a faction you are **at war** with is
   an amphibious landing: allowed as long as no enemy field army holds the
@@ -573,3 +635,33 @@ The game writes its save to your user folder and never touches the project. If
 a campaign gets into a strange state, start a new one — and please note the
 **world seed** and what you did, because with the seed the exact same situation
 can be reproduced and fixed.
+
+
+## Terrain, scouts, and map agreements
+
+The campaign opens in the detailed 3D terrain view. **Options → Realistic
+campaign terrain** switches to the classic comparison. Both views issue the
+same orders. Infantry, mounted troops and equipment are representative figures;
+use the force panel for actual numbers.
+
+Marsh costs 2 movement before road improvements, compared with 1 for plains.
+Mountains are traversed through passes; marked unbroken ridges and unbridged
+river borders cannot be marched, attacked, or besieged across. A bridge adds
+0.25 movement and gives its defender a 20% crossing advantage, alongside the
+existing terrain/class factors. Straits require the existing coastal transport
+order. Roads also govern land trade and grain connections.
+
+The province panel explains terrain and known crossings. The army strip shows
+whether a secure ground supply connection to the capital exists. This is a land
+connection report; it does not yet simulate rations, naval supply, or starvation
+for field armies.
+
+Uncharted provinces are absent from the map. Lookouts, armies, scouts, agents,
+watchposts and fleets contribute reports. Geography remains mapped after the
+scouts leave, while current enemy troops require current observation. A stale
+or shared map never grants a live enemy roster.
+
+In **Diplomacy → Negotiate**, add **Grant access to our maps** or **Request access
+to their maps** alongside payment or other terms. Accepted rights include the
+current atlas and future direct geographic reports. War stops future updates;
+already acquired geography remains known. An alliance alone does not share maps.

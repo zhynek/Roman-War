@@ -1,0 +1,138 @@
+{
+  "$schema": "../schemas/campaign_terrain.schema.json",
+  "description": "Authored campaign-scale route constraints, not a surveyed reconstruction of ancient crossings.",
+  "terrains": {
+    "plains": {
+      "name": "Open country",
+      "description": "Firm ground supports broad formations.",
+      "relief": 3,
+      "color": "#777c48",
+      "trees": 35
+    },
+    "forest": {
+      "name": "Woodland",
+      "description": "Tree cover conceals approaches; scouts report nearby forces.",
+      "relief": 8,
+      "color": "#424f32",
+      "trees": 280
+    },
+    "hills": {
+      "name": "High ground",
+      "description": "Defenders hold elevated ground; columns follow the lower tracks.",
+      "relief": 13,
+      "color": "#777448",
+      "trees": 80
+    },
+    "mountains": {
+      "name": "Mountain country",
+      "description": "Armies use marked passes. Unbroken ridges cannot be crossed.",
+      "relief": 30,
+      "color": "#737369",
+      "trees": 35
+    },
+    "marsh": {
+      "name": "Marshland",
+      "description": "Soft ground costs twice a plain march before road improvements.",
+      "relief": 2,
+      "color": "#536652",
+      "trees": 75
+    },
+    "desert": {
+      "name": "Dry country",
+      "description": "Loose ground and long approaches slow the column.",
+      "relief": 8,
+      "color": "#a49164",
+      "trees": 0
+    },
+    "steppe": {
+      "name": "Open steppe",
+      "description": "Open grassland favors movement and mounted reconnaissance.",
+      "relief": 5,
+      "color": "#90905d",
+      "trees": 12
+    }
+  },
+  "crossing_types": {
+    "bridge": {
+      "name": "Bridge crossing",
+      "description": "The road crosses the river at a bridge. Defenders control the narrow approach."
+    },
+    "river": {
+      "name": "Unbridged river",
+      "description": "No land crossing here. Find a bridge on another route."
+    },
+    "causeway": {
+      "name": "Marsh causeway",
+      "description": "A raised crossing concentrates troops onto a narrow approach."
+    },
+    "pass": {
+      "name": "Mountain pass",
+      "description": "The pass is traversable; the surrounding ridge is not."
+    },
+    "ridge": {
+      "name": "Unbroken ridge",
+      "description": "No traversable pass on this border. Route around the ridge."
+    },
+    "water": {
+      "name": "Open water",
+      "description": "Land armies cannot march across this water. Use coastal transport."
+    }
+  },
+  "crossings": [
+    {
+      "a": "latium",
+      "b": "umbria",
+      "kind": "bridge"
+    },
+    {
+      "a": "etruria",
+      "b": "umbria",
+      "kind": "river"
+    },
+    {
+      "a": "cisalpina",
+      "b": "venetia",
+      "kind": "causeway"
+    },
+    {
+      "a": "cisalpina",
+      "b": "raetia",
+      "kind": "pass"
+    },
+    {
+      "a": "arvernia",
+      "b": "raetia",
+      "kind": "ridge"
+    },
+    {
+      "a": "raetia",
+      "b": "noricum",
+      "kind": "pass"
+    },
+    {
+      "a": "pannonia",
+      "b": "dacia",
+      "kind": "river"
+    },
+    {
+      "a": "moesia",
+      "b": "dacia",
+      "kind": "bridge"
+    },
+    {
+      "a": "bruttium",
+      "b": "sicilia_graeca",
+      "kind": "water"
+    },
+    {
+      "a": "baetica",
+      "b": "mauretania",
+      "kind": "water"
+    },
+    {
+      "a": "europa",
+      "b": "bithynia",
+      "kind": "water"
+    }
+  ]
+}

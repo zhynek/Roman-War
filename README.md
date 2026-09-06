@@ -4,6 +4,12 @@ An original, clean-room turn-based grand-strategy game of the ancient Mediterran
 inspired by the *mechanics* (never the assets, text, or data) of classic 2004-era
 campaign strategy games. Built with Godot 4 for macOS (and anywhere else Godot runs).
 
+**Play version 0.14.0:** download the universal macOS app from the
+[production release](https://github.com/zhynek/Roman-War/releases/tag/v0.14.0).
+The campaign now uses procedural 3D terrain, physical crossings and negotiated
+map access. See the [release notes](docs/releases/0.14.0.md) and
+[next development handoff](docs/NEXT_DEVELOPMENT.md).
+
 The design philosophy, researched in depth in
 [`docs/research/rtw-research-report.md`](docs/research/rtw-research-report.md), is:
 
@@ -89,6 +95,20 @@ python3 tools/validate_data.py
 - The whole `GameState` is a plain dictionary: saving is `JSON.stringify`, and
   every random draw goes through one seeded RNG, so campaigns replay
   deterministically.
+
+## Map experience (0.13)
+
+Click an army or its commander, then click its destination; drag the army for
+an immediate route preview. Close view now shows individual commander faces,
+authored equipment for all 21 factions, cultural troop formations and mounted
+leaders. Cavalry travels and scouts farther than infantry or artillery.
+Build watchtowers and fortified posts, inspect visible garrison/wall strength,
+and watch recorded enemy movements through your scouts' coverage. Far zoom
+retains the territorial view and the deterministic province-based campaign.
+
+Read the [v0.13 review and validation notes](docs/reviews/2026-09-v13-map-overhaul.md),
+the [initial codebase review](docs/reviews/2026-09-map-experience.md), and
+[map controls](PLAYING.md#commanding-armies-directly-on-the-map-013).
 
 ## Status
 

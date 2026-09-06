@@ -65,6 +65,10 @@ static func set_stance(state: Dictionary, a: String, b: String, stance: String) 
 		return false
 	if not state["factions"].has(a) or not state["factions"].has(b):
 		return false
+	if stance == "war":
+		for pair in [[a, b], [b, a]]:
+			var rights: Array = state.get("map_access", {}).get(pair[0], [])
+			rights.erase(pair[1])
 	state["factions"][a]["diplomacy"][b] = stance
 	state["factions"][b]["diplomacy"][a] = stance
 	return true
@@ -208,6 +212,12 @@ static func evaluate_offer(data: GameData, state: Dictionary, from_id: String, t
 		return {"accept": false, "score": 0.0, "breakdown": [],
 			"vetoes": ["the_republic_is_at_war_with_itself"]}
 
+	if offer.get("give_map_access", false):
+		factors.append({"label": "their_map_access", "value": CartographyRules.access_value(data, state, from_id, to_id)})
+	if offer.get("ask_map_access", false):
+		factors.append({"label": "our_map_access", "value": -CartographyRules.access_value(data, state, to_id, from_id)})
+	if (offer.get("give_map_access", false) or offer.get("ask_map_access", false)) and at_war(state, from_id, to_id) and proposed_stance not in ["neutral", "trade", "alliance"]:
+		vetoes.append("map_access_requires_peace")
 	var give_payment := int(offer.get("give_payment", 0))
 	if give_payment > 0:
 		factors.append({"label": "their_payment", "value": float(give_payment)})
@@ -335,6 +345,12 @@ static func apply_offer(data: GameData, state: Dictionary, offer: Dictionary) ->
 			# the chronicle records it at the signing, not by diffing.
 			ChronicleRules.record(data, state, "alliance_made",
 				{"faction": from_id, "other_faction": to_id}, 4)
+
+	if not at_war(state, from_id, to_id):
+		if offer.get("give_map_access", false):
+			CartographyRules.grant(data, state, from_id, to_id)
+		if offer.get("ask_map_access", false):
+			CartographyRules.grant(data, state, to_id, from_id)
 
 
 static func region_value(data: GameData, state: Dictionary, region_id: String) -> float:

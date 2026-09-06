@@ -11,6 +11,22 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Current terrain and visual direction
+
+**Production handoff: 0.14.0.** The owner authorized release of the integrated
+build on 2026-09-06. Start the next round with
+[`NEXT_DEVELOPMENT.md`](NEXT_DEVELOPMENT.md), which defines the first playable
+scene, acceptance criteria, known limitations and shutdown/restart notes.
+The release tag is `v0.14.0`; use the normal production app for persistent play.
+
+Read [`reviews/2026-09-terrain-standard.md`](reviews/2026-09-terrain-standard.md)
+for the latest work. The approved 3D direction is now the live campaign default,
+with shared UI styling, generated character/unit/building plates, explicit
+land crossings, persistent geographic reports and negotiated map access.
+`RealismStudy` is still an optional staged woods-emergence example; it is no
+longer the only 3D surface. Do not undo these changes to restore its earlier
+"comparison only" scope. The earlier comparison-only notes below are historical.
+
 ## 1. Where things stand
 
 **`main` is the trunk. Use it.** Until 2026-09-01 this repository had no `main`
@@ -21,14 +37,40 @@ integration of five of those branches, Phase 7 on top of them, and the military
 strategy layer on top of that (PR #2, fast-forwarded into `main` on 2026-09-05),
 and is the only branch worth building.
 
-**Why sessions keep forking the wrong commit:** GitHub's *default branch* for
-this repository is still `claude/new-session-3g3s4m` — the old `9026730` — so
-every new Claude Code session is cloned and branched from it unless somebody
-switches. Two more sessions did exactly that after `main` existed (the two
-"also superseded" branches below), and so did the session that wrote this
-paragraph. The fix is a repository setting only the owner can make:
-**Settings → General → Default branch → `main`**. Until then, the first command
-of every session is `git fetch origin main && git checkout -B <branch> origin/main`.
+**Default branch corrected:** GitHub now reports `main` as the default branch
+(verified 2026-09-05 during the Codex map review). Older sessions branched from
+`claude/new-session-3g3s4m` (`9026730`), which explains the superseded branches
+below. Check `git status`, fetch `origin/main`, and create new work from that
+trunk; do not reset an occupied worktree to recover from an old session.
+
+**Earlier realism development comparison (not a release):**
+[`reviews/2026-09-realism-study.md`](reviews/2026-09-realism-study.md) documents
+an opt-in procedural 3D landscape/formation study with camera controls, a
+scrubbable woods-emergence example and comparison to the existing 2D campaign.
+Run `tools/realism_preview.gd` or the separate development app. It is staged
+art and motion, not actual province terrain or implemented ambush gameplay.
+That study isolated storage before creating UI. The newer terrain development
+app opens the integrated live campaign described above. The original geometry
+remains stylized; finished photorealistic art remains further work.
+
+**0.13 commander/scouting overhaul:**
+[`reviews/2026-09-v13-map-overhaul.md`](reviews/2026-09-v13-map-overhaul.md)
+records the new mobility, watchposts, observed movement, procedural portraits
+and input fixes. Read it after the initial map review. The v0.13 work builds
+on the existing local v0.12 changes in `codex/map-gameplay`; no older Claude
+branch has been substituted. Both `tools/map_playtest.gd` and
+`tools/recon_playtest.gd` exercise rendered gameplay. QA output belongs in
+`/tmp`, not among game assets. Save version remains 2. Automated test and QA entry points now isolate
+`user://` into per-process directories; custom test scripts must do likewise
+before constructing the UI, because Save/Load uses that namespace.
+
+**0.12 map experience:** see
+[`reviews/2026-09-map-experience.md`](reviews/2026-09-map-experience.md) for the
+review, new order strip, close-view miniatures, marching playback, terrain
+chunk culling, fixes and remaining priorities. `AGENTS.md` points every coding
+agent to the same architecture contract in `CLAUDE.md`. This work is local to
+`codex/map-gameplay` until integrated; the historical merge table remains a
+record of what was on the trunk before this review.
 
 **Merged into `main`, in this order:**
 
@@ -220,10 +262,9 @@ nothing until it finishes, so a quiet terminal is not a hang.
 > Until a run actually executes again, the gates are local-only and a red check
 > on GitHub means nothing either way.
 
-`pip install jsonschema` if the validator can't import. **There is no
-single-file test filter** — `tests/run_tests.gd` globs `res://tests/test_*.gd`
-unconditionally and parses no arguments. It's the whole suite or a throwaway
-script.
+`pip install jsonschema` if the validator can't import. **Targeted test runs** use `-- suite=pathfinding,ui_smoke` after the runner
+command (exact suite names, comma-separated). Omitting the filter runs every
+`tests/test_*.gd`; the full suite remains the release gate.
 
 For balance work: `godot --headless --path . --script res://tools/soak.gd`
 runs **two** 100-turn campaigns (~2 min) and prints what kind of world comes
@@ -615,9 +656,9 @@ What costs time to rediscover:
   the technique table, which dilutes the one-pick-per-success origination draw
   for civil crafts — a per-technique origination weight is the contained fix
   if soaks show civil crafts arriving late.
-- **No character portraits and no battle-scene art.** Buildings, units, the
-  map and its towns are all drawn by code now, so the pattern exists — the
-  portraits simply have not been done.
+- **Art fidelity and live ambush behavior remain unfinished.** Procedural
+  commander portraits and 3D unit/building plates now exist. The separate woods
+  study is staged; use `NEXT_DEVELOPMENT.md` for the next campaign-scene work.
 
 ## 8. Ways forward
 

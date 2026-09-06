@@ -19,15 +19,9 @@ class TerrainLayer:
 		var geometry: MapGeometry = view.geometry
 		if geometry == null or view.game == null:
 			return
-		# Shallow-water halo, then the parchment base that hides any hairline
-		# seams between independently simplified province polygons.
-		for mass in geometry.landmasses:
-			_stroke_ring(mass["outline"], UiStyle.SEA_SHELF, 9.0)
-		for mass in geometry.landmasses:
-			for piece in mass["fills"]:
-				draw_colored_polygon(piece, UiStyle.LAND_BASE)
+
 		for region_id in geometry.cells:
-			var terrain := _terrain_of(region_id)
+			var terrain := _terrain_of(region_id) if view.known_cache.has(region_id) else ""
 			if terrain == "":
 				continue
 			var fill: Color = UiStyle.TERRAIN_FILL[terrain]
@@ -36,9 +30,9 @@ class TerrainLayer:
 				draw_colored_polygon(piece, fill)
 		_draw_roads(geometry)
 		for region_id in geometry.cells:
-			_draw_decor(region_id, _terrain_of(region_id))
-		for mass in geometry.landmasses:
-			_stroke_ring(mass["outline"], UiStyle.COAST_LINE, 2.2)
+			if view.known_cache.has(region_id):
+				_draw_decor(region_id, _terrain_of(region_id))
+
 
 	func _terrain_of(region_id: String) -> String:
 		return String(view.game.data.regions.get(region_id, {}).get("terrain", ""))
@@ -50,6 +44,9 @@ class TerrainLayer:
 
 	func _draw_roads(geometry: MapGeometry) -> void:
 		for key in geometry.edges:
+			var ends := String(key).split("|")
+			if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
+				continue
 			var path: PackedVector2Array = geometry.edges[key]
 			var level := int(view.road_levels.get(key, 0))
 			match level:
@@ -66,7 +63,7 @@ class TerrainLayer:
 					draw_polyline(path, Color(UiStyle.ROAD_PAVED_CORE, 0.8), 1.2, true)
 
 	func _draw_decor(region_id: String, terrain: String) -> void:
-		if terrain == "":
+		if terrain == "" or view._zoom >= MapView.DETAIL_ZOOM:
 			return
 		var color: Color = UiStyle.TERRAIN_GLYPH[terrain]
 		for point in view.decor_points(region_id):
@@ -96,6 +93,22 @@ class TerrainLayer:
 					draw_line(point + Vector2(-3, 0), point + Vector2(3, 0), color, 1.2, true)
 
 
+class DetailTerrainChunk:
+	extends Node2D
+	## One retained draw list per province, visible only inside the camera.
+	## A single continent-sized draw list still submits every tree when zoomed
+	## into a town; these chunks remove that CPU/GPU work without repainting.
+	var view: MapView
+	var region_id := ""
+
+	func _draw() -> void:
+		var terrain := String(view.game.data.regions.get(region_id, {}).get("terrain", "plains"))
+		var salt := 0
+		for point in view.decor_points(region_id, true):
+			salt += 1
+			CampaignMiniatures.terrain(self, point, terrain, region_id, salt * 19)
+
+
 class PoliticalLayer:
 	extends Node2D
 	## Owner tints over explored territory; province borders everywhere.
@@ -113,10 +126,12 @@ class PoliticalLayer:
 			if owner_color == null:
 				continue
 			var tint: Color = owner_color
-			tint.a = 0.30
+			tint.a = 0.08 if view._zoom >= MapView.DETAIL_ZOOM else 0.30
 			for piece in geometry.cells[region_id]["fills"]:
 				draw_colored_polygon(piece, tint)
 		for region_id in geometry.cells:
+			if not view.known_cache.has(region_id):
+				continue
 			for polygon in geometry.cells[region_id]["polys"]:
 				var closed := PackedVector2Array(polygon)
 				closed.append(polygon[0])
@@ -131,10 +146,10 @@ class FogLayer:
 
 	func _draw() -> void:
 		var geometry: MapGeometry = view.geometry
-		if geometry == null or view.game == null or view.visible_cache.is_empty():
+		if geometry == null or view.game == null:
 			return
 		for region_id in geometry.cells:
-			if view.visible_cache.has(region_id):
+			if view.visible_cache.has(region_id) or not view.known_cache.has(region_id):
 				continue
 			for piece in geometry.cells[region_id]["fills"]:
 				draw_colored_polygon(piece, UiStyle.FOG_VEIL)
@@ -176,7 +191,12 @@ class UnitsLayer:
 		if params.is_empty():
 			draw_circle(anchor, 8.0, Color(0.5, 0.5, 0.5))
 			return
-		SettlementIcons.draw_settlement(self, anchor, params)
+		if view._zoom >= MapView.DETAIL_ZOOM:
+			if game.data.regions[region_id].get("terrain", "") in ["plains", "hills", "steppe"]:
+				CampaignMiniatures.farms(self, anchor, region_id, 12 + int(params["level"]) * 1.5)
+			CampaignMiniatures.settlement(self, anchor, params)
+		else:
+			SettlementIcons.draw_settlement(self, anchor, params)
 
 	func _draw_armies(region_id: String, anchor: Vector2) -> void:
 		var game: Game = view.game
@@ -234,6 +254,9 @@ class OverlayLayer:
 		var game: Game = view.game
 		if game == null:
 			return
+		if view.show_sight:
+			for region_id in view.visible_cache:
+				_paint_region(region_id, Color(0.28,0.68,0.80,0.06), Color(0.42,0.80,0.92,0.62), 0.8)
 		for region_id in view.highlight_regions:
 			match String(view.highlight_regions[region_id]):
 				"forced":
@@ -286,16 +309,31 @@ class OverlayLayer:
 				segment = view.geometry.edge_path(previous, next)
 			if segment.is_empty():
 				segment = PackedVector2Array([_anchor(previous), _anchor(next)])
-			draw_polyline(segment, Color(0.08, 0.08, 0.1, 0.5), 5.0, true)
-			draw_polyline(segment, ink, 2.6, true)
+			if view.landscape != null and view.realism_enabled:
+				for i in range(segment.size()):
+					segment[i].y -= view.landscape.ground(segment[i]).y / tan(CampaignLandscape.PITCH)
+			var line_scale := maxf(view._zoom, 1.0)
+			var color := UiStyle.CAPITAL_GOLD if int(leg.get("turn", 1)) <= 1 else ink
+			draw_polyline(segment, Color(0.08, 0.08, 0.1, 0.5), 5.0 / line_scale, true)
+			if int(leg.get("turn", 1)) <= 1:
+				draw_polyline(segment, color, 2.4 / line_scale, true)
+			else:
+				for i in range(1, segment.size()):
+					draw_dashed_line(segment[i - 1], segment[i], color, 2.0 / line_scale, 7.0 / line_scale)
+			if segment.size() >= 2:
+				var midpoint := segment[segment.size() / 2]
+				var direction := (segment[-1] - segment[0]).normalized()
+				var normal := Vector2(-direction.y, direction.x)
+				draw_polyline(PackedVector2Array([midpoint - direction * 3 + normal * 2, midpoint,
+					midpoint - direction * 3 - normal * 2]), color, 1.0 / line_scale, true)
 			previous = next
 		if bool(preview.get("blocked", false)) and preview.has("target"):
 			var from_anchor := _anchor(previous)
 			var to_anchor := _anchor(String(preview["target"]))
 			draw_dashed_line(from_anchor, to_anchor, UiStyle.SIEGE_RED, 2.4, 9.0)
 			draw_arc(to_anchor, 14.0, 0, TAU, 24, UiStyle.SIEGE_RED, 2.2)
-		# Per-leg cost chips, then the arrival flag.
-		if view.map_font != null:
+		# At close zoom route information lives in fixed-size screen labels.
+		if view.map_font != null and view._zoom < MapView.DETAIL_ZOOM:
 			for leg in legs:
 				var at := _anchor(String(leg["region"])) + Vector2(0, -20.0)
 				var cost_text := "%.1f" % float(leg["cost"])
@@ -319,6 +357,9 @@ class OverlayLayer:
 		return view.world_pos(view.game.data.regions.get(region_id, {}))
 
 	func _paint_region(region_id: String, fill: Color, edge: Color, width: float) -> void:
+		if view._zoom >= MapView.DETAIL_ZOOM:
+			fill.a *= 0.22
+			width /= view._zoom
 		var geometry: MapGeometry = view.geometry
 		if geometry != null and geometry.cells.has(region_id) \
 				and view.game.data.regions.has(region_id):
@@ -328,7 +369,7 @@ class OverlayLayer:
 			for polygon in cell["polys"]:
 				var closed := PackedVector2Array(polygon)
 				closed.append(polygon[0])
-				draw_polyline(closed, edge, width, true)
+				draw_polyline(closed, edge, width / maxf(view._zoom, 1.0), true)
 		elif view.game.data.regions.has(region_id):
 			var anchor := view.world_pos(view.game.data.regions[region_id])
 			draw_arc(anchor, 16.0, 0, TAU, 32, edge, width + 1.0)
@@ -352,7 +393,7 @@ class LabelLayer:
 		var zoom := view._zoom
 		# Sea names at their authored anchors, faint and wide.
 		if zoom >= 0.45:
-			for zone_id in game.data.sea_zones:
+			for zone_id in view.visible_zones:
 				var anchor_data: Dictionary = game.data.sea_zones[zone_id].get("position", {})
 				if anchor_data.is_empty():
 					continue
@@ -363,18 +404,20 @@ class LabelLayer:
 					sea_name, HORIZONTAL_ALIGNMENT_CENTER, -1, 13).x
 				draw_string(view.map_font, at + Vector2(-sea_width / 2.0, -14.0), sea_name,
 					HORIZONTAL_ALIGNMENT_CENTER, -1, 13, UiStyle.SEA_LABEL)
-		for region_id in view.visible_cache:
+		for region_id in view.known_cache:
 			var region: Dictionary = game.data.regions.get(region_id, {})
 			if region.is_empty():
 				continue
-			var settlement: Dictionary = game.state["settlements"].get(region_id, {})
+			if not Rect2(Vector2.ZERO, view.size).grow(100).has_point(view.to_screen(view.world_pos(region))):
+				continue
+			var settlement: Dictionary = game.state["settlements"].get(region_id, {}) if view.visible_cache.has(region_id) else {}
 			var tier := 1
 			if not settlement.is_empty():
 				tier = Constants.level_index(
 					SettlementRules.settlement_level(game.data, settlement)) + 1
 			if zoom < _reveal_zoom(tier):
 				continue
-			var text: String = region.get("settlement_name", region_id)
+			var text: String = region.get("settlement_name" if view.visible_cache.has(region_id) else "name", region_id)
 			var font_size := 11 + tier
 			var screen := view.to_screen(view.world_pos(region))
 			var width := view.map_font.get_string_size(
@@ -384,6 +427,14 @@ class LabelLayer:
 				HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, 4, UiStyle.LABEL_OUTLINE)
 			draw_string(view.map_font, at, text,
 				HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, UiStyle.LABEL_INK)
+			if zoom >= MapView.DETAIL_ZOOM and not settlement.is_empty():
+				var words: Dictionary = game.data.effects_glossary["map_commands"]
+				var intel := String(words["garrison_map"]).format({"men": CombatRules.soldiers_in(game.data, settlement["garrison"]),
+					"walls": int(SettlementRules.effect_max(game.data, settlement, "wall_level"))})
+				var intel_width := view.map_font.get_string_size(intel, HORIZONTAL_ALIGNMENT_CENTER, -1, 11).x
+				var baseline := Vector2(screen.x - intel_width / 2, at.y + 15)
+				draw_style_box(UiStyle._flat(Color(0.05,0.09,0.10,0.88), 3), Rect2(baseline + Vector2(-5,-12), Vector2(intel_width+10,17)))
+				draw_string(view.map_font, baseline, intel, HORIZONTAL_ALIGNMENT_CENTER, -1, 11, UiStyle.PARCHMENT)
 
 	func _reveal_zoom(tier: int) -> float:
 		match tier:
@@ -410,4 +461,69 @@ class BannerLayer:
 		if view.game == null:
 			return
 		for entry in view.banner_layout():
-			view.draw_banner(self, entry)
+			if entry["id"] != view._sighting.get("id", ""):
+				view.draw_banner(self, entry)
+		view.draw_contacts(self)
+		view.draw_sighting(self)
+		_draw_route_labels()
+
+
+	func _draw_route_labels() -> void:
+		if view.map_font == null:
+			return
+		for leg in view.path_preview.get("legs", []):
+			var at := view.to_screen(view.world_pos(view.game.data.regions[leg["region"]]))
+			if not Rect2(Vector2.ZERO, view.size).has_point(at):
+				continue
+			var text := "S%d · %.1f" % [int(leg.get("turn", 1)), float(leg["cost"])]
+			_chip(at + Vector2(0, -26 * minf(view._zoom, 1.4)), text, UiStyle.CAPITAL_GOLD)
+
+
+	func _chip(at: Vector2, text: String, ink: Color) -> void:
+		var width := view.map_font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, 12).x
+		var box := Rect2(at + Vector2(-width * 0.5 - 6, -13), Vector2(width + 12, 20))
+		draw_style_box(UiStyle._flat(Color(0.06, 0.10, 0.11, 0.94), 4), box)
+		draw_string(view.map_font, at + Vector2(-width * 0.5, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, ink)
+
+
+class MiniatureLayer:
+	extends Node2D
+	## Only the small living layer repaints during a march. Land, roads and
+	## settlements remain retained. Offscreen columns do not emit draw calls.
+	var view: MapView
+
+	func _draw() -> void:
+		if view.game == null or view._zoom < MapView.DETAIL_ZOOM:
+			return
+		for region in view.game.state.get("watchposts", {}):
+			var post: Dictionary = view.game.state["watchposts"][region]
+			if view.visible_cache.has(region) and ReconRules.post_active(view.game.state, region, post):
+				var at := view.world_pos(view.game.data.regions[region]) + Vector2(-22,-17)
+				CampaignMiniatures.watchpost(self, at, int(post["level"]), Color.html(view.game.data.factions[post["owner"]]["color"]))
+		var ids: Array = view.army_visuals.keys()
+		ids.sort_custom(func(a, b): return view.force_world_position(a).y < view.force_world_position(b).y)
+		var frame := Rect2(-view._camera_offset, view.size / view._zoom).grow(40)
+		for id in ids:
+			if id == view._sighting.get("id", ""):
+				continue
+			var at := view.force_world_position(id)
+			if not frame.has_point(at):
+				continue
+			var summary: Dictionary = view.force_summaries.get(id, {})
+			if summary.is_empty():
+				continue
+			var color := Color.html(view.game.data.factions.get(summary["owner"], {}).get("color", "#808080"))
+			var moving := view._marches.has(id)
+			var direction: Vector2 = view._marches.get(id, {}).get("direction", Vector2.RIGHT)
+			draw_set_transform(at, 0, Vector2.ONE * float(view.army_visuals[id].get("scale", 1)))
+			CampaignMiniatures.army(self, Vector2.ZERO, summary, color, view.army_visuals[id]["classes"],
+				view._visual_clock, moving, id == view.selected_force, direction, view.troop_looks[id], view.commander_styles[id])
+			draw_set_transform(Vector2.ZERO)
+
+		if not view._sighting.is_empty():
+			var sighting: Dictionary = view._sighting
+			var summary: Dictionary = sighting["summary"]
+			var culture := String(view.game.data.factions.get(summary["owner"], {}).get("culture", "neutral"))
+			var kit: Dictionary = UnitArt.for_data(view.game.data).kits.get(culture, {})
+			CampaignMiniatures.army(self, sighting["position"], summary, sighting["style"]["cape"], [],
+				view._visual_clock, float(sighting["length"]) > 0 and view.motion_enabled, false, sighting["direction"], [kit], sighting["style"])

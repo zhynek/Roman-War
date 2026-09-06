@@ -14,9 +14,9 @@ signal chain_selected(chain_id: String)
 signal tier_selected(index: int)
 signal tab_selected(tab: String)
 
-const GOLD := Color(0.95, 0.90, 0.75)
-const BODY := Color(0.85, 0.85, 0.85)
-const DIM := Color(0.62, 0.62, 0.60)
+const GOLD := UiStyle.PARCHMENT
+const BODY := UiStyle.TEXT
+const DIM := UiStyle.TEXT_DIM
 const GOOD := Color(0.55, 0.85, 0.55)
 const BAD := Color(0.90, 0.55, 0.50)
 const WARN := Color(0.90, 0.80, 0.50)
@@ -44,7 +44,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = false
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.11, 0.11, 0.12, 0.97)
+	style.bg_color = Color(UiStyle.BG_PANEL, 0.98)
 	style.border_color = Color(0.86, 0.80, 0.66, 0.55)
 	style.border_width_top = 2
 	style.content_margin_left = 10

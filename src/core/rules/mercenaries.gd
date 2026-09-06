@@ -52,6 +52,7 @@ static func hire(data: GameData, state: Dictionary, army_id: String, template_id
 		counts[template_id] = float(counts[template_id]) - 1.0
 		army["units"].append({"template": template_id, "experience": 1, "strength_pct": 100,
 			"weapon": 0, "armor": 0})
+		MovementRules.cap_movement(data, state, army)
 		return true
 	return false
 

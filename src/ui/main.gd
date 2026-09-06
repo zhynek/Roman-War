@@ -14,6 +14,7 @@ var _faction_ids: Array = []
 
 
 func _ready() -> void:
+	theme = UiStyle.build_theme()
 	_data = GameData.load_from()
 	if not _data.ok():
 		status_label.text = "Data failed to load:\n" + "\n".join(_data.load_errors)

@@ -353,6 +353,8 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 
 
 func halt_march(army_id: String) -> bool:
+	if not _owns_army(army_id):
+		return false
 	var army: Dictionary = state["armies"].get(army_id, {})
 	if not army.has("march_path"):
 		return false
@@ -365,7 +367,7 @@ func army_reachable(army_id: String, forced_march: bool = false) -> Dictionary:
 	## {region_id: cost} within this turn's remaining points, through the
 	## owner's fog — the map's movement-range overlay.
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if army.is_empty() or not _owns_army(army_id):
 		return {}
 	return PathfindingRules.reachable(
 		data, state, army_id, -1.0, forced_march, visible_regions(String(army["owner"])))
@@ -375,10 +377,18 @@ func army_path_preview(army_id: String, to_region: String, forced_march: bool = 
 	## best_path through the owner's fog, without moving anything — the map's
 	## hover preview. Route and turns account for a forced march when asked.
 	var army: Dictionary = state["armies"].get(army_id, {})
-	if army.is_empty():
+	if army.is_empty() or not _owns_army(army_id):
 		return {}
 	return PathfindingRules.best_path(
 		data, state, army_id, to_region, visible_regions(String(army["owner"])), forced_march)
+
+
+func army_order_preview(army_id: String, to_region: String, forced: bool = false) -> Dictionary:
+	return MapOrderRules.preview(data, state, army_id, to_region, forced, visible_regions())
+
+
+func queued_march_preview(army_id: String) -> Dictionary:
+	return MapOrderRules.queued(data, state, army_id, visible_regions())
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
@@ -506,7 +516,7 @@ func battle_estimate(attacker_id: String, defender_id: String) -> Dictionary:
 	if attacker.is_empty() or defender.is_empty() or attacker["owner"] == defender["owner"]:
 		return {}
 	if attacker["region"] != defender["region"] \
-			and not MapRules.are_adjacent(data, attacker["region"], defender["region"]):
+			and not TerrainRules.land_connection(data, attacker["region"], defender["region"]):
 		return {}
 	return BattleResolver.estimate(data, attacker["units"], defender["units"],
 		CombatRules.battle_context(data, state, attacker, defender))
@@ -1221,6 +1231,20 @@ func unit_dossier(region_id: String, template_id: String) -> Dictionary:
 	return BuildingInfo.unit_dossier(data, state, region_id, template_id)
 
 
+func known_regions(faction_id: String = "") -> Dictionary:
+	return CartographyRules.known_regions(data, state, faction_id if faction_id != "" else String(state["player_faction"]))
+
+
+func terrain_report(region_id: String, from_region: String = "") -> Dictionary:
+	if not known_regions().has(region_id):
+		return {}
+	var terrain := String(data.regions[region_id]["terrain"])
+	return {"terrain": terrain, "movement": PathfindingRules.known_step_cost(data, state, region_id, visible_regions(), from_region),
+		"defense": float(data.balance["battle"]["terrain_defense_multiplier"].get(terrain, 1.0)),
+		"crossing": TerrainRules.crossing_kind(data, from_region, region_id),
+		"observed": visible_regions().has(region_id)}
+
+
 func visible_regions(faction_id: String = "") -> Dictionary:
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return VisibilityRules.visible_regions(data, state, fid)
@@ -1259,6 +1283,8 @@ func _rng() -> CampaignRng:
 
 
 func _cancel_march(army_id: String) -> void:
+	if not _owns_army(army_id):
+		return
 	## Every explicit order supersedes a queued march — a besieger must not
 	## walk away from its own siege next turn because an old road was queued.
 	var army: Dictionary = state["armies"].get(army_id, {})
@@ -1281,6 +1307,15 @@ func _after_relocation() -> void:
 	## value, no randomness involved.
 	SettlementRules.refresh_governors(data, state)
 
+	ReconRules.refresh_contacts(data, state)
 
 func _owns_settlement(region_id: String) -> bool:
 	return state["settlements"].get(region_id, {}).get("owner", "") == state["player_faction"]
+
+
+func watchpost_quote(army_id: String) -> Dictionary:
+	return ReconRules.post_quote(data, state, army_id)
+
+
+func build_watchpost(army_id: String) -> Dictionary:
+	return ReconRules.build_post(data, state, army_id)

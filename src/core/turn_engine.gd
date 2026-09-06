@@ -63,11 +63,17 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	var region_ids: Array = state["settlements"].keys()
 	region_ids.sort()
 
+	state["recon"] = {"contacts": state.get("recon", {}).get("contacts", {}), "movements": []}
+	ReconRules.refresh_contacts(data, state)
 	FactionAi.begin_round(data, state)
 	for faction_id in faction_ids:
 		if faction_id != state["player_faction"]:
 			FactionAi.take_turn(data, state, faction_id, rng, resolver,
 				report["ai"], report["characters"])
+	for sighting in state["recon"]["movements"]:
+		TurnJournal.add(journal, "army_sighted", {"faction": sighting["summary"]["owner"],
+			"other": state["player_faction"], "region": sighting["to"] if sighting["to"] != "" else sighting["from"],
+			"subject": sighting["id"], "value": sighting["summary"]["soldiers"], "extra": sighting})
 	for notice in report["ai"]:
 		_journal_ai_notice(journal, notice)
 
@@ -251,6 +257,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		if army.get("march_path", []).is_empty():
 			continue
 		var destination := String(army["march_path"].back())
+		var origin := String(army["region"])
 		var outcome := PathfindingRules.advance_march(data, state, army_id)
 		report["marches"].append({
 			"army": army_id, "owner": army["owner"], "region": army["region"],
@@ -264,7 +271,9 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			leg = "march_halted"
 		TurnJournal.add(journal, leg, {
 			"faction": String(army["owner"]), "region": destination,
-			"extra": {"standing_at": String(army["region"])},
+			"subject": army_id,
+			"extra": {"standing_at": String(army["region"]), "from": origin,
+				"traversed": outcome.get("traversed", [])},
 		})
 
 	report["winner"] = VictoryRules.check(data, state)
@@ -280,6 +289,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	if report["winner"] != null:
 		TurnJournal.add(journal, "campaign_decided", {"faction": String(report["winner"])})
 
+	ReconRules.refresh_contacts(data, state)
 	state["journal"] = {"turn": int(state["turn"]), "beats": journal}
 	# The scribes write last: derived records (wars, reigns, alliances,
 	# destructions) against the snapshot, then compaction. No rng.
