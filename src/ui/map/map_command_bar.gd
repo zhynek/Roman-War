@@ -7,6 +7,7 @@ signal planning_requested
 signal issue_requested
 signal cancel_requested
 signal halt_requested
+signal patrol_requested
 signal post_requested
 signal sight_changed(enabled: bool)
 signal focus_requested
@@ -22,6 +23,7 @@ var issue: Button
 var cancel: Button
 var halt: Button
 var focus: Button
+var patrol: Button
 var post: Button
 var sight: CheckButton
 var forced: CheckButton
@@ -51,6 +53,7 @@ func _ready() -> void:
 	cancel = _button("cancel", func(): cancel_requested.emit())
 	halt = _button("halt", func(): halt_requested.emit())
 	focus = _button("focus", func(): focus_requested.emit())
+	patrol = _button("patrol", func(): patrol_requested.emit())
 	post = _button("post_tower", func(): post_requested.emit())
 	sight = CheckButton.new()
 	sight.text = words("sight")
@@ -96,8 +99,13 @@ func render(army_id: String, preview: Dictionary, planning: bool, pinned: bool) 
 	detail.text = words("mobility", {"class": String(mobility["class"]).replace("_", " ").capitalize(),
 		"left": String.num(float(summary["movement_left"]), 2), "max": String.num(float(summary["movement_max"]), 2),
 		"sight": ReconRules.army_sight(game.data, army)})
-	var supply := TerrainRules.supply_regions(game.data, game.state, String(army["owner"]))
+	var supply := TerrainRules.supply_regions(game.data, game.state, String(army["owner"]), true)
 	detail.text += " · " + words("ground_supply", {"status": words("supply_connected" if supply.has(army["region"]) else "supply_cut")})
+	var patrol_quote := ReconRules.patrol_quote(game.data, game.state, army_id)
+	patrol.disabled = not patrol_quote["ok"]
+	patrol.tooltip_text = words("patrol_help" if patrol_quote["ok"] else patrol_quote["reason"], patrol_quote)
+	if game.data.regions[army["region"]]["terrain"] == "forest":
+		detail.text += " · " + words("forest_exposed" if army.get("forced_march", false) or ForceRules.besieging(game.state, army_id) != null else "forest_cover")
 	var quote := game.watchpost_quote(army_id)
 	post.text = words("post_tower" if int(quote["level"]) == 1 else "post_fort", quote)
 	post.disabled = not quote["ok"]
@@ -121,6 +129,12 @@ func render(army_id: String, preview: Dictionary, planning: bool, pinned: bool) 
 		if preview["reason"] in ["unreachable", "uncharted"]:
 			detail.text = words("unavailable_route")
 		var warnings: Array[String] = []
+		if game.known_regions().has(target):
+			var defense := (float(game.terrain_report(target).get("defense", 1)) - 1) * 100
+			var crossing_defense := TerrainRules.crossing_defense(game.data, String(preview["from"]), target)
+			detail.text += " · " + words("route_defense", {"terrain": roundi(defense), "crossing": roundi(crossing_defense)})
+			if region.get("terrain", "") == "forest":
+				warnings.append(words("forest_warning"))
 		var crossing := String(preview.get("crossing", ""))
 		if crossing != "" and game.known_regions().has(target):
 			var crossing_info: Dictionary = game.data.terrain_content.get("crossing_types", {}).get(crossing, {})

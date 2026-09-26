@@ -87,7 +87,7 @@ func _run() -> void:
 	await create_timer(4.1).timeout
 	await _shot("05-arrival")
 	_check(view._marches.is_empty(), "the visual march completes")
-	view.set_zoom_level(5.5)
+	view.set_zoom_level(MapView.ZOOM_MAX)
 	view.focus_force()
 	await _shot("06-maximum-detail")
 	# Image readback is a synchronous GPU stall, so exclude screenshots and

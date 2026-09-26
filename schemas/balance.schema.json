@@ -349,7 +349,48 @@
       ]
     },
     "reconnaissance": {
-      "$ref": "#/$defs/numeric_section"
+      "allOf": [
+        {
+          "$ref": "#/$defs/numeric_section"
+        },
+        {
+          "type": "object",
+          "required": [
+            "forest_mounted_detection",
+            "forest_spy_detection",
+            "forest_fort_detection",
+            "patrol_radius",
+            "patrol_movement_cost"
+          ],
+          "properties": {
+            "forest_mounted_detection": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "forest_spy_detection": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "forest_fort_detection": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "patrol_radius": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3
+            },
+            "patrol_movement_cost": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 2
+            }
+          }
+        }
+      ]
     },
     "terrain_routes": {
       "type": "object",

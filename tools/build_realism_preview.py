@@ -6,6 +6,9 @@ The source tree (including local edits) is copied into a temporary project.
 The normal main scene, release name, app bundle and user saves are untouched.
 """
 import argparse
+import hashlib
+import json
+import platform
 from pathlib import Path
 import shutil
 import subprocess
@@ -26,32 +29,48 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", default=shutil.which("godot"))
     parser.add_argument("--campaign", action="store_true", help="Build the integrated terrain development app")
+    parser.add_argument("--route", action="store_true", help="Build the playable forest, bridge, marsh and pass development route")
     args = parser.parse_args()
     if not args.godot:
         parser.error("Supply --godot with the local Godot 4.4+ executable")
-    destination = ROOT / "build" / ("terrain-preview" if args.campaign else "realism-study")
-    name = "Roman War Terrain Preview" if args.campaign else "Roman War Realism Study"
+    destination = ROOT / "build" / ("campaign-route-development" if args.route else "terrain-preview" if args.campaign else "realism-study")
+    name = "Roman War Route Development" if args.route else "Roman War Terrain Preview" if args.campaign else "Roman War Realism Study"
     destination.mkdir(parents=True, exist_ok=True)
     archive = destination / (name.replace(" ", "-") + ".zip")
     with tempfile.TemporaryDirectory(prefix="roman-realism-export-") as temp:
         project = Path(temp) / "project"
         shutil.copytree(ROOT, project, ignore=shutil.ignore_patterns(
-            ".git", ".godot", "build", ".venv", "__pycache__", ".DS_Store"))
+            ".git", ".godot", "build", ".venv", "__pycache__", ".DS_Store", "*.core"))
         config = project / "project.godot"
         config.write_text(config.read_text()
                           .replace('config/name="Roman War"',
                                    f'config/name="{name}"')
                           .replace('run/main_scene="res://src/ui/main.tscn"',
                                    'run/main_scene="res://src/ui/realism/development.tscn"'))
+        if args.route:
+            config.write_text(config.read_text().replace('config/version="0.14.0"', 'config/version="0.14.0-dev-route.1"'))
         presets = project / "export_presets.cfg"
         presets.write_text(presets.read_text().replace(
             'application/bundle_identifier="com.romanwar.game"',
-            'application/bundle_identifier="com.romanwar.terrain-preview"' if args.campaign else 'application/bundle_identifier="com.romanwar.realism-study"'))
+            'application/bundle_identifier="com.romanwar.campaign-route-development"' if args.route else 'application/bundle_identifier="com.romanwar.terrain-preview"' if args.campaign else 'application/bundle_identifier="com.romanwar.realism-study"'))
         run_godot(args.godot, ["--headless", "--path", str(project), "--import"],
                   destination / "import.log")
         run_godot(args.godot, ["--headless", "--path", str(project),
                               "--export-debug", "macOS", str(archive)],
                   destination / "export.log")
+    if platform.system() == "Darwin":
+        subprocess.run(["ditto", "-x", "-k", str(archive), str(destination)], check=True)
+    source_hashes = {}
+    for folder in ("src", "data", "schemas", "tests", "tools"):
+        for path in sorted((ROOT / folder).rglob("*")):
+            if path.is_file() and "__pycache__" not in path.parts:
+                source_hashes[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
+    (destination / "provenance.json").write_text(json.dumps({
+        "base_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "source_sha256": source_hashes,
+        "archive_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+        "development_only": True,
+    }, indent=2) + "\n")
     print(archive)
 
 

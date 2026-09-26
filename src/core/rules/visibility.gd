@@ -69,3 +69,57 @@ static func add_radius(data: GameData, visible: Dictionary, origin: String, hops
 					visible[neighbor] = true
 					next.append(neighbor)
 		frontier = next
+
+
+static func forest_detection(data: GameData, state: Dictionary, faction: String) -> Dictionary:
+	## Local presence and deliberate reconnaissance penetrate woodland. Town
+	## lookouts map a forest, but cannot count columns under its canopy.
+	var detected := {}
+	var rules := ReconRules.rules(data)
+	for army in state.get("armies", {}).values():
+		if army["owner"] == faction:
+			add_radius(data, detected, army["region"], int(rules.get("forest_mounted_detection", 1)) if MovementRules.mobility_profile(data, army)["mounted"] else 0)
+	for agent in state.get("agents", {}).values():
+		if agent["owner"] == faction:
+			add_radius(data, detected, agent["region"], int(rules.get("forest_spy_detection", 1)) if agent.get("kind", "") == "spy" else 0)
+	for region in state.get("watchposts", {}):
+		var post: Dictionary = state["watchposts"][region]
+		if post["owner"] == faction and ReconRules.post_active(state, region, post):
+			add_radius(data, detected, region, int(rules.get("forest_fort_detection", 1)) if int(post["level"]) >= 2 else 0)
+	for region in state.get("forest_patrols", {}).get(faction, {}):
+		if int(state["forest_patrols"][faction][region]) == int(state["turn"]):
+			detected[region] = true
+	return detected
+
+
+static func army_visible(data: GameData, state: Dictionary, faction: String,
+		army: Dictionary, region: String = "", observed: Dictionary = {}, detected: Variant = null) -> bool:
+	if army.is_empty():
+		return false
+	if army["owner"] == faction:
+		return true
+	var at := region if region != "" else String(army["region"])
+	var sight := visible_regions(data, state, faction) if observed.is_empty() else observed
+	if not sight.has(at):
+		return false
+	if data.regions.get(at, {}).get("terrain", "") != "forest":
+		return true
+	# A siege or forced march exposes the column; normal travel into cover
+	# does not. This is evaluated at rule boundaries, never by animation.
+	if army.get("forced_march", false):
+		return true
+	var siege = state.get("settlements", {}).get(at, {}).get("siege")
+	if siege != null and state.get("armies", {}).get(siege["besieger"], {}) == army:
+		return true
+	var scouts: Dictionary = forest_detection(data, state, faction) if detected == null else detected
+	return scouts.has(at)
+
+
+static func visible_armies(data: GameData, state: Dictionary, faction: String) -> Dictionary:
+	var result := {}
+	var observed := visible_regions(data, state, faction)
+	var detected := forest_detection(data, state, faction)
+	for id in state.get("armies", {}):
+		if army_visible(data, state, faction, state["armies"][id], "", observed, detected):
+			result[id] = true
+	return result

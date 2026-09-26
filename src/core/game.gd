@@ -131,9 +131,9 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	## out cannot attack, and no army fights twice in one turn. This is the
 	## player's rule; the AI's own path (CombatRules.attack_army) sequences its
 	## marches and battles itself — DESIGN §6.3.
-	_cancel_march(attacker_id)
-	if not _owns_army(attacker_id) or not state["armies"].has(defender_id):
+	if not _owns_army(attacker_id) or not army_is_visible(defender_id):
 		return {}
+	_cancel_march(attacker_id)
 	var attacker: Dictionary = state["armies"][attacker_id]
 	if float(attacker["movement_left"]) <= 0.0001:
 		return {}
@@ -513,7 +513,7 @@ func battle_estimate(attacker_id: String, defender_id: String) -> Dictionary:
 	## cannot come to grips. Reads the same context the battle will use.
 	var attacker: Dictionary = state["armies"].get(attacker_id, {})
 	var defender: Dictionary = state["armies"].get(defender_id, {})
-	if attacker.is_empty() or defender.is_empty() or attacker["owner"] == defender["owner"]:
+	if not army_is_visible(defender_id) or attacker.is_empty() or defender.is_empty() or attacker["owner"] == defender["owner"]:
 		return {}
 	if attacker["region"] != defender["region"] \
 			and not TerrainRules.land_connection(data, attacker["region"], defender["region"]):
@@ -833,6 +833,8 @@ func force_summary(force_id: String) -> Dictionary:
 	## One dictionary describing an army ("army_N"), a fleet ("fleet_N"), a
 	## garrison ("garrison:<region>") or a harbour ("harbour:<region>") — see
 	## ForceRules.summary.
+	if state["armies"].has(force_id) and not army_is_visible(force_id):
+		return {}
 	return ForceRules.summary(data, state, force_id)
 
 
@@ -861,7 +863,7 @@ func reachable_regions(army_id: String) -> Dictionary:
 		for neighbor in data.regions.get(region_id, {}).get("adjacent", []):
 			if reach.has(neighbor) or blocked.has(neighbor):
 				continue
-			var reason := MovementRules.block_reason(state, owner, String(neighbor), visible.has(neighbor))
+			var reason := MovementRules.block_reason(state, owner, String(neighbor), visible.has(neighbor), data)
 			if reason != "":
 				blocked[neighbor] = reason
 	return {"reach": reach, "blocked": blocked}
@@ -873,7 +875,7 @@ func targets_for(army_id: String) -> Dictionary:
 	## own business behind its own fog.
 	if not _owns_army(army_id):
 		return {}
-	return MovementRules.targets_for(data, state, army_id)
+	return MovementRules.targets_for(data, state, army_id, String(state["player_faction"]))
 
 
 func reachable_zones(fleet_id: String) -> Dictionary:
@@ -1319,3 +1321,19 @@ func watchpost_quote(army_id: String) -> Dictionary:
 
 func build_watchpost(army_id: String) -> Dictionary:
 	return ReconRules.build_post(data, state, army_id)
+
+
+func army_is_visible(army_id: String) -> bool:
+	return VisibilityRules.army_visible(data, state, state["player_faction"], state["armies"].get(army_id, {}))
+
+
+func observed_armies_in(region: String) -> Array:
+	return ForceRules.armies_in(state, region).filter(func(id): return army_is_visible(id))
+
+
+func patrol_woods(army_id: String) -> Dictionary:
+	return ReconRules.patrol(data, state, army_id)
+
+
+func visible_armies() -> Dictionary:
+	return VisibilityRules.visible_armies(data, state, state["player_faction"])

@@ -40,7 +40,7 @@ const DRAG_START_DISTANCE := 6.0
 const ZOOM_STEP := 1.15
 const KEY_PAN_STEP := 90.0
 const ZOOM_MIN := 0.35
-const ZOOM_MAX := 5.5
+const ZOOM_MAX := 9.0
 const DETAIL_ZOOM := 1.8
 
 # Banner geometry at zoom 1 (everything scales with _zoom).
@@ -271,6 +271,8 @@ func refresh_state() -> void:
 
 	army_groups = {}
 	for army in game.state["armies"].values():
+		if not VisibilityRules.army_visible(game.data, game.state, game.state["player_faction"], army):
+			continue
 		var groups: Dictionary = army_groups.get(army["region"], {})
 		var entry: Dictionary = groups.get(army["owner"],
 			{"stacks": 0, "units": 0, "has_general": false, "fatigued": false})
@@ -295,14 +297,14 @@ func refresh_state() -> void:
 	var army_ids: Array = game.state["armies"].keys()
 	army_ids.sort()
 	for army_id in army_ids:
-		if visible_cache.has(game.state["armies"][army_id]["region"]):
+		if game.army_is_visible(army_id):
 			force_summaries[army_id] = game.force_summary(army_id)
 	army_visuals = {}
 	commander_styles = {}
 	troop_looks = {}
 	var art := UnitArt.for_data(game.data)
 	for region_id in visible_cache:
-		var ids := _ordered_forces(ForceRules.armies_in(game.state, region_id), String(game.state["player_faction"]))
+		var ids := _ordered_forces(game.observed_armies_in(region_id), String(game.state["player_faction"]))
 		for i in range(ids.size()):
 			var id: String = ids[i]
 			var classes: Array = []
@@ -502,6 +504,9 @@ func _process(_delta: float) -> void:
 	# _camera_offset writes here keeps the pinned camera contract intact.
 	var camera := _map_transform()
 	if _world_root != null and camera != _drawn_camera:
+		# A stationary pointer no longer names the same province after a focus,
+		# automatic march or keyboard pan. Re-arm only on real pointer motion.
+		_clear_hover()
 		_drawn_camera = camera
 		_world_root.transform = camera
 		_label_layer.queue_redraw()
@@ -927,11 +932,11 @@ func banner_layout() -> Array:
 	for region_id in region_ids:
 		if not game.data.regions.has(region_id):
 			continue
-		var armies := _ordered_forces(ForceRules.armies_in(game.state, region_id), player)
+		var armies := _ordered_forces(game.observed_armies_in(region_id), player)
 		if _zoom >= DETAIL_ZOOM:
 			for id in armies:
 				var anchor := to_screen(force_world_position(id))
-				var card := Rect2(anchor + Vector2(-37, -maxf(110, 24 * _zoom + 90)), Vector2(74, 78))
+				var card := Rect2(anchor + Vector2(-30, -maxf(78, 10 * _zoom + 55)), Vector2(60, 65))
 				# Stable collision resolution, shared by painting and hit testing.
 				for attempt in range(12):
 					var overlaps := false
@@ -1019,17 +1024,17 @@ func _draw_commander_card(canvas: CanvasItem, entry: Dictionary) -> void:
 	var at: Vector2 = entry["leader_at"]
 	canvas.draw_line(rect.get_center() + Vector2(0, 20), at + Vector2(0, -12), Color(color.lightened(0.35), 0.65), 1.2, true)
 	canvas.draw_style_box(UiStyle._flat(Color(0.035, 0.065, 0.07, 0.94), 4), rect.grow(2))
-	CommanderArt.portrait(canvas, Rect2(rect.position + Vector2(14, 0), Vector2(46,46)), style, selected)
+	CommanderArt.portrait(canvas, Rect2(rect.position + Vector2(12, 0), Vector2(36,36)), style, selected)
 	var name := String(summary["general"]["name"]) if summary["general"] != null else String(game.data.effects_glossary["map_commands"]["captain"])
 	# Full name on hover and in the roster; the map keeps a compact surname.
 	var words := name.split(" ")
 	if words.size() > 1:
 		name = words[-1]
-	canvas.draw_string(_font, rect.position + Vector2(2, 57), name, HORIZONTAL_ALIGNMENT_CENTER, 70, 11, UiStyle.PARCHMENT)
-	canvas.draw_string(_font, rect.position + Vector2(2, 69), str(summary["soldiers"]), HORIZONTAL_ALIGNMENT_CENTER, 70, 10, UiStyle.TEXT_DIM)
+	canvas.draw_string(_font, rect.position + Vector2(2, 46), name, HORIZONTAL_ALIGNMENT_CENTER, 56, 11, UiStyle.PARCHMENT)
+	canvas.draw_string(_font, rect.position + Vector2(2, 57), str(summary["soldiers"]), HORIZONTAL_ALIGNMENT_CENTER, 56, 10, UiStyle.TEXT_DIM)
 	for i in range(10):
 		var filled := i < ceili(float(summary["units"]) / 2.0)
-		canvas.draw_rect(Rect2(rect.position + Vector2(i * 7.4, 73), Vector2(5.4, 3)), color.lightened(0.2) if filled else Color(0.3,0.34,0.31,0.5))
+		canvas.draw_rect(Rect2(rect.position + Vector2(i * 6, 61), Vector2(4, 2)), color.lightened(0.2) if filled else Color(0.3,0.34,0.31,0.5))
 	if selected or entry["id"] == hover_force:
 		canvas.draw_rect(rect.grow(3), UiStyle.CAPITAL_GOLD if selected else UiStyle.PARCHMENT, false, 1.5)
 
@@ -1351,7 +1356,7 @@ func play_march(id: String, from: String, traversed: Array) -> void:
 			path = PackedVector2Array([world_pos(game.data.regions[previous]), world_pos(game.data.regions[next])])
 		points.append_array(path)
 		previous = next
-	var destination_ids := _ordered_forces(ForceRules.armies_in(game.state, previous), String(game.state["player_faction"]))
+	var destination_ids := _ordered_forces(game.observed_armies_in(previous), String(game.state["player_faction"]))
 	points.append(world_pos(game.data.regions[previous]) + _formation_offset(previous, maxi(destination_ids.find(id), 0)))
 	var length := 0.0
 	for i in range(1, points.size()):
@@ -1409,7 +1414,7 @@ func draw_sighting(canvas: CanvasItem) -> void:
 	if _sighting.is_empty():
 		return
 	var at := to_screen(_sighting["position"])
-	var record := {"id": _sighting["id"], "rect": Rect2(at+Vector2(-37,-maxf(110,24*_zoom+90)),Vector2(74,78)),
+	var record := {"id": _sighting["id"], "rect": Rect2(at+Vector2(-30,-maxf(78,10*_zoom+55)),Vector2(60,65)),
 		"summary": _sighting["summary"], "style": _sighting["style"], "leader_at": at}
 	_draw_commander_card(canvas, record)
 	canvas.draw_arc(at, 20, 0, TAU, 40, Color(UiStyle.SIEGE_RED, 0.75), 1.5, true)
@@ -1421,7 +1426,7 @@ func draw_contacts(canvas: CanvasItem) -> void:
 	for contact in game.state.get("recon", {}).get("contacts", {}).values():
 		var summary: Dictionary = contact["summary"]
 		var region := String(summary["region"])
-		if visible_cache.has(region) or not game.data.regions.has(region):
+		if game.army_is_visible(String(summary["id"])) or not game.data.regions.has(region):
 			continue
 		var at := to_screen(world_pos(game.data.regions[region]))
 		var color := Color(0.77,0.72,0.54,0.72)

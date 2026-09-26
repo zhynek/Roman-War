@@ -667,7 +667,12 @@
     "fort_cost": 1200,
     "build_movement_cost": 1,
     "fort_defense_pct": 20,
-    "contact_memory_turns": 3
+    "contact_memory_turns": 3,
+    "forest_mounted_detection": 1,
+    "forest_spy_detection": 1,
+    "forest_fort_detection": 1,
+    "patrol_radius": 1,
+    "patrol_movement_cost": 1
   },
   "terrain_routes": {
     "crossing_cost": {

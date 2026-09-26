@@ -1033,6 +1033,24 @@ def cross_checks(t: dict[str, dict]) -> None:
                          for e in edict.get("effects", {})):
         if f'"{effect}"' not in engine_text:
             err(f"edicts: effect key '{effect}' is authored but no engine code reads it")
+    route = t.get("campaign_terrain.json", {}).get("development_route", {})
+    route_regions = route.get("regions", [])
+    for unit in route.get("contact_units", []):
+        if unit["template"] not in units:
+            err(f"campaign route: unknown contact unit {unit['template']}")
+    for region in route_regions + [route.get("contact_region", "")]:
+        if region not in regions:
+            err(f"campaign route: unknown region {region}")
+    for faction in route.get("peace_with", []) + [route.get("player", ""), route.get("contact_owner", ""), route.get("map_grantor", "")]:
+        if faction not in factions:
+            err(f"campaign route: unknown faction {faction}")
+    for a, b in zip(route_regions, route_regions[1:]):
+        if b not in regions.get(a, {}).get("adjacent", []):
+            err(f"campaign route: non-adjacent leg {a}/{b}")
+        for crossing in t.get("campaign_terrain.json", {}).get("crossings", []):
+            if {a, b} == {crossing["a"], crossing["b"]} and crossing["kind"] in {"river", "ridge", "water"}:
+                err(f"campaign route: impassable leg {a}/{b}")
+
     # --- dispatch: prose and engine must name the same beats ---------------
     dispatch = t.get("dispatch.json", {})
     chapter_ids = {c["id"] for c in dispatch.get("chapters", [])}

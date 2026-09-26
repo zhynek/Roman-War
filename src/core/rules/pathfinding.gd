@@ -220,7 +220,7 @@ static func _blocked(data: GameData, state: Dictionary, owner: String,
 		if DiplomacyRules.at_war(state, owner, String(state["settlements"][region_id]["owner"])):
 			return true
 	for army in state["armies"].values():
-		if army["region"] == region_id and DiplomacyRules.at_war(state, owner, String(army["owner"])):
+		if army["region"] == region_id and DiplomacyRules.at_war(state, owner, String(army["owner"])) and (visible.is_empty() or VisibilityRules.army_visible(data, state, owner, army, "", visible)):
 			return true
 	return false
 

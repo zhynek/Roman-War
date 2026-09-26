@@ -52,6 +52,60 @@ runs on Apple Silicon only; an Intel Mac needs the universal zip. Bump
 `application/config/version` in `project.godot` before exporting — it is the
 number on the start menu, and the first thing to ask for in a playtest report.
 
+## Fresh macOS feedback builds
+
+Use the dedicated builder for an explicitly labeled preview of the current
+checkout, including local changes. It leaves production project settings and
+the production campaign save alone:
+
+```sh
+python3 tools/build_macos_playtest.py --godot /path/to/Godot --mode campaign
+python3 tools/build_macos_playtest.py --godot /path/to/Godot --mode route
+```
+
+The default version is `0.14.1-preview.20260926`; set `--version` for a later
+preview and `--output` to a fresh output directory. The default outputs are
+`build/playtest-2026-09-26/campaign/` and `build/playtest-2026-09-26/route/`.
+Each contains a universal release ZIP, an extracted app on macOS, a frozen
+source ZIP, source/configuration hashes, archive checksum, and verification
+logs. Godot needs its matching macOS export template; on macOS templates live
+under `~/Library/Application Support/Godot/export_templates/<version>/`.
+The Python interpreter running the builder needs `jsonschema` installed.
+
+**Roman War Playtest** opens the normal faction/seed campaign menu and uses
+`~/Library/Application Support/Roman War Playtest/` for persistent saves.
+**Roman War Route Playtest** opens the authored Alpine route and uses
+`~/Library/Application Support/Roman War Route Playtest/`. These apps have
+distinct bundle identifiers and never share the production save slot or each
+other's slot. Save and Load are available inside the campaign.
+
+The builder validates data, rejects import/export error diagnostics, and on
+macOS verifies the ad-hoc signature, Intel/Apple Silicon slices, bundle version,
+and a packaged campaign/save replay. Run the complete test suite and the
+rendered planning/marching/arrival/maximum-zoom checks separately before
+delivery; the manifest does not claim they ran automatically. Keep QA images
+outside the repository. These preview apps are not Developer ID signed or
+notarized; use the Open Anyway instructions in `PLAYING.md` when needed.
+
+## Approved macOS releases
+
+After validation, the full suite and rendered QA, commit the exact source and
+build from a clean checkout:
+
+```sh
+python3 tools/build_macos_playtest.py --godot /path/to/Godot --release --version 0.14.1 --mode campaign
+python3 tools/build_macos_playtest.py --godot /path/to/Godot --release --version 0.14.1 --mode route
+```
+
+Outputs are in `build/v0.14.1/{campaign,route}/`. The main app is **Roman War**,
+bundle `com.romanwar.game`, with its existing production save directory under
+`~/Library/Application Support/Godot/app_userdata/Roman War/`. The companion is
+**Roman War Alpine Route**, bundle `com.romanwar.alpine-route`, with saves under
+`~/Library/Application Support/Roman War Alpine Route/`. Preview saves are not
+copied automatically. All source/configuration hashes, package probes and native
+checks remain required. Publish both ZIPs with checksums and build provenance,
+tag the exact source commit, and explicitly mark the GitHub release latest.
+
 ## No-build alternative (good for playtesters)
 
 Install Godot 4.4+ from godotengine.org (drag to Applications), download this

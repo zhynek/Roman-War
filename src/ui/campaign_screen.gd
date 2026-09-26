@@ -960,7 +960,7 @@ func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
 					return
 				if other["owner"] == player:
 					select_force("army", target_id)
-				elif game.visible_regions().has(other["region"]):
+				elif game.army_is_visible(target_id):
 					attack_army_order(target_id)
 			"fleet":
 				if game.state["fleets"].get(target_id, {}).get("owner", "") == player:
@@ -1072,7 +1072,7 @@ func _enemy_army_in(region_id: String) -> String:
 	army_ids.sort()
 	for army_id in army_ids:
 		var other: Dictionary = game.state["armies"][army_id]
-		if other["region"] == region_id and DiplomacyRules.at_war(game.state, player, other["owner"]):
+		if other["region"] == region_id and DiplomacyRules.at_war(game.state, player, other["owner"]) and game.army_is_visible(army_id):
 			return army_id
 	return ""
 
@@ -1714,6 +1714,10 @@ func _build_command_bar() -> void:
 		game.halt_march(selected_army)
 		_after_order())
 	command_bar.focus_requested.connect(map_view.focus_force)
+	command_bar.patrol_requested.connect(func():
+		var result := game.patrol_woods(selected_army)
+		_log(command_bar.words("patrol_done" if result["ok"] else result["reason"], result))
+		_after_order())
 	command_bar.post_requested.connect(func():
 		var result := game.build_watchpost(selected_army)
 		if result["ok"]:

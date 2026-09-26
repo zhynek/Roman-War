@@ -102,6 +102,27 @@ func test_pinch_zooms_about_the_fingers_and_manual_pan_releases_follow(t) -> voi
 	screen.free()
 
 
+func test_camera_motion_clears_stale_province_tooltip(t) -> void:
+	var screen := _screen()
+	var view := screen.map_view
+	view._process(0.0)
+	var before := screen.game.state.duplicate(true)
+	view.hover_region = "etruria"
+	view._show_tooltip()
+	t.check(view.tooltip.visible, "a province tooltip is displayed before camera motion")
+	view.center_on("apulia")
+	view._process(0.5)
+	t.check_eq(view.hover_region, "", "programmatic camera motion discards the old province")
+	t.check(not view.tooltip.visible, "the old tooltip cannot remain over different ground")
+	view._process(0.5)
+	t.check(not view.tooltip.visible, "a stationary pointer does not reopen the stale tooltip")
+	view._update_hover(view.to_screen(view.world_pos(screen.game.data.regions["apulia"])))
+	view._process(0.5)
+	t.check(view.tooltip.visible, "new pointer motion permits a fresh tooltip")
+	t.check_eq(screen.game.state, before, "hover invalidation does not alter campaign state or RNG")
+	screen.free()
+
+
 func test_route_sampling_handles_bends_and_zero_length_segments(t) -> void:
 	var points := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2(10, 0), Vector2(10, 20)])
 	var sample := MapView.sample_route(points, 15)

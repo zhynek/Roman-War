@@ -80,13 +80,15 @@ static func record_move(data: GameData, state: Dictionary, army_id: String, dest
 		return
 	var visible := VisibilityRules.visible_regions(data, state, state["player_faction"])
 	var origin := String(army["region"])
-	if not visible.has(origin) and not visible.has(destination):
+	var seen_from := VisibilityRules.army_visible(data, state, state["player_faction"], army, origin, visible)
+	var seen_to := VisibilityRules.army_visible(data, state, state["player_faction"], army, destination, visible)
+	if not seen_from and not seen_to:
 		return
 	var summary := public_summary(data, state, army_id)
 	# A hidden endpoint is deliberately absent, even when a road would let the
 	# player guess it. Neither replay nor a loaded dispatch may recover it.
-	var from := origin if visible.has(origin) else ""
-	var to := destination if visible.has(destination) else ""
+	var from := origin if seen_from else ""
+	var to := destination if seen_to else ""
 	summary["region"] = to if to != "" else from
 	var sighting := {"id": army_id, "from": from, "to": to, "summary": summary, "turn": state["turn"]}
 	state["recon"]["movements"].append(sighting)
@@ -98,15 +100,75 @@ static func refresh_contacts(data: GameData, state: Dictionary) -> void:
 	if not state.has("recon"):
 		return
 	var visible := VisibilityRules.visible_regions(data, state, state["player_faction"])
+	var detected := VisibilityRules.forest_detection(data, state, state["player_faction"])
 	var contacts: Dictionary = state["recon"]["contacts"]
 	var lifetime := int(rules(data).get("contact_memory_turns", 3))
 	for id in contacts.keys():
 		var contact: Dictionary = contacts[id]
-		if int(state["turn"]) - int(contact["turn"]) > lifetime or visible.has(contact["summary"]["region"]):
+		if int(state["turn"]) - int(contact["turn"]) > lifetime or (visible.has(contact["summary"]["region"]) and (data.regions.get(contact["summary"]["region"], {}).get("terrain", "") != "forest" or detected.has(contact["summary"]["region"]))):
 			contacts.erase(id)
 	var ids: Array = state["armies"].keys()
 	ids.sort()
 	for id in ids:
 		var army: Dictionary = state["armies"][id]
-		if army["owner"] != state["player_faction"] and visible.has(army["region"]):
+		if army["owner"] != state["player_faction"] and VisibilityRules.army_visible(data, state, state["player_faction"], army, "", visible, detected):
 			contacts[id] = {"summary": public_summary(data, state, id), "turn": state["turn"]}
+
+
+static func patrol_quote(data: GameData, state: Dictionary, army_id: String) -> Dictionary:
+	var cost := float(rules(data).get("patrol_movement_cost", 1))
+	var army: Dictionary = state["armies"].get(army_id, {})
+	var result := {"ok": false, "reason": "patrol_need_army", "cost": cost, "radius": int(rules(data).get("patrol_radius", 1))}
+	if army.is_empty() or army["owner"] != state["player_faction"]:
+		return result
+	if ForceRules.besieging(state, army_id) != null:
+		result["reason"] = "patrol_siege"
+	elif float(army["movement_left"]) < cost:
+		result["reason"] = "patrol_no_movement"
+	else:
+		result["ok"] = true
+		result["reason"] = ""
+	return result
+
+
+static func mark_patrol(state: Dictionary, faction: String, regions: Dictionary) -> void:
+	if not state.has("forest_patrols"):
+		state["forest_patrols"] = {}
+	if not state["forest_patrols"].has(faction):
+		state["forest_patrols"][faction] = {}
+	var ids: Array = regions.keys()
+	ids.sort()
+	for region in ids:
+		state["forest_patrols"][faction][region] = int(state["turn"])
+
+
+static func patrol(data: GameData, state: Dictionary, army_id: String) -> Dictionary:
+	var quote := patrol_quote(data, state, army_id)
+	if not quote["ok"]:
+		return quote
+	var army: Dictionary = state["armies"][army_id]
+	army["movement_left"] = SocietyRules.quantize(float(army["movement_left"]) - float(quote["cost"]))
+	var covered := {}
+	VisibilityRules.add_radius(data, covered, army["region"], int(quote["radius"]))
+	mark_patrol(state, army["owner"], covered)
+	refresh_contacts(data, state)
+	return quote
+
+
+static func encounter(data: GameData, state: Dictionary, army: Dictionary, destination: String) -> void:
+	## An affordable attempted march into a concealed hostile position halts
+	## at the border. The advance guard spends its patrol cost and reports the
+	## province. No automatic battle and no destination movement are implied.
+	if not TerrainRules.land_connection(data, army["region"], destination):
+		return
+	if not MovementRules.hostile_army_in(state, army["owner"], destination):
+		return
+	var hidden := false
+	for other in state["armies"].values():
+		if other["region"] == destination and DiplomacyRules.at_war(state, army["owner"], other["owner"]) and not VisibilityRules.army_visible(data, state, army["owner"], other):
+			hidden = true
+	if not hidden:
+		return
+	army["movement_left"] = SocietyRules.quantize(maxf(0, float(army["movement_left"]) - float(rules(data).get("patrol_movement_cost", 1))))
+	mark_patrol(state, army["owner"], {destination: true})
+	refresh_contacts(data, state)

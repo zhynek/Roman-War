@@ -24,7 +24,7 @@ static func preview(data: GameData, state: Dictionary, army_id: String,
 		enemies.sort()
 		for enemy_id in enemies:
 			var enemy: Dictionary = state["armies"][enemy_id]
-			if enemy["region"] == target and DiplomacyRules.at_war(state, army["owner"], enemy["owner"]):
+			if enemy["region"] == target and DiplomacyRules.at_war(state, army["owner"], enemy["owner"]) and VisibilityRules.army_visible(data, state, army["owner"], enemy, "", visible):
 				result["action"] = "attack"
 				result["defender"] = enemy_id
 				break
@@ -38,7 +38,7 @@ static func preview(data: GameData, state: Dictionary, army_id: String,
 						result["reason"] = "engines"
 				else:
 					result["reason"] = "invested"
-			elif SiegeRules._owner_army_in(state, String(settlement["owner"]), target):
+			elif state["armies"].values().any(func(a): return a["region"] == target and a["owner"] == settlement["owner"] and VisibilityRules.army_visible(data, state, army["owner"], a, "", visible)):
 				result["reason"] = "relief_army"
 		if result["action"] in ["attack", "siege", "assault"]:
 			var cost := 0.0 if origin == target else MovementRules.step_cost(data, state, target, origin)
@@ -55,7 +55,7 @@ static func preview(data: GameData, state: Dictionary, army_id: String,
 		var budget := float(army["movement_left"])
 		if forced:
 			budget *= float(data.balance["movement"]["forced_march_multiplier"])
-		if TerrainRules.land_connection(data, origin, target) and MovementRules.can_enter(data, state, army_id, target) \
+		if TerrainRules.land_connection(data, origin, target) and not PathfindingRules._blocked(data, state, army["owner"], target, visible) \
 				and MovementRules.step_cost(data, state, target, origin) <= budget + 0.0001:
 			result["action"] = "withdraw"
 			result["cost"] = MovementRules.step_cost(data, state, target, origin)
@@ -93,7 +93,7 @@ static func queued(data: GameData, state: Dictionary, army_id: String, visible: 
 		if not data.regions.has(region):
 			return {}
 		var cost := PathfindingRules.known_step_cost(data, state, region, visible, previous)
-		result["legs"].append({"region": region, "cost": cost})
+		result["legs"].append({"region": region, "cost": cost, "crossing": TerrainRules.crossing_kind(data, previous, region)})
 		result["cost"] += cost
 		previous = region
 	# Retain the actual saved queue. Re-running best_path here could draw a

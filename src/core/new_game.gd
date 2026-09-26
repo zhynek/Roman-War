@@ -86,6 +86,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"tributes": [],
 		"pending_offers": [],
 		"agents": {},
+		"forest_patrols": {},
 		"watchposts": {},
 		"recon": {"contacts": {}, "movements": []},
 		"cartography": {},
@@ -207,6 +208,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		state["map_access"] = {}
 	if new_cartography and data != null:
 		CartographyRules.record_reports(data, state)
+	if not state.has("forest_patrols"):
+		state["forest_patrols"] = {}
 	if not state.has("watchposts"):
 		state["watchposts"] = {}
 	if not state.has("recon"):

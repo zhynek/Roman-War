@@ -313,7 +313,7 @@ func _build_armies_section() -> void:
 	army_ids.sort()
 	var local: Array = []
 	for army_id in army_ids:
-		if game.state["armies"][army_id]["region"] == region_id:
+		if game.state["armies"][army_id]["region"] == region_id and game.army_is_visible(army_id):
 			local.append(army_id)
 	if local.is_empty():
 		return

@@ -92,7 +92,7 @@ func _build(parsed: Dictionary) -> void:
 	for edge in parsed.get("edges", []):
 		if not (edge is Dictionary) or (edge.get("path", []) as Array).size() < 2:
 			continue
-		edges["%s|%s" % [edge.get("a", ""), edge.get("b", "")]] = _points(edge["path"])
+		edges["%s|%s" % [edge.get("a", ""), edge.get("b", "")]] = _soften_path(_points(edge["path"]), [edge["a"], edge["b"]])
 	if min_point.x < INF:
 		world_rect = Rect2(min_point, max_point - min_point)
 
@@ -109,3 +109,22 @@ static func _decompose(polygon: PackedVector2Array) -> Array:
 	## Convex pieces for filling; winding does not matter to the decomposer.
 	## A rare degenerate ring decomposes to nothing — the stroke still shows.
 	return Geometry2D.decompose_polygon_in_convex(polygon)
+
+
+func _soften_path(path: PackedVector2Array, owners: Array) -> PackedVector2Array:
+	# Round generated corners only where both new points remain on the
+	# edge's two provinces. Preserve endpoints and narrow coastal approaches.
+	for iteration in range(2):
+		var softened := PackedVector2Array([path[0]])
+		for i in range(path.size() - 1):
+			var a := path[i].lerp(path[i + 1], 0.25)
+			var b := path[i].lerp(path[i + 1], 0.75)
+			if owners.has(region_at_world(a)) and owners.has(region_at_world(b)):
+				softened.append(a)
+				softened.append(b)
+			else:
+				softened.append(path[i])
+				softened.append(path[i + 1])
+		softened.append(path[-1])
+		path = softened
+	return path

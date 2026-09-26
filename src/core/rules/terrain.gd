@@ -17,7 +17,7 @@ static func crossing_cost(data: GameData, a: String, b: String) -> float:
 static func crossing_defense(data: GameData, a: String, b: String) -> float:
 	return float(data.balance.get("terrain_routes", {}).get("crossing_defense_pct", {}).get(crossing_kind(data, a, b), 0.0))
 
-static func supply_regions(data: GameData, state: Dictionary, faction: String) -> Dictionary:
+static func supply_regions(data: GameData, state: Dictionary, faction: String, observed_only: bool = false) -> Dictionary:
 	## Ground supply from the capital through friendly or allied territory.
 	## Enemy field forces and besieged towns interrupt a road just like a ridge.
 	var origin := String(state["factions"].get(faction, {}).get("capital", ""))
@@ -31,7 +31,7 @@ static func supply_regions(data: GameData, state: Dictionary, faction: String) -
 		var stance := DiplomacyRules.stance_between(state, faction, settlement["owner"])
 		if not stance in ["self", "alliance", "protectorate"] or settlement.get("siege") != null:
 			continue
-		if MovementRules.hostile_army_in(state, faction, current):
+		if state["armies"].values().any(func(a): return a["region"] == current and DiplomacyRules.at_war(state, faction, a["owner"]) and (not observed_only or VisibilityRules.army_visible(data, state, faction, a))):
 			continue
 		reached[current] = true
 		var neighbors: Array = data.regions.get(current, {}).get("adjacent", []).duplicate()

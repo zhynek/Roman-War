@@ -98,13 +98,14 @@ static func can_enter(data: GameData, state: Dictionary, army_id: String, to_reg
 
 static func move_army(data: GameData, state: Dictionary, army_id: String, to_region: String, forced_march: bool = false) -> bool:
 	var army: Dictionary = state["armies"][army_id]
-	if not can_enter(data, state, army_id, to_region):
-		return false
 	var cost := step_cost(data, state, to_region, army["region"])
 	var budget := float(army["movement_left"])
 	if forced_march:
 		budget *= float(data.balance["movement"]["forced_march_multiplier"])
 	if cost > budget + 0.0001:
+		return false
+	if not can_enter(data, state, army_id, to_region):
+		ReconRules.encounter(data, state, army, to_region)
 		return false
 	# Remainders are quantized like every stored float: 2.0 - 0.5 - 0.9 is
 	# 0.6000000000000001 live and 0.6 after a save, and the next step would
@@ -199,20 +200,20 @@ static func _at_war(state: Dictionary, a: String, b: String) -> bool:
 
 ## --- What a force can do from where it stands ---------------------------------
 
-static func block_reason(state: Dictionary, owner: String, region_id: String, seen: bool = true) -> String:
+static func block_reason(state: Dictionary, owner: String, region_id: String, seen: bool = true, data: GameData = null) -> String:
 	## Why a region cannot simply be entered: "" when it can. A region the
 	## viewer cannot see never reports a reason — highlights must not leak what
 	## the fog hides; the march halts on contact instead.
 	if not seen:
 		return ""
-	if hostile_army_in(state, owner, region_id):
+	if state["armies"].values().any(func(a): return a["region"] == region_id and _at_war(state, owner, a["owner"]) and (data == null or VisibilityRules.army_visible(data, state, owner, a))):
 		return "hostile_army"
 	if state["settlements"].has(region_id) and _at_war(state, owner, state["settlements"][region_id]["owner"]):
 		return "hostile_settlement"
 	return ""
 
 
-static func targets_for(data: GameData, state: Dictionary, army_id: String) -> Dictionary:
+static func targets_for(data: GameData, state: Dictionary, army_id: String, observer: String = "") -> Dictionary:
 	## {region_id: "attack" | "siege"}: the hostile armies and at-war
 	## settlements an army can strike from where it stands — its own region
 	## and its neighbours. Fog is the caller's business. An army with no
@@ -230,12 +231,12 @@ static func targets_for(data: GameData, state: Dictionary, army_id: String) -> D
 		# (the winner ends up there); the army's own region costs nothing.
 		if region_id != army["region"] and not can_afford_step(data, state, army, region_id):
 			continue
-		if hostile_army_in(state, owner, region_id):
+		if state["armies"].values().any(func(a): return a["region"] == region_id and _at_war(state, owner, a["owner"]) and (observer == "" or VisibilityRules.army_visible(data, state, observer, a))):
 			targets[region_id] = "attack"
 		elif state["settlements"].has(region_id):
 			var settlement: Dictionary = state["settlements"][region_id]
 			if _at_war(state, owner, settlement["owner"]) and settlement["siege"] == null \
-					and not SiegeRules._owner_army_in(state, String(settlement["owner"]), region_id):
+					and not state["armies"].values().any(func(a): return a["region"] == region_id and a["owner"] == settlement["owner"] and (observer == "" or VisibilityRules.army_visible(data, state, observer, a))):
 				targets[region_id] = "siege"
 	return targets
 

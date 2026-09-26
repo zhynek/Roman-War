@@ -15,10 +15,10 @@ void fragment() {
  float field=noise(UV*0.16);
  vec3 soil=ground_color.rgb*(0.68+field*0.35+grain*0.4);
  float rock=smoothstep(6.0,21.0,height);
- soil=mix(soil,vec3(0.33,0.34,0.30)*(0.7+grain*0.6),rock);
- soil=mix(soil,vec3(0.73,0.74,0.69),smoothstep(28.0,44.0,height)*0.7);
+ soil=mix(soil,vec3(0.38,0.40,0.35)*(0.7+grain*0.6),rock);
+ soil=mix(soil,vec3(0.49,0.50,0.45),smoothstep(28.0,44.0,height)*0.7);
  float wet=marsh? smoothstep(0.34,0.62,noise(UV*0.22)):0.0;
- ALBEDO=pow(mix(soil,vec3(0.055,0.13,0.13)*(0.7+grain*0.6),wet),vec3(2.2));
+ ALBEDO=pow(mix(soil,vec3(0.10,0.16,0.13)*(0.7+grain*0.6),wet),vec3(2.2));
  ROUGHNESS=mix(0.92,0.26,wet);
  METALLIC=wet*0.28;
  NORMAL_MAP=normalize(vec3((noise(UV*9.0)-0.5)*0.25,(noise(UV*9.0+7.0)-0.5)*0.25,1.0))*0.5+0.5;

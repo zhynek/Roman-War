@@ -6,36 +6,36 @@
       "name": "Open country",
       "description": "Firm ground supports broad formations.",
       "relief": 3,
-      "color": "#777c48",
-      "trees": 35
+      "color": "#74764f",
+      "trees": 55
     },
     "forest": {
       "name": "Woodland",
-      "description": "Tree cover conceals approaches; scouts report nearby forces.",
+      "description": "Normal columns in woodland evade distant lookouts. A local army, agent or tower, nearby mounted scouts, spies or forts, or a paid patrol reveals them. Forced marching and besieging expose troops.",
       "relief": 8,
-      "color": "#424f32",
-      "trees": 280
+      "color": "#555c3c",
+      "trees": 440
     },
     "hills": {
       "name": "High ground",
       "description": "Defenders hold elevated ground; columns follow the lower tracks.",
       "relief": 13,
-      "color": "#777448",
-      "trees": 80
+      "color": "#77765a",
+      "trees": 100
     },
     "mountains": {
       "name": "Mountain country",
       "description": "Armies use marked passes. Unbroken ridges cannot be crossed.",
       "relief": 30,
-      "color": "#737369",
-      "trees": 35
+      "color": "#77796d",
+      "trees": 65
     },
     "marsh": {
       "name": "Marshland",
       "description": "Soft ground costs twice a plain march before road improvements.",
       "relief": 2,
-      "color": "#536652",
-      "trees": 75
+      "color": "#646951",
+      "trees": 110
     },
     "desert": {
       "name": "Dry country",
@@ -133,6 +133,67 @@
       "a": "europa",
       "b": "bithynia",
       "kind": "water"
+    },
+    {
+      "a": "pannonia",
+      "b": "illyria",
+      "kind": "bridge"
+    },
+    {
+      "a": "illyria",
+      "b": "venetia",
+      "kind": "causeway"
+    },
+    {
+      "a": "venetia",
+      "b": "noricum",
+      "kind": "pass"
     }
-  ]
+  ],
+  "development_route": {
+    "id": "alpine_route",
+    "player": "julii",
+    "seed": 42,
+    "regions": [
+      "pannonia",
+      "illyria",
+      "venetia",
+      "noricum",
+      "raetia"
+    ],
+    "contact_owner": "rebels",
+    "contact_region": "boiohaemum",
+    "peace_with": [
+      "gaul",
+      "germania",
+      "dacia"
+    ],
+    "map_grantor": "germania",
+    "contact_units": [
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      },
+      {
+        "template": "germanic_spear_wall"
+      }
+    ]
+  }
 }

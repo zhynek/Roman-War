@@ -1,13 +1,20 @@
 # Roman War
 
+Development: [September 26 audit](docs/reviews/2026-09-26-release-audit.md),
+[prioritized roadmap](docs/ROADMAP.md), and
+[macOS feedback-build notes](docs/releases/0.14.1-preview.20260926.md).
+
 An original, clean-room turn-based grand-strategy game of the ancient Mediterranean,
 inspired by the *mechanics* (never the assets, text, or data) of classic 2004-era
 campaign strategy games. Built with Godot 4 for macOS (and anywhere else Godot runs).
 
-**Play version 0.14.0:** download the universal macOS app from the
-[production release](https://github.com/zhynek/Roman-War/releases/tag/v0.14.0).
-The campaign now uses procedural 3D terrain, physical crossings and negotiated
-map access. See the [release notes](docs/releases/0.14.0.md) and
+**Play version 0.14.1:** download the universal
+[Roman War Mac app](https://github.com/zhynek/Roman-War/releases/download/v0.14.1/Roman-War-macOS-0.14.1.zip)
+or the separate
+[Alpine Route app](https://github.com/zhynek/Roman-War/releases/download/v0.14.1/Roman-War-Alpine-Route-macOS-0.14.1.zip).
+The [latest release](https://github.com/zhynek/Roman-War/releases/latest) includes
+forest concealment, patrols, improved procedural terrain and safer saves.
+See the [release notes](docs/releases/0.14.1.md) and
 [next development handoff](docs/NEXT_DEVELOPMENT.md).
 
 The design philosophy, researched in depth in

@@ -1,9 +1,31 @@
-# Next development round — after Roman War 0.14.0
+# Next development round — after Roman War 0.14.1
+
+## Current checkpoint
+
+The owner approved the audited apps as the latest Mac standard on September 26.
+Use [release 0.14.1](releases/0.14.1.md): **Roman War.app** for the full campaign
+and **Roman War Alpine Route.app** for the route. The main app retains the
+existing production save directory; the companion has its own persistent slot.
+
+The September 26 audit and preceding macOS feedback previews are described in
+[the audit](reviews/2026-09-26-release-audit.md) and
+[preview notes](releases/0.14.1-preview.20260926.md). Follow
+[the prioritized roadmap](ROADMAP.md) for the next implementation sequence:
+campaign trust and objective clarity, stronger AI, a playable tactical battle,
+naval campaigns, then broader siege/content/presentation work. The Alpine route
+remains the art and movement feedback exercise; production is v0.14.1.
+
+Read [the campaign-route review](reviews/2026-09-campaign-route.md), then open
+the released **Roman War Alpine Route.app**. It provides
+real forest concealment, paid patrols, bridge/causeway/pass movement and classic
+comparison with persistent saves. Review the scene
+with the owner before widening the art pass. The original acceptance brief
+below remains the product direction; finished photorealism is still pending.
 
 ## Start here
 
-The owner authorized shipping the integrated terrain build on 2026-09-06 and
-then shutting down this session's Roman War processes. Version **0.14.0** uses
+The owner authorized publishing the audited Mac apps on 2026-09-26.
+Version **0.14.1** uses
 the normal start menu, persistent campaign saves and realistic procedural 3D
 campaign view by default. The classic comparison remains in Options. The
 separate Terrain Preview app is an older development artifact with per-process
@@ -13,7 +35,7 @@ Read `CLAUDE.md`, `docs/HANDOFF.md`, and
 `docs/reviews/2026-09-terrain-standard.md` before editing. Fetch `origin/main`
 and inspect the worktree. Start new work from the shipped trunk; do not revive
 historical Claude branches or reset local changes. The release is tagged
-`v0.14.0`; the GitHub release and local `build/v0.14.0` contain the macOS app.
+`v0.14.1`; the GitHub release and local `build/v0.14.1` contain the macOS apps.
 Release provenance and verification logs are in that local build directory.
 
 ## First deliverable: one convincing campaign scene

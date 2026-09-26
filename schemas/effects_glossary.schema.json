@@ -760,6 +760,78 @@
         },
         "frontier_help": {
           "type": "string"
+        },
+        "patrol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patrol_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patrol_need_army": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patrol_no_movement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patrol_siege": {
+          "type": "string",
+          "minLength": 1
+        },
+        "patrol_done": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest_cover": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest_exposed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest_warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_defense": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forest_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_brief": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_reset": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_compare": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_current": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_concealment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_saved": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

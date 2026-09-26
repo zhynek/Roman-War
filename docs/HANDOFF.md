@@ -13,6 +13,41 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Current terrain and visual direction
 
+**Current approved Mac standard: 0.14.1.** The owner explicitly authorized
+publication of both audited Mac apps on 2026-09-26. Use
+[`releases/0.14.1.md`](releases/0.14.1.md) for downloads, app identities and saves.
+The full campaign is **Roman War.app** with its existing production save slot;
+**Roman War Alpine Route.app** is the companion with separate persistent saves.
+The release source includes the route, save hardening, hover fix and roadmap.
+Build from the tagged source using the documented `--release --version 0.14.1`
+commands. Earlier "not approved" and "production remains 0.14.0" statements below
+describe previous checkpoints and are superseded by this authorization.
+
+**2026-09-26 audit and Mac feedback build:** read
+[`reviews/2026-09-26-release-audit.md`](reviews/2026-09-26-release-audit.md),
+[`ROADMAP.md`](ROADMAP.md), and
+[`releases/0.14.1-preview.20260926.md`](releases/0.14.1-preview.20260926.md).
+The local preview includes the route work below, safer save replacement/backup
+recovery, and a stale-hover fix. Use `tools/build_macos_playtest.py` for distinct
+full-campaign and route apps; their identities, native versions and persistent
+save folders are isolated from production. The older preview builder's mode
+names no longer reliably distinguish its entry scenes. GitHub main and the
+published production release remain 0.14.0. Actions now executes; its latest tag
+run failed the fixed 600 ms timing guard at 603 ms, superseding the older
+account-blocked warning later in this handoff.
+
+**Current local development: playable Alpine route.** On `codex/campaign-route`,
+based on fetched production `3670aac`, the next scene is now a real campaign
+route through forest, bridge, marsh and passes, with deterministic woodland
+concealment and paid patrol counterplay. Read
+[`reviews/2026-09-campaign-route.md`](reviews/2026-09-campaign-route.md) for rules,
+verification and the separate `Roman War Route Development.app`. It has its own
+persistent saves. Classic comparison remains available. **Production is still
+0.14.0; no new release is approved or published.** The route replaces the staged
+woods example in the development app; the old art study remains available only
+through its separate tool/opt-in entry.
+
+
 **Production handoff: 0.14.0.** The owner authorized release of the integrated
 build on 2026-09-06. Start the next round with
 [`NEXT_DEVELOPMENT.md`](NEXT_DEVELOPMENT.md), which defines the first playable
@@ -656,9 +691,10 @@ What costs time to rediscover:
   the technique table, which dilutes the one-pick-per-success origination draw
   for civil crafts — a per-technique origination weight is the contained fix
   if soaks show civil crafts arriving late.
-- **Art fidelity and live ambush behavior remain unfinished.** Procedural
-  commander portraits and 3D unit/building plates now exist. The separate woods
-  study is staged; use `NEXT_DEVELOPMENT.md` for the next campaign-scene work.
+- **Art fidelity remains unfinished.** The development branch now has real
+  forest concealment, contact halts and patrol reveal in campaign play; it does
+  not implement automatic ambush combat or individual tactical battles. See
+  the campaign-route review before extending the art pass.
 
 ## 8. Ways forward
 

@@ -16,6 +16,12 @@ var tree_meshes: Array = []
 var infantry_meshes := {}
 var _frame := Rect2()
 var bridges: Array = []
+var water_material: ShaderMaterial
+var terrain_sources: Array = []
+var crossing_sites: Array = []
+var track_grid := {}
+var _ground_cache := {}
+var _cache_ground := false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -29,8 +35,8 @@ func _ready() -> void:
 	world = Node3D.new()
 	viewport.add_child(world)
 	noise.seed = 270
-	noise.frequency = 0.047
-	noise.fractal_octaves = 5
+	noise.frequency = 0.016
+	noise.fractal_octaves = 3
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.keep_aspect = Camera3D.KEEP_HEIGHT
@@ -44,20 +50,57 @@ func _ready() -> void:
 	atmosphere.background_color = UiStyle.BG_DARK
 	atmosphere.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	atmosphere.ambient_light_color = Color("#a7bcc1")
-	atmosphere.ambient_light_energy = 0.72
+	atmosphere.ambient_light_energy = 0.85
 	atmosphere.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	atmosphere.tonemap_exposure = 1.2
+	atmosphere.tonemap_exposure = 1.05
 	environment.environment = atmosphere
 	world.add_child(environment)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-39, -33, 0)
 	sun.light_color = Color("#ffedc7")
-	sun.light_energy = 1.35
+	sun.light_energy = 1.1
 	sun.shadow_enabled = true
 	sun.directional_shadow_max_distance = 1200
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.shadow_bias = 0.025
 	world.add_child(sun)
+	water_material = ShaderMaterial.new()
+	water_material.shader = preload("res://src/ui/realism/water.gdshader")
+	for id in view.game.data.regions:
+		var r: Dictionary = view.game.data.regions[id]
+		terrain_sources.append({"at": view.world_pos(r), "relief": float(view.game.data.terrain_content["terrains"][r["terrain"]]["relief"])})
+	for key in view.geometry.edges:
+		var ends := String(key).split("|")
+		if TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
+			var track: PackedVector2Array = view.geometry.edges[key]
+			for j in range(track.size() - 1):
+				var box := Rect2(track[j], Vector2.ZERO).expand(track[j + 1]).grow(16)
+				for x in range(floori(box.position.x / 32), floori(box.end.x / 32) + 1):
+					for y in range(floori(box.position.y / 32), floori(box.end.y / 32) + 1):
+						var cell := Vector2i(x, y)
+						if not track_grid.has(cell):
+							track_grid[cell] = []
+						track_grid[cell].append([track[j], track[j + 1]])
+		var kind := TerrainRules.crossing_kind(view.game.data, ends[0], ends[1])
+		if kind == "":
+			continue
+		var path: PackedVector2Array = view.geometry.edges[key]
+		var length := 0.0
+		for j in range(path.size() - 1):
+			length += path[j].distance_to(path[j + 1])
+		var sample := MapView.sample_route(path, length * 0.5 + 0.1)
+		if kind == "causeway":
+			# Place the causeway inside its marsh endpoint, not at the arbitrary
+			# midpoint of a long province edge that may still be wooded hills.
+			var closest := INF
+			for j in range(1, 100):
+				var candidate := MapView.sample_route(path, length * j / 100.0)
+				var id := view.geometry.region_at_world(candidate["position"])
+				if view.game.data.regions.get(id, {}).get("terrain", "") == "marsh" and absf(j - 50) < closest:
+					sample = candidate
+					closest = absf(j - 50)
+		var tangent: Vector2 = sample["direction"]
+		crossing_sites.append({"key": key, "kind": kind, "center": sample["position"], "tangent": tangent, "cross": Vector2(-tangent.y, tangent.x)})
 	for i in range(3):
 		tree_meshes.append(RealismModels.tree(i))
 	routes = Node3D.new()
@@ -65,7 +108,7 @@ func _ready() -> void:
 
 func project(point: Vector2) -> Vector2:
 	var at := (point + view._camera_offset) * view._zoom
-	at.y = (at.y - view.size.y * 0.5) * sin(PITCH) + view.size.y * 0.5 - ground(point).y * cos(PITCH) * view._zoom
+	at.y = (at.y - view.size.y * 0.5) * sin(PITCH) + view.size.y * 0.5 - _troop_ground(point).y * cos(PITCH) * view._zoom
 	return at
 
 func unproject(point: Vector2) -> Vector2:
@@ -109,30 +152,50 @@ func _sync_camera() -> void:
 	camera.size = view.size.y / view._zoom
 
 func ground(point: Vector2, region: String = "") -> Vector3:
+	if not _cache_ground:
+		return _ground(point, region)
+	if not _ground_cache.has(region):
+		_ground_cache[region] = {}
+	if not _ground_cache[region].has(point):
+		_ground_cache[region][point] = _ground(point, region)
+	return _ground_cache[region][point]
+
+func _ground(point: Vector2, region: String = "") -> Vector3:
 	var id := region if region != "" else view.geometry.region_at_world(point)
 	if not view.game.data.regions.has(id):
 		return Vector3(point.x, 0.5, point.y)
 	var terrain := String(view.game.data.regions[id]["terrain"])
-	var relief := float(view.game.data.terrain_content.get("terrains", {}).get(terrain, {}).get("relief", 3.0))
+	# A continuous relief field removes cliffs at province borders. Terrain
+	# identity still comes from the authored province; roads cut broad valleys.
+	var weight := 0.0
+	var relief := 0.0
+	for source in terrain_sources:
+		var w := 1.0 / pow(maxf(point.distance_squared_to(source.at), 64.0), 2.0)
+		weight += w
+		relief += source.relief * w
+	relief /= maxf(weight, 0.00000001)
 	var n := noise.get_noise_2d(point.x, point.y)
-	var h := 1.0 + pow(absf(n) * 1.8, 1.5) * relief
-	if terrain == "marsh":
-		h = 0.6 + n * 0.45
-	# Same authored tracks that armies follow cut through the relief.
-	var anchor := view.world_pos(view.game.data.regions[id])
-	var distance_to_track := maxf(0.0, point.distance_to(anchor) - 10.0)
-	for neighbor in view.game.data.regions[id].get("adjacent", []):
-		if not TerrainRules.land_connection(view.game.data, id, neighbor):
+	var h := 1.0 + pow(clampf(n + 0.55, 0, 1), 2.0) * relief
+	# One global corridor field on both sides of every province boundary.
+	# Region-local distance tests used to tear the mesh at shared borders.
+	var distance_to_track := _track_distance(point, id)
+	for source in terrain_sources:
+		distance_to_track = minf(distance_to_track, maxf(0, point.distance_to(source.at) - 13.0))
+	h = lerpf(0.95, h, smoothstep(2.1, 15.0, distance_to_track))
+	for site in crossing_sites:
+		if not site.kind in ["river", "bridge"]:
 			continue
-		var path := view.geometry.edge_path(id, neighbor)
-		for j in range(path.size() - 1):
-			distance_to_track = minf(distance_to_track, point.distance_to(Geometry2D.get_closest_point_to_segment(point, path[j], path[j + 1])))
-	h = lerpf(0.95, h, smoothstep(2.1, 6.0, distance_to_track))
+		var relative: Vector2 = point - site.center
+		var across := relative.dot(site.cross)
+		var along := relative.dot(site.tangent) - sin(across * 0.13) * 1.1
+		if absf(across) < 28:
+			h = lerpf(0.30, h, smoothstep(3.0, 6.0, absf(along)))
 	return Vector3(point.x, h, point.y)
 
 func sync_state() -> void:
 	if not is_node_ready() or view.geometry == null:
 		return
+	_cache_ground = true
 	for id in regions.keys():
 		if not view.known_cache.has(id):
 			regions[id].queue_free()
@@ -175,6 +238,8 @@ func sync_state() -> void:
 		armies[id] = {"node": root, "groups": groups, "material": mat, "key": key}
 
 	_build_routes()
+	_cache_ground = false
+	_ground_cache.clear()
 	sync_frame()
 
 func sync_frame() -> void:
@@ -184,6 +249,7 @@ func sync_frame() -> void:
 	if not visible:
 		return
 	_sync_camera()
+	water_material.set_shader_parameter("clock_time", view._visual_clock)
 	_frame = Rect2(-view._camera_offset, view.size / view._zoom).grow(40)
 	for id in regions:
 		regions[id].visible = _frame.intersects(view.geometry.cells[id]["bounds"])
@@ -198,7 +264,7 @@ func sync_frame() -> void:
 		var right := Vector2(-direction.y, direction.x)
 		for group in armies[id].groups.values():
 			var miniature: MultiMeshInstance3D = group.node
-			var scale_by := 0.7 if group.kind in ["cavalry", "horse_archer", "general_bodyguard", "chariot", "elephant"] else 1.15
+			var scale_by := float(view.army_visuals[id].get("scale", 1.0)) * (0.78 if group.kind in ["elephant", "chariot"] else 1.0)
 			var basis := Basis(Vector3.UP, atan2(-direction.x, -direction.y)).scaled(Vector3.ONE * scale_by)
 			for j in range(miniature.multimesh.instance_count):
 				var i := int(group.indices[j])
@@ -218,8 +284,9 @@ func _troop_ground(point: Vector2) -> Vector3:
 	var at := ground(point)
 	for bridge in bridges:
 		var relative: Vector2 = point - bridge.center
-		if absf(relative.dot(bridge.tangent)) < 3.2 and absf(relative.dot(bridge.cross)) < 1.5:
-			at.y = float(bridge.deck)
+		var along := absf(relative.dot(bridge.tangent))
+		if along < float(bridge.length) + 4 and absf(relative.dot(bridge.cross)) < 1.5:
+			at.y = lerpf(float(bridge.deck), 1.03, clampf((along - float(bridge.length)) / 4, 0, 1))
 	return at
 
 func _build_region(id: String) -> void:
@@ -250,9 +317,9 @@ func _build_region(id: String) -> void:
 		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 16:
 			continue
 		var p := ground(at, id)
-		if absf(p.y - 0.95) < 0.12:
+		if _track_distance(at, id) < 6.5:
 			continue
-		var scale_by := 0.32 + RealismModels.scatter(key, 3) * 0.22
+		var scale_by := 0.65 + RealismModels.scatter(key, 3) * 0.65
 		groups[i % 3].append(Transform3D(Basis(Vector3.UP, RealismModels.scatter(key, 2) * TAU).scaled(Vector3.ONE * scale_by), p))
 		if groups[0].size() + groups[1].size() + groups[2].size() >= int(profile.trees):
 			break
@@ -261,43 +328,95 @@ func _build_region(id: String) -> void:
 		poses.assign(groups[i])
 		if not poses.is_empty():
 			_batch(root, tree_meshes[i], tree_material, poses)
-	# A geographically known town is a silhouette only; owner flags and live
-	# garrisons are the filtered 2D information layer above this surface.
-	var town := RealismModels.new()
-	var stone := RealismModels.pigment("#a49879")
-	var roof := RealismModels.pigment("#774936")
-	for i in range(16):
-		var at := ground(anchor + Vector2((i % 4) * 2.6 - 4.4, (i / 4) * 2.8 - 2.7), id)
-		var high := 1.3 + RealismModels.scatter(id, i) * 1.0
-		var tint := stone.lerp(RealismModels.pigment("#827c69"), RealismModels.scatter(id, i + 30) * 0.3)
-		town.box(at + Vector3.UP * high * 0.5, Vector3(1.8, high, 2.1), tint)
-		var a := at + Vector3(-1.05, high, -1.2)
-		var b := at + Vector3(1.05, high, -1.2)
-		var c := at + Vector3(0, high + 0.65, -1.2)
-		town.triangle(a, b, c, roof)
-		town.triangle(a, c, a + Vector3.BACK * 2.4, roof)
-		town.triangle(c, c + Vector3.BACK * 2.4, a + Vector3.BACK * 2.4, roof)
-		town.triangle(b, b + Vector3.BACK * 2.4, c, roof)
-		town.triangle(c, b + Vector3.BACK * 2.4, c + Vector3.BACK * 2.4, roof)
-		town.box(at + Vector3(0, 0.4, -1.06), Vector3(0.4, 0.8, 0.04), RealismModels.pigment("#3e382e"))
-		for side in [-0.55, 0.55]:
-			town.box(at + Vector3(side, high * 0.65, -1.06), Vector3(0.3, 0.3, 0.04), RealismModels.pigment("#4e483b"))
-	var civic := ground(anchor + Vector2(-6, -5), id)
-	town.box(civic, Vector3(5, 0.4, 3), stone)
-	for i in range(6):
-		var at := civic + Vector3(i * 0.8 - 2, 0.2, -1.1)
-		town.rod(at, at + Vector3.UP * 2.6, 0.17, stone)
-	town.box(civic + Vector3.UP * 2.9, Vector3(5.3, 0.5, 3.2), roof)
-	for i in range(4):
-		var at := ground(anchor + Vector2(-8 if i % 2 == 0 else 8, -8 if i < 2 else 8), id)
-		town.box(at + Vector3.UP * 1.8, Vector3(1.5, 3.6, 1.5), stone)
-		for j in range(3):
-			town.box(at + Vector3(j * 0.55 - 0.55, 3.8, -0.6), Vector3(0.3, 0.5, 0.3), stone)
+	# Reeds, scrub and stones break up the banks and forest floor. One mesh
+	# per material, deterministic scatter, no individual scene-tree foliage.
+	var undergrowth: Array[Transform3D] = []
+	var stones := RealismModels.new()
+	var pools := RealismModels.new()
+	for i in range(700 if region["terrain"] in ["marsh", "forest"] else 180):
+		var key := id + "/ground/" + str(i)
+		var at := bounds.position + bounds.size * Vector2(RealismModels.scatter(key, 0), RealismModels.scatter(key, 1))
+		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 18 or _track_distance(at, id) < 2.4:
+			continue
+		var p := ground(at, id)
+		var scale_by := 0.6 + RealismModels.scatter(key, 2) * 1.0
+		undergrowth.append(Transform3D(Basis(Vector3.UP, RealismModels.scatter(key, 3) * TAU).scaled(Vector3.ONE * scale_by), p))
+		if i % 13 == 0:
+			stones.ellipsoid(p, Vector3(0.5, 0.3, 0.7) * scale_by, RealismModels.pigment("#696b5e"))
+		if region["terrain"] == "marsh" and i % 11 == 0:
+			# Flat, irregular pools, with reeds rooted in their shallow margins.
+			for j in range(12):
+				var a := Vector3(cos(j * TAU / 12), 0, sin(j * TAU / 12)) * (1.4 + RealismModels.scatter(key, j + 10))
+				var b := Vector3(cos((j + 1) * TAU / 12), 0, sin((j + 1) * TAU / 12)) * (1.4 + RealismModels.scatter(key, (j + 1) % 12 + 10))
+				p.y = ground(at, id).y + 0.09
+				pools.triangle(p, p + a, p + b, Color.WHITE)
+	if not undergrowth.is_empty():
+		_batch(root, RealismModels.grass(region["terrain"] == "marsh"), tree_material, undergrowth)
+	if stones.vertex_count > 0:
+		_mesh(root, stones.finish(), _vertex_material())
+	if pools.vertex_count > 0:
+		_mesh(root, pools.finish(), water_material)
+	_build_town(root, id, anchor)
 
+func _track_distance(point: Vector2, id: String) -> float:
+	var distance_to_track := INF
+	for segment in track_grid.get(Vector2i(floori(point.x / 32), floori(point.y / 32)), []):
+		distance_to_track = minf(distance_to_track, point.distance_to(Geometry2D.get_closest_point_to_segment(point, segment[0], segment[1])))
+	return distance_to_track
+
+func _build_town(root: Node3D, id: String, anchor: Vector2) -> void:
+	# Geographic architecture is deliberately independent of unseen owners,
+	# population, construction and garrisons. Wards vary by geography/id.
+	var town := RealismModels.new()
+	var stone := RealismModels.pigment("#aaa18c")
+	var timber := RealismModels.pigment("#554939")
+	var roof := RealismModels.pigment("#795442")
+	for i in range(30):
+		var key := id + "/ward/" + str(i)
+		var angle := i * 2.399
+		var radius := 4.0 + sqrt(float(i)) * 1.65
+		var offset := Vector2(cos(angle), sin(angle)) * radius
+		if _track_distance(anchor + offset, id) < 2.3:
+			continue
+		var at := ground(anchor + offset, id)
+		var h := 1.2 + RealismModels.scatter(key, 0) * 1.8
+		var w := 1.3 + RealismModels.scatter(key, 1) * 1.5
+		var d := 1.8 + RealismModels.scatter(key, 2) * 1.8
+		var tint := stone.lerp(RealismModels.pigment("#7d7967"), RealismModels.scatter(key, 3) * 0.5)
+		town.box(at + Vector3.UP * h * 0.5, Vector3(w, h, d), tint)
+		var ridge := h + w * 0.3
+		for side in [-1.0, 1.0]:
+			var a := at + Vector3(side * (w * 0.5 + 0.15), h, -d * 0.5 - 0.15)
+			var b := a + Vector3.BACK * (d + 0.3)
+			var c := at + Vector3(0, ridge, -d * 0.5 - 0.15)
+			var e := c + Vector3.BACK * (d + 0.3)
+			var tile := roof.lightened(RealismModels.scatter(key, 4) * 0.13)
+			town.triangle(a, b, c, tile)
+			town.triangle(c, b, e, tile)
+			for j in range(5):
+				town.rod(a.lerp(c, j / 5.0), b.lerp(e, j / 5.0), 0.018, tile.darkened(0.16))
+			town.box(at + Vector3(side * w * 0.28, h * 0.65, -d * 0.5 - 0.025), Vector3(0.25, 0.35, 0.04), timber)
+		town.triangle(at + Vector3(-w * 0.5, h, -d * 0.5), at + Vector3(w * 0.5, h, -d * 0.5), at + Vector3(0, ridge, -d * 0.5), tint)
+		town.box(at + Vector3(0, 0.48, -d * 0.5 - 0.03), Vector3(0.45, 0.96, 0.06), timber)
+		if i % 3 == 0:
+			town.box(at + Vector3(w * 0.65, 0.45, 0), Vector3(0.5, 0.9, d * 0.65), timber)
+	# Courtyard hall and sheltered colonnade, in a clearing off the highway.
+	var civic := ground(anchor + Vector2(-5, -6), id)
+	town.box(civic + Vector3.UP * 0.25, Vector3(4.8, 0.5, 3.5), stone)
+	town.box(civic + Vector3(0, 1.6, 0.5), Vector3(3.6, 2.4, 2), stone)
+	for i in range(6):
+		var p := civic + Vector3(i * 0.75 - 1.9, 0.5, -1.35)
+		town.rod(p, p + Vector3.UP * 2.3, 0.13, stone)
+	town.box(civic + Vector3.UP * 3, Vector3(5.2, 0.4, 3.8), roof)
 	_mesh(root, town.finish(), _vertex_material())
 
 func _triangle(st: SurfaceTool, id: String, a: Vector2, b: Vector2, c: Vector2, depth: int) -> void:
-	if depth < 7 and maxf(a.distance_squared_to(b), maxf(b.distance_squared_to(c), c.distance_squared_to(a))) > 16:
+	var spacing := 16.0
+	var center := (a + b + c) / 3
+	for site in crossing_sites:
+		if center.distance_squared_to(site.center) < 900 and site.kind in ["river", "bridge", "causeway"]:
+			spacing = 1.0
+	if depth < 10 and maxf(a.distance_squared_to(b), maxf(b.distance_squared_to(c), c.distance_squared_to(a))) > spacing:
 		var ab := (a + b) * 0.5
 		var bc := (b + c) * 0.5
 		var ca := (c + a) * 0.5
@@ -321,66 +440,88 @@ func _build_routes() -> void:
 	var structures := RealismModels.new()
 	for key in view.geometry.edges:
 		var ends := String(key).split("|")
-		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]):
+		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
 			continue
 		var path: PackedVector2Array = view.geometry.edges[key]
-		var kind := TerrainRules.crossing_kind(view.game.data, ends[0], ends[1])
-		if TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
-			for i in range(path.size() - 1):
-				var segments := maxi(1, ceili(path[i].distance_to(path[i + 1]) / 2))
-				for j in range(segments):
-					var a := ground(path[i].lerp(path[i + 1], float(j) / segments)) + Vector3.UP * 0.15
-					var b := ground(path[i].lerp(path[i + 1], float(j + 1) / segments)) + Vector3.UP * 0.15
-					road.rod(a, b, 0.42 + float(view.road_levels.get(key, 0)) * 0.12, RealismModels.pigment("#b4a17b"))
-		if kind in ["bridge", "river", "causeway", "ridge", "pass"]:
-			var middle := path[path.size() / 2]
-			var tangent := (path[-1] - path[0]).normalized()
-			var cross := Vector2(-tangent.y, tangent.x)
-			if kind in ["river", "bridge", "causeway"]:
-				for i in range(18):
-					var a := middle + cross * (i * 2.0 - 18) + tangent * sin(i * 0.55) * 1.1
-					var b := middle + cross * ((i + 1) * 2.0 - 18) + tangent * sin((i + 1) * 0.55) * 1.1
-					water.rod(ground(a) + Vector3.UP * 0.55, ground(b) + Vector3.UP * 0.55, 1.1, Color.WHITE)
-				if kind != "river":
-					var a := ground(middle - tangent * 3) + Vector3.UP * 1.5
-					var b := ground(middle + tangent * 3) + Vector3.UP * 1.5
-					a.y = maxf(a.y, b.y)
-					b.y = a.y
-					bridges.append({"center": middle, "tangent": tangent, "cross": cross, "deck": a.y + 0.18})
-					structures.box((a + b) * 0.5, Vector3(2.8, 0.35, a.distance_to(b)), RealismModels.pigment("#b9ad8e"), Vector3(0, atan2(-tangent.x, -tangent.y), 0))
-					for side in [-1.0, 1.0]:
-						var offset: Vector3 = Vector3(cross.x, 0.5, cross.y) * float(side)
-						structures.rod(a + offset, b + offset, 0.15, RealismModels.pigment("#8e826c"))
-			else:
-				for i in range(9):
-					if kind == "pass" and i in [3, 4, 5]:
-						continue
-					var p := ground(middle + cross * (i * 3 - 12))
-					structures.ellipsoid(p + Vector3.UP * 3, Vector3(3, 6 + i % 3, 2.5), RealismModels.pigment("#75766b"))
+		var width := 0.7 + float(view.road_levels.get(key, 0)) * 0.12
+		for i in range(path.size() - 1):
+			var segments := maxi(1, ceili(path[i].distance_to(path[i + 1]) / 1.0))
+			var direction := (path[i + 1] - path[i]).normalized()
+			var normal := Vector2(-direction.y, direction.x) * width
+			for j in range(segments):
+				var a := path[i].lerp(path[i + 1], float(j) / segments)
+				var b := path[i].lerp(path[i + 1], float(j + 1) / segments)
+				var tint := RealismModels.pigment("#81765e").darkened(RealismModels.scatter(String(key), j) * 0.08)
+				_quad(road, ground(a - normal) + Vector3.UP * 0.08, ground(a + normal) + Vector3.UP * 0.08, ground(b - normal) + Vector3.UP * 0.08, ground(b + normal) + Vector3.UP * 0.08, tint)
+	for site in crossing_sites:
+		var ends := String(site.key).split("|")
+		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]):
+			continue
+		var middle: Vector2 = site.center
+		var tangent: Vector2 = site.tangent
+		var cross: Vector2 = site.cross
+		var kind: String = site.kind
+		if kind in ["river", "bridge"]:
+			for i in range(56):
+				var a := middle + cross * (i - 28.0) + tangent * sin((i - 28.0) * 0.13) * 1.1
+				var b := middle + cross * (i - 27.0) + tangent * sin((i - 27.0) * 0.13) * 1.1
+				if not view.known_cache.has(view.geometry.region_at_world(a)) or not view.known_cache.has(view.geometry.region_at_world(b)):
+					continue
+				var n := tangent * 3.1
+				_quad(water, Vector3(a.x - n.x, 0.83, a.y - n.y), Vector3(a.x + n.x, 0.83, a.y + n.y), Vector3(b.x - n.x, 0.83, b.y - n.y), Vector3(b.x + n.x, 0.83, b.y + n.y), Color.WHITE)
+		if kind in ["bridge", "causeway"]:
+			var half_length := 6.0 if kind == "bridge" else 9.0
+			var deck := 1.65 if kind == "bridge" else 1.25
+			bridges.append({"center": middle, "tangent": tangent, "cross": cross, "deck": deck, "length": half_length})
+			var rot := Vector3(0, atan2(-tangent.x, -tangent.y), 0)
+			var center := Vector3(middle.x, deck - 0.22, middle.y)
+			structures.box(center, Vector3(3.1, 0.44, half_length * 2), RealismModels.pigment("#8b806c"), rot)
+			var along3 := Vector3(tangent.x, 0, tangent.y) * half_length
+			var across3 := Vector3(cross.x, 0, cross.y) * 1.5
+			var top := Vector3(middle.x, deck + 0.015, middle.y)
+			_quad(structures, top - along3 - across3, top - along3 + across3, top + along3 - across3, top + along3 + across3, RealismModels.pigment("#9a8e75"))
+			for joint in range(int(half_length * 2)):
+				var at := top + Vector3(tangent.x, 0, tangent.y) * (joint - half_length)
+				structures.rod(at - across3, at + across3, 0.022, RealismModels.pigment("#5c584b"))
+			for side in [-1.0, 1.0]:
+				var n: Vector3 = Vector3(cross.x, 0, cross.y) * float(side) * 1.5
+				var along := Vector3(tangent.x, 0, tangent.y)
+				if kind == "bridge":
+					structures.box(center + n + Vector3.UP * 0.5, Vector3(0.22, 0.8, half_length * 2), RealismModels.pigment("#847b68"), rot)
+					for j in [-2.8, 0, 2.8]:
+						structures.box(Vector3(middle.x, 0.75, middle.y) + along * j + n * 0.7, Vector3(0.45, 1.5, 0.65), RealismModels.pigment("#77715f"), rot)
+				# Sloping approaches meet the actual deck, not the river bed.
+				var end: Vector2 = middle + tangent * half_length * float(side)
+				var approach: Vector2 = middle + tangent * (half_length + 4) * float(side)
+				var edge := cross * 1.5
+				_quad(structures, Vector3(end.x - edge.x, deck, end.y - edge.y), Vector3(end.x + edge.x, deck, end.y + edge.y), Vector3(approach.x - edge.x, 1.03, approach.y - edge.y), Vector3(approach.x + edge.x, 1.03, approach.y + edge.y), RealismModels.pigment("#84785e"))
+		elif kind in ["ridge", "pass"]:
+			# Broken outcrops leave the same traversable corridor as the graph.
+			for i in range(13):
+				if kind == "pass" and i in [5, 6, 7]:
+					continue
+				var p := ground(middle + cross * (i * 3.5 - 21))
+				structures.ellipsoid(p + Vector3.UP, Vector3(2.4, 2.5 + i % 3, 2.0), RealismModels.pigment("#747769"))
 	for region in view.visible_cache:
 		var post: Dictionary = view.game.state.get("watchposts", {}).get(region, {})
 		if post.is_empty() or not ReconRules.post_active(view.game.state, region, post):
 			continue
 		var at := ground(view.world_pos(view.game.data.regions[region]) + Vector2(-14, 10))
 		structures.box(at + Vector3.UP * 3, Vector3(2.2, 6, 2.2), RealismModels.pigment("#8b8771"))
-		for i in range(4):
-			structures.box(at + Vector3(-0.85 + i * 0.57, 6.2, -0.95), Vector3(0.35, 0.6, 0.35), RealismModels.pigment("#a99e83"))
 	if road.vertex_count > 0:
 		_mesh(routes, road.finish(), _vertex_material())
 	if water.vertex_count > 0:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color("#346b72")
-		mat.metallic = 0.45
-		mat.roughness = 0.25
-		_mesh(routes, water.finish(), mat)
+		_mesh(routes, water.finish(), water_material)
 	if structures.vertex_count > 0:
 		_mesh(routes, structures.finish(), _vertex_material())
 
-func _vertex_material() -> StandardMaterial3D:
-	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.roughness = 0.87
+func _quad(model: RealismModels, a: Vector3, b: Vector3, c: Vector3, d: Vector3, tint: Color) -> void:
+	model.triangle(a, c, b, tint)
+	model.triangle(b, c, d, tint)
+
+func _vertex_material() -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://src/ui/realism/campaign_solid.gdshader")
 	return mat
 
 func _mesh(parent: Node3D, mesh: Mesh, material: Material) -> MeshInstance3D:

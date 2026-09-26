@@ -18,10 +18,11 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	# an enemy's, or the city's own owner's, since the declaration below would
 	# make it an enemy the moment the ladders went up — and marching up to the
 	# walls costs the same step as any other march: a siege is never a free hop.
+	if marching_in and MovementRules.step_cost(data, state, region_id, army["region"]) > float(army["movement_left"]) + 0.0001:
+		return false
 	if MovementRules.hostile_army_in(state, army["owner"], region_id) \
 			or _owner_army_in(state, String(settlement["owner"]), region_id):
-		return false
-	if marching_in and MovementRules.step_cost(data, state, region_id, army["region"]) > float(army["movement_left"]) + 0.0001:
+		ReconRules.encounter(data, state, army, region_id)
 		return false
 	# Investing a settlement IS a declaration of war — and one the Republic
 	# forbids is refused here, before a single ladder is raised.

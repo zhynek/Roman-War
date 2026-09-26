@@ -90,7 +90,7 @@ func _armies_section(region_id: String, player: String) -> void:
 	army_ids.sort()
 	for army_id in army_ids:
 		var army: Dictionary = game.state["armies"][army_id]
-		if String(army["region"]) != region_id:
+		if String(army["region"]) != region_id or not game.army_is_visible(army_id):
 			continue
 		var faction: Dictionary = game.data.factions.get(army["owner"], {})
 		var general_name := "a captain"

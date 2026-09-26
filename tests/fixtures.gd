@@ -485,6 +485,7 @@ static func state(game_data: GameData) -> Dictionary:
 		"armies": {}, "fleets": {}, "characters": {},
 		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
 		"tributes": [], "pending_offers": [], "agents": {},
+		"forest_patrols": {},
 		"watchposts": {}, "recon": {"contacts": {}, "movements": []},
 		"cartography": {},
 		"map_access": {},

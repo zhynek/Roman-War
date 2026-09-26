@@ -415,6 +415,82 @@
           "kind"
         ]
       }
+    },
+    "development_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "player",
+        "seed",
+        "regions",
+        "contact_owner",
+        "contact_region",
+        "peace_with",
+        "map_grantor",
+        "contact_units"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "player": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact_owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contact_region": {
+          "type": "string",
+          "minLength": 1
+        },
+        "map_grantor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regions": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "peace_with": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "contact_units": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "template"
+            ],
+            "properties": {
+              "template": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
     }
   },
   "required": [
