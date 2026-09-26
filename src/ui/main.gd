@@ -1,10 +1,10 @@
 extends Control
 ## Start menu: pick a house, a difficulty, and a seed, then take the field.
-## Boots straight into the campaign screen; the campaign UI never knows the
-## menu existed.
+## One app launches the full campaign or the authored Alpine route.
 
 var _data: GameData
 var _faction_ids: Array = []
+var active_session: Control
 
 @onready var faction_options: OptionButton = $Center/Menu/FactionRow/Factions
 @onready var difficulty_options: OptionButton = $Center/Menu/DifficultyRow/Difficulty
@@ -21,6 +21,9 @@ func _ready() -> void:
 		push_error(status_label.text)
 		return
 
+	var words: Dictionary = _data.effects_glossary["map_commands"]
+	$Center/Menu/Alpine.text = words["route_start"]
+	$Center/Menu/AlpineHelp.text = words["route_menu_help"]
 	var faction_ids: Array = _data.factions.keys()
 	faction_ids.sort()
 	for playable_tier in ["playable", "unlockable"]:
@@ -46,11 +49,37 @@ func _ready() -> void:
 
 
 func _on_start_pressed() -> void:
-	if _faction_ids.is_empty():
+	if active_session != null or _faction_ids.is_empty():
 		return
 	var faction_id: String = _faction_ids[faction_options.selected]
 	var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
 	var game := Game.new_campaign(faction_id, int(seed_spin.value), difficulty,
 		"long", guided_check.button_pressed)
-	$Center.visible = false
-	add_child(CampaignScreen.create(game))
+	var screen := CampaignScreen.create(game)
+	screen.main_menu_enabled = true
+	screen.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
+	_open_session(screen)
+
+
+func _on_alpine_pressed() -> void:
+	if active_session != null or not _data.ok():
+		return
+	var route = load("res://src/ui/realism/development.tscn").instantiate()
+	route.embedded = true
+	route.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
+	_open_session(route)
+
+
+func _open_session(session: Control) -> void:
+	active_session = session
+	$Center.hide()
+	add_child(session)
+
+
+func _return_to_menu() -> void:
+	if active_session != null:
+		remove_child(active_session)
+		active_session.queue_free()
+		active_session = null
+	$Center.show()
+	$Center/Menu/Start.grab_focus()

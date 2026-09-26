@@ -16,6 +16,8 @@ extends Control
 ## playback_enabled = false and the same turn resolves synchronously, which is
 ## what the headless suite does when it drives twenty-five turns in a loop.
 
+signal main_menu_requested
+
 const SAVE_PATH := "user://roman_war_save.json"
 const OPTIONS_PATH := "user://roman_war_options.json"
 
@@ -25,6 +27,11 @@ const OPTION_CONTROLS := 3
 const OPTION_MOTION := 4
 const OPTION_REALISM := 5
 const OPTION_LANDSCAPE := 6
+const OPTION_MAIN_MENU := 7
+
+# Each screen owns its slot; changing modes never changes global user://.
+var save_path := SAVE_PATH
+var main_menu_enabled := false
 
 var realism_development_enabled := false
 var realism_study: RealismStudy
@@ -329,6 +336,9 @@ func _build_options_menu() -> MenuButton:
 	if realism_development_enabled or OS.get_cmdline_user_args().has("realism-preview"):
 		popup.add_separator()
 		popup.add_item(String(RealismStudy.read_settings().copy.menu), OPTION_REALISM)
+	if main_menu_enabled:
+		popup.add_separator()
+		popup.add_item(String(game.data.effects_glossary["map_commands"]["main_menu"]), OPTION_MAIN_MENU)
 	popup.id_pressed.connect(_on_option_pressed)
 	popup.about_to_popup.connect(_sync_options)
 	return menu
@@ -1541,11 +1551,11 @@ func _show_victory_banner(winner: String) -> void:
 
 
 func _save_game() -> void:
-	_log("Game saved." if game.save_to(SAVE_PATH) else "Save failed.")
+	_log("Game saved." if game.save_to(save_path) else "Save failed.")
 
 
 func _load_game() -> void:
-	if game.load_from(SAVE_PATH):
+	if game.load_from(save_path):
 		map_view.finish_marches()
 		_clear_force_selection()
 		selected_agent = ""
@@ -1655,6 +1665,10 @@ func _on_option_pressed(id: int) -> void:
 			map_view.set_realism_enabled(not map_view.realism_enabled)
 		OPTION_REALISM:
 			open_realism_study()
+		OPTION_MAIN_MENU:
+			if main_menu_enabled:
+				_confirm(String(game.data.effects_glossary["map_commands"]["main_menu_confirm"]),
+					func(): main_menu_requested.emit())
 
 
 func set_playback(enabled: bool) -> void:

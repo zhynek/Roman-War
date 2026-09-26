@@ -1,8 +1,8 @@
 # Roman War development roadmap
 
 Updated 2026-09-26 from the [release audit](reviews/2026-09-26-release-audit.md).
-The approved Mac baseline is now [release 0.14.1](releases/0.14.1.md), including
-the full campaign and separate Alpine-route app.
+The approved Mac baseline is now [release 0.14.2](releases/0.14.2.md), with
+the full campaign and Alpine Route in one app and independent save slots.
 This is a prioritized delivery plan; `DESIGN.md` remains the system specification
 and `CLAUDE.md` remains the architecture contract. Milestones below are proposed
 work, not features already delivered or calendar commitments.

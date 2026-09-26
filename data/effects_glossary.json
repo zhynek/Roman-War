@@ -417,12 +417,16 @@
     "forest_warning": "Woodland can hide troops. Mounted scouts, nearby spies or forts, and Patrol woods reveal them; maps alone do not.",
     "route_defense": "Defender factors: ground {terrain}% · crossing +{crossing}%",
     "forest_description": "Normal columns in woodland evade distant lookouts. A local army, agent or tower, nearby mounted scouts, spies or forts, or a paid patrol reveals them. Forced marching and besieging expose troops.",
-    "route_title": "ALPINE FRONTIER · Development campaign",
+    "route_title": "ALPINE FRONTIER · Route campaign",
     "route_brief": "Lead this column from Pannonia’s woods across the Illyrian bridge, Venetia’s marsh causeway and the Noric–Raetian passes. Choose each waypoint, then issue its march. End turn restores movement. At Noreia, Patrol woods searches the neighbouring forest. Orders, diplomacy and saves work normally.",
     "route_reset": "Restart route",
     "route_compare": "Classic comparison",
     "route_current": "Current position: {region} · Select the column, then choose a waypoint.",
     "route_concealment": "FOREST RECONNAISSANCE · Distant lookouts see land, not troops. Patrol woods costs {cost} movement; nearby mounted scouts, spies and forts also penetrate cover.",
-    "route_saved": "Development saves are separate from the production campaign."
+    "route_saved": "Alpine Route saves are separate from the full campaign.",
+    "route_start": "PLAY THE ALPINE ROUTE",
+    "route_menu_help": "A Julii route through forests, bridges and mountain passes. Separate saves.",
+    "main_menu": "Return to main menu…",
+    "main_menu_confirm": "Return to the main menu? Unsaved progress will be lost. Cancel and press Save first to keep it."
   }
 }

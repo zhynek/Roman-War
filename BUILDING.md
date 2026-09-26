@@ -63,7 +63,7 @@ python3 tools/build_macos_playtest.py --godot /path/to/Godot --mode campaign
 python3 tools/build_macos_playtest.py --godot /path/to/Godot --mode route
 ```
 
-The default version is `0.14.1-preview.20260926`; set `--version` for a later
+The default version is `0.14.2-preview.20260926`; set `--version` for a later
 preview and `--output` to a fresh output directory. The default outputs are
 `build/playtest-2026-09-26/campaign/` and `build/playtest-2026-09-26/route/`.
 Each contains a universal release ZIP, an extracted app on macOS, a frozen
@@ -72,7 +72,7 @@ logs. Godot needs its matching macOS export template; on macOS templates live
 under `~/Library/Application Support/Godot/export_templates/<version>/`.
 The Python interpreter running the builder needs `jsonschema` installed.
 
-**Roman War Playtest** opens the normal faction/seed campaign menu and uses
+**Roman War Playtest** opens the shared campaign/Alpine menu and uses
 `~/Library/Application Support/Roman War Playtest/` for persistent saves.
 **Roman War Route Playtest** opens the authored Alpine route and uses
 `~/Library/Application Support/Roman War Route Playtest/`. These apps have
@@ -89,22 +89,36 @@ notarized; use the Open Anyway instructions in `PLAYING.md` when needed.
 
 ## Approved macOS releases
 
-After validation, the full suite and rendered QA, commit the exact source and
-build from a clean checkout:
+Version 0.14.2 ships **one app**: the normal menu includes both full campaign
+and Alpine Route. Separate route exports remain a developer preview tool only;
+`--release --mode route` is rejected to prevent split public downloads.
+
+After data validation, the full suite and rendered QA, commit the exact source
+and build from a clean checkout:
 
 ```sh
-python3 tools/build_macos_playtest.py --godot /path/to/Godot --release --version 0.14.1 --mode campaign
-python3 tools/build_macos_playtest.py --godot /path/to/Godot --release --version 0.14.1 --mode route
+python3 tools/build_macos_playtest.py --godot /path/to/Godot --release --version 0.14.2
 ```
 
-Outputs are in `build/v0.14.1/{campaign,route}/`. The main app is **Roman War**,
-bundle `com.romanwar.game`, with its existing production save directory under
-`~/Library/Application Support/Godot/app_userdata/Roman War/`. The companion is
-**Roman War Alpine Route**, bundle `com.romanwar.alpine-route`, with saves under
-`~/Library/Application Support/Roman War Alpine Route/`. Preview saves are not
-copied automatically. All source/configuration hashes, package probes and native
-checks remain required. Publish both ZIPs with checksums and build provenance,
-tag the exact source commit, and explicitly mark the GitHub release latest.
+Output: `build/v0.14.2/campaign/Roman-War-macOS-0.14.2.zip`, containing
+**Roman War.app**, bundle `com.romanwar.game`. The full campaign keeps
+`~/Library/Application Support/Godot/app_userdata/Roman War/roman_war_save.json`.
+The embedded Alpine mode keeps the published companion's existing
+`~/Library/Application Support/Roman War Alpine Route/roman_war_save.json` on
+macOS. Both previous saves and their backups work without moving files. This
+is storage compatibility, not a second app. On other platforms and in isolated
+previews/tests, Alpine uses `user://alpine_route_save.json`.
+
+The menu never changes global `user://` when switching modes. Preview builds
+and QA retain their isolated storage and cannot access either production slot.
+Run `tools/app_playtest.gd` with `-- phase=save qa_id=<id>` then
+`-- phase=load qa_id=<same-id>` against the packaged app: it exercises both menu
+entries, confirmed returns, route restart, independent saves and restoration
+across two processes. Run map and route rendering harnesses too.
+
+Publish only the unified ZIP with checksums and build provenance, tag its exact
+source commit, and explicitly mark the GitHub release latest. Older releases
+remain historical; never replace a version's binaries in place.
 
 ## No-build alternative (good for playtesters)
 

@@ -13,15 +13,15 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Current terrain and visual direction
 
-**Current approved Mac standard: 0.14.1.** The owner explicitly authorized
-publication of both audited Mac apps on 2026-09-26. Use
-[`releases/0.14.1.md`](releases/0.14.1.md) for downloads, app identities and saves.
-The full campaign is **Roman War.app** with its existing production save slot;
-**Roman War Alpine Route.app** is the companion with separate persistent saves.
-The release source includes the route, save hardening, hover fix and roadmap.
-Build from the tagged source using the documented `--release --version 0.14.1`
-commands. Earlier "not approved" and "production remains 0.14.0" statements below
-describe previous checkpoints and are superseded by this authorization.
+**Current approved Mac standard: 0.14.2 — one Roman War app.** The owner
+requested merging the campaign and Alpine Route apps. The start menu now
+launches either mode, and Options → Return to main menu permits switching
+without quitting. See [`releases/0.14.2.md`](releases/0.14.2.md).
+Both published Mac save locations remain intact; a screen owns its save path,
+so embedding the route never changes global storage. Custom test/preview
+storage stays isolated. Release builds ship only the campaign/menu entry.
+The two-app 0.14.1 release and earlier development checkpoints below are
+historical, superseded by this merged release.
 
 **2026-09-26 audit and Mac feedback build:** read
 [`reviews/2026-09-26-release-audit.md`](reviews/2026-09-26-release-audit.md),

@@ -8,13 +8,14 @@ An original, clean-room turn-based grand-strategy game of the ancient Mediterran
 inspired by the *mechanics* (never the assets, text, or data) of classic 2004-era
 campaign strategy games. Built with Godot 4 for macOS (and anywhere else Godot runs).
 
-**Play version 0.14.1:** download the universal
-[Roman War Mac app](https://github.com/zhynek/Roman-War/releases/download/v0.14.1/Roman-War-macOS-0.14.1.zip)
-or the separate
-[Alpine Route app](https://github.com/zhynek/Roman-War/releases/download/v0.14.1/Roman-War-Alpine-Route-macOS-0.14.1.zip).
+**Play version 0.14.2:** download the universal
+[Roman War Mac app](https://github.com/zhynek/Roman-War/releases/download/v0.14.2/Roman-War-macOS-0.14.2.zip).
+One app includes the full campaign and **Alpine Route**, selectable from the
+main menu. Use **Options → Return to main menu** to switch; save first to keep
+progress. Each mode retains its own save slot, including existing 0.14.1 saves.
 The [latest release](https://github.com/zhynek/Roman-War/releases/latest) includes
 forest concealment, patrols, improved procedural terrain and safer saves.
-See the [release notes](docs/releases/0.14.1.md) and
+See the [release notes](docs/releases/0.14.2.md) and
 [next development handoff](docs/NEXT_DEVELOPMENT.md).
 
 The design philosophy, researched in depth in

@@ -1,3 +1,13 @@
+## One app, two ways to play
+
+In version 0.14.2, **Begin the Campaign** uses your house, difficulty and seed
+choices. **Play the Alpine Route** opens the authored Julii route through
+forests, bridges, marshes and mountain passes. It uses the same campaign rules.
+Save and Load work independently in each mode. Existing 0.14.1 Mac campaign
+and Alpine saves are retained. To resume, open the desired mode and press Load.
+Use **Options → Return to main menu** to switch modes; save first to keep
+progress. The confirmation lets you cancel if you have not saved.
+
 # Roman War — how to play
 
 A short guide for the current build. This is the **campaign layer**: you run a

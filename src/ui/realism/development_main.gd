@@ -1,9 +1,13 @@
 extends Control
-## Persistent, separate development Save/Load storage, established before UI.
+## Shared Alpine route, embedded in the main app or run as a developer entry.
+signal main_menu_requested
+var embedded := false
 var screen: CampaignScreen
 var route_panel: PanelContainer
 
 func _enter_tree() -> void:
+	if embedded:
+		return
 	ProjectSettings.set_setting("application/config/use_custom_user_dir", true)
 	ProjectSettings.set_setting("application/config/custom_user_dir_name", "Roman War Route App QA/%d" % OS.get_process_id() if OS.get_cmdline_user_args().has("route-qa") else "Roman War Campaign Route Development")
 	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir())
@@ -17,6 +21,11 @@ func start_route() -> void:
 		remove_child(screen)
 		screen.queue_free()
 	screen = CampaignScreen.create(CampaignRoute.build())
+	if embedded:
+		screen.save_path = embedded_save_path()
+		DirAccess.make_dir_recursive_absolute(screen.save_path.get_base_dir())
+		screen.main_menu_enabled = true
+		screen.main_menu_requested.connect(func(): main_menu_requested.emit())
 	add_child(screen)
 	for id in screen.game.state["armies"]:
 		if screen.game.state["armies"][id]["owner"] == screen.game.state["player_faction"]:
@@ -81,6 +90,16 @@ func start_route() -> void:
 func _focus_start() -> void:
 	# The campaign's initial resize completes after _ready; focus then so
 	# its pending capital centering cannot override the selected route army.
+	if not is_inside_tree():
+		return
 	await get_tree().process_frame
 	if is_instance_valid(screen):
 		screen.map_view.focus_force()
+
+
+static func embedded_save_path() -> String:
+	# Keep the published 0.14.1 Mac route slot, including its .bak recovery.
+	# Custom storage (tests and previews) must never reach production saves.
+	if OS.get_name() == "macOS" and not ProjectSettings.get_setting("application/config/use_custom_user_dir", false) and ProjectSettings.get_setting("application/config/name", "") == "Roman War":
+		return OS.get_data_dir().path_join("Roman War Alpine Route/roman_war_save.json")
+	return "user://alpine_route_save.json"

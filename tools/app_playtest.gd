@@ -49,7 +49,7 @@ func _run() -> void:
 	if phase == "save":
 		screen._end_turn()
 		screen._save_game()
-		var saved := SaveGame.read_file(CampaignScreen.SAVE_PATH)
+		var saved := SaveGame.read_file(screen.save_path)
 		_check(not saved.is_empty() and _canon(saved) == _canon(screen.game.state), "UI Save persists the campaign after a real end turn")
 		var expected := FileAccess.open("user://expected_state.json", FileAccess.WRITE)
 		expected.store_string(_canon(screen.game.state))
@@ -59,6 +59,33 @@ func _run() -> void:
 		var expected := FileAccess.get_file_as_string("user://expected_state.json")
 		_check(not expected.is_empty() and _canon(screen.game.state) == expected, "UI Load restores the prior process's exact campaign")
 	await _shot("%s-campaign" % phase)
+	var campaign_bytes := FileAccess.get_file_as_string(screen.save_path)
+	await _return_via_options(main, screen)
+	main.get_node("Center/Menu/Alpine").pressed.emit()
+	var route = main.active_session
+	screen = route.screen
+	_check(screen.save_path == "user://alpine_route_save.json", "Alpine QA uses a separate slot inside isolated storage")
+	screen.playback_enabled = false
+	if phase == "save":
+		screen._end_turn()
+		screen._save_game()
+		var expected := FileAccess.open("user://expected_route.json", FileAccess.WRITE)
+		expected.store_string(_canon(screen.game.state))
+		expected.close()
+	else:
+		screen._load_game()
+		_check(_canon(screen.game.state) == FileAccess.get_file_as_string("user://expected_route.json"), "Alpine Load restores the prior process's exact route")
+	_check(FileAccess.get_file_as_string(CampaignScreen.SAVE_PATH) == campaign_bytes, "Alpine saves leave the full campaign unchanged")
+	await _shot("%s-alpine" % phase)
+	route.start_route()
+	screen = route.screen
+	screen._load_game()
+	_check(_canon(screen.game.state) == FileAccess.get_file_as_string("user://expected_route.json"), "restart keeps the Alpine save slot")
+	await _return_via_options(main, screen)
+	main.get_node("Center/Menu/Start").pressed.emit()
+	screen = main.active_session
+	screen._load_game()
+	_check(_canon(screen.game.state) == FileAccess.get_file_as_string("user://expected_state.json"), "switching back restores the full campaign")
 	print("app playtest ", phase, ": ", "FAIL" if failed else "PASS", " storage ", OS.get_user_data_dir())
 	quit(1 if failed else 0)
 
@@ -77,3 +104,28 @@ func _shot(name: String) -> void:
 		await process_frame
 		RenderingServer.force_draw(false)
 	root.get_texture().get_image().save_png(output.path_join(name + ".png"))
+
+
+func _return_via_options(main, screen: CampaignScreen) -> void:
+	screen.options_menu.get_popup().id_pressed.emit(CampaignScreen.OPTION_MAIN_MENU)
+	var dialog: ConfirmationDialog
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialog = child
+	_check(dialog != null and dialog.visible, "return to menu asks before discarding progress")
+	if dialog == null:
+		return
+	var before := _canon(screen.game.state)
+	dialog.hide()
+	dialog.canceled.emit()
+	for i in range(2):
+		await process_frame
+	_check(main.active_session != null and _canon(screen.game.state) == before, "canceling return keeps the current game unchanged")
+	screen.options_menu.get_popup().id_pressed.emit(CampaignScreen.OPTION_MAIN_MENU)
+	for child in screen.get_children():
+		if child is ConfirmationDialog:
+			dialog = child
+	dialog.confirmed.emit()
+	for i in range(3):
+		await process_frame
+	_check(main.active_session == null and main.get_node("Center").visible, "return to menu removes the active session")

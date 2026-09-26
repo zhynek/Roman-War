@@ -97,7 +97,7 @@ def main():
     parser.add_argument("--godot", default=shutil.which("godot"),
                         help="Godot editor executable with matching macOS export templates")
     parser.add_argument("--mode", choices=MODES, default="campaign")
-    parser.add_argument("--version", default="0.14.1-preview.20260926")
+    parser.add_argument("--version", default="0.14.2-preview.20260926")
     parser.add_argument("--release", action="store_true",
                         help="Use standard app identities; requires a numeric --version")
     parser.add_argument("--output", type=Path,
@@ -116,10 +116,11 @@ def main():
         parser.error("Use a numeric version with --release, otherwise an explicit -preview version")
     numeric_version = version_match.group(1)
     mode = MODES[args.mode].copy()
+    if args.release and args.mode != "campaign":
+        parser.error("Releases ship one Roman War app; Alpine Route is included in its menu")
     if args.release:
-        mode.update({"name": "Roman War" if args.mode == "campaign" else "Roman War Alpine Route",
-                     "bundle_id": "com.romanwar.game" if args.mode == "campaign" else "com.romanwar.alpine-route",
-                     "save_directory": "Godot/app_userdata/Roman War" if args.mode == "campaign" else "Roman War Alpine Route"})
+        mode.update({"name": "Roman War", "bundle_id": "com.romanwar.game",
+                     "save_directory": "Godot/app_userdata/Roman War"})
     default_output = ROOT / "build" / (f"v{args.version}" if args.release else "playtest-2026-09-26") / args.mode
     destination = (args.output or default_output).expanduser().resolve()
     if destination.exists() and not destination.is_dir():

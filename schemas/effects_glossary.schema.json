@@ -832,6 +832,22 @@
         "route_saved": {
           "type": "string",
           "minLength": 1
+        },
+        "route_start": {
+          "type": "string",
+          "minLength": 1
+        },
+        "route_menu_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "main_menu": {
+          "type": "string",
+          "minLength": 1
+        },
+        "main_menu_confirm": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }
