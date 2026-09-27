@@ -182,7 +182,8 @@
     "experience_max": 9,
     "retrain_cost_factor": 0.5,
     "army_unit_cap": 20,
-    "upgrade_max": 3
+    "upgrade_max": 3,
+    "city_escort_limit": 1
   },
   "forces": {
     "disband_population_return_pct": 100
@@ -687,5 +688,337 @@
     },
     "map_access_value_per_region": 30,
     "map_access_base_value": 120
+  },
+  "city": {
+    "initial_cleanliness": 38.0,
+    "initial_street_condition": 42.0,
+    "completed_cleanliness": 88.0,
+    "completed_street_condition": 86.0,
+    "grain_duration_days": 4,
+    "unrest_base": 24.0,
+    "unrest_grievance_scale": 0.55,
+    "unrest_legitimacy_gap_scale": 0.16,
+    "unrest_grime_scale": 0.2,
+    "unrest_disrepair_scale": 0.12,
+    "unrest_patrols": -6.0,
+    "unrest_grain": -8.0,
+    "unrest_taverns_closed": -3.0,
+    "restive_threshold": 50.0,
+    "rebellious_threshold": 75.0,
+    "daily_cost_by_tax": {
+      "very_low": 32,
+      "low": 24,
+      "normal": 12,
+      "high": 4,
+      "very_high": 0
+    },
+    "daily_patrol_cost": 16,
+    "daily_taverns_closed_cost": 10,
+    "grievance_base": 0.18,
+    "grievance_tax": {
+      "very_low": -0.6,
+      "low": -0.35,
+      "normal": 0.15,
+      "high": 0.85,
+      "very_high": 1.3
+    },
+    "grievance_grime_scale": 0.014,
+    "grievance_disrepair_scale": 0.007,
+    "grievance_patrols": 0.45,
+    "grievance_grain": -2.2,
+    "grievance_taverns_closed": 0.65,
+    "legitimacy_base": -0.06,
+    "legitimacy_tax": {
+      "very_low": 0.45,
+      "low": 0.3,
+      "normal": 0.0,
+      "high": -0.4,
+      "very_high": -0.65
+    },
+    "legitimacy_patrols": -0.4,
+    "legitimacy_grain": 0.7,
+    "legitimacy_taverns_closed": -0.3,
+    "action_costs": {
+      "grain_relief": 160,
+      "patrols_increase": 60,
+      "patrols_reduce": 0,
+      "tax_low": 0,
+      "tax_normal": 0,
+      "tax_high": 0,
+      "repair_streets": 340,
+      "clean_water": 420,
+      "close_taverns": 30,
+      "reopen_taverns": 30,
+      "improve_tavern": 300,
+      "improve_barracks": 480,
+      "improve_market": 380,
+      "improve_curia": 460,
+      "drill_maniples": 800,
+      "equip_maniples": 1000,
+      "workforce_normal": 0,
+      "workforce_paid": 0,
+      "workforce_requisition": 0,
+      "reinforce_gate": 950,
+      "prepare_fire_arrows": 600
+    },
+    "project_days": {
+      "repair_streets": 3,
+      "clean_water": 4,
+      "improve_tavern": 3,
+      "improve_barracks": 4,
+      "improve_market": 3,
+      "improve_curia": 4,
+      "drill_maniples": 3,
+      "equip_maniples": 4,
+      "reinforce_gate": 4,
+      "prepare_fire_arrows": 3
+    },
+    "project_maintenance": {
+      "repair_streets": 4,
+      "clean_water": 5,
+      "improve_tavern": 6,
+      "improve_barracks": 12,
+      "improve_market": 8,
+      "improve_curia": 9,
+      "drill_maniples": 18,
+      "equip_maniples": 20,
+      "reinforce_gate": 6,
+      "prepare_fire_arrows": 4
+    },
+    "project_effects": {
+      "repair_streets": {
+        "grievance": -0.25,
+        "legitimacy": 0.3
+      },
+      "clean_water": {
+        "grievance": -0.35,
+        "legitimacy": 0.5
+      },
+      "improve_tavern": {
+        "grievance": -0.35,
+        "legitimacy": 0.1
+      },
+      "improve_barracks": {
+        "grievance": 0.1,
+        "legitimacy": 0.35
+      },
+      "improve_market": {
+        "grievance": -0.4,
+        "legitimacy": 0.2
+      },
+      "improve_curia": {
+        "grievance": -0.1,
+        "legitimacy": 0.4
+      },
+      "drill_maniples": {
+        "grievance": 0.25,
+        "legitimacy": -0.1
+      },
+      "equip_maniples": {
+        "grievance": 0.15,
+        "legitimacy": 0.1
+      },
+      "reinforce_gate": {
+        "grievance": 0.15,
+        "legitimacy": 0.25
+      },
+      "prepare_fire_arrows": {
+        "grievance": 0.1,
+        "legitimacy": 0.15
+      }
+    },
+    "project_military_effects": {
+      "drill_maniples": {
+        "experience": 1,
+        "weapon": 0,
+        "armor": 0
+      },
+      "equip_maniples": {
+        "experience": 0,
+        "weapon": 1,
+        "armor": 1
+      }
+    },
+    "workforce_rate": {
+      "normal": 1,
+      "paid": 2,
+      "requisition": 2
+    },
+    "workforce_daily_cost": {
+      "normal": 0,
+      "paid": 26,
+      "requisition": 6
+    },
+    "workforce_grievance": {
+      "normal": 0.0,
+      "paid": -0.1,
+      "requisition": 0.65
+    },
+    "workforce_legitimacy": {
+      "normal": 0.0,
+      "paid": 0.15,
+      "requisition": -0.45
+    },
+    "military_daily_progress": 1
+  },
+  "city_battle": {
+    "gate_integrity": 100,
+    "gate_damage_per_formation": 6,
+    "melee_range": 1,
+    "missile_range": 2,
+    "casualty_pct_per_step": 5,
+    "minimum_damage_ratio": 0.3,
+    "maximum_damage_ratio": 3.0,
+    "objective_hold_steps": 3,
+    "maximum_steps": 90,
+    "realtime": {
+      "tick_ms": 100,
+      "grid_cm": 200,
+      "clearance_cm": 90,
+      "melee_range_cm": 340,
+      "archer_range_cm": 3000,
+      "acquire_range_cm": 3600,
+      "objective_radius_cm": 600,
+      "objective_hold_ms": 15000,
+      "maximum_ms": 360000,
+      "gate_damage_per_second": 5,
+      "base_damage_per_second": 2600,
+      "counter_multiplier": 2.6,
+      "disadvantage_multiplier": 0.55,
+      "charge_multiplier": 2.0,
+      "charge_runup_cm": 700,
+      "charge_recovery_ms": 10000,
+      "formation_separation_cm": 180,
+      "repath_ticks": 10,
+      "recruit_days": 3,
+      "display_soldiers_per_model": 4,
+      "roles": {
+        "infantry": "soldier",
+        "spear": "soldier",
+        "pike": "soldier",
+        "peasant": "soldier",
+        "missile": "archer",
+        "cavalry": "cavalry",
+        "general_bodyguard": "cavalry",
+        "horse_archer": "archer",
+        "chariot": "cavalry",
+        "elephant": "cavalry",
+        "siege": "archer",
+        "ship": "soldier"
+      },
+      "profiles": {
+        "soldier": {
+          "speed_cm_s": 240,
+          "attack_ms": 900,
+          "range_cm": 340
+        },
+        "archer": {
+          "speed_cm_s": 210,
+          "attack_ms": 1500,
+          "range_cm": 3000
+        },
+        "cavalry": {
+          "speed_cm_s": 520,
+          "attack_ms": 1100,
+          "range_cm": 340
+        }
+      },
+      "beats": {
+        "archer": "cavalry",
+        "cavalry": "soldier",
+        "soldier": "archer"
+      },
+      "charge_speed_multiplier": 1.5,
+      "engaged_speed_multiplier": 0.5,
+      "archer_melee_multiplier": 0.45,
+      "power_ratio_min": 0.4,
+      "power_ratio_max": 2.5,
+      "morale_per_experience": 3,
+      "rout_threshold": 12,
+      "waypoint_tolerance_cm": 50,
+      "projectile_sample_cm": 50,
+      "gate_attack_radius_cm": 650,
+      "deployment_limit_cm": 7400,
+      "group_columns": 3,
+      "group_spacing_cm": 300
+    },
+    "siege": {
+      "ram_hp": 100000,
+      "ram_speed_cm_s": 85,
+      "ram_spawn_offset_cm": 800,
+      "ram_stop_offset_cm": 360,
+      "crew_radius_cm": 1600,
+      "ram_attack_ms": 2000,
+      "ram_gate_damage": 12,
+      "infantry_gate_damage": 1,
+      "arrow_damage": 2400,
+      "fire_heat_per_volley": 35,
+      "ignition_heat": 100,
+      "burn_damage_per_second": 6500,
+      "arrow_arc_cm": 1200,
+      "event_retention_ms": 2200,
+      "event_limit": 128,
+      "gate_bonus": 80
+    },
+    "specialists": {
+      "classes": {
+        "general_bodyguard": "commander"
+      },
+      "templates": {
+        "roman_principes": "veteran",
+        "cohort_legionaries": "veteran",
+        "eagle_cohort": "veteran",
+        "oathsworn_of_mars": "veteran",
+        "roman_triarii": "spear_guard",
+        "silver_pikes": "spear_guard",
+        "sacred_band_of_baal": "spear_guard",
+        "germanic_spear_wall": "spear_guard",
+        "gallic_oathsworn": "veteran"
+      },
+      "profiles": {
+        "commander": {
+          "damage": 1.2,
+          "resistance": 0.88,
+          "duration_ms": 12000,
+          "cooldown_ms": 45000,
+          "active_damage": 1.1,
+          "active_resistance": 0.85,
+          "active_speed": 1.0,
+          "morale_bonus": 18,
+          "radius_cm": 1800,
+          "stops_charge": false
+        },
+        "veteran": {
+          "damage": 1.12,
+          "resistance": 0.92,
+          "duration_ms": 10000,
+          "cooldown_ms": 35000,
+          "active_damage": 1.45,
+          "active_resistance": 1.0,
+          "active_speed": 1.0,
+          "morale_bonus": 8,
+          "radius_cm": 0,
+          "stops_charge": false
+        },
+        "spear_guard": {
+          "damage": 1.08,
+          "resistance": 0.9,
+          "duration_ms": 12000,
+          "cooldown_ms": 40000,
+          "active_damage": 1.0,
+          "active_resistance": 0.55,
+          "active_speed": 0.35,
+          "morale_bonus": 12,
+          "radius_cm": 0,
+          "stops_charge": true
+        }
+      }
+    }
+  },
+  "city_campaign": {
+    "civic_days_per_season": 3,
+    "max_advance_seasons": 4,
+    "history_limit": 640,
+    "chronicle_limit": 40
   }
 }

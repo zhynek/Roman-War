@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "city_governance.schema.json",
+  "title": "Local civic-day decisions; wording belongs to effects_glossary.city_view",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "regions",
+    "default_policies",
+    "actions",
+    "building_profiles",
+    "military_programs",
+    "defense_projects",
+    "defense_inspections"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "default_policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "patrols",
+        "taverns",
+        "workforce"
+      ],
+      "properties": {
+        "patrols": {
+          "enum": [
+            "normal",
+            "heavy"
+          ]
+        },
+        "taverns": {
+          "enum": [
+            "open",
+            "closed"
+          ]
+        },
+        "workforce": {
+          "enum": [
+            "normal",
+            "paid",
+            "requisition"
+          ]
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "site",
+          "kind"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "site": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "kind": {
+            "enum": [
+              "relief",
+              "policy",
+              "tax",
+              "project"
+            ]
+          },
+          "policy": {
+            "enum": [
+              "patrols",
+              "taverns",
+              "workforce"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "requires_project": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "policy"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "policy",
+                "value"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "tax"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "value"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "building_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "site",
+          "project",
+          "stages"
+        ],
+        "properties": {
+          "site": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "project": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "stages": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "current",
+              "construction",
+              "improved"
+            ],
+            "properties": {
+              "current": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "construction": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "improved": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "military_programs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "defense_projects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "defense_inspections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "position",
+          "look_at",
+          "projects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "look_at": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "projects": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

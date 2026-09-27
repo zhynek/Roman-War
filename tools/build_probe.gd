@@ -10,7 +10,7 @@ extends SceneTree
 ## JSON round-trip, because JSON numbers come back as floats and the writer
 ## sorts keys — neither is a difference in the world.
 
-const EXPECTED_TABLES := 36
+const EXPECTED_TABLES := 38
 const TURNS := 5
 
 
@@ -85,12 +85,40 @@ func _init() -> void:
 		if not lockstep:
 			failures += 1
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	if not _battle_probe():
+		failures += 1
 
 	if failures == 0:
 		print("probe OK")
 	else:
 		print("probe FAILED with %d failure(s)" % failures)
 	quit(0 if failures == 0 else 1)
+
+
+func _battle_probe() -> bool:
+	# Exercise the packaged tactical classes and authored map, including a save
+	# in the middle of combat. All storage is isolated by the probe's _init.
+	var game := Game.new_campaign("senate", 42, "medium", "long", false)
+	if not game.city_battle_begin("latium", true).get("ok", false):
+		print("probe FAIL: packaged Roma practice battle unavailable")
+		return false
+	game.city_battle_order("latium", "defender_0", "gate_street")
+	game.city_battle_start("latium")
+	game.city_battle_step("latium")
+	var saved := SaveGame.from_json(SaveGame.to_json(game.state))
+	if saved.is_empty():
+		print("probe FAIL: packaged battle save rejected")
+		return false
+	var resumed := Game.new_campaign("senate", 42, "medium", "long", false)
+	resumed.state = saved
+	NewGame.ensure_state_keys(resumed.state, resumed.data)
+	game.city_battle_step("latium")
+	resumed.city_battle_step("latium")
+	if _canon(game.state) != _canon(resumed.state):
+		print("probe FAIL: packaged battle resume diverged")
+		return false
+	print("probe: Roma battle deployment, combat and saved replay match")
+	return true
 
 
 func _canon(state: Dictionary) -> String:

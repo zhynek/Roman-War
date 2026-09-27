@@ -2,9 +2,14 @@ shader_type spatial;
 render_mode cull_disabled;
 uniform float clock_time = 0.0;
 uniform float walking = 0.0;
+uniform float fighting = 0.0;
+uniform float hit_reaction = 0.0;
+uniform float shooting = 0.0;
 varying vec4 tint;
 void vertex() {
  tint=COLOR;
+ VERTEX.z+=smoothstep(0.75,1.6,VERTEX.y)*hit_reaction*0.16;
+ if(VERTEX.x>0.22 && VERTEX.y>0.9) {VERTEX.z+=shooting*0.15;}
  float phase=clock_time*7.0+INSTANCE_CUSTOM.r*6.283;
  if(VERTEX.y<0.85) {
   float leg=VERTEX.x>0.0?1.0:-1.0;
@@ -12,6 +17,7 @@ void vertex() {
   VERTEX.y+=max(0.0,cos(phase)*leg)*0.09*(1.0-VERTEX.y/0.85)*walking;
  }
  VERTEX.y+=sin(phase*2.0)*0.018*walking;
+ if(VERTEX.x>0.22 && VERTEX.y>0.9) { VERTEX.z+=sin(clock_time*11.0+INSTANCE_CUSTOM.r*6.283)*0.22*fighting; }
  if(VERTEX.z>0.16 && VERTEX.y>0.9) { VERTEX.z+=sin(phase+VERTEX.y*6.0)*0.025*walking; }
 }
 void fragment() {

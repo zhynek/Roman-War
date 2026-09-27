@@ -27,6 +27,8 @@ TABLES = {
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
+    "city_governance.json": "city_governance.schema.json",
+    "roma_city.json": "roma_city.schema.json",
     "ai.json": "ai.schema.json",
     "agents.json": "agents.schema.json",
     "techniques.json": "techniques.schema.json",
@@ -125,6 +127,7 @@ def load_tables() -> dict[str, dict]:
 
 
 def cross_checks(t: dict[str, dict]) -> None:
+    _city_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 
@@ -1472,6 +1475,263 @@ def cross_checks(t: dict[str, dict]) -> None:
                 f"and can never be reached")
 
 
+def _city_battle_checks(t: dict[str, dict], city: dict) -> None:
+    """Tactical routes share the visible district's streets and gate aperture."""
+    battle = city.get("battle", {})
+    nodes = {node["id"]: node for node in battle.get("nodes", [])}
+    if len(nodes) != len(battle.get("nodes", [])):
+        err("roma battle: duplicate node id")
+    words = t.get("effects_glossary.json", {}).get("city_battle", {})
+    for key in ("attacker_entry", "defender_entry", "objective"):
+        if battle.get(key) not in nodes:
+            err(f"roma battle: {key} references an unknown node")
+    if sum(node.get("role") == "gate" for node in nodes.values()) != 1:
+        err("roma battle: exactly one gate is required")
+    if nodes.get(battle.get("objective"), {}).get("role") != "objective":
+        err("roma battle: objective must reference the objective node")
+    for node_id in battle.get("deployment_nodes", []):
+        if node_id not in nodes or nodes[node_id].get("role") in ("approach", "gate"):
+            err(f"roma battle: invalid defender deployment node {node_id}")
+    if battle.get("defender_entry") not in battle.get("deployment_nodes", []):
+        err("roma battle: defender entry must allow deployment")
+    units = {unit["id"]: unit for unit in t.get("units.json", {}).get("units", [])}
+    realtime = t.get("balance.json", {}).get("city_battle", {}).get("realtime", {})
+    specialists = t.get("balance.json", {}).get("city_battle", {}).get("specialists", {})
+    escort_limit = t.get("balance.json", {}).get("recruitment", {}).get("city_escort_limit", 0)
+    if not isinstance(escort_limit, int) or escort_limit < 1:
+        err("roma specialists: city_escort_limit must be a positive integer")
+    for unit in units.values():
+        if unit.get("class") == "general_bodyguard" and unit.get("city_recruit_only") and unit.get("cost", 0) <= 0:
+            err(f"roma specialists: city escort {unit['id']} must have a recruitment cost")
+    for template in specialists.get("templates", {}):
+        if template not in units:
+            err(f"roma specialists: unknown template {template}")
+    for unit_class in specialists.get("classes", {}):
+        if unit_class not in realtime.get("roles", {}):
+            err(f"roma specialists: unknown class {unit_class}")
+    for ability, profile in specialists.get("profiles", {}).items():
+        for key in ("specialty_", "ability_"):
+            if key + ability not in words:
+                err(f"roma specialists: missing prose {key + ability}")
+        if "ability_" + ability + "_help" not in words:
+            err(f"roma specialists: missing ability help {ability}")
+        if profile["duration_ms"] >= profile["cooldown_ms"]:
+            err(f"roma specialists: {ability} needs recovery after its duration")
+        for clock in ("duration_ms", "cooldown_ms"):
+            if profile[clock] % realtime.get("tick_ms", 100):
+                err(f"roma specialists: {ability} {clock} must match the tick quantum")
+    roles = realtime.get("roles", {})
+    for unit in units.values():
+        if unit.get("class") not in roles:
+            err(f"roma battle: missing tactical role for {unit.get('class')}")
+    if realtime.get("beats") != {"archer": "cavalry", "cavalry": "soldier", "soldier": "archer"}:
+        err("roma battle: tactical counter cycle must remain archers > cavalry > soldiers > archers")
+    spatial = battle.get("spatial", {})
+    objective = nodes.get(battle.get("objective"), {}).get("position", [])
+    if spatial.get("objective_cm") != [round(v*100) for v in objective]:
+        err("roma battle: spatial objective must match the displayed Forum objective")
+    if spatial.get("gate_cm") != [0, round(city.get("walls", {}).get("half_extent", 0)*100)]:
+        err("roma battle: spatial gate must match the actual wall opening")
+    if 1000 % realtime.get("tick_ms", 100) != 0:
+        err("roma battle: tick quantum must divide a second exactly")
+    for role in ("soldier", "archer", "cavalry"):
+        if "role_" + role not in words or role not in realtime.get("profiles", {}):
+            err(f"roma battle: missing profile or role prose for {role}")
+    for unit_id in battle.get("practice_attackers", []):
+        if unit_id not in units or units[unit_id].get("class") == "ship":
+            err(f"roma battle: invalid practice unit {unit_id}")
+    extent = float(city.get("extent", 0)) / 2
+    wall = float(city.get("walls", {}).get("half_extent", 0))
+    gate_half_width = float(city.get("walls", {}).get("gate_width", 0)) / 2
+    for node_id, node in nodes.items():
+        if "node_" + node_id not in words:
+            err(f"roma battle: missing node prose node_{node_id}")
+        if any(abs(value) > extent for value in node["position"]):
+            err(f"roma battle: node {node_id} outside district")
+        for neighbor_id in node["neighbors"]:
+            neighbor = nodes.get(neighbor_id)
+            if neighbor is None or neighbor_id == node_id:
+                err(f"roma battle: invalid edge {node_id} to {neighbor_id}")
+                continue
+            if node_id not in neighbor["neighbors"]:
+                err(f"roma battle: edge {node_id} to {neighbor_id} is not bidirectional")
+            # Sample the complete route, with a metre of formation clearance,
+            # against the actual authored houses; endpoints alone miss corners.
+            a, b = node["position"], neighbor["position"]
+            samples = max(1, int(((b[0]-a[0])**2 + (b[1]-a[1])**2)**0.5 * 2))
+            for i in range(samples + 1):
+                point = [a[axis] + (b[axis]-a[axis])*i/samples for axis in (0, 1)]
+                if abs(point[0]) >= wall - 1.2 or point[1] <= -wall + 1.2 or (point[1] >= wall - 1.2 and abs(point[0]) >= gate_half_width - 1):
+                    err(f"roma battle: edge {node_id} to {neighbor_id} crosses a solid wall")
+                    break
+                if any(all(abs(point[axis]-building["position"][axis]) < building["size"][axis]/2 + 1 for axis in (0, 1)) for building in city.get("buildings", [])):
+                    err(f"roma battle: edge {node_id} to {neighbor_id} intersects a building")
+                    break
+                fountain = city.get("water_position", [0, 0])
+                if (point[0]-fountain[0])**2 + (point[1]-fountain[1])**2 < 16:
+                    err(f"roma battle: edge {node_id} to {neighbor_id} intersects the fountain")
+                    break
+    seen, frontier = set(), [battle.get("attacker_entry")]
+    while frontier:
+        node_id = frontier.pop()
+        if node_id in seen or node_id not in nodes:
+            continue
+        seen.add(node_id)
+        frontier.extend(nodes[node_id]["neighbors"])
+    if seen != set(nodes):
+        err("roma battle: tactical graph must be connected")
+
+
+def _city_checks(t: dict[str, dict]) -> None:
+    """The walkable district and civic rules share region/site and prose IDs."""
+    city = t.get("roma_city.json", {})
+    _city_battle_checks(t, city)
+    governance = t.get("city_governance.json", {})
+    rules = t.get("balance.json", {}).get("city", {})
+    words = t.get("effects_glossary.json", {}).get("city_view", {})
+    region_ids = {r["id"] for r in t.get("regions.json", {}).get("regions", [])}
+    if city.get("region") not in region_ids:
+        err(f"roma city: unknown region {city.get('region')}")
+    for region in governance.get("regions", []):
+        if region not in region_ids:
+            err(f"city governance: unknown region {region}")
+        if region != city.get("region"):
+            err(f"city governance: region {region} has no walkable city geometry")
+    site_ids = {site["id"] for site in city.get("sites", [])}
+    for collection in ("sites", "buildings", "roads", "citizen_routes", "people_anchors"):
+        ids = [item["id"] for item in city.get(collection, [])]
+        if len(ids) != len(set(ids)):
+            err(f"roma city: duplicate {collection} id")
+    actions = governance.get("actions", [])
+    action_ids = {a["id"] for a in actions}
+    if len(action_ids) != len(actions):
+        err("city governance: duplicate action id")
+    for site in city.get("sites", []):
+        for field in ("name_key", "description_key"):
+            if site[field] not in words:
+                err(f"roma city: {site['id']} has no city_view prose for {site[field]}")
+    projects = set()
+    for action in actions:
+        aid = action["id"]
+        if action["site"] not in site_ids:
+            err(f"city governance: {aid} references unknown site {action['site']}")
+        for prefix in ("action_", "help_"):
+            if prefix + aid not in words:
+                err(f"city governance: {aid} has no city_view prose {prefix + aid}")
+        kind = action["kind"]
+        if kind == "project":
+            projects.add(aid)
+        elif kind == "policy":
+            vocabulary = {"patrols": {"normal", "heavy"}, "taverns": {"open", "closed"},
+                          "workforce": {"normal", "paid", "requisition"}}
+            policy = action.get("policy", "")
+            if action.get("value") not in vocabulary.get(policy, set()):
+                err(f"city governance: {aid} has invalid policy/value")
+        elif kind == "tax" and action.get("value") not in rules.get("daily_cost_by_tax", {}):
+            err(f"city governance: {aid} has an unsupported tax level")
+    if action_ids != set(rules.get("action_costs", {})):
+        err("city governance: every action needs exactly one balance cost")
+    if projects != set(rules.get("project_days", {})):
+        err("city governance: project ids and balance project_days disagree")
+    for table in ("project_maintenance", "project_effects"):
+        if projects != set(rules.get(table, {})):
+            err(f"city governance: project ids and balance {table} disagree")
+    profiles = governance.get("building_profiles", [])
+    profile_sites = [profile["site"] for profile in profiles]
+    if len(profile_sites) != len(set(profile_sites)) or set(profile_sites) != site_ids:
+        err("city governance: every site needs exactly one building profile")
+    profile_projects = [profile["project"] for profile in profiles]
+    programs = set(governance.get("military_programs", []))
+    defenses = set(governance.get("defense_projects", []))
+    if len(profile_projects) != len(set(profile_projects)) or set(profile_projects) | programs | defenses != projects or set(profile_projects) & programs or defenses & (programs | set(profile_projects)):
+        err("city governance: every project needs exactly one building profile or military programme")
+    inspection_ids = set()
+    for point in governance.get("defense_inspections", []):
+        if point["id"] in inspection_ids:
+            err("city governance: duplicate defense inspection")
+        inspection_ids.add(point["id"])
+        if not set(point["projects"]) <= projects:
+            err("city governance: inspection references unknown project")
+        for key in ("defense_" + point["id"], "defense_" + point["id"] + "_help"):
+            if key not in words:
+                err(f"city governance: missing inspection prose {key}")
+    if programs != set(rules.get("project_military_effects", {})):
+        err("city governance: military programmes and balance effects disagree")
+    for kind in ("project_completed", "relief_expired", "troops_trained", "troops_equipped", "program_paused"):
+        if "event_" + kind not in words:
+            err(f"city governance: daily event has no city_view prose event_{kind}")
+    for policy in rules.get("workforce_rate", {}):
+        if "factor_workforce_" + policy not in words:
+            err(f"city governance: workforce flow has no city_view prose factor_workforce_{policy}")
+    action_by_id = {action["id"]: action for action in actions}
+    for action in actions:
+        prerequisite = action.get("requires_project")
+        if prerequisite is not None and (prerequisite not in projects or prerequisite == action["id"]):
+            err(f"city governance: {action['id']} has invalid project prerequisite")
+        visited = {action["id"]}
+        while prerequisite in action_by_id:
+            if prerequisite in visited:
+                err(f"city governance: {action['id']} has a cyclic project prerequisite")
+                break
+            visited.add(prerequisite)
+            prerequisite = action_by_id[prerequisite].get("requires_project")
+    for profile in profiles:
+        project_id = profile["project"]
+        if action_by_id.get(project_id, {}).get("site") != profile["site"]:
+            err(f"city governance: {project_id} building profile belongs to the wrong site")
+        for key in profile["stages"].values():
+            if key not in words:
+                err(f"city governance: building stage has no city_view prose {key}")
+    for project_id in projects:
+        for prefix in ("project_", "factor_"):
+            if prefix + project_id not in words:
+                err(f"city governance: project has no city_view prose {prefix + project_id}")
+        if rules.get("action_costs", {}).get(project_id, 0) <= 0:
+            err(f"city governance: {project_id} requires a paid construction cost")
+        if rules.get("project_maintenance", {}).get(project_id, 0) <= 0:
+            err(f"city governance: {project_id} requires recurring maintenance")
+        effects = rules.get("project_effects", {}).get(project_id, {})
+        if not any(value != 0 for value in effects.values()):
+            err(f"city governance: {project_id} must have a readable civic effect")
+    if not (0 < rules.get("restive_threshold", 0) < rules.get("rebellious_threshold", 0) <= 100):
+        err("city governance: mood thresholds must increase within 0–100")
+    for metric in ("cleanliness", "street_condition"):
+        initial, complete = rules.get("initial_" + metric, 0), rules.get("completed_" + metric, 0)
+        if not 0 <= initial < complete <= 100:
+            err(f"city governance: {metric} must improve within 0–100")
+    extent = float(city.get("extent", 0)) / 2
+    def check_point(point: list, location: str) -> None:
+        if any(abs(float(value)) > extent for value in point):
+            err(f"roma city: {location} outside district bounds")
+    for site in city.get("sites", []):
+        check_point(site["position"], f"site {site['id']}")
+        check_point(site["approach"], f"site approach {site['id']}")
+    spawn = city.get("spawn", [0, 0, 0])
+    check_point([spawn[0], spawn[2]], "spawn")
+    for building in city.get("buildings", []):
+        if any(float(size) <= 0 for size in building["size"]):
+            err(f"roma city: {building['id']} has a non-positive footprint")
+        if building["enterable"] and float(building["door_width"]) >= float(building["size"][0]):
+            err(f"roma city: {building['id']} door is wider than its facade")
+        for sx, sz in ((-1, -1), (1, 1)):
+            check_point([building["position"][0] + sx * building["size"][0] / 2,
+                         building["position"][1] + sz * building["size"][1] / 2],
+                        f"building {building['id']} footprint")
+    for collection in ("roads", "citizen_routes"):
+        for path in city.get(collection, []):
+            for index, point in enumerate(path["points"]):
+                check_point(point, f"{path['id']} waypoint {index}")
+            for a, b in zip(path["points"], path["points"][1:]):
+                if a == b:
+                    err(f"roma city: {path['id']} has a zero-length waypoint segment")
+    for anchor in city.get("people_anchors", []):
+        check_point(anchor["position"], f"people anchor {anchor['id']}")
+    for collection in ("trees", "market_stalls", "rubbish", "repair_areas"):
+        for index, point in enumerate(city.get(collection, [])):
+            check_point(point, f"{collection} {index}")
+    check_point(city.get("water_position", [0, 0]), "water position")
+
+
 def main() -> int:
     global LIVE_MISSION_KINDS
     LIVE_MISSION_KINDS = _live_mission_kinds()
@@ -1530,7 +1790,7 @@ def _entity_count(document: dict) -> int:
     if "unit_classes" in document:
         return sum(len(document.get(key, [])) for key in
                    ("unit_classes", "attributes", "effects", "building_kinds"))
-    for key in ("cultures", "factions", "chains", "units", "classes", "regions",
+    for key in ("actions", "cultures", "factions", "chains", "units", "classes", "regions",
                 "traits", "ancillaries", "events", "wonders", "missions",
                 "conditions", "pools", "cells", "advances", "axes",
                 "edicts", "sites", "stages", "effects", "recipes",

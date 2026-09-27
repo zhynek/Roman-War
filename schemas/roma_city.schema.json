@@ -1,0 +1,666 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "roma_city.schema.json",
+  "title": "Authored walkable Republican Roma district",
+  "type": "object",
+  "required": [
+    "id",
+    "region",
+    "extent",
+    "spawn",
+    "historical_basis",
+    "forum",
+    "walls",
+    "yard",
+    "sites",
+    "buildings",
+    "roads",
+    "citizen_routes",
+    "people_anchors",
+    "trees",
+    "market_stalls",
+    "rubbish",
+    "repair_areas",
+    "water_position",
+    "battle"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "roma"
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "extent": {
+      "type": "number",
+      "minimum": 160,
+      "maximum": 300
+    },
+    "spawn": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number"
+      }
+    },
+    "historical_basis": {
+      "type": "string",
+      "minLength": 80
+    },
+    "forum": {
+      "type": "object",
+      "required": [
+        "position",
+        "size"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "size": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "walls": {
+      "type": "object",
+      "required": [
+        "half_extent",
+        "height",
+        "gate_width",
+        "gate_open"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "half_extent": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "gate_width": {
+          "type": "number"
+        },
+        "gate_open": {
+          "type": "boolean"
+        }
+      }
+    },
+    "yard": {
+      "type": "object",
+      "required": [
+        "position",
+        "size",
+        "gate_width"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "position": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "size": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "gate_width": {
+          "type": "number"
+        }
+      }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name_key",
+          "description_key",
+          "position",
+          "approach",
+          "radius"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name_key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "description_key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "approach": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "radius": {
+            "type": "number",
+            "minimum": 1
+          }
+        }
+      },
+      "minItems": 6
+    },
+    "buildings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "size",
+          "height",
+          "kind",
+          "enterable",
+          "door_width",
+          "palette"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "size": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "height": {
+            "type": "number",
+            "minimum": 3,
+            "maximum": 12
+          },
+          "kind": {
+            "enum": [
+              "curia",
+              "tavern",
+              "barracks",
+              "house"
+            ]
+          },
+          "enterable": {
+            "type": "boolean"
+          },
+          "door_width": {
+            "type": "number",
+            "minimum": 1.5
+          },
+          "palette": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          }
+        }
+      },
+      "minItems": 3
+    },
+    "roads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "width",
+          "points"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "width": {
+            "type": "number",
+            "minimum": 3
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "minItems": 2
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "citizen_routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "points",
+          "count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "role": {
+            "enum": [
+              "citizen",
+              "porter",
+              "guard"
+            ]
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "minItems": 2
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "status_group": {
+            "enum": [
+              "patrol_extra",
+              "protest",
+              "grain_queue",
+              "tavern"
+            ]
+          },
+          "loop": {
+            "type": "boolean"
+          }
+        }
+      },
+      "minItems": 1
+    },
+    "people_anchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "position",
+          "count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "role": {
+            "enum": [
+              "citizen",
+              "porter",
+              "guard",
+              "patron",
+              "merchant",
+              "protester",
+              "grain_queue"
+            ]
+          },
+          "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          },
+          "facing": {
+            "type": "number"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "spacing": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 2
+          },
+          "status_group": {
+            "enum": [
+              "patrol_extra",
+              "protest",
+              "grain_queue",
+              "tavern"
+            ]
+          },
+          "activity": {
+            "enum": [
+              "drill"
+            ]
+          }
+        }
+      },
+      "minItems": 0
+    },
+    "trees": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "minItems": 0
+    },
+    "market_stalls": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "minItems": 0
+    },
+    "rubbish": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "minItems": 0
+    },
+    "repair_areas": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number"
+        }
+      },
+      "minItems": 0
+    },
+    "water_position": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number"
+      }
+    },
+    "battle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes",
+        "attacker_entry",
+        "defender_entry",
+        "objective",
+        "deployment_nodes",
+        "practice_attackers",
+        "garrison_muster",
+        "spatial"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "position",
+              "neighbors",
+              "role"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "position": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "neighbors": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "role": {
+                "enum": [
+                  "approach",
+                  "gate",
+                  "street",
+                  "objective",
+                  "reserve"
+                ]
+              }
+            }
+          }
+        },
+        "attacker_entry": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "defender_entry": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "objective": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "deployment_nodes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "practice_attackers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "garrison_muster": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "origin",
+            "columns",
+            "spacing"
+          ],
+          "properties": {
+            "origin": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number"
+              }
+            },
+            "columns": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "spacing": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "spatial": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "attacker_origin_cm",
+            "defender_origin_cm",
+            "deployment_columns",
+            "deployment_spacing_cm",
+            "gate_cm",
+            "objective_cm",
+            "wall_half_depth_cm",
+            "gate_join_cm",
+            "approach_half_width_cm",
+            "fountain_radius_cm",
+            "attacker_max_columns"
+          ],
+          "properties": {
+            "attacker_origin_cm": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "defender_origin_cm": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "deployment_columns": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "deployment_spacing_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "gate_cm": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "objective_cm": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "integer"
+              }
+            },
+            "wall_half_depth_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "gate_join_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "approach_half_width_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fountain_radius_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "attacker_max_columns": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

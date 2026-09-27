@@ -1222,7 +1222,7 @@
       "attributes": [
         "fast_moving"
       ],
-      "description": "Riders schooled in the African fashion \u2014 no saddle, no rest, no warning. They circle a column for days until it forgets what safety felt like."
+      "description": "Riders schooled in the African fashion — no saddle, no rest, no warning. They circle a column for days until it forgets what safety felt like."
     },
     {
       "id": "punic_noble_horse",
@@ -2365,6 +2365,61 @@
       "requires_technique": "corvus_boarding_bridge",
       "era": "any",
       "description": "Legionaries drilled to cross the raven's bridge with the deck heaving under them. Fighting on land they keep the habit: close fast, grip hard, and give no ground that took blood to win."
+    },
+    {
+      "id": "roman_allied_bowmen",
+      "name": "Allied Bowmen",
+      "class": "missile",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 120,
+      "attack": 3,
+      "missile_attack": 7,
+      "charge": 1,
+      "defense": 5,
+      "morale": 6,
+      "speed": 5,
+      "cost": 380,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 1
+      },
+      "era": "pre_marian",
+      "description": "Allied bowmen mustered alongside the citizen levy. A gameplay recruitment option for the Roma battle: sustained volleys punish mounted formations, while shielded foot can close and scatter the bow line.",
+      "city_recruit_only": true
+    },
+    {
+      "id": "roman_command_escort",
+      "name": "Commander’s Mounted Escort",
+      "class": "general_bodyguard",
+      "culture": "roman",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate"
+      ],
+      "soldiers": 40,
+      "attack": 10,
+      "charge": 10,
+      "defense": 16,
+      "morale": 14,
+      "speed": 8,
+      "cost": 1200,
+      "upkeep": 200,
+      "requirements": {
+        "building_kind": "barracks",
+        "building_level": 3
+      },
+      "era": "any",
+      "description": "A mounted household escort for Roma’s commander, recruited through the barracks while a general is present. One such escort may be maintained by the faction, including troops in training or serving in field armies. A gameplay muster option: armored riders carry a crested helmet, command standard and the Rally the line ability.",
+      "city_recruit_only": true
     }
   ]
 }

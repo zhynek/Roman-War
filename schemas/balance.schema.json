@@ -31,7 +31,10 @@
     "edicts",
     "chronicle",
     "reconnaissance",
-    "terrain_routes"
+    "terrain_routes",
+    "city",
+    "city_battle",
+    "city_campaign"
   ],
   "additionalProperties": false,
   "properties": {
@@ -463,6 +466,1588 @@
         "map_access_value_per_region",
         "map_access_base_value"
       ]
+    },
+    "city": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_cleanliness",
+        "initial_street_condition",
+        "completed_cleanliness",
+        "completed_street_condition",
+        "grain_duration_days",
+        "unrest_base",
+        "unrest_grievance_scale",
+        "unrest_legitimacy_gap_scale",
+        "unrest_grime_scale",
+        "unrest_disrepair_scale",
+        "unrest_patrols",
+        "unrest_grain",
+        "unrest_taverns_closed",
+        "restive_threshold",
+        "rebellious_threshold",
+        "daily_cost_by_tax",
+        "daily_patrol_cost",
+        "daily_taverns_closed_cost",
+        "grievance_base",
+        "grievance_tax",
+        "grievance_grime_scale",
+        "grievance_disrepair_scale",
+        "grievance_patrols",
+        "grievance_grain",
+        "grievance_taverns_closed",
+        "legitimacy_base",
+        "legitimacy_tax",
+        "legitimacy_patrols",
+        "legitimacy_grain",
+        "legitimacy_taverns_closed",
+        "action_costs",
+        "project_days",
+        "project_maintenance",
+        "project_effects",
+        "project_military_effects",
+        "workforce_rate",
+        "workforce_daily_cost",
+        "workforce_grievance",
+        "workforce_legitimacy",
+        "military_daily_progress"
+      ],
+      "properties": {
+        "initial_cleanliness": {
+          "type": "number"
+        },
+        "initial_street_condition": {
+          "type": "number"
+        },
+        "completed_cleanliness": {
+          "type": "number"
+        },
+        "completed_street_condition": {
+          "type": "number"
+        },
+        "grain_duration_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unrest_base": {
+          "type": "number"
+        },
+        "unrest_grievance_scale": {
+          "type": "number"
+        },
+        "unrest_legitimacy_gap_scale": {
+          "type": "number"
+        },
+        "unrest_grime_scale": {
+          "type": "number"
+        },
+        "unrest_disrepair_scale": {
+          "type": "number"
+        },
+        "unrest_patrols": {
+          "type": "number"
+        },
+        "unrest_grain": {
+          "type": "number"
+        },
+        "unrest_taverns_closed": {
+          "type": "number"
+        },
+        "restive_threshold": {
+          "type": "number"
+        },
+        "rebellious_threshold": {
+          "type": "number"
+        },
+        "daily_cost_by_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "high": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "very_high": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "daily_patrol_cost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "daily_taverns_closed_cost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "grievance_base": {
+          "type": "number"
+        },
+        "grievance_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "number"
+            },
+            "low": {
+              "type": "number"
+            },
+            "normal": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "very_high": {
+              "type": "number"
+            }
+          }
+        },
+        "grievance_grime_scale": {
+          "type": "number"
+        },
+        "grievance_disrepair_scale": {
+          "type": "number"
+        },
+        "grievance_patrols": {
+          "type": "number"
+        },
+        "grievance_grain": {
+          "type": "number"
+        },
+        "grievance_taverns_closed": {
+          "type": "number"
+        },
+        "legitimacy_base": {
+          "type": "number"
+        },
+        "legitimacy_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "number"
+            },
+            "low": {
+              "type": "number"
+            },
+            "normal": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "very_high": {
+              "type": "number"
+            }
+          }
+        },
+        "legitimacy_patrols": {
+          "type": "number"
+        },
+        "legitimacy_grain": {
+          "type": "number"
+        },
+        "legitimacy_taverns_closed": {
+          "type": "number"
+        },
+        "action_costs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "grain_relief",
+            "patrols_increase",
+            "patrols_reduce",
+            "tax_low",
+            "tax_normal",
+            "tax_high",
+            "repair_streets",
+            "clean_water",
+            "close_taverns",
+            "reopen_taverns",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples",
+            "workforce_normal",
+            "workforce_paid",
+            "workforce_requisition",
+            "reinforce_gate",
+            "prepare_fire_arrows"
+          ],
+          "properties": {
+            "grain_relief": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "patrols_increase": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "patrols_reduce": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_high": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "close_taverns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reopen_taverns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_paid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_requisition": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reinforce_gate": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prepare_fire_arrows": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "project_days": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples",
+            "reinforce_gate",
+            "prepare_fire_arrows"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "reinforce_gate": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "prepare_fire_arrows": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "project_maintenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples",
+            "reinforce_gate",
+            "prepare_fire_arrows"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reinforce_gate": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "prepare_fire_arrows": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "project_effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples",
+            "reinforce_gate",
+            "prepare_fire_arrows"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "clean_water": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_tavern": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_barracks": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_market": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_curia": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "drill_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "equip_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "reinforce_gate": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "prepare_fire_arrows": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "project_military_effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "drill_maniples",
+            "equip_maniples"
+          ],
+          "properties": {
+            "drill_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "experience",
+                "weapon",
+                "armor"
+              ],
+              "properties": {
+                "experience": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "weapon": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "armor": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "equip_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "experience",
+                "weapon",
+                "armor"
+              ],
+              "properties": {
+                "experience": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "weapon": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "armor": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "workforce_rate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "paid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "requisition": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "workforce_daily_cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "paid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "requisition": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "workforce_grievance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "requisition": {
+              "type": "number"
+            }
+          }
+        },
+        "workforce_legitimacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "requisition": {
+              "type": "number"
+            }
+          }
+        },
+        "military_daily_progress": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "city_battle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate_integrity",
+        "gate_damage_per_formation",
+        "melee_range",
+        "missile_range",
+        "casualty_pct_per_step",
+        "minimum_damage_ratio",
+        "maximum_damage_ratio",
+        "objective_hold_steps",
+        "maximum_steps",
+        "realtime",
+        "siege",
+        "specialists"
+      ],
+      "properties": {
+        "gate_integrity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "gate_damage_per_formation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "melee_range": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "missile_range": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "casualty_pct_per_step": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_damage_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_damage_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "objective_hold_steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximum_steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "realtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tick_ms",
+            "grid_cm",
+            "clearance_cm",
+            "melee_range_cm",
+            "archer_range_cm",
+            "acquire_range_cm",
+            "objective_radius_cm",
+            "objective_hold_ms",
+            "maximum_ms",
+            "gate_damage_per_second",
+            "base_damage_per_second",
+            "counter_multiplier",
+            "disadvantage_multiplier",
+            "charge_multiplier",
+            "charge_runup_cm",
+            "charge_recovery_ms",
+            "formation_separation_cm",
+            "repath_ticks",
+            "recruit_days",
+            "display_soldiers_per_model",
+            "roles",
+            "profiles",
+            "beats",
+            "charge_speed_multiplier",
+            "engaged_speed_multiplier",
+            "archer_melee_multiplier",
+            "power_ratio_min",
+            "power_ratio_max",
+            "morale_per_experience",
+            "rout_threshold",
+            "waypoint_tolerance_cm",
+            "projectile_sample_cm",
+            "gate_attack_radius_cm",
+            "deployment_limit_cm",
+            "group_columns",
+            "group_spacing_cm"
+          ],
+          "properties": {
+            "tick_ms": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "grid_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "clearance_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "melee_range_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "archer_range_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "acquire_range_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "objective_radius_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "objective_hold_ms": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "maximum_ms": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "gate_damage_per_second": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "base_damage_per_second": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "counter_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "disadvantage_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "charge_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "charge_runup_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "charge_recovery_ms": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "formation_separation_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "repath_ticks": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "recruit_days": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "display_soldiers_per_model": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "roles": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "infantry",
+                "spear",
+                "pike",
+                "peasant",
+                "missile",
+                "cavalry",
+                "general_bodyguard",
+                "horse_archer",
+                "chariot",
+                "elephant",
+                "siege",
+                "ship"
+              ],
+              "properties": {
+                "infantry": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "spear": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "pike": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "peasant": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "missile": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "cavalry": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "general_bodyguard": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "horse_archer": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "chariot": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "elephant": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "siege": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "ship": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                }
+              }
+            },
+            "profiles": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "soldier",
+                "archer",
+                "cavalry"
+              ],
+              "properties": {
+                "soldier": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "speed_cm_s",
+                    "attack_ms",
+                    "range_cm"
+                  ],
+                  "properties": {
+                    "speed_cm_s": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "attack_ms": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "range_cm": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                "archer": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "speed_cm_s",
+                    "attack_ms",
+                    "range_cm"
+                  ],
+                  "properties": {
+                    "speed_cm_s": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "attack_ms": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "range_cm": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                },
+                "cavalry": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "speed_cm_s",
+                    "attack_ms",
+                    "range_cm"
+                  ],
+                  "properties": {
+                    "speed_cm_s": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "attack_ms": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "range_cm": {
+                      "type": "integer",
+                      "minimum": 1
+                    }
+                  }
+                }
+              }
+            },
+            "beats": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "archer",
+                "cavalry",
+                "soldier"
+              ],
+              "properties": {
+                "archer": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "cavalry": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                },
+                "soldier": {
+                  "enum": [
+                    "soldier",
+                    "archer",
+                    "cavalry"
+                  ]
+                }
+              }
+            },
+            "charge_speed_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "engaged_speed_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "archer_melee_multiplier": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "power_ratio_min": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "power_ratio_max": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "morale_per_experience": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "rout_threshold": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "waypoint_tolerance_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "projectile_sample_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "gate_attack_radius_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "deployment_limit_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "group_columns": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "group_spacing_cm": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "siege": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ram_hp",
+            "ram_speed_cm_s",
+            "ram_spawn_offset_cm",
+            "ram_stop_offset_cm",
+            "crew_radius_cm",
+            "ram_attack_ms",
+            "ram_gate_damage",
+            "infantry_gate_damage",
+            "arrow_damage",
+            "fire_heat_per_volley",
+            "ignition_heat",
+            "burn_damage_per_second",
+            "arrow_arc_cm",
+            "event_retention_ms",
+            "event_limit",
+            "gate_bonus"
+          ],
+          "properties": {
+            "ram_hp": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ram_speed_cm_s": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ram_spawn_offset_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ram_stop_offset_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "crew_radius_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ram_attack_ms": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ram_gate_damage": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "infantry_gate_damage": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "arrow_damage": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fire_heat_per_volley": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "ignition_heat": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "burn_damage_per_second": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "arrow_arc_cm": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "event_retention_ms": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "event_limit": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "gate_bonus": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "specialists": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "classes",
+            "templates",
+            "profiles"
+          ],
+          "properties": {
+            "classes": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "commander",
+                  "veteran",
+                  "spear_guard"
+                ]
+              }
+            },
+            "templates": {
+              "type": "object",
+              "additionalProperties": {
+                "enum": [
+                  "commander",
+                  "veteran",
+                  "spear_guard"
+                ]
+              }
+            },
+            "profiles": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "commander",
+                "veteran",
+                "spear_guard"
+              ],
+              "properties": {
+                "commander": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "damage",
+                    "resistance",
+                    "duration_ms",
+                    "cooldown_ms",
+                    "active_damage",
+                    "active_resistance",
+                    "active_speed",
+                    "morale_bonus",
+                    "radius_cm",
+                    "stops_charge"
+                  ],
+                  "properties": {
+                    "damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "duration_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "cooldown_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "active_damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_speed": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "morale_bonus": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "radius_cm": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 3600
+                    },
+                    "stops_charge": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "veteran": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "damage",
+                    "resistance",
+                    "duration_ms",
+                    "cooldown_ms",
+                    "active_damage",
+                    "active_resistance",
+                    "active_speed",
+                    "morale_bonus",
+                    "radius_cm",
+                    "stops_charge"
+                  ],
+                  "properties": {
+                    "damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "duration_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "cooldown_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "active_damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_speed": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "morale_bonus": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "radius_cm": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 3600
+                    },
+                    "stops_charge": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "spear_guard": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "damage",
+                    "resistance",
+                    "duration_ms",
+                    "cooldown_ms",
+                    "active_damage",
+                    "active_resistance",
+                    "active_speed",
+                    "morale_bonus",
+                    "radius_cm",
+                    "stops_charge"
+                  ],
+                  "properties": {
+                    "damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "duration_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "cooldown_ms": {
+                      "type": "integer",
+                      "minimum": 100,
+                      "maximum": 120000
+                    },
+                    "active_damage": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_resistance": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "active_speed": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 3
+                    },
+                    "morale_bonus": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 30
+                    },
+                    "radius_cm": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 3600
+                    },
+                    "stops_charge": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "city_campaign": {
+      "type": "object",
+      "required": [
+        "civic_days_per_season",
+        "max_advance_seasons",
+        "history_limit",
+        "chronicle_limit"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "civic_days_per_season": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "max_advance_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "history_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "chronicle_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      }
     }
   },
   "$defs": {

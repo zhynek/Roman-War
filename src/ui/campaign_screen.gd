@@ -16,7 +16,11 @@ extends Control
 ## playback_enabled = false and the same turn resolves synchronously, which is
 ## what the headless suite does when it drives twenty-five turns in a loop.
 
+var city_defense_button: Button
+
 signal main_menu_requested
+signal city_requested
+signal state_loaded
 
 const SAVE_PATH := "user://roman_war_save.json"
 const OPTIONS_PATH := "user://roman_war_options.json"
@@ -32,6 +36,7 @@ const OPTION_MAIN_MENU := 7
 # Each screen owns its slot; changing modes never changes global user://.
 var save_path := SAVE_PATH
 var main_menu_enabled := false
+var shared_session := false
 
 var realism_development_enabled := false
 var realism_study: RealismStudy
@@ -187,6 +192,7 @@ func _ready() -> void:
 	region_panel = RegionPanel.new()
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
+	region_panel.city_requested.connect(_enter_roma)
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.army_raised.connect(_on_army_raised)
 	region_panel.fleet_launched.connect(_on_fleet_launched)
@@ -294,6 +300,9 @@ func _build_top_bar() -> PanelContainer:
 	end_turn.theme_type_variation = &"EndTurnButton"
 	end_turn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	readings.add_child(end_turn)
+	city_defense_button = _bar_button(String(game.data.effects_glossary["city_battle"]["campaign_pending"]), _enter_roma)
+	city_defense_button.theme_type_variation = &"EndTurnButton"
+	readings.add_child(city_defense_button)
 
 	var scrolls := HFlowContainer.new()
 	scrolls.add_theme_constant_override("h_separation", 4)
@@ -382,6 +391,11 @@ func _draw_treasury() -> void:
 
 
 func refresh() -> void:
+	var city_defense := game.city_battle_status("latium")
+	var saved_battle: Dictionary = game.state.get("city_battles", {}).get("latium", {})
+	var can_open_battle: bool = game.state["settlements"].get("latium", {}).get("owner", "") == game.state["player_faction"] or saved_battle.get("owner", "") == game.state["player_faction"]
+	city_defense_button.visible = can_open_battle and (bool(city_defense.get("can_defend", false)) or bool(city_defense.get("active", false)))
+	city_defense_button.text = String(game.data.effects_glossary["city_battle"]["campaign_report" if city_defense.get("phase", "") == "finished" else "campaign_pending"])
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
 	# Only the day's own swing is animated. Spending money on a building should
 	# show immediately, and a loaded game should never tick up from a stale
@@ -1326,12 +1340,21 @@ func _end_turn() -> void:
 	## running two days at once.
 	if turn_sequence.is_playing() or dispatch_panel.visible:
 		return
+	var city_defense := game.city_battle_status("latium")
+	if city_defense.get("can_defend", false) or (city_defense.get("active", false) and city_defense.get("phase", "") != "finished"):
+		_enter_roma()
+		return
 	var faction: Dictionary = game.state["factions"][game.state["player_faction"]]
 	var treasury_before := int(faction["treasury"])
 
 	_cancel_map_order()
 	map_view.finish_marches()
-	game.end_turn()
+	var turn_result := game.end_turn()
+	if not turn_result.get("ok", true):
+		var reason := String(turn_result.get("reason", "advance_blocked"))
+		_log(String(game.data.effects_glossary["city_view"].get("reason_" + reason, reason)))
+		refresh()
+		return
 
 	_day_beats = game.day_beats()
 	_treasury_delta = int(faction["treasury"]) - treasury_before
@@ -1556,23 +1579,28 @@ func _save_game() -> void:
 
 func _load_game() -> void:
 	if game.load_from(save_path):
-		map_view.finish_marches()
-		_clear_force_selection()
-		selected_agent = ""
-		map_view.selected_region = ""
-		region_panel.clear_panel()
-		_victory_shown = false
-		map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
-		# The loaded campaign brings its own day with it: the journal travels in
-		# the save, so the Dispatch reopens on the turn that was actually last
-		# resolved rather than on whatever this session happened to play.
-		_day_beats = game.day_beats()
-		_treasury_ticking = false
-		_treasury_delta = 0
+		_restore_loaded_presentation()
+		state_loaded.emit()
 		_log("Game loaded.")
 		refresh()
 	else:
 		_log("No saved game to load.")
+
+
+func _restore_loaded_presentation() -> void:
+	map_view.finish_marches()
+	_clear_force_selection()
+	selected_agent = ""
+	map_view.selected_region = ""
+	region_panel.clear_panel()
+	_victory_shown = false
+	map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
+	# The loaded campaign brings its own day with it: the journal travels in
+	# the save, so the Dispatch reopens on the turn that was actually last
+	# resolved rather than on whatever this session happened to play.
+	_day_beats = game.day_beats()
+	_treasury_ticking = false
+	_treasury_delta = 0
 
 
 func _log(text: String) -> void:
@@ -1827,3 +1855,27 @@ func open_realism_study() -> void:
 	else:
 		realism_study.show()
 	move_child(realism_study,-1)
+
+
+func _enter_roma() -> void:
+	if shared_session:
+		city_requested.emit()
+		return
+	var saved_battle: Dictionary = game.state.get("city_battles", {}).get("latium", {})
+	if game.state["settlements"].get("latium", {}).get("owner", "") != game.state["player_faction"] and saved_battle.get("owner", "") != game.state["player_faction"]:
+		return
+	var city := RomaCityScreen.new()
+	city.game = game
+	city.standalone = false
+	city.save_path = save_path
+	city.state_loaded.connect(_restore_loaded_presentation)
+	city.main_menu_requested.connect(func():
+		city.queue_free()
+		process_mode = Node.PROCESS_MODE_INHERIT
+		show()
+		refresh(), CONNECT_DEFERRED)
+	hide()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	get_parent().add_child(city)
+	if game.city_battle_status("latium").get("can_defend", false):
+		city.open_battle()

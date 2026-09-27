@@ -867,9 +867,10 @@ func test_start_menu_scene_loads(t) -> void:
 	menu._on_start_pressed()
 	var campaign: CampaignScreen = null
 	for child in menu.get_children():
-		if child is CampaignScreen:
-			campaign = child
-	t.check(campaign != null, "starting spawns the campaign screen")
+		if child is CampaignSession:
+			campaign = child.campaign
+			t.check(child.game == campaign.game, "the session owns the campaign screen's game")
+	t.check(campaign != null, "starting spawns the campaign screen inside its continuing session")
 	if campaign != null:
 		t.check_eq(campaign.game.state["player_faction"], menu._faction_ids[1],
 			"the house that was picked is the house that is played")

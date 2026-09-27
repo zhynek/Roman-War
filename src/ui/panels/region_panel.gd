@@ -6,6 +6,7 @@ extends VBoxContainer
 ## the armies and agents standing there, and every settlement action. The
 ## selected force itself is described by the ForcePanel above this one.
 
+signal city_requested
 signal action_taken
 signal army_selected(army_id: String)
 signal army_raised(army_id: String)
@@ -126,6 +127,11 @@ func _rebuild() -> void:
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if not settlement.is_empty():
 		_build_settlement_section(settlement)
+		if region_id == "latium" and settlement["owner"] == game.state["player_faction"]:
+			var enter_city := Button.new()
+			enter_city.text = game.data.effects_glossary["city_view"]["campaign_enter"]
+			enter_city.pressed.connect(func(): city_requested.emit())
+			add_child(enter_city)
 	_build_armies_section()
 	_build_agents_section()
 

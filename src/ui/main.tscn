@@ -94,6 +94,16 @@ custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
 text = "BEGIN THE CAMPAIGN"
 
+[node name="Roma" type="Button" parent="Center/Menu"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+custom_minimum_size = Vector2(0, 46)
+
+[node name="RomaHelp" type="Label" parent="Center/Menu"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+
 [node name="Alpine" type="Button" parent="Center/Menu"]
 layout_mode = 2
 
@@ -110,3 +120,5 @@ theme_override_font_sizes/font_size = 11
 [connection signal="pressed" from="Center/Menu/Start" to="." method="_on_start_pressed"]
 
 [connection signal="pressed" from="Center/Menu/Alpine" to="." method="_on_alpine_pressed"]
+
+[connection signal="pressed" from="Center/Menu/Roma" to="." method="_on_roma_pressed"]

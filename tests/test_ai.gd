@@ -12,6 +12,46 @@ func _game(data: GameData, state: Dictionary) -> Game:
 	return game
 
 
+func test_route_queries_refresh_diplomacy_ownership_and_faction(t) -> void:
+	var data := Fixtures.data()
+	data.regions["epsilon"]["sea_zones"] = []
+	var state := Fixtures.state(data)
+	var before := JSON.stringify(state)
+	t.check(not AiAssess.distance_map(data, state, "red", ["island"]).has("alpha"),
+		"a sea route cannot enter a hostile port")
+	t.check_eq(JSON.stringify(state), before, "route planning leaves state and RNG untouched")
+
+	DiplomacyRules.set_stance(state, "red", "blue", "neutral")
+	var crossing := AiAssess.sea_hop_cost(data)
+	t.check_eq(AiAssess.distance_map(data, state, "red", ["island"]).get("alpha"), crossing,
+		"peace opens the port on the next query")
+	DiplomacyRules.set_stance(state, "red", "blue", "war")
+	t.check(not AiAssess.distance_map(data, state, "red", ["island"]).has("alpha"),
+		"a new war closes the same port again")
+	state["settlements"]["alpha"]["owner"] = "red"
+	t.check_eq(AiAssess.distance_map(data, state, "red", ["island"]).get("alpha"), crossing,
+		"capturing the port changes the next query without changing diplomacy")
+	t.check(not AiAssess.distance_map(data, state, "blue", ["island"]).has("alpha"),
+		"the next faction sees its own access rules")
+	var other_state := Fixtures.state(data)
+	t.check(not AiAssess.distance_map(data, other_state, "red", ["island"]).has("alpha"),
+		"another campaign sharing GameData does not inherit access")
+
+
+func test_route_queries_keep_hostile_sources_land_only(t) -> void:
+	var data := Fixtures.data()
+	data.regions["epsilon"]["sea_zones"] = []
+	var state := Fixtures.state(data)
+	var reach := AiAssess.distance_map(data, state, "red", ["alpha"])
+	t.check_eq(reach.get("alpha"), 0, "a hostile target still seeds the approach search")
+	t.check_eq(reach.get("beta"), 1, "a besieger can approach that target over land")
+	t.check(not reach.has("island"), "the hostile target cannot advertise a sea approach")
+	reach = AiAssess.distance_map(data, state, "red", ["alpha", "island", "missing"])
+	t.check_eq(reach.get("island"), 0, "each valid source keeps its own zero cost")
+	t.check(not reach.has("missing"), "unknown sources remain ignored")
+	t.check_eq(AiAssess.distance_map(data, state, "red", []), {}, "no sources reach nothing")
+
+
 ## --- CombatRules helpers the AI stands on ---------------------------------
 
 func test_raise_army_from_garrison(t) -> void:
