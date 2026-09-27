@@ -31,7 +31,8 @@
     "edicts",
     "chronicle",
     "reconnaissance",
-    "terrain_routes"
+    "terrain_routes",
+    "city"
   ],
   "additionalProperties": false,
   "properties": {
@@ -463,6 +464,716 @@
         "map_access_value_per_region",
         "map_access_base_value"
       ]
+    },
+    "city": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_cleanliness",
+        "initial_street_condition",
+        "completed_cleanliness",
+        "completed_street_condition",
+        "grain_duration_days",
+        "unrest_base",
+        "unrest_grievance_scale",
+        "unrest_legitimacy_gap_scale",
+        "unrest_grime_scale",
+        "unrest_disrepair_scale",
+        "unrest_patrols",
+        "unrest_grain",
+        "unrest_taverns_closed",
+        "restive_threshold",
+        "rebellious_threshold",
+        "daily_cost_by_tax",
+        "daily_patrol_cost",
+        "daily_taverns_closed_cost",
+        "grievance_base",
+        "grievance_tax",
+        "grievance_grime_scale",
+        "grievance_disrepair_scale",
+        "grievance_patrols",
+        "grievance_grain",
+        "grievance_taverns_closed",
+        "legitimacy_base",
+        "legitimacy_tax",
+        "legitimacy_patrols",
+        "legitimacy_grain",
+        "legitimacy_taverns_closed",
+        "action_costs",
+        "project_days",
+        "project_maintenance",
+        "project_effects",
+        "project_military_effects",
+        "workforce_rate",
+        "workforce_daily_cost",
+        "workforce_grievance",
+        "workforce_legitimacy",
+        "military_daily_progress"
+      ],
+      "properties": {
+        "initial_cleanliness": {
+          "type": "number"
+        },
+        "initial_street_condition": {
+          "type": "number"
+        },
+        "completed_cleanliness": {
+          "type": "number"
+        },
+        "completed_street_condition": {
+          "type": "number"
+        },
+        "grain_duration_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unrest_base": {
+          "type": "number"
+        },
+        "unrest_grievance_scale": {
+          "type": "number"
+        },
+        "unrest_legitimacy_gap_scale": {
+          "type": "number"
+        },
+        "unrest_grime_scale": {
+          "type": "number"
+        },
+        "unrest_disrepair_scale": {
+          "type": "number"
+        },
+        "unrest_patrols": {
+          "type": "number"
+        },
+        "unrest_grain": {
+          "type": "number"
+        },
+        "unrest_taverns_closed": {
+          "type": "number"
+        },
+        "restive_threshold": {
+          "type": "number"
+        },
+        "rebellious_threshold": {
+          "type": "number"
+        },
+        "daily_cost_by_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "high": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "very_high": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "daily_patrol_cost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "daily_taverns_closed_cost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "grievance_base": {
+          "type": "number"
+        },
+        "grievance_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "number"
+            },
+            "low": {
+              "type": "number"
+            },
+            "normal": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "very_high": {
+              "type": "number"
+            }
+          }
+        },
+        "grievance_grime_scale": {
+          "type": "number"
+        },
+        "grievance_disrepair_scale": {
+          "type": "number"
+        },
+        "grievance_patrols": {
+          "type": "number"
+        },
+        "grievance_grain": {
+          "type": "number"
+        },
+        "grievance_taverns_closed": {
+          "type": "number"
+        },
+        "legitimacy_base": {
+          "type": "number"
+        },
+        "legitimacy_tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "very_low",
+            "low",
+            "normal",
+            "high",
+            "very_high"
+          ],
+          "properties": {
+            "very_low": {
+              "type": "number"
+            },
+            "low": {
+              "type": "number"
+            },
+            "normal": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            },
+            "very_high": {
+              "type": "number"
+            }
+          }
+        },
+        "legitimacy_patrols": {
+          "type": "number"
+        },
+        "legitimacy_grain": {
+          "type": "number"
+        },
+        "legitimacy_taverns_closed": {
+          "type": "number"
+        },
+        "action_costs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "grain_relief",
+            "patrols_increase",
+            "patrols_reduce",
+            "tax_low",
+            "tax_normal",
+            "tax_high",
+            "repair_streets",
+            "clean_water",
+            "close_taverns",
+            "reopen_taverns",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples",
+            "workforce_normal",
+            "workforce_paid",
+            "workforce_requisition"
+          ],
+          "properties": {
+            "grain_relief": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "patrols_increase": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "patrols_reduce": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_low": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tax_high": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "close_taverns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "reopen_taverns": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_paid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "workforce_requisition": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "project_days": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "project_maintenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "clean_water": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_tavern": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_barracks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_market": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "improve_curia": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "drill_maniples": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "equip_maniples": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "project_effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repair_streets",
+            "clean_water",
+            "improve_tavern",
+            "improve_barracks",
+            "improve_market",
+            "improve_curia",
+            "drill_maniples",
+            "equip_maniples"
+          ],
+          "properties": {
+            "repair_streets": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "clean_water": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_tavern": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_barracks": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_market": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "improve_curia": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "drill_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            },
+            "equip_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "grievance",
+                "legitimacy"
+              ],
+              "properties": {
+                "grievance": {
+                  "type": "number"
+                },
+                "legitimacy": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "project_military_effects": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "drill_maniples",
+            "equip_maniples"
+          ],
+          "properties": {
+            "drill_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "experience",
+                "weapon",
+                "armor"
+              ],
+              "properties": {
+                "experience": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "weapon": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "armor": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "equip_maniples": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "experience",
+                "weapon",
+                "armor"
+              ],
+              "properties": {
+                "experience": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "weapon": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "armor": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "workforce_rate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "paid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "requisition": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "workforce_daily_cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "paid": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "requisition": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "workforce_grievance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "requisition": {
+              "type": "number"
+            }
+          }
+        },
+        "workforce_legitimacy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "normal",
+            "paid",
+            "requisition"
+          ],
+          "properties": {
+            "normal": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "requisition": {
+              "type": "number"
+            }
+          }
+        },
+        "military_daily_progress": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
     }
   },
   "$defs": {

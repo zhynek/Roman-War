@@ -86,10 +86,18 @@ static func recruit_profile(data: GameData, state: Dictionary, region_id: String
 		+ boon_xp
 	if template_id != "":
 		experience += KnowledgeRules.class_recruit_xp(data, state, owner, ArmyRules.class_of(data, template_id))
+	var city_land_training := template_id == "" or String(data.units.get(template_id, {}).get("class", "")) != "ship"
+	var weapon := upgrade_level(data, state, settlement, "weapon_upgrade")
+	var armor := upgrade_level(data, state, settlement, "armor_upgrade")
+	if city_land_training:
+		experience += RomaCityRules.military_bonus(data, state, region_id, "experience")
+		var cap := int(recruitment_rules["upgrade_max"]) + int(KnowledgeRules.faction_effect_total(data, state, owner, "upgrade_cap"))
+		weapon = mini(cap, weapon + RomaCityRules.military_bonus(data, state, region_id, "weapon"))
+		armor = mini(cap, armor + RomaCityRules.military_bonus(data, state, region_id, "armor"))
 	return {
 		"experience": clampi(experience, 0, int(recruitment_rules["experience_max"])),
-		"weapon": upgrade_level(data, state, settlement, "weapon_upgrade"),
-		"armor": upgrade_level(data, state, settlement, "armor_upgrade"),
+		"weapon": weapon,
+		"armor": armor,
 	}
 
 
@@ -157,14 +165,13 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 	if settlement["siege"] != null:
 		return 0
 	var faction: Dictionary = state["factions"][settlement["owner"]]
-	var kit := recruit_profile(data, state, region_id)
 	var healed := 0
 	var in_port: Array = settlement["garrison"] + settlement.get("harbour", [])
 	for unit in in_port:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if not _requirements_met(data, settlement, template):
 			continue
-		stamp_upgrades(unit, kit)
+		stamp_upgrades(unit, recruit_profile(data, state, region_id, String(unit["template"])))
 		var strength := int(unit["strength_pct"])
 		if strength >= 100:
 			continue

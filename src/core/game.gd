@@ -56,6 +56,38 @@ func edict_status(region_id: String) -> Dictionary:
 	return EdictRules.status(data, state, region_id)
 
 
+## Civic days are an explicit local simulation step, separate from seasons.
+## Reading or walking through the city never advances the campaign or RNG.
+func city_status(region_id: String) -> Dictionary:
+	return RomaCityRules.status(data, state, region_id)
+
+
+func city_action(region_id: String, action_id: String) -> bool:
+	return RomaCityRules.apply_action(data, state, region_id, action_id)
+
+
+func city_advance_day(region_id: String) -> bool:
+	return RomaCityRules.advance_day(data, state, region_id)
+
+
+func city_action_forecast(region_id: String, action_id: String) -> Dictionary:
+	return RomaCityRules.action_forecast(data, state, region_id, action_id)
+
+
+func city_day_forecast(region_id: String) -> Dictionary:
+	return RomaCityRules.action_forecast(data, state, region_id)
+
+
+func city_troop_status(region_id: String) -> Dictionary:
+	return RomaCityRules.troop_status(data, state, region_id)
+
+
+func city_queue_unit(region_id: String, template_id: String) -> bool:
+	if not data.city_governance.get("regions", []).has(region_id):
+		return false
+	return queue_unit(region_id, template_id)
+
+
 func queue_building(region_id: String, chain_id: String) -> bool:
 	if not _owns_settlement(region_id):
 		return false
@@ -1337,3 +1369,7 @@ func patrol_woods(army_id: String) -> Dictionary:
 
 func visible_armies() -> Dictionary:
 	return VisibilityRules.visible_armies(data, state, state["player_faction"])
+
+
+func city_building_info(region_id: String, site_id: String) -> Dictionary:
+	return RomaCityRules.building_info(data, state, region_id, site_id)

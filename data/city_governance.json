@@ -1,0 +1,187 @@
+{
+  "$schema": "../schemas/city_governance.schema.json",
+  "regions": [
+    "latium"
+  ],
+  "default_policies": {
+    "patrols": "normal",
+    "taverns": "open",
+    "workforce": "normal"
+  },
+  "actions": [
+    {
+      "id": "grain_relief",
+      "site": "market",
+      "kind": "relief"
+    },
+    {
+      "id": "patrols_increase",
+      "site": "barracks",
+      "kind": "policy",
+      "policy": "patrols",
+      "value": "heavy"
+    },
+    {
+      "id": "patrols_reduce",
+      "site": "barracks",
+      "kind": "policy",
+      "policy": "patrols",
+      "value": "normal"
+    },
+    {
+      "id": "tax_low",
+      "site": "curia",
+      "kind": "tax",
+      "value": "low"
+    },
+    {
+      "id": "tax_normal",
+      "site": "curia",
+      "kind": "tax",
+      "value": "normal"
+    },
+    {
+      "id": "tax_high",
+      "site": "curia",
+      "kind": "tax",
+      "value": "high"
+    },
+    {
+      "id": "repair_streets",
+      "site": "forum",
+      "kind": "project"
+    },
+    {
+      "id": "clean_water",
+      "site": "fountain",
+      "kind": "project"
+    },
+    {
+      "id": "close_taverns",
+      "site": "tavern",
+      "kind": "policy",
+      "policy": "taverns",
+      "value": "closed"
+    },
+    {
+      "id": "reopen_taverns",
+      "site": "tavern",
+      "kind": "policy",
+      "policy": "taverns",
+      "value": "open"
+    },
+    {
+      "id": "improve_tavern",
+      "site": "tavern",
+      "kind": "project"
+    },
+    {
+      "id": "improve_barracks",
+      "site": "barracks",
+      "kind": "project"
+    },
+    {
+      "id": "improve_market",
+      "site": "market",
+      "kind": "project"
+    },
+    {
+      "id": "improve_curia",
+      "site": "curia",
+      "kind": "project"
+    },
+    {
+      "id": "drill_maniples",
+      "site": "barracks",
+      "kind": "project",
+      "requires_project": "improve_barracks"
+    },
+    {
+      "id": "equip_maniples",
+      "site": "barracks",
+      "kind": "project",
+      "requires_project": "drill_maniples"
+    },
+    {
+      "id": "workforce_normal",
+      "site": "forum",
+      "kind": "policy",
+      "policy": "workforce",
+      "value": "normal"
+    },
+    {
+      "id": "workforce_paid",
+      "site": "forum",
+      "kind": "policy",
+      "policy": "workforce",
+      "value": "paid"
+    },
+    {
+      "id": "workforce_requisition",
+      "site": "forum",
+      "kind": "policy",
+      "policy": "workforce",
+      "value": "requisition"
+    }
+  ],
+  "building_profiles": [
+    {
+      "site": "forum",
+      "project": "repair_streets",
+      "stages": {
+        "current": "stage_forum_current",
+        "construction": "stage_forum_construction",
+        "improved": "stage_forum_improved"
+      }
+    },
+    {
+      "site": "fountain",
+      "project": "clean_water",
+      "stages": {
+        "current": "stage_fountain_current",
+        "construction": "stage_fountain_construction",
+        "improved": "stage_fountain_improved"
+      }
+    },
+    {
+      "site": "tavern",
+      "project": "improve_tavern",
+      "stages": {
+        "current": "stage_tavern_current",
+        "construction": "stage_tavern_construction",
+        "improved": "stage_tavern_improved"
+      }
+    },
+    {
+      "site": "barracks",
+      "project": "improve_barracks",
+      "stages": {
+        "current": "stage_barracks_current",
+        "construction": "stage_barracks_construction",
+        "improved": "stage_barracks_improved"
+      }
+    },
+    {
+      "site": "market",
+      "project": "improve_market",
+      "stages": {
+        "current": "stage_market_current",
+        "construction": "stage_market_construction",
+        "improved": "stage_market_improved"
+      }
+    },
+    {
+      "site": "curia",
+      "project": "improve_curia",
+      "stages": {
+        "current": "stage_curia_current",
+        "construction": "stage_curia_construction",
+        "improved": "stage_curia_improved"
+      }
+    }
+  ],
+  "military_programs": [
+    "drill_maniples",
+    "equip_maniples"
+  ]
+}

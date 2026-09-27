@@ -11,6 +11,38 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Roma city development
+
+The main menu includes a walkable Roma district with citizens, unrest,
+interiors, governing orders and separate saves. Campaign owners of Roma can
+enter with their live campaign state. The persistent bottom **Govern Roma**
+command bar, building selection and right-click dossiers, safe double-click
+travel, **Tab** mouse look and **H** overlay toggle remain the navigation model.
+
+Current phase 3 adds **Development** tabs with rotatable **Existing / Building /
+Completed** models, exact order/day forecasts, and ordinary, paid or requisitioned
+work crews with real construction-rate, treasury and social tradeoffs. Previewing
+or rotating models is pure presentation. **Barracks → Troops** shows actual
+campaign units and recruitable types; prerequisite-gated drill and equipment
+programmes improve the standing garrison and campaign recruitment profiles.
+Standalone Roma trains its existing garrison. Recruitment buttons appear only
+when entered from a campaign, because new troops use its seasonal queue.
+
+**Next civic day** resolves first, then presents a synthesized gong and dawn
+report with actual stock changes, named causes, completed projects and relief
+expiry. **Gong: on** mutes the sound for the current city visit; **Day report**
+reopens the latest report without advancing time. Pending civic orders and the
+latest report migrate additively and survive saves. No tween, audio playback,
+preview, navigation or report replay advances simulation or RNG.
+
+Read [`reviews/2026-09-roma-city.md`](reviews/2026-09-roma-city.md) for controls,
+architecture, historical limits and verification. Phase 3 is verified with
+576 passing tests, rendered city/campaign acceptance, and the exported universal
+Mac preview at `build/roma-city-phase3-20260926/` (0.15.2-preview.20260926).
+Phase 2’s 565-test preview remains a historical checkpoint. This remains preview development, with original
+procedural artwork rather than a photorealistic reconstruction. Freeform
+rebuilding and city battles remain future work; combat must retain BattleResolver.
+
 ## Current terrain and visual direction
 
 **Current approved Mac standard: 0.14.2 — one Roman War app.** The owner

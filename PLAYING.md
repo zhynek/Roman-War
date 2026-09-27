@@ -675,3 +675,79 @@ In **Diplomacy → Negotiate**, add **Grant access to our maps** or **Request ac
 to their maps** alongside payment or other terms. Accepted rights include the
 current atlas and future direct geographic reports. War stops future updates;
 already acquired geography remains known. An alliance alone does not share maps.
+
+## Walk Roma
+
+Choose **Enter Roma** from the main menu for the governor’s city. The pointer
+starts free: **left-click** a building to select it, then **right-click** it or
+choose **Building details** for its dossier. The forum, fountain, tavern,
+barracks, market and council house have **Orders** and **Development** tabs.
+The barracks also has **Troops**. Residences have inspection cards and links to
+public works that affect them.
+
+**Govern Roma** in the bottom command bar, or **G**, opens **Policies & relief**,
+**Public works** and **City report**. The bottom bar stays available when **H**
+hides the other panels. It also holds Building details, City plan, mouse-look
+controls, **Next civic day**, **Day report**, Save, Load and Return.
+
+Walk with **W/A/S/D**; **Shift** hastens your pace and **Left/Right** turns.
+Press **Tab** to switch mouse look on or off; **Esc** releases the pointer and
+closes the panel. **E** speaks to nearby citizens or inspects a nearby place.
+**M** switches between the street and the city plan. The tavern, barracks and
+council house have walkable interiors.
+
+**Double-click** a location in the street view, city plan or compass map to
+jump there. Building and site targets use a safe entrance or approach; obstructed
+or inaccessible ground is rejected. Walking, looking, inspecting and jumping
+spend no money or civic days and do not advance the campaign or its random state.
+
+A civic building’s **Development** tab compares **Existing**, **Building** and
+**Completed** models. Drag the model with the left mouse button to rotate it;
+use the mouse wheel to zoom. These are previews: choosing a completed model
+cannot fund or finish a project. The dossier also shows real progress, expected
+completion, price, maintenance and social effects. Refurbishments make visible
+changes in the street when actual work finishes.
+
+Choose **Preview consequences** beneath an available order to see its immediate
+cost and unrest change, then the next civic day’s grievance, trust and unrest
+changes. **City report → Show tomorrow’s outlook** forecasts the next day under
+current orders. Forecasts use the same rules as execution and warn if the next
+day cannot be funded. Later decisions can change the result; quieter streets
+can still be accumulating grievance.
+
+Public works can use ordinary crews, paid additional crews or requisitioned
+civilian labor. Ordinary crews complete one unit of work per civic day; the
+other choices complete two. Additional wages cost more and help consent, while
+requisition costs less and increases grievance. These standing policies keep
+their daily costs and social effects until you change them. Military programmes
+retain their own pace.
+
+In **Barracks → Troops**, inspect the actual garrison’s experience, weapons and
+armour, and the troop types the campaign can recruit here. Restore the barracks,
+then establish the drill programme; its completion trains eligible units present
+in Roma and improves future recruits. The following equipment programme refits
+eligible garrison units and improves the local equipment standard. These affect
+real campaign units, within campaign caps; they do not convert one troop type
+into another. The focused city mode upgrades its existing garrison. When entered
+from a campaign, the tab can also queue new troops; that queue completes through
+campaign seasons, never through civic days.
+
+**Next civic day** resolves one local day with the displayed upkeep, then a gong
+and dawn report show the actual consequences: orders already paid, overnight
+upkeep, changes in grievance and trust, completed works and military programmes,
+and expiring grain relief. The named causes explain the stock changes. Choose
+**Walk into the new day**, or press **Esc**, **Enter** or **Space**, to dismiss it.
+**Gong: on** toggles mute for the current city visit. **Day report** reopens the
+latest saved report without resolving another day. The gong and dawn animation
+only present a day that has already resolved.
+
+Save/Load use Roma’s own slot, and Return saves it before leaving. If you own
+Roma in a campaign, enter from the settlement panel to govern your actual
+campaign city. Policies, project and military progress, recorded orders and the
+latest day report persist; camera positions and decorative pedestrians do not.
+
+This district is an original interpretation of Republican Roma, with a shared
+collidable layout intended for future battles. It remains procedural artwork,
+not a photorealistic or surveyed reconstruction. Freeform rebuilding, city combat
+and individual household simulation are not implemented. See the
+[Roma city review](docs/reviews/2026-09-roma-city.md) for scope and verification.

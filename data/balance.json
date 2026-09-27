@@ -687,5 +687,163 @@
     },
     "map_access_value_per_region": 30,
     "map_access_base_value": 120
+  },
+  "city": {
+    "initial_cleanliness": 38.0,
+    "initial_street_condition": 42.0,
+    "completed_cleanliness": 88.0,
+    "completed_street_condition": 86.0,
+    "grain_duration_days": 4,
+    "unrest_base": 24.0,
+    "unrest_grievance_scale": 0.55,
+    "unrest_legitimacy_gap_scale": 0.16,
+    "unrest_grime_scale": 0.2,
+    "unrest_disrepair_scale": 0.12,
+    "unrest_patrols": -6.0,
+    "unrest_grain": -8.0,
+    "unrest_taverns_closed": -3.0,
+    "restive_threshold": 50.0,
+    "rebellious_threshold": 75.0,
+    "daily_cost_by_tax": {
+      "very_low": 32,
+      "low": 24,
+      "normal": 12,
+      "high": 4,
+      "very_high": 0
+    },
+    "daily_patrol_cost": 16,
+    "daily_taverns_closed_cost": 10,
+    "grievance_base": 0.18,
+    "grievance_tax": {
+      "very_low": -0.6,
+      "low": -0.35,
+      "normal": 0.15,
+      "high": 0.85,
+      "very_high": 1.3
+    },
+    "grievance_grime_scale": 0.014,
+    "grievance_disrepair_scale": 0.007,
+    "grievance_patrols": 0.45,
+    "grievance_grain": -2.2,
+    "grievance_taverns_closed": 0.65,
+    "legitimacy_base": -0.06,
+    "legitimacy_tax": {
+      "very_low": 0.45,
+      "low": 0.3,
+      "normal": 0.0,
+      "high": -0.4,
+      "very_high": -0.65
+    },
+    "legitimacy_patrols": -0.4,
+    "legitimacy_grain": 0.7,
+    "legitimacy_taverns_closed": -0.3,
+    "action_costs": {
+      "grain_relief": 160,
+      "patrols_increase": 60,
+      "patrols_reduce": 0,
+      "tax_low": 0,
+      "tax_normal": 0,
+      "tax_high": 0,
+      "repair_streets": 340,
+      "clean_water": 420,
+      "close_taverns": 30,
+      "reopen_taverns": 30,
+      "improve_tavern": 300,
+      "improve_barracks": 480,
+      "improve_market": 380,
+      "improve_curia": 460,
+      "drill_maniples": 800,
+      "equip_maniples": 1000,
+      "workforce_normal": 0,
+      "workforce_paid": 0,
+      "workforce_requisition": 0
+    },
+    "project_days": {
+      "repair_streets": 3,
+      "clean_water": 4,
+      "improve_tavern": 3,
+      "improve_barracks": 4,
+      "improve_market": 3,
+      "improve_curia": 4,
+      "drill_maniples": 3,
+      "equip_maniples": 4
+    },
+    "project_maintenance": {
+      "repair_streets": 4,
+      "clean_water": 5,
+      "improve_tavern": 6,
+      "improve_barracks": 12,
+      "improve_market": 8,
+      "improve_curia": 9,
+      "drill_maniples": 18,
+      "equip_maniples": 20
+    },
+    "project_effects": {
+      "repair_streets": {
+        "grievance": -0.25,
+        "legitimacy": 0.3
+      },
+      "clean_water": {
+        "grievance": -0.35,
+        "legitimacy": 0.5
+      },
+      "improve_tavern": {
+        "grievance": -0.35,
+        "legitimacy": 0.1
+      },
+      "improve_barracks": {
+        "grievance": 0.1,
+        "legitimacy": 0.35
+      },
+      "improve_market": {
+        "grievance": -0.4,
+        "legitimacy": 0.2
+      },
+      "improve_curia": {
+        "grievance": -0.1,
+        "legitimacy": 0.4
+      },
+      "drill_maniples": {
+        "grievance": 0.25,
+        "legitimacy": -0.1
+      },
+      "equip_maniples": {
+        "grievance": 0.15,
+        "legitimacy": 0.1
+      }
+    },
+    "project_military_effects": {
+      "drill_maniples": {
+        "experience": 1,
+        "weapon": 0,
+        "armor": 0
+      },
+      "equip_maniples": {
+        "experience": 0,
+        "weapon": 1,
+        "armor": 1
+      }
+    },
+    "workforce_rate": {
+      "normal": 1,
+      "paid": 2,
+      "requisition": 2
+    },
+    "workforce_daily_cost": {
+      "normal": 0,
+      "paid": 26,
+      "requisition": 6
+    },
+    "workforce_grievance": {
+      "normal": 0.0,
+      "paid": -0.1,
+      "requisition": 0.65
+    },
+    "workforce_legitimacy": {
+      "normal": 0.0,
+      "paid": 0.15,
+      "requisition": -0.45
+    },
+    "military_daily_progress": 1
   }
 }

@@ -1,0 +1,914 @@
+{
+  "$schema": "../schemas/roma_city.schema.json",
+  "id": "roma",
+  "region": "latium",
+  "extent": 180,
+  "spawn": [
+    0,
+    0,
+    45
+  ],
+  "historical_basis": "An original, interpretive Republican Roman civic district around 270 BCE. Streets, masonry, courtyard housing and roofed civic space evoke the period; this is not an archaeological reconstruction or a survey of all Rome. The muster house is a gameplay abstraction for the garrison, not an assertion that a later imperial permanent barracks existed here. The curia represents civic administration rather than a claim about an exact surviving plan. The tavern represents a modest food and wine shop; later imperial monuments are deliberately absent.",
+  "forum": {
+    "position": [
+      0,
+      0
+    ],
+    "size": [
+      46,
+      54
+    ]
+  },
+  "walls": {
+    "half_extent": 78,
+    "height": 7.4,
+    "gate_width": 12,
+    "gate_open": false
+  },
+  "yard": {
+    "position": [
+      46,
+      6
+    ],
+    "size": [
+      31,
+      32
+    ],
+    "gate_width": 7
+  },
+  "sites": [
+    {
+      "id": "forum",
+      "name_key": "site_forum",
+      "description_key": "about_forum",
+      "position": [
+        0,
+        0
+      ],
+      "approach": [
+        0,
+        14
+      ],
+      "radius": 10
+    },
+    {
+      "id": "curia",
+      "name_key": "site_curia",
+      "description_key": "about_curia",
+      "position": [
+        0,
+        -43
+      ],
+      "approach": [
+        0,
+        -30
+      ],
+      "radius": 7
+    },
+    {
+      "id": "barracks",
+      "name_key": "site_barracks",
+      "description_key": "about_barracks",
+      "position": [
+        46,
+        -23
+      ],
+      "approach": [
+        46,
+        0
+      ],
+      "radius": 8
+    },
+    {
+      "id": "tavern",
+      "name_key": "site_tavern",
+      "description_key": "about_tavern",
+      "position": [
+        -40,
+        0
+      ],
+      "approach": [
+        -40,
+        17
+      ],
+      "radius": 8
+    },
+    {
+      "id": "market",
+      "name_key": "site_market",
+      "description_key": "about_market",
+      "position": [
+        -40,
+        -28
+      ],
+      "approach": [
+        -35,
+        -20
+      ],
+      "radius": 10
+    },
+    {
+      "id": "fountain",
+      "name_key": "site_fountain",
+      "description_key": "about_fountain",
+      "position": [
+        -14,
+        5
+      ],
+      "approach": [
+        -10,
+        5
+      ],
+      "radius": 6
+    }
+  ],
+  "buildings": [
+    {
+      "id": "curia",
+      "position": [
+        0,
+        -43
+      ],
+      "size": [
+        28,
+        19
+      ],
+      "height": 7.8,
+      "kind": "curia",
+      "enterable": true,
+      "door_width": 5,
+      "palette": 0
+    },
+    {
+      "id": "tavern",
+      "position": [
+        -40,
+        0
+      ],
+      "size": [
+        22,
+        22
+      ],
+      "height": 4.5,
+      "kind": "tavern",
+      "enterable": true,
+      "door_width": 3.5,
+      "palette": 2
+    },
+    {
+      "id": "barracks",
+      "position": [
+        46,
+        -23
+      ],
+      "size": [
+        30,
+        24
+      ],
+      "height": 5.5,
+      "kind": "barracks",
+      "enterable": true,
+      "door_width": 5,
+      "palette": 1
+    },
+    {
+      "id": "house_west_0_0",
+      "position": [
+        -20,
+        41
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "height": 5.3,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 1
+    },
+    {
+      "id": "house_west_0_1",
+      "position": [
+        -20,
+        62
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "height": 7.8,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 2
+    },
+    {
+      "id": "house_west_1_0",
+      "position": [
+        -42,
+        41
+      ],
+      "size": [
+        16,
+        14
+      ],
+      "height": 7.8,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 2
+    },
+    {
+      "id": "house_west_1_1",
+      "position": [
+        -42,
+        62
+      ],
+      "size": [
+        16,
+        14
+      ],
+      "height": 5.3,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 3
+    },
+    {
+      "id": "house_east_0_0",
+      "position": [
+        20,
+        41
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "height": 5.3,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 0
+    },
+    {
+      "id": "house_east_0_1",
+      "position": [
+        20,
+        62
+      ],
+      "size": [
+        14,
+        14
+      ],
+      "height": 7.8,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 1
+    },
+    {
+      "id": "house_east_1_0",
+      "position": [
+        42,
+        41
+      ],
+      "size": [
+        16,
+        14
+      ],
+      "height": 7.8,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 1
+    },
+    {
+      "id": "house_east_1_1",
+      "position": [
+        42,
+        62
+      ],
+      "size": [
+        16,
+        14
+      ],
+      "height": 5.3,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.8,
+      "palette": 2
+    },
+    {
+      "id": "outer_house_0",
+      "position": [
+        -41,
+        -53
+      ],
+      "size": [
+        23,
+        13
+      ],
+      "height": 6.0,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 0
+    },
+    {
+      "id": "outer_house_1",
+      "position": [
+        42,
+        -51
+      ],
+      "size": [
+        24,
+        15
+      ],
+      "height": 7.5,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 1
+    },
+    {
+      "id": "outer_house_2",
+      "position": [
+        -70,
+        -44
+      ],
+      "size": [
+        9,
+        21
+      ],
+      "height": 5,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 2
+    },
+    {
+      "id": "outer_house_3",
+      "position": [
+        -70,
+        -4
+      ],
+      "size": [
+        9,
+        22
+      ],
+      "height": 6,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 3
+    },
+    {
+      "id": "outer_house_4",
+      "position": [
+        -70,
+        38
+      ],
+      "size": [
+        9,
+        20
+      ],
+      "height": 6,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 0
+    },
+    {
+      "id": "outer_house_5",
+      "position": [
+        72,
+        42
+      ],
+      "size": [
+        8,
+        20
+      ],
+      "height": 5.5,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 1
+    },
+    {
+      "id": "outer_house_6",
+      "position": [
+        -38,
+        -69
+      ],
+      "size": [
+        19,
+        10
+      ],
+      "height": 5.5,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 2
+    },
+    {
+      "id": "outer_house_7",
+      "position": [
+        37,
+        -70
+      ],
+      "size": [
+        20,
+        10
+      ],
+      "height": 5.5,
+      "kind": "house",
+      "enterable": false,
+      "door_width": 1.6,
+      "palette": 3
+    }
+  ],
+  "roads": [
+    {
+      "id": "forum_axis",
+      "width": 8,
+      "points": [
+        [
+          0,
+          79
+        ],
+        [
+          0,
+          28
+        ],
+        [
+          0,
+          -33.5
+        ]
+      ]
+    },
+    {
+      "id": "southern_cross",
+      "width": 7,
+      "points": [
+        [
+          -65,
+          24
+        ],
+        [
+          65,
+          24
+        ]
+      ]
+    },
+    {
+      "id": "northern_cross",
+      "width": 6,
+      "points": [
+        [
+          -65,
+          -13
+        ],
+        [
+          65,
+          -13
+        ]
+      ]
+    },
+    {
+      "id": "west_lane",
+      "width": 5,
+      "points": [
+        [
+          -60,
+          72
+        ],
+        [
+          -60,
+          -61
+        ],
+        [
+          -18,
+          -61
+        ]
+      ]
+    },
+    {
+      "id": "east_lane",
+      "width": 5,
+      "points": [
+        [
+          65,
+          72
+        ],
+        [
+          65,
+          -61
+        ],
+        [
+          18,
+          -61
+        ]
+      ]
+    },
+    {
+      "id": "north_lane",
+      "width": 5,
+      "points": [
+        [
+          -18,
+          -61
+        ],
+        [
+          18,
+          -61
+        ]
+      ]
+    },
+    {
+      "id": "market_lane",
+      "width": 7,
+      "points": [
+        [
+          -60,
+          -28
+        ],
+        [
+          -23,
+          -28
+        ]
+      ]
+    },
+    {
+      "id": "tavern_approach",
+      "width": 5,
+      "points": [
+        [
+          -40,
+          11
+        ],
+        [
+          -40,
+          24
+        ]
+      ]
+    },
+    {
+      "id": "barracks_approach",
+      "width": 5,
+      "points": [
+        [
+          46,
+          -11
+        ],
+        [
+          46,
+          24
+        ]
+      ]
+    }
+  ],
+  "citizen_routes": [
+    {
+      "id": "forum_circuit",
+      "role": "citizen",
+      "count": 16,
+      "points": [
+        [
+          -18,
+          -19
+        ],
+        [
+          16,
+          -19
+        ],
+        [
+          18,
+          16
+        ],
+        [
+          -18,
+          16
+        ]
+      ]
+    },
+    {
+      "id": "main_street",
+      "role": "citizen",
+      "count": 10,
+      "points": [
+        [
+          -2,
+          69
+        ],
+        [
+          -2,
+          29
+        ],
+        [
+          2,
+          29
+        ],
+        [
+          2,
+          69
+        ]
+      ]
+    },
+    {
+      "id": "western_trade",
+      "role": "porter",
+      "count": 6,
+      "points": [
+        [
+          -58,
+          -27
+        ],
+        [
+          -58,
+          22
+        ],
+        [
+          -35,
+          22
+        ],
+        [
+          -24,
+          20
+        ],
+        [
+          -24,
+          -12
+        ],
+        [
+          -57,
+          -12
+        ]
+      ]
+    },
+    {
+      "id": "market_circuit",
+      "role": "citizen",
+      "count": 8,
+      "points": [
+        [
+          -48,
+          -35
+        ],
+        [
+          -30,
+          -35
+        ],
+        [
+          -30,
+          -22
+        ],
+        [
+          -48,
+          -22
+        ]
+      ]
+    },
+    {
+      "id": "city_watch",
+      "role": "guard",
+      "count": 4,
+      "points": [
+        [
+          35,
+          17
+        ],
+        [
+          56,
+          17
+        ],
+        [
+          56,
+          -7
+        ],
+        [
+          35,
+          -7
+        ]
+      ]
+    },
+    {
+      "id": "heavy_watch",
+      "role": "guard",
+      "count": 6,
+      "status_group": "patrol_extra",
+      "points": [
+        [
+          -22,
+          24
+        ],
+        [
+          -22,
+          -13
+        ],
+        [
+          22,
+          -13
+        ],
+        [
+          22,
+          24
+        ]
+      ]
+    }
+  ],
+  "people_anchors": [
+    {
+      "id": "tavern_guests",
+      "role": "patron",
+      "position": [
+        -44,
+        2
+      ],
+      "facing": 1.2,
+      "count": 4,
+      "spacing": 0.8
+    },
+    {
+      "id": "tavern_keeper",
+      "role": "merchant",
+      "position": [
+        -46,
+        -7
+      ],
+      "facing": 0,
+      "count": 1
+    },
+    {
+      "id": "market_sellers",
+      "role": "merchant",
+      "position": [
+        -37,
+        -40
+      ],
+      "facing": 0,
+      "count": 3,
+      "spacing": 0.85
+    },
+    {
+      "id": "drill_rank",
+      "role": "guard",
+      "position": [
+        43,
+        6
+      ],
+      "facing": 0,
+      "count": 6,
+      "spacing": 1.1,
+      "activity": "drill"
+    },
+    {
+      "id": "forum_discontent",
+      "role": "protester",
+      "position": [
+        10,
+        6
+      ],
+      "facing": -1,
+      "count": 12,
+      "spacing": 0.8
+    },
+    {
+      "id": "grain_distribution",
+      "role": "grain_queue",
+      "position": [
+        -31,
+        -21
+      ],
+      "facing": 3.14,
+      "count": 8,
+      "spacing": 0.7
+    },
+    {
+      "id": "curia_clerk",
+      "role": "citizen",
+      "position": [
+        2.5,
+        -46
+      ],
+      "facing": 1.5,
+      "count": 1
+    }
+  ],
+  "trees": [
+    [
+      -25,
+      31
+    ],
+    [
+      25,
+      31
+    ],
+    [
+      -26,
+      55
+    ],
+    [
+      26,
+      55
+    ],
+    [
+      -55,
+      48
+    ],
+    [
+      57,
+      50
+    ],
+    [
+      -24,
+      -45
+    ],
+    [
+      25,
+      -45
+    ],
+    [
+      -53,
+      -46
+    ],
+    [
+      58,
+      -49
+    ],
+    [
+      -73,
+      65
+    ],
+    [
+      72,
+      65
+    ],
+    [
+      -54,
+      68
+    ],
+    [
+      57,
+      68
+    ]
+  ],
+  "market_stalls": [
+    [
+      -47,
+      -38
+    ],
+    [
+      -38,
+      -38
+    ],
+    [
+      -29,
+      -38
+    ],
+    [
+      -48,
+      -18
+    ]
+  ],
+  "rubbish": [
+    [
+      -23,
+      31
+    ],
+    [
+      25,
+      32
+    ],
+    [
+      -53,
+      12
+    ],
+    [
+      28,
+      -8
+    ],
+    [
+      -54,
+      -18
+    ],
+    [
+      -16,
+      28
+    ]
+  ],
+  "repair_areas": [
+    [
+      12,
+      24
+    ],
+    [
+      -16,
+      24
+    ]
+  ],
+  "water_position": [
+    -14,
+    5
+  ]
+}

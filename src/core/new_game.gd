@@ -91,6 +91,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"recon": {"contacts": {}, "movements": []},
 		"cartography": {},
 		"map_access": {},
+		"city_governance": {},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -201,6 +202,11 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	if not state.has("city_governance"):
+		state["city_governance"] = {}
+	if data != null:
+		for city in state["city_governance"].values():
+			RomaCityRules.ensure_project_keys(data, city)
 	var new_cartography := not state.has("cartography")
 	if new_cartography:
 		state["cartography"] = {}

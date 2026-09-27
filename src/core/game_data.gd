@@ -36,6 +36,7 @@ var epithets: Dictionary = {}          # id -> epithet dict (names earned by dee
 var offices: Dictionary = {}           # id -> senate office dict (the cursus honorum)
 var annals: Dictionary = {}            # chronicle kind -> [prose template variants]
 var campaign: Dictionary = {}
+var city_governance: Dictionary = {}
 var dispatch_beats: Dictionary = {}    # beat kind -> presentation entry
 var dispatch_chapters: Array = []      # the day's acts, in playing order
 var sites: Dictionary = {}             # id -> point-of-interest dict
@@ -60,6 +61,7 @@ func ok() -> bool:
 func _load_all(dir: String) -> void:
 	balance = _read_json(dir + "/balance.json")
 	campaign = _read_json(dir + "/campaign.json")
+	city_governance = _read_json(dir + "/city_governance.json")
 	terrain_content = _read_json(dir + "/campaign_terrain.json")
 	for crossing in terrain_content.get("crossings", []):
 		terrain_crossings[TerrainRules.edge_key(crossing["a"], crossing["b"])] = crossing

@@ -27,6 +27,8 @@ TABLES = {
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
+    "city_governance.json": "city_governance.schema.json",
+    "roma_city.json": "roma_city.schema.json",
     "ai.json": "ai.schema.json",
     "agents.json": "agents.schema.json",
     "techniques.json": "techniques.schema.json",
@@ -125,6 +127,7 @@ def load_tables() -> dict[str, dict]:
 
 
 def cross_checks(t: dict[str, dict]) -> None:
+    _city_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 
@@ -1472,6 +1475,144 @@ def cross_checks(t: dict[str, dict]) -> None:
                 f"and can never be reached")
 
 
+def _city_checks(t: dict[str, dict]) -> None:
+    """The walkable district and civic rules share region/site and prose IDs."""
+    city = t.get("roma_city.json", {})
+    governance = t.get("city_governance.json", {})
+    rules = t.get("balance.json", {}).get("city", {})
+    words = t.get("effects_glossary.json", {}).get("city_view", {})
+    region_ids = {r["id"] for r in t.get("regions.json", {}).get("regions", [])}
+    if city.get("region") not in region_ids:
+        err(f"roma city: unknown region {city.get('region')}")
+    for region in governance.get("regions", []):
+        if region not in region_ids:
+            err(f"city governance: unknown region {region}")
+        if region != city.get("region"):
+            err(f"city governance: region {region} has no walkable city geometry")
+    site_ids = {site["id"] for site in city.get("sites", [])}
+    for collection in ("sites", "buildings", "roads", "citizen_routes", "people_anchors"):
+        ids = [item["id"] for item in city.get(collection, [])]
+        if len(ids) != len(set(ids)):
+            err(f"roma city: duplicate {collection} id")
+    actions = governance.get("actions", [])
+    action_ids = {a["id"] for a in actions}
+    if len(action_ids) != len(actions):
+        err("city governance: duplicate action id")
+    for site in city.get("sites", []):
+        for field in ("name_key", "description_key"):
+            if site[field] not in words:
+                err(f"roma city: {site['id']} has no city_view prose for {site[field]}")
+    projects = set()
+    for action in actions:
+        aid = action["id"]
+        if action["site"] not in site_ids:
+            err(f"city governance: {aid} references unknown site {action['site']}")
+        for prefix in ("action_", "help_"):
+            if prefix + aid not in words:
+                err(f"city governance: {aid} has no city_view prose {prefix + aid}")
+        kind = action["kind"]
+        if kind == "project":
+            projects.add(aid)
+        elif kind == "policy":
+            vocabulary = {"patrols": {"normal", "heavy"}, "taverns": {"open", "closed"},
+                          "workforce": {"normal", "paid", "requisition"}}
+            policy = action.get("policy", "")
+            if action.get("value") not in vocabulary.get(policy, set()):
+                err(f"city governance: {aid} has invalid policy/value")
+        elif kind == "tax" and action.get("value") not in rules.get("daily_cost_by_tax", {}):
+            err(f"city governance: {aid} has an unsupported tax level")
+    if action_ids != set(rules.get("action_costs", {})):
+        err("city governance: every action needs exactly one balance cost")
+    if projects != set(rules.get("project_days", {})):
+        err("city governance: project ids and balance project_days disagree")
+    for table in ("project_maintenance", "project_effects"):
+        if projects != set(rules.get(table, {})):
+            err(f"city governance: project ids and balance {table} disagree")
+    profiles = governance.get("building_profiles", [])
+    profile_sites = [profile["site"] for profile in profiles]
+    if len(profile_sites) != len(set(profile_sites)) or set(profile_sites) != site_ids:
+        err("city governance: every site needs exactly one building profile")
+    profile_projects = [profile["project"] for profile in profiles]
+    programs = set(governance.get("military_programs", []))
+    if len(profile_projects) != len(set(profile_projects)) or set(profile_projects) | programs != projects or set(profile_projects) & programs:
+        err("city governance: every project needs exactly one building profile or military programme")
+    if programs != set(rules.get("project_military_effects", {})):
+        err("city governance: military programmes and balance effects disagree")
+    for kind in ("project_completed", "relief_expired", "troops_trained", "troops_equipped", "program_paused"):
+        if "event_" + kind not in words:
+            err(f"city governance: daily event has no city_view prose event_{kind}")
+    for policy in rules.get("workforce_rate", {}):
+        if "factor_workforce_" + policy not in words:
+            err(f"city governance: workforce flow has no city_view prose factor_workforce_{policy}")
+    action_by_id = {action["id"]: action for action in actions}
+    for action in actions:
+        prerequisite = action.get("requires_project")
+        if prerequisite is not None and (prerequisite not in projects or prerequisite == action["id"]):
+            err(f"city governance: {action['id']} has invalid project prerequisite")
+        visited = {action["id"]}
+        while prerequisite in action_by_id:
+            if prerequisite in visited:
+                err(f"city governance: {action['id']} has a cyclic project prerequisite")
+                break
+            visited.add(prerequisite)
+            prerequisite = action_by_id[prerequisite].get("requires_project")
+    for profile in profiles:
+        project_id = profile["project"]
+        if action_by_id.get(project_id, {}).get("site") != profile["site"]:
+            err(f"city governance: {project_id} building profile belongs to the wrong site")
+        for key in profile["stages"].values():
+            if key not in words:
+                err(f"city governance: building stage has no city_view prose {key}")
+    for project_id in projects:
+        for prefix in ("project_", "factor_"):
+            if prefix + project_id not in words:
+                err(f"city governance: project has no city_view prose {prefix + project_id}")
+        if rules.get("action_costs", {}).get(project_id, 0) <= 0:
+            err(f"city governance: {project_id} requires a paid construction cost")
+        if rules.get("project_maintenance", {}).get(project_id, 0) <= 0:
+            err(f"city governance: {project_id} requires recurring maintenance")
+        effects = rules.get("project_effects", {}).get(project_id, {})
+        if not any(value != 0 for value in effects.values()):
+            err(f"city governance: {project_id} must have a readable civic effect")
+    if not (0 < rules.get("restive_threshold", 0) < rules.get("rebellious_threshold", 0) <= 100):
+        err("city governance: mood thresholds must increase within 0–100")
+    for metric in ("cleanliness", "street_condition"):
+        initial, complete = rules.get("initial_" + metric, 0), rules.get("completed_" + metric, 0)
+        if not 0 <= initial < complete <= 100:
+            err(f"city governance: {metric} must improve within 0–100")
+    extent = float(city.get("extent", 0)) / 2
+    def check_point(point: list, location: str) -> None:
+        if any(abs(float(value)) > extent for value in point):
+            err(f"roma city: {location} outside district bounds")
+    for site in city.get("sites", []):
+        check_point(site["position"], f"site {site['id']}")
+        check_point(site["approach"], f"site approach {site['id']}")
+    spawn = city.get("spawn", [0, 0, 0])
+    check_point([spawn[0], spawn[2]], "spawn")
+    for building in city.get("buildings", []):
+        if any(float(size) <= 0 for size in building["size"]):
+            err(f"roma city: {building['id']} has a non-positive footprint")
+        if building["enterable"] and float(building["door_width"]) >= float(building["size"][0]):
+            err(f"roma city: {building['id']} door is wider than its facade")
+        for sx, sz in ((-1, -1), (1, 1)):
+            check_point([building["position"][0] + sx * building["size"][0] / 2,
+                         building["position"][1] + sz * building["size"][1] / 2],
+                        f"building {building['id']} footprint")
+    for collection in ("roads", "citizen_routes"):
+        for path in city.get(collection, []):
+            for index, point in enumerate(path["points"]):
+                check_point(point, f"{path['id']} waypoint {index}")
+            for a, b in zip(path["points"], path["points"][1:]):
+                if a == b:
+                    err(f"roma city: {path['id']} has a zero-length waypoint segment")
+    for anchor in city.get("people_anchors", []):
+        check_point(anchor["position"], f"people anchor {anchor['id']}")
+    for collection in ("trees", "market_stalls", "rubbish", "repair_areas"):
+        for index, point in enumerate(city.get(collection, [])):
+            check_point(point, f"{collection} {index}")
+    check_point(city.get("water_position", [0, 0]), "water position")
+
+
 def main() -> int:
     global LIVE_MISSION_KINDS
     LIVE_MISSION_KINDS = _live_mission_kinds()
@@ -1530,7 +1671,7 @@ def _entity_count(document: dict) -> int:
     if "unit_classes" in document:
         return sum(len(document.get(key, [])) for key in
                    ("unit_classes", "attributes", "effects", "building_kinds"))
-    for key in ("cultures", "factions", "chains", "units", "classes", "regions",
+    for key in ("actions", "cultures", "factions", "chains", "units", "classes", "regions",
                 "traits", "ancillaries", "events", "wonders", "missions",
                 "conditions", "pools", "cells", "advances", "axes",
                 "edicts", "sites", "stages", "effects", "recipes",

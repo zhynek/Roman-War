@@ -111,6 +111,7 @@ static func _valid_state(state: Variant) -> bool:
 		"agents": TYPE_DICTIONARY, "watchposts": TYPE_DICTIONARY,
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
+		"city_governance": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
@@ -168,10 +169,117 @@ static func _valid_state(state: Variant) -> bool:
 	for post in state.get("watchposts", {}).values():
 		if not _fields(post, {"owner": TYPE_STRING, "level": TYPE_FLOAT}):
 			return false
+	for region_id in state.get("city_governance", {}):
+		if not state["settlements"].has(region_id) or not _valid_city(state["city_governance"][region_id]):
+			return false
 	for recipients in state.get("map_access", {}).values():
 		if not recipients is Array:
 			return false
 	return true
+
+
+static func _valid_city(city: Variant) -> bool:
+	if not _fields(city, {"day": TYPE_FLOAT, "grain_days": TYPE_FLOAT,
+		"policies": TYPE_DICTIONARY, "projects": TYPE_DICTIONARY}):
+		return false
+	if not _whole_at_least(city["day"], 1) or not _whole_at_least(city["grain_days"], 0):
+		return false
+	if not _fields(city["policies"], {"patrols": TYPE_STRING, "taverns": TYPE_STRING}):
+		return false
+	if not ["normal", "heavy"].has(city["policies"]["patrols"]) or not ["open", "closed"].has(city["policies"]["taverns"]):
+		return false
+	if city["policies"].has("workforce") and not ["normal", "paid", "requisition"].has(city["policies"]["workforce"]):
+		return false
+	if city.has("pending_orders") and not _valid_city_orders(city["pending_orders"]):
+		return false
+	if city.has("last_day_report") and not _valid_city_report(city["last_day_report"], int(city["day"])):
+		return false
+	for project in city["projects"].values():
+		if not _fields(project, {"remaining": TYPE_FLOAT, "completed": TYPE_BOOL}):
+			return false
+		if not _whole_at_least(project["remaining"], 0) or (project["completed"] and project["remaining"] != 0):
+			return false
+		for stamp in ["funded_day", "completed_day"]:
+			if project.has(stamp) and (not _whole_at_least(project[stamp], 0) or float(project[stamp]) > float(city["day"])):
+				return false
+		if int(project.get("completed_day", 0)) > 0 and not project["completed"]:
+			return false
+		if int(project.get("completed_day", 0)) > 0 and int(project.get("funded_day", 0)) > int(project["completed_day"]):
+			return false
+	return true
+
+
+static func _valid_city_orders(orders: Variant) -> bool:
+	if not orders is Array:
+		return false
+	var seen := {}
+	for order in orders:
+		if not _fields(order, {"id": TYPE_STRING, "count": TYPE_FLOAT, "cost": TYPE_FLOAT}):
+			return false
+		if order["id"] == "" or seen.has(order["id"]) or not _whole_at_least(order["count"], 1) or not _whole_at_least(order["cost"], 0):
+			return false
+		seen[order["id"]] = true
+	return true
+
+
+static func _valid_city_report(report: Variant, current_day: int) -> bool:
+	if not report is Dictionary:
+		return false
+	if report.is_empty():
+		return true
+	if not _fields(report, {"day_before": TYPE_FLOAT, "day_after": TYPE_FLOAT, "treasury_spent": TYPE_FLOAT,
+		"order_cost": TYPE_FLOAT, "before": TYPE_DICTIONARY, "after": TYPE_DICTIONARY, "deltas": TYPE_DICTIONARY,
+		"flows": TYPE_DICTIONARY, "events": TYPE_ARRAY, "orders_issued": TYPE_ARRAY}):
+		return false
+	if not _whole_at_least(report["day_before"], 1) or report["day_after"] != report["day_before"] + 1 or report["day_after"] > current_day:
+		return false
+	if not _whole_at_least(report["treasury_spent"], 0) or not _whole_at_least(report["order_cost"], 0) or not _valid_city_orders(report["orders_issued"]):
+		return false
+	var order_cost := 0
+	for order in report["orders_issued"]:
+		order_cost += int(order["cost"])
+	if order_cost != int(report["order_cost"]):
+		return false
+	for section in ["before", "after", "deltas"]:
+		var snapshot: Dictionary = report[section]
+		for key in ["day", "treasury", "daily_cost", "grain_days", "unrest", "grievance", "legitimacy"]:
+			if not _number(snapshot.get(key)):
+				return false
+		for key in ["day", "treasury", "daily_cost", "grain_days"]:
+			if float(snapshot[key]) != floorf(float(snapshot[key])):
+				return false
+		if section != "deltas":
+			if not _whole_at_least(snapshot["day"], 1) or not _whole_at_least(snapshot["grain_days"], 0) or not _whole_at_least(snapshot["daily_cost"], 0):
+				return false
+	if report["before"]["day"] != report["day_before"] or report["after"]["day"] != report["day_after"]:
+		return false
+	if report["before"]["treasury"] - report["after"]["treasury"] != report["treasury_spent"]:
+		return false
+	for stock in ["grievance", "legitimacy"]:
+		if not report["flows"].get(stock) is Array:
+			return false
+		for factor in report["flows"][stock]:
+			if not _fields(factor, {"label": TYPE_STRING, "value": TYPE_FLOAT}):
+				return false
+	for event in report["events"]:
+		if not _fields(event, {"kind": TYPE_STRING, "params": TYPE_DICTIONARY}):
+			return false
+		match String(event["kind"]):
+			"project_completed", "program_paused":
+				if not _fields(event["params"], {"project": TYPE_STRING}):
+					return false
+			"troops_trained", "troops_equipped":
+				if not _whole_at_least(event["params"].get("count"), 0):
+					return false
+			"relief_expired":
+				pass
+			_:
+				return false
+	return true
+
+
+static func _whole_at_least(value: Variant, minimum: int) -> bool:
+	return _number(value) and float(value) >= minimum and float(value) == floorf(float(value))
 
 
 static func _fields(record: Variant, types: Dictionary, optional: bool = false) -> bool:

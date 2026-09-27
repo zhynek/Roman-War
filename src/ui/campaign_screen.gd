@@ -187,6 +187,7 @@ func _ready() -> void:
 	region_panel = RegionPanel.new()
 	region_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	region_panel.action_taken.connect(refresh)
+	region_panel.city_requested.connect(_enter_roma)
 	region_panel.army_selected.connect(_on_army_selected)
 	region_panel.army_raised.connect(_on_army_raised)
 	region_panel.fleet_launched.connect(_on_fleet_launched)
@@ -1556,23 +1557,27 @@ func _save_game() -> void:
 
 func _load_game() -> void:
 	if game.load_from(save_path):
-		map_view.finish_marches()
-		_clear_force_selection()
-		selected_agent = ""
-		map_view.selected_region = ""
-		region_panel.clear_panel()
-		_victory_shown = false
-		map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
-		# The loaded campaign brings its own day with it: the journal travels in
-		# the save, so the Dispatch reopens on the turn that was actually last
-		# resolved rather than on whatever this session happened to play.
-		_day_beats = game.day_beats()
-		_treasury_ticking = false
-		_treasury_delta = 0
+		_restore_loaded_presentation()
 		_log("Game loaded.")
 		refresh()
 	else:
 		_log("No saved game to load.")
+
+
+func _restore_loaded_presentation() -> void:
+	map_view.finish_marches()
+	_clear_force_selection()
+	selected_agent = ""
+	map_view.selected_region = ""
+	region_panel.clear_panel()
+	_victory_shown = false
+	map_view.center_on(game.state["factions"][game.state["player_faction"]]["capital"])
+	# The loaded campaign brings its own day with it: the journal travels in
+	# the save, so the Dispatch reopens on the turn that was actually last
+	# resolved rather than on whatever this session happened to play.
+	_day_beats = game.day_beats()
+	_treasury_ticking = false
+	_treasury_delta = 0
 
 
 func _log(text: String) -> void:
@@ -1827,3 +1832,21 @@ func open_realism_study() -> void:
 	else:
 		realism_study.show()
 	move_child(realism_study,-1)
+
+
+func _enter_roma() -> void:
+	if game.state["settlements"].get("latium", {}).get("owner", "") != game.state["player_faction"]:
+		return
+	var city := RomaCityScreen.new()
+	city.game = game
+	city.standalone = false
+	city.save_path = save_path
+	city.state_loaded.connect(_restore_loaded_presentation)
+	city.main_menu_requested.connect(func():
+		city.queue_free()
+		process_mode = Node.PROCESS_MODE_INHERIT
+		show()
+		refresh(), CONNECT_DEFERRED)
+	hide()
+	process_mode = Node.PROCESS_MODE_DISABLED
+	get_parent().add_child(city)

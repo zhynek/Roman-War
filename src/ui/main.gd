@@ -22,6 +22,8 @@ func _ready() -> void:
 		return
 
 	var words: Dictionary = _data.effects_glossary["map_commands"]
+	$Center/Menu/Roma.text = _data.effects_glossary["city_view"]["menu"]
+	$Center/Menu/RomaHelp.text = _data.effects_glossary["city_view"]["menu_help"]
 	$Center/Menu/Alpine.text = words["route_start"]
 	$Center/Menu/AlpineHelp.text = words["route_menu_help"]
 	var faction_ids: Array = _data.factions.keys()
@@ -83,3 +85,11 @@ func _return_to_menu() -> void:
 		active_session = null
 	$Center.show()
 	$Center/Menu/Start.grab_focus()
+
+
+func _on_roma_pressed() -> void:
+	if active_session != null or not _data.ok():
+		return
+	var city := RomaCityScreen.new()
+	city.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
+	_open_session(city)

@@ -10,7 +10,7 @@ extends SceneTree
 ## JSON round-trip, because JSON numbers come back as floats and the writer
 ## sorts keys — neither is a difference in the world.
 
-const EXPECTED_TABLES := 36
+const EXPECTED_TABLES := 38
 const TURNS := 5
 
 
