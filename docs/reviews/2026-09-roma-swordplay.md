@@ -102,3 +102,24 @@ Full-suite release gate: **666 tests, 0 failures**, with no script/error diagnos
 The existing anchored-control sizing warning remains in the headless UI suite;
 rendered swordplay, fortress and map acceptance logs are clean. Data validation
 reported **0 errors, 0 warnings**. `git diff --check` passed.
+
+## GitHub publication follow-up
+
+The initial GitHub runs passed the functional assertions but failed the existing
+600 ms campaign-turn budget (600 and 622 ms averages). Profiling identified
+repeated diplomacy checks while expanding AI routes. Each route query now
+computes region access once; this temporary lookup is discarded before another
+query, so wars, captures and other campaigns cannot leave stale access behind.
+The path expansion order, costs, game rules and timing threshold are unchanged.
+
+An isolated 60-turn seed-42 run fell from 20.79 to 19.33 seconds locally, including
+state serialization. All 60 serialized turn-state hashes matched the pre-change
+run. Two regression tests cover access changes between queries, independent
+campaigns/factions and hostile-source land/sea rules. The packaged 0.20.0 preview
+above predates this source-only routing optimization.
+
+The optimized source passed **668 tests, 0 failures**, with no script/error
+diagnostics. Data validation and Godot import were clean. The rendered map gate
+passed again; planning, marching, arrival and maximum-zoom screenshots were
+inspected under `/tmp/roman-war-ci-fix-map`. The existing headless UI sizing
+warning remains unchanged.

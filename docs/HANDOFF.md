@@ -13,6 +13,14 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Roma city development
 
+**GitHub integration follow-up.** The initial Linux CI runs exposed the existing
+600 ms campaign-turn limit. AI route queries now evaluate territorial access
+once per region per query, preserving costs and expansion order. A 60-turn
+comparison matched every pre-change state hash. The optimized source passed
+**668 tests, 0 failures**, clean data/import gates and the rendered map gate.
+The packaged 0.20.0 preview below predates this behavior-preserving source fix;
+see the [publication follow-up](reviews/2026-09-roma-swordplay.md#github-publication-follow-up).
+
 **Swordplay and specialists update (0.20.0 preview).** Articulated tactical
 troops now thrust, cut, block and fall; mounted guards and elite formations
 have distinct procedural kit and deterministic timed abilities. Roma can muster

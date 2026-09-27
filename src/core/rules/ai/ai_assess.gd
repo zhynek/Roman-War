@@ -127,17 +127,23 @@ static func distance_map(data: GameData, state: Dictionary, faction_id: String, 
 			cost[source] = 0
 			frontier.append(source)
 	var table := _traversal_table(data)
+	# Ownership and diplomacy cannot change during this read-only query.
+	# Evaluate them once per region instead of again for every relaxed edge.
+	# Keep this local: the next faction may declare war or capture a town.
+	var traversable := {}
+	for region_id in table:
+		traversable[region_id] = passable(state, faction_id, region_id)
 	while not frontier.is_empty():
 		frontier.sort()  # canonical expansion order
 		var next_frontier: Array = []
 		for region_id in frontier:
 			var here := int(cost[region_id])
-			var land_only := not passable(state, faction_id, region_id)
+			var land_only := not bool(traversable[region_id])
 			for step in table[region_id]:
 				if land_only and step["sea"]:
 					continue
 				var neighbor: String = step["region"]
-				if not passable(state, faction_id, neighbor):
+				if not traversable[neighbor]:
 					continue
 				var through := here + int(step["cost"])
 				if not cost.has(neighbor) or through < int(cost[neighbor]):
