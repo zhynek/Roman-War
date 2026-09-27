@@ -203,7 +203,11 @@ Historical framing consulted:
 - [Parco archeologico del Colosseo: Curia Iulia](https://colosseo.it/en/invisible-deposits-conference/the-curia-iulia/) dates Caesar's later refoundation, which this scene does not claim to reproduce.
 - [World History Encyclopedia: Food in the Roman World](https://www.worldhistory.org/article/684/food-in-the-roman-world/) describes food-and-wine establishments; this is comparative daily-life context, not proof of a particular 270 BC floor plan.
 
-## Future battles
+## Battle scope at the phase 3 checkpoint
+
+The following describes phase 3. The subsequent playable Roma siege protocol,
+including deployment, explicit combat steps and campaign defence, is documented
+in [City battles](../CITY_BATTLES.md).
 
 The layout retains wide approach streets, a central assembly space, narrow
 side streets, courtyards, perimeter gates and interior door openings. Routes,

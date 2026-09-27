@@ -113,6 +113,13 @@ static func _press_sieges(data: GameData, state: Dictionary, faction_id: String,
 		var siege = state["settlements"][region_id]["siege"]
 		if siege == null or siege["besieger"] != army_id:
 			continue
+		# The authored player's city is a commandable defensive battle. The
+		# season that readies the engines finishes normally, then the facade
+		# holds the next season until the player resolves the defense.
+		# Keep the army committed here so AI movement cannot lift that decision.
+		if CityBattleRules.pending_defense(data, state, region_id):
+			handled[army_id] = true
+			continue
 		var attack_power := AiAssess.army_power(data, state, army)
 		# A siege that would end in a slaughter at the walls when the garrison
 		# finally sallies is lifted now — the army falls back through the
@@ -448,5 +455,3 @@ static func garrison_floor(data: GameData, state: Dictionary, region_id: String)
 			return int(ai_rules["garrison_units_frontier"])
 		_:
 			return int(ai_rules["garrison_units_interior"])
-
-

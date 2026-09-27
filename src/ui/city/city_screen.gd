@@ -4,14 +4,17 @@ extends Control
 ## deterministic civic-day rules; camera and citizen animation never do.
 signal main_menu_requested
 signal state_loaded
+signal campaign_requested
 
 const REGION := "latium"
 var game: Game
 var standalone := true
+var shared_session := false
 var save_path := "user://roma_city_save.json"
 var layout: Dictionary
 var words: Dictionary
 var world: RomaCityWorld
+var garrison_view: RomaCityBattleForces
 var citizens: RomaCityPeople
 var viewport: SubViewport
 var player: CharacterBody3D
@@ -50,6 +53,10 @@ var _preview_description: Label
 var _stage_buttons: Dictionary = {}
 var dawn: RomaCityDawn
 var report_button: Button
+var battle_panel: RomaCityBattlePanel
+var battle_button: Button
+var season_button: Button
+var campaign_panel: RomaCityCampaignPanel
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -57,19 +64,29 @@ func _ready() -> void:
 	if game == null:
 		game = Game.new_campaign("senate", 42, "medium", "long", false)
 	words = game.data.effects_glossary.get("city_view", {})
-	layout = JSON.parse_string(FileAccess.get_file_as_string("res://data/roma_city.json"))
+	layout = game.data.roma_city
 	if standalone and FileAccess.file_exists(save_path):
 		var saved := SaveGame.read_file(save_path)
 		if saved.get("player_faction", "") == "senate" and saved.get("settlements", {}).get(REGION, {}).get("owner", "") == "senate":
 			game.load_from(save_path)
 	RomaCityRules.ensure_city(game.data, game.state, REGION)
+	if shared_session:
+		game.city_campaign_enter(REGION)
 	_build_view()
 	_build_hud()
 	dawn = RomaCityDawn.new()
 	add_child(dawn)
 	dawn.dismissed.connect(_dawn_dismissed)
+	battle_panel = RomaCityBattlePanel.new()
+	add_child(battle_panel)
+	battle_panel.configure(self)
+	campaign_panel = RomaCityCampaignPanel.new()
+	add_child(campaign_panel)
+	campaign_panel.configure(self)
 	refresh_city()
 	show_message(w("welcome"))
+	if game.city_battle_status(REGION).get("active", false):
+		battle_panel.open()
 
 func w(key: String) -> String:
 	return String(words.get(key, key))
@@ -85,7 +102,7 @@ func _build_view() -> void:
 	viewport.size = Vector2i(1280, 800)
 	viewport.own_world_3d = true
 	viewport.handle_input_locally = false
-	viewport.msaa_3d = Viewport.MSAA_2X
+	viewport.msaa_3d = Viewport.MSAA_4X
 	container.add_child(viewport)
 	world = RomaCityWorld.new()
 	viewport.add_child(world)
@@ -93,6 +110,9 @@ func _build_view() -> void:
 	citizens = RomaCityPeople.new()
 	world.add_child(citizens)
 	citizens.build(layout)
+	garrison_view=RomaCityBattleForces.new()
+	garrison_view.soldiers_per_model=int(CityBattleSim.rules(game.data)["display_soldiers_per_model"])
+	world.add_child(garrison_view)
 	# The world is all at street grade. Collision uses the same geometry as
 	# the future tactical surface, including real gaps for doors and gates.
 	player = CharacterBody3D.new()
@@ -174,24 +194,30 @@ func _build_hud() -> void:
 	var foot_box := VBoxContainer.new()
 	foot_box.add_theme_constant_override("separation", 6)
 	command_bar.add_child(foot_box)
-	var commands := HBoxContainer.new()
-	commands.add_theme_constant_override("separation", 8)
+	var commands := HFlowContainer.new()
+	commands.add_theme_constant_override("h_separation", 8)
+	commands.add_theme_constant_override("v_separation", 4)
 	foot_box.add_child(commands)
 	govern_button = _button(w("bottom_govern"), _open_governance)
 	govern_button.theme_type_variation = "EndTurnButton"
 	commands.add_child(govern_button)
 	inspect_button = _button(w("bottom_inspect"), inspect_selection)
 	commands.add_child(inspect_button)
+	commands.add_child(_button(w("defense_inspect"), open_defenses))
 	commands.add_child(_button(w("map"), toggle_overview))
 	walk_button = _button(w("walk_mode"), toggle_walk)
 	commands.add_child(walk_button)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	commands.add_child(spacer)
+	battle_button = _button(String(game.data.effects_glossary.get("city_battle", {}).get("entry", "")), open_battle)
+	commands.add_child(battle_button)
 	report_button = _button(w("dawn_report"), show_day_report.bind(false))
 	commands.add_child(report_button)
 	day_button = _button("", advance_day)
 	commands.add_child(day_button)
+	if shared_session:
+		season_button = _button(w("next_season"), advance_season)
+		commands.add_child(season_button)
+		commands.add_child(_button(w("campaign_ledger"), open_campaign_ledger))
+		commands.add_child(_button(w("campaign_map"), _request_campaign))
 	for command in [["save", save_city], ["load", load_city], ["leave", leave_city]]:
 		commands.add_child(_button(w(command[0]), command[1]))
 	prompt_label = _label(w("cursor_controls"), 13)
@@ -249,6 +275,8 @@ func _button(text: String, callback: Callable) -> Button:
 	return button
 
 func _view_input(event: InputEvent) -> void:
+	if battle_panel != null and battle_panel.visible:
+		return
 	if event is not InputEventMouseButton or not event.pressed:
 		return
 	if event.button_index not in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
@@ -327,6 +355,13 @@ func toggle_walk() -> void:
 	_refresh_position()
 
 func _input(event: InputEvent) -> void:
+	if battle_panel != null and battle_panel.visible:
+		return
+	if campaign_panel != null and campaign_panel.visible:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			campaign_panel.hide()
+			get_viewport().set_input_as_handled()
+		return
 	if dawn != null and dawn.visible:
 		if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE, KEY_ENTER, KEY_SPACE]:
 			dawn.dismiss()
@@ -354,6 +389,10 @@ func _input(event: InputEvent) -> void:
 				interact()
 
 func _physics_process(delta: float) -> void:
+	if battle_panel != null and battle_panel.visible:
+		return
+	if campaign_panel != null and campaign_panel.visible:
+		return
 	if player == null:
 		return
 	var direction := Vector3.ZERO
@@ -450,6 +489,9 @@ func _drawer_heading(title: String) -> void:
 	row.add_child(_button(w("panel_close"), drawer.hide))
 
 func open_drawer(site_id: String = "") -> void:
+	if site_id == "defenses":
+		open_defenses()
+		return
 	if site_id != _drawer_site:
 		_dossier_tab = "orders"
 		_preview_stage = ""
@@ -636,6 +678,7 @@ func _set_preview_stage(stage: String) -> void:
 func _build_troops() -> void:
 	var military := game.city_troop_status(REGION)
 	_paragraph(w("troops_help"), drawer_body, 13)
+	_paragraph(w("troops_counters"),drawer_body,13).modulate=UiStyle.ACCENT
 	drawer_body.add_child(_label(w("troops_programs"), 16))
 	for programme in military.get("programs", []):
 		var effects: Dictionary = programme.get("effects", {})
@@ -664,23 +707,22 @@ func _build_troops() -> void:
 		_paragraph(w("troops_base_stats") % [int(template.get("attack", 0)), int(template.get("defense", 0)), int(template.get("morale", 0))], drawer_body, 12)
 		_paragraph(w("troops_unit_terms") % [int(unit.get("soldiers", 0)), int(unit.get("cost", 0)), int(unit.get("upkeep", 0))], drawer_body, 12)
 		_paragraph(_troop_profile(unit.get("profile", {})), drawer_body, 12)
-		if not standalone:
-			var button := _button(w("troops_recruit") % String(unit["name"]), _queue_city_unit.bind(String(unit["id"])))
-			button.disabled = not unit.get("available", false)
-			drawer_body.add_child(button)
-			if button.disabled:
-				_paragraph(w("reason_" + String(unit.get("reason", "unit_unavailable"))), drawer_body, 12)
+		var button := _button(w("troops_recruit") % String(unit["name"]), _queue_city_unit.bind(String(unit["id"])))
+		button.disabled = not unit.get("available", false)
+		drawer_body.add_child(button)
+		if button.disabled:
+			_paragraph(w("reason_" + String(unit.get("reason", "unit_unavailable"))), drawer_body, 12)
 	if not military.get("queue", []).is_empty():
 		drawer_body.add_child(_label(w("troops_queue"), 16))
 		for job in military["queue"]:
 			var template := String(job["template"])
-			_paragraph(w("troops_queue_entry") % [String(game.data.units.get(template, {}).get("name", template)), int(job.get("turns_left", 0))], drawer_body, 12)
+			_paragraph(w("troops_city_queue" if job.has("city_days_left") else "troops_queue_entry") % [String(game.data.units.get(template, {}).get("name", template)), int(job.get("city_days_left",job.get("turns_left",0)))], drawer_body, 12)
 
 func _troop_profile(profile: Dictionary) -> String:
 	return w("troops_unit_profile") % [int(profile.get("experience", 0)), int(profile.get("weapon", 0)), int(profile.get("armor", 0))]
 
 func _queue_city_unit(template: String) -> void:
-	var ok := game.city_queue_unit(REGION, template)
+	var ok := game.city_queue_unit(REGION, template, standalone or shared_session)
 	refresh_city()
 	_refresh_drawer()
 	show_message(w("troops_queued") % String(game.data.units.get(template, {}).get("name", template)) if ok else w("refused"))
@@ -753,6 +795,8 @@ func perform_action(id: String) -> void:
 		_refresh_drawer()
 
 func advance_day() -> void:
+	if battle_panel != null and battle_panel.visible:
+		return
 	if dawn.visible:
 		return
 	if game.city_advance_day(REGION):
@@ -780,10 +824,14 @@ func refresh_city() -> void:
 	status = game.city_status(REGION)
 	world.apply_status(status)
 	citizens.apply_status(status)
+	_sync_garrison()
 	day_button.text = w("bottom_next_day") + " · " + w("cost") % int(status.get("daily_cost", 0))
 	day_button.disabled = not status.get("can_advance", false)
 	report_button.disabled = status.get("last_day_report", {}).is_empty()
 	stats_label.text = w("stats_compact") % [int(status.get("day", 0)), int(status.get("treasury", 0)), w("mood_" + String(status.get("mood", "calm"))), int(status.get("unrest", 0))]
+	if shared_session:
+		stats_label.text = campaign_date() + "\n" + stats_label.text
+		season_button.disabled = not game.city_campaign_status(REGION).get("can_advance", false)
 	_refresh_position()
 
 func toggle_overview() -> void:
@@ -797,17 +845,24 @@ func show_message(message: String) -> void:
 	toast_label.text = message
 
 func save_city() -> void:
+	battle_panel.host.stop()
 	show_message(w("saved") if game.save_to(save_path) else w("save_failed"))
 
 func load_city() -> void:
+	battle_panel.host.stop()
 	var loaded := SaveGame.read_file(save_path)
-	if loaded.get("player_faction", "") != game.state["player_faction"] or loaded.get("settlements", {}).get(REGION, {}).get("owner", "") != game.state["player_faction"]:
+	if loaded.is_empty() or (not shared_session and (loaded.get("player_faction", "") != game.state["player_faction"] or loaded.get("settlements", {}).get(REGION, {}).get("owner", "") != game.state["player_faction"])):
 		show_message(w("load_failed"))
 		return
 	if game.load_from(save_path):
 		RomaCityRules.ensure_city(game.data, game.state, REGION)
 		refresh_city()
 		state_loaded.emit()
+		if shared_session and game.state["settlements"][REGION]["owner"] != game.state["player_faction"] and not game.city_battle_status(REGION).get("active", false):
+			campaign_requested.emit()
+			return
+		if game.city_battle_status(REGION).get("active", false):
+			battle_panel.open()
 		if drawer.visible:
 			_refresh_drawer()
 		show_message(w("loaded"))
@@ -815,6 +870,7 @@ func load_city() -> void:
 		show_message(w("load_failed"))
 
 func leave_city() -> void:
+	battle_panel.host.stop()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if standalone and not game.save_to(save_path):
 		show_message(w("save_failed"))
@@ -822,4 +878,122 @@ func leave_city() -> void:
 	main_menu_requested.emit()
 
 func _exit_tree() -> void:
+	if battle_panel != null: battle_panel.host.stop()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func open_battle() -> void:
+	if campaign_panel != null:
+		campaign_panel.hide()
+	if dawn != null and dawn.visible:
+		dawn.dismiss()
+	battle_panel.open()
+
+
+func campaign_date() -> String:
+	var year := int(game.state["year"])
+	return w("calendar_date") % [w("calendar_bc") % -year if year < 0 else w("calendar_ad") % year, w("calendar_" + String(game.state["season"])), int(game.state["turn"]) + 1]
+
+
+func _request_campaign() -> void:
+	battle_panel.host.stop()
+	campaign_panel.hide()
+	if dawn.visible:
+		dawn.dismiss()
+	campaign_requested.emit()
+
+
+func open_campaign_ledger() -> void:
+	if battle_panel.visible:
+		return
+	battle_panel.host.stop()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	drawer.hide()
+	if dawn.visible:
+		dawn.dismiss()
+	campaign_panel.present()
+
+
+func advance_season(count: int = 1) -> void:
+	if battle_panel.visible:
+		return
+	battle_panel.host.stop()
+	var result := game.city_campaign_advance(REGION, count)
+	refresh_city()
+	_refresh_drawer()
+	var message := w("calendar_passed") % [int(result.get("seasons_advanced", 0)), int(result.get("civic_days_advanced", 0))]
+	var reason := String(result.get("stop_reason", result.get("reason", "")))
+	if reason != "":
+		message += " " + w("calendar_stop") % w("reason_" + reason)
+	for report in result.get("reports", []):
+		if int(report.get("unfunded_civic_days", 0)) > 0:
+			message += " " + w("calendar_unfunded")
+			break
+	show_message(message)
+	campaign_panel.last_message = message
+	var battle := game.city_battle_status(REGION)
+	if battle.get("can_defend", false) or battle.get("active", false):
+		open_battle()
+	elif game.state["settlements"][REGION]["owner"] != game.state["player_faction"]:
+		show_message(w("calendar_lost"))
+		campaign_requested.emit()
+	else:
+		campaign_panel.present()
+
+
+func _sync_garrison() -> void:
+	if garrison_view==null:return
+	var settlement:Dictionary=game.state["settlements"][REGION]
+	var formations:Array=[]
+	var muster:Dictionary=layout["battle"]["garrison_muster"]
+	if settlement["owner"]==game.state["player_faction"]:
+		for index in range(settlement["garrison"].size()):
+			var unit:Dictionary=settlement["garrison"][index]
+			var at:Vector2=Vector2(muster["origin"][0],muster["origin"][1])+Vector2((index%int(muster["columns"]))*muster["spacing"][0],(index/int(muster["columns"]))*muster["spacing"][1])
+			formations.append({"id":"garrison_%d"%index,"side":"defender","unit":unit.duplicate(true),"role":CityBattleSim.role(game.data,unit["template"]),"specialty":CityBattleSpecialists.specialty(game.data,unit["template"]),"soldiers":game.data.units[unit["template"]]["soldiers"],"position":[roundi(at.x*100),roundi(at.y*100)],"facing":[0,1000],"moving":false,"engaged":false})
+	garrison_view.sync(layout,{"phase":"garrison","active":true,"formations":formations})
+	garrison_view.visible=not (battle_panel!=null and battle_panel.visible)
+
+func open_defenses() -> void:
+	if battle_panel != null and battle_panel.visible:return
+	_drawer_site = "defenses"
+	_drawer_building = ""
+	_layout_drawer(true)
+	_clear_drawer()
+	_drawer_heading(w("defense_title"))
+	_paragraph(w("defense_help"),drawer_body,13)
+	var defense := CitySiegeRules.defenses(game.data,game.state,REGION)
+	_paragraph(w("defense_integrity") % int(defense["gate_integrity"]),drawer_body,16).modulate=UiStyle.ACCENT
+	var archers := 0
+	for unit in game.state["settlements"][REGION]["garrison"]:
+		if CityBattleSim.role(game.data,unit["template"])=="archer" and int(unit["strength_pct"])>0:archers+=1
+	_paragraph(w("defense_archers") % archers,drawer_body,14)
+	for point in game.data.city_governance["defense_inspections"]:
+		drawer_body.add_child(HSeparator.new())
+		drawer_body.add_child(_label(w("defense_"+point["id"]),17))
+		var help := w("defense_"+point["id"]+"_help")
+		if point["id"]=="gate":help=help % int(CitySiegeRules.tuning(game.data)["gate_bonus"])
+		_paragraph(help,drawer_body,13)
+		drawer_body.add_child(_button(w("defense_visit"),visit_defense.bind(point)))
+		for id in point["projects"]:
+			var project: Dictionary=status.get("projects",{}).get(id,{})
+			if project.get("completed",false):
+				_paragraph(w("project_"+id)+" · "+w("defense_ready"),drawer_body,13).modulate=UiStyle.ACCENT
+			elif int(project.get("remaining",0))>0:
+				_paragraph(w("project_"+id)+" · "+w("defense_working") % int(project.get("estimated_days_remaining",project["remaining"])),drawer_body,13)
+			else:
+				for action in status.get("actions",[]):
+					if action["id"]==id:_action_card(action,drawer_body)
+		if point["id"]=="barracks":drawer_body.add_child(_button(w("defense_troops"),func():open_drawer("barracks");_choose_dossier_tab("troops")))
+
+func visit_defense(point: Dictionary) -> void:
+	if battle_panel != null and battle_panel.visible:return
+	var at := Vector3(float(point["position"][0]),0.1,float(point["position"][1]))
+	if not quick_jump(at):return
+	drawer.hide()
+	var target := Vector3(float(point["look_at"][0]),player.position.y,float(point["look_at"][1]))
+	player.look_at(target)
+	_pitch=0.10
+	camera.rotation.x=_pitch
+	destination=""
+	selection_label.text=w("defense_"+point["id"])
+	show_message(w("defense_help"))

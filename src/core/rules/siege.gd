@@ -89,6 +89,11 @@ static func advance_sieges(data: GameData, state: Dictionary, rng: CampaignRng, 
 		var equipment_turns := equipment_turns_for(data, state, besieger_owner)
 		if int(siege["turns"]) >= equipment_turns:
 			siege["equipment_ready"] = true
+		# A supported player city offers its defensive command before either
+		# assault or starvation resolves. Do not emit a false starve-out beat;
+		# the unresolved siege itself is the persistent, saveable decision.
+		if CityBattleRules.pending_defense(data, state, region_id):
+			continue
 
 		var level := SettlementRules.settlement_level(data, settlement)
 		var starve_turns: Array = siege_rules["starve_turns_per_settlement_level"]

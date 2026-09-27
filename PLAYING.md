@@ -1,19 +1,24 @@
-## One app, two ways to play
-
-In version 0.14.2, **Begin the Campaign** uses your house, difficulty and seed
-choices. **Play the Alpine Route** opens the authored Julii route through
-forests, bridges, marshes and mountain passes. It uses the same campaign rules.
-Save and Load work independently in each mode. Existing 0.14.1 Mac campaign
-and Alpine saves are retained. To resume, open the desired mode and press Load.
-Use **Options → Return to main menu** to switch modes; save first to keep
-progress. The confirmation lets you cancel if you have not saved.
-
 # Roman War — how to play
 
+## One campaign, city and map
+
+**Begin the Campaign** starts with your house, difficulty and seed choices.
+**Enter Roma** continues the common campaign save inside the city when you own
+it, or opens its strategic map when you do not. With no common save, an older
+Roma save is imported if present; otherwise Roma starts a Senate campaign using
+the chosen difficulty and seed. An existing campaign takes priority over the
+older Roma slot.
+
+Roma and the campaign map now share troops, treasury, time and Save/Load.
+**Campaign map** takes you out to the Mediterranean; entering Roma brings back
+the same city visit. Returning to the main menu saves the shared campaign.
+**Play the Alpine Route** remains a separate authored Julii comparison through
+forests, bridges, marshes and mountain passes, with its own retained save slot.
+
 A short guide for the current build. This is the **campaign layer**: you run a
-house, its cities, its money, and its armies. Battles are resolved
-automatically for now (a real-time battle mode is designed for later, and the
-game is built so it can drop in without changing anything else).
+house, its cities, its money, and its armies. Roma offers controllable continuous
+siege defence on its city streets. Other city and field battles use the
+campaign's automatic resolver.
 
 ## Starting a campaign
 
@@ -688,7 +693,8 @@ public works that affect them.
 **Govern Roma** in the bottom command bar, or **G**, opens **Policies & relief**,
 **Public works** and **City report**. The bottom bar stays available when **H**
 hides the other panels. It also holds Building details, City plan, mouse-look
-controls, **Next civic day**, **Day report**, Save, Load and Return.
+controls, **Next civic day**, **Day report**, **Next season**, **Calendar &
+history**, **Campaign map**, Save, Load and Return.
 
 Walk with **W/A/S/D**; **Shift** hastens your pace and **Left/Right** turns.
 Press **Tab** to switch mouse look on or off; **Esc** releases the pointer and
@@ -728,9 +734,11 @@ then establish the drill programme; its completion trains eligible units present
 in Roma and improves future recruits. The following equipment programme refits
 eligible garrison units and improves the local equipment standard. These affect
 real campaign units, within campaign caps; they do not convert one troop type
-into another. The focused city mode upgrades its existing garrison. When entered
-from a campaign, the tab can also queue new troops; that queue completes through
-campaign seasons, never through civic days.
+into another. Recruit new cohorts from the same tab. The first local cohort
+completes after three funded civic days; a campaign season schedules these
+days too. Recruiting from the strategic map keeps its normal seasonal queue.
+Early Allied Bowmen provide archers, while cavalry requires stables. Completed
+recruits appear in the barracks yard with swords, bows or horses.
 
 **Next civic day** resolves one local day with the displayed upkeep, then a gong
 and dawn report show the actual consequences: orders already paid, overnight
@@ -741,13 +749,92 @@ and expiring grain relief. The named causes explain the stock changes. Choose
 latest saved report without resolving another day. The gong and dawn animation
 only present a day that has already resolved.
 
-Save/Load use Roma’s own slot, and Return saves it before leaving. If you own
-Roma in a campaign, enter from the settlement panel to govern your actual
-campaign city. Policies, project and military progress, recorded orders and the
-latest day report persist; camera positions and decorative pedestrians do not.
+**Next season** advances the actual half-year campaign turn, including other
+factions, taxes, growth, upkeep, construction and military activity. Once Roma
+has been visited, each accepted season also schedules three funded civic work
+days. This happens from either city or map. Unfunded work waits while the normal
+seasonal economy resolves; a queue cannot finish the same recruit twice.
+Individual civic days remain available without advancing the calendar.
+
+**Calendar & history** opens **Roma through the years**, with calendar and
+stock charts, dated history and
+campaign construction orders. **Advance one year** requests two seasons and
+stops for threats, sieges, important decisions, loss of Roma or the campaign
+ending. You play within the existing 270 BC–AD 14 era; history records the
+seasons you actually advance.
+
+Save/Load use the common campaign slot, and Return saves it before leaving.
+Policies, project and military progress, recorded orders, calendar, history and
+the latest day report persist. Walking position and city camera remain during
+city/map switches in the current session; they are presentation, not saved
+campaign state. A live battle pauses when you leave its view.
 
 This district is an original interpretation of Republican Roma, with a shared
-collidable layout intended for future battles. It remains procedural artwork,
-not a photorealistic or surveyed reconstruction. Freeform rebuilding, city combat
+collidable layout shared with the continuous city battle model. It remains procedural
+artwork, not a photorealistic or surveyed reconstruction. Freeform rebuilding
 and individual household simulation are not implemented. See the
 [Roma city review](docs/reviews/2026-09-roma-city.md) for scope and verification.
+
+## Defend Roma
+
+Choose **Defend Roma → Practice siege** to fight with a copy of the current
+garrison. Select a formation or left-drag a rectangle over the city to select
+several friendly formations, then right-click clear ground to deploy. Choose
+**Begin battle** and the battle runs continuously.
+
+Right-click ground to move or an enemy to focus attacks. Use **Attack move**,
+**Hold position**, **Fall back**, cavalry **Charge** and **Cease fire / Fire at
+will** to direct your troops. Marquee selection works while the battle runs;
+Shift-click or Shift-drag adds formations. Ctrl/Cmd+A selects all defenders.
+Space pauses/resumes; **Speed** switches 1×/2×.
+
+WASD or middle-drag pans; wheel/pinch zooms. Alt-left-drag or Alt-middle-drag
+orbits and tilts; Q/E orbits and Up/Down changes elevation. **Inspect troops**
+brings the camera closer, **F / Follow selected** follows the group, and
+**V / Aerial view** restores the overview. **Tilt view** changes elevation.
+Double-click or middle-drag the inset plan to recenter the camera. These
+controls never advance the fight.
+
+Archers counter cavalry, cavalry counter foot soldiers, and foot soldiers
+counter archers. Training, equipment, numbers and positioning matter too.
+Defend the gate and keep the Forum contested; fifteen uncontested seconds
+there loses the city. Defeat the attackers or hold out for six simulated minutes.
+Practice losses do not affect the real garrison.
+
+A prepared campaign siege offers **Defend current siege**. The campaign waits
+for your defence; its casualties and possible loss of Roma apply when battle
+ends. **Save battle** saves and pauses. Returning to town leaves the fight
+paused and resumable, including when you switch to the campaign map. The
+campaign cannot advance a season around an unfinished battle. A completed loss
+report remains readable and you can return to any surviving campaign holdings.
+See [City battles](docs/CITY_BATTLES.md) for the full model.
+
+
+### Fortress preview (0.19)
+
+In Roma, open **Inspect defenses** to visit the south gate, curtain and barracks.
+Fund **Reinforce the south gate** and **Prepare incendiary arrows**, then advance
+four civic days to finish both at the normal work rate. Recruit **Allied Bowmen**
+from **Barracks → Troops**; civic training takes three funded days.
+
+Open **Defend Roma → Practice siege**. Deploy the archers on the street just
+inside the south gate, select **Target siege ram**, choose **Use fire arrows**,
+and begin the battle. The ram needs nearby attackers to move and strike. Repeated
+incendiary volleys set it alight; destroying it slows the gate assault. Ordinary
+arrows also damage the machine and its crew. Completed reinforcement raises gate
+integrity; incomplete work gives no benefit. Existing saved fights retain their
+old equipment state, so start a new practice to see the ram.
+
+The new desktop renderer is Forward+. Compatibility is available with
+`--rendering-method gl_compatibility` for machines that need it. This remains a
+procedural preview; city-wide fire spread and individual soldier physics are not
+implemented.
+
+Roma specialist troops: open **Barracks → Troops**, queue **Commander’s Mounted
+Escort**, and advance three civic days. It costs 1,200 before modifiers, requires
+an eligible local general and level-three barracks, and is limited to one paid
+escort per faction. In a newly started **Practice siege**, select the escort for
+**Rally the line**, Principes for **Disciplined assault**, or Triarii for **Brace
+spears**. Begin battle to enable abilities; pause to issue orders, then resume.
+Hover the ability button for effects and recovery. **Inspect troops** and the
+camera controls give close views of swordplay and mounted guards.

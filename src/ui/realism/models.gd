@@ -4,8 +4,12 @@ extends RefCounted
 ## encodes metallic response here, not transparency. No imported bitmap assets.
 var vertex_count := 0
 var surface := SurfaceTool.new()
+# Optional rigid-part tag for the tactical animation shader. Ordinary art uses 0.
+var part := 0.0
+var tagged_parts := false
 
-func _init() -> void:
+func _init(use_part_tags: bool = false) -> void:
+	tagged_parts=use_part_tags
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 func add(mesh: PrimitiveMesh, at: Vector3, scale_by: Vector3, color: Color, rotation: Vector3 = Vector3.ZERO) -> void:
@@ -18,6 +22,7 @@ func add(mesh: PrimitiveMesh, at: Vector3, scale_by: Vector3, color: Color, rota
 	for j in range(indices.size() if not indices.is_empty() else vertices.size()):
 		var i: int = indices[j] if not indices.is_empty() else j
 		surface.set_color(color)
+		if tagged_parts:surface.set_uv2(Vector2(part,0))
 		surface.set_normal((normal_basis * normals[i]).normalized())
 		surface.add_vertex(at + basis * vertices[i])
 		vertex_count += 1
@@ -48,6 +53,7 @@ func triangle(a: Vector3, b: Vector3, c: Vector3, tint: Color) -> void:
 	var normal := (b - a).cross(c - a).normalized()
 	for p in [a,b,c]:
 		surface.set_color(tint)
+		if tagged_parts:surface.set_uv2(Vector2(part,0))
 		surface.set_normal(normal)
 		surface.add_vertex(p)
 		vertex_count += 1

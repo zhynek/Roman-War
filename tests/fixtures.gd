@@ -18,6 +18,7 @@ static func data() -> GameData:
 	var game_data := GameData.new()
 	var balance_text := FileAccess.get_file_as_string("res://data/balance.json")
 	game_data.balance = JSON.parse_string(balance_text)
+	game_data.roma_city = JSON.parse_string(FileAccess.get_file_as_string("res://data/roma_city.json"))
 	game_data.city_governance = JSON.parse_string(
 		FileAccess.get_file_as_string("res://data/city_governance.json"))
 	# Balance, advances and society all come from the real tables — they are the
@@ -492,6 +493,8 @@ static func state(game_data: GameData) -> Dictionary:
 		"cartography": {},
 		"map_access": {},
 		"city_governance": {},
+		"city_battles": {},
+		"city_campaign": {},
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}

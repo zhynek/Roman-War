@@ -7,12 +7,13 @@ class_name RecruitmentRules
 ## strains the town (levy_strain), softened by its drill yards.
 
 
-static func available_units(data: GameData, state: Dictionary, region_id: String) -> Array:
+static func available_units(data: GameData, state: Dictionary, region_id: String, include_city: bool = false, for_training: bool = false) -> Array:
 	var settlement: Dictionary = state["settlements"][region_id]
 	var owner: String = settlement["owner"]
 	var faction: Dictionary = state["factions"][owner]
 	var available: Array = []
 	for unit in data.units_for_faction(owner):
+		if unit.get("city_recruit_only",false) and not include_city: continue
 		if unit.get("era", "any") != "any" and unit["era"] != faction["era"]:
 			continue
 		# The era gate generalized: a unit may require a PRACTICED technique
@@ -22,17 +23,37 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 			continue
 		if unit["factions"].has("mercenary"):
 			continue
-		# A general's escort exists only around a general: it is never mustered
-		# from the barracks (its cost is 0, so it would be everyone's favourite).
+		# Legacy free bodyguards are never recruitable. A priced city escort
+		# has a living local general and a faction-wide cap including queues.
 		if String(unit.get("class", "")) == "general_bodyguard":
-			continue
+			if not include_city or not unit.get("city_recruit_only",false) or int(unit["cost"])<=0:continue
+			if not for_training and not city_escort_available(data,state,region_id):continue
 		if not _requirements_met(data, settlement, unit):
 			continue
 		available.append(unit)
 	return available
 
 
-static func queue_unit(data: GameData, state: Dictionary, region_id: String, template_id: String) -> bool:
+static func city_escort_available(data: GameData, state: Dictionary, region_id: String) -> bool:
+	if not data.city_governance["regions"].has(region_id):return false
+	var owner:String=state["settlements"][region_id]["owner"]
+	if ForceRules.candidate_generals(data,state,region_id,owner).is_empty():return false
+	var count:=0
+	for settlement in state["settlements"].values():
+		if settlement["owner"]!=owner:continue
+		for units in [settlement["garrison"],settlement["recruitment_queue"]]:
+			for unit in units:
+				var template:Dictionary=data.units.get(unit.get("template",""),{})
+				if template.get("class","")=="general_bodyguard" and template.get("city_recruit_only",false):count+=1
+	for army in state["armies"].values():
+		if army["owner"]!=owner:continue
+		for unit in army["units"]:
+			var template:Dictionary=data.units.get(unit["template"],{})
+			if template.get("class","")=="general_bodyguard" and template.get("city_recruit_only",false):count+=1
+	return count<int(data.balance["recruitment"]["city_escort_limit"])
+
+
+static func queue_unit(data: GameData, state: Dictionary, region_id: String, template_id: String, include_city: bool = false) -> bool:
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["siege"] != null:
 		return false  # nobody musters under siege
@@ -41,7 +62,7 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	if template.is_empty():
 		return false
 	var allowed := false
-	for unit in available_units(data, state, region_id):
+	for unit in available_units(data, state, region_id, include_city):
 		if unit["id"] == template_id:
 			allowed = true
 			break
@@ -133,6 +154,9 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 	var remaining: Array = []
 	var first := true
 	for job in settlement["recruitment_queue"]:
+		if job.has("city_days_left"):
+			remaining.append(job)
+			continue
 		if first:
 			job["turns_left"] = int(job["turns_left"]) - 1
 			first = false

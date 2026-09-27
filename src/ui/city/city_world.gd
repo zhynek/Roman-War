@@ -22,6 +22,10 @@ var _site_id := ""
 var selection: MeshInstance3D
 var project_scaffolds: Dictionary = {}
 var project_improvements: Dictionary = {}
+var gate_reinforcement: MeshInstance3D
+var fire_stores: MeshInstance3D
+var battle_gate: MeshInstance3D
+var gate_collisions: Array[CollisionShape3D] = []
 var preview_site_id := ""
 var preview_center := Vector3.ZERO
 var preview_radius := 18.0
@@ -50,6 +54,7 @@ func build(authored_layout: Dictionary) -> void:
 	for building in layout.buildings:
 		_building(building)
 	_city_walls()
+	_fortress_detail()
 	_site_id = "barracks"
 	_barracks_yard()
 	_site_id = "forum"
@@ -87,6 +92,8 @@ func apply_status(status: Dictionary) -> void:
 		water_material.albedo_color = Color("#629b9a") if bool(well.get("completed", false)) else Color("#637d65")
 	var policies: Dictionary = status.get("policies", {})
 	tavern_closed.visible = str(policies.get("taverns", "open")) == "closed"
+	if gate_reinforcement != null:gate_reinforcement.visible=projects.get("reinforce_gate",{}).get("completed",false)
+	if fire_stores != null:fire_stores.visible=projects.get("prepare_fire_arrows",{}).get("completed",false)
 	for action_id in project_scaffolds:
 		var project: Dictionary = projects.get(action_id, {})
 		project_scaffolds[action_id].visible = int(project.get("remaining", 0)) > 0 and not bool(project.get("completed", false))
@@ -111,7 +118,14 @@ func _lighting() -> void:
 	environment.ambient_light_color = Color("#c2c5bd")
 	environment.ambient_light_energy = 0.38
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	environment.tonemap_exposure = 0.95
+	environment.tonemap_exposure = 1.05
+	if RenderingServer.get_current_rendering_method() == "forward_plus":
+		environment.ssao_enabled = true
+		environment.ssao_radius = 1.3
+		environment.ssao_intensity = 1.5
+		environment.ssil_enabled = true
+		environment.ssil_radius = 4.0
+		environment.glow_enabled = true
 	environment.fog_enabled = true
 	environment.fog_light_color = Color("#bfc1ae")
 	environment.fog_density = 0.0010
@@ -521,13 +535,27 @@ func _city_walls() -> void:
 		_box(_detail,Vector3(side*(gate/2-0.12),2.5,e+0.6),Vector3(0.3,5,4.2),_timber)
 	_solid(Vector3(0,h-0.25,e),Vector3(gate+1,1.6,2.8),_limestone)
 	if not bool(spec.get("gate_open", false)):
+		var leaves := RealismModels.new()
 		for side in [-1.0,1.0]:
-			_solid(Vector3(side*gate/4,2.7,e+0.35),Vector3(gate/2,5.4,0.35),_timber)
+			_box(leaves,Vector3(side*gate/4,2.7,e+0.35),Vector3(gate/2,5.4,0.35),_timber)
+			_collision(Vector3(side*gate/4,2.7,e+0.35),Vector3(gate/2,5.4,0.35))
+			gate_collisions.append(solid_body.get_child(solid_body.get_child_count()-1))
 			for plank in range(6):
 				var x: float = float(side)*gate/4-gate/4+(plank+0.5)*gate/12
-				_box(_detail,Vector3(x,2.7,e+0.12),Vector3(gate/12-0.045,5.3,0.12),_timber.lightened((plank%3)*0.035))
+				_box(leaves,Vector3(x,2.7,e+0.12),Vector3(gate/12-0.045,5.3,0.12),_timber.lightened((plank%3)*0.035))
 			for rail in [1.3,3.8]:
-				_box(_detail,Vector3(side*gate/4,rail,e),Vector3(gate/2-0.2,0.23,0.13),Color("#625e4e"))
+				_box(leaves,Vector3(side*gate/4,rail,e),Vector3(gate/2-0.2,0.23,0.13),Color("#625e4e"))
+
+		battle_gate = _mesh(leaves,"SouthGateLeaves")
+
+func set_battle_gate_breached(breached: bool) -> void:
+	# Presentation reflects the explicit battle step; this never changes rules.
+	if battle_gate != null:
+		battle_gate.visible = not breached
+	if gate_reinforcement != null:
+		gate_reinforcement.visible = gate_reinforcement.visible and not breached
+	for shape in gate_collisions:
+		shape.disabled = breached
 
 func _tower(p: Vector3, h: float) -> void:
 	_solid(p+Vector3.UP*h/2,Vector3(5.3,h,5.3),Color("#aaa185"))
@@ -1169,3 +1197,62 @@ func _waterworks_geometry() -> void:
 	renewed.rod(p+Vector3(0,1.72,-1.21),p+Vector3(0,1.72,-0.69),0.12,Color("#92854f"))
 	renewed.ellipsoid(p+Vector3(0,1.72,-0.67),Vector3(0.145,0.14,0.05),Color("#92854f"))
 	project_improvements["clean_water"] = _mesh(renewed,"RestoredWaterBasin")
+
+func _fortress_detail() -> void:
+	var e:=float(layout.walls.half_extent)
+	var h:=float(layout.walls.height)
+	var width:=float(layout.walls.gate_width)
+	# Deep, dressed arch voussoirs have an actual curved silhouette. Recessed
+	# joints and alternating headers keep the gatehouse from reading as cubes.
+	var radius:=width*0.5
+	var center:=Vector3(0,3.4,e)
+	for i in range(19):
+		var a:=PI*float(i)/19+0.008
+		var b:=PI*float(i+1)/19-0.008
+		var color:=_limestone.darkened(RealismModels.scatter("gate-arch",i)*0.13)
+		var inner_a:=Vector3(cos(a)*radius,sin(a)*radius*0.57,0)
+		var inner_b:=Vector3(cos(b)*radius,sin(b)*radius*0.57,0)
+		var outer_a:=Vector3(cos(a)*(radius+0.65),sin(a)*(radius*0.57+0.65),0)
+		var outer_b:=Vector3(cos(b)*(radius+0.65),sin(b)*(radius*0.57+0.65),0)
+		for side in [-1.0,1.0]:
+			var face:=center+Vector3(0,0,side*1.44)
+			_arch_face(face+inner_a,face+inner_b,face+outer_b,face+outer_a,Vector3(0,0,side),color)
+		var inside:=Vector3(-cos((a+b)*0.5),-sin((a+b)*0.5)/0.57,0).normalized()
+		_arch_face(center+inner_a+Vector3(0,0,-1.44),center+inner_b+Vector3(0,0,-1.44),center+inner_b+Vector3(0,0,1.44),center+inner_a+Vector3(0,0,1.44),inside,color.darkened(0.12))
+	_box(_detail,Vector3(0,5.93,e+0.36),Vector3(width,1.06,0.38),_timber)
+	for side in [-1.0,1.0]:
+		# Buttresses stay entirely within the already blocked curtain footprint.
+		for z in range(-60,61,20):
+			_box(_detail,Vector3(side*(e-1.12),h*0.45,z),Vector3(0.4,h*0.9,1.15),_limestone.darkened(0.14))
+			_box(_detail,Vector3(side*(e-1.12),0.23,z),Vector3(0.6,0.46,1.6),_limestone)
+		var tower:=Vector3(side*(width/2+3),0,e)
+		for floor_y in [3.1,6.0]:
+			for face_side in [-1.0,1.0]:
+				var p:=tower+Vector3(0,floor_y,face_side*2.67)
+				_box(_detail,p,Vector3(0.22,1.05,0.035),Color("#33312b"))
+				for jamb in [-1.0,1.0]:_box(_detail,p+Vector3(jamb*0.22,0,0.055),Vector3(0.20,1.32,0.16),_limestone)
+				_box(_detail,p+Vector3(0,-0.59,0.09),Vector3(0.7,0.17,0.27),_limestone)
+	var brace:=RealismModels.new()
+	var iron:=Color("#494b44")
+	for side in [-1.0,1.0]:
+		for y in [1.1,2.8,4.8]:
+			_box(brace,Vector3(side*width/4,y,e-0.15),Vector3(width/2-0.25,0.21,0.19),iron)
+			for rivet in range(7):brace.ellipsoid(Vector3(side*width/4-width/4+0.35+rivet*(width/2-0.7)/6,y,e-0.27),Vector3(0.05,0.05,0.03),iron.lightened(0.2))
+		brace.rod(Vector3(side*0.4,0.7,e-0.2),Vector3(side*(width/2-0.35),5.0,e-0.2),0.12,_timber)
+	gate_reinforcement=_mesh(brace,"CompletedGateReinforcement")
+	var stores:=RealismModels.new()
+	for i in range(5):
+		var p:=Vector3(59+i*0.48,0.55,-6)
+		stores.rod(p-Vector3.UP*0.45,p+Vector3.UP*0.45,0.18,_timber)
+		stores.rod(p+Vector3.UP*0.45,p+Vector3.UP*0.5,0.20,_tile)
+	fire_stores=_mesh(stores,"PreparedFireArrowStores")
+
+func _arch_face(a: Vector3,b: Vector3,c: Vector3,d: Vector3,normal: Vector3,color: Color) -> void:
+	# Clockwise front faces, explicit outward normals; never two coplanar
+	# opposite triangles, which fight for depth and create black wedges.
+	var points: Array=[a,c,b,a,d,c] if (b-a).cross(c-a).dot(normal)>0 else [a,b,c,a,c,d]
+	_detail.surface.set_color(color)
+	_detail.surface.set_normal(normal)
+	for point in points:
+		_detail.surface.add_vertex(point)
+		_detail.vertex_count+=1

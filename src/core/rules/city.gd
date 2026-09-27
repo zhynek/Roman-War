@@ -86,6 +86,8 @@ static func allowed(data: GameData, state: Dictionary, region_id: String, action
 	var refusal := _access_reason(data, state, region_id)
 	if refusal != "":
 		return {"ok": false, "reason": refusal}
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "cost": int(data.balance["city"]["action_costs"].get(action_id, 0))}
 	var action := _action(data, action_id)
 	if action.is_empty():
 		return {"ok": false, "reason": "unknown_action"}
@@ -95,7 +97,7 @@ static func allowed(data: GameData, state: Dictionary, region_id: String, action
 	var prerequisite: String = action.get("requires_project", "")
 	if prerequisite != "" and not _completed(city, prerequisite):
 		refusal = "project_required"
-	if data.city_governance.get("military_programs", []).has(action_id) and settlement["siege"] != null:
+	if (data.city_governance.get("military_programs", []).has(action_id) or data.city_governance.get("defense_projects", []).has(action_id)) and settlement["siege"] != null:
 		refusal = "under_siege"
 	match String(action["kind"]):
 		"relief":
@@ -268,12 +270,14 @@ static func status(data: GameData, state: Dictionary, region_id: String) -> Dict
 		"pending_orders": _normalize_record(city.get("pending_orders", [])),
 		"grain_days": int(city["grain_days"]), "cleanliness": cleanliness, "street_condition": street_condition,
 		"factors": factors, "flows": _flows(data, city, policies, cleanliness, street_condition),
-		"actions": actions, "daily_cost": daily_cost, "can_advance": treasury >= daily_cost,
-		"advance_reason": "" if treasury >= daily_cost else "insufficient_funds",
+		"actions": actions, "daily_cost": daily_cost, "can_advance": treasury >= daily_cost and not CityBattleRules.locked(state),
+		"advance_reason": "battle_active" if CityBattleRules.locked(state) else ("" if treasury >= daily_cost else "insufficient_funds"),
 	}
 
 
 static func advance_day(data: GameData, state: Dictionary, region_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	var report := status(data, state, region_id)
 	if not report.get("available", false) or not report.get("can_advance", false):
 		return false
@@ -300,7 +304,7 @@ static func advance_day(data: GameData, state: Dictionary, region_id: String) ->
 	for project_id in project_ids:
 		var project: Dictionary = city["projects"][project_id]
 		if int(project["remaining"]) > 0:
-			if data.city_governance.get("military_programs", []).has(project_id) and settlement["siege"] != null:
+			if (data.city_governance.get("military_programs", []).has(project_id) or data.city_governance.get("defense_projects", []).has(project_id)) and settlement["siege"] != null:
 				events.append({"kind": "program_paused", "params": {"project": project_id}})
 				continue
 			project["remaining"] = maxi(0, int(project["remaining"]) - _project_rate(data, city, project_id))
@@ -309,6 +313,18 @@ static func advance_day(data: GameData, state: Dictionary, region_id: String) ->
 				project["completed_day"] = int(city["day"])
 				events.append({"kind": "project_completed", "params": {"project": project_id}})
 				_complete_program(data, state, region_id, project_id, events)
+	# Civic-day recruits advance only here, never on a render frame or season.
+	if settlement["siege"] == null:
+		for job in settlement["recruitment_queue"]:
+			if not job.has("city_days_left"): continue
+			job["city_days_left"] = maxi(0,int(job["city_days_left"])-1)
+			if int(job["city_days_left"]) == 0:
+				var profile := RecruitmentRules.recruit_profile(data,state,region_id,String(job["template"]))
+				var unit := {"template":job["template"],"strength_pct":100,"experience":int(profile["experience"]),"weapon":int(profile["weapon"]),"armor":int(profile["armor"])}
+				RecruitmentRules.deliver_unit(data,state,region_id,unit)
+				settlement["recruitment_queue"].erase(job)
+				events.append({"kind":"troops_trained","params":{"count":1}})
+			break
 	var after := status(data, state, region_id)
 	var order_cost := 0
 	for order in city["pending_orders"]:
@@ -463,7 +479,7 @@ static func _complete_program(data: GameData, state: Dictionary, region_id: Stri
 	if not data.city_governance.get("military_programs", []).has(project_id):
 		return
 	var eligible := {}
-	for template in RecruitmentRules.available_units(data, state, region_id):
+	for template in RecruitmentRules.available_units(data, state, region_id, true, true):
 		if template.get("class", "") != "ship":
 			eligible[template["id"]] = true
 	var effects: Dictionary = data.balance["city"]["project_military_effects"][project_id]
@@ -511,7 +527,7 @@ static func troop_status(data: GameData, state: Dictionary, region_id: String) -
 			"experience": int(unit["experience"]), "weapon": int(unit.get("weapon", 0)), "armor": int(unit.get("armor", 0)),
 			"strength_pct": int(unit["strength_pct"])})
 	var recruitable: Array = []
-	for template in RecruitmentRules.available_units(data, state, region_id):
+	for template in RecruitmentRules.available_units(data, state, region_id, true):
 		if template.get("class", "") == "ship":
 			continue
 		var cost := RecruitmentRules.recruit_cost(data, state, settlement["owner"], template)

@@ -9,7 +9,9 @@
     "default_policies",
     "actions",
     "building_profiles",
-    "military_programs"
+    "military_programs",
+    "defense_projects",
+    "defense_inspections"
   ],
   "properties": {
     "$schema": {
@@ -183,6 +185,62 @@
       "items": {
         "type": "string",
         "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "defense_projects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      }
+    },
+    "defense_inspections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "position",
+          "look_at",
+          "projects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "position": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "look_at": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          "projects": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     }
   }

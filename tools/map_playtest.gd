@@ -11,9 +11,7 @@ var _failed := false
 
 func _init() -> void:
 	# Test/QA scripts must never read or overwrite a player's campaign slot.
-	ProjectSettings.set_setting("application/config/use_custom_user_dir", true)
-	ProjectSettings.set_setting("application/config/custom_user_dir_name", "Roman War Map QA/%d" % OS.get_process_id())
-	DirAccess.make_dir_recursive_absolute(OS.get_user_data_dir())
+	preload("res://tools/render_qa_storage.gd").configure("Roman War Map QA/%d" % OS.get_process_id())
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("out_dir="):
 			_out = arg.trim_prefix("out_dir=")

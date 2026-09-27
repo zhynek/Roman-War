@@ -13,20 +13,87 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Roma city development
 
+**Swordplay and specialists update (0.20.0 preview).** Articulated tactical
+troops now thrust, cut, block and fall; mounted guards and elite formations
+have distinct procedural kit and deterministic timed abilities. Roma can muster
+a paid mounted escort from the barracks. Existing active battles retain their
+old rules. Read the [swordplay review](reviews/2026-09-roma-swordplay.md) for
+mechanics, limitations, the acquisition route and verification. **Verified: 666
+tests, 0 failures; clean data/import gates; rendered swordplay, fortress and map
+checks; exact exported-app ability playthrough.** The universal app, ZIP and
+frozen source are at `build/roma-swordplay-20260927/`.
+
+**Previous local preview: 0.19.0 — fortress inspection and siege fire.** The occupied
+Roma branch retains the shared campaign work below. Buildings now use richer
+procedural materials and gate details; desktop rendering defaults to Forward+.
+**Inspect defenses** visits the gate, curtain and barracks, with paid gate
+reinforcement and incendiary-arrow preparation. New battles include a crewed,
+destructible ram, visible arrow volleys, fire/smoke and delayed cosmetic hit/fall
+reactions. Existing saved battles retain their equipment model. This is still
+procedural artwork, not finished photorealism. Read the
+[fortress review](reviews/2026-09-roma-fortress.md) for exact mechanics and limits.
+The local universal app/source snapshot is in `build/roma-fortress-20260927/`.
+Verified: **651 full-suite tests plus 18 final focused checks, 0 failures**, clean
+data validation and final rendered fortress/map acceptance; no production release.
+
+
+**Previous local build: 0.18.0 — one continuing Roma campaign with live marquee and camera
+controls.** `CampaignSession` owns one Game/save and retains city and strategic
+views. Main-menu Roma resumes the common campaign; legacy Roma saves import
+only when the common slot is absent. A foreign-owned Roma opens the surviving
+campaign. Alpine remains the separate comparison scenario/save.
+
+Inside Roma, **Campaign map**, **Next season** and **Calendar & history**
+connect the city to actual seasonal AI, economy, construction and history.
+After visiting, each accepted season schedules three funded civic work days
+through the same facade from either view. City barracks recruitment uses that
+civic queue; strategic recruitment remains seasonal, with no duplicate training.
+The ledger has calendar, history and construction tabs. Year advances stop for
+threats or decisions; unresolved battles prevent all seasonal work and spending.
+
+Live battles now accept rectangle selection, additive Shift gestures and group
+orders. The perspective camera supports zoom, middle-drag pan, Alt-drag orbit,
+follow, aerial and tilt controls; selection uses the same interpolated anchors
+as drawing. Every view switch/load/exit stops and joins the worker before
+another surface reads the shared campaign. City positions persist through
+view switches, and completed defeat reports remain accessible after loss.
+
+Read [`CITY_BATTLES.md`](CITY_BATTLES.md) and the
+[current review](reviews/2026-09-roma-unified-campaign.md). **Verified: 643 tests, 0 failures; clean import/data validation; rendered campaign-map gate; exact packaged shared-session and complete continuous-battle acceptance.** The universal Mac app and frozen source are at `build/roma-unified-campaign-20260927/`. The 200-season
+history fixture validates storage and dates, not a century of AI play.
+
+**Previous battle checkpoint: continuous Roma battles (0.17.0 preview).** Roma
+supports free ground orders, pause/resume, speed control, ranged volleys,
+cavalry charges, morale and the requested archers > cavalry > soldiers > archers
+counter cycle. A runtime worker supplies deterministic ticks; UI frames only
+read detached snapshots. New recruits appear in the town garrison.
+Prepared real sieges still wait for player command and commit once through the
+existing BattleResolver seam. Old compatible battle saves migrate additively.
+Its historical verification is in
+[`reviews/2026-09-roma-live-battles.md`](reviews/2026-09-roma-live-battles.md).
+The universal Mac app, zip, source snapshot and play guide are at
+`build/roma-live-battles-20260927/`. Source and packaged rendered playthroughs
+cover actual recruitment, live controls, battle completion and return to town.
+That checkpoint's complete suite passed **617 tests with 0 failures**, including the
+existing turn-speed guard; data validation has 0 errors and 0 warnings.
+The previous 0.16 stepped build and its measurements remain a historical
+checkpoint in [`reviews/2026-09-roma-battles.md`](reviews/2026-09-roma-battles.md).
+
 The main menu includes a walkable Roma district with citizens, unrest,
-interiors, governing orders and separate saves. Campaign owners of Roma can
-enter with their live campaign state. The persistent bottom **Govern Roma**
+interiors and governing orders within the shared campaign. Campaign owners of
+Roma can enter from the settlement panel. The persistent bottom **Govern Roma**
 command bar, building selection and right-click dossiers, safe double-click
 travel, **Tab** mouse look and **H** overlay toggle remain the navigation model.
 
-Current phase 3 adds **Development** tabs with rotatable **Existing / Building /
-Completed** models, exact order/day forecasts, and ordinary, paid or requisitioned
+The civic phase 3 foundation adds **Development** tabs with rotatable
+**Existing / Building / Completed** models, exact order/day forecasts, and
+ordinary, paid or requisitioned
 work crews with real construction-rate, treasury and social tradeoffs. Previewing
 or rotating models is pure presentation. **Barracks → Troops** shows actual
 campaign units and recruitable types; prerequisite-gated drill and equipment
 programmes improve the standing garrison and campaign recruitment profiles.
-Standalone Roma trains its existing garrison. Recruitment buttons appear only
-when entered from a campaign, because new troops use its seasonal queue.
+Roma recruits new cohorts through a civic queue. Both city and campaign views
+show the actual garrison in the barracks yard, including bows and horses.
 
 **Next civic day** resolves first, then presents a synthesized gong and dawn
 report with actual stock changes, named causes, completed projects and relief
@@ -36,12 +103,14 @@ latest report migrate additively and survive saves. No tween, audio playback,
 preview, navigation or report replay advances simulation or RNG.
 
 Read [`reviews/2026-09-roma-city.md`](reviews/2026-09-roma-city.md) for controls,
-architecture, historical limits and verification. Phase 3 is verified with
-576 passing tests, rendered city/campaign acceptance, and the exported universal
+architecture, historical limits and verification. The earlier phase 3 checkpoint
+was verified with 576 passing tests, rendered city/campaign acceptance, and the exported universal
 Mac preview at `build/roma-city-phase3-20260926/` (0.15.2-preview.20260926).
-Phase 2’s 565-test preview remains a historical checkpoint. This remains preview development, with original
-procedural artwork rather than a photorealistic reconstruction. Freeform
-rebuilding and city battles remain future work; combat must retain BattleResolver.
+Phase 2’s 565-test preview remains a historical checkpoint. This remains preview
+development, with original procedural artwork rather than a photorealistic reconstruction. Freeform
+rebuilding remains future work. Tactical movement follows freely chosen ground positions on a grid derived
+from Roma's authored streets; combat remains at formation level. Other cities
+retain the campaign resolver.
 
 ## Current terrain and visual direction
 

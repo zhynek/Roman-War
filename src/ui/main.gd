@@ -24,6 +24,7 @@ func _ready() -> void:
 	var words: Dictionary = _data.effects_glossary["map_commands"]
 	$Center/Menu/Roma.text = _data.effects_glossary["city_view"]["menu"]
 	$Center/Menu/RomaHelp.text = _data.effects_glossary["city_view"]["menu_help"]
+	_refresh_roma_entry()
 	$Center/Menu/Alpine.text = words["route_start"]
 	$Center/Menu/AlpineHelp.text = words["route_menu_help"]
 	var faction_ids: Array = _data.factions.keys()
@@ -57,8 +58,7 @@ func _on_start_pressed() -> void:
 	var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
 	var game := Game.new_campaign(faction_id, int(seed_spin.value), difficulty,
 		"long", guided_check.button_pressed)
-	var screen := CampaignScreen.create(game)
-	screen.main_menu_enabled = true
+	var screen := CampaignSession.create(game)
 	screen.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
 	_open_session(screen)
 
@@ -84,12 +84,40 @@ func _return_to_menu() -> void:
 		active_session.queue_free()
 		active_session = null
 	$Center.show()
+	_refresh_roma_entry()
 	$Center/Menu/Start.grab_focus()
+
+
+func _refresh_roma_entry() -> void:
+	var words: Dictionary = _data.effects_glossary["city_view"]
+	var saved := SaveGame.read_file(CampaignScreen.SAVE_PATH)
+	if saved.is_empty():
+		$Center/Menu/Roma.text = words["menu"]
+		$Center/Menu/RomaHelp.text = words["menu_help"]
+	elif saved["settlements"]["latium"]["owner"] == saved["player_faction"]:
+		$Center/Menu/Roma.text = words["menu_resume_roma"]
+		$Center/Menu/RomaHelp.text = words["menu_help"]
+	else:
+		$Center/Menu/Roma.text = words["menu_resume_campaign"]
+		$Center/Menu/RomaHelp.text = words["menu_resume_campaign_help"]
 
 
 func _on_roma_pressed() -> void:
 	if active_session != null or not _data.ok():
 		return
-	var city := RomaCityScreen.new()
-	city.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
-	_open_session(city)
+	var difficulty: String = ["easy", "medium", "hard", "very_hard"][difficulty_options.selected]
+	var current_game := Game.new_campaign("senate", int(seed_spin.value), difficulty, "long", false)
+	# The common slot has priority, including a campaign where Roma has been
+	# lost. Legacy Roma saves are read only when no common slot exists.
+	var slot := CampaignScreen.SAVE_PATH
+	if FileAccess.file_exists(slot):
+		if not current_game.load_from(slot):
+			status_label.text = String(_data.effects_glossary["city_view"]["load_failed"])
+			return
+	elif FileAccess.file_exists("user://roma_city_save.json"):
+		if not current_game.load_from("user://roma_city_save.json"):
+			status_label.text = String(_data.effects_glossary["city_view"]["load_failed"])
+			return
+	var session := CampaignSession.create(current_game, "city", slot)
+	session.main_menu_requested.connect(_return_to_menu, CONNECT_DEFERRED)
+	_open_session(session)

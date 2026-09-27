@@ -111,7 +111,7 @@ static func _valid_state(state: Variant) -> bool:
 		"agents": TYPE_DICTIONARY, "watchposts": TYPE_DICTIONARY,
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
-		"city_governance": TYPE_DICTIONARY,
+		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
@@ -142,6 +142,9 @@ static func _valid_state(state: Variant) -> bool:
 			return false
 		if not _units(settlement["garrison"]) or not _units(settlement.get("harbour", [])):
 			return false
+		for job in settlement["recruitment_queue"]:
+			if not job is Dictionary: return false
+			if job.has("city_days_left") and not _whole_at_least(job["city_days_left"],1): return false
 	for army in state["armies"].values():
 		if not _fields(army, {"owner": TYPE_STRING, "region": TYPE_STRING,
 			"movement_left": TYPE_FLOAT, "units": TYPE_ARRAY}) or not _units(army["units"]):
@@ -172,8 +175,208 @@ static func _valid_state(state: Variant) -> bool:
 	for region_id in state.get("city_governance", {}):
 		if not state["settlements"].has(region_id) or not _valid_city(state["city_governance"][region_id]):
 			return false
+	for region_id in state.get("city_campaign", {}):
+		if not state["settlements"].has(region_id) or not _valid_city_campaign(state["city_campaign"][region_id], int(state["turn"])):
+			return false
+	var active_battles := 0
+	for region_id in state.get("city_battles", {}):
+		var battle = state["city_battles"][region_id]
+		if not state["settlements"].has(region_id) or not _valid_city_battle(battle, String(region_id)):
+			return false
+		if battle["phase"] != "finished":
+			active_battles += 1
+	if active_battles > 1:
+		return false
 	for recipients in state.get("map_access", {}).values():
 		if not recipients is Array:
+			return false
+	return true
+
+
+static func _valid_city_campaign(record: Variant, current_turn: int) -> bool:
+	if not _fields(record, {"active": TYPE_BOOL, "history": TYPE_ARRAY}):
+		return false
+	var previous_turn := -1
+	for row in record["history"]:
+		if not _fields(row, {"kind": TYPE_STRING, "turn": TYPE_FLOAT, "year": TYPE_FLOAT,
+			"season": TYPE_STRING, "owner": TYPE_STRING, "population": TYPE_FLOAT,
+			"treasury": TYPE_FLOAT, "garrison_soldiers": TYPE_FLOAT, "civic_day": TYPE_FLOAT,
+			"population_delta": TYPE_FLOAT, "treasury_delta": TYPE_FLOAT, "garrison_delta": TYPE_FLOAT,
+			"civic_days_advanced": TYPE_FLOAT, "unfunded_civic_days": TYPE_FLOAT,
+			"civic_reason": TYPE_STRING, "stop_reason": TYPE_STRING,
+			"completed_projects": TYPE_ARRAY, "completed_units": TYPE_ARRAY}):
+			return false
+		if not row["kind"] in ["initial", "season"] or not row["season"] in ["summer", "winter"]:
+			return false
+		for key in ["turn", "population", "garrison_soldiers", "civic_days_advanced", "unfunded_civic_days"]:
+			if not _whole_at_least(row[key], 0):
+				return false
+		if not _whole_at_least(row["civic_day"], 1) or int(row["turn"]) <= previous_turn or int(row["turn"]) > current_turn:
+			return false
+		if float(row["year"]) != floor(float(row["year"])) or int(row["year"]) == 0:
+			return false
+		for key in ["treasury", "population_delta", "treasury_delta", "garrison_delta"]:
+			if float(row[key]) != floor(float(row[key])):
+				return false
+		if not _fields(row, {"completed_buildings": TYPE_ARRAY}, true):
+			return false
+		for key in ["completed_projects", "completed_units", "completed_buildings"]:
+			for id in row.get(key, []):
+				if not id is String or id == "":
+					return false
+		previous_turn = int(row["turn"])
+	return true
+
+
+static func _valid_city_battle(battle: Variant, region: String) -> bool:
+	if not _fields(battle, {"region": TYPE_STRING, "owner": TYPE_STRING, "phase": TYPE_STRING,
+		"practice": TYPE_BOOL, "committed": TYPE_BOOL, "tick": TYPE_FLOAT,
+		"gate_integrity": TYPE_FLOAT, "objective_progress": TYPE_FLOAT,
+		"formations": TYPE_ARRAY, "result": TYPE_DICTIONARY, "context": TYPE_DICTIONARY,
+		"node_ids": TYPE_ARRAY, "besieger": TYPE_STRING, "source": TYPE_STRING,
+		"graph_signature": TYPE_STRING, "initial_attackers": TYPE_ARRAY, "initial_defenders": TYPE_ARRAY}):
+		return false
+	if battle["region"] != region or battle["owner"] == "" or not battle["phase"] in ["deployment", "fighting", "finished"]:
+		return false
+	for key in ["tick", "gate_integrity", "objective_progress"]:
+		if not _whole_at_least(battle[key], 0):
+			return false
+	if battle["phase"] == "deployment" and int(battle["tick"]) != 0:
+		return false
+	if battle["committed"] and (battle["phase"] != "finished" or battle["practice"]):
+		return false
+	if not battle["practice"] and (battle["besieger"] == "" or (battle["phase"] == "finished" and not battle["committed"])):
+		return false
+	if battle["phase"] == "finished":
+		if not battle["result"].get("winner", "") in ["attacker", "defender"]:
+			return false
+	elif not battle["result"].is_empty():
+		return false
+	var graph = JSON.parse_string(battle["graph_signature"])
+	var source = JSON.parse_string(battle["source"])
+	if not graph is Dictionary or not source is Dictionary or not graph.get("nodes") is Array:
+		return false
+	if not _fields(source, {"turn": TYPE_FLOAT, "owner": TYPE_STRING, "garrison": TYPE_ARRAY,
+		"army": TYPE_DICTIONARY, "player": TYPE_STRING}) or not _units(source["garrison"]):
+		return false
+	if not _nullable_fields(source, {"siege": TYPE_DICTIONARY, "governor": TYPE_STRING}):
+		return false
+	if not _fields(battle["context"], {"terrain": TYPE_STRING, "wall_level": TYPE_FLOAT}):
+		return false
+	if not _fields(battle["context"], {"attacker_martial": TYPE_FLOAT, "defender_martial": TYPE_FLOAT,
+		"attacker_mods": TYPE_DICTIONARY, "defender_mods": TYPE_DICTIONARY, "attacker_fatigued": TYPE_BOOL, "sally": TYPE_BOOL}, true):
+		return false
+	for side in ["attacker", "defender"]:
+		if not _valid_city_battle_mods(battle["context"].get(side + "_mods", {})):
+			return false
+		var general = battle["context"].get(side + "_general")
+		if general != null and not _fields(general, {"command": TYPE_FLOAT, "troop_morale": TYPE_FLOAT}, true):
+			return false
+	var nodes := {}
+	for id in battle["node_ids"]:
+		if not id is String or id == "" or nodes.has(id):
+			return false
+		nodes[id] = true
+	if nodes.is_empty() or graph["nodes"].size() != nodes.size():
+		return false
+	var graph_ids := {}
+	for node in graph["nodes"]:
+		if not _fields(node, {"id": TYPE_STRING, "neighbors": TYPE_ARRAY, "role": TYPE_STRING, "position": TYPE_ARRAY}):
+			return false
+		if not nodes.has(node["id"]) or graph_ids.has(node["id"]):
+			return false
+		graph_ids[node["id"]] = true
+		for neighbor in node["neighbors"]:
+			if not neighbor is String or not nodes.has(neighbor):
+				return false
+	var originals := {}
+	for side in ["attacker", "defender"]:
+		var units: Array = battle["initial_" + side + "s"]
+		if units.is_empty() or not _units(units):
+			return false
+		for index in range(units.size()):
+			var unit: Dictionary = units[index]
+			if not _whole_at_least(unit["strength_pct"], 1) or float(unit["strength_pct"]) > 100.0:
+				return false
+			originals["%s_%d" % [side, index]] = unit
+	if battle["formations"].size() != originals.size():
+		return false
+	if battle.has("model_version"):
+		if not _whole_at_least(battle["model_version"],2) or int(battle["model_version"]) != 2: return false
+		if not _fields(battle,{"paused":TYPE_BOOL,"speed":TYPE_FLOAT,"elapsed_ms":TYPE_FLOAT,"capture_ms":TYPE_FLOAT,"events":TYPE_ARRAY,"event_seq":TYPE_FLOAT,"layout_signature":TYPE_STRING}): return false
+		if not _whole_at_least(battle["speed"],1) or not int(battle["speed"]) in [1,2]: return false
+		for key in ["elapsed_ms","capture_ms","event_seq"]:
+			if not _whole_at_least(battle[key],0): return false
+		if not JSON.parse_string(battle["layout_signature"]) is Dictionary: return false
+		if battle["events"].size()>128: return false
+		for event in battle["events"]:
+			if not _fields(event,{"id":TYPE_FLOAT,"kind":TYPE_STRING,"from":TYPE_ARRAY,"to":TYPE_ARRAY}): return false
+			if not event["kind"] in ["volley","clash","fire_volley","ram_hit"] or not _battle_point(event["from"]) or not _battle_point(event["to"]): return false
+			if not _fields(event,{"source":TYPE_STRING,"target":TYPE_STRING},true): return false
+			for key in ["time_ms","arc_cm"]:
+				if event.has(key) and not _whole_at_least(event[key],0):return false
+			if not _whole_at_least(event["id"],1) or event["id"]>battle["event_seq"]:return false
+	if battle.has("siege_engine"):
+		if not _fields(battle,{"siege_engine":TYPE_DICTIONARY,"fire_prepared":TYPE_BOOL,"gate_max_integrity":TYPE_FLOAT}):return false
+		if not _whole_at_least(battle["gate_max_integrity"],1) or battle["gate_integrity"]>battle["gate_max_integrity"]:return false
+		var engine: Dictionary=battle["siege_engine"]
+		if not _fields(engine,{"id":TYPE_STRING,"position":TYPE_ARRAY,"hp":TYPE_FLOAT,"max_hp":TYPE_FLOAT,"heat":TYPE_FLOAT,"burning":TYPE_BOOL,"cooldown_ms":TYPE_FLOAT,"attack_seq":TYPE_FLOAT,"moving":TYPE_BOOL,"crewed":TYPE_BOOL}):return false
+		if engine["id"]!="siege_ram" or not _battle_point(engine["position"]):return false
+		for key in ["hp","max_hp","heat","cooldown_ms","attack_seq"]:
+			if not _whole_at_least(engine[key],0):return false
+		if engine["max_hp"]<=0 or engine["hp"]>engine["max_hp"]:return false
+	elif battle.has("fire_prepared") or battle.has("gate_max_integrity"):
+		return false
+	var formations := {}
+	if battle.has("specialists_version") and (not _whole_at_least(battle["specialists_version"],1) or int(battle["specialists_version"])!=1):return false
+	for formation in battle["formations"]:
+		if not formation is Dictionary:return false
+		if battle.has("specialists_version") or formation.has("specialty") or formation.has("ability_remaining_ms") or formation.has("ability_cooldown_ms"):
+			if not battle.has("specialists_version") or not _fields(formation,{"specialty":TYPE_STRING,"ability_remaining_ms":TYPE_FLOAT,"ability_cooldown_ms":TYPE_FLOAT}):return false
+			if not formation["specialty"] in ["","commander","veteran","spear_guard"]:return false
+			for key in ["ability_remaining_ms","ability_cooldown_ms"]:
+				if not _whole_at_least(formation[key],0) or formation[key]>120000:return false
+			if formation["ability_remaining_ms"]>formation["ability_cooldown_ms"]:return false
+			if formation["specialty"]=="" and (formation["ability_remaining_ms"]>0 or formation["ability_cooldown_ms"]>0):return false
+		if not _fields(formation, {"id": TYPE_STRING, "side": TYPE_STRING, "template": TYPE_STRING,
+			"unit": TYPE_DICTIONARY, "initial_strength": TYPE_FLOAT, "node": TYPE_STRING, "target": TYPE_STRING}):
+			return false
+		if not originals.has(formation["id"]) or formations.has(formation["id"]) or not formation["side"] in ["attacker", "defender"]:
+			return false
+		if not String(formation["id"]).begins_with(String(formation["side"]) + "_"):
+			return false
+		formations[formation["id"]] = true
+		var original: Dictionary = originals[formation["id"]]
+		var unit: Dictionary = formation["unit"]
+		if not _units([unit]) or formation["template"] != unit["template"] or unit["template"] != original["template"]:
+			return false
+		if float(formation["initial_strength"]) != float(original["strength_pct"]):
+			return false
+		if not _whole_at_least(unit["strength_pct"], 0) or float(unit["strength_pct"]) > float(formation["initial_strength"]):
+			return false
+		if not nodes.has(formation["node"]) or not nodes.has(formation["target"]):
+			return false
+		if battle.has("model_version") and not _battle_formation(formation): return false
+	return true
+
+
+static func _valid_city_battle_mods(mods: Variant) -> bool:
+	if not mods is Dictionary:
+		return false
+	for key in mods:
+		if key in ["class_stats", "matchup_pct", "terrain_pct"]:
+			if not mods[key] is Dictionary:
+				return false
+			for row in mods[key].values():
+				if not row is Dictionary:
+					return false
+				for number in row.values():
+					if not _number(number):
+						return false
+		elif key == "fatigue_immune":
+			if not mods[key] is bool:
+				return false
+		elif not _number(mods[key]):
 			return false
 	return true
 
@@ -318,3 +521,21 @@ static func _units(units: Array) -> bool:
 		if not _fields(unit, {"weapon": TYPE_FLOAT, "armor": TYPE_FLOAT}, true):
 			return false
 	return true
+
+
+static func _battle_point(value: Variant) -> bool:
+	return value is Array and value.size()==2 and _whole_at_least(value[0],-100000) and _whole_at_least(value[1],-100000) and absf(float(value[0]))<=100000 and absf(float(value[1]))<=100000
+
+
+static func _battle_formation(f: Dictionary) -> bool:
+	if f.has("incendiary") and not f["incendiary"] is bool:return false
+	if not _fields(f,{"position":TYPE_ARRAY,"goal":TYPE_ARRAY,"destination":TYPE_ARRAY,"path":TYPE_ARRAY,"facing":TYPE_ARRAY,"role":TYPE_STRING,"order":TYPE_STRING,"target_id":TYPE_STRING,"fire_at_will":TYPE_BOOL,"hp":TYPE_FLOAT,"soldiers":TYPE_FLOAT,"revealed":TYPE_BOOL,"cooldown_ms":TYPE_FLOAT,"charge_cooldown_ms":TYPE_FLOAT,"runup_cm":TYPE_FLOAT,"morale":TYPE_FLOAT,"routed":TYPE_BOOL,"engaged":TYPE_BOOL,"moving":TYPE_BOOL,"power":TYPE_FLOAT,"attack_seq":TYPE_FLOAT}): return false
+	for key in ["position","goal","destination","facing"]:
+		if not _battle_point(f[key]): return false
+	if f["path"].size()>20000: return false
+	for p in f["path"]:
+		if not _battle_point(p): return false
+	if not f["role"] in ["soldier","archer","cavalry"] or not f["order"] in ["hold","move","attack_move","attack","charge","retreat"]: return false
+	for key in ["soldiers","hp","cooldown_ms","charge_cooldown_ms","runup_cm","morale","power","attack_seq"]:
+		if not _whole_at_least(f[key],0): return false
+	return int(f["hp"])<=int(f["initial_strength"])*1000 and int(f["unit"]["strength_pct"])==ceili(float(f["hp"])/1000.0) and int(f["morale"])<=100

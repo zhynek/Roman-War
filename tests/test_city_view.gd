@@ -70,7 +70,10 @@ func test_foreign_roma_cannot_open_and_menu_can_start_focused_city(t) -> void:
 	var menu = load("res://src/ui/main.tscn").instantiate()
 	tree.root.add_child(menu)
 	menu._on_roma_pressed()
-	t.check(menu.active_session is RomaCityScreen, "start menu enters city")
-	t.check_eq(menu.active_session.save_path, "user://roma_city_save.json", "focused city has separate slot")
-	t.check_eq(menu.active_session.game.state["settlements"]["latium"]["owner"], "senate", "focused mode uses Roma's actual owner")
+	t.check(menu.active_session is CampaignSession, "start menu enters the ongoing campaign session")
+	var session: CampaignSession = menu.active_session
+	t.check_eq(session.active_view, "city", "Roma menu entry begins inside the city")
+	t.check_eq(session.save_path, CampaignScreen.SAVE_PATH, "city and campaign share one save slot")
+	t.check(session.city.game == session.game, "city uses the session's actual campaign")
+	t.check_eq(session.game.state["settlements"]["latium"]["owner"], "senate", "focused mode uses Roma's actual owner")
 	menu.free()

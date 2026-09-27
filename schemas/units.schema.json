@@ -197,6 +197,9 @@
             "type": "string",
             "pattern": "^[a-z][a-z0-9_]*$",
             "description": "Technique the recruiting faction must have adopted (in addition to era and building requirements)"
+          },
+          "city_recruit_only": {
+            "type": "boolean"
           }
         }
       }

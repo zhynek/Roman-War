@@ -18,7 +18,17 @@ static func new_campaign(player_faction: String, seed_value: int = 1, difficulty
 
 
 func end_turn() -> Dictionary:
-	return TurnEngine.end_turn(data, state, resolver)
+	if state.get("winner") != null and CityCampaignRules.active(state):
+		return {"ok": false, "reason": "campaign_finished"}
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active"}
+	for region in state["settlements"]:
+		if CityBattleRules.pending_defense(data, state, region):
+			return {"ok": false, "reason": "defense_pending", "region": region}
+	var civic_operations := CityCampaignRules.advance_civic_work(data, state)
+	var report := TurnEngine.end_turn(data, state, resolver)
+	CityCampaignRules.record_season(data, state, report, civic_operations)
+	return report
 
 
 ## --- Settlement actions --------------------------------------------------
@@ -27,6 +37,8 @@ func end_turn() -> Dictionary:
 ## pieces (that would also perturb the deterministic simulation).
 
 func set_tax_level(region_id: String, tax_level: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_settlement(region_id) or not Constants.TAX_LEVELS.has(tax_level):
 		return false
 	state["settlements"][region_id]["tax_level"] = tax_level
@@ -36,6 +48,8 @@ func set_tax_level(region_id: String, tax_level: String) -> bool:
 
 
 func set_edict(region_id: String, edict_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	## Issue the province's one standing order. It takes a few turns to take
 	## hold — see EdictRules — which is fast against stocks that move over
 	## decades, but is not a switch.
@@ -43,6 +57,8 @@ func set_edict(region_id: String, edict_id: String) -> bool:
 
 
 func revoke_edict(region_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	## Immediate, and followed by a cooldown. Whatever the edict moved decays at
 	## its own pace: stopping the corn dole does not unmake the expectation.
 	return EdictRules.revoke(data, state, region_id)
@@ -63,10 +79,14 @@ func city_status(region_id: String) -> Dictionary:
 
 
 func city_action(region_id: String, action_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	return RomaCityRules.apply_action(data, state, region_id, action_id)
 
 
 func city_advance_day(region_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	return RomaCityRules.advance_day(data, state, region_id)
 
 
@@ -82,13 +102,56 @@ func city_troop_status(region_id: String) -> Dictionary:
 	return RomaCityRules.troop_status(data, state, region_id)
 
 
-func city_queue_unit(region_id: String, template_id: String) -> bool:
+func city_battle_status(region_id: String) -> Dictionary:
+	return CityBattleRules.status(data, state, region_id)
+
+
+func city_battle_begin(region_id: String, practice: bool = true) -> Dictionary:
+	return CityBattleRules.begin(data, state, region_id, practice)
+
+
+func city_battle_order(region_id: String, formation_id: String, node_id: String) -> Dictionary:
+	return CityBattleRules.order(data, state, region_id, formation_id, node_id)
+
+
+func city_battle_start(region_id: String) -> Dictionary:
+	return CityBattleRules.start(data, state, region_id)
+
+
+func city_battle_step(region_id: String) -> Dictionary:
+	return CityBattleRules.step(data, state, region_id)
+
+
+func city_battle_close(region_id: String) -> Dictionary:
+	return CityBattleRules.close(data, state, region_id)
+
+
+func city_campaign_enter(region_id: String) -> Dictionary:
+	return CityCampaignRules.enter(data, state, region_id)
+
+
+func city_campaign_status(region_id: String) -> Dictionary:
+	return CityCampaignRules.status(data, state, region_id)
+
+
+func city_campaign_advance(region_id: String, seasons: int = 1) -> Dictionary:
+	return CityCampaignRules.advance(self, region_id, seasons)
+
+
+func city_queue_unit(region_id: String, template_id: String, civic_days: bool = false) -> bool:
 	if not data.city_governance.get("regions", []).has(region_id):
 		return false
-	return queue_unit(region_id, template_id)
+	if not queue_unit(region_id, template_id, true):
+		return false
+	if civic_days:
+		var queue: Array = state["settlements"][region_id]["recruitment_queue"]
+		queue[-1]["city_days_left"] = int(data.balance["city_battle"]["realtime"]["recruit_days"])
+	return true
 
 
 func queue_building(region_id: String, chain_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_settlement(region_id):
 		return false
 	var queued := ConstructionRules.queue_project(data, state, region_id, chain_id)
@@ -101,27 +164,35 @@ func queue_building(region_id: String, chain_id: String) -> bool:
 
 
 func demolish_building(region_id: String, chain_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_settlement(region_id):
 		return false
 	return ConstructionRules.demolish(data, state, region_id, chain_id)
 
 
-func queue_unit(region_id: String, template_id: String) -> bool:
+func queue_unit(region_id: String, template_id: String, include_city: bool = false) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_settlement(region_id):
 		return false
-	var queued := RecruitmentRules.queue_unit(data, state, region_id, template_id)
+	var queued := RecruitmentRules.queue_unit(data, state, region_id, template_id, include_city)
 	if queued:
 		GuidedRules.bump(state, "units_recruited")
 	return queued
 
 
 func retrain_garrison(region_id: String) -> int:
+	if CityBattleRules.locked(state):
+		return 0
 	if not _owns_settlement(region_id):
 		return 0
 	return RecruitmentRules.retrain_garrison(data, state, region_id)
 
 
 func move_capital(region_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	var settlement: Dictionary = state["settlements"].get(region_id, {})
 	if settlement.is_empty() or settlement["owner"] != state["player_faction"]:
 		return false
@@ -135,6 +206,8 @@ func move_capital(region_id: String) -> bool:
 ## at the next end of turn.
 
 func move_army(army_id: String, to_region: String, forced_march: bool = false) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	_cancel_march(army_id)
 	if not _owns_army(army_id):
 		return false
@@ -146,12 +219,16 @@ func move_army(army_id: String, to_region: String, forced_march: bool = false) -
 
 
 func move_fleet(fleet_id: String, to_zone: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_force(fleet_id):
 		return false
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
 func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## Multi-lane voyage along the cheapest route (see MovementRules.sail).
 	if not _owns_force(fleet_id):
 		return {"ok": false, "arrived": false, "path": [], "stopped_at": ""}
@@ -159,6 +236,8 @@ func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## A battle takes the rest of the season: an army that has marched itself
 	## out cannot attack, and no army fights twice in one turn. This is the
 	## player's rule; the AI's own path (CombatRules.attack_army) sequences its
@@ -186,11 +265,15 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 
 
 func declare_war(other_faction: String, faction_id: String = "") -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	return DiplomacyRules.declare_war(data, state, fid, other_faction)
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
 	if stance == "war" and DiplomacyRules.roman_war_forbidden(data, state, fid, other_faction):
 		return false
@@ -280,6 +363,8 @@ func senate_overview() -> Dictionary:
 
 
 func comply_senate_demand() -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	## The patriarch dies for the house. Succession settles at once; the
 	## Senate pays when it next judges the charge. No randomness is drawn.
 	var notices: Array = []
@@ -302,6 +387,8 @@ func preview_offer(offer: Dictionary) -> Dictionary:
 
 
 func propose_offer(offer: Dictionary) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## Put the offer to the other side; it takes effect at once if accepted.
 	offer["from"] = String(state["player_faction"])
 	if not state["factions"].get(offer.get("to", ""), {}).get("alive", false):
@@ -325,6 +412,8 @@ func pending_offers() -> Array:
 
 
 func respond_offer(offer_id: String, accept: bool) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	## Returns true when the offer was applied (or declined); false when it was
 	## found but no longer stands — the envoy has quietly withdrawn.
 	for i in range(state["pending_offers"].size()):
@@ -341,6 +430,8 @@ func respond_offer(offer_id: String, accept: bool) -> bool:
 
 
 func sea_move_army(army_id: String, to_region: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	_cancel_march(army_id)
 	if not _owns_army(army_id):
 		return false
@@ -352,6 +443,8 @@ func sea_move_army(army_id: String, to_region: String) -> bool:
 
 
 func march_army(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## Plot the cheapest route and set off at once; the remainder resumes each
 	## end_turn. The route only ever takes plain move_army steps — combat
 	## stays an explicit order — and it is plotted with the owner's own fog,
@@ -385,6 +478,8 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 
 
 func halt_march(army_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_army(army_id):
 		return false
 	var army: Dictionary = state["armies"].get(army_id, {})
@@ -424,6 +519,8 @@ func queued_march_preview(army_id: String) -> Dictionary:
 
 
 func hire_mercenary(army_id: String, template_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_army(army_id):
 		return false
 	var hired := MercenaryRules.hire(data, state, army_id, template_id)
@@ -439,22 +536,30 @@ func mercenaries_available(region_id: String) -> Array:
 ## --- Agents (Phase 5) ------------------------------------------------------
 
 func recruit_agent(region_id: String, kind: String) -> String:
+	if CityBattleRules.locked(state):
+		return ""
 	if state["settlements"].get(region_id, {}).get("owner", "") != state["player_faction"]:
 		return ""
 	return AgentRules.recruit_agent(data, state, region_id, kind)
 
 
 func move_agent(agent_id: String, to_region: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
 		return false
 	return AgentRules.move_agent(data, state, agent_id, to_region)
 
 
 func agent_scout(agent_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	return AgentRules.scout_report(data, state, agent_id)
 
 
 func agent_assassinate(agent_id: String, target_char_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
 		return {}
 	var rng := _rng()
@@ -464,12 +569,16 @@ func agent_assassinate(agent_id: String, target_char_id: String) -> Dictionary:
 
 
 func agent_bribe(agent_id: String, army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
 		return {}
 	return AgentRules.bribe_army(data, state, agent_id, army_id)
 
 
 func agent_steal_technique(agent_id: String, technique_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if state["agents"].get(agent_id, {}).get("owner", "") != state["player_faction"]:
 		return {}
 	var rng := _rng()
@@ -535,6 +644,8 @@ func technique_overview(faction_id: String = "") -> Dictionary:
 
 
 func begin_adoption(technique_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	return KnowledgeRules.begin_adoption(data, state, String(state["player_faction"]), technique_id)
 
 
@@ -644,10 +755,14 @@ func _office_name(office_id) -> String:
 
 
 func set_heir(char_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	return FamilyRules.set_heir(data, state, String(state["player_faction"]), char_id)
 
 
 func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	## Player-only convenience, per the design: the AI never shuffles retinues.
 	var source: Dictionary = state["characters"].get(from_char, {})
 	if source.is_empty() or source["faction"] != state["player_faction"]:
@@ -656,6 +771,8 @@ func transfer_ancillary(from_char: String, to_char: String, ancillary_id: String
 
 
 func besiege(army_id: String, region_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	_cancel_march(army_id)
 	if not _owns_army(army_id) or not state["settlements"].has(region_id):
 		return false
@@ -666,6 +783,8 @@ func besiege(army_id: String, region_id: String) -> bool:
 
 
 func assault_settlement(army_id: String, region_id: String, occupation: String = "occupy") -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## Storming the walls is a battle like any other: it needs movement left
 	## and takes the rest of the season (the turn engine's starve-outs go
 	## through SiegeRules directly and are not subject to this).
@@ -690,6 +809,8 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 
 
 func garrison_army(army_id: String) -> bool:
+	if CityBattleRules.locked(state):
+		return false
 	if not _owns_army(army_id):
 		return false
 	_cancel_march(army_id)
@@ -710,6 +831,8 @@ const _CHECK_ARITY := {
 
 
 func check(action: String, args: Array) -> String:
+	if CityBattleRules.locked(state):
+		return "battle_active"
 	## "" when the order would be taken; else an error code (ForceRules.ERR_*,
 	## plus wrong_owner / bad_args / unknown_action from the facade itself).
 	if not _CHECK_ARITY.has(action):
@@ -751,6 +874,8 @@ func check(action: String, args: Array) -> String:
 
 
 func raise_units(region_id: String, indices: Array, general_id: String = "") -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## The ticked garrison units march out as a new army under a captain or a
 	## man standing in the city (raise_army below takes the whole garrison).
 	if not _owns_settlement(region_id):
@@ -763,6 +888,8 @@ func raise_units(region_id: String, indices: Array, general_id: String = "") -> 
 
 
 func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(from_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.transfer_units(data, state, from_id, to_id, indices)
@@ -772,6 +899,8 @@ func transfer_units(from_id: String, to_id: String, indices: Array) -> Dictionar
 
 
 func merge_armies(from_id: String, into_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(from_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	_cancel_march(from_id)
@@ -782,6 +911,8 @@ func merge_armies(from_id: String, into_id: String) -> Dictionary:
 
 
 func split_army(army_id: String, indices: Array, general_choice: String = "") -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(army_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "army_id": ""}
 	var result := ForceRules.split_army(data, state, army_id, indices, general_choice)
@@ -791,6 +922,8 @@ func split_army(army_id: String, indices: Array, general_choice: String = "") ->
 
 
 func disband_unit(force_id: String, index: int) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(force_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "returned": 0}
 	var result := ForceRules.disband_unit(data, state, force_id, index)
@@ -800,6 +933,8 @@ func disband_unit(force_id: String, index: int) -> Dictionary:
 
 
 func attach_general(army_id: String, char_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(army_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.attach_general(data, state, army_id, char_id)
@@ -809,6 +944,8 @@ func attach_general(army_id: String, char_id: String) -> Dictionary:
 
 
 func detach_general(army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(army_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	var result := ForceRules.detach_general(data, state, army_id)
@@ -818,6 +955,8 @@ func detach_general(army_id: String) -> Dictionary:
 
 
 func consolidate_units(force_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(force_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return ForceRules.consolidate(data, state, force_id)
@@ -826,24 +965,32 @@ func consolidate_units(force_id: String) -> Dictionary:
 ## --- Fleets (launch, dock, merge, split) --------------------------------------
 
 func launch_fleet(region_id: String, indices: Array, zone_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_settlement(region_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
 	return NavalRules.launch_fleet(data, state, region_id, indices, zone_id)
 
 
 func dock_fleet(fleet_id: String, region_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(fleet_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return NavalRules.dock_fleet(data, state, fleet_id, region_id)
 
 
 func merge_fleets(from_id: String, into_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(from_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER}
 	return NavalRules.merge_fleets(data, state, from_id, into_id)
 
 
 func split_fleet(fleet_id: String, indices: Array) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	if not _owns_force(fleet_id):
 		return {"ok": false, "error": ForceRules.ERR_WRONG_OWNER, "fleet_id": ""}
 	return NavalRules.split_fleet(data, state, fleet_id, indices)
@@ -940,6 +1087,8 @@ func forces_awaiting_orders(faction_id: String = "") -> Array:
 
 
 func raise_army(region_id: String) -> String:
+	if CityBattleRules.locked(state):
+		return ""
 	## The whole garrison (up to the stack cap) marches out as a field army
 	## under the best of the house present — the same rules, the same
 	## movement, as raising ticked units (the AI musters through its own
@@ -964,6 +1113,8 @@ func guided_enabled() -> bool:
 
 
 func set_guided(enabled: bool) -> void:
+	if CityBattleRules.locked(state):
+		return
 	## The guided mode is a switch, not a campaign setting: off, the trail
 	## stops issuing objectives and rewards; on again, it resumes from the
 	## stage it had reached. Travels with the save like the rest of the trail.
@@ -973,6 +1124,8 @@ func set_guided(enabled: bool) -> void:
 
 
 func explore_site(army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	## Search the point of interest in the army's region. Player armies only —
 	## the map's finds are the player's reward for ranging out. Searching
 	## spends the rest of the season's movement, and each site yields once,
@@ -1352,6 +1505,8 @@ func watchpost_quote(army_id: String) -> Dictionary:
 
 
 func build_watchpost(army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	return ReconRules.build_post(data, state, army_id)
 
 
@@ -1364,6 +1519,8 @@ func observed_armies_in(region: String) -> Array:
 
 
 func patrol_woods(army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
 	return ReconRules.patrol(data, state, army_id)
 
 
@@ -1373,3 +1530,11 @@ func visible_armies() -> Dictionary:
 
 func city_building_info(region_id: String, site_id: String) -> Dictionary:
 	return RomaCityRules.building_info(data, state, region_id, site_id)
+
+
+func city_battle_command(region: String, ids: Array, action: String, position: Array = [], target: String = "") -> Dictionary:
+	return CityBattleRules.command(data,state,region,ids,action,position,target)
+
+
+func city_battle_control(region: String, action: String) -> Dictionary:
+	return CityBattleRules.control(data,state,region,action)

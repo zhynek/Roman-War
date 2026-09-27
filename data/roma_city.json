@@ -751,18 +751,6 @@
       "spacing": 0.85
     },
     {
-      "id": "drill_rank",
-      "role": "guard",
-      "position": [
-        43,
-        6
-      ],
-      "facing": 0,
-      "count": 6,
-      "spacing": 1.1,
-      "activity": "drill"
-    },
-    {
       "id": "forum_discontent",
       "role": "protester",
       "position": [
@@ -910,5 +898,160 @@
   "water_position": [
     -14,
     5
-  ]
+  ],
+  "battle": {
+    "nodes": [
+      {
+        "id": "approach",
+        "position": [
+          0,
+          86
+        ],
+        "neighbors": [
+          "gate"
+        ],
+        "role": "approach"
+      },
+      {
+        "id": "gate",
+        "position": [
+          0,
+          76
+        ],
+        "neighbors": [
+          "approach",
+          "gate_street"
+        ],
+        "role": "gate"
+      },
+      {
+        "id": "gate_street",
+        "position": [
+          0,
+          59
+        ],
+        "neighbors": [
+          "gate",
+          "south_street"
+        ],
+        "role": "street"
+      },
+      {
+        "id": "south_street",
+        "position": [
+          0,
+          41
+        ],
+        "neighbors": [
+          "gate_street",
+          "crossroads"
+        ],
+        "role": "street"
+      },
+      {
+        "id": "crossroads",
+        "position": [
+          0,
+          24
+        ],
+        "neighbors": [
+          "south_street",
+          "forum",
+          "west_cross",
+          "east_cross"
+        ],
+        "role": "street"
+      },
+      {
+        "id": "forum",
+        "position": [
+          0,
+          5
+        ],
+        "neighbors": [
+          "crossroads",
+          "west_cross",
+          "east_cross"
+        ],
+        "role": "objective"
+      },
+      {
+        "id": "west_cross",
+        "position": [
+          -16,
+          24
+        ],
+        "neighbors": [
+          "crossroads",
+          "forum"
+        ],
+        "role": "reserve"
+      },
+      {
+        "id": "east_cross",
+        "position": [
+          16,
+          24
+        ],
+        "neighbors": [
+          "crossroads",
+          "forum"
+        ],
+        "role": "reserve"
+      }
+    ],
+    "attacker_entry": "approach",
+    "defender_entry": "crossroads",
+    "objective": "forum",
+    "deployment_nodes": [
+      "gate_street",
+      "south_street",
+      "crossroads",
+      "forum",
+      "west_cross",
+      "east_cross"
+    ],
+    "practice_attackers": [
+      "tribal_warband",
+      "gallic_long_swords",
+      "tribal_light_horse",
+      "forest_hunters"
+    ],
+    "garrison_muster": {
+      "origin": [
+        35,
+        -4
+      ],
+      "columns": 5,
+      "spacing": [
+        5,
+        6
+      ]
+    },
+    "spatial": {
+      "attacker_origin_cm": [
+        -800,
+        8400
+      ],
+      "defender_origin_cm": [
+        -800,
+        1600
+      ],
+      "deployment_columns": 5,
+      "deployment_spacing_cm": 400,
+      "gate_cm": [
+        0,
+        7800
+      ],
+      "objective_cm": [
+        0,
+        500
+      ],
+      "wall_half_depth_cm": 200,
+      "gate_join_cm": 400,
+      "approach_half_width_cm": 2200,
+      "fountain_radius_cm": 380,
+      "attacker_max_columns": 10
+    }
+  }
 }

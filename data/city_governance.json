@@ -122,6 +122,16 @@
       "kind": "policy",
       "policy": "workforce",
       "value": "requisition"
+    },
+    {
+      "id": "reinforce_gate",
+      "site": "barracks",
+      "kind": "project"
+    },
+    {
+      "id": "prepare_fire_arrows",
+      "site": "barracks",
+      "kind": "project"
     }
   ],
   "building_profiles": [
@@ -183,5 +193,55 @@
   "military_programs": [
     "drill_maniples",
     "equip_maniples"
+  ],
+  "defense_projects": [
+    "reinforce_gate",
+    "prepare_fire_arrows"
+  ],
+  "defense_inspections": [
+    {
+      "id": "gate",
+      "position": [
+        0,
+        70
+      ],
+      "look_at": [
+        0,
+        78
+      ],
+      "projects": [
+        "reinforce_gate"
+      ]
+    },
+    {
+      "id": "curtain",
+      "position": [
+        64,
+        63
+      ],
+      "look_at": [
+        78,
+        63
+      ],
+      "projects": [
+        "prepare_fire_arrows"
+      ]
+    },
+    {
+      "id": "barracks",
+      "position": [
+        46,
+        0
+      ],
+      "look_at": [
+        46,
+        -23
+      ],
+      "projects": [
+        "improve_barracks",
+        "drill_maniples",
+        "equip_maniples"
+      ]
+    }
   ]
 }

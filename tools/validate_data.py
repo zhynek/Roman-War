@@ -1475,9 +1475,117 @@ def cross_checks(t: dict[str, dict]) -> None:
                 f"and can never be reached")
 
 
+def _city_battle_checks(t: dict[str, dict], city: dict) -> None:
+    """Tactical routes share the visible district's streets and gate aperture."""
+    battle = city.get("battle", {})
+    nodes = {node["id"]: node for node in battle.get("nodes", [])}
+    if len(nodes) != len(battle.get("nodes", [])):
+        err("roma battle: duplicate node id")
+    words = t.get("effects_glossary.json", {}).get("city_battle", {})
+    for key in ("attacker_entry", "defender_entry", "objective"):
+        if battle.get(key) not in nodes:
+            err(f"roma battle: {key} references an unknown node")
+    if sum(node.get("role") == "gate" for node in nodes.values()) != 1:
+        err("roma battle: exactly one gate is required")
+    if nodes.get(battle.get("objective"), {}).get("role") != "objective":
+        err("roma battle: objective must reference the objective node")
+    for node_id in battle.get("deployment_nodes", []):
+        if node_id not in nodes or nodes[node_id].get("role") in ("approach", "gate"):
+            err(f"roma battle: invalid defender deployment node {node_id}")
+    if battle.get("defender_entry") not in battle.get("deployment_nodes", []):
+        err("roma battle: defender entry must allow deployment")
+    units = {unit["id"]: unit for unit in t.get("units.json", {}).get("units", [])}
+    realtime = t.get("balance.json", {}).get("city_battle", {}).get("realtime", {})
+    specialists = t.get("balance.json", {}).get("city_battle", {}).get("specialists", {})
+    escort_limit = t.get("balance.json", {}).get("recruitment", {}).get("city_escort_limit", 0)
+    if not isinstance(escort_limit, int) or escort_limit < 1:
+        err("roma specialists: city_escort_limit must be a positive integer")
+    for unit in units.values():
+        if unit.get("class") == "general_bodyguard" and unit.get("city_recruit_only") and unit.get("cost", 0) <= 0:
+            err(f"roma specialists: city escort {unit['id']} must have a recruitment cost")
+    for template in specialists.get("templates", {}):
+        if template not in units:
+            err(f"roma specialists: unknown template {template}")
+    for unit_class in specialists.get("classes", {}):
+        if unit_class not in realtime.get("roles", {}):
+            err(f"roma specialists: unknown class {unit_class}")
+    for ability, profile in specialists.get("profiles", {}).items():
+        for key in ("specialty_", "ability_"):
+            if key + ability not in words:
+                err(f"roma specialists: missing prose {key + ability}")
+        if "ability_" + ability + "_help" not in words:
+            err(f"roma specialists: missing ability help {ability}")
+        if profile["duration_ms"] >= profile["cooldown_ms"]:
+            err(f"roma specialists: {ability} needs recovery after its duration")
+        for clock in ("duration_ms", "cooldown_ms"):
+            if profile[clock] % realtime.get("tick_ms", 100):
+                err(f"roma specialists: {ability} {clock} must match the tick quantum")
+    roles = realtime.get("roles", {})
+    for unit in units.values():
+        if unit.get("class") not in roles:
+            err(f"roma battle: missing tactical role for {unit.get('class')}")
+    if realtime.get("beats") != {"archer": "cavalry", "cavalry": "soldier", "soldier": "archer"}:
+        err("roma battle: tactical counter cycle must remain archers > cavalry > soldiers > archers")
+    spatial = battle.get("spatial", {})
+    objective = nodes.get(battle.get("objective"), {}).get("position", [])
+    if spatial.get("objective_cm") != [round(v*100) for v in objective]:
+        err("roma battle: spatial objective must match the displayed Forum objective")
+    if spatial.get("gate_cm") != [0, round(city.get("walls", {}).get("half_extent", 0)*100)]:
+        err("roma battle: spatial gate must match the actual wall opening")
+    if 1000 % realtime.get("tick_ms", 100) != 0:
+        err("roma battle: tick quantum must divide a second exactly")
+    for role in ("soldier", "archer", "cavalry"):
+        if "role_" + role not in words or role not in realtime.get("profiles", {}):
+            err(f"roma battle: missing profile or role prose for {role}")
+    for unit_id in battle.get("practice_attackers", []):
+        if unit_id not in units or units[unit_id].get("class") == "ship":
+            err(f"roma battle: invalid practice unit {unit_id}")
+    extent = float(city.get("extent", 0)) / 2
+    wall = float(city.get("walls", {}).get("half_extent", 0))
+    gate_half_width = float(city.get("walls", {}).get("gate_width", 0)) / 2
+    for node_id, node in nodes.items():
+        if "node_" + node_id not in words:
+            err(f"roma battle: missing node prose node_{node_id}")
+        if any(abs(value) > extent for value in node["position"]):
+            err(f"roma battle: node {node_id} outside district")
+        for neighbor_id in node["neighbors"]:
+            neighbor = nodes.get(neighbor_id)
+            if neighbor is None or neighbor_id == node_id:
+                err(f"roma battle: invalid edge {node_id} to {neighbor_id}")
+                continue
+            if node_id not in neighbor["neighbors"]:
+                err(f"roma battle: edge {node_id} to {neighbor_id} is not bidirectional")
+            # Sample the complete route, with a metre of formation clearance,
+            # against the actual authored houses; endpoints alone miss corners.
+            a, b = node["position"], neighbor["position"]
+            samples = max(1, int(((b[0]-a[0])**2 + (b[1]-a[1])**2)**0.5 * 2))
+            for i in range(samples + 1):
+                point = [a[axis] + (b[axis]-a[axis])*i/samples for axis in (0, 1)]
+                if abs(point[0]) >= wall - 1.2 or point[1] <= -wall + 1.2 or (point[1] >= wall - 1.2 and abs(point[0]) >= gate_half_width - 1):
+                    err(f"roma battle: edge {node_id} to {neighbor_id} crosses a solid wall")
+                    break
+                if any(all(abs(point[axis]-building["position"][axis]) < building["size"][axis]/2 + 1 for axis in (0, 1)) for building in city.get("buildings", [])):
+                    err(f"roma battle: edge {node_id} to {neighbor_id} intersects a building")
+                    break
+                fountain = city.get("water_position", [0, 0])
+                if (point[0]-fountain[0])**2 + (point[1]-fountain[1])**2 < 16:
+                    err(f"roma battle: edge {node_id} to {neighbor_id} intersects the fountain")
+                    break
+    seen, frontier = set(), [battle.get("attacker_entry")]
+    while frontier:
+        node_id = frontier.pop()
+        if node_id in seen or node_id not in nodes:
+            continue
+        seen.add(node_id)
+        frontier.extend(nodes[node_id]["neighbors"])
+    if seen != set(nodes):
+        err("roma battle: tactical graph must be connected")
+
+
 def _city_checks(t: dict[str, dict]) -> None:
     """The walkable district and civic rules share region/site and prose IDs."""
     city = t.get("roma_city.json", {})
+    _city_battle_checks(t, city)
     governance = t.get("city_governance.json", {})
     rules = t.get("balance.json", {}).get("city", {})
     words = t.get("effects_glossary.json", {}).get("city_view", {})
@@ -1534,8 +1642,19 @@ def _city_checks(t: dict[str, dict]) -> None:
         err("city governance: every site needs exactly one building profile")
     profile_projects = [profile["project"] for profile in profiles]
     programs = set(governance.get("military_programs", []))
-    if len(profile_projects) != len(set(profile_projects)) or set(profile_projects) | programs != projects or set(profile_projects) & programs:
+    defenses = set(governance.get("defense_projects", []))
+    if len(profile_projects) != len(set(profile_projects)) or set(profile_projects) | programs | defenses != projects or set(profile_projects) & programs or defenses & (programs | set(profile_projects)):
         err("city governance: every project needs exactly one building profile or military programme")
+    inspection_ids = set()
+    for point in governance.get("defense_inspections", []):
+        if point["id"] in inspection_ids:
+            err("city governance: duplicate defense inspection")
+        inspection_ids.add(point["id"])
+        if not set(point["projects"]) <= projects:
+            err("city governance: inspection references unknown project")
+        for key in ("defense_" + point["id"], "defense_" + point["id"] + "_help"):
+            if key not in words:
+                err(f"city governance: missing inspection prose {key}")
     if programs != set(rules.get("project_military_effects", {})):
         err("city governance: military programmes and balance effects disagree")
     for kind in ("project_completed", "relief_expired", "troops_trained", "troops_equipped", "program_paused"):
