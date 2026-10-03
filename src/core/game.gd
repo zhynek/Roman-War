@@ -110,6 +110,10 @@ func city_battle_begin(region_id: String, practice: bool = true) -> Dictionary:
 	return CityBattleRules.begin(data, state, region_id, practice)
 
 
+func city_battle_drill(region_id: String) -> Dictionary:
+	return CityBattleRules.begin(data,state,region_id,true,true)
+
+
 func city_battle_order(region_id: String, formation_id: String, node_id: String) -> Dictionary:
 	return CityBattleRules.order(data, state, region_id, formation_id, node_id)
 

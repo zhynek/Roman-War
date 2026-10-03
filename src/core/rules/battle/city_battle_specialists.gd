@@ -74,7 +74,7 @@ static func damage_multiplier(data: GameData, battle: Dictionary, source: Dictio
 	var value := float(attack.get("damage",1.0))*float(defense.get("resistance",1.0))
 	if int(source.get("ability_remaining_ms",0))>0:value*=float(attack.get("active_damage",1.0))
 	var protection := 1.0
-	if int(target.get("ability_remaining_ms",0))>0:
+	if int(target.get("ability_remaining_ms",0))>0 and (not battle.has("tactics_version") or target.get("specialty","")!="spear_guard" or CityBattleTactics.facing_dot(target,source)>=float(CityBattleTactics.rules(data)["front_dot"])):
 		protection=float(defense.get("active_resistance",1.0))
 		if charging and defense.get("stops_charge",false):value/=float(CityBattleSim.rules(data)["charge_multiplier"])
 	# Rally does not stack with itself or multiply another defensive ability.

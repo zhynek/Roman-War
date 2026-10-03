@@ -108,3 +108,15 @@ func test_multi_selection_ground_commands_use_one_serialized_host_call(t) -> voi
 			t.check(Vector2(formation["position"][0], formation["position"][1]).distance_to(Vector2(0, 4500)) < 1800, "all selected formations deploy in the commanded area")
 	t.check_eq(arrived, selected_before.size(), "one group command handles the full selected platoon set")
 	city.free()
+
+func test_select_battalion_replaces_unrelated_selection(t) -> void:
+	var city:=_city()
+	var view:=city.battle_panel
+	view._issue("split")
+	var source:=view.selected
+	view.select_formation("defender_1")
+	view.select_formation(source,true)
+	view._tactics_order("battalion_select")
+	t.check_eq(view._selection().size(),3,"battalion selects exactly its three platoons")
+	t.check(not view._selection().has("defender_1"),"unrelated cavalry/infantry is removed")
+	city.free()

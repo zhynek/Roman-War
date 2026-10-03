@@ -15,13 +15,13 @@ static func pending_defense(data: GameData, state: Dictionary, region: String) -
 	return _refusal(data, state, region, false) == ""
 
 
-static func _refusal(data: GameData, state: Dictionary, region: String, practice: bool) -> String:
+static func _refusal(data: GameData, state: Dictionary, region: String, practice: bool, drill: bool = false) -> String:
 	if region != data.roma_city.get("region", "") or data.roma_city.get("battle", {}).is_empty():
 		return "unsupported_city"
 	var settlement: Dictionary = state.get("settlements", {}).get(region, {})
 	if settlement.get("owner", "") != state.get("player_faction", ""):
 		return "unauthorized"
-	if settlement.get("garrison", []).is_empty():
+	if settlement.get("garrison", []).is_empty() and not (practice and drill):
 		return "no_garrison"
 	if practice:
 		return ""
@@ -42,13 +42,14 @@ static func status(data: GameData, state: Dictionary, region: String) -> Diction
 	var battle: Dictionary = state.get("city_battles", {}).get(region, {})
 	if battle.is_empty():
 		return {"ok": true, "reason": _refusal(data, state, region, false), "active": false,
+			"can_drill": not locked(state) and _refusal(data,state,region,true,true)=="",
 			"can_practice": not locked(state) and _refusal(data, state, region, true) == "",
 			"can_defend": not locked(state) and _refusal(data, state, region, false) == ""}
 	var report := {}
 	for key in ["phase", "region", "practice", "tick", "gate_integrity", "objective_progress",
 			"formations", "result", "committed"]:
 		report[key] = battle[key]
-	for key in ["model_version", "paused", "speed", "elapsed_ms", "capture_ms", "events", "event_seq", "siege_engine", "fire_prepared", "gate_max_integrity", "specialists_version"]:
+	for key in ["model_version", "paused", "speed", "elapsed_ms", "capture_ms", "events", "event_seq", "siege_engine", "fire_prepared", "gate_max_integrity", "specialists_version", "tactics_version"]:
 		if battle.has(key): report[key] = battle[key]
 	report["active"] = true
 	report["ok"] = true
@@ -56,15 +57,19 @@ static func status(data: GameData, state: Dictionary, region: String) -> Diction
 	return report.duplicate(true)
 
 
-static func begin(data: GameData, state: Dictionary, region: String, practice: bool) -> Dictionary:
+static func begin(data: GameData, state: Dictionary, region: String, practice: bool, drill: bool = false) -> Dictionary:
 	if locked(state) or state.get("city_battles", {}).has(region):
 		return _error("battle_active")
-	var reason := _refusal(data, state, region, practice)
+	var reason := _refusal(data, state, region, practice, drill)
 	if reason != "":
 		return _error(reason)
 	var graph: Dictionary = data.roma_city["battle"]
 	var settlement: Dictionary = state["settlements"][region]
 	var defenders: Array = settlement["garrison"].duplicate(true)
+	if practice and drill:
+		defenders=[]
+		for template in CityBattleTactics.rules(data)["drill_units"]:
+			defenders.append({"template":template,"strength_pct":100,"experience":int(CityBattleTactics.rules(data)["phalanx_experience"]),"weapon":0,"armor":0})
 	var attackers: Array = []
 	var context := {"terrain": data.regions[region]["terrain"], "wall_level": int(SettlementRules.effect_max(data, settlement, "wall_level"))}
 	var besieger := ""
@@ -102,6 +107,7 @@ static func begin(data: GameData, state: Dictionary, region: String, practice: b
 	CityBattleSim.initialize(data, battle)
 	CitySiegeRules.initialize(data, state, battle)
 	CityBattleSpecialists.initialize(data, battle)
+	CityBattleTactics.initialize(battle)
 	if not state.has("city_battles"):
 		state["city_battles"] = {}
 	state["city_battles"][region] = battle
@@ -277,14 +283,15 @@ static func _finish(data: GameData, state: Dictionary, battle: Dictionary, winne
 		var before := 0
 		var after := 0
 		var report: Array = []
-		for formation in battle["formations"]:
-			if formation["side"] != side:
-				continue
-			var full := int(data.units[formation["template"]]["soldiers"])
-			before += int(ceil(float(full * int(formation["initial_strength"])) / 100.0))
-			after += int(ceil(float(full * int(formation["unit"]["strength_pct"])) / 100.0))
-			report.append({"template": formation["template"], "strength_before": formation["initial_strength"],
-				"strength_after": formation["unit"]["strength_pct"], "destroyed": not _alive(formation)})
+		var survivors := CityBattleTactics.survivors(battle,side)
+		for index in range(survivors.size()):
+			var unit: Dictionary=survivors[index]
+			var original: Dictionary=battle["initial_"+side+"s"][index]
+			var full := int(data.units[unit["template"]]["soldiers"])
+			before += ceili(float(full * int(original["strength_pct"])) / 100.0)
+			after += ceili(float(full * int(unit["strength_pct"])) / 100.0)
+			report.append({"template":unit["template"],"strength_before":original["strength_pct"],
+				"strength_after":unit["strength_pct"],"destroyed":int(unit["strength_pct"])<=0})
 		result[side + "_casualty_pct"] = SocietyRules.quantize(100.0 * float(before - after) / maxf(1.0, float(before)))
 		result[side + "_destroyed"] = after == 0
 		result[side + "_report"] = report

@@ -227,3 +227,61 @@ while an eligible general is present. This uses the real treasury, population,
 training queue and upkeep. Existing active battles retain their former rules;
 start a new practice to enable specialties. See
 [the swordplay review](reviews/2026-09-roma-swordplay.md) for tuning, limits and QA.
+
+## Formation command phase (October 2026)
+
+Open **Defend Roma → Formation command drill** to try trained hoplites, cavalry
+and archers without paying for or changing campaign troops. Ordinary Practice
+siege still copies the actual garrison; Defend current siege still applies real
+losses. The supplied drill is also available with an empty owned garrison.
+
+Select a battalion and choose **Split into platoons** to create three independently
+commanded detachments. Splitting is available in deployment or away from melee
+in a running fight, requires at least 45 strength points, and preserves health,
+training, equipment and recovery clocks. General guards remain together.
+**Select battalion** selects the three related platoons; Shift keeps other
+selected troops. Survivors reunite into their original campaign unit after battle.
+“Battalion” and “platoon” describe command scales here, not an assertion about
+ancient Roman organizational terminology.
+
+Right-drag across clear ground to preview a frontage and its facing arrow. On
+release, the selected troops receive separate positions along it. **Move** and
+**Fall back** retain those orders; **Attack move** engages along the approach.
+Drag the opposite direction to reverse facing. **Face direction**, then
+right-click, sets a guarded direction; live troops turn gradually. Orders and
+formation changes remain available while the continuous battle runs or pauses.
+
+| Formation | Tactical effect |
+| --- | --- |
+| Battle line | Ordinary combat and movement |
+| March column | 20% faster movement, 15% more incoming damage, visibly narrow ranks |
+| Phalanx | Phalanx-capable spears with experience 2+: 35% more frontal melee damage, 50% less incoming frontal damage, 45% movement speed, slow turning; frontal cavalry impact bonus is canceled |
+
+Changing shape during combat takes three simulated seconds. While reforming,
+troops move at 25% speed, deal 60% damage and take 25% more damage. Deployment
+lets the commander arrange ranks before starting the clock. Phalanxes require
+room for their frontage; ordinary ranks traverse narrower streets. Enemy trained
+spears follow the same reform rules and leave phalanx when their route narrows.
+Enemy cavalry can issue actual charges with the existing run-up/recovery rules.
+
+Attacks within the front 120-degree sector receive frontal protection. Melee
+from a flank deals 30% more damage; the rear sector takes 60% more, or double
+from cavalry. A formed phalanx additionally takes 35% more damage from its sides
+and 60% more from behind, and attacks outside its front deal only 45% damage.
+These are original balance values, not historical measurements. Specialist spear
+bracing also requires a frontal attacker in new battles. A phalanx turns at
+18 degrees per second versus 100 for ordinary ranks, so it cannot instantly
+cancel a cavalry attack from behind.
+
+New fights carry `tactics_version: 1`. Older saved battles retain their former
+mechanics; start a new battle to use formation commands. Platoons retain original
+source ids and proportional integer health budgets. The resolver aggregates
+survivors once, in source order, and cannot create extra campaign unit slots.
+The added command state, facing, formation and reform clocks survive saves.
+
+The implementation remains a formation simulation in Roma's authored district.
+It does not add per-soldier collision, surveyed historical kit, universal tactical
+layouts, siege ladders/towers, multiple breaches, or attacker-side player control.
+The existing role counter cycle is retained. Procedural models represent groups
+of soldiers. See [the command-phase review](reviews/2026-10-siege-command.md) for
+verification, sources and remaining limitations.

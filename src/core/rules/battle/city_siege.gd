@@ -63,7 +63,7 @@ static func archer_shot(data: GameData, battle: Dictionary, f: Dictionary) -> bo
 		engine["burning"]=int(engine["heat"])>=int(config["ignition_heat"])
 	f["cooldown_ms"]=int(CityBattleSim.rules(data)["profiles"]["archer"]["attack_ms"])
 	f["attack_seq"]=int(f["attack_seq"])+1
-	f["facing"]=CityBattleNavigation.packed((target-p).normalized()*1000)
+	if not battle.has("tactics_version"):f["facing"]=CityBattleNavigation.packed((target-p).normalized()*1000)
 	event(data,battle,"fire_volley" if fire else "volley",f["position"],engine["position"],{"source":f["id"],"target":"siege_ram","arc_cm":int(config["arrow_arc_cm"])})
 	return true
 

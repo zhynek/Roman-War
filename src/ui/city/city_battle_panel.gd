@@ -26,6 +26,7 @@ var phase_label: Label
 var help_label: Label
 var message_label: Label
 var objective_label: Label
+var drill_button: Button
 var practice_button: Button
 var defend_button: Button
 var start_button: Button
@@ -42,6 +43,9 @@ var overview_button: Button
 var follow_button: Button
 var tilt_button: Button
 const DRAG_THRESHOLD := 6.0
+var tactics_buttons := {}
+var _frontage_press := false
+var _frontage_start := Vector2.ZERO
 var _selection_press := false
 var _marquee := false
 var _gesture_additive := false
@@ -148,6 +152,14 @@ func _build() -> void:
 	left.offset_bottom = -205
 	var left_box := _box(left)
 	left_box.add_child(_label(w("defenders"), 17))
+	var tactics := HFlowContainer.new()
+	left_box.add_child(tactics)
+	for action in ["line","column","phalanx","face","split","battalion_select"]:
+		var button := _button(action,_tactics_order.bind(action))
+		button.custom_minimum_size.y=30
+		tactics.add_child(button)
+		tactics_buttons[action]=button
+	tactics.tooltip_text=w("tactics_help")
 	var scroll := ScrollContainer.new()
 	roster_scroll=scroll
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -183,6 +195,9 @@ func _build() -> void:
 	bottom_box.add_child(buttons)
 	practice_button = _button("practice", begin.bind(true))
 	buttons.add_child(practice_button)
+	drill_button=_button("drill",func():_action(host.invoke("drill")))
+	drill_button.tooltip_text=w("drill_help")
+	buttons.add_child(drill_button)
 	defend_button = _button("defend", begin.bind(false))
 	buttons.add_child(defend_button)
 	start_button = _button("start", start)
@@ -322,6 +337,8 @@ func refresh() -> void:
 	_reconcile_selection()
 	_refresh_roster()
 	practice_button.visible = not active
+	drill_button.visible=not active
+	drill_button.disabled=not bool(snapshot.get("can_drill",false))
 	practice_button.disabled = not bool(snapshot.get("can_practice", false))
 	defend_button.visible = not active
 	defend_button.disabled = not bool(snapshot.get("can_defend", false))
@@ -345,6 +362,18 @@ func refresh() -> void:
 			order_buttons[action].tooltip_text=w("siege_help")
 			if action=="fire_arrows":order_buttons[action].text=w("normal_arrows" if selected_formation().get("incendiary",false) else "fire_arrows")
 	var chosen := selected_formation()
+	for action in tactics_buttons:
+		var button: Button=tactics_buttons[action]
+		button.visible=active and phase in ["deployment","fighting"]
+		button.disabled=stale or chosen.is_empty() or not snapshot.has("tactics_version")
+		button.modulate=UiStyle.ACCENT if chosen.get("formation","")==action or order_mode==action else Color.WHITE
+		button.tooltip_text=w("split_help" if action=="split" else "column_help" if action=="column" else "tactics_help")
+		if action=="split":button.disabled=button.disabled or _selection().size()!=1 or int(chosen.get("platoon",0))!=0
+		if action=="phalanx":
+			var r:=CityBattleTactics.rules(screen.game.data)
+			button.tooltip_text=w("phalanx_help") % [int(r["phalanx_experience"]),int(r["reform_ms"])/1000,roundi((float(r["phalanx_attack"])-1)*100),roundi((1-float(r["phalanx_front_resistance"]))*100),roundi(float(r["phalanx_speed"])*100)]
+			for f in snapshot.get("formations",[]):
+				if _selection().has(f["id"]) and not CityBattleTactics.phalanx_eligible(screen.game.data,f):button.disabled=true
 	var specialty := String(chosen.get("specialty",""))
 	ability_button.visible=active and phase in ["deployment","fighting"]
 	ability_button.disabled=stale or phase!="fighting" or specialty=="" or _selection().size()!=1 or int(chosen.get("ability_cooldown_ms",0))>0 or not CityBattleSim.active(chosen) if not chosen.is_empty() else true
@@ -426,7 +455,9 @@ func _refresh_roster() -> void:
 		if f.get("specialty","")!="":
 			row["detail"].text+="\n"+w("specialty_"+String(f["specialty"]))+" · "+_ability_state(f)
 			row["button"].tooltip_text=_ability_help(f)
-		row["bar"].value=int(f["unit"]["strength_pct"])
+		if f.has("formation"):
+			row["detail"].text+="\n"+w("formation_status") % [w("formation_"+String(f["formation"])),w("formation_reforming") % ceili(float(f["reform_ms"])/1000) if int(f["reform_ms"])>0 else w("formation_ready")]
+		row["bar"].value=100.0*int(f["unit"]["strength_pct"])/maxi(1,int(f["initial_strength"]))
 
 func _ability_state(f: Dictionary) -> String:
 	if int(f.get("ability_remaining_ms",0))>0:return w("ability_active") % ceili(float(f["ability_remaining_ms"])/1000)
@@ -449,7 +480,8 @@ func formation_name(formation: Dictionary) -> String:
 	if formation.get("side", "") != "defender":
 		return w("attacker")
 	var template := String(formation.get("template", formation.get("unit", {}).get("template", "")))
-	return String(screen.game.data.units.get(template, {}).get("name", template))
+	var name:=String(screen.game.data.units.get(template, {}).get("name", template))
+	return w("platoon_name") % [name,int(formation["platoon"])] if int(formation.get("platoon",0))>0 else name
 
 func selected_formation() -> Dictionary:
 	for formation in snapshot.get("formations", []):
@@ -529,6 +561,17 @@ func step() -> void:
 
 func hold() -> void:
 	_issue("hold")
+
+func _tactics_order(action: String) -> void:
+	if action=="battalion_select":
+		var source:=String(selected_formation().get("source_id",""))
+		if not Input.is_key_pressed(KEY_SHIFT):selected_ids.clear()
+		for f in snapshot.get("formations",[]):
+			if f.get("source_id","")==source and _is_defender(f["id"]):
+				if not selected_ids.has(f["id"]):selected_ids.append(f["id"])
+		refresh()
+	elif action=="face":_choose_order(action)
+	else:_issue(action)
 
 func _choose_order(action: String) -> void:
 	if action in ["fire","fire_arrows","attack_engine"]:
@@ -628,6 +671,12 @@ func _draw() -> void:
 		var defender: bool = formation.get("side", "") == "defender"
 		var color := RomaCityBattleForces.DEFENDER_COLOR if defender else RomaCityBattleForces.ATTACKER_COLOR
 		draw_circle(at, 4, color)
+		if defender and (id==selected or selected_ids.has(id)):
+			var facing:=CityBattleNavigation.point(formation.get("facing",[0,1000])).normalized()
+			var anchor: Vector3=forces.anchors[id]
+			var nose:=_project(anchor+Vector3(facing.x,0,facing.y)*5+Vector3.UP*4)
+			draw_line(at,nose,UiStyle.ACCENT,2,true)
+			draw_circle(nose,3,UiStyle.ACCENT)
 		if id == selected or selected_ids.has(id):
 			draw_arc(at, 6, 0, TAU, 24, UiStyle.ACCENT, 1.5, true)
 		_formation_rects[id] = Rect2(at - Vector2(11, 11), Vector2(22, 22))
@@ -638,6 +687,17 @@ func _draw() -> void:
 				draw_dashed_line(at,goal,UiStyle.ACCENT,1.5,5)
 				draw_arc(goal,7,0,TAU,20,UiStyle.ACCENT,2,true)
 
+	if _frontage_press and _frontage_start.distance_to(_drag_point)>=DRAG_THRESHOLD:
+		draw_line(_frontage_start,_drag_point,UiStyle.ACCENT,3,true)
+		var a: Variant=_ground_at(_frontage_start)
+		var b: Variant=_ground_at(_drag_point)
+		if a is Vector3 and b is Vector3:
+			var forward:=Vector3(-(b.z-a.z),0,b.x-a.x).normalized()
+			var center: Vector3=(a+b)*0.5
+			var start:=_project(center)
+			var end:=_project(center+forward*6)
+			draw_line(start,end,UiStyle.ACCENT,2,true)
+			draw_circle(end,4,UiStyle.ACCENT)
 	if _selection_press and _marquee:
 		var rectangle := Rect2(_press_point, _drag_point - _press_point).abs().intersection(central)
 		draw_rect(rectangle, Color(0.35, 0.68, 0.80, 0.14), true)
@@ -648,6 +708,7 @@ func _draw() -> void:
 				draw_arc(formation_screen_point(id), 9, 0, TAU, 20, UiStyle.ACCENT, 1.5, true)
 
 func _cancel_gesture() -> void:
+	_frontage_press=false
 	_selection_press = false
 	_marquee = false
 	_camera_drag = ""
@@ -658,7 +719,7 @@ func _notification(what: int) -> void:
 		_cancel_gesture()
 
 func _input(event: InputEvent) -> void:
-	if not visible or (not _selection_press and _camera_drag == ""):
+	if not visible or (not _selection_press and not _frontage_press and _camera_drag == ""):
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 		_cancel_gesture()
@@ -667,7 +728,10 @@ func _input(event: InputEvent) -> void:
 		_gesture_motion(event.position - global_position)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and not event.pressed:
-		if _selection_press and event.button_index == MOUSE_BUTTON_LEFT:
+		if _frontage_press and event.button_index==MOUSE_BUTTON_RIGHT:
+			_finish_frontage(event.position-global_position)
+			get_viewport().set_input_as_handled()
+		elif _selection_press and event.button_index == MOUSE_BUTTON_LEFT:
 			_finish_selection(event.position - global_position)
 			get_viewport().set_input_as_handled()
 		elif _camera_drag != "" and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE]:
@@ -675,7 +739,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and (_selection_press or _camera_drag != ""):
+	if event is InputEventMouseMotion and (_selection_press or _frontage_press or _camera_drag != ""):
 		_gesture_motion(event.position)
 		accept_event()
 		return
@@ -690,7 +754,9 @@ func _gui_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton:
 		return
 	if not event.pressed:
-		if event.button_index == MOUSE_BUTTON_LEFT and _selection_press:
+		if event.button_index==MOUSE_BUTTON_RIGHT and _frontage_press:
+			_finish_frontage(event.position)
+		elif event.button_index == MOUSE_BUTTON_LEFT and _selection_press:
 			_finish_selection(event.position)
 		elif _camera_drag != "":
 			_cancel_gesture()
@@ -716,14 +782,18 @@ func _gui_input(event: InputEvent) -> void:
 				_drag_point = event.position
 		MOUSE_BUTTON_RIGHT:
 			_cancel_gesture()
-			command_at(event.position)
+			_frontage_press=true
+			_frontage_start=event.position
+			_drag_point=event.position
 	accept_event()
 
 func _ground_at(point: Vector2) -> Variant:
 	return camera_rig.ground_at(point * Vector2(screen.viewport.size) / screen.view_container.size)
 
 func _gesture_motion(point: Vector2) -> void:
-	if _camera_drag != "":
+	if _frontage_press:
+		_drag_point=point
+	elif _camera_drag != "":
 		if _camera_drag == "orbit":
 			camera_rig.orbit(point - _camera_pointer)
 		else:
@@ -735,6 +805,21 @@ func _gesture_motion(point: Vector2) -> void:
 	elif _selection_press:
 		_drag_point = point
 		_marquee = _marquee or _press_point.distance_to(point) >= DRAG_THRESHOLD
+	queue_redraw()
+
+func _finish_frontage(point: Vector2) -> void:
+	_frontage_press=false
+	if not battle_rect().has_point(point):return
+	if _frontage_start.distance_to(point)<DRAG_THRESHOLD:
+		command_at(point)
+		return
+	var a: Variant=_ground_at(_frontage_start)
+	var b: Variant=_ground_at(point)
+	if a is Vector3 and b is Vector3:
+		if order_mode=="face":
+			_issue("face",[roundi(b.x*100),roundi(b.z*100)])
+		else:
+			_issue("assault_line",[roundi(a.x*100),roundi(a.z*100),roundi(b.x*100),roundi(b.z*100)],"attack_move" if order_mode=="charge" else order_mode)
 	queue_redraw()
 
 func _finish_selection(point: Vector2) -> void:
@@ -777,7 +862,7 @@ func _hit_formation(point: Vector2, side: String = "") -> String:
 
 func command_at(point: Vector2) -> void:
 	var target := _hit_formation(point, "attacker")
-	if target != "" and snapshot.get("phase", "") != "deployment":
+	if target != "" and order_mode!="face" and snapshot.get("phase", "") != "deployment":
 		_issue("charge" if order_mode == "charge" else "attack", [], target)
 		return
 	var at: Variant = _ground_at(point)
@@ -785,7 +870,7 @@ func command_at(point: Vector2) -> void:
 		command_ground(Vector2(at.x, at.z))
 
 func command_ground(at: Vector2) -> void:
-	var action := "move" if snapshot.get("phase", "") == "deployment" else ("attack_move" if order_mode == "charge" else order_mode)
+	var action := "face" if order_mode=="face" else "move" if snapshot.get("phase", "") == "deployment" else ("attack_move" if order_mode == "charge" else order_mode)
 	_issue(action, [roundi(at.x * 100), roundi(at.y * 100)])
 
 func _process(delta: float) -> void:

@@ -13,6 +13,20 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Roma city development
 
+**Current command phase (October 2026).** Roma battles now support battalion
+splitting into three independent platoons, frontage dragging, explicit facing,
+line/column/phalanx commands and directional combat. **Defend Roma → Formation
+command drill** supplies trained hoplites, cavalry and archers for immediate
+practice. Continuous battles still run through the deterministic worker, and
+platoon survivors recombine into original campaign units through BattleResolver.
+Old active battles retain their original rules. Read the
+[command review](reviews/2026-10-siege-command.md) and
+[play guide](CITY_BATTLES.md#formation-command-phase-october-2026).
+Verified: **688 tests, 0 failures**, clean data/import gates, rendered map and
+exact exported-app command checks. The universal `0.21.0-preview.20261003` app,
+ZIP and frozen source are in `build/roma-tactics-20261003/`.
+
+
 **GitHub integration follow-up.** The initial Linux CI runs exposed the existing
 600 ms campaign-turn limit. AI route queries now evaluate territorial access
 once per region per query, preserving costs and expansion order. A 60-turn

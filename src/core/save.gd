@@ -299,7 +299,7 @@ static func _valid_city_battle(battle: Variant, region: String) -> bool:
 			if not _whole_at_least(unit["strength_pct"], 1) or float(unit["strength_pct"]) > 100.0:
 				return false
 			originals["%s_%d" % [side, index]] = unit
-	if battle["formations"].size() != originals.size():
+	if not battle.has("tactics_version") and battle["formations"].size() != originals.size():
 		return false
 	if battle.has("model_version"):
 		if not _whole_at_least(battle["model_version"],2) or int(battle["model_version"]) != 2: return false
@@ -328,6 +328,10 @@ static func _valid_city_battle(battle: Variant, region: String) -> bool:
 	elif battle.has("fire_prepared") or battle.has("gate_max_integrity"):
 		return false
 	var formations := {}
+	var shares := {}
+	if battle.has("tactics_version"):
+		if not _whole_at_least(battle["tactics_version"],1) or int(battle["tactics_version"])!=1 or not battle.has("model_version"):return false
+		if battle["formations"].size()>originals.size()*3:return false
 	if battle.has("specialists_version") and (not _whole_at_least(battle["specialists_version"],1) or int(battle["specialists_version"])!=1):return false
 	for formation in battle["formations"]:
 		if not formation is Dictionary:return false
@@ -341,22 +345,56 @@ static func _valid_city_battle(battle: Variant, region: String) -> bool:
 		if not _fields(formation, {"id": TYPE_STRING, "side": TYPE_STRING, "template": TYPE_STRING,
 			"unit": TYPE_DICTIONARY, "initial_strength": TYPE_FLOAT, "node": TYPE_STRING, "target": TYPE_STRING}):
 			return false
-		if not originals.has(formation["id"]) or formations.has(formation["id"]) or not formation["side"] in ["attacker", "defender"]:
+		if formation.has("source_id") and not formation["source_id"] is String:return false
+		var source_id: String=formation.get("source_id",formation["id"])
+		if not originals.has(source_id) or formations.has(formation["id"]) or not formation["side"] in ["attacker", "defender"]:
 			return false
 		if not String(formation["id"]).begins_with(String(formation["side"]) + "_"):
 			return false
 		formations[formation["id"]] = true
-		var original: Dictionary = originals[formation["id"]]
+		var original: Dictionary = originals[source_id]
 		var unit: Dictionary = formation["unit"]
 		if not _units([unit]) or formation["template"] != unit["template"] or unit["template"] != original["template"]:
 			return false
-		if float(formation["initial_strength"]) != float(original["strength_pct"]):
+		if battle.has("tactics_version"):
+			if not _battle_formation(formation) or not _tactical_formation(formation,original):return false
+			if not shares.has(source_id):shares[source_id]={"strength":0,"parts":[],"hp":0}
+			shares[source_id]["strength"]+=int(formation["initial_strength"])
+			shares[source_id]["hp"]+=int(formation["hp"])
+			if shares[source_id]["parts"].has(int(formation["platoon"])):return false
+			shares[source_id]["parts"].append(int(formation["platoon"]))
+		elif formation.has("source_id") or formation.has("formation") or formation.has("platoon") or formation.has("reform_ms") or formation.has("facing_goal") or formation.has("facing_locked") or formation.has("source_strength") or formation.has("ai_reform_ms"):return false
+		if not battle.has("tactics_version") and float(formation["initial_strength"]) != float(original["strength_pct"]):
 			return false
 		if not _whole_at_least(unit["strength_pct"], 0) or float(unit["strength_pct"]) > float(formation["initial_strength"]):
 			return false
 		if not nodes.has(formation["node"]) or not nodes.has(formation["target"]):
 			return false
 		if battle.has("model_version") and not _battle_formation(formation): return false
+	if battle.has("tactics_version"):
+		if shares.size()!=originals.size():return false
+		for id in shares:
+			var share: Dictionary=shares[id]
+			share["parts"].sort()
+			if share["parts"]!=[0] and share["parts"]!=[1,2,3]:return false
+			if int(share["strength"])!=int(originals[id]["strength_pct"]) or int(share["hp"])>int(share["strength"])*1000:return false
+	return true
+
+
+static func _tactical_formation(f: Dictionary, original: Dictionary) -> bool:
+	if not _fields(f,{"source_id":TYPE_STRING,"source_strength":TYPE_FLOAT,"platoon":TYPE_FLOAT,"formation":TYPE_STRING,"reform_ms":TYPE_FLOAT,"ai_reform_ms":TYPE_FLOAT,"facing_goal":TYPE_ARRAY,"facing_locked":TYPE_BOOL}):return false
+	if not _whole_at_least(f["platoon"],0) or int(f["platoon"])>3:return false
+	if not _whole_at_least(f["source_strength"],1) or f["source_strength"]!=original["strength_pct"]:return false
+	if not _whole_at_least(f["initial_strength"],1):return false
+	if not f["formation"] in ["line","column","phalanx"]:return false
+	for clock in ["reform_ms","ai_reform_ms"]:
+		if not _whole_at_least(f[clock],0) or f[clock]>120000:return false
+	if not _battle_point(f["facing_goal"]) or not _battle_point(f.get("facing")):return false
+	for key in ["facing","facing_goal"]:
+		var length := CityBattleNavigation.point(f[key]).length()
+		if length<998 or length>1002:return false
+	var expected := String(f["source_id"])+("_p"+str(int(f["platoon"])) if int(f["platoon"])>1 else "")
+	if f["id"]!=expected:return false
 	return true
 
 

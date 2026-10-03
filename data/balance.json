@@ -1013,6 +1013,41 @@
           "stops_charge": true
         }
       }
+    },
+    "tactics": {
+      "phalanx_attribute": "phalanx",
+      "phalanx_experience": 2,
+      "platoons": 3,
+      "minimum_platoon_strength": 15,
+      "reform_ms": 3000,
+      "forming_speed": 0.25,
+      "forming_damage": 0.6,
+      "forming_resistance": 1.25,
+      "turn_degrees_per_second": 100,
+      "phalanx_turn_degrees_per_second": 18,
+      "front_dot": 0.5,
+      "rear_dot": -0.5,
+      "flank_damage": 1.3,
+      "rear_damage": 1.6,
+      "rear_cavalry_damage": 2.0,
+      "phalanx_attack": 1.35,
+      "phalanx_front_resistance": 0.5,
+      "phalanx_side_resistance": 1.35,
+      "phalanx_rear_resistance": 1.6,
+      "phalanx_speed": 0.45,
+      "phalanx_off_front_attack": 0.45,
+      "column_speed": 1.2,
+      "column_resistance": 1.15,
+      "frontage_min_cm": 300,
+      "frontage_max_cm": 2400,
+      "phalanx_half_width_cm": 170,
+      "drill_units": [
+        "chosen_hoplites",
+        "roman_equites",
+        "roman_allied_bowmen"
+      ],
+      "route_lookahead_points": 3,
+      "ai_reform_cooldown_ms": 6000
     }
   },
   "city_campaign": {

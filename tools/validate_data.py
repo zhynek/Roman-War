@@ -1497,6 +1497,23 @@ def _city_battle_checks(t: dict[str, dict], city: dict) -> None:
     units = {unit["id"]: unit for unit in t.get("units.json", {}).get("units", [])}
     realtime = t.get("balance.json", {}).get("city_battle", {}).get("realtime", {})
     specialists = t.get("balance.json", {}).get("city_battle", {}).get("specialists", {})
+    tactics = t.get("balance.json", {}).get("city_battle", {}).get("tactics", {})
+    for template in tactics.get("drill_units", []):
+        if template not in units:
+            err(f"roma tactics: unknown drill template {template}")
+    if any(tactics.get(clock, 0) % realtime.get("tick_ms", 100) for clock in ("reform_ms", "ai_reform_cooldown_ms")):
+        err("roma tactics: formation clock must match tick quantum")
+    if tactics.get("rear_dot", 0) >= tactics.get("front_dot", 0):
+        err("roma tactics: rear and front arcs must be ordered")
+    if tactics.get("frontage_min_cm", 0) >= tactics.get("frontage_max_cm", 0):
+        err("roma tactics: invalid frontage limits")
+    if tactics.get("phalanx_experience", 0) > t.get("balance.json", {}).get("recruitment", {}).get("experience_max", 0):
+        err("roma tactics: unreachable phalanx training")
+    if not any(tactics.get("phalanx_attribute") in u.get("attributes", []) for u in units.values()):
+        err("roma tactics: missing phalanx-capable unit")
+    for key in ("split", "line", "column", "phalanx", "face", "assault_line", "tactics_help", "split_help", "phalanx_help", "column_help"):
+        if key not in words:
+            err(f"roma tactics: missing prose {key}")
     escort_limit = t.get("balance.json", {}).get("recruitment", {}).get("city_escort_limit", 0)
     if not isinstance(escort_limit, int) or escort_limit < 1:
         err("roma specialists: city_escort_limit must be a positive integer")

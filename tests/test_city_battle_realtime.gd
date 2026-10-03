@@ -114,10 +114,10 @@ func test_legacy_battle_migrates_without_restoring_casualties(t) -> void:
  var game:=_game()
  game.city_battle_begin("latium",true)
  var b:Dictionary=game.state.city_battles.latium
- for key in ["model_version","paused","speed","elapsed_ms","capture_ms","events","event_seq","layout_signature"]:b.erase(key)
+ for key in ["model_version","paused","speed","elapsed_ms","capture_ms","events","event_seq","layout_signature","tactics_version"]:b.erase(key)
  b.formations[0].unit.strength_pct=65
  for f in b.formations:
-  for key in ["position","goal","destination","path","role","order","target_id","fire_at_will","hp","soldiers","revealed","cooldown_ms","charge_cooldown_ms","runup_cm","facing","morale","routed","engaged","moving","power","attack_seq"]:f.erase(key)
+  for key in ["position","goal","destination","path","role","order","target_id","fire_at_will","hp","soldiers","revealed","cooldown_ms","charge_cooldown_ms","runup_cm","facing","morale","routed","engaged","moving","power","attack_seq","source_id","source_strength","platoon","formation","reform_ms","ai_reform_ms","facing_goal","facing_locked"]:f.erase(key)
  var loaded:=SaveGame.from_json(SaveGame.to_json(game.state))
  NewGame.ensure_state_keys(loaded,game.data)
  t.check_eq(loaded.city_battles.latium.model_version,2,"old tactical save upgrades additively")

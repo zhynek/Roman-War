@@ -13,9 +13,8 @@ func _init(battle: Dictionary) -> void:
 func resolve(_data: GameData, _rng: CampaignRng, attacker_units: Array, defender_units: Array, _context: Dictionary) -> Dictionary:
 	attacker_units.clear()
 	defender_units.clear()
-	for formation in _battle["formations"]:
-		if int(formation["unit"]["strength_pct"]) <= 0:
-			continue
-		var output: Array = attacker_units if formation["side"] == "attacker" else defender_units
-		output.append(formation["unit"].duplicate(true))
+	for side in ["attacker","defender"]:
+		var output: Array=attacker_units if side=="attacker" else defender_units
+		for unit in CityBattleTactics.survivors(_battle,side):
+			if int(unit["strength_pct"])>0:output.append(unit)
 	return _battle["result"].duplicate(true)

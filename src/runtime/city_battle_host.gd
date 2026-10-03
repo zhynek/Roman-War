@@ -55,6 +55,7 @@ func invoke(action: String, args: Array = []) -> Dictionary:
 	var result: Dictionary
 	match action:
 		"begin": result=_game.city_battle_begin(_region,bool(args[0]))
+		"drill": result=_game.city_battle_drill(_region)
 		"start": result=_game.city_battle_start(_region)
 		"control": result=_game.city_battle_control(_region,String(args[0]))
 		"order": result=_game.city_battle_command(_region,args[0],String(args[1]),args[2],String(args[3]))

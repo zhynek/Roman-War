@@ -50,7 +50,7 @@ static func initialize(data: GameData, battle: Dictionary) -> void:
 			f["path"] = CityBattleNavigation.route(navigation(data),position,CityBattleNavigation.point(data.roma_city["battle"]["spatial"]["objective_cm"]))
 
 static func command(data: GameData, battle: Dictionary, ids: Array, action: String, at: Array = [], target_id: String = "") -> String:
-	if not action in ["move","attack_move","attack","charge","hold","retreat","fire","attack_engine","fire_arrows","ability"] or ids.is_empty():
+	if not action in ["move","attack_move","attack","charge","hold","retreat","fire","attack_engine","fire_arrows","ability","split","line","column","phalanx","face","assault_line"] or ids.is_empty():
 		return "invalid_order"
 	var selected: Array = []
 	var target: Dictionary = {}
@@ -63,6 +63,8 @@ static func command(data: GameData, battle: Dictionary, ids: Array, action: Stri
 			target=f
 	if selected.size()!=ids.size():
 		return "invalid_formation"
+	if action in ["split","line","column","phalanx","face","assault_line"]:
+		return CityBattleTactics.command(data,battle,selected,action,at,target_id)
 	if action=="ability":
 		return CityBattleSpecialists.command(data,battle,selected)
 	if action in ["attack_engine","fire_arrows"]:
@@ -94,6 +96,7 @@ static func command(data: GameData, battle: Dictionary, ids: Array, action: Stri
 			dest=CityBattleNavigation.point(target["position"])
 		if not CityBattleNavigation.clear(data.roma_city,rules(data),dest) or (battle["phase"]=="deployment" and dest.y>=int(rules(data)["deployment_limit_cm"])):
 			return "invalid_position"
+		if battle["phase"]=="deployment" and f.get("formation","")=="phalanx" and not CityBattleTactics.room(data,dest,CityBattleNavigation.point(f["facing"])):return "formation_space"
 		var path := CityBattleNavigation.route(navigation(data),p,dest)
 		if path.is_empty() and dest.distance_to(p)>int(rules(data)["waypoint_tolerance_cm"]):
 			return "no_path"
@@ -105,6 +108,7 @@ static func command(data: GameData, battle: Dictionary, ids: Array, action: Stri
 			f["fire_at_will"]=not f["fire_at_will"]
 			continue
 		f["order"]=action
+		if f.has("facing_locked") and action!="hold":f["facing_locked"]=false
 		f["runup_cm"]=0
 		f["target_id"]=target_id
 		f["destination"]=positions[index]
@@ -135,6 +139,10 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 	var breached := int(battle["gate_integrity"])<=0
 	var damage := {}
 	var positions := {}
+	var facings := {}
+	if battle.has("tactics_version"):
+		for f in formations:
+			if f["side"]=="attacker" and active(f):CityBattleTactics.enemy_orders(data,battle,f)
 	CityBattleSpecialists.prepare(data,battle)
 	battle["events"]=battle["events"].filter(func(e):return int(battle["elapsed_ms"])-int(e.get("time_ms",-100000))<=int(CitySiegeRules.tuning(data)["event_retention_ms"]))
 	for f in formations:
@@ -164,9 +172,10 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 			if f["order"]!="retreat":
 				stop_for_fire=true
 		if not target.is_empty() and f["order"] in ["attack","charge","attack_move"] and not stop_for_fire:
-			if int(battle["tick"])%int(tuning["repath_ticks"])==0 or f["path"].is_empty():
+			if (int(battle["tick"])%int(tuning["repath_ticks"])==0 and (not battle.has("tactics_version") or f["destination"]!=target["position"])) or f["path"].is_empty():
 				f["destination"]=target["position"].duplicate()
 				f["path"]=CityBattleNavigation.route(navigation(data),p,CityBattleNavigation.point(target["position"]))
+				if battle.has("tactics_version"):f["path"]=CityBattleTactics.forward_connector(data,p,f["path"])
 		elif target.is_empty() and (f["order"]=="attack_move" or f["side"]=="attacker"):
 			if f["destination"]!=f["goal"] or f["path"].is_empty():
 				f["destination"]=f["goal"].duplicate()
@@ -182,11 +191,11 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 			if p==next:
 				f["path"].pop_front()
 				if not f["path"].is_empty():next=CityBattleNavigation.point(f["path"][0])
-			var speed := float(profile["speed_cm_s"])*CityBattleSpecialists.speed_multiplier(data,f)
+			var speed := float(profile["speed_cm_s"])*CityBattleSpecialists.speed_multiplier(data,f)*CityBattleTactics.speed_multiplier(data,f)
 			if f["order"]=="charge" and int(f["charge_cooldown_ms"])==0:speed*=float(tuning["charge_speed_multiplier"])
 			if f["engaged"]:speed*=float(tuning["engaged_speed_multiplier"])
 			var moved := p.move_toward(next,speed*dt/1000.0)
-			if CityBattleNavigation.clear(layout,tuning,moved,breached):
+			if CityBattleNavigation.clear(layout,tuning,moved,breached) and (not CityBattleTactics.formed(f) or CityBattleTactics.room(data,moved,CityBattleNavigation.point(f["facing"]),breached)):
 				var blocked := false
 				for enemy in formations:
 					if not active(enemy) or enemy["id"]==f["id"]:continue
@@ -198,7 +207,9 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 					positions[f["id"]]=CityBattleNavigation.packed(moved)
 					f["moving"]=moved.distance_to(p)>0
 					f["runup_cm"]=int(f["runup_cm"])+roundi(moved.distance_to(p)) if f["order"]=="charge" else 0
-					if moved!=p:f["facing"]=CityBattleNavigation.packed((moved-p).normalized()*1000)
+					if moved!=p:
+						if battle.has("tactics_version"):facings[f["id"]]=(moved-p).normalized()
+						else:f["facing"]=CityBattleNavigation.packed((moved-p).normalized()*1000)
 		if can_hit and int(f["cooldown_ms"])==0:
 			var ratio := clampf(float(f["power"])/maxf(1,float(target["power"])),float(tuning["power_ratio_min"]),float(tuning["power_ratio_max"]))
 			var hit := float(tuning["base_damage_per_second"])*float(profile["attack_ms"])/1000.0*ratio*multiplier(data,f["role"],target["role"])
@@ -210,11 +221,18 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 				f["charge_cooldown_ms"]=int(tuning["charge_recovery_ms"])
 				f["runup_cm"]=0
 			hit*=CityBattleSpecialists.damage_multiplier(data,battle,f,target,charging)
+			hit*=CityBattleTactics.damage_multiplier(data,f,target,charging)
 			damage[target["id"]]=int(damage.get(target["id"],0))+maxi(1,roundi(hit))
 			f["cooldown_ms"]=int(profile["attack_ms"])
 			f["attack_seq"]=int(f["attack_seq"])+1
-			f["facing"]=CityBattleNavigation.packed((CityBattleNavigation.point(target["position"])-p).normalized()*1000)
+			if not battle.has("tactics_version"):
+				f["facing"]=CityBattleNavigation.packed((CityBattleNavigation.point(target["position"])-p).normalized()*1000)
 			CitySiegeRules.event(data,battle,"volley" if f["role"]=="archer" and distance>int(tuning["melee_range_cm"]) else "clash",f["position"],target["position"],{"source":f["id"],"target":target["id"],"arc_cm":500})
+		if battle.has("tactics_version"):
+			if f["facing_locked"] and not f["moving"]:facings[f["id"]]=CityBattleNavigation.point(f["facing_goal"])
+			elif firing_at_engine:facings[f["id"]]=CityBattleNavigation.point(battle["siege_engine"]["position"])-p
+			elif not target.is_empty() and not f["moving"]:facings[f["id"]]=CityBattleNavigation.point(target["position"])-p
+			if facings.has(f["id"]):facings[f["id"]]=CityBattleTactics.turn_toward(data,f,facings[f["id"]])
 	CitySiegeRules.tick(data,battle)
 	var attackers := false
 	var defenders := false
@@ -222,12 +240,17 @@ static func tick(data: GameData, state: Dictionary, battle: Dictionary) -> void:
 	var contest := false
 	for f in formations:
 		if positions.has(f["id"]):f["position"]=positions[f["id"]]
+		if facings.has(f["id"]):f["facing"]=facings[f["id"]]
+		if f.has("reform_ms"):
+			f["reform_ms"]=maxi(0,int(f["reform_ms"])-dt)
+			f["ai_reform_ms"]=maxi(0,int(f["ai_reform_ms"])-dt)
 		f["hp"]=maxi(0,int(f["hp"])-int(damage.get(f["id"],0)))
 		f["unit"]["strength_pct"]=ceili(float(f["hp"])/1000.0)
 	# Resolve all health before auras/morale, so a fallen commander cannot help
 	# cohorts earlier in array order for one extra tick.
 	for f in formations:
-		f["morale"]=clampi(int(f["unit"]["strength_pct"])+int(f["unit"]["experience"])*int(tuning["morale_per_experience"])+CityBattleSpecialists.morale_bonus(data,battle,f),0,100)
+		var remaining := roundi(100.0*int(f["hp"])/maxi(1,int(f["initial_strength"])*1000)) if f.has("source_id") else int(f["unit"]["strength_pct"])
+		f["morale"]=clampi(remaining+int(f["unit"]["experience"])*int(tuning["morale_per_experience"])+CityBattleSpecialists.morale_bonus(data,battle,f),0,100)
 		# Broken cohorts leave the fight with their survivors; only campaign
 		# aftermath decides occupation. No renderer removes authoritative troops.
 		if int(f["morale"])<=int(tuning["rout_threshold"]):f["routed"]=true

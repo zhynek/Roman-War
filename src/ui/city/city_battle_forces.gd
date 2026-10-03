@@ -69,7 +69,9 @@ func sync(layout: Dictionary, snapshot: Dictionary, selected: String = "", selec
 		f["unit"]=raw["unit"].duplicate()
 		var identity:=String(f["id"])
 		var actual:=int(f["unit"]["strength_pct"])
-		if not _visual_health.has(identity):_visual_health[identity]=actual
+		if not _visual_health.has(identity) or int(_visual_health[identity])>int(f["initial_strength"]):
+			_visual_health[identity]=actual
+			_pending_health.erase(identity)
 		if actual<int(_visual_health[identity]):
 			if not _pending_health.has(identity):_pending_health[identity]={"due":_clock+(0.8 if volley_targets.has(identity) else (0.32 if melee_targets.has(identity) else 0.0)),"strength":actual}
 			_pending_health[identity]["strength"]=actual
@@ -87,10 +89,12 @@ func sync(layout: Dictionary, snapshot: Dictionary, selected: String = "", selec
 		# Never resolve a rival's underlying template or hidden equipment here.
 		var role:=String(f.get("role","soldier")) if defender or f.get("revealed",false) else "unknown"
 		var specialty:=String(f.get("specialty","")) if defender or f.get("revealed",false) else ""
-		var key:=("own_" if defender else "enemy_")+role+("_"+specialty if specialty!="" else "")
+		var shape:=String(f.get("formation","line")) if defender or f.get("revealed",false) else "line"
+		var spears:=shape=="phalanx" or specialty=="spear_guard"
+		var key:=("own_" if defender else "enemy_")+role+("_"+specialty if specialty!="" else "")+("_spears" if spears else "")
 		var color:=DEFENDER_COLOR if defender else ATTACKER_COLOR
 		if not _meshes.has(key):
-			_meshes[key]=RomaBattleModels.build(color,role,specialty)
+			_meshes[key]=RomaBattleModels.build(color,role,"spear_guard" if spears and specialty=="" else specialty)
 		var at:=Vector3.ZERO
 		if f.has("position"):
 			at=Vector3(float(f["position"][0])/100.0,0.08,float(f["position"][1])/100.0)
@@ -148,6 +152,7 @@ func sync(layout: Dictionary, snapshot: Dictionary, selected: String = "", selec
 			troops.multimesh.mesh=_meshes[key]
 			troops.multimesh.instance_count=count
 		group.set_meta("mounted",role=="cavalry")
+		group.set_meta("formation",shape)
 		group.set_meta("engaged",f.get("engaged",false))
 		var contact_distance:=3.4
 		if f.get("engaged",false):
@@ -161,8 +166,8 @@ func sync(layout: Dictionary, snapshot: Dictionary, selected: String = "", selec
 		mat.set_shader_parameter("fighting",1.0 if f.get("engaged",false) else 0.0)
 		mat.set_shader_parameter("mounted",1.0 if role=="cavalry" else 0.0)
 		mat.set_shader_parameter("archer",1.0 if role=="archer" else 0.0)
-		mat.set_shader_parameter("spear",1.0 if specialty=="spear_guard" else 0.0)
-		mat.set_shader_parameter("bracing",1.0 if specialty=="spear_guard" and int(f.get("ability_remaining_ms",0))>0 else 0.0)
+		mat.set_shader_parameter("spear",1.0 if spears else 0.0)
+		mat.set_shader_parameter("bracing",1.0 if shape=="phalanx" or (specialty=="spear_guard" and int(f.get("ability_remaining_ms",0))>0) else 0.0)
 		group.get_node("Ability").visible=specialty!="" and int(f.get("ability_remaining_ms",0))>0
 		group.set_meta("strength",int(f["unit"]["strength_pct"]))
 		group.set_meta("observed",defender or f.get("revealed",false))
@@ -258,14 +263,15 @@ func _pose_ranks(group: Node3D, blend: float) -> void:
 	var troops:MultiMeshInstance3D=group.get_node("Troops")
 	var mounted:bool=group.get_meta("mounted",false)
 	var engaged:bool=group.get_meta("engaged",false)
-	var columns:=3 if mounted else 5
+	var shape:=String(group.get_meta("formation","line"))
+	var columns:=2 if shape=="column" else (6 if shape=="phalanx" else 3 if mounted else 5)
 	var rows:=ceili(float(troops.multimesh.instance_count)/columns)
-	var spacing:=1.8 if mounted else 0.87
+	var spacing:=0.65 if shape=="phalanx" else 1.8 if mounted else 0.87
 	for i in range(troops.multimesh.instance_count):
 		var row:=floori(float(i)/columns)
 		var front:float=-maxf(0,(float(group.get_meta("contact_distance",3.4))-(2.1 if mounted else 1.35))*0.5)
 		var depth:=front+row*spacing if engaged else (row-(rows-1)*0.5)*spacing
-		var offset:=Vector3((i%columns-(columns-1)*0.5)*(1.15 if mounted else 0.78),0,depth)
+		var offset:=Vector3((i%columns-(columns-1)*0.5)*(0.64 if shape=="phalanx" else 1.15 if mounted else 0.78),0,depth)
 		var current:=troops.multimesh.get_instance_transform(i).origin
 		troops.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.90),current.lerp(offset,blend)))
 		troops.multimesh.set_instance_custom_data(i,Color(RealismModels.scatter(String(group.name),i),1.0 if row==0 else 0.0,0,1))
