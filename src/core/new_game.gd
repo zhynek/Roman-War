@@ -31,6 +31,8 @@ class_name NewGame
 ##                         location, alive, deeds, epithet,
 ##                         office: office_id|null, offices_held: [office_id]}}
 ##  watchposts: {region: {owner, level}} — 1 = watchtower, 2 = fortified post
+##  settlement_memory: {faction: {region: {owner, level, population, buildings,
+##      watchpost, construction, turn}}} — dated architecture, never troop rosters
 ##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
 ##      — public identity/count snapshots and only the endpoints seen at the time
 ##  events_fired: [event_id], winner: null|String, next_id: int
@@ -90,6 +92,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"watchposts": {},
 		"recon": {"contacts": {}, "movements": []},
 		"cartography": {},
+		"settlement_memory": {},
 		"map_access": {},
 		"city_governance": {},
 		"city_battles": {},
@@ -216,11 +219,14 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		for city in state["city_governance"].values():
 			RomaCityRules.ensure_project_keys(data, city)
 	var new_cartography := not state.has("cartography")
+	var new_memory := not state.has("settlement_memory")
+	if new_memory:
+		state["settlement_memory"] = {}
 	if new_cartography:
 		state["cartography"] = {}
 	if not state.has("map_access"):
 		state["map_access"] = {}
-	if new_cartography and data != null:
+	if (new_cartography or new_memory) and data != null:
 		CartographyRules.record_reports(data, state)
 	if not state.has("forest_patrols"):
 		state["forest_patrols"] = {}

@@ -138,6 +138,8 @@ func _ready() -> void:
 	map_view.region_context_requested.connect(open_map_menu)
 	map_view.force_clicked.connect(_on_force_clicked)
 	map_view.background_clicked.connect(_on_background_clicked)
+	map_view.city_enter_requested.connect(_enter_roma)
+	map_view.settlement_focused.connect(_inspect_settlement)
 	map_view.order_target.connect(_on_order_target)
 	map_view.tooltip_provider = _tooltip_for
 	split.add_child(map_view)
@@ -569,6 +571,12 @@ func _on_region_clicked(region_id: String) -> void:
 			and region_id != game.state["agents"][selected_agent]["region"]:
 		_agent_order(region_id)
 		return
+	_inspect_settlement(region_id)
+
+
+func _inspect_settlement(region_id: String) -> void:
+	## Camera presets and city handoffs inspect a place without interpreting
+	## navigation as a march order for a previously selected force or agent.
 	_clear_force_selection()
 	selected_agent = ""
 	map_view.selected_region = region_id
@@ -834,7 +842,16 @@ func _tooltip_for(region_id: String) -> String:
 	if region.is_empty():
 		return ""
 	if not map_view.visible_cache.has(region_id):
-		return "[b]%s[/b]\n[i]Beyond our maps.[/i]" % region.get("name", region_id)
+		var words: Dictionary = game.data.effects_glossary["map_commands"]
+		var report := game.settlement_report(region_id)
+		if report.is_empty():
+			return "[b]%s[/b]\n[i]%s[/i]" % [region.get("name", region_id), words["report_geography" if map_view.known_cache.has(region_id) else "uncharted"]]
+		return "[b]%s[/b]\n%s\n[i]%s[/i]" % [region.get("settlement_name", region_id),
+			String(words["report_settlement"]).format({"name": region.get("name", region_id),
+				"level": String(report["level"]).replace("_", " "), "population": report["population"],
+				"owner": game.data.factions.get(report["owner"], {}).get("name", report["owner"])}),
+			String(words["report_remembered"]).format({"turn": int(report["turn"]) + 1,
+				"age": maxi(0, int(game.state["turn"]) - int(report["turn"]))})]
 	var lines: Array[String] = []
 	lines.append("[b]%s[/b] · %s" % [region.get("settlement_name", region_id), region.get("name", "")])
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
@@ -1869,6 +1886,14 @@ func _enter_roma() -> void:
 	city.standalone = false
 	city.save_path = save_path
 	city.state_loaded.connect(_restore_loaded_presentation)
+	city.campaign_requested.connect(func():
+		city.queue_free()
+		process_mode = Node.PROCESS_MODE_INHERIT
+		show()
+		refresh()
+		map_view.focus_settlement("latium"), CONNECT_DEFERRED)
+	city.campaign_zoom_requested.connect(func():
+		city.campaign_requested.emit(), CONNECT_DEFERRED)
 	city.main_menu_requested.connect(func():
 		city.queue_free()
 		process_mode = Node.PROCESS_MODE_INHERIT

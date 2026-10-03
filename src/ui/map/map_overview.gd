@@ -33,11 +33,14 @@ func _draw() -> void:
 		if view.geometry.cells.has(id):
 			for fill in view.geometry.cells[id]["fills"]:
 				draw_colored_polygon(transform * fill, Color("#566553"))
-	for id in view.visible_cache:
+	for id in view.owner_colors:
 		if not view.geometry.cells.has(id):
 			continue
+		var owner: Color = view.owner_colors[id]
+		if not view.visible_cache.has(id):
+			owner = owner.darkened(0.5)
 		for fill in view.geometry.cells[id]["fills"]:
-			draw_colored_polygon(transform * fill, view.owner_colors.get(id, UiStyle.LAND_BASE))
+			draw_colored_polygon(transform * fill, owner)
 	for id in view.army_visuals:
 		if view.game.state["armies"][id]["owner"] == view.game.state["player_faction"]:
 			draw_circle(transform * view.force_world_position(id), 2, Color.WHITE if id == view.selected_force else UiStyle.CAPITAL_GOLD)
@@ -48,7 +51,7 @@ func _draw() -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if view == null or view.geometry == null:
+	if view == null or view.geometry == null or not view.camera_input_enabled:
 		return
 	var pressed: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
 	var dragging: bool = event is InputEventMouseMotion and event.button_mask & MOUSE_BUTTON_MASK_LEFT

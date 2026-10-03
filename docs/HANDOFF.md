@@ -13,6 +13,23 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Roma city development
 
+**City-to-country navigation (October 2026).** Roma now opens in an aerial
+survey, with scroll/pinch inspection and an outward transition into the shared
+campaign. The map spans 0.18×–40× and offers **City / Countryside / Country**
+framing plus explicit **Enter Roma**. Procedural settlement miniatures grow
+their wards, completed buildings, walls and gates from public architectural
+reports. The additive `settlement_memory` field preserves dated appearances
+and ownership outside current sight; unseen troops remain governed by the
+existing reconnaissance/forest rules. Geography treaties do not confer live
+city intelligence. Street-level entry remains Roma-only; campaign miniatures
+and Roma's authored district are distinct presentations of the same campaign.
+Read the [city-to-country review](reviews/2026-10-city-country.md) and
+[play guide](../PLAYING.md#one-campaign-city-and-map). The local universal Mac
+preview, ZIP and frozen source are in `build/city-country-20261003/`.
+Verified: **705 tests, 0 failures**, clean data/import gates, rendered
+planning/marching/arrival/40× map acceptance, and the complete city-to-country
+acceptance in both source and the exact exported Mac app.
+
 **Current command phase (October 2026).** Roma battles now support battalion
 splitting into three independent platoons, frontage dragging, explicit facing,
 line/column/phalanx commands and directional combat. **Defend Roma → Formation

@@ -120,13 +120,15 @@ class PoliticalLayer:
 		if geometry == null or view.game == null:
 			return
 		for region_id in geometry.cells:
-			if not view.visible_cache.has(region_id):
+			if not view.known_cache.has(region_id):
 				continue
 			var owner_color = view.owner_colors.get(region_id)
 			if owner_color == null:
 				continue
 			var tint: Color = owner_color
 			tint.a = 0.08 if view._zoom >= MapView.DETAIL_ZOOM else 0.30
+			if not view.visible_cache.has(region_id):
+				tint.a *= 0.45
 			for piece in geometry.cells[region_id]["fills"]:
 				draw_colored_polygon(piece, tint)
 		for region_id in geometry.cells:
@@ -411,13 +413,11 @@ class LabelLayer:
 			if not Rect2(Vector2.ZERO, view.size).grow(100).has_point(view.to_screen(view.world_pos(region))):
 				continue
 			var settlement: Dictionary = game.state["settlements"].get(region_id, {}) if view.visible_cache.has(region_id) else {}
-			var tier := 1
-			if not settlement.is_empty():
-				tier = Constants.level_index(
-					SettlementRules.settlement_level(game.data, settlement)) + 1
+			var report: Dictionary = view.settlement_reports.get(region_id, {})
+			var tier := Constants.level_index(String(report.get("level", "village"))) + 1
 			if zoom < _reveal_zoom(tier):
 				continue
-			var text: String = region.get("settlement_name" if view.visible_cache.has(region_id) else "name", region_id)
+			var text: String = region.get("settlement_name" if not report.is_empty() else "name", region_id)
 			var font_size := 11 + tier
 			var screen := view.to_screen(view.world_pos(region))
 			var width := view.map_font.get_string_size(

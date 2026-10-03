@@ -112,6 +112,15 @@ func _rebuild() -> void:
 	if not is_visible:
 		_header(region["name"], 16)
 		_label(words["chart_known"])
+		var report := game.settlement_report(region_id)
+		if report.is_empty():
+			_label(words["report_geography"])
+		else:
+			_label(String(words["report_settlement"]).format({"name": region.get("settlement_name", region_id),
+				"owner": game.data.factions.get(report["owner"], {}).get("name", report["owner"]),
+				"level": String(report["level"]).replace("_", " "), "population": report["population"]}))
+			_label(String(words["report_remembered"]).format({"turn": int(report["turn"]) + 1,
+				"age": maxi(0, int(game.state["turn"]) - int(report["turn"]))}))
 		_terrain_details(region)
 		return
 
@@ -140,6 +149,10 @@ func _terrain_details(region: Dictionary) -> void:
 	var words: Dictionary = game.data.effects_glossary["map_commands"]
 	var report := game.terrain_report(region_id)
 	var profile: Dictionary = game.data.terrain_content.get("terrains", {}).get(region["terrain"], {})
+	if report.get("observed", false):
+		_label(words["report_current"], UiStyle.TEXT_DIM)
+	if region["terrain"] == "forest":
+		_label(words["report_forest"], UiStyle.TEXT_DIM)
 	_label(String(words["ground_report"]).format({"name": profile.get("name", region["terrain"]),
 		"cost": String.num(report.get("movement", 0.0), 2), "defense": roundi((float(report.get("defense", 1.0)) - 1.0) * 100)}))
 	_label(profile.get("description", ""), UiStyle.TEXT_DIM)

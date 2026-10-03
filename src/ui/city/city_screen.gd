@@ -5,8 +5,11 @@ extends Control
 signal main_menu_requested
 signal state_loaded
 signal campaign_requested
+signal campaign_zoom_requested
 
 const REGION := "latium"
+const SURVEY_MIN := 24.0
+const SURVEY_MAX := 260.0
 var game: Game
 var standalone := true
 var shared_session := false
@@ -57,6 +60,7 @@ var battle_panel: RomaCityBattlePanel
 var battle_button: Button
 var season_button: Button
 var campaign_panel: RomaCityCampaignPanel
+var _survey_dragging := false
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -275,9 +279,28 @@ func _button(text: String, callback: Callable) -> Button:
 	return button
 
 func _view_input(event: InputEvent) -> void:
-	if battle_panel != null and battle_panel.visible:
+	if (battle_panel != null and battle_panel.visible) or (campaign_panel != null and campaign_panel.visible) or (dawn != null and dawn.visible):
+		return
+	if event is InputEventMagnifyGesture:
+		zoom_city(event.factor, event.position)
+		view_container.accept_event()
+		return
+	if event is InputEventPanGesture and overview:
+		_pan_survey(event.delta * 12.0)
+		view_container.accept_event()
+		return
+	if event is InputEventMouseMotion and overview and _survey_dragging and event.button_mask & MOUSE_BUTTON_MASK_MIDDLE:
+		_pan_survey(-event.relative)
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
+		_survey_dragging = event.pressed and overview
 		return
 	if event is not InputEventMouseButton or not event.pressed:
+		return
+	if event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+		var direction := 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0
+		zoom_city(pow(MapView.ZOOM_STEP, direction * maxf(event.factor, 0.1)), event.position)
+		view_container.accept_event()
 		return
 	if event.button_index not in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
 		return
@@ -355,6 +378,8 @@ func toggle_walk() -> void:
 	_refresh_position()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+		_survey_dragging = false
 	if battle_panel != null and battle_panel.visible:
 		return
 	if campaign_panel != null and campaign_panel.visible:
@@ -434,7 +459,7 @@ func _refresh_position() -> void:
 		var distance := Vector2(player.position.x, player.position.z).distance_to(Vector2(pos[0], pos[1]))
 		guide_label.text = w("destination") % [w("site_" + destination), roundi(distance)]
 	else:
-		guide_label.text = w("map_hint")
+		guide_label.text = String(game.data.effects_glossary.get("map_commands", {}).get("city_zoom_help", "")) if overview else w("map_hint")
 
 func site_by_id(id: String) -> Dictionary:
 	for site in layout.get("sites", []):
@@ -840,6 +865,52 @@ func toggle_overview() -> void:
 	survey_camera.current = overview
 	camera.current = not overview
 	_refresh_position()
+
+
+func show_city_overview() -> void:
+	if not overview:
+		toggle_overview()
+	survey_camera.size = 176.0
+	survey_camera.position = Vector3(0, 125, 88)
+	survey_camera.look_at(Vector3.ZERO)
+	_refresh_position()
+
+
+func zoom_city(factor: float, point: Vector2) -> void:
+	## The survey and street cameras change presentation only. Town commands
+	## still require an explicit action; the campaign scale opens via a signal.
+	if not is_finite(factor) or factor <= 0 or (battle_panel != null and battle_panel.visible) or (campaign_panel != null and campaign_panel.visible) or (dawn != null and dawn.visible):
+		return
+	if not overview:
+		if factor >= 1.0:
+			return
+		toggle_overview()
+		survey_camera.size = 48.0
+		survey_camera.position = player.position + Vector3(0, 125, 88)
+		survey_camera.look_at(player.position)
+	var next_size := survey_camera.size / factor
+	if next_size > SURVEY_MAX and not standalone:
+		_survey_dragging = false
+		campaign_zoom_requested.emit()
+		return
+	var before := _survey_ground(point)
+	survey_camera.size = clampf(next_size, SURVEY_MIN, SURVEY_MAX)
+	var after := _survey_ground(point)
+	survey_camera.position += before - after
+
+
+func _survey_ground(point: Vector2) -> Vector3:
+	if view_container.size.x <= 0 or view_container.size.y <= 0:
+		return Vector3.ZERO
+	var screen_point := point * Vector2(viewport.size) / view_container.size
+	var origin := survey_camera.project_ray_origin(screen_point)
+	var ray := survey_camera.project_ray_normal(screen_point)
+	return origin - ray * origin.y / minf(ray.y, -0.001)
+
+
+func _pan_survey(delta: Vector2) -> void:
+	var center := view_container.size * 0.5
+	survey_camera.position += _survey_ground(center + delta) - _survey_ground(center)
 
 func show_message(message: String) -> void:
 	toast_label.text = message

@@ -26,6 +26,8 @@ signal sea_zone_clicked(zone_id: String)
 signal region_context_requested(region_id: String)
 signal force_clicked(kind: String, id: String)             # left-click on an army or fleet banner
 signal background_clicked()                                 # left-click on open sea, nothing under it
+signal city_enter_requested
+signal settlement_focused(region_id: String)
 signal order_target(kind: String, id: String, forced: bool) # right press with a force selected; kind in army/fleet/region/zone
 
 const WORLD_SCALE := 14.0
@@ -39,9 +41,10 @@ const DRAG_START_DISTANCE := 6.0
 ## pan_by / reset_view as the wheel and the drag do.
 const ZOOM_STEP := 1.15
 const KEY_PAN_STEP := 90.0
-const ZOOM_MIN := 0.35
-const ZOOM_MAX := 9.0
+const ZOOM_MIN := 0.18
+const ZOOM_MAX := 40.0
 const DETAIL_ZOOM := 1.8
+const CITY_ZOOM := 24.0
 
 # Banner geometry at zoom 1 (everything scales with _zoom).
 const BANNER_W := 12.0
@@ -64,6 +67,7 @@ var game: Game
 var selected_region := "":
 	set(value):
 		selected_region = value
+		_update_city_entry()
 		if _overlay_layer != null:
 			_overlay_layer.queue_redraw()
 var selected_force := "":
@@ -116,6 +120,8 @@ var army_groups: Dictionary = {}
 var fleet_groups: Dictionary = {}
 var force_summaries: Dictionary = {}
 var road_levels: Dictionary = {}
+var settlement_reports: Dictionary = {}
+var city_entry_button: Button
 
 var _camera_offset := Vector2(-200, -200)
 var _pan_target: Vector2 = Vector2.ZERO
@@ -264,10 +270,16 @@ func refresh_state() -> void:
 	visible_zones = game.visible_sea_zones()
 
 	owner_colors = {}
-	for region_id in game.state["settlements"]:
-		var owner: String = game.state["settlements"][region_id]["owner"]
-		owner_colors[region_id] = Color.html(
-			game.data.factions.get(owner, {}).get("color", "#808080"))
+	settlement_reports = game.settlement_reports()
+	for region_id in known_cache:
+		var report: Dictionary = settlement_reports.get(region_id, {})
+		if report.is_empty():
+			continue
+		var owner := String(report.get("owner", ""))
+		if owner != "":
+			owner_colors[region_id] = Color.html(
+				game.data.factions.get(owner, {}).get("color", "#808080"))
+	_update_city_entry()
 
 	army_groups = {}
 	for army in game.state["armies"].values():
@@ -438,7 +450,11 @@ func pan_to(region_id: String, seconds: float) -> void:
 
 
 func _offset_centering(region_id: String) -> Vector2:
-	return -world_pos(game.data.regions[region_id]) + size / (2.0 * _zoom)
+	var point := world_pos(game.data.regions[region_id])
+	var offset := -point + size / (2.0 * _zoom)
+	if landscape != null and realism_enabled:
+		offset.y += landscape.ground(point).y / tan(CampaignLandscape.PITCH)
+	return offset
 
 
 func _advance_pan(delta: float) -> void:
@@ -777,7 +793,9 @@ func _camera_button(text: String, tooltip_text_value: String, font_size: int, ha
 	# Never take keyboard focus, or the arrow keys would drive the buttons
 	# instead of the map.
 	button.focus_mode = Control.FOCUS_NONE
-	button.pressed.connect(handler)
+	button.pressed.connect(func():
+		if camera_input_enabled:
+			handler.call())
 	return button
 
 
@@ -811,6 +829,8 @@ func reset_view() -> void:
 
 
 func _zoom_at(screen_point: Vector2, factor: float) -> void:
+	if not is_finite(factor) or factor <= 0.0:
+		return
 	_panning = false
 	_follow_force = ""
 	var before := landscape.unproject(screen_point) if landscape != null and realism_enabled else screen_point / _zoom - _camera_offset
@@ -850,13 +870,13 @@ func _pick(screen_point: Vector2) -> Dictionary:
 	var entries := banner_layout()
 	for i in range(entries.size() - 1, -1, -1):
 		var entry: Dictionary = entries[i]
-		if (entry["rect"] as Rect2).grow(2.0 * _zoom).has_point(screen_point):
+		if (entry["rect"] as Rect2).grow(2.0 * minf(_zoom, 3.5)).has_point(screen_point):
 			return {"kind": entry["kind"], "id": entry["id"]}
 	if _zoom >= DETAIL_ZOOM:
 		var ids: Array = army_visuals.keys()
 		ids.reverse()
 		for id in ids:
-			if to_screen(force_world_position(id)).distance_to(screen_point) < 16 * _zoom * float(army_visuals[id].get("scale", 1)):
+			if _force_contains_point(id, screen_point):
 				return {"kind": "army", "id": id}
 	var region := _region_at(screen_point)
 	if region != "":
@@ -865,6 +885,21 @@ func _pick(screen_point: Vector2) -> Dictionary:
 	if zone != "":
 		return {"kind": "zone", "id": zone}
 	return {"kind": "", "id": ""}
+
+
+func _force_contains_point(id: String, point: Vector2) -> bool:
+	var scale_by := float(army_visuals[id].get("scale", 1))
+	if _zoom < 7.0:
+		return to_screen(force_world_position(id)).distance_to(point) < 16 * _zoom * scale_by
+	if landscape != null and realism_enabled:
+		return landscape.force_contains_point(id, point)
+	var local := (point - to_screen(force_world_position(id))) / (_zoom * scale_by)
+	var rectangles := CampaignMiniatures.army_pick_rects(force_summaries[id], army_visuals[id]["classes"],
+		_visual_clock, _marches.has(id), _marches.get(id, {}).get("direction", Vector2.RIGHT))
+	for rect in rectangles:
+		if rect.has_point(local):
+			return true
+	return false
 
 
 func _sea_zone_at(screen_point: Vector2) -> String:
@@ -1259,10 +1294,77 @@ func _build_zoom_presets() -> void:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(row)
 	var words: Dictionary = game.data.effects_glossary.get("map_commands", {}) if game != null else {}
-	for preset in [["territory", 0.5], ["campaign", 1.2], ["detail", 3.5]]:
-		var value := float(preset[1])
-		row.add_child(_camera_button(String(words.get(preset[0], preset[0])), "", 12,
-			func(): set_zoom_level(value)))
+	for preset in ["country", "countryside", "city"]:
+		row.add_child(_camera_button(String(words.get(preset, preset)), String(words.get(preset + "_help", "")), 12,
+			apply_zoom_preset.bind(preset)))
+	city_entry_button = _camera_button(String(words.get("enter_city", "")), String(words.get("enter_city_help", "")), 12, _request_city_entry)
+	city_entry_button.position = Vector2(14, 52)
+	add_child(city_entry_button)
+	_update_city_entry()
+
+
+func apply_zoom_preset(preset: String) -> void:
+	if not camera_input_enabled or game == null:
+		return
+	match preset:
+		"country":
+			frame_known_world()
+		"countryside":
+			set_zoom_level(3.5)
+		"city":
+			var region := selected_region
+			if region == "" or not known_cache.has(region):
+				region = String(game.state["factions"][game.state["player_faction"]].get("capital", ""))
+			var zoom := CITY_ZOOM
+			if landscape != null and realism_enabled:
+				var diameter: float = landscape.settlement_radius(region) * 2.4
+				var available := (size - Vector2(96, 160)).max(Vector2.ONE)
+				zoom = minf(zoom, minf(available.x / diameter, available.y / (diameter * sin(CampaignLandscape.PITCH))))
+			focus_settlement(region, maxf(zoom, DETAIL_ZOOM))
+
+
+func focus_settlement(region_id: String, zoom: float = CITY_ZOOM) -> void:
+	if game == null or not game.data.regions.has(region_id) or not known_cache.has(region_id):
+		return
+	selected_region = region_id
+	selected_force = ""
+	set_zoom_level(zoom)
+	center_on(region_id)
+	settlement_focused.emit(region_id)
+
+
+func frame_known_world() -> void:
+	## Fit only charted geography. A new settlement report never enlarges the
+	## camera to reveal uncharted land, and this gesture never scouts anything.
+	var bounds := Rect2()
+	var first := true
+	for region_id in known_cache:
+		var cell := Rect2(world_pos(game.data.regions[region_id]) - Vector2.ONE * 20, Vector2.ONE * 40)
+		if geometry != null and geometry.cells.has(region_id):
+			cell = geometry.cells[region_id]["bounds"]
+		bounds = cell if first else bounds.merge(cell)
+		first = false
+	if first or size.x <= 1 or size.y <= 1:
+		return
+	_panning = false
+	_follow_force = ""
+	var tilt := sin(CampaignLandscape.PITCH) if landscape != null and realism_enabled else 1.0
+	var available := (size - Vector2(96, 120)).max(Vector2.ONE)
+	_zoom = clampf(minf(available.x / maxf(bounds.size.x, 1), available.y / maxf(bounds.size.y * tilt, 1)), ZOOM_MIN, 1.2)
+	_camera_offset = -bounds.get_center() + size / (2 * _zoom)
+	_clear_hover()
+	queue_redraw()
+
+
+func _update_city_entry() -> void:
+	if city_entry_button == null:
+		return
+	city_entry_button.visible = game != null and selected_region == "latium" and game.state["settlements"].get("latium", {}).get("owner", "") == game.state["player_faction"]
+
+
+func _request_city_entry() -> void:
+	if camera_input_enabled and city_entry_button != null and city_entry_button.visible:
+		city_enter_requested.emit()
 
 
 func force_world_position(id: String) -> Vector2:

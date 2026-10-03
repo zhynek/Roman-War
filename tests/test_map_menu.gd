@@ -80,7 +80,7 @@ func test_fog_and_rivals_keep_their_secrets(t) -> void:
 	t.check(fogged != "", "somewhere lies beyond the maps")
 	if fogged != "":
 		screen.open_map_menu(fogged)
-		t.check(_has_text(screen.map_menu, "Beyond our maps"),
+		t.check(_has_text(screen.map_menu, game.data.effects_glossary["map_commands"]["uncharted"]),
 			"fog yields no reports")
 		t.check(not _has_text(screen.map_menu, "Garrison"),
 			"and certainly no garrison")
@@ -114,4 +114,25 @@ func test_fog_and_rivals_keep_their_secrets(t) -> void:
 			"nor its works")
 		t.check(_has_text(screen.map_menu, "souls"),
 			"though the town itself is plain to see")
+	screen.free()
+
+
+func test_remembered_dossier_uses_the_dated_survey_not_hidden_state(t) -> void:
+	var game := Game.new_campaign("julii", 7)
+	var region := "parthia"
+	game.state["armies"]["survey_fixture"] = {"owner": "julii", "region": region,
+		"units": [{"template": "rural_levies", "strength_pct": 100, "experience": 0}],
+		"general": null, "movement_left": 0}
+	CartographyRules.record_reports(game.data, game.state)
+	var report := game.settlement_report(region)
+	game.state["armies"].erase("survey_fixture")
+	game.state["settlements"][region]["population"] = 987654
+	game.state["turn"] += 2
+	var screen := CampaignScreen.create(game)
+	(Engine.get_main_loop() as SceneTree).root.add_child(screen)
+	screen.open_map_menu(region)
+	t.check(_has_text(screen.map_menu, str(report["population"])), "last surveyed population is retained")
+	t.check(_has_text(screen.map_menu, "2 seasons ago"), "the stale report carries its age")
+	t.check(not _has_text(screen.map_menu, "987654"), "unseen growth cannot leak into the dossier")
+	t.check(not _has_text(screen.map_menu, "Garrison"), "old architecture reports do not invent military intelligence")
 	screen.free()

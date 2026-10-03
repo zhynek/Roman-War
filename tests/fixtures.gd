@@ -491,6 +491,7 @@ static func state(game_data: GameData) -> Dictionary:
 		"forest_patrols": {},
 		"watchposts": {}, "recon": {"contacts": {}, "movements": []},
 		"cartography": {},
+		"settlement_memory": {},
 		"map_access": {},
 		"city_governance": {},
 		"city_battles": {},

@@ -10,6 +10,8 @@ var world: Node3D
 var camera: Camera3D
 var regions := {}
 var armies := {}
+var settlements := {}
+var settlement_material: ShaderMaterial
 var routes: Node3D
 var noise := FastNoiseLite.new()
 var tree_meshes: Array = []
@@ -66,6 +68,7 @@ func _ready() -> void:
 	world.add_child(sun)
 	water_material = ShaderMaterial.new()
 	water_material.shader = preload("res://src/ui/realism/water.gdshader")
+	settlement_material = _vertex_material()
 	for id in view.game.data.regions:
 		var r: Dictionary = view.game.data.regions[id]
 		terrain_sources.append({"at": view.world_pos(r), "relief": float(view.game.data.terrain_content["terrains"][r["terrain"]]["relief"])})
@@ -180,7 +183,7 @@ func _ground(point: Vector2, region: String = "") -> Vector3:
 	# Region-local distance tests used to tear the mesh at shared borders.
 	var distance_to_track := _track_distance(point, id)
 	for source in terrain_sources:
-		distance_to_track = minf(distance_to_track, maxf(0, point.distance_to(source.at) - 13.0))
+		distance_to_track = minf(distance_to_track, maxf(0, point.distance_to(source.at) - 18.0))
 	h = lerpf(0.95, h, smoothstep(2.1, 15.0, distance_to_track))
 	for site in crossing_sites:
 		if not site.kind in ["river", "bridge"]:
@@ -203,6 +206,7 @@ func sync_state() -> void:
 	for id in view.known_cache:
 		if view.geometry.cells.has(id) and not regions.has(id):
 			_build_region(id)
+	_sync_settlements()
 	for id in armies.keys():
 		if not view.army_visuals.has(id):
 			armies[id].node.queue_free()
@@ -253,6 +257,16 @@ func sync_frame() -> void:
 	_frame = Rect2(-view._camera_offset, view.size / view._zoom).grow(40)
 	for id in regions:
 		regions[id].visible = _frame.intersects(view.geometry.cells[id]["bounds"])
+	for id in settlements:
+		var entry: Dictionary = settlements[id]
+		entry.node.visible = _frame.grow(24).has_point(view.world_pos(view.game.data.regions[id]))
+		var close_detail: bool = entry.node.visible and view._zoom >= 7.0
+		if close_detail and entry.detail == null:
+			var detail_mesh := CampaignCityModel.build(entry.plan, view.world_pos(view.game.data.regions[id]), ground, true)
+			if detail_mesh != null:
+				entry.detail = _mesh(entry.node, detail_mesh, settlement_material)
+		if entry.detail != null:
+			entry.detail.visible = close_detail
 	for id in armies:
 		var node: Node3D = armies[id].node
 		var at := view.force_world_position(id)
@@ -314,7 +328,7 @@ func _build_region(id: String) -> void:
 	for i in range(int(profile.trees) * 3):
 		var key := id + "/" + str(i)
 		var at := bounds.position + bounds.size * Vector2(RealismModels.scatter(key, 0), RealismModels.scatter(key, 1))
-		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 16:
+		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 24:
 			continue
 		var p := ground(at, id)
 		if _track_distance(at, id) < 6.5:
@@ -336,7 +350,7 @@ func _build_region(id: String) -> void:
 	for i in range(700 if region["terrain"] in ["marsh", "forest"] else 180):
 		var key := id + "/ground/" + str(i)
 		var at := bounds.position + bounds.size * Vector2(RealismModels.scatter(key, 0), RealismModels.scatter(key, 1))
-		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 18 or _track_distance(at, id) < 2.4:
+		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 24 or _track_distance(at, id) < 2.4:
 			continue
 		var p := ground(at, id)
 		var scale_by := 0.6 + RealismModels.scatter(key, 2) * 1.0
@@ -356,7 +370,6 @@ func _build_region(id: String) -> void:
 		_mesh(root, stones.finish(), _vertex_material())
 	if pools.vertex_count > 0:
 		_mesh(root, pools.finish(), water_material)
-	_build_town(root, id, anchor)
 
 func _track_distance(point: Vector2, id: String) -> float:
 	var distance_to_track := INF
@@ -364,51 +377,64 @@ func _track_distance(point: Vector2, id: String) -> float:
 		distance_to_track = minf(distance_to_track, point.distance_to(Geometry2D.get_closest_point_to_segment(point, segment[0], segment[1])))
 	return distance_to_track
 
-func _build_town(root: Node3D, id: String, anchor: Vector2) -> void:
-	# Geographic architecture is deliberately independent of unseen owners,
-	# population, construction and garrisons. Wards vary by geography/id.
-	var town := RealismModels.new()
-	var stone := RealismModels.pigment("#aaa18c")
-	var timber := RealismModels.pigment("#554939")
-	var roof := RealismModels.pigment("#795442")
-	for i in range(30):
-		var key := id + "/ward/" + str(i)
-		var angle := i * 2.399
-		var radius := 4.0 + sqrt(float(i)) * 1.65
-		var offset := Vector2(cos(angle), sin(angle)) * radius
-		if _track_distance(anchor + offset, id) < 2.3:
+func settlement_radius(id: String) -> float:
+	return float(settlements.get(id, {}).get("plan", {}).get("radius", 8.0))
+
+func settlement_anchor(id: String) -> Vector3:
+	return ground(view.world_pos(view.game.data.regions[id]), id)
+
+func force_contains_point(id: String, point: Vector2) -> bool:
+	## Pick the rendered instances, including marching poses and mount size.
+	## At architectural zoom a generous campaign-radius circle would swallow
+	## streets hundreds of pixels away from any visible soldier.
+	if not armies.has(id) or not armies[id].node.visible or viewport.size.x <= 0 or viewport.size.y <= 0:
+		return false
+	var screen_scale := view.size / Vector2(viewport.size)
+	for group in armies[id].groups.values():
+		var miniature: MultiMeshInstance3D = group.node
+		var mesh_bounds: AABB = miniature.multimesh.mesh.get_aabb()
+		for i in range(miniature.multimesh.instance_count):
+			var pose := miniature.global_transform * miniature.multimesh.get_instance_transform(i)
+			var rectangle := Rect2()
+			for corner in range(8):
+				var projected := camera.unproject_position(pose * mesh_bounds.get_endpoint(corner)) * screen_scale
+				rectangle = Rect2(projected, Vector2.ZERO) if corner == 0 else rectangle.expand(projected)
+			if rectangle.grow(3).has_point(point):
+				return true
+	return false
+
+func _sync_settlements() -> void:
+	for id in settlements.keys():
+		if not view.known_cache.has(id) or view.settlement_reports.get(id, {}).is_empty():
+			settlements[id].node.queue_free()
+			settlements.erase(id)
+	for id in view.settlement_reports:
+		if not view.known_cache.has(id) or not regions.has(id):
 			continue
-		var at := ground(anchor + offset, id)
-		var h := 1.2 + RealismModels.scatter(key, 0) * 1.8
-		var w := 1.3 + RealismModels.scatter(key, 1) * 1.5
-		var d := 1.8 + RealismModels.scatter(key, 2) * 1.8
-		var tint := stone.lerp(RealismModels.pigment("#7d7967"), RealismModels.scatter(key, 3) * 0.5)
-		town.box(at + Vector3.UP * h * 0.5, Vector3(w, h, d), tint)
-		var ridge := h + w * 0.3
-		for side in [-1.0, 1.0]:
-			var a := at + Vector3(side * (w * 0.5 + 0.15), h, -d * 0.5 - 0.15)
-			var b := a + Vector3.BACK * (d + 0.3)
-			var c := at + Vector3(0, ridge, -d * 0.5 - 0.15)
-			var e := c + Vector3.BACK * (d + 0.3)
-			var tile := roof.lightened(RealismModels.scatter(key, 4) * 0.13)
-			town.triangle(a, b, c, tile)
-			town.triangle(c, b, e, tile)
-			for j in range(5):
-				town.rod(a.lerp(c, j / 5.0), b.lerp(e, j / 5.0), 0.018, tile.darkened(0.16))
-			town.box(at + Vector3(side * w * 0.28, h * 0.65, -d * 0.5 - 0.025), Vector3(0.25, 0.35, 0.04), timber)
-		town.triangle(at + Vector3(-w * 0.5, h, -d * 0.5), at + Vector3(w * 0.5, h, -d * 0.5), at + Vector3(0, ridge, -d * 0.5), tint)
-		town.box(at + Vector3(0, 0.48, -d * 0.5 - 0.03), Vector3(0.45, 0.96, 0.06), timber)
-		if i % 3 == 0:
-			town.box(at + Vector3(w * 0.65, 0.45, 0), Vector3(0.5, 0.9, d * 0.65), timber)
-	# Courtyard hall and sheltered colonnade, in a clearing off the highway.
-	var civic := ground(anchor + Vector2(-5, -6), id)
-	town.box(civic + Vector3.UP * 0.25, Vector3(4.8, 0.5, 3.5), stone)
-	town.box(civic + Vector3(0, 1.6, 0.5), Vector3(3.6, 2.4, 2), stone)
-	for i in range(6):
-		var p := civic + Vector3(i * 0.75 - 1.9, 0.5, -1.35)
-		town.rod(p, p + Vector3.UP * 2.3, 0.13, stone)
-	town.box(civic + Vector3.UP * 3, Vector3(5.2, 0.4, 3.8), roof)
-	_mesh(root, town.finish(), _vertex_material())
+		var report: Dictionary = view.settlement_reports[id]
+		var key := CampaignCityModel.appearance_key(report)
+		if key == "" or (settlements.has(id) and settlements[id].key == key):
+			continue
+		if settlements.has(id):
+			settlements[id].node.queue_free()
+		var approaches: Array = []
+		var anchor := view.world_pos(view.game.data.regions[id])
+		for edge_key in view.geometry.edges:
+			var endpoints := String(edge_key).split("|")
+			if not id in endpoints or not TerrainRules.land_connection(view.game.data, endpoints[0], endpoints[1]):
+				continue
+			var local_path := PackedVector2Array()
+			for point in view.geometry.edges[edge_key]:
+				local_path.append(point - anchor)
+			approaches.append(local_path)
+		var spec := CampaignCityModel.plan(view.game.data, id, report, approaches)
+		var root := Node3D.new()
+		root.name = "Settlement_" + String(id)
+		world.add_child(root)
+		var shell := CampaignCityModel.build(spec, view.world_pos(view.game.data.regions[id]), ground)
+		if shell != null:
+			_mesh(root, shell, settlement_material)
+		settlements[id] = {"node": root, "key": key, "plan": spec, "detail": null}
 
 func _triangle(st: SurfaceTool, id: String, a: Vector2, b: Vector2, c: Vector2, depth: int) -> void:
 	var spacing := 16.0
@@ -502,12 +528,6 @@ func _build_routes() -> void:
 					continue
 				var p := ground(middle + cross * (i * 3.5 - 21))
 				structures.ellipsoid(p + Vector3.UP, Vector3(2.4, 2.5 + i % 3, 2.0), RealismModels.pigment("#747769"))
-	for region in view.visible_cache:
-		var post: Dictionary = view.game.state.get("watchposts", {}).get(region, {})
-		if post.is_empty() or not ReconRules.post_active(view.game.state, region, post):
-			continue
-		var at := ground(view.world_pos(view.game.data.regions[region]) + Vector2(-14, 10))
-		structures.box(at + Vector3.UP * 3, Vector3(2.2, 6, 2.2), RealismModels.pigment("#8b8771"))
 	if road.vertex_count > 0:
 		_mesh(routes, road.finish(), _vertex_material())
 	if water.vertex_count > 0:

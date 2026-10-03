@@ -57,9 +57,11 @@ func show_city() -> void:
 		city.shared_session = true
 		city.save_path = save_path
 		city.campaign_requested.connect(show_campaign, CONNECT_DEFERRED)
+		city.campaign_zoom_requested.connect(show_campaign_from_city, CONNECT_DEFERRED)
 		city.main_menu_requested.connect(return_to_menu, CONNECT_DEFERRED)
 		city.state_loaded.connect(_state_loaded)
 		add_child(city)
+		city.show_city_overview()
 		city.battle_panel.closed.connect(_battle_view_closed, CONNECT_DEFERRED)
 	city.process_mode = Node.PROCESS_MODE_INHERIT
 	city.show()
@@ -88,6 +90,13 @@ func show_campaign() -> void:
 	campaign.refresh()
 	if can_enter_city():
 		campaign.map_view.center_on("latium")
+
+
+func show_campaign_from_city() -> void:
+	## Crossing the aerial camera's outer limit is navigation only. The shared
+	## session stops any worker before the campaign renderer reads its state.
+	show_campaign()
+	campaign.map_view.focus_settlement("latium")
 
 
 func _state_loaded() -> void:

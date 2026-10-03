@@ -1426,6 +1426,21 @@ func known_regions(faction_id: String = "") -> Dictionary:
 	return CartographyRules.known_regions(data, state, faction_id if faction_id != "" else String(state["player_faction"]))
 
 
+func settlement_report(region_id: String) -> Dictionary:
+	return CartographyRules.settlement_report(data, state, String(state["player_faction"]), region_id)
+
+
+func settlement_reports() -> Dictionary:
+	var reports := {}
+	var faction := String(state["player_faction"])
+	var observed := visible_regions()
+	for region in known_regions():
+		var report := CartographyRules.settlement_report(data, state, faction, region, observed)
+		if not report.is_empty():
+			reports[region] = report
+	return reports
+
+
 func terrain_report(region_id: String, from_region: String = "") -> Dictionary:
 	if not known_regions().has(region_id):
 		return {}

@@ -2,6 +2,32 @@ extends RefCounted
 ## Integration contracts for the retained city, strategic map and battle host.
 ## The runner isolates user://; each test also uses its own save filename.
 
+
+func test_aerial_zoom_crosses_into_the_same_campaign_without_simulation(t) -> void:
+	var session := _session("aerial-bridge")
+	var city := session.city
+	t.check(city.overview and city.survey_camera.current, "Roma begins with an aerial view of the complete city")
+	_synchronous_signal(city, "campaign_zoom_requested")
+	var before := _canon(session.game.state)
+	city._survey_dragging = true
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_MIDDLE
+	release.pressed = false
+	release.position = Vector2(-100, -100)
+	city._input(release)
+	t.check(not city._survey_dragging, "releasing outside the city viewport ends the aerial pan")
+	city.survey_camera.size = RomaCityScreen.SURVEY_MAX
+	city.zoom_city(1.0 / MapView.ZOOM_STEP, Vector2(400, 300))
+	t.check_eq(session.active_view, "campaign", "scrolling beyond the city survey opens the surrounding map")
+	t.check_eq(session.campaign.map_view.selected_region, "latium", "the map handoff remains anchored on Roma")
+	t.check_eq(session.campaign.map_view._zoom, MapView.CITY_ZOOM, "the handoff starts with the detailed city exterior")
+	t.check(session.campaign.map_view.city_entry_button.visible, "an explicit entry command returns to owned Roma")
+	t.check_eq(_canon(session.game.state), before, "the scale transition changes no campaign or civic state")
+	session.show_city()
+	t.check(session.city == city and city.overview, "return retains the same aerial city presentation")
+	t.check_eq(_canon(session.game.state), before, "returning also preserves all rules state")
+	session.free()
+
 func _session(name: String, game: Game = null, view: String = "city") -> CampaignSession:
 	if game == null:
 		game = Game.new_campaign("senate", 42, "medium", "long", false)

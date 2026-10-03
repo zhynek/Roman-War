@@ -393,7 +393,21 @@
         "welcome_controls",
         "idle_controls",
         "post_detail",
-        "map_intro"
+        "map_intro",
+        "country",
+        "countryside",
+        "city",
+        "country_help",
+        "countryside_help",
+        "city_help",
+        "enter_city",
+        "enter_city_help",
+        "city_zoom_help",
+        "report_current",
+        "report_remembered",
+        "report_settlement",
+        "report_geography",
+        "report_forest"
       ],
       "additionalProperties": false,
       "properties": {
@@ -848,6 +862,62 @@
           "minLength": 1
         },
         "main_menu_confirm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country": {
+          "type": "string",
+          "minLength": 1
+        },
+        "countryside": {
+          "type": "string",
+          "minLength": 1
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1
+        },
+        "country_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "countryside_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "city_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enter_city": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enter_city_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "city_zoom_help": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_current": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_remembered": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_settlement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_geography": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_forest": {
           "type": "string",
           "minLength": 1
         }

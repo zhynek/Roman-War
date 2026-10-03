@@ -32,10 +32,17 @@ func open_for(current_game: Game, region_id: String) -> void:
 	if region.is_empty():
 		return
 	if not game.visible_regions().has(region_id):
-		# Fog grants the land's name and nothing else — the same line the
-		# tooltip draws, and no settlement name either.
 		_title(String(region.get("name", region_id)))
-		_line("Beyond our maps: no reports come from this land.", UiStyle.TEXT_DIM)
+		var words: Dictionary = game.data.effects_glossary.get("map_commands", {})
+		var report := game.settlement_report(region_id)
+		if not report.is_empty():
+			_line(String(words.get("report_settlement", "")).format({"name": region.get("settlement_name", region_id),
+				"owner": game.data.factions.get(report["owner"], {}).get("name", report["owner"]),
+				"level": String(report["level"]).replace("_", " "), "population": report["population"]}), UiStyle.TEXT_DIM)
+			_line(String(words.get("report_remembered", "")).format({"turn": int(report["turn"]) + 1,
+				"age": maxi(0, int(game.state["turn"]) - int(report["turn"]))}), UiStyle.TEXT_DIM)
+		else:
+			_line(String(words.get("report_geography" if game.known_regions().has(region_id) else "uncharted", "")), UiStyle.TEXT_DIM)
 		return
 	_title("%s — %s" % [String(region.get("settlement_name", region_id)),
 		String(region.get("name", ""))])

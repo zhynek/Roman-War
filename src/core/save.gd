@@ -110,6 +110,7 @@ static func _valid_state(state: Variant) -> bool:
 		"tributes": TYPE_ARRAY, "pending_offers": TYPE_ARRAY, "sites_explored": TYPE_ARRAY,
 		"agents": TYPE_DICTIONARY, "watchposts": TYPE_DICTIONARY,
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
+		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
@@ -190,6 +191,26 @@ static func _valid_state(state: Variant) -> bool:
 	for recipients in state.get("map_access", {}).values():
 		if not recipients is Array:
 			return false
+	for memory in state.get("settlement_memory", {}).values():
+		if not memory is Dictionary:
+			return false
+		for report in memory.values():
+			if not _fields(report, {"owner": TYPE_STRING, "level": TYPE_STRING,
+				"population": TYPE_FLOAT, "buildings": TYPE_ARRAY,
+				"turn": TYPE_FLOAT, "watchpost": TYPE_DICTIONARY}):
+				return false
+			if not Constants.SETTLEMENT_LEVELS.has(report["level"]) or not _whole_at_least(report["population"], 0) or not _whole_at_least(report["turn"], 0) or int(report["turn"]) > int(state["turn"]):
+				return false
+			for building in report["buildings"]:
+				if not building is String:
+					return false
+			if not _fields(report, {"construction": TYPE_ARRAY}, true):
+				return false
+			for building in report.get("construction", []):
+				if not building is String:
+					return false
+			if not report["watchpost"].is_empty() and not _fields(report["watchpost"], {"owner": TYPE_STRING, "level": TYPE_FLOAT}):
+				return false
 	return true
 
 

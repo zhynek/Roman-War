@@ -143,20 +143,39 @@ static func army(canvas: CanvasItem, at: Vector2, summary: Dictionary, color: Co
 			var offset := -direction * (7 + dust * 16) + Vector2(0, sin(i * 3.2) * 4)
 			_ellipse(canvas, at + offset, Vector2(2 + dust * 3, 1 + dust), Color(0.83, 0.75, 0.54, (1 - dust) * 0.12))
 	for i in range(count):
-		var row := i / 5
-		var col := i % 5
-		var offset := Vector2((col - 2) * 3.6, (row - 2) * 3.2)
-		if moving:
-			# Columns turn into the road and keep formation around their commander.
-			var across := Vector2(-direction.y, direction.x)
-			offset = across * ((col - 2) * 2.6) - direction * (row * 3.4 + 3)
-		var bounce := sin(phase * 11 + i * 1.7) * 0.35 if moving else 0.0
 		var kind := String(classes[i % classes.size()]) if not classes.is_empty() else "infantry"
-		_soldier(canvas, at + offset + Vector2(0, bounce), color, kind, phase + i, moving, looks[i % looks.size()] if not looks.is_empty() else {})
+		_soldier(canvas, at + soldier_offset(i, phase, moving, direction), color, kind, phase + i, moving, looks[i % looks.size()] if not looks.is_empty() else {})
 	if summary["general"] != null:
 		# The mounted commander is a recognisable leader at the head of the men.
 		_soldier(canvas, at + direction * 7 if moving else at + Vector2(8, -10), color.lightened(0.15), "commander", phase, moving, commander)
 	_flag(canvas, at + Vector2(2, -8), color, phase if moving else phase * 0.35)
+
+
+static func soldier_offset(index: int, phase: float, moving: bool, direction: Vector2) -> Vector2:
+	var row := index / 5
+	var col := index % 5
+	var offset := Vector2((col - 2) * 3.6, (row - 2) * 3.2)
+	if moving:
+		var across := Vector2(-direction.y, direction.x)
+		offset = across * ((col - 2) * 2.6) - direction * (row * 3.4 + 3)
+		offset.y += sin(phase * 11 + index * 1.7) * 0.35
+	return offset
+
+
+static func army_pick_rects(summary: Dictionary, classes: Array, phase: float, moving: bool, direction: Vector2) -> Array[Rect2]:
+	## The same figure offsets feed drawing and close picking. Empty space
+	## between a city and its camp must never become an invisible army button.
+	var result: Array[Rect2] = []
+	for i in range(clampi(int(summary["units"]) * 3, 6, 30)):
+		var kind := String(classes[i % classes.size()]) if not classes.is_empty() else "infantry"
+		var width := 6.0 if kind in ["cavalry", "general_bodyguard", "commander", "horse_archer", "elephant", "chariot"] else 2.6
+		result.append(Rect2(soldier_offset(i, phase, moving, direction) + Vector2(-width, -8), Vector2(width * 2, 10)))
+	if summary["general"] != null:
+		result.append(Rect2((direction * 7 if moving else Vector2(8, -10)) + Vector2(-6, -8), Vector2(12, 10)))
+	result.append(Rect2(Vector2(1, -23), Vector2(8, 16)))
+	if not moving:
+		result.append(Rect2(Vector2(-18, -11), Vector2(10, 15)))
+	return result
 
 
 static func _soldier(canvas: CanvasItem, at: Vector2, color: Color, kind: String, phase: float, moving: bool, look: Dictionary = {}) -> void:

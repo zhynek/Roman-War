@@ -1,6 +1,77 @@
 extends RefCounted
 
 
+func test_city_and_country_presets_preserve_campaign_and_pick_positions(t) -> void:
+	var screen := _screen()
+	var view := screen.map_view
+	var region := String(screen.game.state["armies"][screen.selected_army]["region"])
+	var before := screen.game.state.duplicate(true)
+	view.focus_settlement(region)
+	t.check_eq(screen.selected_army, "", "focusing a city cancels force selection instead of issuing a march")
+	t.check_eq(view._zoom, MapView.CITY_ZOOM, "city focus opens the architectural scale")
+	var anchor := view.world_pos(screen.game.data.regions[region])
+	t.check_near(view.to_screen(anchor).distance_to(view.size * 0.5), 0, 0.01, "settlement is centered at architectural scale")
+	for zoom in [1.0, 3.5, 12.0, 24.0, MapView.ZOOM_MAX]:
+		view.set_zoom_level(zoom)
+		t.check_eq(view._region_at(view.to_screen(anchor)), region, "the drawn city remains pickable at every scale")
+	view.apply_zoom_preset("country")
+	t.check(view._zoom <= 1.2, "country scale fits the known atlas")
+	for known in view.known_cache:
+		if view.geometry.cells.has(known):
+			var bounds: Rect2 = view.geometry.cells[known]["bounds"]
+			t.check(Rect2(Vector2.ZERO, view.size).has_point(view.to_screen(bounds.position)), "northwestern charted boundary fits country view")
+			t.check(Rect2(Vector2.ZERO, view.size).has_point(view.to_screen(bounds.end)), "southeastern charted boundary fits country view")
+	view.apply_zoom_preset("city")
+	t.check_eq(view.selected_region, region, "city scale returns to the inspected settlement")
+	t.check_eq(screen.game.state, before, "zooming and inspecting cannot advance rules, movement, time or RNG")
+	screen.free()
+
+
+func test_city_entry_is_explicit_and_only_available_for_owned_roma(t) -> void:
+	var screen := _screen()
+	var view := screen.map_view
+	view.selected_region = "latium"
+	t.check(not view.city_entry_button.visible, "foreign Roma does not offer street-level entry")
+	var requested := []
+	view.city_enter_requested.connect(func(): requested.append(true))
+	view._request_city_entry()
+	t.check(requested.is_empty(), "hidden entry command cannot request a foreign city")
+	view.set_zoom_level(MapView.ZOOM_MAX)
+	t.check(requested.is_empty(), "zooming inward never switches into another scene")
+	view._zoom_at(Vector2(100, 100), -1)
+	t.check_eq(view._zoom, MapView.ZOOM_MAX, "invalid gesture factors cannot corrupt the camera")
+	screen.free()
+
+
+func test_architectural_picking_uses_figures_and_camera_buttons_respect_modals(t) -> void:
+	var screen := _screen()
+	var view := screen.map_view
+	var id := screen.selected_army
+	view.set_zoom_level(MapView.ZOOM_MAX)
+	var scale_by := float(view.army_visuals[id].get("scale", 1))
+	var anchor := view.force_world_position(id)
+	var figure := CampaignMiniatures.soldier_offset(0, view._visual_clock, false, Vector2.RIGHT)
+	t.check(view._force_contains_point(id, view.to_screen(anchor + (figure + Vector2(0, -3)) * scale_by)), "a rendered figure can be picked at maximum zoom")
+	t.check(not view._force_contains_point(id, view.to_screen(anchor + Vector2(14, 5) * scale_by)), "empty space beside the figures no longer selects a distant army")
+	var before := screen.game.state.duplicate(true)
+	var zoom := view._zoom
+	var offset := view._camera_offset
+	var button := view._camera_button("+", "", 12, func(): view.zoom_by(0.5))
+	view.camera_input_enabled = false
+	button.pressed.emit()
+	view.apply_zoom_preset("country")
+	var overview_click := InputEventMouseButton.new()
+	overview_click.button_index = MOUSE_BUTTON_LEFT
+	overview_click.pressed = true
+	overview_click.position = Vector2(90, 55)
+	view._overview._gui_input(overview_click)
+	t.check_eq(view._zoom, zoom, "modal input barriers also cover camera buttons and scale presets")
+	t.check_eq(view._camera_offset, offset, "the overview cannot pan through a modal input barrier")
+	t.check_eq(screen.game.state, before, "blocked navigation cannot change the simulation")
+	button.free()
+	screen.free()
+
+
 func _screen() -> CampaignScreen:
 	var screen := CampaignScreen.create(Game.new_campaign("julii", 42))
 	(Engine.get_main_loop() as SceneTree).root.add_child(screen)

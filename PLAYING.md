@@ -12,6 +12,25 @@ older Roma slot.
 Roma and the campaign map now share troops, treasury, time and Save/Load.
 **Campaign map** takes you out to the Mediterranean; entering Roma brings back
 the same city visit. Returning to the main menu saves the shared campaign.
+
+Roma opens in an aerial city view. Scroll inward to inspect its streets and
+buildings; scroll outward past the city survey to reach its campaign exterior,
+then continue outward across the countryside. Middle-drag pans the aerial view.
+The map's **City / Countryside / Country** buttons frame a selected settlement,
+its surroundings, or all charted land. Wheel and pinch zoom continuously between
+0.18× and 40×. Select owned Roma and choose **Enter Roma** to return to its
+streets and governing commands. Other towns have detailed map exteriors and
+their existing settlement panels; they do not yet have walkable interiors.
+
+Campaign cities expand their wards as their government tier grows. Completed
+walls, temples, barracks, markets and farms change the miniature; the current
+construction project adds scaffolding. After your observers leave, the map keeps
+the last surveyed appearance and owner, with the survey date in the town panel.
+New troops and development require fresh observation. Watchtowers maintain
+geographic sight, while forest troops still require the existing local scouts,
+patrols or fortified-post detection. Purchased maps grant geography, not a live
+survey of another faction's towns. Camera movement never advances time.
+
 **Play the Alpine Route** remains a separate authored Julii comparison through
 forests, bridges, marshes and mountain passes, with its own retained save slot.
 
@@ -107,7 +126,7 @@ campaign runs to AD 14.
 
 Select an army's standard, or its formation in **Close view**. Your commander
 appears at the head of the men; **F** finds him and **V** switches between
-campaign and close view. Use the map's **Territories / Campaign / Close view**
+campaign and close view. Use the map's **Country / Countryside / City**
 buttons, scroll or pinch, and the geographic inset to find your way.
 
 For an immediate order, **click your army, then click a reachable province or
