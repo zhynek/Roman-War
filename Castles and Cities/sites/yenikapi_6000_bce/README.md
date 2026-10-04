@@ -7,7 +7,11 @@ Circa 6000 BCE is an approximate setting within the attested Neolithic occupatio
 not a foundation date or a claim to reconstruct the first village exactly.
 
 Open [experience/project.godot](experience/project.godot) in Godot 4.4.1,
-or use the separate **Yenikapi Early Settlement** Mac prerelease. The circa-1200
+or use the separate [Yenikapı Early Settlement 0.1.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0).
+Its verified downloads are the [Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-macOS-0.1.0.zip),
+[10 GLB models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-Models-0.1.0.zip)
+and [editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-Source-0.1.0.zip).
+The circa-1200
 Constantinople experience, its 17,561 reference plot records, Pantokrator district,
 16 architectural types, 26 landmarks and all earlier downloads remain intact.
 The prehistoric study is organized by site, without assigning a Byzantine realm

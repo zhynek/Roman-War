@@ -53,7 +53,11 @@ The universal, ad-hoc signed **0.1.0** package is frozen at
 **8.320/9.107 ms**, aerial **3.156/4.117**, street **2.647/3.427**, interior
 **2.612/3.387**. Local frame pacing varied between runs; these are observations,
 not a source/package speedup claim. Intel rendering remains untested locally.
-The independent prerelease tag is `yenikapi-early-settlement-v0.1.0`.
+The [independent prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0)
+is published. All five public downloads were fetched anonymously and matched
+local SHA-256 hashes; all three downloaded ZIPs passed integrity checks. The tag
+resolves to the frozen commit. All six earlier releases and their assets remain
+unchanged, and the latest stable release is still `v0.14.2`.
 
 ## Independent Constantinople city study
 

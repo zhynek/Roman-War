@@ -5,6 +5,23 @@ Verified October 4, 2026. The release payload is frozen at
 the results without changing those application, model or source ZIP bytes.
 The separate tag is `yenikapi-early-settlement-v0.1.0`.
 
+## Publication and downloads
+
+The [prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0)
+is public. Its tag resolves to the frozen commit above. All five actual public
+browser download URLs were downloaded anonymously after publication; GitHub's
+asset digests, local package hashes and the downloaded checksum manifest match.
+The three downloaded ZIPs pass integrity checks. The Mac archive is therefore
+byte-identical to the exact application package tested below.
+
+All six pre-existing releases retain their release IDs, prerelease flags and
+asset IDs/names/sizes/SHA-256 digests. The latest stable release remains
+`v0.14.2`; Constantinople `v0.3.0` retains all five original download assets.
+The local publication report is `verification/publication.json` in the build
+directory. The initial concurrent upload failed with a TLS transport error;
+GitHub removed the incomplete attempt. The final publication used a draft,
+sequential HTTP/1.1 uploads and digest verification before becoming public.
+
 ## Gates and preservation
 
 - Closed data schema and all **14 data regression cases** pass.
@@ -22,6 +39,11 @@ The separate tag is `yenikapi-early-settlement-v0.1.0`.
   byte for byte, including data, creative-save logic and export configuration.
 - Universal `arm64`/`x86_64` application structure and ad-hoc signature pass.
   All **10 GLB containers**, **three ZIPs** and artifact SHA-256 hashes pass.
+
+The local full-suite pass above is distinct from hosted Linux CI. The starting
+main baseline's [CI run](https://github.com/zhynek/Roman-War/actions/runs/37225845821)
+failed the existing campaign-turn speed assertion at 603 ms average. No campaign
+engine, timing threshold or CI configuration is changed by this village work.
 
 ## Render inspection
 
