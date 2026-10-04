@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "id": "replace_city_period",
+  "name": "Replace with the historical city name",
+  "realm_id": "replace_realm",
+  "study_kind": "city",
+  "status": "research_foundation",
+  "reference_year_ce": null,
+  "period_note": "Choose a specific reference year before registering this study.",
+  "categories": [],
+  "gameplay_binding": null,
+  "model_status": "not_started",
+  "georeference": {
+    "length_unit": "metre",
+    "axes": "x_east_y_north_z_up",
+    "horizontal_crs": null,
+    "vertical_datum": null,
+    "origin": null,
+    "survey_accuracy_m": null,
+    "note": "No survey established."
+  },
+  "documents": {"brief": "README.md", "atlas": "ATLAS.md", "stages": "STAGES.md", "sources": "SOURCES.md", "workplan": "WORKPLAN.md"},
+  "capabilities": [],
+  "districts": [],
+  "historical_snapshots": [],
+  "active_snapshot_id": null,
+  "creative_variants": [],
+  "open_questions": ["Establish period, sources, geographic scope and first modeling target."]
+}

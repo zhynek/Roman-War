@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "realms": [
+    {
+      "id": "byzantine_empire",
+      "name": "Byzantine Empire (Eastern Roman Empire)",
+      "political_form": "empire",
+      "brief": "realms/byzantine_empire/README.md"
+    }
+  ],
+  "studies": [
+    {
+      "id": "constantinople_1200",
+      "realm_id": "byzantine_empire",
+      "manifest": "realms/byzantine_empire/cities/constantinople_1200/study.json"
+    }
+  ]
+}

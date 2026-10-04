@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "id": "constantinople_1200",
+  "name": "Constantinople",
+  "realm_id": "byzantine_empire",
+  "study_kind": "city",
+  "status": "research_foundation",
+  "reference_year_ce": 1200,
+  "period_note": "Circa 1200 CE, before the fires and sack of 1203–1204; each asset requires period-specific evidence.",
+  "categories": ["imperial_capital", "fortified_maritime_city", "religious_center", "trade_and_craft_hub"],
+  "gameplay_binding": null,
+  "model_status": "not_started",
+  "georeference": {
+    "length_unit": "metre",
+    "axes": "x_east_y_north_z_up",
+    "horizontal_crs": null,
+    "vertical_datum": null,
+    "origin": null,
+    "survey_accuracy_m": null,
+    "note": "No measured base map or survey control has been acquired. Unknown values are not zero."
+  },
+  "documents": {
+    "brief": "README.md",
+    "atlas": "ATLAS.md",
+    "stages": "STAGES.md",
+    "sources": "SOURCES.md",
+    "workplan": "WORKPLAN.md"
+  },
+  "capabilities": [
+    {"id": "maritime_exchange", "name": "Maritime exchange", "physical_requirements": "Landing places, shore access, storage, handling yards and routes inland; no numerical throughput assigned."},
+    {"id": "fortified_access", "name": "Fortified access", "physical_requirements": "Dated wall sectors, gates, approaches, circulation and repair access; no defensive bonus assigned."},
+    {"id": "imperial_administration", "name": "Imperial administration", "physical_requirements": "Audience, residential, service, guarded access and ceremonial spaces researched by precinct."},
+    {"id": "religious_life", "name": "Religious and communal life", "physical_requirements": "Church precincts and associated circulation and service spaces; exact functions need asset evidence."},
+    {"id": "water_storage_distribution", "name": "Water storage and distribution", "physical_requirements": "Supply, gradients, cisterns and access; operating condition and connections in 1200 remain open."},
+    {"id": "craft_and_provisioning", "name": "Craft and provisioning", "physical_requirements": "Production, storage, sale, fuel, water and waste spaces; locate specific crafts only when supported."},
+    {"id": "domestic_life", "name": "Domestic life", "physical_requirements": "Diverse dwellings, yards, thresholds and service access; density and household counts remain unknown."}
+  ],
+  "districts": [
+    {"id": "cathedral_hippodrome", "name": "Hagia Sophia–Hippodrome precinct", "priority": "first", "capability_ids": ["religious_life", "imperial_administration"], "source_ids": ["met_hagia_sophia", "met_deesis", "uchicago_hippodrome"], "geometry_status": "not_modeled"},
+    {"id": "great_palace_marmara", "name": "Great Palace and Marmara edge", "priority": "later", "capability_ids": ["imperial_administration", "maritime_exchange"], "source_ids": ["westbrook_great_palace", "uchicago_hippodrome"], "geometry_status": "not_modeled"},
+    {"id": "golden_horn_waterfront", "name": "Golden Horn waterfront", "priority": "next", "capability_ids": ["maritime_exchange", "craft_and_provisioning"], "source_ids": ["schreiner_landing_stages", "preiser_kapeller_moorings"], "geometry_status": "not_modeled"},
+    {"id": "blachernae", "name": "Blachernae palace and defenses", "priority": "later", "capability_ids": ["imperial_administration", "fortified_access"], "source_ids": ["westbrook_great_palace", "columbia_land_walls"], "geometry_status": "not_modeled"},
+    {"id": "land_walls", "name": "Land-wall corridor and gates", "priority": "next", "capability_ids": ["fortified_access"], "source_ids": ["columbia_land_walls"], "geometry_status": "not_modeled"},
+    {"id": "water_network", "name": "Water infrastructure transect", "priority": "next", "capability_ids": ["water_storage_distribution"], "source_ids": ["ward_crow_crapper_water"], "geometry_status": "not_modeled"},
+    {"id": "inhabited_wards", "name": "Residential and monastic wards", "priority": "later", "capability_ids": ["domestic_life", "religious_life"], "source_ids": ["ousterhout_secular"], "geometry_status": "not_modeled"},
+    {"id": "commercial_routes", "name": "Commercial routes and workshop plots", "priority": "later", "capability_ids": ["craft_and_provisioning", "maritime_exchange", "domestic_life"], "source_ids": ["fhw_book_eparch", "ousterhout_secular", "schreiner_landing_stages"], "geometry_status": "not_modeled"}
+  ],
+  "historical_snapshots": [
+    {"id": "constantinople_330_ce", "label": "Circa 330 — imperial foundation", "year_ce": 330, "status": "research_outline", "source_ids": ["met_byzantium", "uchicago_hippodrome"]},
+    {"id": "constantinople_565_ce", "label": "Circa 565 — after the 562 dome rebuilding", "year_ce": 565, "status": "research_outline", "source_ids": ["met_hagia_sophia", "ward_crow_crapper_water"]},
+    {"id": "constantinople_1100_ce", "label": "Circa 1100 — changing court and waterfront geography", "year_ce": 1100, "status": "research_outline", "source_ids": ["westbrook_great_palace", "schreiner_landing_stages", "ousterhout_secular"]},
+    {"id": "constantinople_1200_ce", "label": "Circa 1200 — primary historical reference", "year_ce": 1200, "status": "active_reference", "source_ids": ["ashmolean_alexios_iii", "met_byzantium", "columbia_land_walls", "met_hagia_sophia"]}
+  ],
+  "active_snapshot_id": "constantinople_1200_ce",
+  "creative_variants": [],
+  "open_questions": [
+    "Acquire a usable measured and dated geographic base with known rights, control points and vertical datum.",
+    "Establish the circa-1200 shoreline rather than tracing today's reclaimed coast.",
+    "Resolve precinct street levels, monument alterations and supported roof forms.",
+    "Establish which Great Palace buildings remained in use and in what condition.",
+    "Obtain fuller evidence for Blachernae geometry and gate/tower phases.",
+    "Research ordinary housing, plots, vegetation, workshops and infrastructure in each district.",
+    "Leave population, household counts, production rates and detailed capacities unset until supported."
+  ]
+}

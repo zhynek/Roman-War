@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:roman-war:city-studies:catalog:v1",
+  "title": "Independent city-study catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "realms", "studies"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "realms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "political_form", "brief"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"$ref": "#/$defs/text"},
+          "political_form": {"$ref": "#/$defs/id"},
+          "brief": {"$ref": "#/$defs/local_path"}
+        }
+      }
+    },
+    "studies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "realm_id", "manifest"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "realm_id": {"$ref": "#/$defs/id"},
+          "manifest": {"$ref": "#/$defs/local_path"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "local_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[\\\\:])[A-Za-z0-9_. -]+(?:/[A-Za-z0-9_. -]+)*$",
+      "description": "Relative workspace file path. The validator also checks resolved containment and existence."
+    }
+  }
+}

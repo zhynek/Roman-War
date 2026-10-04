@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:roman-war:city-studies:study:v1",
+  "title": "Independent historical city, settlement or castle study",
+  "description": "Authoring metadata only; no campaign rules, effects, costs or statistics are accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "name", "realm_id", "study_kind", "status", "reference_year_ce", "period_note", "categories", "gameplay_binding", "model_status", "georeference", "documents", "capabilities", "districts", "historical_snapshots", "active_snapshot_id", "creative_variants", "open_questions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"$ref": "#/$defs/id"},
+    "name": {"$ref": "#/$defs/text"},
+    "realm_id": {"$ref": "#/$defs/id"},
+    "study_kind": {"enum": ["castle", "settlement", "city"]},
+    "status": {"enum": ["research_foundation", "blockout", "detailed_model", "reviewed"]},
+    "reference_year_ce": {"$ref": "#/$defs/year_ce"},
+    "period_note": {"$ref": "#/$defs/text"},
+    "categories": {"$ref": "#/$defs/ids", "minItems": 1},
+    "gameplay_binding": {"const": null},
+    "model_status": {"enum": ["not_started", "blockout", "detailed_model", "reviewed"]},
+    "georeference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length_unit", "axes", "horizontal_crs", "vertical_datum", "origin", "survey_accuracy_m", "note"],
+      "properties": {
+        "length_unit": {"const": "metre"},
+        "axes": {"const": "x_east_y_north_z_up"},
+        "horizontal_crs": {"anyOf": [{"$ref": "#/$defs/text"}, {"type": "null"}]},
+        "vertical_datum": {"anyOf": [{"$ref": "#/$defs/text"}, {"type": "null"}]},
+        "origin": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label", "coordinates", "note"],
+              "properties": {
+                "label": {"$ref": "#/$defs/text"},
+                "coordinates": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+                "note": {"$ref": "#/$defs/text"}
+              }
+            }
+          ]
+        },
+        "survey_accuracy_m": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "note": {"$ref": "#/$defs/text"}
+      }
+    },
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brief", "atlas", "stages", "sources", "workplan"],
+      "properties": {
+        "brief": {"$ref": "#/$defs/local_path"},
+        "atlas": {"$ref": "#/$defs/local_path"},
+        "stages": {"$ref": "#/$defs/local_path"},
+        "sources": {"$ref": "#/$defs/local_path"},
+        "workplan": {"$ref": "#/$defs/local_path"}
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "physical_requirements"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"$ref": "#/$defs/text"},
+          "physical_requirements": {"$ref": "#/$defs/text"}
+        }
+      }
+    },
+    "districts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "priority", "capability_ids", "source_ids", "geometry_status"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"$ref": "#/$defs/text"},
+          "priority": {"enum": ["first", "next", "later"]},
+          "capability_ids": {"$ref": "#/$defs/ids"},
+          "source_ids": {"$ref": "#/$defs/ids", "minItems": 1},
+          "geometry_status": {"enum": ["not_modeled", "blockout", "detailed_model", "reviewed"]}
+        }
+      }
+    },
+    "historical_snapshots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "year_ce", "status", "source_ids"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "label": {"$ref": "#/$defs/text"},
+          "year_ce": {"$ref": "#/$defs/year_ce"},
+          "status": {"enum": ["research_outline", "active_reference"]},
+          "source_ids": {"$ref": "#/$defs/ids", "minItems": 1}
+        }
+      }
+    },
+    "active_snapshot_id": {"$ref": "#/$defs/id"},
+    "creative_variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "base_snapshot_id", "brief", "historical_status"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "name": {"$ref": "#/$defs/text"},
+          "base_snapshot_id": {"$ref": "#/$defs/id"},
+          "brief": {"$ref": "#/$defs/local_path"},
+          "historical_status": {"const": "creative"}
+        }
+      }
+    },
+    "open_questions": {"type": "array", "items": {"$ref": "#/$defs/text"}, "uniqueItems": true}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "ids": {"type": "array", "items": {"$ref": "#/$defs/id"}, "uniqueItems": true},
+    "year_ce": {"type": "integer", "not": {"const": 0}, "description": "CE year; negative numbers denote BCE. Historical dates have no year zero."},
+    "local_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[\\\\:])[A-Za-z0-9_. -]+(?:/[A-Za-z0-9_. -]+)*$",
+      "description": "Relative file path contained within this study's directory, including after symlink resolution."
+    }
+  }
+}
