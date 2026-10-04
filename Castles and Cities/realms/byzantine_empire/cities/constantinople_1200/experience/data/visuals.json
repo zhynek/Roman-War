@@ -1,0 +1,28 @@
+{
+  "terrain_grid_m": 46.0,
+  "chunk_size_m": 700.0,
+  "detail_distance_m": 950.0,
+  "ocean_extent_m": 42000.0,
+  "road_sample_m": 15.0,
+  "population_spacing_m": 31.0,
+  "tree_detail_distance_m": 1100.0,
+  "prototype_count": 6,
+  "palette": {
+    "stone": "b6a887",
+    "brick": "946955",
+    "roof": "96654d",
+    "plaster": "c9b899",
+    "wood": "69503a",
+    "gold": "b29247",
+    "water": "316d73",
+    "dark": "302e29",
+    "glass": "626a60",
+    "green": "536046",
+    "lead": "767770",
+    "road": "9e9378",
+    "ground": "7a8060",
+    "linen": "d0c2a0",
+    "skin": "a07a5e"
+  },
+  "note": "Original procedural surface and instance budgets; illustrative authoring parameters, not surveyed historical measurements or campaign balance."
+}

@@ -5,8 +5,9 @@ capital. We will not label it a village simply to make a progression ladder work
 
 ## Historical snapshots
 
-These are separately dated reconstruction scopes, not completed maps. Only 1200
-is the active reference; the others are research outlines. See the source IDs
+These are separately dated reconstruction scopes. Only 1200 has a rendered
+interpretive model and is the active reference; the others remain research
+outlines, without modeled historical snapshots. See the source IDs
 and dates in [study.json](study.json) and [SOURCES.md](SOURCES.md).
 
 | Snapshot | Visual questions to resolve | Guard against |
@@ -23,23 +24,29 @@ as increasing building count. Do not assume uninterrupted growth between dates.
 
 ## Creative growth studies
 
-These are **hypothetical future authoring scenarios**, not claims about the
-historical city's development. Create them under [variants/](variants/README.md)
-without overwriting the 1200 baseline. They let us explore the sort of visible
-development the owner wants before assigning gameplay rules.
+The experience implements three selectable visual states. The IDs below
+are runtime authoring IDs; `reference_1200` corresponds to the research snapshot
+`constantinople_1200_ce`. The other two are **hypothetical**, with no assigned
+historical date. They are documented under [variants/](variants/README.md).
 
-| Design state | Visible changes to author | Continuity to preserve |
+| Runtime state | Current visible behavior | Continuity |
 |---|---|---|
-| G0 — historical reference | The reviewed district as it stood in the selected baseline | Source record, dated fabric and uncertainties |
-| G1 — repair and service | Repaired surfaces, restored roofs, better water/service access, occupied vacant structures where deliberately proposed | Existing street and monument identity |
-| G2 — district expansion | New plots, workshops/storage, added dwellings and supporting access outside the retained core | Plausible terrain, water, delivery routes and historical boundaries identified as changed |
-| G3 — civic reconstruction | A deliberately redesigned administrative precinct, larger public spaces or a new defense/harbor project | Explicit demolition, relocation, construction space and retained older landmarks |
+| `reference_1200` — Constantinople · 1200 | Dated interpretive city and its documented uncertainty | Source record and stable modeled objects |
+| `serviced` — Serviced city | Additional occupied plots within the same authoring wards | Every baseline house retains its ID, position, dimensions and appearance |
+| `expanded` — Expanded city | Further infill over the same city framework | Existing landmarks, principal streets and baseline houses remain |
 
-G1–G3 can be rejected, branched or designed differently. There are no population
-thresholds, construction costs, unlocks, time advancement or building effects in
-these records. A town-hall-style progression in another city can use its own
-cultural institutions; Constantinople's growth should not be expressed solely
-by enlarging one hall.
+“Serviced” is a creative design label; the current implementation adds visual
+infill, without calculating a working water network, repair schedule or capacity.
+“Expanded” currently increases occupation within the authoring wards; it does
+not attest a later historic wall circuit or a dated suburban expansion. Further
+harbor projects, civic rebuilding and changes to institutions can be authored
+as explicit variants. The workshop supplies placeable design objects for such
+experiments and keeps their saved data separate from the baseline.
+
+There are no population thresholds, construction costs, unlocks, time advancement
+or campaign effects in these states. A town-hall-style progression in another
+city can use its own cultural institutions; Constantinople's growth should not
+be expressed solely by enlarging one hall.
 
 ## What to compare at each stage
 

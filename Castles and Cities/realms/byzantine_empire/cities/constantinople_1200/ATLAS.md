@@ -16,7 +16,13 @@ roads and calling them medieval.
 
 The first geographic deliverable is a plan with a declared projection, scale,
 north direction and evidence overlay. Known anchors, inferred extents and
-unresolved ground must be distinguishable. No such plan has been produced yet.
+unresolved ground must be distinguishable. The standalone experience now has a
+plan view of an original, local-metre layout. Its approximate coastline, heights
+and generated parcels do not supply a measured geographic base or a cadastral
+evidence overlay. The work packages below describe the next research upgrades
+to this existing model; “first artifact” means the first evidence-led deliverable
+for that package. Research districts overlap and do not correspond one-to-one
+with the eight non-overlapping procedural housing wards in `experience/data/city.json`.
 
 ## 1. Hagia Sophia–Hippodrome precinct
 

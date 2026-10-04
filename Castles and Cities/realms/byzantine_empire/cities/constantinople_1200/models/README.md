@@ -1,7 +1,19 @@
 # Original model source
 
-No geometry has been authored yet. This directory will hold original parametric
-model source and reviewed dimension schedules for this city. Follow the workspace
+Original editable model source now lives in the standalone
+[experience](../experience/project.godot):
+
+- [city.json](../experience/data/city.json) contains site, ward, route, landmark,
+  dimension and evidence parameters.
+- [layout.gd](../experience/src/layout.gd) creates deterministic plots and terrain.
+- [geometry.gd](../experience/src/geometry.gd) and
+  [landmarks.gd](../experience/src/landmarks.gd) build original architectural meshes.
+- [export_models.gd](../experience/tools/export_models.gd) exports the city and
+  individual landmarks as GLB derivatives with neutral materials and provenance.
+
+These are procedural mesh sources, not a surveyed or constraint-based CAD solid
+model. This directory remains the place for future measured dimension schedules
+and higher-precision CAD assemblies. Follow the workspace
 [modeling guide](../../../../../MODELING.md).
 
 Suggested organization as work is produced:

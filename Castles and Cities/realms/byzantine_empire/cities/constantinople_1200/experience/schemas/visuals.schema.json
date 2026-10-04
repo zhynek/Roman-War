@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roman-war.local/constantinople/visuals.schema.json",
+  "title": "Standalone city procedural presentation budgets",
+  "description": "Original presentation configuration. Bounds limit unreasonable mesh/instance settings; they are not historical dimensions or a frame-rate guarantee.",
+  "type": "object",
+  "properties": {
+    "terrain_grid_m": {
+      "type": "number",
+      "minimum": 20,
+      "maximum": 160
+    },
+    "chunk_size_m": {
+      "type": "number",
+      "minimum": 100,
+      "maximum": 2000
+    },
+    "detail_distance_m": {
+      "type": "number",
+      "minimum": 100,
+      "maximum": 5000
+    },
+    "ocean_extent_m": {
+      "type": "number",
+      "minimum": 12000,
+      "maximum": 100000
+    },
+    "road_sample_m": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 60
+    },
+    "population_spacing_m": {
+      "type": "number",
+      "minimum": 8,
+      "maximum": 200
+    },
+    "tree_detail_distance_m": {
+      "type": "number",
+      "minimum": 100,
+      "maximum": 5000
+    },
+    "prototype_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "palette": {
+      "type": "object",
+      "properties": {
+        "stone": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "brick": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "roof": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "plaster": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "wood": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "gold": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "water": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "dark": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "glass": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "green": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "lead": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "road": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "ground": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "linen": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        },
+        "skin": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": [
+        "stone",
+        "brick",
+        "roof",
+        "plaster",
+        "wood",
+        "gold",
+        "water",
+        "dark",
+        "glass",
+        "green",
+        "lead",
+        "road",
+        "ground",
+        "linen",
+        "skin"
+      ],
+      "additionalProperties": false
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    }
+  },
+  "required": [
+    "terrain_grid_m",
+    "chunk_size_m",
+    "detail_distance_m",
+    "ocean_extent_m",
+    "road_sample_m",
+    "population_spacing_m",
+    "tree_detail_distance_m",
+    "prototype_count",
+    "palette",
+    "note"
+  ],
+  "additionalProperties": false
+}

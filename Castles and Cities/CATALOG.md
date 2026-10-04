@@ -2,7 +2,7 @@
 
 | Realm | Study | Date | Categories | Current artifact |
 |---|---|---|---|---|
-| Byzantine Empire (Eastern Roman Empire) | [Constantinople](realms/byzantine_empire/cities/constantinople_1200/README.md) | circa 1200 CE | Imperial capital; fortified maritime city; religious center; trade and craft hub | Research foundation and modeling briefs |
+| Byzantine Empire (Eastern Roman Empire) | [Constantinople](realms/byzantine_empire/cities/constantinople_1200/README.md) | circa 1200 CE | Imperial capital; fortified maritime city; religious center; trade and craft hub | Standalone procedural 3D experience; historical study and editable creative variants |
 
 The existing [Roma city data](../data/roma_city.json) remains in the running game.
 It is an interpretive Roman district, not a measured historical city; it has not

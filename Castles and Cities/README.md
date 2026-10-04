@@ -5,15 +5,19 @@ An independent city-design workspace for Roman War. Start with
 historically defensible, eventually hyper-realistic city: terrain, streets,
 buildings, interiors, infrastructure and everyday occupation, not just a skyline.
 
-This folder establishes the research and authoring foundation. **It does not yet
-contain a finished CAD model, a 3D city, or a renderer.** The first modeling task
-is defined in the city's work plan. No new playable faction, campaign map,
-balance rule or save field has been introduced.
+This folder now contains an **explorable, original procedural 3D study of
+Constantinople circa 1200**, in its own Godot project. It includes city-wide terrain
+and urban fabric, detailed landmark assemblies, architectural inspection, visual
+stages, a creative workshop and a GLB export tool. Historical identities inform
+the scene; most footprints, streets, terrain, interiors and ordinary buildings
+remain interpretive. This is not a surveyed reconstruction or a constraint-based
+CAD model. No new playable faction, campaign rule or save field is introduced.
 
 ## Start here
 
 | Resource | Use |
 |---|---|
+| [Standalone city project](realms/byzantine_empire/cities/constantinople_1200/experience/project.godot) | Open the independent 3D experience in Godot 4.4 |
 | [City catalog](CATALOG.md) | Find cities by realm, period and design role |
 | [Constantinople brief](realms/byzantine_empire/cities/constantinople_1200/README.md) | Understand the selected city and reconstruction boundary |
 | [District atlas](realms/byzantine_empire/cities/constantinople_1200/ATLAS.md) | Work on one district and its physical capabilities |
@@ -37,11 +41,13 @@ Castles and Cities/
       cities/constantinople_1200/
         study.json                     # period, district and stage inventory
         README.md / ATLAS.md / STAGES.md / SOURCES.md / WORKPLAN.md
-        models/README.md                # future original parametric source
-        variants/README.md              # future creative alternatives
+        experience/                    # standalone Godot app and editable source
+          data/ / schemas/ / src/ / tools/
+        models/README.md                # model/export map and future CAD schedules
+        variants/README.md              # creative stage and workshop conventions
 ```
 
-Each city owns its research, model source, review notes and future variants.
+Each city owns its research, model source, review notes and creative variants.
 `realm_id` is a research grouping, not a Roman War faction ID. The structure
 supports kingdoms, empires and independent city-states without forcing them into
 one political form. A castle can be its own study or an assembly within a city.
@@ -55,8 +61,9 @@ evidence for its medieval roof, furnishings or adjacent houses.
 
 Creative studies start as separately named variants of a baseline. They carry a
 change ledger, including the reason for each addition or redesign. The baseline
-remains available for comparison. This is an authoring organization now; an
-interactive creative-mode editor remains future work.
+remains available for comparison. Constantinople has two built-in hypothetical
+infill stages and an interactive workshop for placing, transforming and saving
+original design objects. These are independent city-study tools.
 
 Development stages describe visible city fabric: retained streets, new wards,
 repaired walls, water access, larger institutions and changed densities. Historical
@@ -67,7 +74,9 @@ gameplay bonuses.
 ## Independence from the game
 
 The repository's [architecture contract](../CLAUDE.md) remains authoritative.
-The `.gdignore` marker keeps this workspace outside Godot's resource import.
+The `.gdignore` marker keeps this workspace outside the parent game's Godot
+resource import. The city experience has its own `project.godot`, scene and
+application storage; open that project directly to run it.
 The campaign's explicit content loader does not load these files. The modern
 playtest packager copies selected runtime directories; the older realism preview
 packager can copy the workspace as source, so do not treat `.gdignore` as a
@@ -94,5 +103,7 @@ python3 "Castles and Cities/tools/validate_studies.py"
 
 This checks the catalog, study metadata, local file references and source/stage/
 district relationships. It cannot certify historical truth or geometric accuracy.
-These design-only files do not require starting Godot. Any later runtime/map
-integration must pass all gates in the repository's `AGENTS.md`.
+The standalone app also has its own data, determinism and geometric-exclusion
+checks in `experience/tools/validate_city.py`; pass `--godot /path/to/godot` to
+exercise its generator. Inspect actual city renders separately. Any later
+campaign/map integration must pass every gate in the repository's `AGENTS.md`.

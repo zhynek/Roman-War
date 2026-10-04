@@ -6,9 +6,12 @@ layouts, editable architectural components and visual growth stages. It follows
 on image files in the repository. It does not change the campaign, create a new
 playable faction, or connect a city to construction, combat or saves.
 
-**No finished model or renderer is supplied yet.** The conventions below define
-how to author and review future work. They do not claim that CAD conversion,
-mesh export, rendering or gameplay integration has been implemented.
+**Constantinople now has an independent procedural model and interactive
+renderer.** Its editable parameters and original mesh generators live in
+[experience/](realms/byzantine_empire/cities/constantinople_1200/experience/).
+A GLB export tool produces viewing derivatives. Constraint-based CAD solids,
+survey accuracy and completed historical verification are still outstanding;
+the standards below guide further refinement.
 
 ## What historical realism means
 
@@ -39,7 +42,7 @@ in the horizontal XY plane and elevations along Z. Name dimensions by meaning,
 such as `wall_thickness_m` or `springing_height_m`, rather than ambiguous scale
 factors.
 
-A future Godot adapter maps an authoring point `[x, y, z]` to `[x, z, -y]`:
+The standalone Godot adapter maps an authoring point `[x, y, z]` to `[x, z, -y]`:
 Godot +X remains east, +Y becomes up and -Z becomes north. Apply the same basis
 change consistently to geometry, normals, orientations and any inspection or
 picking geometry. Do not manually swap coordinates in individual assets. Keep
@@ -109,8 +112,8 @@ surfaces and irregular masonry may need a different representation from their
 structural CAD source. Record the conversion and simplifications, and regenerate
 derivatives when their source changes.
 
-**glTF is a possible scene and mesh interchange format, not the archival CAD
-source.** A triangulated export cannot stand in for editable dimensions, solid
+**The supplied GLB exports are scene and mesh interchange files, not archival
+CAD source.** A triangulated export cannot stand in for editable dimensions, solid
 construction or historical evidence. Do not promise lossless round trips between
 CAD, a DCC tool and Godot.
 
@@ -141,13 +144,12 @@ changes:
    mortar, brick, plaster, timber, metal and roofing treatments. Explain why
    weathering, repairs, soot, moisture and wear occur where they do.
 
-A proposed first detailed district is the **Hagia Sophia–Hippodrome area of
-Constantinople**. Begin with a dated relationship study of the two landmarks,
-their approaches, surrounding open spaces and selected neighboring structures.
-Choose a bounded precinct for the first detailed pass after checking source
-coverage. This is a proposed research focus, not a claim that an accurate plan
-or complete district model already exists. Do not combine features from
-different historical phases simply because they appear together in modern
+The next evidence-led refinement focuses on the **Hagia Sophia–Hippodrome area
+of Constantinople**. The current experience already models its principal forms
+and interpreted spaces. Refine it through a dated relationship study of the
+landmarks, approaches, street levels and neighboring structures. A visually
+detailed precinct is not proof of an accurate medieval plan. Do not combine
+features from different historical phases simply because they appear together in modern
 photographs or plans.
 
 The wall bay test can proceed as a separate, small assembly study while the
@@ -200,7 +202,7 @@ uniform random noise.
 
 ## Visual review and completion criteria
 
-Review an actual render or interactive view when a rendering route exists.
+Review the actual city renderer and exported meshes after relevant changes.
 Code inspection alone cannot establish the appearance of a city. Keep camera,
 stage and lighting metadata with external QA captures so comparisons can be
 reproduced. At minimum, inspect:

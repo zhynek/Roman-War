@@ -1,0 +1,2143 @@
+{
+  "schema_version": 1,
+  "id": "constantinople_1200",
+  "title": "Constantinople \u00b7 circa 1200",
+  "subtitle": "An independent city experience",
+  "reference_year_ce": 1200,
+  "approximation_notice": "Original interpretive reconstruction. Landmark identities follow sources; coastline, relief, street plots, ordinary buildings and many monument dimensions are authored approximations. No survey accuracy, complete historical reconstruction, population or economic simulation is claimed.",
+  "coordinate_system": {
+    "axes": "east_north_up",
+    "units": "metres",
+    "origin_name": "Hagia Sophia vicinity",
+    "modern_anchor_latitude_deg": 41.0086666667,
+    "modern_anchor_longitude_deg": 28.9801666667,
+    "source_id": "asce_hagia_sophia",
+    "surveyed": false
+  },
+  "site": {
+    "boundary_m": [
+      [
+        -6700,
+        -2350
+      ],
+      [
+        -5650,
+        -2110
+      ],
+      [
+        -4750,
+        -1890
+      ],
+      [
+        -3650,
+        -1730
+      ],
+      [
+        -2650,
+        -1520
+      ],
+      [
+        -1760,
+        -1360
+      ],
+      [
+        -800,
+        -1120
+      ],
+      [
+        170,
+        -955
+      ],
+      [
+        650,
+        -600
+      ],
+      [
+        830,
+        -60
+      ],
+      [
+        830,
+        650
+      ],
+      [
+        580,
+        1120
+      ],
+      [
+        120,
+        1370
+      ],
+      [
+        -740,
+        1570
+      ],
+      [
+        -1560,
+        1830
+      ],
+      [
+        -2360,
+        2180
+      ],
+      [
+        -3090,
+        2640
+      ],
+      [
+        -3700,
+        3210
+      ],
+      [
+        -4260,
+        3650
+      ],
+      [
+        -6700,
+        4200
+      ]
+    ],
+    "hills": [
+      {
+        "position_m": [
+          0,
+          280
+        ],
+        "height_m": 37,
+        "radius_m": 840
+      },
+      {
+        "position_m": [
+          -880,
+          260
+        ],
+        "height_m": 49,
+        "radius_m": 1000
+      },
+      {
+        "position_m": [
+          -1800,
+          570
+        ],
+        "height_m": 59,
+        "radius_m": 1050
+      },
+      {
+        "position_m": [
+          -3080,
+          1050
+        ],
+        "height_m": 69,
+        "radius_m": 1200
+      },
+      {
+        "position_m": [
+          -3730,
+          2050
+        ],
+        "height_m": 64,
+        "radius_m": 1000
+      },
+      {
+        "position_m": [
+          -4400,
+          2650
+        ],
+        "height_m": 67,
+        "radius_m": 950
+      },
+      {
+        "position_m": [
+          -4030,
+          -550
+        ],
+        "height_m": 57,
+        "radius_m": 1250
+      }
+    ],
+    "sea_level_m": 0,
+    "base_height_m": 4,
+    "coast_falloff_m": 130,
+    "western_land_edge_m": -6700,
+    "generation": {
+      "seed": 12001003,
+      "max_buildings": 40000,
+      "max_trees": 4200,
+      "tree_attempts": 10500,
+      "coast_clearance_m": 26,
+      "road_setback_m": 3,
+      "wall_setback_m": 15,
+      "landmark_margin_m": 22,
+      "house_gap_m": 1.3,
+      "lane_every_x": 8,
+      "lane_every_y": 9,
+      "lane_width_m": 4.5
+    },
+    "context_land": [
+      {
+        "id": "galata_north_shore",
+        "name": "Galata and the northern European shore",
+        "polygon_m": [
+          [
+            -6700,
+            4600
+          ],
+          [
+            -4600,
+            4350
+          ],
+          [
+            -3820,
+            4030
+          ],
+          [
+            -3100,
+            3440
+          ],
+          [
+            -2220,
+            2930
+          ],
+          [
+            -1450,
+            2600
+          ],
+          [
+            -740,
+            2310
+          ],
+          [
+            120,
+            2110
+          ],
+          [
+            650,
+            2120
+          ],
+          [
+            1120,
+            2380
+          ],
+          [
+            1450,
+            2860
+          ],
+          [
+            1750,
+            3650
+          ],
+          [
+            2400,
+            5200
+          ],
+          [
+            3700,
+            9000
+          ],
+          [
+            -6700,
+            9000
+          ]
+        ],
+        "base_height_m": 7,
+        "coast_falloff_m": 170,
+        "hills": [
+          {
+            "position_m": [
+              -300,
+              3700
+            ],
+            "height_m": 95,
+            "radius_m": 1900
+          },
+          {
+            "position_m": [
+              -2900,
+              4700
+            ],
+            "height_m": 110,
+            "radius_m": 1700
+          },
+          {
+            "position_m": [
+              1800,
+              6300
+            ],
+            "height_m": 125,
+            "radius_m": 2400
+          }
+        ],
+        "evidence": "Broad geography only: Galata lies across the Golden Horn and Asia across the Bosphorus. This polygon, relief and vegetated silhouette are original approximate authoring values, not a coastline survey or a reconstructed 1200 settlement. No modern skyline is represented.",
+        "source_ids": [
+          "columbia_geography",
+          "walters_galata_view"
+        ]
+      },
+      {
+        "id": "asian_bosphorus_shore",
+        "name": "Asian shore beyond the Bosphorus",
+        "polygon_m": [
+          [
+            4500,
+            -6000
+          ],
+          [
+            3200,
+            -3700
+          ],
+          [
+            2900,
+            -2100
+          ],
+          [
+            3050,
+            -550
+          ],
+          [
+            2800,
+            500
+          ],
+          [
+            2950,
+            1900
+          ],
+          [
+            3450,
+            3000
+          ],
+          [
+            4000,
+            3850
+          ],
+          [
+            4200,
+            5600
+          ],
+          [
+            5000,
+            9000
+          ],
+          [
+            10000,
+            9000
+          ],
+          [
+            10000,
+            -6000
+          ]
+        ],
+        "base_height_m": 8,
+        "coast_falloff_m": 220,
+        "hills": [
+          {
+            "position_m": [
+              4700,
+              -2500
+            ],
+            "height_m": 100,
+            "radius_m": 1800
+          },
+          {
+            "position_m": [
+              5100,
+              1100
+            ],
+            "height_m": 140,
+            "radius_m": 2200
+          },
+          {
+            "position_m": [
+              6500,
+              5000
+            ],
+            "height_m": 185,
+            "radius_m": 2700
+          }
+        ],
+        "evidence": "Broad geography only: Galata lies across the Golden Horn and Asia across the Bosphorus. This polygon, relief and vegetated silhouette are original approximate authoring values, not a coastline survey or a reconstructed 1200 settlement. No modern skyline is represented.",
+        "source_ids": [
+          "columbia_geography"
+        ]
+      }
+    ]
+  },
+  "roads": [
+    {
+      "id": "mese",
+      "points_m": [
+        [
+          -5449.864,
+          -1594.405
+        ],
+        [
+          -5384.916,
+          -1597.003
+        ],
+        [
+          -5339.952,
+          -1598.802
+        ],
+        [
+          -5255.02,
+          -1602.199
+        ],
+        [
+          -4490,
+          -920
+        ],
+        [
+          -3650,
+          -550
+        ],
+        [
+          -2780,
+          -330
+        ],
+        [
+          -2100,
+          -150
+        ],
+        [
+          -1480,
+          -95
+        ],
+        [
+          -795,
+          -140
+        ],
+        [
+          -190,
+          -160
+        ],
+        [
+          80,
+          -110
+        ]
+      ],
+      "width_m": 23,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored. The gate approach crosses both authored wall lines perpendicular to the modeled portal; its alignment is interpretive."
+    },
+    {
+      "id": "northern_branch",
+      "points_m": [
+        [
+          -2780,
+          -330
+        ],
+        [
+          -2900,
+          620
+        ],
+        [
+          -3120,
+          1160
+        ],
+        [
+          -3770,
+          1900
+        ],
+        [
+          -4380,
+          2570
+        ],
+        [
+          -4260,
+          3120
+        ]
+      ],
+      "width_m": 18,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "golden_horn_shore",
+      "points_m": [
+        [
+          580,
+          1110
+        ],
+        [
+          -520,
+          1300
+        ],
+        [
+          -1450,
+          1620
+        ],
+        [
+          -2180,
+          1920
+        ],
+        [
+          -3000,
+          2450
+        ],
+        [
+          -3670,
+          3000
+        ],
+        [
+          -4250,
+          3350
+        ]
+      ],
+      "width_m": 16,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "marmara_shore",
+      "points_m": [
+        [
+          -5200,
+          -1760
+        ],
+        [
+          -4400,
+          -1590
+        ],
+        [
+          -3650,
+          -1510
+        ],
+        [
+          -2730,
+          -1300
+        ],
+        [
+          -1800,
+          -1150
+        ],
+        [
+          -810,
+          -950
+        ],
+        [
+          180,
+          -760
+        ],
+        [
+          625,
+          -350
+        ]
+      ],
+      "width_m": 13,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "cathedral_approach",
+      "points_m": [
+        [
+          -750,
+          530
+        ],
+        [
+          -420,
+          300
+        ],
+        [
+          -210,
+          150
+        ],
+        [
+          20,
+          180
+        ],
+        [
+          320,
+          520
+        ]
+      ],
+      "width_m": 17,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "forum_to_shore",
+      "points_m": [
+        [
+          -1480,
+          -95
+        ],
+        [
+          -1300,
+          470
+        ],
+        [
+          -1420,
+          1030
+        ],
+        [
+          -1480,
+          1620
+        ]
+      ],
+      "width_m": 15,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "aqueduct_route",
+      "points_m": [
+        [
+          -3300,
+          500
+        ],
+        [
+          -2600,
+          610
+        ],
+        [
+          -2010,
+          690
+        ],
+        [
+          -1470,
+          720
+        ]
+      ],
+      "width_m": 12,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "pantokrator_shore",
+      "points_m": [
+        [
+          -2900,
+          620
+        ],
+        [
+          -2550,
+          1030
+        ],
+        [
+          -2260,
+          1560
+        ],
+        [
+          -2200,
+          1920
+        ]
+      ],
+      "width_m": 12,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "central_gate",
+      "points_m": [
+        [
+          -5294.128,
+          463.823
+        ],
+        [
+          -5229.643,
+          455.655
+        ],
+        [
+          -5185.0,
+          450.0
+        ],
+        [
+          -5100.674,
+          439.319
+        ],
+        [
+          -4320,
+          520
+        ],
+        [
+          -3630,
+          750
+        ],
+        [
+          -3120,
+          1160
+        ]
+      ],
+      "width_m": 18,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored. The gate approach crosses both authored wall lines perpendicular to the modeled portal; its alignment is interpretive."
+    },
+    {
+      "id": "northern_gate",
+      "points_m": [
+        [
+          -4996.084,
+          1799.088
+        ],
+        [
+          -4933.398,
+          1781.9
+        ],
+        [
+          -4890.0,
+          1770.0
+        ],
+        [
+          -4808.026,
+          1747.523
+        ],
+        [
+          -4490,
+          1720
+        ],
+        [
+          -3780,
+          1900
+        ],
+        [
+          -3050,
+          2450
+        ]
+      ],
+      "width_m": 16,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored. The gate approach crosses both authored wall lines perpendicular to the modeled portal; its alignment is interpretive."
+    },
+    {
+      "id": "southern_cross",
+      "points_m": [
+        [
+          -4460,
+          -1600
+        ],
+        [
+          -4300,
+          -900
+        ],
+        [
+          -4090,
+          -300
+        ],
+        [
+          -4020,
+          420
+        ],
+        [
+          -4380,
+          1250
+        ],
+        [
+          -4490,
+          1720
+        ]
+      ],
+      "width_m": 12,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "east_shore_to_palace",
+      "points_m": [
+        [
+          620,
+          -360
+        ],
+        [
+          360,
+          -330
+        ],
+        [
+          150,
+          -260
+        ],
+        [
+          -100,
+          -230
+        ]
+      ],
+      "width_m": 12,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "hippodrome_west",
+      "points_m": [
+        [
+          -600,
+          -820
+        ],
+        [
+          -590,
+          -380
+        ],
+        [
+          -480,
+          -80
+        ],
+        [
+          -220,
+          180
+        ]
+      ],
+      "width_m": 13,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    },
+    {
+      "id": "palace_sea_access",
+      "points_m": [
+        [
+          180,
+          -750
+        ],
+        [
+          240,
+          -600
+        ],
+        [
+          330,
+          -400
+        ],
+        [
+          380,
+          -120
+        ],
+        [
+          100,
+          140
+        ]
+      ],
+      "width_m": 10,
+      "evidence": "Interpretive route joining urban anchors; width and bends are authored."
+    }
+  ],
+  "walls": [
+    {
+      "id": "theodosian_inner",
+      "points_m": [
+        [
+          -5350,
+          -1850
+        ],
+        [
+          -5320,
+          -1100
+        ],
+        [
+          -5280,
+          -300
+        ],
+        [
+          -5185,
+          450
+        ],
+        [
+          -5060,
+          1150
+        ],
+        [
+          -4890,
+          1770
+        ],
+        [
+          -4690,
+          2280
+        ],
+        [
+          -4490,
+          2640
+        ],
+        [
+          -4430,
+          3010
+        ],
+        [
+          -4260,
+          3470
+        ]
+      ],
+      "width_m": 5,
+      "height_m": 12,
+      "tower_spacing_m": 84,
+      "evidence": "Interpretive dimensions and alignment of historically attested main wall."
+    },
+    {
+      "id": "theodosian_outer",
+      "points_m": [
+        [
+          -5373,
+          -1850
+        ],
+        [
+          -5343,
+          -1100
+        ],
+        [
+          -5303,
+          -300
+        ],
+        [
+          -5208,
+          450
+        ],
+        [
+          -5083,
+          1150
+        ],
+        [
+          -4913,
+          1770
+        ],
+        [
+          -4713,
+          2280
+        ],
+        [
+          -4513,
+          2640
+        ]
+      ],
+      "width_m": 2.5,
+      "height_m": 8,
+      "tower_spacing_m": 87,
+      "evidence": "Interpretive outer line; not uniformly extended around Blachernae."
+    },
+    {
+      "id": "marmara_walls",
+      "points_m": [
+        [
+          -5350,
+          -1850
+        ],
+        [
+          -4750,
+          -1850
+        ],
+        [
+          -3650,
+          -1690
+        ],
+        [
+          -2650,
+          -1480
+        ],
+        [
+          -1760,
+          -1320
+        ],
+        [
+          -800,
+          -1080
+        ],
+        [
+          170,
+          -915
+        ],
+        [
+          610,
+          -570
+        ],
+        [
+          790,
+          -50
+        ],
+        [
+          790,
+          640
+        ],
+        [
+          545,
+          1080
+        ],
+        [
+          110,
+          1330
+        ]
+      ],
+      "width_m": 3,
+      "height_m": 9,
+      "tower_spacing_m": 125,
+      "evidence": "Interpretive seawall following an authored historical shore hypothesis."
+    },
+    {
+      "id": "golden_horn_walls",
+      "points_m": [
+        [
+          110,
+          1330
+        ],
+        [
+          -740,
+          1530
+        ],
+        [
+          -1560,
+          1790
+        ],
+        [
+          -2360,
+          2140
+        ],
+        [
+          -3090,
+          2600
+        ],
+        [
+          -3700,
+          3170
+        ],
+        [
+          -4260,
+          3470
+        ]
+      ],
+      "width_m": 3,
+      "height_m": 10,
+      "tower_spacing_m": 115,
+      "evidence": "Interpretive seawall; individual 1200 repairs not surveyed."
+    }
+  ],
+  "districts": [
+    {
+      "id": "eastern_precinct",
+      "name": "Eastern monumental city",
+      "polygon_m": [
+        [
+          -850,
+          -900
+        ],
+        [
+          620,
+          -610
+        ],
+        [
+          700,
+          700
+        ],
+        [
+          410,
+          1160
+        ],
+        [
+          -820,
+          1360
+        ]
+      ],
+      "density": 0.94,
+      "style": "urban",
+      "grid_rotation_deg": 14,
+      "plot_pitch_m": 21,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "golden_horn_east",
+      "name": "Golden Horn merchants",
+      "polygon_m": [
+        [
+          -2050,
+          570
+        ],
+        [
+          -850,
+          500
+        ],
+        [
+          -820,
+          1360
+        ],
+        [
+          -1600,
+          1740
+        ],
+        [
+          -2250,
+          1970
+        ]
+      ],
+      "density": 0.96,
+      "style": "merchant",
+      "grid_rotation_deg": -13,
+      "plot_pitch_m": 21,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "mese_quarters",
+      "name": "Mese and craft streets",
+      "polygon_m": [
+        [
+          -2910,
+          -1050
+        ],
+        [
+          -870,
+          -790
+        ],
+        [
+          -850,
+          500
+        ],
+        [
+          -2050,
+          570
+        ],
+        [
+          -2850,
+          740
+        ]
+      ],
+      "density": 0.94,
+      "style": "workshop",
+      "grid_rotation_deg": 8,
+      "plot_pitch_m": 21,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "monastic_heights",
+      "name": "Monastic heights",
+      "polygon_m": [
+        [
+          -3580,
+          550
+        ],
+        [
+          -2850,
+          740
+        ],
+        [
+          -2050,
+          570
+        ],
+        [
+          -2250,
+          1970
+        ],
+        [
+          -3200,
+          2590
+        ],
+        [
+          -3580,
+          2160
+        ]
+      ],
+      "density": 0.73,
+      "style": "courtyard",
+      "grid_rotation_deg": -10,
+      "plot_pitch_m": 24,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "western_inner",
+      "name": "Western inner wards",
+      "polygon_m": [
+        [
+          -5070,
+          -650
+        ],
+        [
+          -2910,
+          -1050
+        ],
+        [
+          -2850,
+          740
+        ],
+        [
+          -3580,
+          550
+        ],
+        [
+          -3580,
+          2160
+        ],
+        [
+          -4620,
+          2260
+        ],
+        [
+          -4990,
+          1130
+        ]
+      ],
+      "density": 0.44,
+      "style": "garden",
+      "grid_rotation_deg": 5,
+      "plot_pitch_m": 27,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "southwestern_wards",
+      "name": "Southwestern monastic wards",
+      "polygon_m": [
+        [
+          -5180,
+          -1750
+        ],
+        [
+          -4000,
+          -1570
+        ],
+        [
+          -2910,
+          -1320
+        ],
+        [
+          -2910,
+          -1050
+        ],
+        [
+          -5070,
+          -650
+        ]
+      ],
+      "density": 0.57,
+      "style": "garden",
+      "grid_rotation_deg": 14,
+      "plot_pitch_m": 25,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "blachernae_quarter",
+      "name": "Blachernae and upper shore",
+      "polygon_m": [
+        [
+          -4610,
+          2270
+        ],
+        [
+          -3580,
+          2160
+        ],
+        [
+          -3200,
+          2590
+        ],
+        [
+          -3700,
+          3070
+        ],
+        [
+          -4200,
+          3400
+        ],
+        [
+          -4370,
+          2990
+        ]
+      ],
+      "density": 0.8,
+      "style": "courtyard",
+      "grid_rotation_deg": -18,
+      "plot_pitch_m": 23,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    },
+    {
+      "id": "southern_working_shore",
+      "name": "Southern working shore",
+      "polygon_m": [
+        [
+          -2910,
+          -1320
+        ],
+        [
+          -1700,
+          -1200
+        ],
+        [
+          -870,
+          -980
+        ],
+        [
+          -870,
+          -790
+        ],
+        [
+          -2910,
+          -1050
+        ]
+      ],
+      "density": 0.94,
+      "style": "merchant",
+      "grid_rotation_deg": 13,
+      "plot_pitch_m": 21,
+      "evidence": "Authoring ward and density, not a medieval administrative boundary or census."
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "hagia_sophia",
+      "name": "Hagia Sophia",
+      "kind": "hagia_sophia",
+      "position_m": [
+        0,
+        0
+      ],
+      "rotation_deg": 32,
+      "dimensions": {
+        "width_m": 73,
+        "depth_m": 82,
+        "height_m": 55.6,
+        "dome_radius_m": 15.5,
+        "dome_height_m": 13.5,
+        "nave_width_m": 31,
+        "aisle_width_m": 15,
+        "arcade_height_m": 15
+      },
+      "description": "The Great Church, with a central dome above layered arcades. ASCE gives an approximately 31 m dome diameter and a modern geographic locator. Other model dimensions and details are approximate. Minarets and the post-1261 Deesis mosaic are absent.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "met_hagia_sophia",
+        "asce_hagia_sophia"
+      ],
+      "tour_distance_m": 212.6,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "hippodrome",
+      "name": "Hippodrome",
+      "kind": "hippodrome",
+      "position_m": [
+        -330,
+        -410
+      ],
+      "rotation_deg": 24,
+      "dimensions": {
+        "width_m": 118,
+        "depth_m": 410,
+        "height_m": 24
+      },
+      "description": "Elongated arena with a curved southern end and monument spine. Seating, dimensions and surviving details are interpreted; this is not evidence of exact crowd counts or event schedules.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "uchicago_hippodrome"
+      ],
+      "tour_distance_m": 803.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "hagia_eirene",
+      "name": "Hagia Eirene",
+      "kind": "church",
+      "position_m": [
+        50,
+        315
+      ],
+      "rotation_deg": 32,
+      "dimensions": {
+        "width_m": 38,
+        "depth_m": 82,
+        "height_m": 35,
+        "dome_radius_m": 8.5,
+        "dome_height_m": 8,
+        "nave_width_m": 17,
+        "basilican": 1,
+        "dome_count": 1
+      },
+      "description": "The neighboring church includes medieval rebuilding after the earthquake of 740. Domed basilican volumes are interpreted; the later Ottoman palace enclosure is absent.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_eirene"
+      ],
+      "tour_distance_m": 212.6,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "basilica_cistern",
+      "name": "Basilica Cistern",
+      "kind": "cistern",
+      "position_m": [
+        -185,
+        -35
+      ],
+      "rotation_deg": 32,
+      "dimensions": {
+        "width_m": 70,
+        "depth_m": 140,
+        "height_m": 9,
+        "column_count": 336,
+        "underground": 1,
+        "column_grid_x": 12,
+        "column_grid_z": 28
+      },
+      "description": "A covered reservoir beneath the precinct, presented as an accessible cutaway study. It is not an exposed above-ground hall. Its exact operation and hydraulic connections in 1200 remain uncertain; model dimensions are approximate. The rendered 12 by 28 column grid is a model arrangement, awaiting checked primary dimensional documentation.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "ward_water"
+      ],
+      "tour_distance_m": 317.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "great_palace",
+      "name": "Great Palace terraces",
+      "kind": "palace",
+      "position_m": [
+        180,
+        -385
+      ],
+      "rotation_deg": 24,
+      "dimensions": {
+        "width_m": 235,
+        "depth_m": 205,
+        "height_m": 29
+      },
+      "description": "Representative courts, halls and service ranges on artificial terraces. Some older imperial functions continued after the principal court moved northwest. This assembly does not recreate a fully preserved sixth-century palace.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "westbrook_palace"
+      ],
+      "tour_distance_m": 488.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "boukoleon",
+      "name": "Boukoleon sea palace",
+      "kind": "palace",
+      "position_m": [
+        -80,
+        -800
+      ],
+      "rotation_deg": 11,
+      "dimensions": {
+        "width_m": 155,
+        "depth_m": 70,
+        "height_m": 24
+      },
+      "description": "An interpreted sea-facing imperial range. The maritime relationship is historical; room plans, roof forms and quay arrangement are hypotheses.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "westbrook_palace"
+      ],
+      "tour_distance_m": 344.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "sergius_bacchus",
+      "name": "Saints Sergius and Bacchus",
+      "kind": "church",
+      "position_m": [
+        -550,
+        -750
+      ],
+      "rotation_deg": 26,
+      "dimensions": {
+        "width_m": 31,
+        "depth_m": 35,
+        "height_m": 23,
+        "dome_radius_m": 8.2,
+        "dome_height_m": 7
+      },
+      "description": "A sixth-century domed church in the southern city. The central mass is an original simplified interpretation, with later Ottoman additions excluded.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_sergius"
+      ],
+      "tour_distance_m": 128.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "constantine_column",
+      "name": "Column of Constantine",
+      "kind": "column",
+      "position_m": [
+        -795,
+        -140
+      ],
+      "rotation_deg": 0,
+      "dimensions": {
+        "width_m": 9,
+        "depth_m": 9,
+        "height_m": 35,
+        "cross_top": 1,
+        "shaft_radius_m": 1.8
+      },
+      "description": "The earlier imperial statue fell in 1105/6; Manuel I replaced it with a cross. The column retains this medieval identity without the later stone encasement. Model height is approximate.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_constantine"
+      ],
+      "tour_distance_m": 81.2,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "forum_theodosius",
+      "name": "Forum of Theodosius area",
+      "kind": "column",
+      "position_m": [
+        -1480,
+        -95
+      ],
+      "rotation_deg": 0,
+      "dimensions": {
+        "width_m": 14,
+        "depth_m": 14,
+        "height_m": 36,
+        "shaft_radius_m": 2.5
+      },
+      "description": "A restrained public-space hypothesis west of Constantine. The column is an interpretive marker for a forum whose precise medieval extent and arrangement remain uncertain.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_theodosius"
+      ],
+      "tour_distance_m": 90.2,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "myrelaion",
+      "name": "Myrelaion monastery church",
+      "kind": "church",
+      "position_m": [
+        -1810,
+        -410
+      ],
+      "rotation_deg": 20,
+      "dimensions": {
+        "width_m": 13.1,
+        "depth_m": 24.1,
+        "height_m": 22,
+        "dome_radius_m": 4.1,
+        "dome_height_m": 4
+      },
+      "description": "A tenth-century foundation above a substructure. Columbia reports the surviving 13.10 by 24.10 m platform. Roof, facades and surrounding plots are interpreted for the pre-1203 city.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_myrelaion"
+      ],
+      "tour_distance_m": 108.38,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "pantokrator",
+      "name": "Pantokrator monastery",
+      "kind": "monastery",
+      "position_m": [
+        -2460,
+        1240
+      ],
+      "rotation_deg": 17,
+      "dimensions": {
+        "width_m": 115,
+        "depth_m": 105,
+        "height_m": 28,
+        "dome_radius_m": 6,
+        "church_count": 3
+      },
+      "description": "A Komnenian foundation with three adjoining churches, imperial burials and charitable functions. These domed ranges express that compound organization; full campus geometry is interpreted.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_pantokrator"
+      ],
+      "tour_distance_m": 272.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "holy_apostles",
+      "name": "Church of the Holy Apostles",
+      "kind": "monastery",
+      "position_m": [
+        -3100,
+        1130
+      ],
+      "rotation_deg": 8,
+      "dimensions": {
+        "width_m": 115,
+        "depth_m": 122,
+        "height_m": 41,
+        "dome_radius_m": 8.2,
+        "dome_count": 5
+      },
+      "description": "A lost imperial church and burial complex on the western heights. The five-domed composition is an architectural hypothesis for a monument whose reconstruction remains debated.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "doaks_apostles"
+      ],
+      "tour_distance_m": 284.6,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "valens_aqueduct",
+      "name": "Aqueduct of Valens",
+      "kind": "aqueduct",
+      "position_m": [
+        -2520,
+        645
+      ],
+      "rotation_deg": -12,
+      "dimensions": {
+        "width_m": 970,
+        "depth_m": 7,
+        "height_m": 24,
+        "arch_count": 86
+      },
+      "description": "An elevated arcade crossing an urban saddle. The 970 m length follows the modern bridge length cited by Ward, Crow and Crapper; spans, height, alignment and hydraulic operation are interpreted.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "ward_water"
+      ],
+      "tour_distance_m": 1811.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "blachernae_palace",
+      "name": "Blachernae imperial precinct",
+      "kind": "palace",
+      "position_m": [
+        -4240,
+        2840
+      ],
+      "rotation_deg": -24,
+      "dimensions": {
+        "width_m": 225,
+        "depth_m": 155,
+        "height_m": 32
+      },
+      "description": "The principal court in the northwest, represented by terraces and reception halls. Its detailed 1200 plan remains unresolved; the later Tekfur Saray\u0131 is absent.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "westbrook_palace",
+        "columbia_walls"
+      ],
+      "tour_distance_m": 470.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "blachernae_church",
+      "name": "Blachernae sanctuary study",
+      "kind": "church",
+      "position_m": [
+        -4090,
+        3110
+      ],
+      "rotation_deg": 5,
+      "dimensions": {
+        "width_m": 45,
+        "depth_m": 70,
+        "height_m": 26,
+        "dome_radius_m": 8
+      },
+      "description": "An explicitly interpretive sanctuary beside the northwestern court and waterfront. The assembly represents a religious precinct and does not claim to reproduce the lost church exactly.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "preiser_moorings",
+        "westbrook_palace"
+      ],
+      "tour_distance_m": 191.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "stoudios",
+      "name": "Stoudios monastery",
+      "kind": "monastery",
+      "position_m": [
+        -4800,
+        -1320
+      ],
+      "rotation_deg": 17,
+      "dimensions": {
+        "width_m": 108,
+        "depth_m": 115,
+        "height_m": 22,
+        "basilican": 1,
+        "dome_count": 0
+      },
+      "description": "A longstanding monastic precinct in the southwest. This original spatial hypothesis restores habitation without treating the roofless present-day ruin as its condition in 1200.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_stoudios"
+      ],
+      "tour_distance_m": 272.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "vefa_church",
+      "name": "Middle Byzantine church at Vefa",
+      "kind": "church",
+      "position_m": [
+        -2260,
+        460
+      ],
+      "rotation_deg": 10,
+      "dimensions": {
+        "width_m": 21,
+        "depth_m": 29,
+        "height_m": 21,
+        "dome_radius_m": 4.5
+      },
+      "description": "A Middle Byzantine church with disputed original dedication. Its surviving monument identity is retained without assigning an unqualified historical name or copying all later additions.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_vefa"
+      ],
+      "tour_distance_m": 117.2,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "golden_gate",
+      "name": "Golden Gate approach",
+      "kind": "gate",
+      "position_m": [
+        -5339.952,
+        -1598.802
+      ],
+      "rotation_deg": 87.70939,
+      "dimensions": {
+        "width_m": 55,
+        "depth_m": 23,
+        "height_m": 18,
+        "tower_height_m": 21
+      },
+      "description": "The monumental southwestern entrance is represented by portals, flanking masses and a paved approach. The schematic original assembly omits the later Yedikule fortress.",
+      "evidence": "Historical identity supported. Local position is snapped to the authored theodosian_inner centerline and the gate width follows its tangent; this alignment and all passage, envelope, construction and surface details are interpretive. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_walls"
+      ],
+      "tour_distance_m": 164.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "mesoteichion_gate",
+      "name": "Central land-wall gate study",
+      "kind": "gate",
+      "position_m": [
+        -5185,
+        450
+      ],
+      "rotation_deg": 82.780979,
+      "dimensions": {
+        "width_m": 42,
+        "depth_m": 23,
+        "height_m": 16,
+        "tower_height_m": 19
+      },
+      "description": "An interpreted access assembly in the central defenses. The label identifies a model sector, without settling disputed gate identifications.",
+      "evidence": "Historical identity supported. Local position is snapped to the authored theodosian_inner centerline and the gate width follows its tangent; this alignment and all passage, envelope, construction and surface details are interpretive. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_walls"
+      ],
+      "tour_distance_m": 140.60000000000002,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "charisius_gate",
+      "name": "Northern land-wall gate study",
+      "kind": "gate",
+      "position_m": [
+        -4890,
+        1770
+      ],
+      "rotation_deg": 74.666715,
+      "dimensions": {
+        "width_m": 40,
+        "depth_m": 24,
+        "height_m": 17,
+        "tower_height_m": 20
+      },
+      "description": "An interpreted northern gate and city approach. Passage proportions and tower phases await sector-specific measurement.",
+      "evidence": "Historical identity supported. Local position is snapped to the authored theodosian_inner centerline and the gate width follows its tangent; this alignment and all passage, envelope, construction and surface details are interpretive. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "columbia_walls"
+      ],
+      "tour_distance_m": 137.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "aetius_reservoir",
+      "name": "Aetius cistern study",
+      "kind": "cistern",
+      "position_m": [
+        -4500,
+        1710
+      ],
+      "rotation_deg": -15,
+      "dimensions": {
+        "width_m": 85,
+        "depth_m": 244,
+        "height_m": 13,
+        "open_top": 1
+      },
+      "description": "An open reservoir represented as a sunk walled basin. Model extent and fill state are approximate; water in the model is not proof that the basin operated in 1200.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "ward_water"
+      ],
+      "tour_distance_m": 504.2,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "aspar_reservoir",
+      "name": "Aspar cistern study",
+      "kind": "cistern",
+      "position_m": [
+        -3740,
+        1910
+      ],
+      "rotation_deg": 0,
+      "dimensions": {
+        "width_m": 152,
+        "depth_m": 152,
+        "height_m": 11,
+        "open_top": 1
+      },
+      "description": "An interpreted open storage basin on the heights, treated as one part of a distributed water system rather than a complete network.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "ward_water"
+      ],
+      "tour_distance_m": 338.6,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "mocius_reservoir",
+      "name": "Mocius cistern study",
+      "kind": "cistern",
+      "position_m": [
+        -4020,
+        -240
+      ],
+      "rotation_deg": 4,
+      "dimensions": {
+        "width_m": 170,
+        "depth_m": 224,
+        "height_m": 12,
+        "open_top": 1
+      },
+      "description": "An interpreted open basin among the western wards. Its exact medieval operation and connections remain unresolved.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "ward_water"
+      ],
+      "tour_distance_m": 468.2,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "neorion_landing",
+      "name": "Neorion waterfront warehouses",
+      "kind": "palace",
+      "position_m": [
+        -525,
+        940
+      ],
+      "rotation_deg": -15,
+      "dimensions": {
+        "width_m": 138,
+        "depth_m": 72,
+        "height_m": 14,
+        "warehouse": 1
+      },
+      "description": "Storage ranges and handling yards near the Golden Horn. This original ensemble expresses maritime exchange without asserting a surveyed quay plan.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "schreiner_harbors"
+      ],
+      "tour_distance_m": 313.4,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "perama_landing",
+      "name": "Perama landing-place study",
+      "kind": "palace",
+      "position_m": [
+        -1450,
+        1470
+      ],
+      "rotation_deg": -18,
+      "dimensions": {
+        "width_m": 155,
+        "depth_m": 70,
+        "height_m": 13,
+        "warehouse": 1
+      },
+      "description": "Shore access and storage hypotheses in the commercial waterfront. Concession boundaries and cargo mix remain uncertain.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "schreiner_harbors"
+      ],
+      "tour_distance_m": 344.0,
+      "exclusion_margin_m": 22
+    },
+    {
+      "id": "kontoskalion",
+      "name": "Marmara harbor study",
+      "kind": "palace",
+      "position_m": [
+        -1500,
+        -1050
+      ],
+      "rotation_deg": 11,
+      "dimensions": {
+        "width_m": 142,
+        "depth_m": 82,
+        "height_m": 14,
+        "warehouse": 1
+      },
+      "description": "A representative working waterfront. Storage, vessels and slipway arrangements are interpretive rather than a timeless plan of the changing Marmara harbors.",
+      "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
+      "source_ids": [
+        "schreiner_harbors"
+      ],
+      "tour_distance_m": 320.6,
+      "exclusion_margin_m": 22
+    }
+  ],
+  "harbors": [
+    {
+      "id": "golden_horn_harbor",
+      "name": "Golden Horn landing places",
+      "position_m": [
+        -670,
+        1670
+      ],
+      "width_m": 680,
+      "depth_m": 260,
+      "rotation_deg": 164,
+      "piers": 4,
+      "count": 9,
+      "description": "Interpretive vessels and jetties; no surveyed pier plan. Pier bearing is Godot yaw about up, with local +Z directed seaward; pier roots are snapped to the authored coast.",
+      "source_ids": [
+        "schreiner_harbors"
+      ]
+    },
+    {
+      "id": "perama_harbor",
+      "name": "Perama shore",
+      "position_m": [
+        -1620,
+        1960
+      ],
+      "width_m": 520,
+      "depth_m": 230,
+      "rotation_deg": 161,
+      "piers": 3,
+      "count": 7,
+      "description": "Interpretive cargo waterfront. Pier bearing is Godot yaw about up, with local +Z directed seaward; pier roots are snapped to the authored coast.",
+      "source_ids": [
+        "schreiner_harbors"
+      ]
+    },
+    {
+      "id": "marmara_harbor",
+      "name": "Marmara harbor study",
+      "position_m": [
+        -1500,
+        -1490
+      ],
+      "width_m": 510,
+      "depth_m": 260,
+      "rotation_deg": 12,
+      "piers": 3,
+      "count": 6,
+      "description": "Interpretive harbor assembly and approximate coast. Pier bearing is Godot yaw about up, with local +Z directed seaward; pier roots are snapped to the authored coast.",
+      "source_ids": [
+        "schreiner_harbors"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "id": "western_gardens",
+      "polygon_m": [
+        [
+          -6200,
+          -1400
+        ],
+        [
+          -5570,
+          -1510
+        ],
+        [
+          -5540,
+          400
+        ],
+        [
+          -6060,
+          1000
+        ]
+      ],
+      "kind": "fields"
+    },
+    {
+      "id": "northwest_orchards",
+      "polygon_m": [
+        [
+          -6130,
+          1300
+        ],
+        [
+          -5310,
+          1170
+        ],
+        [
+          -4800,
+          2740
+        ],
+        [
+          -5570,
+          3180
+        ]
+      ],
+      "kind": "orchard"
+    },
+    {
+      "id": "inner_gardens",
+      "polygon_m": [
+        [
+          -4870,
+          630
+        ],
+        [
+          -4510,
+          700
+        ],
+        [
+          -4270,
+          1300
+        ],
+        [
+          -4740,
+          1260
+        ]
+      ],
+      "kind": "gardens"
+    }
+  ],
+  "sources": [
+    {
+      "id": "met_hagia_sophia",
+      "title": "Metropolitan Museum \u2014 Hagia Sophia",
+      "url": "https://www.metmuseum.org/essays/hagia-sophia-532-37",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "asce_hagia_sophia",
+      "title": "ASCE \u2014 Hagia Sophia modern locator and dome diameter",
+      "url": "https://www.asce.org/about-civil-engineering/history-and-heritage/historic-landmarks/hagia-sophia",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "unesco_istanbul",
+      "title": "UNESCO \u2014 Historic Areas of Istanbul",
+      "url": "https://whc.unesco.org/en/list/356/",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_walls",
+      "title": "Columbia \u2014 Land Walls",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/land-walls-constantinople",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "ward_water",
+      "title": "Ward, Crow & Crapper \u2014 Water-supply infrastructure (2017), pp.175\u2013195",
+      "url": "https://www.pure.ed.ac.uk/ws/files/46577281/Ward_Crow_Crapper_2017_JRA_WaterSupplyConstantinople_AM.pdf",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "schreiner_harbors",
+      "title": "Schreiner \u2014 Western Landing Stages (2021), p.151, indexed opening consulted",
+      "url": "https://doi.org/10.11588/propylaeum.911.c12071",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "preiser_moorings",
+      "title": "Preiser-Kapeller \u2014 Heptaskalon and other moorings, p.150, indexed conclusion consulted",
+      "url": "https://books.ub.uni-heidelberg.de/propylaeum/catalog/view/911/1531/96879",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "ousterhout_housing",
+      "title": "Ousterhout \u2014 Middle Byzantine secular architecture",
+      "url": "https://smarthistory.org/middle-byzantine-secular-architecture/",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "westbrook_palace",
+      "title": "Westbrook \u2014 The Great Palace (2026), abstract consulted",
+      "url": "https://research-repository.uwa.edu.au/en/publications/the-great-palace/",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "uchicago_hippodrome",
+      "title": "University of Chicago, Encyclopaedia Romana \u2014 Hippodrome",
+      "url": "https://penelope.uchicago.edu/encyclopaedia_romana/circusmaximus/hippodrome.html",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_eirene",
+      "title": "Columbia \u2014 Hagia Eirene",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/hagia-eirene",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_pantokrator",
+      "title": "Columbia \u2014 Pantokrator Monastery",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/zeyrek-kilise-camii-pantokrator-monastery",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_myrelaion",
+      "title": "Columbia \u2014 Myrelaion Monastery",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/bodrum-camii-myrelaion-monastery",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_sergius",
+      "title": "Columbia \u2014 Saints Sergius and Bacchus",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/kucuk-ayasofya-camii-church-sts-sergius-and-bacchus",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "doaks_apostles",
+      "title": "Dumbarton Oaks \u2014 The Holy Apostles, scholarly volume description",
+      "url": "https://shop.doaks.org/the-holy-apostles-16513.html",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_stoudios",
+      "title": "Columbia \u2014 Monastery of Saint John Stoudios",
+      "url": "https://mcid.mcah.columbia.edu/work/w0001593",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_constantine",
+      "title": "Columbia \u2014 Column of Constantine",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/column-constantine",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_theodosius",
+      "title": "Columbia \u2014 Forum of Theodosius",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/forum-theodosius",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_vefa",
+      "title": "Columbia \u2014 Vefa Kilise Camii",
+      "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/vefa-kilise-camii",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "fhw_crafts",
+      "title": "Foundation of the Hellenic World \u2014 Book of the Eparch",
+      "url": "https://constantinople.ehw.gr/Forms/fLemmaBodyExtended.aspx?lemmaID=11805",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "columbia_geography",
+      "title": "Columbia Global Centers \u2014 Visiting Istanbul; broad continental and waterway relationship only",
+      "url": "https://globalcenters.columbia.edu/content/visiting-istanbul",
+      "accessed": "2026-10-03"
+    },
+    {
+      "id": "walters_galata_view",
+      "title": "Walters Art Museum \u2014 View of Constantinople; broad Galata viewpoint geography only, later painting not a 1200 appearance reference",
+      "url": "https://art.thewalters.org/detail/1416/view-of-constantinople/",
+      "accessed": "2026-10-03"
+    }
+  ],
+  "stages": [
+    {
+      "id": "reference_1200",
+      "name": "Constantinople \u00b7 1200",
+      "description": "Historical reference with openly interpretive architecture and urban fabric.",
+      "density_multiplier": 1.0,
+      "hypothetical": false
+    },
+    {
+      "id": "serviced",
+      "name": "Creative \u00b7 renewed city",
+      "description": "Hypothetical repair and service additions. Retains reference plots and adds limited infill.",
+      "density_multiplier": 1.13,
+      "hypothetical": true
+    },
+    {
+      "id": "expanded",
+      "name": "Creative \u00b7 expanded city",
+      "description": "Hypothetical denser neighborhoods and inhabited plots; not a later historical date.",
+      "density_multiplier": 1.32,
+      "hypothetical": true
+    }
+  ],
+  "initial_focus": "hagia_sophia"
+}

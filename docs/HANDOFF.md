@@ -11,6 +11,27 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Independent Constantinople city study
+
+`Castles and Cities/` now contains a standalone **Constantinople circa 1200**
+Godot project, with 26 landmark assemblies, 17,561 reference dwellings,
+fortifications, waterfronts, reservoirs, surrounding terrain, inspected
+interiors and two hypothetical infill variants. A separate creative editor
+saves additions without touching campaign data. Start at its
+[experience guide](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/README.md)
+and [release builder](../Castles%20and%20Cities/BUILDING.md).
+The workspace remains excluded from the main game by `.gdignore`.
+Geometry is original procedural work with explicit historical uncertainty;
+it is not a surveyed or finished photorealistic reconstruction. The model
+export supplies whole-city and individual landmark GLB meshes, not CAD solids.
+
+Verified October 4: city data/presentation schemas, deterministic layouts,
+actual-scene geometry/editor/persistence checks, real rendering including
+reservoir exclusion and terrain coverage; parent campaign **705 tests,
+0 failures**, data/import and planning/marching/arrival/40× map gates.
+Generated applications, models and verification logs belong under ignored
+`build/`, with QA screenshots outside tracked assets.
+
 ## Roma city development
 
 **City-to-country navigation (October 2026).** Roma now opens in an aerial

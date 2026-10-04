@@ -3,13 +3,40 @@
 **Design target:** an inhabited Byzantine imperial capital immediately before
 the upheavals of 1203–1204. The principal reference year is **1200 CE**; a
 source from another date must be checked before its details enter this baseline.
-This is a research foundation, not yet a surveyed or rendered reconstruction.
+The independent [3D experience](experience/project.godot) now presents an
+inhabited, explorable interpretation at peninsula, neighborhood and architectural
+scales. It is not a surveyed reconstruction; detailed geometry does not resolve
+the historical uncertainties recorded below.
 
 The city occupies a peninsula with the Golden Horn to the north, the Bosphorus
 to the east and the Sea of Marmara to the south. Its land defenses, religious
 monuments and maritime setting provide the organizing framework. See
 [SOURCES.md](SOURCES.md) for the source register, including UNESCO's account of
 the historic peninsula.
+
+## What is built
+
+The standalone Godot 4.4 project has 26 landmark/site models, eight authoring
+wards, walls, three waterfront zones, interpreted terrain and a whole-city plan.
+The current deterministic baseline generates **17,561 ordinary buildings**, with
+3,264 trees and 192 neighborhood lane runs. These are modeling counts, never
+population or household estimates. Density is greater in central and waterfront
+wards; western open ground and gardens remain visible.
+
+Use the place list to approach a landmark, inspect an interior or courtyard,
+switch between orbit and architectural movement, and compare three visual
+states. `reference_1200` is the dated interpretive baseline; `serviced` and
+`expanded` are hypothetical infill alternatives. The creative workshop supports
+editable design objects and a separate saved variant. Camera and stage actions
+never advance Roman War gameplay.
+
+Editable geographic parameters and source links are in
+[city.json](experience/data/city.json); the original procedural geometry is in
+[experience/src/](experience/src/). The
+[GLB export tool](experience/tools/export_models.gd) creates a whole-city mesh and
+individual landmark derivatives with neutral materials and a provenance file.
+These exports do not preserve CAD solid constraints or the application's shader
+appearance. High-fidelity historical and architectural refinement remains ongoing.
 
 ## What the city should feel like
 
@@ -46,15 +73,16 @@ use repetitive buildings to suggest a population count we have not established.
 
 | Scale | Required design artifact | Current state |
 |---|---|---|
-| Peninsula | Terrain, historic shoreline hypotheses, wall circuits, principal routes and monument anchors | Research tasks identified; no georeferenced map yet |
-| District | Plots, street widths, slope/steps, public/private boundaries, services and sightlines | Eight district briefs in the atlas |
-| Building | Plans, elevations, sections, structural system, roof and material schedule | Modeling method defined; measured drawings not yet acquired |
-| Room and street detail | Joinery, openings, paving, furniture, tools, lighting and wear tied to use | Future work after the relevant building is established |
+| Peninsula | Terrain, historic shoreline hypotheses, wall circuits, principal routes and monument anchors | Original terrain, shore hypotheses, walls, routes and anchors rendered in a local metre frame; no survey control |
+| District | Plots, street widths, slope/steps, public/private boundaries, services and sightlines | Eight research briefs plus eight procedural authoring wards; their boundaries serve different purposes |
+| Building | Plans, elevations, sections, structural system, roof and material schedule | 26 original landmark/site assemblies and varied dwelling generators; most dimensions remain approximate |
+| Room and street detail | Joinery, openings, paving, furniture, tools, lighting and wear tied to use | Selected interpretive interiors, openings and procedural surfaces; room-by-room evidence and construction refinement remain open |
 
-The first detailed focus is the **Hagia Sophia–Hippodrome area**. It offers a
+The next detailed research focus is the **Hagia Sophia–Hippodrome area**. It offers a
 recognizable context and surviving anchors, but the precinct, street levels and
-lost structures still require research. Finish a small, well-supported area
-before spending compute on city-wide detail.
+lost structures still require research. Improve a bounded area against sources
+before increasing its decorative detail.
+The city-wide experience supplies spatial context for that work.
 
 ## Read and continue
 

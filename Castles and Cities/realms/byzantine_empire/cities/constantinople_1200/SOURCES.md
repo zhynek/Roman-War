@@ -6,6 +6,15 @@ support particular claims, not a surveyed reconstruction of the whole city.
 No source images, maps, meshes, or reconstructed building designs are copied
 into this collection. Source IDs are stable references for study data.
 
+The running model has a separate, compact source table in
+[experience/data/city.json](experience/data/city.json), including additional
+institutional monument pages, a modern ASCE locator and a small number of
+explicitly cited dimensions. Runtime source IDs belong to that table; the IDs
+below belong to `study.json`. Model descriptions identify supported identity and
+individual sourced values while marking the other local positions, envelopes,
+material details, interiors and ordinary fabric as interpretive. The existence
+of detailed generated geometry does not strengthen the underlying evidence.
+
 ## Sources consulted
 
 ### `unesco_historic_istanbul` — peninsula and chronological layers
