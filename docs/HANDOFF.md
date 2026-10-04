@@ -57,6 +57,19 @@ ignored `build/`; QA images stay in external temporary directories. Keep
 `build/.gdignore` so campaign imports cannot scan generated GLBs. The authoring
 workspace's `.gdignore` keeps the city independent of campaign resources/saves.
 
+**Exact 0.3.0 release package:** frozen source commit `d497520739d34bd023085494a3244940969a8999`,
+artifacts and logs in `build/constantinople-0.3.0-publish/`. The universal ad-hoc
+signed app passed **9,068 scene/editor checks, 86 navigation, 212 landmark,
+8 terrain checks (546,664 samples) and 374 neighborhood checks**, all zero
+failures. All 32 exact-app captures were inspected, including the retained
+23 views and nine district/walking views. External images are recorded in the
+package provenance; none are repository assets. Exact-app frame medians/p95 on
+M3 Max at 1600×1000 were city **11.73/12.75 ms**, district **12.21/13.43 ms**,
+street **7.66/8.33 ms**, startup **9.08 s**. The three ZIPs passed SHA-256 and
+ZIP-integrity checks; all 44 GLB containers passed structural validation.
+The [separate city prerelease](https://github.com/zhynek/Roman-War/releases/tag/constantinople-v0.3.0)
+uses that frozen commit and does not replace the campaign stable release.
+
 ## Roma city development
 
 **City-to-country navigation (October 2026).** Roma now opens in an aerial
