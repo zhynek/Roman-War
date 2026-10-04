@@ -1,0 +1,1328 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "yenikapi_c6000_bce",
+  "snapshot_kind": "dated_interpretation",
+  "nominal_year_bce": 6000,
+  "authoring_category": "village",
+  "title": "Yenikapı · circa 6000 BCE",
+  "subtitle": "An early-settlement interpretation on Istanbul’s historic peninsula",
+  "datum_note": "Local metres, x east / y up / z south. Sea surface y=0 is an authoring datum, not present sea level. No surveyed georeference.",
+  "terrain": {
+    "extent": 240,
+    "grid": 2,
+    "shore_z": 112,
+    "stream_x": 48,
+    "stream_width": 4.0,
+    "walk_limit": 170
+  },
+  "sources": [
+    {
+      "id": "yenikapi_excavation",
+      "class": "direct",
+      "title": "Başaran and Kızıltan, The Archaeology of the Historic Peninsula, 2016, pp. 49–53",
+      "url": "https://www.ancientportsantiques.com/wp-content/uploads/Documents/PLACES/Bosphorus-BlackSea/Yenikapi-Basaran2016.pdf",
+      "claim": "Yenikapı preserves small timber-supported rooms, stone footing traces, wattle and daub, pottery, grinding tools and paddles. The rendered arrangement is not an excavated plan."
+    },
+    {
+      "id": "algan_coast",
+      "class": "direct",
+      "title": "Algan et al., Holocene coastal change, Quaternary Research 76 (2011), 30–45",
+      "url": "https://doi.org/10.1016/j.yqres.2011.04.002",
+      "claim": "A lower coastal plain and stream preceded marine inundation. This model uses a local, hypothetical waterline and datum; neither the modern nor Byzantine harbor outline is reused."
+    },
+    {
+      "id": "ozdogan_marmara",
+      "class": "regional_analogy",
+      "title": "Özdoğan, Archaeological Evidence on the Westward Expansion of Farming Communities, 2011",
+      "url": "https://doi.org/10.1086/658895",
+      "claim": "Marmara comparisons inform timber/earthen building traditions and mixed farming, fishing and gathering. Roofs, field placement and domestic arrangements remain interpretation."
+    },
+    {
+      "id": "donmez_chronology",
+      "class": "direct",
+      "title": "Dönmez, The Protohistoric Times of Istanbul in the Light of New Evidence, 2017",
+      "url": "https://dergipark.org.tr/tr/download/article-file/1726443",
+      "claim": "The reported Neolithic range includes circa 6000 BCE. This nominal date does not date each represented object or assert the first year of settlement."
+    }
+  ],
+  "objects": [
+    {
+      "id": "yk_house_01",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -12,
+        8
+      ],
+      "yaw": -8,
+      "size": [
+        4.8,
+        5.2
+      ],
+      "wall_height": 2.25,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "dwelling",
+      "label": "House by the shared yard",
+      "household": "yk_household_01",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.248,
+            -1.04
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            1.104,
+            -1.04
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.296,
+            -1.6640000000000001
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.2,
+            1.1440000000000001
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            1.152,
+            0.676
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_02",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -17.1,
+        8.7
+      ],
+      "yaw": -8,
+      "size": [
+        4.1,
+        4.6
+      ],
+      "wall_height": 2.37,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "dwelling",
+      "label": "Adjoining household",
+      "household": "yk_household_02",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.0659999999999998,
+            -0.9199999999999999
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            0.943,
+            -0.9199999999999999
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.107,
+            -1.472
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.025,
+            1.012
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            0.9839999999999999,
+            0.598
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_03",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        8,
+        3
+      ],
+      "yaw": 12,
+      "size": [
+        4.6,
+        5.1
+      ],
+      "wall_height": 2.49,
+      "roof_rise": 2.1,
+      "roof": "hip",
+      "use": "dwelling",
+      "label": "House beside the stream path",
+      "household": "yk_household_03",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.196,
+            -1.02
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            1.058,
+            -1.02
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.242,
+            -1.632
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.15,
+            1.1219999999999999
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            1.1039999999999999,
+            0.6629999999999999
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_04",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        12.8,
+        2
+      ],
+      "yaw": 12,
+      "size": [
+        3.6,
+        3.8
+      ],
+      "wall_height": 2.25,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "storage",
+      "label": "Household store",
+      "household": "yk_household_03",
+      "furniture": [
+        {
+          "id": "jar_0",
+          "kind": "pot",
+          "at": [
+            -0.9720000000000001,
+            -1.064
+          ]
+        },
+        {
+          "id": "jar_1",
+          "kind": "pot",
+          "at": [
+            0.9720000000000001,
+            -1.064
+          ]
+        },
+        {
+          "id": "jar_2",
+          "kind": "pot",
+          "at": [
+            -0.9720000000000001,
+            0.2659999999999998
+          ]
+        },
+        {
+          "id": "jar_3",
+          "kind": "pot",
+          "at": [
+            0.9720000000000001,
+            0.2659999999999998
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -0.7,
+            0.3
+          ]
+        },
+        {
+          "id": "mat",
+          "kind": "grain",
+          "at": [
+            0.6,
+            -0.2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_05",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -9,
+        -14
+      ],
+      "yaw": -18,
+      "size": [
+        4.5,
+        4.8
+      ],
+      "wall_height": 2.37,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "dwelling",
+      "label": "Upland household",
+      "household": "yk_household_05",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.17,
+            -0.96
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            1.0350000000000001,
+            -0.96
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.215,
+            -1.536
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.125,
+            1.056
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            1.08,
+            0.624
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_06",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -26,
+        -9
+      ],
+      "yaw": 5,
+      "size": [
+        4.8,
+        4.2
+      ],
+      "wall_height": 2.49,
+      "roof_rise": 2.1,
+      "roof": "hip",
+      "use": "work",
+      "label": "Clay and stone working room",
+      "household": "yk_household_05",
+      "furniture": [
+        {
+          "id": "working_mat",
+          "kind": "mat",
+          "at": [
+            -0.9,
+            -0.7
+          ]
+        },
+        {
+          "id": "clay",
+          "kind": "clay",
+          "at": [
+            1,
+            -0.7
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            -1,
+            0.6
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            0.7,
+            0.3
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.1,
+            -1.1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_07",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        12,
+        -19
+      ],
+      "yaw": -12,
+      "size": [
+        4.5,
+        4.6
+      ],
+      "wall_height": 2.25,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "dwelling",
+      "label": "Northern household",
+      "household": "yk_household_07",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.17,
+            -0.9199999999999999
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            1.0350000000000001,
+            -0.9199999999999999
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.215,
+            -1.472
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.125,
+            1.012
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            1.08,
+            0.598
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_house_08",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -28,
+        25
+      ],
+      "yaw": 20,
+      "size": [
+        4.4,
+        4.2
+      ],
+      "wall_height": 2.37,
+      "roof_rise": 1.9,
+      "roof": "round",
+      "use": "dwelling",
+      "label": "Round-house comparison",
+      "household": "yk_household_08",
+      "furniture": [
+        {
+          "id": "mat",
+          "kind": "mat",
+          "at": [
+            -1.1440000000000001,
+            -0.8400000000000001
+          ]
+        },
+        {
+          "id": "bowl",
+          "kind": "bowl",
+          "at": [
+            1.0120000000000002,
+            -0.8400000000000001
+          ]
+        },
+        {
+          "id": "pot",
+          "kind": "pot",
+          "at": [
+            1.1880000000000002,
+            -1.344
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -1.1,
+            0.924
+          ]
+        },
+        {
+          "id": "quern",
+          "kind": "quern",
+          "at": [
+            1.056,
+            0.546
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_store_01",
+      "kind": "building",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -3,
+        27
+      ],
+      "yaw": -6,
+      "size": [
+        3.4,
+        3.8
+      ],
+      "wall_height": 2.49,
+      "roof_rise": 2.1,
+      "roof": "gable",
+      "use": "storage",
+      "label": "Grain and basket store",
+      "household": "yk_household_01",
+      "furniture": [
+        {
+          "id": "jar_0",
+          "kind": "pot",
+          "at": [
+            -0.918,
+            -1.064
+          ]
+        },
+        {
+          "id": "jar_1",
+          "kind": "pot",
+          "at": [
+            0.918,
+            -1.064
+          ]
+        },
+        {
+          "id": "jar_2",
+          "kind": "pot",
+          "at": [
+            -0.918,
+            0.2659999999999998
+          ]
+        },
+        {
+          "id": "jar_3",
+          "kind": "pot",
+          "at": [
+            0.918,
+            0.2659999999999998
+          ]
+        },
+        {
+          "id": "basket",
+          "kind": "basket",
+          "at": [
+            -0.7,
+            0.3
+          ]
+        },
+        {
+          "id": "mat",
+          "kind": "grain",
+          "at": [
+            0.6,
+            -0.2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "yk_path_landing",
+      "kind": "path",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          0,
+          65
+        ],
+        [
+          1,
+          47
+        ],
+        [
+          3,
+          36
+        ],
+        [
+          0,
+          19
+        ],
+        [
+          0,
+          9
+        ],
+        [
+          1,
+          -5
+        ],
+        [
+          3,
+          -16
+        ],
+        [
+          0,
+          -33
+        ],
+        [
+          -10,
+          -48
+        ]
+      ],
+      "width": 2.4,
+      "label": "Worn earth footpath"
+    },
+    {
+      "id": "yk_path_west",
+      "kind": "path",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -1,
+          20
+        ],
+        [
+          -14,
+          24
+        ],
+        [
+          -22,
+          31
+        ],
+        [
+          -34,
+          37
+        ],
+        [
+          -50,
+          40
+        ],
+        [
+          -67,
+          26
+        ]
+      ],
+      "width": 1.5,
+      "label": "Worn earth footpath"
+    },
+    {
+      "id": "yk_path_yard",
+      "kind": "path",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -29,
+          20
+        ],
+        [
+          -22,
+          16
+        ],
+        [
+          -13,
+          13
+        ],
+        [
+          -4,
+          13
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          13,
+          8
+        ],
+        [
+          24,
+          13
+        ],
+        [
+          31,
+          24
+        ],
+        [
+          40,
+          29
+        ]
+      ],
+      "width": 1.6,
+      "label": "Worn earth footpath"
+    },
+    {
+      "id": "yk_path_craft",
+      "kind": "path",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -24,
+          16
+        ],
+        [
+          -28,
+          16
+        ],
+        [
+          -29,
+          6
+        ],
+        [
+          -28,
+          0
+        ],
+        [
+          -26,
+          -4
+        ],
+        [
+          -17,
+          -5
+        ],
+        [
+          -9,
+          -9
+        ],
+        [
+          0,
+          -9
+        ],
+        [
+          14,
+          -13
+        ],
+        [
+          27,
+          -22
+        ]
+      ],
+      "width": 1.4,
+      "label": "Worn earth footpath"
+    },
+    {
+      "id": "yk_path_fields",
+      "kind": "path",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -26,
+          -4
+        ],
+        [
+          -38,
+          -8
+        ],
+        [
+          -46,
+          -20
+        ],
+        [
+          -60,
+          -28
+        ]
+      ],
+      "width": 1.3,
+      "label": "Worn earth footpath"
+    },
+    {
+      "id": "yk_landing_01",
+      "kind": "landing",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        46,
+        23
+      ],
+      "yaw": 0,
+      "size": [
+        8,
+        9
+      ],
+      "label": "Stream-bank landing",
+      "source_note": "Paddles are attested; this hauled-up canoe and landing arrangement are interpretation."
+    },
+    {
+      "id": "yk_field_01",
+      "kind": "field",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -55,
+        -30
+      ],
+      "yaw": -14,
+      "size": [
+        18,
+        24
+      ],
+      "label": "Small cultivation plot"
+    },
+    {
+      "id": "yk_field_02",
+      "kind": "field",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -59,
+        12
+      ],
+      "yaw": 14,
+      "size": [
+        16,
+        21
+      ],
+      "label": "Cut and standing cereals"
+    },
+    {
+      "id": "yk_work_01",
+      "kind": "work_area",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -4,
+        17
+      ],
+      "yaw": 0,
+      "size": [
+        5,
+        4
+      ],
+      "use": "hearth",
+      "label": "Shared outdoor hearth"
+    },
+    {
+      "id": "yk_work_02",
+      "kind": "work_area",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        40,
+        21
+      ],
+      "yaw": -12,
+      "size": [
+        5,
+        4
+      ],
+      "use": "fishing",
+      "label": "Waterside working area"
+    },
+    {
+      "id": "yk_work_03",
+      "kind": "work_area",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "at": [
+        -32,
+        -3
+      ],
+      "yaw": 5,
+      "size": [
+        4,
+        3
+      ],
+      "use": "clay",
+      "label": "Outdoor clay preparation"
+    },
+    {
+      "id": "yk_screen_01",
+      "kind": "boundary",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -20,
+          3
+        ],
+        [
+          -25,
+          7
+        ],
+        [
+          -25,
+          13
+        ]
+      ],
+      "width": 0.12,
+      "label": "Low woven household screen"
+    },
+    {
+      "id": "yk_screen_02",
+      "kind": "boundary",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          5,
+          -26
+        ],
+        [
+          17,
+          -26
+        ],
+        [
+          20,
+          -20
+        ]
+      ],
+      "width": 0.12,
+      "label": "Low woven household screen"
+    },
+    {
+      "id": "yk_screen_03",
+      "kind": "boundary",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -34,
+          21
+        ],
+        [
+          -36,
+          29
+        ],
+        [
+          -32,
+          33
+        ]
+      ],
+      "width": 0.12,
+      "label": "Low woven household screen"
+    },
+    {
+      "id": "yk_screen_04",
+      "kind": "boundary",
+      "revision": 1,
+      "change": {
+        "kind": "added",
+        "predecessors": []
+      },
+      "evidence": "interpretation",
+      "source_ids": [
+        "yenikapi_excavation"
+      ],
+      "points": [
+        [
+          -36,
+          -15
+        ],
+        [
+          -30,
+          -17
+        ],
+        [
+          -22,
+          -16
+        ]
+      ],
+      "width": 0.12,
+      "label": "Low woven household screen"
+    }
+  ],
+  "stops": [
+    {
+      "id": "arrival",
+      "key": "1",
+      "title": "Village approach",
+      "at": [
+        1,
+        42
+      ],
+      "target": [
+        -5,
+        8
+      ],
+      "note": "A small settlement on a dry rise beside the stream. Every household placement is an interpretation."
+    },
+    {
+      "id": "yard",
+      "key": "2",
+      "title": "Shared yard",
+      "at": [
+        -3,
+        12
+      ],
+      "target": [
+        -13,
+        9
+      ],
+      "note": "Earth paths join domestic thresholds, outdoor work and the water. Boundaries suggest use, not documented ownership."
+    },
+    {
+      "id": "home",
+      "key": "3",
+      "title": "Inside a dwelling",
+      "at": [
+        -12,
+        8.8
+      ],
+      "target": [
+        -12,
+        5
+      ],
+      "note": "Interpretive mats, pottery, basket and grinding stone. The number of beds or pots is not an excavated inventory."
+    },
+    {
+      "id": "work",
+      "key": "4",
+      "title": "Working room",
+      "at": [
+        -26,
+        -8
+      ],
+      "target": [
+        -25,
+        -11
+      ],
+      "note": "Hand-formed clay vessels and stone working, arranged for exploration. No wheel, metal forge or medieval workshop."
+    },
+    {
+      "id": "store",
+      "key": "5",
+      "title": "Household storage",
+      "at": [
+        -3,
+        27.5
+      ],
+      "target": [
+        -3,
+        25
+      ],
+      "note": "Containers and dry grain suggest household provisioning. A dedicated store at this address is a design choice."
+    },
+    {
+      "id": "landing",
+      "key": "6",
+      "title": "At the stream",
+      "at": [
+        40,
+        29
+      ],
+      "target": [
+        47,
+        24
+      ],
+      "note": "Wooden paddles support water travel. Canoe shape, landing slope and working racks are explicitly interpretive."
+    },
+    {
+      "id": "field",
+      "key": "7",
+      "title": "Cultivation edge",
+      "at": [
+        -43,
+        -20
+      ],
+      "target": [
+        -57,
+        -31
+      ],
+      "note": "Regional mixed subsistence informs the crop plots. Species, yields, field boundaries and season are unverified."
+    },
+    {
+      "id": "round",
+      "key": "8",
+      "title": "Round-house comparison",
+      "at": [
+        -28,
+        26
+      ],
+      "target": [
+        -29,
+        23
+      ],
+      "note": "Round forms occur in the published evidence and Marmara comparisons. This roof, plan and furnishings are authored."
+    }
+  ],
+  "scenario_ids": [],
+  "categories": [
+    "village",
+    "town",
+    "large_town",
+    "small_city",
+    "large_city",
+    "metropolis"
+  ],
+  "evidence_note": "Direct evidence anchors place and material vocabulary. Regional analogy informs comparisons. Every visible plan, furnishing arrangement, roof and exact shoreline is interpretation. No continuous village-to-capital history is asserted.",
+  "ui": {
+    "walk": "Walk",
+    "fly": "Free flight",
+    "overview": "Aerial survey",
+    "evidence": "Evidence & limits",
+    "save": "Save view",
+    "load": "Restore view",
+    "help": "WASD / arrows move · drag right mouse or Tab to look · F walk/flight · Q/E rise in flight · Shift faster · 1–8 visit · H hide interface · Esc release mouse",
+    "saved": "View saved in the separate early-settlement folder.",
+    "loaded": "Saved view restored.",
+    "missing": "No compatible early-settlement view to restore.",
+    "water": "The water and distant countryside mark the walking boundary. Use F to explore in flight."
+  }
+}

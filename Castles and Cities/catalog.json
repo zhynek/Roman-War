@@ -6,6 +6,12 @@
       "name": "Byzantine Empire (Eastern Roman Empire)",
       "political_form": "empire",
       "brief": "realms/byzantine_empire/README.md"
+    },
+    {
+      "id": "prehistoric_marmara",
+      "name": "Prehistoric Marmara (geographical grouping, not a known polity)",
+      "political_form": "unspecified",
+      "brief": "sites/README.md"
     }
   ],
   "studies": [
@@ -13,6 +19,11 @@
       "id": "constantinople_1200",
       "realm_id": "byzantine_empire",
       "manifest": "realms/byzantine_empire/cities/constantinople_1200/study.json"
+    },
+    {
+      "id": "yenikapi_6000_bce",
+      "realm_id": "prehistoric_marmara",
+      "manifest": "sites/yenikapi_6000_bce/study.json"
     }
   ]
 }

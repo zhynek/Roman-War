@@ -22,3 +22,9 @@ reconstruction can become a separately indexed study with an explicit relation
 to its predecessor.
 
 Add entries to [catalog.json](catalog.json), then run the workspace validator.
+
+## Prehistoric site study
+
+[Yenikapı · circa 6000 BCE](sites/yenikapi_6000_bce/README.md) is a separate
+interpretive early village with furnished interiors and walking/flight navigation.
+Prehistoric Marmara is a geographical grouping, not a documented realm.

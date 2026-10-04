@@ -13,6 +13,15 @@ the scene; most footprints, streets, terrain, interiors and ordinary buildings
 remain interpretive. This is not a surveyed reconstruction or a constraint-based
 CAD model. No new playable faction, campaign rule or save field is introduced.
 
+## Early-settlement phase
+
+The separate [Yenikapı village, circa 6000 BCE](sites/yenikapi_6000_bce/README.md)
+now explores a much earlier settlement context on the historic peninsula. Its
+plan and furnishings are interpretive, its evidence is separately classified,
+and its explicit object lineage is a foundation for later authored scenarios.
+Only the village is implemented; no continuous development into the medieval
+capital is asserted. The circa-1200 project and downloads remain available.
+
 ## Start here
 
 | Resource | Use |

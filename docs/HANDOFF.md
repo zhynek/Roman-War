@@ -11,6 +11,43 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Independent Yenikapı early village (October 4, 2026)
+
+The separate [Yenikapı circa-6000 BCE study](../Castles%20and%20Cities/sites/yenikapi_6000_bce/README.md)
+begins the early-settlement phase. Direct site archaeology and regional analogies
+are distinguished in its evidence ledger and in-app panel. The specific date is
+nominal within the published Neolithic range. All household placements, roofs,
+furnishing arrangements, fields and exact waterline are interpretation. No
+uninterrupted village-to-Constantinople development is asserted.
+
+Only the village is built: six furnished dwellings, a working room and two stores,
+five curved footpaths, a shared outdoor hearth, low household screens, cultivation
+and a stream-bank landing. There are nine enterable interiors, eight walking
+stops and free flight. Original procedural geometry includes timber, daub, thatch,
+footing stones, thresholds, pottery, mats, baskets and grinding implements.
+The canoe hull and fishing rack are labeled interpretations. People, animated
+crafts, sound, species/season reconstruction and later stages remain unfinished.
+
+`sites/yenikapi_6000_bce/experience/src/fabric.gd` is a deterministic, scene-free
+explicit lineage seam: retain, alter, replace, add, subdivide, remove or abandon
+specific objects. No elapsed time/population upgrades exist; only hypothetical
+test fixtures exercise changes. IDs, revisions, predecessor references and
+inactive fabric persist in the resolver result. Dated snapshots remain separate.
+[Authoring/save contract](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/AUTHORING.md)
+documents the independent `yenikapi_view` version-1 bookmark, bundle identity and
+user directory. No medieval creative or campaign save is migrated.
+
+Source verification passed the 14 data cases and geometric walking/interior,
+collision, picking, repeatability, lineage and real save checks. All 14 source
+views were inspected outside Git (`/tmp/yenikapi-final-qa`). Parent data/import
+were clean; **705 campaign tests, zero failures** and rendered planning/marching/
+arrival/40× map inspection passed (`build/yenikapi-parent-gates`, external images
+`/tmp/yenikapi-parent-map`). The retained medieval neighborhood passed **374
+checks, zero failures**; its entire experience source/data/export configuration
+is unchanged. The new release builder freezes a clean commit and repeats checks,
+14 captures, performance measurements and GLB/ZIP/signature verification against
+the exact universal Mac app. Exact package results are recorded after that run.
+
 ## Independent Constantinople city study
 
 `Castles and Cities/` contains the standalone **Constantinople circa 1200**

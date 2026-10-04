@@ -55,3 +55,31 @@ Run parent data validation, clean import, the complete campaign suite and
 `tools/map_playtest.gd` separately; inspect planning, marching, arrival and
 maximum zoom and check stderr even when exit status is zero. Keep
 `build/.gdignore` present so generated exports cannot enter campaign imports.
+
+## Separate Yenikapı early-settlement prerelease
+
+The new site project is `sites/yenikapi_6000_bce/experience/`. Use its independent
+builder from a clean committed checkout after parent data/import/full-suite/map
+checks. Parent logs must be named `data.log`, `import.log`, `tests.log`, `map.log`.
+
+```sh
+python3 'Castles and Cities/tools/build_early_settlement.py' \
+  --godot /path/to/Godot.app/Contents/MacOS/Godot \
+  --version 0.1.0 --parent-gates build/yenikapi-parent-gates
+```
+
+It freezes the authoring workspace, validates both registered studies and the
+village data, runs negative cases and source geometry/walking/save/lineage checks,
+benchmarks the source, exports and checks the universal ad-hoc signed Mac app,
+then repeats checks, 14 rendered views and the same benchmark in the **exact app**.
+Inspect all images at the external `render_capture_directory` before publishing.
+Source/package geometry hashes must match. Ten GLBs, three ZIPs and SHA-256
+checksums are validated. Parent stderr is checked as well as success markers.
+
+Artifacts use `Yenikapi-Early-Settlement-{macOS,Models,Source}-0.1.0.zip`.
+Publish under **`yenikapi-early-settlement-v0.1.0`**, `--prerelease --latest=false`,
+with the frozen commit target. Do not replace Constantinople or campaign assets.
+Never change bytes under an existing release version. Model material appearance
+is a neutral derivative; editable source retains shaders, data and original code.
+The new app bundle/save namespace is independent of Constantinople's v1 creative
+save and all campaign saves. See its authoring guide for the new view format.

@@ -5,9 +5,11 @@ capital. We will not label it a village simply to make a progression ladder work
 
 ## Historical snapshots
 
-These are separately dated reconstruction scopes. Only 1200 has a rendered
-interpretive model and is the active reference; the others remain research
-outlines, without modeled historical snapshots. See the source IDs
+These are separately dated reconstruction scopes. Within this medieval study, 1200 is the active rendered reference; the other
+dates below remain research outlines. The separate
+[Yenikapı circa-6000 BCE project](../../../../sites/yenikapi_6000_bce/STAGES.md)
+has an interpretive village and its own snapshot identity. It is not an earlier
+upgrade state of this city. See the source IDs
 and dates in [study.json](study.json) and [SOURCES.md](SOURCES.md).
 
 | Snapshot | Visual questions to resolve | Guard against |

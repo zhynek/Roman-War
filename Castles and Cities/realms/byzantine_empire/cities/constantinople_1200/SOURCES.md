@@ -434,3 +434,10 @@ has been added. The two infill states remain **hypothetical designs**. Original
 procedural geometry/materials are used throughout; no source imagery, textures,
 plans or meshes have been imported. See [the implementation and migration
 record](experience/NEIGHBORHOOD.md) for exactly what the new presentation changes.
+
+## Separate Neolithic scope
+
+The [Yenikapı evidence ledger](../../../../sites/yenikapi_6000_bce/SOURCES.md)
+classifies direct site archaeology, regional analogies and the early village’s
+design assumptions. Its circa-6000 BCE setting is independent of this ledger,
+with no inferred continuous parcel history across the intervening millennia.

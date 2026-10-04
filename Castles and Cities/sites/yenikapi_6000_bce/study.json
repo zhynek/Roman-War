@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "id": "yenikapi_6000_bce",
+  "name": "Yenikapı early-settlement interpretation",
+  "realm_id": "prehistoric_marmara",
+  "study_kind": "settlement",
+  "status": "detailed_model",
+  "reference_year_ce": -6000,
+  "period_note": "Nominal circa 6000 BCE within Neolithic occupation; not an exact foundation year or uninterrupted city ancestry.",
+  "categories": [
+    "village"
+  ],
+  "gameplay_binding": null,
+  "model_status": "detailed_model",
+  "georeference": {
+    "length_unit": "metre",
+    "axes": "x_east_y_north_z_up",
+    "horizontal_crs": null,
+    "vertical_datum": null,
+    "origin": null,
+    "survey_accuracy_m": null,
+    "note": "Interpretive local coordinates. Authoring metadata uses x east/y north/z up; runtime transforms to Godot x east/y up/z south. Local sea y=0 in runtime is not modern sea level."
+  },
+  "documents": {
+    "brief": "README.md",
+    "atlas": "experience/AUTHORING.md",
+    "stages": "STAGES.md",
+    "sources": "SOURCES.md",
+    "workplan": "experience/AUTHORING.md"
+  },
+  "capabilities": [
+    {
+      "id": "household_life",
+      "name": "Household life and provisioning",
+      "physical_requirements": "Walkable dwellings, working room, storage and shared outdoor spaces; no game effects."
+    }
+  ],
+  "districts": [
+    {
+      "id": "streamside_cluster",
+      "name": "Interpretive streamside cluster",
+      "priority": "first",
+      "capability_ids": [
+        "household_life"
+      ],
+      "source_ids": [
+        "yenikapi_excavation",
+        "algan_coast",
+        "ozdogan_marmara",
+        "donmez_chronology"
+      ],
+      "geometry_status": "detailed_model"
+    }
+  ],
+  "historical_snapshots": [
+    {
+      "id": "yenikapi_c6000_bce",
+      "label": "Yenikapı around 6000 BCE — interpretive",
+      "year_ce": -6000,
+      "status": "active_reference",
+      "source_ids": [
+        "yenikapi_excavation",
+        "algan_coast",
+        "ozdogan_marmara",
+        "donmez_chronology"
+      ]
+    }
+  ],
+  "active_snapshot_id": "yenikapi_c6000_bce",
+  "creative_variants": [],
+  "open_questions": [
+    "Measured palaeoshoreline and stream course at the nominal date",
+    "Phase-specific architectural publication and domestic inventories",
+    "Roof materials and detailing",
+    "Species, season and landscape ecology",
+    "Discontinuity, inundation and relocation before later urban snapshots"
+  ]
+}

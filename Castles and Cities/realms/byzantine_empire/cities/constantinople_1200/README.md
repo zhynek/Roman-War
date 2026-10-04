@@ -93,3 +93,9 @@ The cathedral precinct remains a future research package.
 [WORKPLAN.md](WORKPLAN.md) gives bounded modeling tasks and review criteria.
 [study.json](study.json) indexes these records for tooling; its IDs are authoring
 IDs and have no campaign meaning.
+
+## Separate early-settlement study
+
+The [Yenikapı village around 6000 BCE](../../../../sites/yenikapi_6000_bce/README.md)
+is now a separate dated interpretation. It does not replace this circa-1200
+reference or transform its plots into a prehistoric plan.
