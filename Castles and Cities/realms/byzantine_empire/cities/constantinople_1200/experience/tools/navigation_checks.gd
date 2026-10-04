@@ -1,5 +1,5 @@
 extends SceneTree
-## Real camera, controls and input checks without constructing city meshes.
+## Real camera, controls and terrain checks without constructing city buildings.
 ## Run with --headless --path <experience> --script res://tools/navigation_checks.gd.
 
 class NavigationHarness extends "res://src/main.gd":
@@ -30,8 +30,19 @@ func _run() -> void:
 	app.camera = Camera3D.new()
 	app.camera.current = true
 	app.add_child(app.camera)
-	app.world = Node3D.new()
+	app.world = load("res://src/world.gd").new()
 	app.add_child(app.world)
+	app.world.data = app.data
+	app.world.visuals = app._read_dictionary("res://data/visuals.json")
+	app.world._materials()
+	app.world._terrain()
+	# Use production terrain interpolation for picking and walking. Architecture
+	# and neighborhood collision are independently exercised by scene/route gates.
+	app.world.neighborhood = load("res://src/neighborhood.gd").new()
+	app.world.neighborhood.active = false
+	app.world.add_child(app.world.neighborhood)
+	app.world.urban.free()
+	app.world.additions.free()
 	app._index_data()
 	app._build_ui()
 	app.ready_for_capture = true
@@ -140,15 +151,15 @@ func _test_speed_and_travel() -> void:
 	app.camera.rotation = Vector3.ZERO
 	app._move_camera(Vector3.FORWARD, 1.0, false)
 	_check(is_equal_approx(app.camera.position.z, -505), "crossing speed never turns terrain walking into high-speed flight")
-	var height: float = app.Layout.height_at(app.data, app.camera.position.x, -app.camera.position.z)
-	_check(is_equal_approx(app.camera.position.y, height + 1.75), "walking still follows authored terrain")
+	var height: float = app.world.walk_surface(app.camera.position)
+	_check(is_equal_approx(app.camera.position.y, height + 1.68), "walking follows rendered terrain at the configured eye height")
 	app._move_camera(Vector3.FORWARD, 1.0, true)
 	_check(is_equal_approx(app.camera.position.z, -517), "walking Shift remains a bounded run")
 	app._set_navigation(app.Navigation.FLY)
 	_check(not app._speed_picker.disabled, "flight speed control returns when flying")
 	app._move_camera(Vector3(1, -1, 1), 100.0, true)
 	_check(app.camera.position.is_finite() and app.camera.position.x <= app._bounds.end.x + 400, "long boosted travel is clamped to study bounds")
-	_check(app.camera.position.y >= app.Layout.height_at(app.data, app.camera.position.x, -app.camera.position.z) + 2, "boosted flight cannot fall below the terrain")
+	_check(app.camera.position.y >= app.world._surface_height(app.camera.position.x, -app.camera.position.z) + 2, "boosted flight cannot fall below the terrain")
 
 
 func _test_hops() -> void:
