@@ -4,6 +4,10 @@ uniform vec4 tint : source_color = vec4(0.7,0.65,0.52,1.0);
 uniform int family = 0;
 uniform float metal_amount = 0.65;
 uniform float surface_roughness = 0.47;
+uniform vec2 ward_origin = vec2(0.0);
+uniform vec2 ward_polygon[16];
+uniform int ward_vertex_count = 5;
+uniform vec4 ground_tint : source_color = vec4(0.48,0.50,0.38,1.0);
 varying vec3 position_world;
 varying vec3 normal_world;
 float hash(vec2 p) { return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
@@ -58,6 +62,25 @@ void fragment() {
   } else if (family==6) {
     color=mix(color,vec3(0.28,0.32,0.20),filtered_noise(p*0.014)*0.30);
     color*=0.87+filtered_noise(p*0.63)*0.18;
+  }
+  if (family==9) {
+    vec2 local=vec2(position_world.x,-position_world.z)-ward_origin;
+    float distance_edge=10000.0;
+    for(int i=0;i<ward_vertex_count;i++) {
+      vec2 a=ward_polygon[i], b=ward_polygon[(i+1)%ward_vertex_count], ab=b-a;
+      distance_edge=min(distance_edge,length(local-a-ab*clamp(dot(local-a,ab)/dot(ab,ab),0.0,1.0)));
+    }
+    vec3 grass=ground_tint.rgb*(0.85+grain);
+    grass=mix(grass,vec3(0.28,0.32,0.20),filtered_noise(p*0.014)*0.30);
+    grass*=0.87+filtered_noise(p*0.63)*0.18;
+    color=mix(grass,color,smoothstep(0.0,9.0,distance_edge));
+  }
+  if (family==8) {
+    float mottling=filtered_noise(p*0.75);
+    float wear=smoothstep(0.38,0.7,filtered_noise(p*2.1));
+    color*=0.87+0.19*mottling;
+    color=mix(color,color*vec3(0.77,0.73,0.65),wear*0.23);
+    ROUGHNESS=0.98;
   }
   ALBEDO=color;
 }

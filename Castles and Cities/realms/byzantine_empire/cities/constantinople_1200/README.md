@@ -18,7 +18,7 @@ the historic peninsula.
 
 The standalone Godot 4.4 project has 26 landmark/site models, eight authoring
 wards, walls, three waterfront zones, interpreted terrain and a whole-city plan.
-The current deterministic baseline generates **17,561 ordinary buildings**, with
+The preserved deterministic baseline contains **17,561 ordinary plot records**, with
 3,264 trees and 192 neighborhood lane runs. These are modeling counts, never
 population or household estimates. Density is greater in central and waterfront
 wards; western open ground and gardens remain visible.
@@ -78,11 +78,13 @@ use repetitive buildings to suggest a population count we have not established.
 | Building | Plans, elevations, sections, structural system, roof and material schedule | 26 original landmark/site assemblies and varied dwelling generators; most dimensions remain approximate |
 | Room and street detail | Joinery, openings, paving, furniture, tools, lighting and wear tied to use | Selected interpretive interiors, openings and procedural surfaces; room-by-room evidence and construction refinement remain open |
 
-The next detailed research focus is the **Hagia Sophia–Hippodrome area**. It offers a
-recognizable context and surviving anchors, but the precinct, street levels and
-lost structures still require research. Improve a bounded area against sources
-before increasing its decorative detail.
-The city-wide experience supplies spatial context for that work.
+Phase 3 builds the **Pantokrator lanes and courts**: six irregular connected
+blocks, 108 occupied parcels, true interior openings, a continuous walking
+circuit and a furnished home, baking workshop and store. The local plan is
+interpretive; the monastery and its 1136 typikon anchor the evidence. The
+[neighborhood authoring guide](experience/NEIGHBORHOOD.md) records regional
+analogies, assumptions, the reversible presentation migration and validation.
+The cathedral precinct remains a future research package.
 
 ## Read and continue
 

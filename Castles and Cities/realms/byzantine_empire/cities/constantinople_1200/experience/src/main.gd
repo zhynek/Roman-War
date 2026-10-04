@@ -26,6 +26,7 @@ var _landmarks: Dictionary = {}
 var _sources: Dictionary = {}
 var _ordered_ids: Array[String] = []
 var _selected_landmark := ""
+var _selected_neighborhood_stop := -1
 var _selected_design := ""
 var _undo: Array = []
 var _next_design_id := 1
@@ -66,6 +67,8 @@ var _stats_label: Label
 var _stage_picker: OptionButton
 var _nav_picker: OptionButton
 var _speed_picker: OptionButton
+var _legacy_neighborhood: CheckBox
+var _walk_stop_picker: OptionButton
 var _district_picker: OptionButton
 var _time_slider: HSlider
 var _time_label: Label
@@ -99,7 +102,7 @@ func _ready() -> void:
 	_build_lighting()
 	camera = Camera3D.new()
 	camera.name = "StudyCamera"
-	camera.near = 0.25
+	camera.near = 0.08
 	camera.far = 32000.0
 	camera.fov = 58.0
 	camera.current = true
@@ -282,6 +285,22 @@ func _build_ui() -> void:
 		_district_picker.add_item(str(district.get("name", district["id"])))
 	_district_picker.item_selected.connect(_on_district_selected)
 	left.add_child(_district_picker)
+	left.add_child(_button("neighborhood_button", neighborhood_overview))
+	_walk_stop_picker = OptionButton.new()
+	_walk_stop_picker.fit_to_longest_item = false
+	_walk_stop_picker.add_item(_t("walk_stops"))
+	var neighborhood_data := _read_dictionary("res://data/neighborhood.json")
+	for stop in neighborhood_data.stops: _walk_stop_picker.add_item(stop.label)
+	_walk_stop_picker.item_selected.connect(func(index:int):
+		if index>0: walk_neighborhood(index-1)
+		_walk_stop_picker.select(0)
+		_walk_stop_picker.release_focus())
+	left.add_child(_walk_stop_picker)
+	_legacy_neighborhood = CheckBox.new()
+	_legacy_neighborhood.text = _t("legacy_neighborhood")
+	_legacy_neighborhood.toggled.connect(func(enabled:bool):
+		if world!=null: world.set_neighborhood_enabled(not enabled))
+	left.add_child(_legacy_neighborhood)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -407,7 +426,7 @@ func _build_ui() -> void:
 	_cutaway_toggle.visible = false
 	_cutaway_toggle.toggled.connect(set_cutaway)
 	info.add_child(_cutaway_toggle)
-	info.add_child(_button("focus_button", func(): focus_landmark(_selected_landmark)))
+	info.add_child(_button("focus_button", _approach_selection))
 	_interior_button = _button("interior_button", func(): interior_view(_selected_landmark))
 	_interior_button.visible = false
 	info.add_child(_interior_button)
@@ -548,10 +567,19 @@ func _button(key: String, callback: Callable) -> Button:
 	return button
 
 
+func _approach_selection() -> void:
+	if _selected_neighborhood_stop >= 0:
+		walk_neighborhood(_selected_neighborhood_stop)
+	else:
+		focus_landmark(_selected_landmark)
+
+
 func focus_landmark(identity: String) -> void:
 	if not _landmarks.has(identity):
 		return
 	_selected_landmark = identity
+	_selected_neighborhood_stop = -1
+	_interior_button.disabled = false
 	var landmark: Dictionary = _landmarks[identity]
 	_orbit_target = Layout.world(data, landmark["position_m"])
 	_orbit_target.y += float(landmark.get("dimensions", {}).get("height_m", 12.0)) * 0.35
@@ -823,7 +851,7 @@ func _set_navigation(mode: int, preserve_frame: bool = true) -> void:
 		_fly_yaw = camera.rotation.y
 		_fly_pitch = camera.rotation.x
 		if mode == Navigation.WALK:
-			camera.position.y = Layout.height_at(data, camera.position.x, -camera.position.z) + 1.75
+			camera.position.y = world.walk_surface(camera.position) + 1.68
 	if _help != null:
 		_help.text = _t(["help_orbit", "help_fly", "help_walk"][mode])
 	if mode == Navigation.WALK:
@@ -979,11 +1007,20 @@ func _move_camera(movement: Vector3, delta: float, boosted: bool) -> void:
 	var proposed := camera.position + direction * speed * delta
 	proposed.x = clampf(proposed.x, _bounds.position.x - 400.0, _bounds.end.x + 400.0)
 	proposed.z = clampf(proposed.z, -_bounds.end.y - 400.0, -_bounds.position.y + 400.0)
-	var ground: float = Layout.height_at(data, proposed.x, -proposed.z)
+	var ground: float = world._surface_height(proposed.x, -proposed.z)
 	if _navigation == Navigation.WALK:
-		proposed.y = ground + 1.75
-		if world.has_method("ground_can_walk") and not world.call("ground_can_walk", proposed):
+		if world.neighborhood.active and (world.neighborhood.contains(camera.position,3.0) or world.neighborhood.contains(proposed,3.0)):
+			camera.position = world.neighborhood.move_walk(camera.position, proposed-camera.position)
 			return
+		# Substeps prevent a boosted or delayed frame from crossing a thin obstacle.
+		var steps := maxi(1,ceili(camera.position.distance_to(proposed)/0.12))
+		var start := camera.position
+		for i in range(1,steps+1):
+			var sample := start.lerp(proposed,float(i)/steps)
+			sample.y = world.walk_surface(sample)+1.68
+			if not world.ground_can_walk(sample):return
+			camera.position = sample
+		return
 	else:
 		if _inside_architecture:
 			if Vector2(proposed.x, proposed.z).distance_to(Vector2(_interior_center.x, _interior_center.z)) > _interior_radius:
@@ -1032,14 +1069,14 @@ func _terrain_pick(screen: Vector2) -> Variant:
 	for iteration in range(900):
 		distance += step
 		var point := origin + direction * distance
-		var height: float = Layout.height_at(data, point.x, -point.z)
+		var height: float = world._surface_height(point.x, -point.z) if world!=null else Layout.height_at(data, point.x, -point.z)
 		if point.y <= height:
 			var low := previous
 			var high := distance
 			for refinement in range(15):
 				var middle := (low + high) * 0.5
 				var sample := origin + direction * middle
-				if sample.y > Layout.height_at(data, sample.x, -sample.z):
+				if sample.y > (world._surface_height(sample.x, -sample.z) if world!=null else Layout.height_at(data, sample.x, -sample.z)):
 					low = middle
 				else:
 					high = middle
@@ -1324,6 +1361,15 @@ func load_variant() -> bool:
 		_next_design_id += 1
 	_rebuild_design()
 	_set_status("load_clamped" if checked["clamped"] else "loaded")
+	# Version-1 designs carry original coordinates, not parcel attachments. Restore
+	# the prior presentation for additions in the changed area; never relocate them.
+	for item in design_objects:
+		var at:=Layout.world(data,item.position_m)
+		if world.neighborhood.contains(at,12.0*float(item.scale)):
+			world.set_neighborhood_enabled(false)
+			_legacy_neighborhood.set_pressed_no_signal(true)
+			_set_status("loaded_legacy_neighborhood")
+			break
 	return true
 
 
@@ -1404,3 +1450,35 @@ func _set_status_text(value: String) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		_release_mouse()
+
+
+func neighborhood_overview() -> void:
+	world.set_neighborhood_enabled(true)
+	_legacy_neighborhood.set_pressed_no_signal(false)
+	var center:Vector3=world.neighborhood.point(Vector2(0,25))
+	set_camera_view(center,290,28,55)
+	_set_status_text(_t("neighborhood_note"))
+
+func walk_neighborhood(index:int=0) -> void:
+	world.set_neighborhood_enabled(true)
+	_legacy_neighborhood.set_pressed_no_signal(false)
+	_selected_neighborhood_stop=index
+	set_cutaway(false)
+	_cutaway_toggle.set_pressed_no_signal(false)
+	_cutaway_toggle.hide()
+	var pose:Dictionary=world.neighborhood.stop_pose(index)
+	_set_navigation(Navigation.WALK,false)
+	camera.position=pose.eye
+	camera.look_at(pose.target,Vector3.UP)
+	_fly_yaw=camera.rotation.y
+	_fly_pitch=camera.rotation.x
+	_info_title.text=pose.stop.label
+	_info_description.text=pose.stop.text
+	_info_evidence.text=world.neighborhood.config.evidence_note
+	_info_sources.text=_t("neighborhood_sources")
+	_info_sources.tooltip_text=_info_sources.text
+	_selected_source_url=world.neighborhood.config.evidence[0].url
+	_source_button.disabled=false
+	_source_button.show()
+	_interior_button.disabled=true
+	_set_status_text(_t("neighborhood_walk_hint"))

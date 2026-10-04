@@ -229,6 +229,57 @@ def validate_architecture(config, schema, city, visuals):
     return errors
 
 
+def validate_neighborhood(config, schema, city):
+    errors = []
+    for error in jsonschema.Draft202012Validator(schema).iter_errors(config):
+        errors.append(f"neighborhood/{list(error.path)}: {error.message}")
+    if errors:
+        return errors
+    sources = {row["id"] for row in config["evidence"]}
+    for table in ("blocks", "streets", "stops", "evidence"):
+        ids = [row["id"] for row in config[table]]
+        if len(ids) != len(set(ids)):
+            errors.append(f"neighborhood/{table}: duplicate stable IDs")
+    errors.extend(polygon_errors("neighborhood/boundary", config["boundary_m"]))
+    parcels = set()
+    for block in config["blocks"]:
+        polygon = block["polygon_m"]
+        errors.extend(polygon_errors(block["id"], polygon))
+        if block["evidence_id"] not in sources:
+            errors.append(f"neighborhood/{block['id']}: unknown evidence")
+        # The analytic inward offset requires counterclockwise convex input.
+        for i, a in enumerate(polygon):
+            b, c = polygon[(i+1)%len(polygon)], polygon[(i+2)%len(polygon)]
+            if (b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]) <= 0:
+                errors.append(f"neighborhood/{block['id']}: expected convex counterclockwise boundary")
+            if not inside(a, config["boundary_m"]):
+                errors.append(f"neighborhood/{block['id']}: block outside override boundary")
+            count = max(2, math.floor(math.dist(a,b)/block["frontage_m"]+0.5))
+            gaps = {(p["edge"], p["index"]) for p in block["passages"]}
+            for j in range(count):
+                if (i,j) not in gaps:
+                    parcels.add(f"{block['id']}_e{i}_p{j}")
+        for gap in block["passages"]:
+            edge = gap["edge"]
+            if edge >= len(polygon):
+                errors.append(f"neighborhood/{block['id']}: passage edge out of range")
+            elif gap["index"] >= max(2, math.floor(math.dist(polygon[edge], polygon[(edge+1)%len(polygon)])/block["frontage_m"]+0.5)):
+                errors.append(f"neighborhood/{block['id']}: passage slot out of range")
+    for stop in config["stops"]:
+        if "parcel_id" in stop and stop["parcel_id"] not in parcels:
+            errors.append(f"neighborhood/{stop['id']}: unknown or open passage parcel")
+        if ("parcel_id" in stop) == ("point_m" in stop):
+            errors.append(f"neighborhood/{stop['id']}: choose a parcel or a point")
+    # Keep the gateway connected to the existing route, not a look-alike parallel road.
+    origin = config["origin_m"]
+    gateway = config["streets"][0]["points_m"][-1]
+    absolute = [origin[0]+gateway[0], origin[1]+gateway[1]]
+    approach = next(row for row in city["roads"] if row["id"] == "pantokrator_shore")
+    if absolute not in approach["points_m"]:
+        errors.append("neighborhood: approach no longer joins the preserved Pantokrator route")
+    return errors
+
+
 GODOT_PROBE = r'''extends SceneTree
 const Layout = preload("res://src/layout.gd")
 var failures: Array[String] = []
@@ -342,6 +393,9 @@ def main():
         architecture = json.loads((ROOT / "data/architecture.json").read_text())
         architecture_schema = json.loads((ROOT / "schemas/architecture.schema.json").read_text())
         errors.extend(validate_architecture(architecture, architecture_schema, data, visuals))
+        neighborhood = json.loads((ROOT / "data/neighborhood.json").read_text())
+        neighborhood_schema = json.loads((ROOT / "schemas/neighborhood.schema.json").read_text())
+        errors.extend(validate_neighborhood(neighborhood, neighborhood_schema, data))
     except (OSError, ValueError) as error:
         errors.append(f"presentation configuration: {error}")
     for error in errors:

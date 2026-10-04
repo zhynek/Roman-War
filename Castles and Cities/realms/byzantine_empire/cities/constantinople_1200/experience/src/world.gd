@@ -15,6 +15,7 @@ var urban := Node3D.new()
 var additions := Node3D.new()
 var _prototypes: Dictionary = {}
 var architecture
+var neighborhood
 var _architecture_placements: Array = []
 var _layout: Dictionary = {}
 var _obstacles: Dictionary = {}
@@ -45,6 +46,10 @@ func configure(city: Dictionary) -> void:
 	add_child(urban)
 	additions.name = "CreativeVariant"
 	add_child(additions)
+	neighborhood = preload("res://src/neighborhood.gd").new()
+	neighborhood.name = "PantokratorNeighborhood"
+	add_child(neighborhood)
+	neighborhood.configure(self)
 	set_stage(_stage)
 
 func _materials() -> void:
@@ -237,6 +242,7 @@ func _roads(records:Array=[], parent:Node3D=null) -> int:
 			for j in range(count):
 				var p:=a.lerp(b,float(j)/count)
 				var q:=a.lerp(b,float(j+1)/count)
+				if parent==urban and neighborhood!=null and neighborhood.active and neighborhood.contains(Vector3((p.x+q.x)*0.5,0,-(p.y+q.y)*0.5),10.0):continue
 				var va:=Layout.world(data,[p.x+side.x,p.y+side.y])+Vector3.UP*0.22
 				var vb:=Layout.world(data,[p.x-side.x,p.y-side.y])+Vector3.UP*0.22
 				var vc:=Layout.world(data,[q.x+side.x,q.y+side.y])+Vector3.UP*0.22
@@ -353,7 +359,11 @@ func set_stage(id:String) -> void:
 	_architecture_placements.clear()
 	var groups:Dictionary={}
 	var type_counts:Dictionary={}
+	neighborhood.suppressed_ids.clear()
 	for item:Dictionary in _layout["buildings"]:
+		if neighborhood.active and neighborhood.masks(item):
+			neighborhood.suppressed_ids.append(item.id)
+			continue
 		var p:Vector3=item["position"]
 		var type_id:String=architecture.select(item)
 		var floors:int=architecture.floors_for(item,type_id)
@@ -416,6 +426,8 @@ func set_stage(id:String) -> void:
 	_trees(_layout["trees"])
 	stats["building_count"]=_layout["buildings"].size()
 	stats["tree_count"]=_layout["trees"].size()
+	stats["detailed_parcels"]=neighborhood.parcels.size() if neighborhood.active else 0
+	stats["replaced_presentations"]=neighborhood.suppressed_ids.size()
 	stats["architecture_types"]=type_counts.size()
 	stats["architecture_counts"]=type_counts
 
@@ -435,6 +447,7 @@ func _plot_surfaces() -> void:
 	# inferred everyday surfaces, never cadastral parcels or surveyed paving.
 	var g=Geometry.new(materials)
 	for item in _layout["buildings"]:
+		if neighborhood.active and neighborhood.masks(item):continue
 		var center:Vector3=item["position"]
 		var half:Vector3=item["size"]*0.5+Vector3(1.1,0,1.1)
 		var basis:=Basis(Vector3.UP,float(item["yaw"]))
@@ -514,6 +527,7 @@ func _trees(points:Array) -> void:
 	var groups:Dictionary={}
 	for i in range(points.size()):
 		var p:Vector3=points[i]
+		if neighborhood.active and neighborhood.contains(p,4.0):continue
 		var key:=Vector2i(floori(p.x/500.0),floori(p.z/500.0))
 		if not groups.has(key):groups[key]=[]
 		groups[key].append(p)
@@ -661,7 +675,7 @@ func set_design_objects(objects:Array) -> void:
 		additions.add_child(node)
 
 func ground_can_walk(p:Vector3) -> bool:
-	if Layout.height_at(data,p.x,-p.z)<0.3:return false
+	if _surface_height(p.x,-p.z)<0.3:return false
 	var key:=Vector2i(floori(p.x/80.0),floori(p.z/80.0))
 	for dx in [-1,0,1]:
 		for dz in [-1,0,1]:
@@ -685,3 +699,15 @@ func _add_mesh(mesh:ArrayMesh,label:String,parent:Node3D) -> MeshInstance3D:
 	instance.mesh=mesh
 	parent.add_child(instance)
 	return instance
+
+func set_neighborhood_enabled(enabled:bool) -> void:
+	if neighborhood.active==enabled:return
+	neighborhood.active=enabled
+	neighborhood.visible=enabled
+	_layout.clear()
+	set_stage(_stage)
+
+func walk_surface(p:Vector3) -> float:
+	if neighborhood.active and neighborhood.contains(p):
+		return neighborhood.walk_height(p,p.y)
+	return _surface_height(p.x,-p.z)+0.24

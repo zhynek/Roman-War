@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "const": "pantokrator_neighborhood"
+    },
+    "layout_version": {
+      "const": 1
+    },
+    "reference_year_ce": {
+      "const": 1200
+    },
+    "name": {
+      "type": "string"
+    },
+    "origin_m": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "boundary_m": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "minItems": 3,
+      "maxItems": 16
+    },
+    "evidence_note": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "wall_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "storey_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "door_width_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "door_height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "roof_rise_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "eave_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "walk_radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "eye_height_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "step_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "move_sample_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": [
+        "wall_m",
+        "storey_m",
+        "door_width_m",
+        "door_height_m",
+        "roof_rise_m",
+        "eave_m",
+        "walk_radius_m",
+        "eye_height_m",
+        "step_m",
+        "move_sample_m"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "direct_constantinople",
+              "regional_analogy",
+              "interpretation"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "locator": {
+            "type": "string"
+          },
+          "claim": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "class",
+          "url",
+          "locator",
+          "claim"
+        ]
+      },
+      "minItems": 1
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "polygon_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 3
+          },
+          "depth_m": {
+            "type": "number",
+            "minimum": 5,
+            "maximum": 15
+          },
+          "frontage_m": {
+            "type": "number",
+            "minimum": 8,
+            "maximum": 20
+          },
+          "use": {
+            "enum": [
+              "court",
+              "home",
+              "work",
+              "store",
+              "garden"
+            ]
+          },
+          "passages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "edge": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "index": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "edge",
+                "index"
+              ]
+            }
+          },
+          "evidence_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "polygon_m",
+          "depth_m",
+          "frontage_m",
+          "use",
+          "passages",
+          "evidence_id"
+        ]
+      }
+    },
+    "streets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "width_m": {
+            "type": "number",
+            "minimum": 2,
+            "maximum": 12
+          },
+          "points_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 2
+          }
+        },
+        "required": [
+          "id",
+          "width_m",
+          "points_m"
+        ]
+      },
+      "minItems": 1
+    },
+    "stops": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "point_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "look_m": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "parcel_id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "text"
+        ]
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "id",
+    "layout_version",
+    "reference_year_ce",
+    "name",
+    "origin_m",
+    "boundary_m",
+    "evidence_note",
+    "dimensions",
+    "evidence",
+    "blocks",
+    "streets",
+    "stops"
+  ]
+}

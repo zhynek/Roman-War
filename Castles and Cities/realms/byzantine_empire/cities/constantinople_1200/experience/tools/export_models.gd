@@ -44,7 +44,16 @@ func _run() -> void:
 			quit(1)
 			return
 		prototype.free()
-	var manifest:={"reference_year_ce":1200,"coordinate_system":"metres; Godot/glTF X east, Y up, -Z north","city_origin":"Hagia Sophia vicinity; interpretive local frame","source":"Original procedural city source; geometry authored with cited and interpretive dimensions","appearance":"Neutral PBR materials; procedural application shaders are not baked into these models","city_mesh":"Detailed landmarks and economical whole-city architecture; additional type- files contain detailed nominal urban prototypes. No claim of cadastral survey or CAD solid history","stats":world.stats,"landmarks":city["landmarks"],"architecture":world.architecture.config}
+	var district:=Node3D.new()
+	district.name="PantokratorLanesAndCourts"
+	root.add_child(district)
+	var origin:Vector3=world.neighborhood.point(Vector2.ZERO)
+	_copy_geometry(world.neighborhood,district,Transform3D(Basis.IDENTITY,-origin))
+	if not _write(district,out_dir.path_join("district-pantokrator.glb")):
+		quit(1)
+		return
+	district.free()
+	var manifest:={"reference_year_ce":1200,"coordinate_system":"metres; Godot/glTF X east, Y up, -Z north","city_origin":"Hagia Sophia vicinity; interpretive local frame","source":"Original procedural city source; geometry authored with cited and interpretive dimensions","appearance":"Neutral PBR materials; procedural application shaders are not baked into these models","city_mesh":"Detailed landmarks and economical whole-city architecture; additional type- files contain detailed nominal urban prototypes. No claim of cadastral survey or CAD solid history","neighborhood":world.neighborhood.config,"neighborhood_local_origin":[origin.x,origin.y,origin.z],"suppressed_legacy_plot_ids":world.neighborhood.suppressed_ids,"stats":world.stats,"landmarks":city["landmarks"],"architecture":world.architecture.config}
 	var file:=FileAccess.open(out_dir.path_join("model-provenance.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(manifest,"  "))
 	file.close()

@@ -14,38 +14,48 @@ minutes. It deliberately does **not** repeat the other docs:
 ## Independent Constantinople city study
 
 `Castles and Cities/` contains the standalone **Constantinople circa 1200**
-Godot project. Phase 2 (0.2.0) adds 16 data-driven architectural types across
-17,561 reference urban plots: courtyard and shop houses, distinct craft courts,
-small churches, wells and markets. Three monument families now have distinct
-assemblies: Sergius and Bacchus, Pantokrator and the Holy Apostles. The two
-hypothetical infill states preserve each reference plot and its type. Separate
-creative saves remain compatible; no campaign code or save keys changed.
+Godot project. Phase 3 (0.3.0) adds **Pantokrator lanes and courts**: six connected
+irregular blocks, 108 occupied parcels, actual wall openings and a continuous
+walking circuit through a home, baking workshop, store and rear court, with a
+working stair/gallery/upper room. The monastery's surviving architecture and
+1136 typikon anchor the research; the neighborhood's exact plan and furnishings
+are explicitly interpretive. The court/stair analogy is regional Corinth evidence.
 
-Navigation now has five visible flight speeds (8–1,000 m/s), Shift boost,
-faster wheel/pinch zoom, eight district jumps and double-click terrain travel.
-Ground/porch supports, terrain-conforming streets, roof enclosure, column
-continuity, facade offsets, LOD bounds and procedural shader filtering address
-verified visual defects. The reference chronology remains independent; a future
-campaign adapter is described in the experience guide, not implemented.
+All v0.2 improvements remain: 16 architectural types, 17,561 stable reference
+plot records, 26 landmarks, distinct Sergius/Pantokrator/Apostles assemblies,
+five flight speeds (8–1,000 m/s), Shift boost and eight district jumps. The new
+presentation masks 78 local building presentations without mutating the baseline
+generator. A legacy checkbox restores the old neighborhood; loading a v1 creative
+save with additions there automatically restores it without moving saved objects.
+The two infill states remain hypothetical designs. No campaign code or save keys
+changed; campaign integration remains a later read-only presentation adapter.
 
-Start at the [experience guide](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/README.md)
-and [release builder](../Castles%20and%20Cities/BUILDING.md). The `.gdignore`
-keeps the authoring workspace outside the campaign resource tree. The model
-bundle provides a whole-city GLB, 26 landmarks and 16 detailed architectural
-types. These are meshes and interpretive reconstructions, not CAD solids,
-measured archaeology or finished photorealism; consult `SOURCES.md` and the
-architecture evidence catalogue before extending them.
+Start at the [experience guide](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/README.md),
+[neighborhood authoring/migration record](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/NEIGHBORHOOD.md)
+and [release builder](../Castles%20and%20Cities/BUILDING.md). Read the source ledger
+before extending historical claims. The district generator shares wall/floor/stair
+geometry with collision, uses deterministic parcel IDs and keeps bounded detail
+resident. The model bundle has **44 GLBs**, including a separate detailed district,
+the whole city, 26 landmarks and 16 nominal architectural types.
 
 Verified October 4: parent campaign **705 tests, 0 failures**, clean data/import
-and planning/marching/arrival/40× map gates. City source gates passed **9,045 scene checks, 86 navigation checks, 212 landmark
-checks and 8 terrain checks** (546,664 terrain interior samples). These include
-schema and deterministic layouts, actual-scene geometry/editor/persistence,
-architecture footprints/grounding and paired LOD checks, camera input, landmark
-enclosures and terrain coverage. Release builds repeat those checks against
-the exact packaged app and render 23 views; `provenance.json` and build logs
-record the results and source hashes. Generated applications/models belong in
-ignored `build/`; QA images stay in external temporary directories. Keep an
-ignored `build/.gdignore` so campaign imports do not scan generated GLBs.
+and planning/marching/arrival/40× map gates. Source neighborhood checks passed
+**374 checks**, including all 108 doors, a continuous walking route, stair ascent
+and descent, collision, repeatable geometry, baseline preservation and real
+creative-save round trips. Eight negative schema/data tests pass. Actual source
+renders were inspected at aerial, street and interior scales. Matched M3 Max
+1600×1000 benchmarks measured street median **7.87 → 8.33 ms**, p95 **8.64 →
+8.63 ms**, startup **10.61 → 10.92 s**. These are local measurements, not universal
+performance promises. The release builder repeats the existing city scene/editor,
+navigation, landmark and terrain gates plus neighborhood checks against the exact
+Mac application, renders 32 views, benchmarks it and records provenance/checksums.
+
+Most rooms remain empty shells, yards are lightly furnished, and the rest of the
+city retains coarser v0.2 architecture. This is procedural interpretation, not
+photorealism or measured archaeology. Generated applications/models belong in
+ignored `build/`; QA images stay in external temporary directories. Keep
+`build/.gdignore` so campaign imports cannot scan generated GLBs. The authoring
+workspace's `.gdignore` keeps the city independent of campaign resources/saves.
 
 ## Roma city development
 

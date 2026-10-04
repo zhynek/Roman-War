@@ -10,6 +10,8 @@ func _initialize() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	root.always_on_top=true
+	root.grab_focus()
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	app=load("res://main.tscn").instantiate()
 	root.add_child(app)
@@ -73,6 +75,7 @@ func _run() -> void:
 	await _capture("22-pantokrator-chapel")
 	app.interior_view("holy_apostles")
 	await _capture("23-apostles-crossing")
+	await _neighborhood()
 	app.home_view()
 	var samples:Array[float]=[]
 	for i in range(90):
@@ -125,7 +128,7 @@ func _architecture_catalog() -> void:
 
 func _capture(label:String) -> void:
 	for i in range(24): await process_frame
-	await RenderingServer.frame_post_draw
+	RenderingServer.force_draw(false)
 	var screenshot:=root.get_texture().get_image()
 	var result:=screenshot.save_png(out_dir.path_join(label+".png"))
 	if result!=OK:
@@ -133,3 +136,34 @@ func _capture(label:String) -> void:
 		quit(1)
 	captures.append(label)
 	print("CAPTURE ",label)
+
+
+func _neighborhood() -> void:
+	app._hud.hide()
+	app.set_daytime(14.0)
+	app.neighborhood_overview()
+	await _capture("24-pantokrator-neighborhood")
+	app.walk_neighborhood(0)
+	await _capture("25-connected-street")
+	for i in [1,2,3]:
+		app.walk_neighborhood(i)
+		var n=app.world.neighborhood
+		var record:Dictionary=n.parcels[n.config.stops[i].parcel_id]
+		var target:Vector3=n.point(Vector2(record.front).lerp(record.back,0.3),record.floor_y+1.68)
+		# Use the production swept mover to enter, retaining collision during QA.
+		app.camera.position=n.move_walk(app.camera.position,target-app.camera.position)
+		app.camera.look_at(n.point(Vector2(record.front).lerp(record.back,0.67),record.floor_y+1.2),Vector3.UP)
+		await _capture(["","26-home-interior","27-baking-workshop","28-store-room"][i])
+	app.walk_neighborhood(4)
+	await _capture("29-garden-court")
+	var n=app.world.neighborhood
+	var home:Dictionary=n.parcels["north_west_e0_p3"]
+	app.camera.position=n.point(Vector2(-55,-5.9),home.floor_y+n.config.dimensions.storey_m+1.68)
+	app.camera.look_at(n.point(Vector2(-42,14),home.floor_y+3.5),Vector3.UP)
+	await _capture("30-upper-gallery")
+	app.camera.position=n.point(Vector2(home.front).lerp(home.back,0.64),home.floor_y+n.config.dimensions.storey_m+1.68)
+	app.camera.look_at(n.point(Vector2(home.front).lerp(home.back,0.35)+Vector2(2,0),home.floor_y+4),Vector3.UP)
+	await _capture("31-upper-room-roof")
+	app._hud.show()
+	app.walk_neighborhood(0)
+	await _capture("32-walking-controls")

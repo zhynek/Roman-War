@@ -75,7 +75,7 @@
   "help_orbit": "Right-drag orbit · middle-drag pan · wheel / pinch zoom · Shift-wheel faster · double-click terrain to approach · Home whole city · H panels",
   "help_fly": "Tab mouse look · WASD move · Q/E descend/rise · wheel or [ / ] speed · Shift ×4 · Escape release · Home whole city · H panels",
   "help_walk": "Tab mouse look · WASD walk · Shift run · Escape release · district menu jump · Home whole city · H panels",
-  "walk_note": "Walking follows terrain and available building obstacles; unsupported interiors are exterior studies.",
+  "walk_note": "Walking follows terrain and obstacles. Pantokrator has detailed interiors and stairs; use its walking starts for the completed route.",
   "open_folder_button": "Open study folder",
   "close_editor": "Close workshop",
   "distance_template": "%s · view distance %d m",
@@ -93,5 +93,12 @@
   "speed_district": "District · 120 m/s",
   "speed_city": "City · 400 m/s",
   "speed_crossing": "Crossing · 1,000 m/s",
-  "speed_status": "Flight speed %d m/s · hold Shift for %d m/s"
+  "speed_status": "Flight speed %d m/s · hold Shift for %d m/s",
+  "neighborhood_button": "Explore Pantokrator neighborhood",
+  "walk_stops": "Walk: choose a starting place…",
+  "legacy_neighborhood": "Use v0.2 neighborhood fabric",
+  "neighborhood_note": "Pantokrator lanes and courts · interpretive neighborhood, circa 1200. Choose a walking start below the district menu.",
+  "neighborhood_walk_hint": "Tab to walk · WASD · Shift to hurry · Escape releases mouse · H hides panels. Doors and passages lead into courts.",
+  "neighborhood_sources": "Evidence: Pantokrator typikon (1136), §§19, 43, 45, 47; Sanders, Corinth (regional analogy). Exact parcels and furnishings are interpretive.",
+  "loaded_legacy_neighborhood": "Design loaded at its saved coordinates. The v0.2 neighborhood fabric is shown for additions in the revised area; uncheck its option to compare."
 }

@@ -1,0 +1,498 @@
+{
+  "id": "pantokrator_neighborhood",
+  "layout_version": 1,
+  "reference_year_ce": 1200,
+  "name": "Pantokrator lanes and courts",
+  "origin_m": [
+    -2710,
+    1110
+  ],
+  "boundary_m": [
+    [
+      -124,
+      -96
+    ],
+    [
+      135,
+      -96
+    ],
+    [
+      144,
+      137
+    ],
+    [
+      10,
+      157
+    ],
+    [
+      -123,
+      146
+    ]
+  ],
+  "evidence_note": "Interpretive neighborhood beside the documented Pantokrator foundation. No recovered parcel plan or claim that these households served the monastery.",
+  "dimensions": {
+    "wall_m": 0.52,
+    "storey_m": 3.25,
+    "door_width_m": 1.65,
+    "door_height_m": 2.35,
+    "roof_rise_m": 1.9,
+    "eave_m": 0.28,
+    "walk_radius_m": 0.27,
+    "eye_height_m": 1.68,
+    "step_m": 0.24,
+    "move_sample_m": 0.12
+  },
+  "evidence": [
+    {
+      "id": "pantokrator_document",
+      "class": "direct_constantinople",
+      "url": "https://macedonia.kroraina.com/bbi/dos_byzantine_monastic_foundation_documents_2000.pdf",
+      "locator": "Document 28, translation Robert Jordan, pp. 725\u2013735, 759\u2013760, sections 43, 45, 47",
+      "claim": "1136 foundation; baking, drainage maintenance and service provisioning are attested. Exact neighborhood buildings, equipment and occupancy in 1200 are not."
+    },
+    {
+      "id": "corinth_court",
+      "class": "regional_analogy",
+      "url": "https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf",
+      "locator": "Sanders 2016, printed pp. 3\u20135; eleventh-century house only",
+      "claim": "Rooms around a well court and stairs to a balcony. This is Corinth, not a capital street plan. The adjacent Frankish commercial complex is later and excluded."
+    },
+    {
+      "id": "authored_fabric",
+      "class": "interpretation",
+      "url": "",
+      "locator": "Original procedural authoring, layout version 1",
+      "claim": "All local lanes, parcels, building dimensions, wall finishes, furnishings and drainage courses are interpretive. No later Ottoman projecting bays or post-1204 damage narrative."
+    }
+  ],
+  "blocks": [
+    {
+      "id": "south_west",
+      "polygon_m": [
+        [
+          -104,
+          -76
+        ],
+        [
+          -33,
+          -70
+        ],
+        [
+          -29,
+          -35
+        ],
+        [
+          -96,
+          -39
+        ]
+      ],
+      "depth_m": 8.5,
+      "frontage_m": 13.5,
+      "use": "court",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 3,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    },
+    {
+      "id": "south_east",
+      "polygon_m": [
+        [
+          -16,
+          -76
+        ],
+        [
+          73,
+          -79
+        ],
+        [
+          97,
+          -39
+        ],
+        [
+          29,
+          -22
+        ],
+        [
+          -16,
+          -30
+        ]
+      ],
+      "depth_m": 9.5,
+      "frontage_m": 13.5,
+      "use": "work",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 4,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    },
+    {
+      "id": "north_west",
+      "polygon_m": [
+        [
+          -103,
+          -19
+        ],
+        [
+          -23,
+          -15
+        ],
+        [
+          -12,
+          36
+        ],
+        [
+          -91,
+          48
+        ]
+      ],
+      "depth_m": 9,
+      "frontage_m": 13.5,
+      "use": "home",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 3,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    },
+    {
+      "id": "north_east",
+      "polygon_m": [
+        [
+          12,
+          -3
+        ],
+        [
+          83,
+          -19
+        ],
+        [
+          115,
+          5
+        ],
+        [
+          112,
+          65
+        ],
+        [
+          20,
+          42
+        ]
+      ],
+      "depth_m": 9,
+      "frontage_m": 13.5,
+      "use": "store",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 4,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    },
+    {
+      "id": "upper_west",
+      "polygon_m": [
+        [
+          -92,
+          60
+        ],
+        [
+          -8,
+          54
+        ],
+        [
+          5,
+          107
+        ],
+        [
+          -65,
+          126
+        ],
+        [
+          -100,
+          107
+        ]
+      ],
+      "depth_m": 9,
+      "frontage_m": 13.5,
+      "use": "garden",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 4,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    },
+    {
+      "id": "upper_east",
+      "polygon_m": [
+        [
+          28,
+          63
+        ],
+        [
+          105,
+          86
+        ],
+        [
+          90,
+          125
+        ],
+        [
+          23,
+          119
+        ]
+      ],
+      "depth_m": 8,
+      "frontage_m": 13.5,
+      "use": "court",
+      "passages": [
+        {
+          "edge": 1,
+          "index": 1
+        },
+        {
+          "edge": 3,
+          "index": 1
+        }
+      ],
+      "evidence_id": "authored_fabric"
+    }
+  ],
+  "streets": [
+    {
+      "id": "approach",
+      "width_m": 6,
+      "points_m": [
+        [
+          -124,
+          -29
+        ],
+        [
+          -99,
+          -27
+        ],
+        [
+          -22,
+          -21
+        ],
+        [
+          4,
+          -11
+        ],
+        [
+          87,
+          -28
+        ],
+        [
+          118,
+          -47
+        ],
+        [
+          160,
+          -80
+        ]
+      ]
+    },
+    {
+      "id": "cross_lane",
+      "width_m": 4.6,
+      "points_m": [
+        [
+          -25,
+          -96
+        ],
+        [
+          -23,
+          -77
+        ],
+        [
+          -23,
+          -28
+        ],
+        [
+          -11,
+          8
+        ],
+        [
+          0,
+          43
+        ],
+        [
+          14,
+          54
+        ],
+        [
+          14,
+          116
+        ],
+        [
+          20,
+          150
+        ]
+      ]
+    },
+    {
+      "id": "garden_lane",
+      "width_m": 4.5,
+      "points_m": [
+        [
+          -123,
+          53
+        ],
+        [
+          -93,
+          54
+        ],
+        [
+          -10,
+          44
+        ],
+        [
+          14,
+          54
+        ],
+        [
+          112,
+          74
+        ],
+        [
+          141,
+          81
+        ]
+      ]
+    },
+    {
+      "id": "west_lane",
+      "width_m": 4,
+      "points_m": [
+        [
+          -111,
+          -88
+        ],
+        [
+          -111,
+          -25
+        ],
+        [
+          -104,
+          49
+        ],
+        [
+          -111,
+          112
+        ],
+        [
+          -77,
+          137
+        ],
+        [
+          14,
+          136
+        ],
+        [
+          106,
+          137
+        ]
+      ]
+    },
+    {
+      "id": "east_lane",
+      "width_m": 4.5,
+      "points_m": [
+        [
+          118,
+          -47
+        ],
+        [
+          125,
+          5
+        ],
+        [
+          120,
+          74
+        ],
+        [
+          106,
+          137
+        ]
+      ]
+    }
+  ],
+  "stops": [
+    {
+      "id": "arrival",
+      "label": "Pantokrator approach",
+      "point_m": [
+        90,
+        -29
+      ],
+      "look_m": [
+        0,
+        -14
+      ],
+      "text": "A working neighborhood, circa 1200. The monastery is the historical anchor; these lanes and properties are an authored interpretation."
+    },
+    {
+      "id": "home",
+      "label": "Courtyard home",
+      "parcel_id": "north_west_e0_p3",
+      "text": "Regional analogy: an eleventh-century house at Corinth had rooms opening to a well court and a stair to an upper balcony. Bed, chest, stools and table here are interpretive furnishings, not an excavated inventory."
+    },
+    {
+      "id": "bakery",
+      "label": "Baking workshop",
+      "parcel_id": "south_east_e3_p1",
+      "text": "Direct city evidence: the Pantokrator typikon of 1136 specifies bakers, a bakery and milling. This modest neighborhood workshop, oven and tools are an interpretation, not the recovered institutional bakery."
+    },
+    {
+      "id": "store",
+      "label": "Store room",
+      "parcel_id": "north_east_e0_p2",
+      "text": "Interpretive storage: a few jars, sacks and timber shelves illustrate provisioning. No trade, owner or room inventory is attested at this address."
+    },
+    {
+      "id": "garden",
+      "label": "Garden court",
+      "point_m": [
+        -49,
+        88
+      ],
+      "look_m": [
+        -25,
+        97
+      ],
+      "text": "Gardening is attested among the monastery service duties in 1136. This open garden, planting and plot boundary are interpretive; the model does not claim a documented botanical inventory."
+    }
+  ]
+}

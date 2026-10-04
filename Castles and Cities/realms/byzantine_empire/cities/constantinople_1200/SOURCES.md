@@ -368,3 +368,68 @@ references. Avoid importing Ottoman minarets, later projecting-bay residential
 streets, post-1261 church annexes, Western Tudor framing or later industrial
 chimney forests into the baseline. These exclusions constrain the visual
 vocabulary; they do not establish a unique alternative facade for every lot.
+
+## Phase 3 · Pantokrator neighborhood (accessed 2026-10-04)
+
+The detailed district is **southwest of the Pantokrator church group**. This
+choice combines an identifiable surviving monument with an unusually detailed
+local foundation document. It supports discussion of work and provisioning at
+human scale without pretending to possess a recovered street or property plan.
+The model's monastery relationship and retained approach route are preserved;
+the chosen 267 × 253 m authoring envelope is not an archaeological boundary.
+
+### Direct Constantinople evidence: Pantokrator and its foundation
+
+- Columbia University, Istanbul Documentation Project,
+  [Zeyrek Kilise Camii / Pantokrator Monastery](https://mcid.mcah.columbia.edu/istanbul-documentation-project/zeyrek-kilise-camii-pantokrator-monastery).
+  The architectural history anchors the adjoining church complex in the
+  twelfth century. The model retains its unequal churches and central chapel.
+- John Thomas and Angela Constantinides Hero, eds., *Byzantine Monastic
+  Foundation Documents* (Dumbarton Oaks, 2000), document 28, **Pantokrator**,
+  translated by Robert Jordan. Read the introduction, printed pp. 725–735,
+  and the service/provisioning provisions, especially §19 and §§43, 45, 47
+  (printed pp. 759–760 for the latter passages).
+  [Full scholarly volume, accessible mirror](https://macedonia.kroraina.com/bbi/dos_byzantine_monastic_foundation_documents_2000.pdf).
+  The Dumbarton Oaks host was unavailable in this session; the published volume
+  was read from the mirror, not inferred from search snippets.
+- The **1136** typikon attests baking, mills, service personnel, gardening and
+  drain maintenance; vessels and provisioning appear among institutional needs.
+  The introduction's archaeological discussion (printed p. 728) distinguishes
+  surviving churches from poorly investigated ancillary remains and the large
+  southwest cistern. It does not supply house footprints for this model.
+- **Limit:** a normative document from 1136 does not certify unchanged operations
+  in 1200. Institutional bakers do not establish a private bakery at the modeled
+  address, and a drain cleaner does not establish the modeled open gutter's
+  course or construction. No exact furnishing, household identity, private
+  ownership or direct employment by the monastery is claimed.
+
+### Regional analogy: courts and vertical access
+
+- Guy D. R. Sanders, *Corinth in the Middle Ages*, BABESCH Byvanck Lecture 2016,
+  [published lecture](https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf),
+  printed pp. 3–5 (PDF pp. 12–14). The eleventh-century house discussion
+  describes rooms opening to a court with a well and a stair to a balcony.
+- **Use:** this supports a regional court/access analogy. The modeled external
+  stair, gallery, well and house arrangement are original interpretations,
+  not copies of that house and not direct capital evidence.
+- **Exclusion:** Sanders' revised chronology places the adjacent Frankish
+  commercial remains in a later period. They are not used as a 1200 street,
+  workshop, facade or occupancy template.
+
+### Artistic and architectural interpretation
+
+All six block outlines, 108 occupied parcels, local lanes, passage locations,
+roof pitches, wall thicknesses, floor heights, repairs and planting are authored.
+The house's bed, chest, table, stools and lamp; the workshop's oven, peel, sacks,
+worktable and dough; and the store's shelves and jars illustrate plausible uses.
+Their exact shapes and arrangement have no excavated inventory at these sites.
+The oven mouth is a visual recess, not a modeled working furnace. Small lamps
+also provide practical viewing light; their illumination is not a photometric
+reconstruction. Plant species, well supply and drainage hydraulics are unproven.
+
+The baseline stays circa 1200. No Ottoman projecting residential bays, later
+church additions, post-1204 destruction story or claimed development chronology
+has been added. The two infill states remain **hypothetical designs**. Original
+procedural geometry/materials are used throughout; no source imagery, textures,
+plans or meshes have been imported. See [the implementation and migration
+record](experience/NEIGHBORHOOD.md) for exactly what the new presentation changes.

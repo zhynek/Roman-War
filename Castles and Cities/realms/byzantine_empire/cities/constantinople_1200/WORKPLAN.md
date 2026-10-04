@@ -1,6 +1,6 @@
 # Work plan — build one defensible piece at a time
 
-Current checkpoint, 2026-10-03: **an original, independently explorable procedural
+Current checkpoint, 2026-10-04: **an original, independently explorable procedural
 3D city now exists** in [experience/](experience/project.godot). It contains 26
 landmark/site models, interpreted interiors and architecture, a peninsula terrain
 and street framework, and varied ordinary buildings. The application also has
@@ -22,34 +22,22 @@ geometry in [experience/src/](experience/src/), and export code in
 interaction and release artifact checks belong to the standalone app's release
 record; retain actual captures and binary exports outside the repository.
 
-## Next session: refine the cathedral precinct against dated evidence
+## Current completed package: Pantokrator lanes and courts
 
-Bound the task to `cathedral_hippodrome`, circa 1200. Begin with the existing
-procedural precinct and identify which parameters are estimates. Acquire and compare usable
-architectural plans and historical topography; establish their rights, dates and
-measurement basis. Record the source locator for every anchor and key dimension.
-Read the repository's `CLAUDE.md`, `docs/HANDOFF.md` and map review first, then this
-study and its sources.
+Phase 3 chooses a bounded neighborhood southwest of the documented foundation.
+Its six connected blocks replace 78 legacy presentations with 108 occupied
+street-facing parcels; the original plot records remain intact. A home, baking
+workshop, store, rear courts and an upper gallery are connected by tested walking
+routes. All local cadastral detail is explicitly interpretive, with a Corinth
+court/stair analogy separated from direct Constantinople evidence.
 
-Produce:
-
-1. A source/claim/dimension schedule distinguishing existence, position, height,
-   1200 condition and uncertainty. Leave unsupported fields unset.
-2. A declared coordinate system and provisional or surveyed datum, with an
-   explicit statement of which it is. Establish control points before calling
-   a map georeferenced.
-3. A dated asset inclusion list and a bounded precinct extent supported by the
-   acquired sources. List excluded later additions and unresolved alternatives.
-4. Revised original plan, elevations and geometry for the bounded area, with
-   each changed parameter linked to a measurement or explicit inference. Retain
-   the previous interpreted version for comparison; do not fabricate precision.
-5. External QA captures of plan, section, oblique and street-level views for
-   any geometry actually produced, with settings and evidence notes.
-
-Completion means a reviewer can trace every major modeled dimension to a source
-or labeled inference and can see the actual geometry. It does not mean a finished
-photorealistic precinct. Record exactly what was verified and the next unresolved
-modeling question.
+Read [experience/NEIGHBORHOOD.md](experience/NEIGHBORHOOD.md) before extending the
+reusable block generator. Continue by diversifying the large shared yards into
+more individually researched property groups, documenting historic street-width
+constraints, and furnishing further homes with object-specific dated evidence.
+Do not multiply this six-block plan across the city as a substitute for research.
+The Hagia Sophia–Hippodrome precinct remains another bounded future package;
+it requires its own dated plans, topography and rights review.
 
 ## Subsequent work packages
 

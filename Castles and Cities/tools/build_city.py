@@ -88,7 +88,7 @@ def check_glb(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", required=True)
-    parser.add_argument("--version", default="0.2.0")
+    parser.add_argument("--version", default="0.3.0")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
@@ -129,9 +129,11 @@ def main():
     editor = [godot, "--headless", "--path", project]
     run([sys.executable, project / "tools/validate_city.py", "--godot", godot],
         logs / "city-validation.log", project)
+    run([sys.executable, project / "tools/test_neighborhood_data.py"],
+        logs / "neighborhood-data-tests.log", project)
     run(editor + ["--import"], logs / "import.log", project)
     run(editor + ["--script", "res://tools/smoke.gd"], logs / "source-smoke.log", project)
-    focused_gates = ("navigation_checks", "landmark_checks", "surface_checks")
+    focused_gates = ("navigation_checks", "landmark_checks", "surface_checks", "neighborhood_checks")
     for gate in focused_gates:
         run(editor + ["--script", f"res://tools/{gate}.gd"], logs / f"source-{gate}.log", project)
     provenance["checks"]["source_validation_and_smoke"] = "passed"
@@ -170,13 +172,17 @@ def main():
     shutil.copy2(render_dir / "render-report.json", logs / "render-report.json")
     provenance["render_capture_directory"] = str(render_dir)
     provenance["checks"]["exact_packaged_smoke_and_render"] = "passed"
+    run([binary, "--script", "res://tools/benchmark.gd", "--", f"out_dir={render_dir / 'benchmark'}"],
+        logs / "packaged-benchmark.log", out)
+    shutil.copy2(render_dir / "benchmark/benchmark.json", logs / "benchmark.json")
+    provenance["performance"] = json.loads((logs / "benchmark.json").read_text())
     models = out / "Constantinople-1200-Models"
     run(editor + ["--script", "res://tools/export_models.gd", "--", f"out_dir={models}"],
         logs / "model-export.log", project)
     model_files = sorted(models.glob("*.glb"))
     city_data = json.loads((project / "data/city.json").read_text())
     architecture = json.loads((project / "data/architecture.json").read_text())
-    if len(model_files) != len(city_data["landmarks"]) + len(architecture["types"]) + 1:
+    if len(model_files) != len(city_data["landmarks"]) + len(architecture["types"]) + 2:
         raise SystemExit("Missing city, landmark or architectural type models")
     provenance["models"] = {p.name: check_glb(p) for p in model_files}
     provenance["checks"]["glb_structure"] = "passed"

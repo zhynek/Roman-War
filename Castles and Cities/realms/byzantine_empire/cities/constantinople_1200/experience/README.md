@@ -14,13 +14,47 @@ buildings, vegetation and vessels are original procedural constructions.
 This is a substantial interpretive reconstruction, **not a finished
 photorealistic or surveyed reproduction of the city in 1200**. The landmark
 list has an evidence register; most measurements, street plots, relief,
-building conditions and everyday details remain approximate. Ordinary houses
-use repeated architectural types and have exterior geometry. There are no
+building conditions and everyday details remain approximate. Outside the detailed Pantokrator neighborhood, ordinary houses
+use repeated architectural types and primarily exterior geometry. There are no
 historically verified room inventories, animated urban economy, soundscape,
 complete mosaics, or measured cadastral plan. Those limitations remain visible
 in the authoring brief rather than being disguised as historical evidence.
 
-## Architectural variety · 0.2.0
+## Connected neighborhood · 0.3.0
+
+**Explore Pantokrator neighborhood** opens six connected irregular blocks
+southwest of the monastery. **Walk: choose a starting place** puts you at the
+approach, courtyard home, baking workshop, store room or garden. Tab captures
+mouse look; WASD walks, Shift hurries, Escape releases the pointer. Street doors
+lead through real wall openings into rooms and rear courts. Walk through the
+home and turn right in its court to climb the stair to its upper gallery/room.
+
+The 108 occupied parcels share boundaries and street frontages, with unequal
+rooflines, twelve open passages, enclosed yards, gardens, shelters and water
+points. Thick walls, recessed windows, open door leaves, roof undersides and
+rafters, level floors, terrain-reaching foundations, shallow threshold steps,
+repairs, plaster variation and drainage strips replace isolated pads in this
+area. Three principal ground-floor interiors and the home's upper room are
+furnished. Other rooms are mostly empty shells. All geometry and materials are
+original procedural work. There is no urban activity or fluid simulation.
+
+The surviving Pantokrator churches and 1136 foundation document provide a
+strong local anchor for provisioning, baking, gardening and drain maintenance.
+The **local street plan, house positions, equipment and finishes are authored
+interpretations**, not excavated properties. The court/stair analogy comes from
+an eleventh-century house at Corinth. Later Frankish shops and Ottoman house
+forms are excluded. See [NEIGHBORHOOD.md](NEIGHBORHOOD.md) for the evidence,
+authoring contract, migration and measured performance.
+
+The v0.2 generator and all 17,561 stable baseline plot records remain intact;
+78 local building presentations are hidden while the 108 new parcels are shown.
+**Use v0.2 neighborhood fabric** restores the old presentation. Loading a v1
+creative save with additions in this area automatically selects that mode and
+keeps every saved identifier and coordinate. The detailed neighborhood can be
+re-enabled with its exploration button. Flight speeds and district jumps remain
+available throughout.
+
+## Architectural variety · preserved from 0.2.0
 
 The 17,561 reference urban plots now draw from **16 architectural types**:
 six domestic plans, shop houses, storehouses, weaving/pottery/smithing/baking
@@ -50,6 +84,8 @@ and the procedural material patterns are filtered to reduce distant shimmer.
 | Home view / Whole city / Plan view | Change the camera scale |
 | Right drag / middle drag / wheel or pinch | Orbit / pan / faster proportional zoom |
 | Shift + wheel | Double the zoom step |
+| Explore Pantokrator / Walk menu | Detailed district overview / five walking starts |
+| Use v0.2 neighborhood fabric | Restore the earlier local presentation for saved designs |
 | Jump to district / double-click terrain | Hop to a neighborhood / approach a chosen spot |
 | Home key | Whole-city overview |
 | Camera menu | Orbit, free flight or ground walking |
@@ -117,8 +153,10 @@ deterministically places the urban fabric. `src/world.gd` assembles it and
 groups repeated meshes for rendering. `data/visuals.json` controls rendering
 budgets and palette. Change these locally and validate before exporting.
 
-The model ZIP contains **43 GLBs**: a whole-city model, 26 landmarks and 16
-fully detailed nominal architectural prototypes (`type-*.glb`).
+The model ZIP contains **44 GLBs**: a whole-city model, 26 landmarks, 16
+fully detailed nominal architectural prototypes (`type-*.glb`) and a separate
+detailed `district-pantokrator.glb`. The district origin is documented in the
+model provenance; its coordinates are centered on the district’s local ground datum.
 They use neutral PBR materials, economical whole-city houses and metric mesh
 geometry. Procedural application shaders are not baked into those derivatives.
 Import them into Blender or another glTF-capable authoring tool; CAD workflows
@@ -135,6 +173,9 @@ python3 tools/validate_city.py --godot /path/to/godot
 /path/to/godot --headless --path . --script res://tools/navigation_checks.gd
 /path/to/godot --headless --path . --script res://tools/landmark_checks.gd
 /path/to/godot --headless --path . --script res://tools/surface_checks.gd
+python3 tools/test_neighborhood_data.py
+/path/to/godot --headless --path . --script res://tools/neighborhood_checks.gd
+/path/to/godot --path . --script res://tools/benchmark.gd -- out_dir=/tmp/constantinople-benchmark
 /path/to/godot --path . --script res://tools/preview.gd -- out_dir=/tmp/constantinople-qa
 /path/to/godot --headless --path . --script res://tools/export_models.gd -- out_dir=/tmp/constantinople-models
 ```
