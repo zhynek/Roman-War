@@ -16,7 +16,7 @@ func run() -> void:
 	var app=load("res://main.tscn").instantiate()
 	root.add_child(app)
 	await process_frame
-	var report:Dictionary={"startup_ms":Time.get_ticks_msec()-begin,"viewport":[root.size.x,root.size.y],"gpu":RenderingServer.get_video_adapter_name(),"engine":Engine.get_version_info().string,"method":"120 warmup + 180 process-frame samples; vsync disabled; screenshots excluded; run alone","views":{}}
+	var report:Dictionary={"startup_ms":Time.get_ticks_msec()-begin,"viewport":[root.size.x,root.size.y],"gpu":RenderingServer.get_video_adapter_name(),"engine":Engine.get_version_info().string,"method":"120 warmup + 180 frame intervals; one forced draw per interval, automatic render loop disabled; vsync disabled; screenshots excluded; run alone","views":{}}
 	if campaign_mode:
 		var state:Dictionary=app.campaign.rules.new_state()
 		for i in range(40):
@@ -31,6 +31,9 @@ func run() -> void:
 		report.hypothetical_turn=state.turn
 	app.hud.hide()
 	app.set_process(false)
+	# macOS can suppress background draws while process_frame continues.
+	# Draw exactly once per measured interval, including animation and rendering.
+	RenderingServer.render_loop_enabled=false
 	for label in ["landscape","aerial","street","interior"]:
 		if label=="landscape":app.set_view(Vector3(146,118,194),Vector3(-5,2,5))
 		elif label=="aerial":app.overview()
@@ -41,14 +44,19 @@ func run() -> void:
 				if building.id=="growth_home_north":
 					var at:Vector3=app.world.building_position(building,Vector3(0,1.68,1.7))
 					app.set_view(at,app.world.building_position(building,Vector3(0,1.2,-1)),false)
-		for i in range(120):await process_frame
+		for i in range(120):
+			await process_frame
+			RenderingServer.force_draw(true)
 		var samples:Array[float]=[]
 		for i in range(180):
 			var start:int=Time.get_ticks_usec()
 			await process_frame
+			RenderingServer.force_draw(true)
 			samples.append((Time.get_ticks_usec()-start)/1000.0)
 		samples.sort()
-		report.views[label]={"median_ms":samples[90],"p95_ms":samples[171],"draw_calls":Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME),"primitives":Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)}
+		if RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)<=0:
+			push_error("Benchmark camera did not render: "+label);quit(1);return
+		report.views[label]={"camera_position":[app.camera.position.x,app.camera.position.y,app.camera.position.z],"median_ms":samples[90],"p95_ms":samples[171],"draw_calls":RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),"primitives":RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)}
 	FileAccess.open(out_dir.path_join("benchmark.json"),FileAccess.WRITE).store_string(JSON.stringify(report,"  "))
 	print("VILLAGE BENCHMARK ",JSON.stringify(report))
 	quit()

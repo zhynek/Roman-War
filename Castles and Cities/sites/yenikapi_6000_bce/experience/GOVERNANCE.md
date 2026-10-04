@@ -154,7 +154,9 @@ Inspect all 12 captures, including the 1280×800 controls, plus the 14 reference
 captures. The source and exact Mac application run these gates separately.
 
 `tools/benchmark.gd -- campaign out_dir=...` measures the grown settlement with
-animated workers, separately from the unchanged reference cameras. The model
+animated workers, separately from the unchanged reference cameras. Each interval
+forces one draw with the automatic render loop disabled, avoiding macOS background
+render suppression. Screenshot readback is excluded from timing. The model
 bundle contains 16 GLBs: the retained ten reference models, a clearly named
 hypothetical town, four new buildings and the revised store. No citizen animation
 or gameplay is baked into the interchange models. Parent campaign data/import,
