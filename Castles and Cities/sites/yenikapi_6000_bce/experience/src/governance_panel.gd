@@ -1,0 +1,257 @@
+extends PanelContainer
+const Rules = preload("res://src/core/settlement_rules.gd")
+const Saves = preload("res://src/campaign_save.gd")
+var app
+var rules
+var copy: Dictionary
+var state: Dictionary = {}
+var tabs: TabContainer
+var column: VBoxContainer
+var notice: Label
+var workforce: Dictionary = {}
+var save_path: String = "user://early_settlement_campaign.json"
+var last_message: String = ""
+var _refreshing: bool = false
+
+func configure(owner_app) -> void:
+	app = owner_app
+	copy = JSON.parse_string(FileAccess.get_file_as_string("res://data/governance_ui.json"))
+	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")))
+	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
+	offset_left = -638; offset_right = -22; offset_top = 164; offset_bottom = -22
+	var panel_style:StyleBoxFlat=app._style();panel_style.bg_color.a=1.0
+	add_theme_stylebox_override("panel",panel_style)
+	refresh()
+	hide()
+
+func label(text: String, size: int = 16) -> Label:
+	var result: Label = app._label(text,size)
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return result
+
+func button(text: String, callback: Callable, id: String = "") -> Button:
+	var result: Button = app._button(text,callback)
+	result.focus_mode=Control.FOCUS_ALL
+	if not id.is_empty(): result.name=id
+	return result
+
+func open() -> void:
+	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+	if not state.is_empty(): app.show_campaign(state,rules)
+	show()
+	refresh()
+
+func begin() -> void:
+	state=rules.new_state()
+	last_message=copy.new_campaign
+	app.show_campaign(state,rules,true)
+	refresh()
+
+func dispatch(action: Dictionary) -> bool:
+	if state.is_empty(): return false
+	var result: Dictionary=rules.command(state,action)
+	if result.has("error"):
+		last_message=copy.get(result.error,result.error);refresh();return false
+	state=result.state
+	last_message=copy.get({"plan":"assigned","commission":"ordered","cancel":"cancelled","appoint":"appointed","policy":"policies_set"}.get(action.kind,"roles_note"),"")
+	app.show_campaign(state,rules)
+	refresh()
+	return true
+
+func resolve_season() -> bool:
+	if state.is_empty(): return false
+	var result: Dictionary=rules.advance(state)
+	if result.has("error"): last_message=copy.get(result.error,result.error);refresh();return false
+	state=result.state
+	last_message=copy.resolved
+	app.show_campaign(state,rules)
+	refresh()
+	return true
+
+func save_campaign() -> bool:
+	var ok: bool=not state.is_empty() and Saves.write(save_path,state,rules)
+	last_message=copy.saved if ok else copy.save_failed
+	refresh()
+	return ok
+
+func load_campaign() -> bool:
+	var loaded: Dictionary=Saves.read(save_path,rules)
+	if loaded.is_empty(): last_message=copy.load_failed;refresh();return false
+	state=loaded
+	last_message=copy.loaded
+	app.show_campaign(state,rules,true)
+	refresh()
+	return true
+
+func _tab(title: String) -> VBoxContainer:
+	var scroll:=ScrollContainer.new();scroll.name=title;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(scroll)
+	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",10);scroll.add_child(body)
+	return body
+
+func refresh() -> void:
+	if _refreshing:return
+	_refreshing=true
+	var selected:int=tabs.current_tab if is_instance_valid(tabs) else 0
+	var scrolls:Array=[]
+	if is_instance_valid(tabs):
+		for child in tabs.get_children():scrolls.append(child.scroll_vertical)
+	for child in get_children():remove_child(child);child.queue_free()
+	column=VBoxContainer.new();column.add_theme_constant_override("separation",8);add_child(column)
+	column.add_child(label(copy.panel_title,23))
+	column.add_child(label(copy.hypothesis,13))
+	var top:=HFlowContainer.new();column.add_child(top)
+	top.add_child(button(copy.close,hide,"ExploreCampaign"))
+	top.add_child(button(copy.reference,func(): app.show_reference();hide(),"ReferenceVillage"))
+	top.add_child(button(copy.save,save_campaign,"SaveCampaign"))
+	top.add_child(button(copy.load,load_campaign,"LoadCampaign"))
+	if state.is_empty():
+		var intro_scroll:=ScrollContainer.new();intro_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;intro_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(intro_scroll)
+		var introduction:=VBoxContainer.new();introduction.size_flags_horizontal=Control.SIZE_EXPAND_FILL;introduction.add_theme_constant_override("separation",14);intro_scroll.add_child(introduction)
+		introduction.add_child(label(copy.intro,18))
+		introduction.add_child(button(copy.begin,begin,"BeginTutorial"))
+		introduction.add_child(label(copy.principle_text,15))
+		tabs=null
+	else:
+		var role_row:=HBoxContainer.new();column.add_child(role_row)
+		var role_picker:=OptionButton.new();role_picker.name="RolePicker";role_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		for role in ["god","steward","watch"]:role_picker.add_item(copy[role])
+		role_picker.select(["god","steward","watch"].find(state.role))
+		role_picker.item_selected.connect(func(index):dispatch({"kind":"role","role":["god","steward","watch"][index]}))
+		role_row.add_child(role_picker)
+		var season: String=copy.year%[1+int(state.turn)/4,copy.seasons[int(state.turn)%4]]
+		column.add_child(label(season+" · "+copy["phase_"+state.phase],20))
+		tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;tabs.clip_tabs=false;column.add_child(tabs)
+		_guide(_tab(copy.overview))
+		_work(_tab(copy.work))
+		_leaders(_tab(copy.leaders))
+		_journal(_tab(copy.journal))
+		var principles:=_tab(copy.principles);principles.add_child(label(copy.principle_text,15));principles.add_child(label(copy.units_note,14))
+		principles.add_child(button(copy.restart,_confirm_restart,"RestartTutorial"))
+		tabs.current_tab=clampi(selected,0,tabs.get_tab_count()-1)
+		for i in range(mini(scrolls.size(),tabs.get_child_count())):tabs.get_child(i).set_deferred("scroll_vertical",scrolls[i])
+		var advance:=button(copy.end_season,resolve_season,"ResolveSeason");advance.custom_minimum_size.y=40;column.add_child(advance)
+		column.add_child(label(copy.pause_notice,12))
+	notice=label(last_message,13);notice.add_theme_color_override("font_color",Color("d6c794"));column.add_child(notice)
+	_refreshing=false
+
+func _guide(body: VBoxContainer) -> void:
+	var count:int=rules.people(state).size()
+	body.add_child(label("%s %d / %d   ·   %s %d / %d   ·   %s %d"%[copy.population,count,rules.capacity(state),copy.provisions,state.food,rules.storage(state),copy.wood,state.wood],18))
+	if state.phase=="town":body.add_child(label(copy.complete,17))
+	elif state.town_achieved:body.add_child(label(copy.recovery,17))
+	elif state.turn==0:body.add_child(label(copy.intro,17))
+	var recommended:String=recommended_project()
+	if not recommended.is_empty():
+		var p:Dictionary=rules.projects[recommended]
+		body.add_child(label(copy.guide_project%[p.title,p.body],17))
+		var queued:bool=false
+		for item in state.queue:
+			if item.id==recommended:queued=true
+		if not queued:
+			var commission:=button(copy.queue_recommended,func():dispatch({"kind":"commission","id":recommended}),"RecommendedProject")
+			commission.disabled=not rules.permitted(state,p.role);body.add_child(commission)
+	elif state.phase!="town":body.add_child(label(copy.guide_growth if count<rules.balance.town_population else copy.guide_sustain,17))
+	body.add_child(button(copy.suggest,_suggest,"SuggestedWorkforce"))
+	_forecast(body)
+	var b:Dictionary=rules.balance
+	body.add_child(label(copy.milestone%[b.town_population,b.town_dwellings,b.town_reserve_seasons,b.town_wellbeing,b.town_cooperation,b.town_security,state.stable_seasons,b.town_sustained_seasons],14))
+
+func recommended_project() -> String:
+	for id in rules.content.tutorial_projects:
+		if not rules.has_project(state,id):return id
+	return ""
+
+func _forecast(body: VBoxContainer) -> void:
+	var f:Dictionary=rules.forecast(state)
+	body.add_child(label(copy.preview,19))
+	body.add_child(label(copy.forecast_line%[f.food_delta,f.gathered,f.used,f.spoil,f.losses,f.food,rules.storage(state),f.wood,f.work],15))
+	body.add_child(label(copy.forecast_losses%[f.unfed,f.overflow],14))
+	for key in ["wellbeing","cooperation","security"]:
+		var factors:PackedStringArray=[]
+		for factor in f.factors[key]:
+			if factor.value!=0:factors.append(copy.factor_names[factor.id]+" %+d"%factor.value)
+		body.add_child(label(copy.factor_line%[copy[key],state[key],f.stocks[key],", ".join(factors)],14))
+
+func _work(body: VBoxContainer) -> void:
+	body.add_child(label(copy.labor_note,14))
+	var grid:=GridContainer.new();grid.columns=5;body.add_child(grid);workforce={}
+	for job in ["food","timber","care","watch","building"]:grid.add_child(label(copy.watch_job if job=="watch" else copy[job],14))
+	for job in ["food","timber","care","watch","building"]:
+		var spin:=SpinBox.new();spin.name="Workers_"+job;spin.min_value=0;spin.max_value=rules.people(state,true).size();spin.step=1;spin.value=state.plan[job];spin.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		spin.editable=job!="food" and (state.role=="god" or (job=="watch" and state.role=="watch") or (job!="watch" and state.role=="steward"))
+		grid.add_child(spin);workforce[job]=spin
+		if job!="food":spin.value_changed.connect(_balance_food)
+	body.add_child(button(copy.assign,_assign,"AssignWorkforce"))
+	body.add_child(button(copy.suggest,_suggest,"SuggestedWorkforceWork"))
+	var welcome:=CheckButton.new();welcome.text=copy.welcome;welcome.button_pressed=state.welcome;welcome.disabled=not rules.permitted(state,"steward");welcome.toggled.connect(func(value):dispatch({"kind":"policy","welcome":value,"tight_rations":state.tight_rations}));body.add_child(welcome)
+	var ration:=CheckButton.new();ration.text=copy.rations;ration.button_pressed=state.tight_rations;ration.disabled=not rules.permitted(state,"steward");ration.toggled.connect(func(value):dispatch({"kind":"policy","welcome":state.welcome,"tight_rations":value}));body.add_child(ration)
+	for item in state.queue:
+		var p:Dictionary=rules.projects[item.id]
+		body.add_child(label(copy.queue_line%[p.title,item.progress,p.work,p.wood],16))
+		var cancel:=button(copy.cancel,func():dispatch({"kind":"cancel","id":item.id}),"Cancel_"+item.id);cancel.disabled=not rules.permitted(state,p.role);body.add_child(cancel)
+	for p in rules.content.projects:
+		if rules.has_project(state,p.id):continue
+		var queued:bool=false
+		for item in state.queue:
+			if item.id==p.id:queued=true
+		if queued:continue
+		body.add_child(HSeparator.new())
+		body.add_child(label(copy.project_cost%[p.title,p.wood,p.work],17))
+		body.add_child(label(p.body,14))
+		var order:=button(copy.queue,func():dispatch({"kind":"commission","id":p.id}),"Commission_"+p.id)
+		order.disabled=not rules.permitted(state,p.role) or state.wood<p.wood or state.queue.size()>=rules.balance.queue_limit
+		for requirement in p.requires:
+			if not rules.has_project(state,requirement):order.disabled=true
+		body.add_child(order)
+
+func _balance_food(_value: float) -> void:
+	var remaining:int=rules.people(state,true).size()
+	for key in ["timber","care","watch","building"]:remaining-=int(workforce[key].value)
+	workforce.food.value=maxi(0,remaining)
+
+func _assign() -> void:
+	var plan:Dictionary={}
+	for key in workforce:plan[key]=int(workforce[key].value)
+	dispatch({"kind":"plan","plan":plan})
+
+func _suggest() -> void:
+	var plan:Dictionary=rules.suggested_plan(state)
+	if state.role=="watch":
+		plan=state.plan.duplicate(true);plan.watch=mini(int(rules.balance.watch_target),int(plan.food)+int(plan.watch));plan.food=rules.people(state,true).size()-int(plan.timber)-int(plan.care)-int(plan.building)-int(plan.watch)
+	elif state.role=="steward":
+		plan.watch=state.plan.watch;plan.food=rules.people(state,true).size()-int(plan.timber)-int(plan.care)-int(plan.building)-int(plan.watch)
+	dispatch({"kind":"plan","plan":plan})
+
+func _leaders(body: VBoxContainer) -> void:
+	body.add_child(label(copy.roles_note,14))
+	for role in ["steward","watch"]:
+		var leader:Dictionary=rules.person_by_id(state,state.leaders[role].id)
+		body.add_child(label(copy.lead_line%[copy[role],leader.get("name","—"),int(leader.get("age",0))/4,rules.leader_skill(state,role),maxi(0,int(rules.balance.term_seasons)-int(state.turn)+int(state.leaders[role].since))],17))
+		var picker:=OptionButton.new();var candidates:Array=[]
+		for person in rules.people(state,true):
+			if rules.eligible(person) and person.id!=state.leaders["watch" if role=="steward" else "steward"].id:
+				candidates.append(person.id);picker.add_item(person.name+" · %d/5"%person[role])
+		body.add_child(picker)
+		var appoint:=button(copy.appoint,func():
+			if picker.selected>=0:dispatch({"kind":"appoint","role":role,"id":candidates[picker.selected]}))
+		appoint.disabled=not rules.permitted(state,role) or candidates.is_empty();body.add_child(appoint)
+	var jobs:Dictionary={}
+	for task in state.assignments:jobs[task.id]=task.job
+	for person in rules.people(state):
+		var job:String=jobs.get(person.id,"child")
+		var household_label:String=""
+		for household in rules.content.households:
+			if household.id==person.household:household_label=household.label
+		body.add_child(label(copy.citizen_line%[person.name,int(person.age)/4,copy.watch_job if job=="watch" else copy.get(job,job),household_label],14))
+
+func _journal(body: VBoxContainer) -> void:
+	for i in range(state.history.size()-1,maxi(-1,state.history.size()-101),-1):
+		var event:Dictionary=state.history[i]
+		var params:Dictionary=event.params.duplicate(true)
+		if params.has("project"):params.project=rules.projects.get(params.project,{}).get("title",params.project)
+		if params.has("role"):params.role=copy.get(params.role,params.role)
+		body.add_child(label(str(copy.events.get(event.kind,event.kind)).format(params),15))
+
+func _confirm_restart() -> void:
+	var confirm:=ConfirmationDialog.new();confirm.dialog_text=copy.restart_confirm;confirm.confirmed.connect(begin);confirm.confirmed.connect(confirm.queue_free);confirm.canceled.connect(confirm.queue_free);app.add_child(confirm);confirm.popup_centered(Vector2i(440,180))

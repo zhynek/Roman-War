@@ -1,7 +1,9 @@
 extends SceneTree
+var campaign_mode:bool=false
 var out_dir:="/tmp/yenikapi-benchmark"
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
+		if arg=="campaign":campaign_mode=true
 		if arg.begins_with("out_dir="):out_dir=arg.trim_prefix("out_dir=")
 	call_deferred("run")
 func run() -> void:
@@ -15,6 +17,18 @@ func run() -> void:
 	root.add_child(app)
 	await process_frame
 	var report:Dictionary={"startup_ms":Time.get_ticks_msec()-begin,"viewport":[root.size.x,root.size.y],"gpu":RenderingServer.get_video_adapter_name(),"engine":Engine.get_version_info().string,"method":"120 warmup + 180 process-frame samples; vsync disabled; screenshots excluded; run alone","views":{}}
+	if campaign_mode:
+		var state:Dictionary=app.campaign.rules.new_state()
+		for i in range(40):
+			state=preload("res://tools/tutorial_driver.gd").orders(app.campaign.rules,state)
+			state=app.campaign.rules.advance(state).state
+			if state.phase=="town":break
+		app.campaign.state=state
+		app.show_campaign(state,app.campaign.rules,true)
+		report.campaign_ready_ms=Time.get_ticks_msec()-begin
+		report.citizens=app.campaign.rules.people(state).size()
+		report.animated_workers=app.campaign_view.actors.size()
+		report.hypothetical_turn=state.turn
 	app.hud.hide()
 	app.set_process(false)
 	for label in ["landscape","aerial","street","interior"]:
@@ -22,6 +36,11 @@ func run() -> void:
 		elif label=="aerial":app.overview()
 		elif label=="street":app.visit(1)
 		else:app.visit(2)
+		if campaign_mode and label=="interior":
+			for building in app.world.buildings:
+				if building.id=="growth_home_north":
+					var at:Vector3=app.world.building_position(building,Vector3(0,1.68,1.7))
+					app.set_view(at,app.world.building_position(building,Vector3(0,1.2,-1)),false)
 		for i in range(120):await process_frame
 		var samples:Array[float]=[]
 		for i in range(180):

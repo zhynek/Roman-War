@@ -14,6 +14,11 @@ var note: Label
 var mode_label: Label
 var location_label: Label
 var status: Label
+var campaign
+var campaign_view
+var campaign_mode: bool = false
+var reference_data: Dictionary
+var _fabric_key: String = ""
 var _look_drag: bool = false
 var _selected: String = ""
 var _update_accum: float = 0.0
@@ -21,6 +26,7 @@ var _save_path: String = "user://early_settlement_view.json"
 
 func _ready() -> void:
 	data=JSON.parse_string(FileAccess.get_file_as_string("res://data/settlement.json"))
+	reference_data=data.duplicate(true)
 	world=Village.new()
 	add_child(world)
 	world.build(data)
@@ -122,8 +128,8 @@ func _interface() -> void:
 	commands.add_child(_button(data.ui.fly,func(): set_flying(true)))
 	commands.add_child(_button(data.ui.overview,overview))
 	commands.add_child(_button(data.ui.evidence,func(): info.visible=not info.visible))
-	commands.add_child(_button(data.ui.save,func(): status.text=data.ui.saved if save_view(_save_path) else data.ui.missing))
-	commands.add_child(_button(data.ui.load,func(): status.text=data.ui.loaded if load_view(_save_path) else data.ui.missing))
+	commands.add_child(_button(data.ui.save,func(): status.text=campaign.copy.reference_save_notice if campaign_mode else (data.ui.saved if save_view(_save_path) else data.ui.missing)))
+	commands.add_child(_button(data.ui.load,func(): status.text=campaign.copy.reference_save_notice if campaign_mode else (data.ui.loaded if load_view(_save_path) else data.ui.missing)))
 	mode_label=_label("",14,Color("c5bd96"));commands.add_child(mode_label)
 	var bottom:=PanelContainer.new()
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -160,6 +166,10 @@ func _interface() -> void:
 	text.meta_clicked.connect(func(url): OS.shell_open(str(url)))
 	info.add_child(text)
 	info.hide()
+	campaign=load("res://src/governance_panel.gd").new()
+	root.add_child(campaign)
+	campaign.configure(self)
+	commands.add_child(_button(campaign.copy.play,campaign.open))
 
 func set_flying(value: bool) -> void:
 	if not value:
@@ -206,7 +216,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_TAB: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-			KEY_ESCAPE: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE;info.hide()
+			KEY_ESCAPE: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE;info.hide();campaign.hide()
 			KEY_F: set_flying(not flying)
 			KEY_H: hud.visible=not hud.visible
 			KEY_I: info.visible=not info.visible
@@ -231,6 +241,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not ready_for_capture:return
+	var focus:Control=get_viewport().gui_get_focus_owner()
+	if focus is LineEdit or focus is SpinBox:return
 	var move:=Vector3.ZERO
 	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):move.z-=1
 	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):move.z+=1
@@ -263,6 +275,7 @@ func _process(delta: float) -> void:
 			location_label.text=nearest.title;note.text=nearest.note
 
 func save_view(path: String) -> bool:
+	if campaign_mode:return false
 	var record:Dictionary={"format":"yenikapi_view","version":1,"snapshot_id":data.snapshot_id,"scenario_id":null,"position":[camera.position.x,camera.position.y,camera.position.z],"rotation":[pitch,yaw],"navigation":"fly" if flying else "walk","flight_speed":flight_speed}
 	var file:=FileAccess.open(path+".tmp",FileAccess.WRITE)
 	if file==null:return false
@@ -270,6 +283,7 @@ func save_view(path: String) -> bool:
 	return DirAccess.rename_absolute(path+".tmp",path)==OK
 
 func load_view(path: String) -> bool:
+	if campaign_mode:return false
 	if not FileAccess.file_exists(path):return false
 	var file:=FileAccess.open(path,FileAccess.READ)
 	if file==null or file.get_length()>8192:return false
@@ -296,3 +310,29 @@ func load_view(path: String) -> bool:
 	flight_speed=speed
 	_update_mode()
 	return true
+
+func show_campaign(state: Dictionary,rules,force: bool = false) -> void:
+	var View=load("res://src/campaign_view.gd")
+	var key:String=JSON.stringify(state.completed)
+	if force or not campaign_mode or key!=_fabric_key:
+		_rebuild_world(View.snapshot(reference_data,state,rules))
+		_fabric_key=key
+	campaign_mode=true
+	if not is_instance_valid(campaign_view):
+		campaign_view=View.new();add_child(campaign_view)
+	campaign_view.refresh(state,rules,world)
+
+func show_reference() -> void:
+	if not campaign_mode:return
+	if is_instance_valid(campaign_view):campaign_view.free()
+	campaign_view=null
+	_rebuild_world(reference_data.duplicate(true))
+	campaign_mode=false
+	_fabric_key=""
+
+func _rebuild_world(config: Dictionary) -> void:
+	if is_instance_valid(campaign_view):campaign_view.free();campaign_view=null
+	world.free()
+	data=config
+	world=Village.new();add_child(world);world.build(data)
+	if not flying:set_flying(false)

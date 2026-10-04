@@ -1,0 +1,1268 @@
+{
+  "version": 1,
+  "scenario_id": "yenikapi_seasons_tutorial",
+  "kind": "hypothetical",
+  "base_snapshot_id": "yenikapi_c6000_bce",
+  "settlement_id": "yenikapi_tutorial",
+  "initial_citizens": [
+    {
+      "id": "citizen_0001",
+      "name": "Aster",
+      "age": 152,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_01",
+      "active": true
+    },
+    {
+      "id": "citizen_0002",
+      "name": "Tala",
+      "age": 184,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_01",
+      "active": true
+    },
+    {
+      "id": "citizen_0003",
+      "name": "Neri",
+      "age": 108,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_01",
+      "active": true
+    },
+    {
+      "id": "citizen_0004",
+      "name": "Sora",
+      "age": 96,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_01",
+      "active": true
+    },
+    {
+      "id": "citizen_0005",
+      "name": "Ilan",
+      "age": 28,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_01",
+      "active": true
+    },
+    {
+      "id": "citizen_0006",
+      "name": "Mira",
+      "age": 136,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_02",
+      "active": true
+    },
+    {
+      "id": "citizen_0007",
+      "name": "Oren",
+      "age": 124,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_02",
+      "active": true
+    },
+    {
+      "id": "citizen_0008",
+      "name": "Luma",
+      "age": 88,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_02",
+      "active": true
+    },
+    {
+      "id": "citizen_0009",
+      "name": "Eren",
+      "age": 68,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_02",
+      "active": true
+    },
+    {
+      "id": "citizen_0010",
+      "name": "Nara",
+      "age": 16,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_02",
+      "active": true
+    },
+    {
+      "id": "citizen_0011",
+      "name": "Tavi",
+      "age": 172,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_03",
+      "active": true
+    },
+    {
+      "id": "citizen_0012",
+      "name": "Seli",
+      "age": 156,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_03",
+      "active": true
+    },
+    {
+      "id": "citizen_0013",
+      "name": "Runi",
+      "age": 112,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_03",
+      "active": true
+    },
+    {
+      "id": "citizen_0014",
+      "name": "Dara",
+      "age": 44,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_03",
+      "active": true
+    },
+    {
+      "id": "citizen_0015",
+      "name": "Vela",
+      "age": 24,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_03",
+      "active": true
+    },
+    {
+      "id": "citizen_0016",
+      "name": "Arin",
+      "age": 144,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_04",
+      "active": true
+    },
+    {
+      "id": "citizen_0017",
+      "name": "Kori",
+      "age": 132,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_04",
+      "active": true
+    },
+    {
+      "id": "citizen_0018",
+      "name": "Evi",
+      "age": 80,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_04",
+      "active": true
+    },
+    {
+      "id": "citizen_0019",
+      "name": "Pela",
+      "age": 56,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_04",
+      "active": true
+    },
+    {
+      "id": "citizen_0020",
+      "name": "Tero",
+      "age": 36,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_04",
+      "active": true
+    },
+    {
+      "id": "citizen_0021",
+      "name": "Sani",
+      "age": 200,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_05",
+      "active": true
+    },
+    {
+      "id": "citizen_0022",
+      "name": "Meli",
+      "age": 176,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_05",
+      "active": true
+    },
+    {
+      "id": "citizen_0023",
+      "name": "Ova",
+      "age": 104,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_05",
+      "active": true
+    },
+    {
+      "id": "citizen_0024",
+      "name": "Rali",
+      "age": 48,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_05",
+      "active": true
+    },
+    {
+      "id": "citizen_0025",
+      "name": "Leri",
+      "age": 12,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_05",
+      "active": true
+    },
+    {
+      "id": "citizen_0026",
+      "name": "Avi",
+      "age": 160,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_06",
+      "active": true
+    },
+    {
+      "id": "citizen_0027",
+      "name": "Suri",
+      "age": 140,
+      "steward": 4,
+      "watch": 5,
+      "household": "sim_household_06",
+      "active": true
+    },
+    {
+      "id": "citizen_0028",
+      "name": "Nemi",
+      "age": 92,
+      "steward": 3,
+      "watch": 2,
+      "household": "sim_household_06",
+      "active": true
+    },
+    {
+      "id": "citizen_0029",
+      "name": "Vani",
+      "age": 64,
+      "steward": 2,
+      "watch": 3,
+      "household": "sim_household_06",
+      "active": true
+    },
+    {
+      "id": "citizen_0030",
+      "name": "Aro",
+      "age": 32,
+      "steward": 5,
+      "watch": 4,
+      "household": "sim_household_06",
+      "active": true
+    }
+  ],
+  "initial_leaders": {
+    "steward": "citizen_0001",
+    "watch": "citizen_0002"
+  },
+  "projects": [
+    {
+      "id": "field_extension",
+      "title": "Extend cultivation",
+      "body": "Clear and tend another plot. More food per food worker; construction competes with gathering.",
+      "role": "steward",
+      "wood": 12,
+      "work": 20,
+      "at": [
+        -68,
+        -52
+      ],
+      "requires": [],
+      "effects": {
+        "food_yield": 1
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_field_01",
+              "kind": "field",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "at": [
+                -68,
+                -52
+              ],
+              "yaw": -14,
+              "size": [
+                18,
+                15
+              ],
+              "label": "Additional cultivated ground"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shared_store",
+      "title": "Improve shared storage",
+      "body": "Enlarge the existing store while retaining its identity. Holds 120 more seasonal provisions; stock still needs tending.",
+      "role": "steward",
+      "wood": 16,
+      "work": 24,
+      "at": [
+        -3,
+        31
+      ],
+      "requires": [],
+      "effects": {
+        "storage": 120
+      },
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_store_01"
+          ],
+          "after": [
+            {
+              "id": "yk_store_01",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -3,
+                27
+              ],
+              "yaw": -6,
+              "size": [
+                4.2,
+                4.8
+              ],
+              "wall_height": 2.49,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "storage",
+              "label": "Enlarged household store",
+              "household": "yk_household_01",
+              "furniture": [
+                {
+                  "id": "jar_0",
+                  "kind": "pot",
+                  "at": [
+                    -0.918,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_1",
+                  "kind": "pot",
+                  "at": [
+                    0.918,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_2",
+                  "kind": "pot",
+                  "at": [
+                    -0.918,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "jar_3",
+                  "kind": "pot",
+                  "at": [
+                    0.918,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -0.7,
+                    0.3
+                  ]
+                },
+                {
+                  "id": "mat",
+                  "kind": "grain",
+                  "at": [
+                    0.6,
+                    -0.2
+                  ]
+                },
+                {
+                  "id": "reserve_basket",
+                  "kind": "basket",
+                  "at": [
+                    1.3,
+                    -1.4
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "watch_shelter",
+      "title": "Organize the watch",
+      "body": "Build a small shelter, agree lookout duties and protect the landing. This is a hypothetical community watch, not a standing army.",
+      "role": "watch",
+      "wood": 12,
+      "work": 16,
+      "at": [
+        27,
+        -8
+      ],
+      "requires": [],
+      "effects": {
+        "security": 16
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_watch_shelter",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                27,
+                -12
+              ],
+              "yaw": 0,
+              "size": [
+                3.6,
+                3.8
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "hip",
+              "use": "work",
+              "label": "Watch shelter",
+              "household": "sim_shared_household",
+              "furniture": [
+                {
+                  "id": "jar_0",
+                  "kind": "pot",
+                  "at": [
+                    -0.9720000000000001,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_1",
+                  "kind": "pot",
+                  "at": [
+                    0.9720000000000001,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_2",
+                  "kind": "pot",
+                  "at": [
+                    -0.9720000000000001,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "jar_3",
+                  "kind": "pot",
+                  "at": [
+                    0.9720000000000001,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -0.7,
+                    0.3
+                  ]
+                },
+                {
+                  "id": "mat",
+                  "kind": "grain",
+                  "at": [
+                    0.6,
+                    -0.2
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "care_shelter",
+      "title": "Share care and food preparation",
+      "body": "A shared working room supports care, food preparation and cooperation. Care workers are still needed every season.",
+      "role": "steward",
+      "wood": 12,
+      "work": 20,
+      "at": [
+        -39,
+        8
+      ],
+      "requires": [],
+      "effects": {
+        "wellbeing": 8
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_care_shelter",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -39,
+                4
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "hip",
+              "use": "work",
+              "label": "Shared care and food preparation shelter",
+              "household": "sim_shared_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "north_lane",
+      "title": "Establish the household lane",
+      "body": "Widen the existing earth path and connect two new household sites. Older paths retain their identities; no stone street appears.",
+      "role": "steward",
+      "wood": 8,
+      "work": 12,
+      "at": [
+        -10,
+        -31
+      ],
+      "requires": [
+        "field_extension"
+      ],
+      "effects": {
+        "cooperation": 3
+      },
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_path_landing"
+          ],
+          "after": [
+            {
+              "id": "yk_path_landing",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  0,
+                  65
+                ],
+                [
+                  1,
+                  47
+                ],
+                [
+                  3,
+                  36
+                ],
+                [
+                  0,
+                  19
+                ],
+                [
+                  0,
+                  9
+                ],
+                [
+                  1,
+                  -5
+                ],
+                [
+                  3,
+                  -16
+                ],
+                [
+                  0,
+                  -33
+                ],
+                [
+                  -10,
+                  -48
+                ]
+              ],
+              "width": 2.6,
+              "label": "Worn earth footpath"
+            }
+          ]
+        },
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_north_lane",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  2,
+                  -16
+                ],
+                [
+                  0,
+                  -27
+                ],
+                [
+                  -2,
+                  -30
+                ],
+                [
+                  -17,
+                  -31
+                ],
+                [
+                  -31,
+                  -34
+                ]
+              ],
+              "width": 1.4,
+              "label": "New household approach"
+            }
+          ]
+        },
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_east_lane",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  0,
+                  -27
+                ],
+                [
+                  8,
+                  -30
+                ],
+                [
+                  8,
+                  -35
+                ]
+              ],
+              "width": 1.4,
+              "label": "East household approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "north_home",
+      "title": "Build the north household",
+      "body": "Build and furnish a dwelling for up to six simulated residents. Housing alone does not produce new people.",
+      "role": "steward",
+      "wood": 18,
+      "work": 24,
+      "at": [
+        -16,
+        -32
+      ],
+      "requires": [
+        "north_lane"
+      ],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_home_north",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -16,
+                -38
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "Growth home north",
+              "household": "growth_home_north_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "east_home",
+      "title": "Build the east household",
+      "body": "Provide a second new dwelling. Welcoming newcomers still requires food reserves, wellbeing and cooperation.",
+      "role": "steward",
+      "wood": 18,
+      "work": 24,
+      "at": [
+        8,
+        -35
+      ],
+      "requires": [
+        "north_lane"
+      ],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_home_east",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                8,
+                -41
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "Growth home east",
+              "household": "growth_home_east_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "refuge_screen",
+      "title": "Prepare a refuge and response route",
+      "body": "A low screen and a rehearsed gathering point improve protection. It is not an excavated fortification or a city wall.",
+      "role": "watch",
+      "wood": 15,
+      "work": 20,
+      "at": [
+        -43,
+        7
+      ],
+      "requires": [
+        "watch_shelter"
+      ],
+      "effects": {
+        "security": 12
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_refuge_screen",
+              "kind": "boundary",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -41,
+                  10
+                ],
+                [
+                  -45,
+                  10
+                ],
+                [
+                  -45,
+                  -1
+                ]
+              ],
+              "width": 0.12,
+              "label": "Refuge screen with open approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "council_ground",
+      "title": "Organize seasonal meetings",
+      "body": "Prepare a shared meeting place for resolving disputes and coordinating work. The institution is an explicit game-design hypothesis.",
+      "role": "steward",
+      "wood": 8,
+      "work": 16,
+      "at": [
+        -15,
+        37
+      ],
+      "requires": [],
+      "effects": {
+        "cooperation": 8
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_council_ground",
+              "kind": "work_area",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation",
+                "ozdogan_marmara"
+              ],
+              "at": [
+                -15,
+                36
+              ],
+              "yaw": 0,
+              "size": [
+                5,
+                4
+              ],
+              "use": "hearth",
+              "label": "Shared meeting ground"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "job_sites": {
+    "food": [
+      -54,
+      -19
+    ],
+    "timber": [
+      -62,
+      43
+    ],
+    "care": [
+      -8,
+      17
+    ],
+    "watch": [
+      34,
+      27
+    ],
+    "building": [
+      -4,
+      32
+    ]
+  },
+  "home_sites": [
+    [
+      -12,
+      12
+    ],
+    [
+      -17,
+      12
+    ],
+    [
+      8,
+      7
+    ],
+    [
+      -9,
+      -10
+    ],
+    [
+      12,
+      -15
+    ],
+    [
+      -28,
+      29
+    ]
+  ],
+  "name_pool": [
+    "Aster",
+    "Tala",
+    "Neri",
+    "Sora",
+    "Ilan",
+    "Mira",
+    "Oren",
+    "Luma",
+    "Eren",
+    "Nara",
+    "Tavi",
+    "Seli",
+    "Runi",
+    "Dara",
+    "Vela",
+    "Arin",
+    "Kori",
+    "Evi",
+    "Pela",
+    "Tero",
+    "Sani",
+    "Meli",
+    "Ova",
+    "Rali",
+    "Leri",
+    "Avi",
+    "Suri",
+    "Nemi",
+    "Vani",
+    "Aro"
+  ],
+  "tutorial_projects": [
+    "field_extension",
+    "shared_store",
+    "watch_shelter",
+    "care_shelter",
+    "north_lane",
+    "north_home",
+    "east_home",
+    "refuge_screen",
+    "council_ground"
+  ],
+  "households": [
+    {
+      "id": "sim_household_01",
+      "building_id": "yk_house_01",
+      "requires": "",
+      "label": "Yard household",
+      "at": [
+        -12,
+        12
+      ]
+    },
+    {
+      "id": "sim_household_02",
+      "building_id": "yk_house_02",
+      "requires": "",
+      "label": "West yard household",
+      "at": [
+        -17,
+        12
+      ]
+    },
+    {
+      "id": "sim_household_03",
+      "building_id": "yk_house_03",
+      "requires": "",
+      "label": "East household",
+      "at": [
+        8,
+        7
+      ]
+    },
+    {
+      "id": "sim_household_04",
+      "building_id": "yk_house_05",
+      "requires": "",
+      "label": "Upper household",
+      "at": [
+        -9,
+        -10
+      ]
+    },
+    {
+      "id": "sim_household_05",
+      "building_id": "yk_house_07",
+      "requires": "",
+      "label": "Northeast household",
+      "at": [
+        12,
+        -15
+      ]
+    },
+    {
+      "id": "sim_household_06",
+      "building_id": "yk_house_08",
+      "requires": "",
+      "label": "Round-house household",
+      "at": [
+        -28,
+        29
+      ]
+    },
+    {
+      "id": "sim_household_07",
+      "building_id": "growth_home_north",
+      "requires": "north_home",
+      "label": "North lane household",
+      "at": [
+        -16,
+        -34
+      ]
+    },
+    {
+      "id": "sim_household_08",
+      "building_id": "growth_home_east",
+      "requires": "east_home",
+      "label": "New east household",
+      "at": [
+        8,
+        -37
+      ]
+    }
+  ]
+}

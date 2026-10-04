@@ -1,0 +1,693 @@
+{
+  "type": "object",
+  "properties": {
+    "play": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "panel_title": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "resume": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "begin": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "restart": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "restart_confirm": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "save": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "load": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "close": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "end_season": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "preview": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "role": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "god": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "steward": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "watch": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "roles_note": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "overview": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "work": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "leaders": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "journal": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "principles": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "food": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "timber": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "care": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "watch_job": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "building": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "assign": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "suggest": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "queue": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "cancel": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "welcome": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "rations": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "population": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "housing": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "provisions": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "wood": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "wellbeing": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "cooperation": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "security": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "year": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "seasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 10000
+      },
+      "maxItems": 2048
+    },
+    "phase_village": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "phase_town": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "pause_notice": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "labor_note": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "units_note": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "milestone": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "complete": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "intro": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "guide_project": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "guide_growth": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "guide_sustain": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "queue_recommended": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "forecast_line": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "factor_line": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "queue_line": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "lead_line": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "appoint": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "citizen_line": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "child": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "retired": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "authority": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "invalid_plan": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "insufficient_wood": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "prerequisite": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "already_ordered": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "queue_full": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "unknown_project": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "invalid_candidate": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "no_active_campaign": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "horizon": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "saved": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "loaded": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "save_failed": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "load_failed": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "cancelled": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "ordered": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "assigned": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "appointed": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "welcome_on": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "policies_set": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "resolved": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "new_campaign": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "factor_names": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "care": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "food": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "crowding": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "ration": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "overwork": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "projects": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "watch": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "leadership": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "base",
+        "care",
+        "food",
+        "crowding",
+        "ration",
+        "overwork",
+        "projects",
+        "watch",
+        "leadership"
+      ],
+      "additionalProperties": false
+    },
+    "principle_text": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "events": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "completed": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "arrival": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "birth": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "departure": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "death": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "succession": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "loss": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "town": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "contracted": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "appointment": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "cancel": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "season",
+        "completed",
+        "arrival",
+        "birth",
+        "departure",
+        "death",
+        "succession",
+        "loss",
+        "town",
+        "contracted",
+        "appointment",
+        "cancel"
+      ],
+      "additionalProperties": false
+    },
+    "recovery": {
+      "type": "string",
+      "minLength": 1
+    },
+    "forecast_losses": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project_cost": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reference_save_notice": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "play",
+    "panel_title",
+    "hypothesis",
+    "reference",
+    "resume",
+    "begin",
+    "restart",
+    "restart_confirm",
+    "save",
+    "load",
+    "close",
+    "end_season",
+    "preview",
+    "role",
+    "god",
+    "steward",
+    "watch",
+    "roles_note",
+    "overview",
+    "work",
+    "leaders",
+    "journal",
+    "principles",
+    "food",
+    "timber",
+    "care",
+    "watch_job",
+    "building",
+    "assign",
+    "suggest",
+    "queue",
+    "cancel",
+    "welcome",
+    "rations",
+    "population",
+    "housing",
+    "provisions",
+    "wood",
+    "wellbeing",
+    "cooperation",
+    "security",
+    "year",
+    "seasons",
+    "phase_village",
+    "phase_town",
+    "pause_notice",
+    "labor_note",
+    "units_note",
+    "milestone",
+    "complete",
+    "intro",
+    "guide_project",
+    "guide_growth",
+    "guide_sustain",
+    "queue_recommended",
+    "forecast_line",
+    "factor_line",
+    "queue_line",
+    "lead_line",
+    "appoint",
+    "citizen_line",
+    "child",
+    "retired",
+    "authority",
+    "invalid_plan",
+    "insufficient_wood",
+    "prerequisite",
+    "already_ordered",
+    "queue_full",
+    "unknown_project",
+    "invalid_candidate",
+    "no_active_campaign",
+    "horizon",
+    "saved",
+    "loaded",
+    "save_failed",
+    "load_failed",
+    "cancelled",
+    "ordered",
+    "assigned",
+    "appointed",
+    "welcome_on",
+    "policies_set",
+    "resolved",
+    "new_campaign",
+    "factor_names",
+    "principle_text",
+    "events",
+    "recovery",
+    "forecast_losses",
+    "project_cost",
+    "reference_save_notice"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

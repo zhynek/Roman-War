@@ -1,0 +1,391 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "kind": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "base_snapshot_id": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "settlement_id": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 10000
+    },
+    "initial_citizens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "age": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "steward": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "watch": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "household": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "age",
+          "steward",
+          "watch",
+          "household",
+          "active"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2048
+    },
+    "initial_leaders": {
+      "type": "object",
+      "properties": {
+        "steward": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "watch": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "steward",
+        "watch"
+      ],
+      "additionalProperties": false
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "role": {
+            "enum": [
+              "steward",
+              "watch"
+            ]
+          },
+          "wood": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            },
+            "maxItems": 2048
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "effects": {
+            "type": "object",
+            "properties": {
+              "food_yield": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "storage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "security": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "wellbeing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "cooperation": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "housing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              }
+            },
+            "additionalProperties": false
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "added",
+                    "altered",
+                    "retained",
+                    "replaced",
+                    "removed",
+                    "abandoned",
+                    "subdivided"
+                  ]
+                },
+                "before": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "after": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "before",
+                "after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "role",
+          "wood",
+          "work",
+          "at",
+          "requires",
+          "effects",
+          "changes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2048
+    },
+    "job_sites": {
+      "type": "object",
+      "properties": {
+        "food": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "maxItems": 2048
+        },
+        "timber": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "maxItems": 2048
+        },
+        "care": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "maxItems": 2048
+        },
+        "watch": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "maxItems": 2048
+        },
+        "building": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "maxItems": 2048
+        }
+      },
+      "required": [
+        "food",
+        "timber",
+        "care",
+        "watch",
+        "building"
+      ],
+      "additionalProperties": false
+    },
+    "home_sites": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "maxItems": 2048
+      },
+      "maxItems": 2048
+    },
+    "name_pool": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 10000
+      },
+      "maxItems": 2048
+    },
+    "tutorial_projects": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 10000
+      },
+      "maxItems": 2048
+    },
+    "households": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "building_id": {
+            "type": "string"
+          },
+          "requires": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "at": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -160,
+              "maximum": 160
+            }
+          }
+        },
+        "required": [
+          "id",
+          "building_id",
+          "requires",
+          "label",
+          "at"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "scenario_id",
+    "kind",
+    "base_snapshot_id",
+    "settlement_id",
+    "initial_citizens",
+    "initial_leaders",
+    "projects",
+    "job_sites",
+    "home_sites",
+    "name_pool",
+    "tutorial_projects",
+    "households"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

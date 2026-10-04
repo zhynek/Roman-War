@@ -25,14 +25,15 @@ The new project has no resource paths to the medieval experience.
 
 Do not recycle IDs to make a replacement look continuous. Preserve published
 building/furnishing IDs and coordinates, or add an explicit lineage/migration
-record. [STAGES.md](../STAGES.md) defines the future change-set seam. Only the
-single dated village snapshot is loaded by the app in this release.
+record. [STAGES.md](../STAGES.md) defines the future change-set seam. The single dated village remains the reference. Release 0.2.0 also loads a
+separate hypothetical seasonal tutorial; its completed project changes pass
+through this lineage seam. See [GOVERNANCE.md](GOVERNANCE.md).
 
 ## Saves
 
 The Mac bundle ID is `com.romanwar.yenikapi.earlysettlement`. The application uses
-`Roman War Yenikapi Early Settlement` as its custom Godot user directory. Its only
-persistent file is `early_settlement_view.json` (a viewing bookmark, not a world
+`Roman War Yenikapi Early Settlement` as its custom Godot user directory. Its reference
+viewing file is `early_settlement_view.json` (a viewing bookmark, not a world
 save). **Save view** writes a temporary file then renames it into place.
 
 Version 1 fields: `format: "yenikapi_view"`, `version: 1`,
@@ -42,6 +43,9 @@ The loader bounds file size, validates types/ranges/finite numbers and snapshot,
 and rejects walking positions inside solids or water before changing the view.
 Additional unrelated fields are ignored; future fields must default additively.
 Unknown versions/scenarios are refused. No existing save is migrated or rewritten.
+The new `early_settlement_campaign.json` uses a different wrapper and validated
+version-1 simulation state; its full contract is in GOVERNANCE.md. Campaign mode
+refuses reference bookmark operations, and uses Save/Load campaign instead.
 The medieval v1 creative save remains in its original app with unchanged IDs,
 positions, rotations, scale and Pantokrator compatibility behavior.
 

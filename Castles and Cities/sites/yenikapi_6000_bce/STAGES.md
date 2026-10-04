@@ -2,7 +2,8 @@
 
 `village → town → large town → small city → large city → metropolis` are authoring
 categories. They are not an established Yenikapı chronology, campaign levels,
-population thresholds or promises of continuous growth. Only **village** is rendered.
+population thresholds or promises of continuous growth. The dated reference remains **village**. Release 0.2.0 adds a separate hypothetical
+seasonal tutorial with a reversible **town** authoring milestone.
 
 The dated snapshot `yenikapi_c6000_bce` and medieval `reference_1200` have separate
 projects, coordinate frames, evidence ledgers and saves. Neither is a successor
@@ -12,8 +13,9 @@ especially through inundation, settlement movement and long chronological gaps.
 `src/fabric.gd` is a scene-free deterministic resolver for **hypothetical** change
 sets. A change set names its base snapshot and explicit objects. It never runs from
 a timer, elapsed years, population or frame callback. Unmentioned records survive
-unchanged. Only test fixtures exercise changes in this release; no later stage,
-scenario file, simulation or growth UI is shipped.
+unchanged. The 0.2.0 tutorial now exercises these explicit changes through commissioned
+projects. It has its own scenario, integer simulation, save and growth UI; it is
+not another historically dated reconstruction.
 
 | Relationship | Identity and history |
 |---|---|
@@ -38,4 +40,5 @@ wrong bases, duplicate/missing predecessors, reused identities, alterations that
 change identity and single-child subdivisions. It copies inputs and sorts results
 by ID. Material, geometry and collision generation is repeatable from IDs/data.
 This is a minimal authoring foundation; undo/redo, a full versioned archive,
-scenario persistence and authoring UI remain future work.
+general authoring UI remain future work. Tutorial persistence and its bounded
+commissioning UI are documented in [GOVERNANCE.md](experience/GOVERNANCE.md).

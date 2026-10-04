@@ -1,0 +1,480 @@
+{
+  "type": "object",
+  "properties": {
+    "initial_food": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "initial_wood": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "initial_wellbeing": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "initial_cooperation": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "initial_security": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "base_housing": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "base_storage": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "adult_age": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "retirement_age": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "death_age": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "term_seasons": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "max_turns": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "queue_limit": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "food_yields": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -1000,
+        "maximum": 100000
+      },
+      "maxItems": 2048
+    },
+    "food_per_person": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "timber_yield": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "work_yield": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "steward_work_divisor": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "full_rations_percent": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "tight_rations_percent": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "spoil_percent": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_base": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_care": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_fed": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_hunger": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_crowded": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "wellbeing_tight": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "cooperation_base": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "cooperation_care": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "cooperation_hunger": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "cooperation_crowded": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "cooperation_tight": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "security_base": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "security_worker": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "security_skill": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "stock_step": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "overwork_limit_percent": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "overwork_cost": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "care_target": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "watch_target": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "build_target": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "timber_target": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_season": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_size": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_adults": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_min_wellbeing": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_min_cooperation": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "migration_reserve_seasons": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "birth_credit_per_person": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "birth_credit_threshold": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "birth_min_wellbeing": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "hunger_departures": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "annual_pressure": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": -1000,
+        "maximum": 100000
+      },
+      "maxItems": 2048
+    },
+    "pressure_base": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "loss_per_shortfall": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "minimum_population": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_population": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_dwellings": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_reserve_seasons": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_wellbeing": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_cooperation": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_security": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_sustained_seasons": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "town_required_projects": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 10000
+      },
+      "maxItems": 2048
+    },
+    "initial_plan": {
+      "type": "object",
+      "properties": {
+        "food": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "timber": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "care": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "watch": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "building": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "food",
+        "timber",
+        "care",
+        "watch",
+        "building"
+      ],
+      "additionalProperties": false
+    },
+    "people_per_dwelling": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "skill_base": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "skill_span": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "arrival_age_spread": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "arrival_child_age": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "minimum_food_workers": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    }
+  },
+  "required": [
+    "initial_food",
+    "initial_wood",
+    "initial_wellbeing",
+    "initial_cooperation",
+    "initial_security",
+    "base_housing",
+    "base_storage",
+    "adult_age",
+    "retirement_age",
+    "death_age",
+    "term_seasons",
+    "max_turns",
+    "queue_limit",
+    "food_yields",
+    "food_per_person",
+    "timber_yield",
+    "work_yield",
+    "steward_work_divisor",
+    "full_rations_percent",
+    "tight_rations_percent",
+    "spoil_percent",
+    "wellbeing_base",
+    "wellbeing_care",
+    "wellbeing_fed",
+    "wellbeing_hunger",
+    "wellbeing_crowded",
+    "wellbeing_tight",
+    "cooperation_base",
+    "cooperation_care",
+    "cooperation_hunger",
+    "cooperation_crowded",
+    "cooperation_tight",
+    "security_base",
+    "security_worker",
+    "security_skill",
+    "stock_step",
+    "overwork_limit_percent",
+    "overwork_cost",
+    "care_target",
+    "watch_target",
+    "build_target",
+    "timber_target",
+    "migration_season",
+    "migration_size",
+    "migration_adults",
+    "migration_min_wellbeing",
+    "migration_min_cooperation",
+    "migration_reserve_seasons",
+    "birth_credit_per_person",
+    "birth_credit_threshold",
+    "birth_min_wellbeing",
+    "hunger_departures",
+    "annual_pressure",
+    "pressure_base",
+    "loss_per_shortfall",
+    "minimum_population",
+    "town_population",
+    "town_dwellings",
+    "town_reserve_seasons",
+    "town_wellbeing",
+    "town_cooperation",
+    "town_security",
+    "town_sustained_seasons",
+    "town_required_projects",
+    "initial_plan",
+    "people_per_dwelling",
+    "skill_base",
+    "skill_span",
+    "arrival_age_spread",
+    "arrival_child_age",
+    "minimum_food_workers"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -21,8 +21,28 @@ func run() -> void:
 			if not write_model(local,out_dir.path_join(id+".glb")):quit(1);return
 			local.free()
 	if not write_model(scene,out_dir.path_join("Yenikapi-Early-Settlement.glb")):quit(1);return
+	# Export a reproducible hypothetical milestone separately from the dated reference.
+	var rules=preload("res://src/core/settlement_rules.gd").new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")))
+	var state:Dictionary=rules.new_state()
+	for i in range(40):
+		state=preload("res://tools/tutorial_driver.gd").orders(rules,state)
+		state=rules.advance(state).state
+		if state.phase=="town":break
+	if state.phase!="town":push_error("Model tutorial did not reach milestone");quit(1);return
+	var town_data:Dictionary=preload("res://src/campaign_view.gd").snapshot(data,state,rules)
+	var town=load("res://src/village.gd").new();root.add_child(town);town.build(town_data)
+	var town_scene:=Node3D.new();town_scene.name="YenikapiHypotheticalTown";root.add_child(town_scene)
+	for id in town.object_nodes:
+		var original:MeshInstance3D=town.object_nodes[id]
+		var copy:=MeshInstance3D.new();copy.name=id;copy.transform=original.transform;copy.mesh=neutral_mesh(original.mesh);town_scene.add_child(copy)
+		if id in ["growth_care_shelter","growth_watch_shelter","growth_home_north","growth_home_east","yk_store_01"]:
+			var local:=MeshInstance3D.new();local.name=id;local.mesh=copy.mesh;root.add_child(local)
+			if not write_model(local,out_dir.path_join(id+("-revision-2" if id=="yk_store_01" else "")+".glb")):quit(1);return
+			local.free()
+	if not write_model(town_scene,out_dir.path_join("Yenikapi-Hypothetical-Town.glb")):quit(1);return
+	FileAccess.open(out_dir.path_join("hypothetical-town-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"scenario_id":rules.content.scenario_id,"status":"Hypothetical playable town milestone, not dated archaeology","state":state,"fabric":town_data.objects,"citizen_meshes":"Not included; application animates original stylized representations"},"  "))
 	FileAccess.open(out_dir.path_join("model-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"snapshot":data,"status":"Original interpretive geometry, not a survey or recovered village plan","coordinates":"metres; X east, Y up, Z south; local sea y=0, no surveyed datum","materials":"Neutral PBR derivatives, no procedural shader, lights, water animation or controller","individual_models":"Nine building models centered at their own ground datum; whole-village model preserves placement"},"  "))
-	print("VILLAGE MODEL EXPORT PASS: 10 GLBs")
+	print("VILLAGE MODEL EXPORT PASS: 16 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

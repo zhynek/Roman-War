@@ -7,12 +7,12 @@ Circa 6000 BCE is an approximate setting within the attested Neolithic occupatio
 not a foundation date or a claim to reconstruct the first village exactly.
 
 Open [experience/project.godot](experience/project.godot) in Godot 4.4.1,
-or use the separate [Yenikapı Early Settlement 0.1.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0).
-Its verified downloads are the [Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-macOS-0.1.0.zip),
-[10 GLB models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-Models-0.1.0.zip)
-and [editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.1.0/Yenikapi-Early-Settlement-Source-0.1.0.zip).
-The circa-1200
-Constantinople experience, its 17,561 reference plot records, Pantokrator district,
+or use the separate [Yenikapı Early Settlement 0.2.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0).
+Its verified downloads are the [Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.2.0/Yenikapi-Early-Settlement-macOS-0.2.0.zip),
+[16 GLB models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.2.0/Yenikapi-Early-Settlement-Models-0.2.0.zip)
+and [editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.2.0/Yenikapi-Early-Settlement-Source-0.2.0.zip).
+The [original 0.1.0 village release](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0) remains available.
+The circa-1200 Constantinople experience, its 17,561 reference plot records, Pantokrator district,
 16 architectural types, 26 landmarks and all earlier downloads remain intact.
 The prehistoric study is organized by site, without assigning a Byzantine realm
 to Neolithic inhabitants. There is no campaign integration.
@@ -45,27 +45,32 @@ coast or the later Theodosian harbor.
 
 [AUTHORING.md](experience/AUTHORING.md) explains metre coordinates, collisions,
 geometry, stable IDs and saves. [STAGES.md](STAGES.md) describes the small explicit
-lineage system. Only the village is implemented. There is no timeline slider,
-upgrade ladder, construction simulation or automatic population growth.
+lineage system. The dated village remains unchanged. The [0.2.0 seasonal tutorial](experience/GOVERNANCE.md)
+adds explicit work projects, fictional household demography, local leaders and a
+reversible town milestone in a separate hypothetical scenario. No date or
+population automatically upgrades buildings.
 
-Run the independent data validator and tests, Godot import and `tools/checks.gd`.
+Run both independent data validators and their tests, Godot import,
+`tools/checks.gd` and `tools/governance_checks.gd`.
 Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and run
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
-repeats these against the exact Mac package. Parent campaign gates remain mandatory.
+repeats these and the 12-view `tools/governance_preview.gd` tutorial against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
 The [0.1.0 verification record](VERIFICATION.md) includes exact-app checks,
 render inspection, performance measurements and preservation results.
 
 ## Present limits
 
-This is detailed procedural art, not photorealism, a survey or a population model.
-There are no people, animals, craft animations, soundscape, operable shutters,
-farming mechanics or water simulation. Generic vegetation does not reconstruct
+This is detailed procedural art, not photorealism, a survey or a historical population estimate.
+The tutorial adds stylized citizens and seasonal food/work mechanics. Animals,
+detailed craft animations, soundscape, operable shutters and water simulation
+remain unimplemented. Generic vegetation does not reconstruct
 species or season. The walking controller is analytic and shares rendered wall,
 furniture and floor geometry; free flight intentionally passes through geometry.
 Far countryside is a lower-resolution backdrop beyond the walking envelope.
 The model ZIP contains neutral-material GLBs, not shader appearance, lights,
-walking physics, CAD solids or automatic future stages. Only Apple Silicon
+walking physics, CAD solids or automatic future stages. The 0.2.0 model bundle adds an explicitly hypothetical
+town and its four new buildings and revised store, for 16 GLBs in total. Only Apple Silicon
 rendering/performance is exercised locally; the package also includes Intel code.
 
 The application is ad-hoc signed, not Developer ID notarized. macOS may require

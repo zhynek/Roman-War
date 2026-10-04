@@ -73,3 +73,25 @@ forges, pottery wheels or later sailing ships are present. Burials and footprint
 are acknowledged as evidence but not repurposed as scenic decoration. All geometry,
 material code and object shapes are original; no source images or plans were
 traced or copied. Vegetation is generic and the water is visual, not hydraulic.
+
+## Governance tutorial added in 0.2.0
+
+Camilla Mazzucato, “Socio-Material Archaeological Networks at Çatalhöyük a
+Community Detection Approach,” *Frontiers in Digital Humanities* 6 (2019).
+[Original research, DOI 10.3389/fdigh.2019.00008](https://www.frontiersin.org/journals/digital-humanities/articles/10.3389/fdigh.2019.00008/full).
+Read the abstract, introduction and household/community discussion on 2026-10-04.
+This distant Anatolian comparison examines relationships among households and
+larger groups and cautions against reading settlement size as evidence for a
+centralized hierarchy. It does **not** establish Yenikapı's institutions, offices,
+political equality or defense organization. No Çatalhöyük plan is transplanted.
+
+**Design interpretation:** the playable seasonal scenario invents a steward,
+watch leader, four-year terms, appointments, named residents, population counts,
+age thresholds, birth/migration rates, workforce categories, predictable supply
+pressure and a reversible town milestone. These are teaching rules, not evidence
+of a Neolithic government, election system, standing army or actual raid. God
+mode is a player perspective. No exact political history is inferred from the
+site's architectural evidence. New homes, shelters, storage adaptation, paths,
+screens and gathering space reuse the declared material vocabulary but retain
+explicit hypothetical identities and lineage. Read [GOVERNANCE.md](experience/GOVERNANCE.md)
+for the rules and their limits.

@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+import copy
+import unittest
+from validate_governance import load,validate
+class GovernanceData(unittest.TestCase):
+    def setUp(self):self.c=load('governance');self.b=load('balance');self.u=load('governance_ui')
+    def errors(self):return validate(self.c,self.b,self.u)
+    def test_baseline(self):self.assertEqual(self.errors(),[])
+    def test_duplicate_project(self):self.c['projects'].append(copy.deepcopy(self.c['projects'][0]));self.assertTrue(self.errors())
+    def test_duplicate_person(self):self.c['initial_citizens'][1]['id']=self.c['initial_citizens'][0]['id'];self.assertTrue(self.errors())
+    def test_invalid_leader(self):self.c['initial_leaders']['watch']='missing';self.assertTrue(self.errors())
+    def test_same_leader(self):self.c['initial_leaders']['watch']=self.c['initial_leaders']['steward'];self.assertTrue(self.errors())
+    def test_child_leader(self):self.c['initial_leaders']['watch']='citizen_0005';self.assertTrue(self.errors())
+    def test_wrong_snapshot(self):self.c['base_snapshot_id']='reference_1200';self.assertTrue(self.errors())
+    def test_scenario_is_hypothetical(self):self.c['kind']='historical';self.assertTrue(self.errors())
+    def test_unknown_requirement(self):self.c['projects'][0]['requires']=['missing'];self.assertTrue(self.errors())
+    def test_cycle(self):self.c['projects'][0]['requires']=[self.c['projects'][-1]['id']];self.assertTrue(self.errors())
+    def test_reused_fabric(self):self.c['projects'][0]['changes'][0]['after'][0]['id']='yk_house_01';self.assertTrue(self.errors())
+    def test_unknown_predecessor(self):self.c['projects'][1]['changes'][0]['before']=['missing'];self.assertTrue(self.errors())
+    def test_unknown_effect(self):self.c['projects'][0]['effects']['gold']=2;self.assertTrue(self.errors())
+    def test_invalid_cost(self):self.c['projects'][0]['work']=0;self.assertTrue(self.errors())
+    def test_negative_yield(self):self.b['food_yields'][0]=-1;self.assertTrue(self.errors())
+    def test_zero_term(self):self.b['term_seasons']=0;self.assertTrue(self.errors())
+    def test_bad_ages(self):self.b['adult_age']=self.b['death_age'];self.assertTrue(self.errors())
+    def test_unknown_tutorial(self):self.c['tutorial_projects'][0]='missing';self.assertTrue(self.errors())
+    def test_nonfinite(self):self.c['projects'][0]['at'][0]=float('nan');self.assertTrue(self.errors())
+    def test_outside_world(self):self.c['projects'][0]['at'][0]=900;self.assertTrue(self.errors())
+    def test_missing_copy(self):del self.u['begin'];self.assertTrue(self.errors())
+    def test_unknown_household(self):self.c['initial_citizens'][0]['household']='missing';self.assertTrue(self.errors())
+if __name__=='__main__':unittest.main()

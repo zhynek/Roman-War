@@ -11,6 +11,54 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı seasonal tutorial (0.2.0, October 4, 2026)
+
+The [governance guide](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/GOVERNANCE.md)
+now defines and implements a playable **hypothetical** seasonal settlement. Start
+with **Play seasonal tutorial**. God controls both offices; the steward manages
+household policy/civil work and the watch leader manages protection. Each resident
+has a stable ID, household, age and skills. Terms rotate every four years; births,
+arrivals, adulthood, departures and mortality unfold through explicit seasons.
+
+One adult gets one task per season. Nine commissioned initiatives consume timber
+and multi-season labor, up to three in the queue. Care/protection/construction
+compete with gathering. Factor lists explain wellbeing, cooperation and protection;
+food accounting distinguishes consumption, unmet need, spoilage, pressure losses
+and overflow. The demonstrated route reaches the reversible town milestone in
+21 seasons with 48 fictional residents, eight dwellings and 13 total buildings.
+No dated reconstruction, actual political office or standing army is asserted.
+The evidence ledger records the comparative research and the game's inventions.
+
+`src/core/settlement_rules.gd` stays scene-free and integer/deterministic. Versioned
+JSON content and balance tables own the rules and new UI prose. Completed projects
+use `fabric.gd`: original homes survive, the store retains its ID at revision 2,
+and new homes/paths/shelters have separate IDs. Citizen figures illustrate recorded
+assignments through collision-aware local motion; no animation advances state.
+The original reference remains available and medieval/campaign sources stay separate.
+
+The independent **`early_settlement_campaign.json`** wrapper is `yenikapi_seasons`
+version 1; scenario/settlement identity and rules version are validated. It stores
+people, office terms, orders, queue progress, completed project IDs, policies,
+resources, stocks, journal and assignments. JSON integral values canonicalize to
+integers before replay. Validation/readback precedes atomic replacement. Reference
+bookmarks are refused in campaign mode; no older save is imported or migrated.
+
+Source rules pass **705 checks** across 40 simulated years, including save/replay,
+succession, mortality, negative inputs, authority, costs and contraction. The
+retained reference passes **248 checks** with the original mesh hash. The builder
+now repeats those checks in the exact Mac app, captures 14 reference and 12 tutorial
+views and measures both reference and grown-settlement performance. The model
+bundle expands to 16 GLBs; new town models are explicitly hypothetical. Package
+and publication verification are recorded after the frozen build completes.
+
+Still limited to one town and two authored offices. There are no field battles,
+trade/diplomacy, general free-placement construction, demographic calibration,
+resource depletion, arbitrary institutions or RPG leader possession. Other offices
+keep standing orders when the player changes role. God mode changes authority,
+not resources. Future battle integration must preserve the parent BattleResolver
+seam. Explicit demolition/abandonment commands and further urban stages remain
+future work; population contraction already retains the older physical fabric.
+
 ## Independent Yenikapı early village (October 4, 2026)
 
 The separate [Yenikapı circa-6000 BCE study](../Castles%20and%20Cities/sites/yenikapi_6000_bce/README.md)
