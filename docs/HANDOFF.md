@@ -48,8 +48,12 @@ succession, mortality, negative inputs, authority, costs and contraction. The
 retained reference passes **248 checks** with the original mesh hash. The builder
 now repeats those checks in the exact Mac app, captures 14 reference and 12 tutorial
 views and measures both reference and grown-settlement performance. The model
-bundle expands to 16 GLBs; new town models are explicitly hypothetical. Package
-and publication verification are recorded after the frozen build completes.
+bundle expands to 16 GLBs; new town models are explicitly hypothetical. The final package is frozen at `3fc10baa1af1f958ccef12fa532336a652b50a13`.
+[Verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.2.md)
+records the 26 reviewed views, 85 tutorial interaction/navigation checks, parent
+release gates and corrected forced-draw benchmarks. On the local M3 Max, the
+48-person town measures 8.27–8.33 ms median / 9.00–9.24 ms p95 across four views.
+Build logs and artifacts are in `build/yenikapi-early-settlement-0.2.0-final/`.
 
 Still limited to one town and two authored offices. There are no field battles,
 trade/diplomacy, general free-placement construction, demographic calibration,

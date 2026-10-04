@@ -56,6 +56,7 @@ Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and 
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
 repeats these and the 12-view `tools/governance_preview.gd` tutorial against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
+The [0.2.0 verification record](VERIFICATION-0.2.md) covers seasonal gameplay and the final package.
 The [0.1.0 verification record](VERIFICATION.md) includes exact-app checks,
 render inspection, performance measurements and preservation results.
 
