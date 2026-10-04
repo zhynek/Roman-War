@@ -5,6 +5,22 @@ Verified October 4, 2026. The release payload is frozen at
 without changing the three frozen ZIPs. The separate prerelease tag is
 `yenikapi-early-settlement-v0.2.0`.
 
+## Publication and download verification
+
+The [separate 0.2.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
+is public, and its tag resolves to the frozen commit above. All **five public
+browser download URLs** were downloaded anonymously after publication. GitHub's
+asset digests, local tested files, downloaded SHA-256 manifest and ZIP integrity
+checks agree. The downloaded Mac archive is byte-identical to the exact app
+verified below. The [study README](README.md) links the app, models and source.
+
+All **seven prior releases** retain their IDs, prerelease status and original
+asset IDs/names/sizes/digests. Latest stable remains **`v0.14.2`**;
+Constantinople 0.3.0 and the original early village 0.1.0 are preserved. Uploads
+were sequential into a draft, verified by release ID before publication, then
+verified again through the public links. Local evidence is
+`build/yenikapi-early-settlement-0.2.0-final/verification/publication.json`.
+
 ## Gates and preservation
 
 - Village and governance schemas pass, with **14 + 22 data regression cases**.

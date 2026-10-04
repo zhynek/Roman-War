@@ -54,6 +54,10 @@ records the 26 reviewed views, 85 tutorial interaction/navigation checks, parent
 release gates and corrected forced-draw benchmarks. On the local M3 Max, the
 48-person town measures 8.27–8.33 ms median / 9.00–9.24 ms p95 across four views.
 Build logs and artifacts are in `build/yenikapi-early-settlement-0.2.0-final/`.
+The [0.2.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
+is public. All five anonymous download links match the tested package hashes;
+all seven older releases retain their original assets and latest stable stays
+`v0.14.2`. The study README links the Mac app, 16 models and editable source.
 
 Still limited to one town and two authored offices. There are no field battles,
 trade/diplomacy, general free-placement construction, demographic calibration,
