@@ -49,7 +49,8 @@ def run(command, log, cwd):
     result = subprocess.run([str(x) for x in command], cwd=cwd, text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=900)
     log.write_text(result.stdout)
-    if result.returncode or re.search(r"(?:SCRIPT ERROR:|^ERROR:)", result.stdout, re.M):
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
+    if result.returncode or re.search(r"(?:SCRIPT ERROR:|^ERROR:)", plain, re.M):
         raise SystemExit(f"Failed {log.stem} (exit {result.returncode}): {log}")
     return result.stdout
 
