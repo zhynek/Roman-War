@@ -49,6 +49,8 @@ Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and 
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
 repeats these against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
+The [0.1.0 verification record](VERIFICATION.md) includes exact-app checks,
+render inspection, performance measurements and preservation results.
 
 ## Present limits
 

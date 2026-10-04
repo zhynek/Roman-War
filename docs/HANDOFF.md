@@ -37,16 +37,23 @@ inactive fabric persist in the resolver result. Dated snapshots remain separate.
 documents the independent `yenikapi_view` version-1 bookmark, bundle identity and
 user directory. No medieval creative or campaign save is migrated.
 
-Source verification passed the 14 data cases and geometric walking/interior,
-collision, picking, repeatability, lineage and real save checks. All 14 source
-views were inspected outside Git (`/tmp/yenikapi-final-qa`). Parent data/import
+The [verification record](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION.md)
+records **14 data cases** and **248 source plus 248 exact-app checks**, all passing.
+All 14 source and 14 packaged views were inspected outside Git. Parent data/import
 were clean; **705 campaign tests, zero failures** and rendered planning/marching/
 arrival/40× map inspection passed (`build/yenikapi-parent-gates`, external images
 `/tmp/yenikapi-parent-map`). The retained medieval neighborhood passed **374
-checks, zero failures**; its entire experience source/data/export configuration
-is unchanged. The new release builder freezes a clean commit and repeats checks,
-14 captures, performance measurements and GLB/ZIP/signature verification against
-the exact universal Mac app. Exact package results are recorded after that run.
+checks, zero failures**; all 54 experience files are byte-for-byte unchanged.
+
+The universal, ad-hoc signed **0.1.0** package is frozen at
+`b4c7e8a5997993f14065225515d4b41ba9feab4d`, in
+`build/yenikapi-early-settlement-0.1.0-publish/`. Source/package mesh hashes match;
+10 GLBs, three ZIPs, signatures and SHA-256 hashes pass. Exact-app startup was
+**4.014 s** on M3 Max, 1600×1000; median/p95 frame times were landscape
+**8.320/9.107 ms**, aerial **3.156/4.117**, street **2.647/3.427**, interior
+**2.612/3.387**. Local frame pacing varied between runs; these are observations,
+not a source/package speedup claim. Intel rendering remains untested locally.
+The independent prerelease tag is `yenikapi-early-settlement-v0.1.0`.
 
 ## Independent Constantinople city study
 
