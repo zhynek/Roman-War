@@ -405,9 +405,10 @@ the chosen 267 × 253 m authoring envelope is not an archaeological boundary.
 
 ### Regional analogy: courts and vertical access
 
-- Guy D. R. Sanders, *Corinth in the Middle Ages*, BABESCH Byvanck Lecture 2016,
+- Guy D. R. Sanders, *Recent Finds from Ancient Corinth: How Little Things
+  Make Big Differences*, BABESCH Byvanck Lecture 2016,
   [published lecture](https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf),
-  printed pp. 3–5 (PDF pp. 12–14). The eleventh-century house discussion
+  printed pp. 3–5 (PDF pp. 13–15). The eleventh-century house discussion
   describes rooms opening to a court with a well and a stair to a balcony.
 - **Use:** this supports a regional court/access analogy. The modeled external
   stair, gallery, well and house arrangement are original interpretations,
