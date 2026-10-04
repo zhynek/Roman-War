@@ -40,6 +40,7 @@ func _run() -> void:
 	var input_snapshot := var_to_bytes(_app.data)
 	_test_world()
 	_test_geometry()
+	load("res://tools/architecture_checks.gd").run(_app.world, _check)
 	_test_reservoir_ground()
 	await _test_camera_and_stages()
 	await _test_editor()

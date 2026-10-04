@@ -65,7 +65,11 @@ func _column(at: Vector3, height: float, radius: float, material: String = "ston
 	var foot: float = minf(radius*0.65,height*0.08)
 	g.box(at+Vector3.UP*foot*0.5,Vector3(radius*2.9,foot,radius*2.9),"stone")
 	g.cylinder(at+Vector3.UP*foot*1.4,radius*1.19,foot,material)
-	g.cylinder(at+Vector3.UP*height*0.48,radius,height*0.86,material,radius*0.83)
+	# The shaft meets the top of the base and the bottom of the capital.
+	# Fixed fractions of total height left tall, slender shafts floating.
+	var shaft_bottom: float = foot*1.9
+	var shaft_top: float = height-foot*2.1
+	g.cylinder(at+Vector3.UP*(shaft_bottom+shaft_top)*0.5,radius,shaft_top-shaft_bottom,material,radius*0.83)
 	g.cylinder(at+Vector3.UP*(height-foot*1.4),radius*1.17,foot*1.4,"stone",radius*1.46)
 	g.box(at+Vector3.UP*(height-foot*0.35),Vector3(radius*2.95,foot*0.7,radius*2.95),"stone")
 	# Carved impost and restrained corner volutes use original geometry.
@@ -327,6 +331,12 @@ func _round_wall_shell(at: Vector3, radius: float, height: float, start_angle: f
 				g.box(p+Vector3.UP*(height*f),Vector3(span+0.08,0.20,thickness+0.10),"stone",Vector3(0,-angle-PI*0.5,0))
 
 func _church(w: float, d: float, h: float) -> void:
+	if bool(dimensions.get("octagonal_gallery",0)):
+		_octagonal_gallery(w,d,h)
+		return
+	if bool(dimensions.get("domed_hall",0)):
+		_domed_hall(w,d,h)
+		return
 	if bool(dimensions.get("basilican",0)):
 		_basilica(w,d,h)
 		return
@@ -339,12 +349,17 @@ func _church(w: float, d: float, h: float) -> void:
 	for side in [-1.0,1.0]:
 		_bands(Vector3(side*w*0.48,0,0),w*0.045,d*0.78,lower)
 		g.roof(Vector3(side*w*0.30,lower,0),w*0.38,d*0.87,h*0.09,"roof")
+		g.box(Vector3(side*w*0.30,lower-0.12,0),Vector3(w*0.38,0.24,d*0.87),"brick")
+		_bands(Vector3(side*w*0.335,0,d*0.43),w*0.31,0.70,lower)
 		_bands(Vector3(side*w*0.285,0,-d*0.47),w*0.38,0.7,lower)
 		for i in range(4):
 			_window(Vector3(side*w*0.505,lower*0.46,(i-1.5)*d*0.20),w*0.07,h*0.15,-side*PI*0.5)
 	g.arch(Vector3(0,0.35,-d*0.47),w*0.17,h*0.28,0.85,0.45,"stone")
 	g.box(Vector3(0,lower*0.85,-d*0.47),Vector3(w*0.20,lower*0.3,0.7),"brick")
 	g.roof(Vector3(0,lower*1.08,-d*0.13),arm,d*0.74,h*0.15,"roof")
+	g.box(Vector3(0,lower*1.08-0.12,-d*0.13),Vector3(arm,0.24,d*0.74),"brick")
+	g.roof(Vector3(0,lower*1.08,d*0.29),arm,d*0.10,h*0.15,"roof")
+	g.box(Vector3(0,lower*1.08-0.12,d*0.29),Vector3(arm,0.24,d*0.10),"brick")
 	for sx in [-1.0,1.0]:
 		for sz in [-1.0,1.0]:
 			_column(Vector3(sx*radius*0.82,0.35,sz*radius*0.82),h*0.46,w*0.025,"green")
@@ -363,6 +378,7 @@ func _church(w: float, d: float, h: float) -> void:
 		var p := Vector3(cos(angle)*arm*0.46,0,d*0.33+sin(angle)*arm*0.46)
 		g.box(p+Vector3.UP*lower*0.4,Vector3(arm*0.135,lower*0.8,0.6),"brick",Vector3(0,-angle-PI*0.5,0))
 	g.dome_section(Vector3(0,lower*0.8,d*0.33),arm*0.46,h*0.10,"roof",0,PI,"gold")
+	_apse_join(Vector3(0,0,d*0.33),w*0.97,lower*1.08,arm*0.46,lower*0.8,h*0.10)
 	g.box(Vector3(0,1.0,d*0.28),Vector3(w*0.12,1.3,d*0.06),"stone")
 	root.set_meta("interior_anchor",Vector3(0,1.9,-d*0.23))
 
@@ -407,6 +423,12 @@ func _basilica(w: float, d: float, h: float) -> void:
 	g.box(Vector3(0,1.2,d*0.30),Vector3(w*0.11,1.1,d*0.045),"stone")
 
 func _monastery(w: float, d: float, h: float) -> void:
+	if bool(dimensions.get("adjoining_sanctuaries",0)):
+		_adjoining_sanctuaries(w,d,h)
+		return
+	if bool(dimensions.get("cruciform_five_domes",0)):
+		_cruciform_five_domes(w,d,h)
+		return
 	var wing: float = minf(w,d)*0.16
 	var wing_height: float = h*0.36
 	for side in [-1.0,1.0]:
@@ -604,7 +626,7 @@ func _cistern(w: float, d: float, h: float) -> void:
 				emitted += 1
 		# The cap belongs to a separate node: exterior inspection can deliberately
 		# cut it away, while entering the cistern restores a fully enclosed room.
-		vaults.box(Vector3(0,0.31,0),Vector3(w,0.62,d),"brick")
+		vaults.box(Vector3(0,-0.31,0),Vector3(w,0.62,d),"brick")
 		var ceiling := MeshInstance3D.new()
 		ceiling.name = "CisternVaultRoof"
 		ceiling.mesh = vaults.finish()
@@ -706,3 +728,262 @@ func _gate(w: float, d: float, h: float) -> void:
 		g.box(Vector3(side*clear*0.51,passage_height*0.31,0),Vector3(0.22,passage_height*0.61,clear*0.47),"wood")
 		for level in range(4):
 			g.box(Vector3(side*(clear*0.51-0.13),passage_height*(0.10+level*0.13),0),Vector3(0.07,0.11,clear*0.48),"dark")
+
+# These families express documented structural distinctions. Their proportions,
+# furnishings and lost ranges remain original study interpretations.
+func _part(name_value: String, previous: RefCounted) -> void:
+	var mesh_node := MeshInstance3D.new()
+	mesh_node.name = name_value
+	mesh_node.mesh = g.finish()
+	root.add_child(mesh_node)
+	g = previous
+
+func _closed_drum(at: Vector3, radius: float, height: float, sides: int = 16) -> void:
+	for i in range(sides):
+		var angle: float = (i+0.5)*TAU/sides
+		var length: float = 2.0*radius*tan(PI/sides)
+		var p: Vector3 = at+Vector3(cos(angle)*radius,height*0.5,sin(angle)*radius)
+		g.box(p,Vector3(length+0.03,height,0.62),"brick",Vector3(0,-angle-PI*0.5,0))
+		g.box(p+Vector3.UP*(height*0.5),Vector3(length+0.12,0.25,0.82),"stone",Vector3(0,-angle-PI*0.5,0))
+
+func _roof_collar(at: Vector3, radius: float, width: float, depth: float, inner_y: float, outer_y: float) -> void:
+	# A circle inside a rectangular roof leaves four spandrel areas. Preserve
+	# each rectangle corner explicitly so no chord cuts off an unroofed wedge.
+	var angles: Array[float] = []
+	for index in range(32):
+		angles.append(index*TAU/32.0)
+	for sx in [-1.0,1.0]:
+		for sz in [-1.0,1.0]:
+			var angle: float = fposmod(atan2(sz*depth,sx*width),TAU)
+			var distinct := true
+			for existing in angles:
+				if absf(existing-angle)<0.00001: distinct=false
+			if distinct: angles.append(angle)
+	angles.sort()
+	for index in range(angles.size()):
+		var a: float = angles[index]
+		var b: float = angles[(index+1)%angles.size()]
+		var dir_a := Vector3(cos(a),0,sin(a))
+		var dir_b := Vector3(cos(b),0,sin(b))
+		var limit_a: float = minf(width*0.5/maxf(absf(dir_a.x),0.00001),depth*0.5/maxf(absf(dir_a.z),0.00001))
+		var limit_b: float = minf(width*0.5/maxf(absf(dir_b.x),0.00001),depth*0.5/maxf(absf(dir_b.z),0.00001))
+		var p: Vector3 = at+dir_a*radius+Vector3.UP*inner_y
+		var q: Vector3 = at+dir_b*radius+Vector3.UP*inner_y
+		var r: Vector3 = at+dir_b*limit_b+Vector3.UP*outer_y
+		var s: Vector3 = at+dir_a*limit_a+Vector3.UP*outer_y
+		g._oriented_quad(p,q,r,s,Vector3.UP,lead)
+		g._oriented_quad(p-Vector3.UP*0.15,q-Vector3.UP*0.15,r-Vector3.UP*0.15,s-Vector3.UP*0.15,Vector3.DOWN,"brick")
+
+func _door_end(z: float, width: float, height: float, opening: float) -> void:
+	for side in [-1.0,1.0]:
+		_bands(Vector3(side*(width+opening)*0.25,0,z),(width-opening)*0.5,0.78,height)
+	var door_height: float = minf(height*0.72,opening*1.5)
+	g.arch(Vector3(0,0.36,z),opening,door_height,0.9,0.4,"stone")
+	var header_bottom: float = door_height+0.78
+	if header_bottom < height:
+		_solid(Vector3(0,(height+header_bottom)*0.5,z),Vector3(opening,height-header_bottom,0.78),"brick")
+
+func _apse_join(at: Vector3, width: float, top: float, radius: float, spring: float, rise: float) -> void:
+	# Fill both shoulders and the wall ABOVE the conch's elliptical arch. The
+	# sanctuary below the arch stays open; no flat wall bisects its interior.
+	var count := 64
+	for index in range(count):
+		var xa: float = -width*0.5+width*index/count
+		var xb: float = -width*0.5+width*(index+1)/count
+		var x: float = (xa+xb)*0.5
+		var lower: float = 0.0
+		if absf(x)<radius:
+			# Use the lower of both edge heights; adjoining strips overlap the
+			# conch very slightly instead of leaving narrow daylight seams.
+			var edge: float = minf(radius,maxf(absf(xa),absf(xb)))
+			lower = spring+rise*sqrt(maxf(0.0,1.0-edge*edge/(radius*radius)))
+		if lower<top:
+			_solid(at+Vector3(x,(lower+top)*0.5,0),Vector3(xb-xa+0.008,top-lower,0.72),"brick")
+
+func _octagonal_gallery(w: float, d: float, h: float) -> void:
+	var radius: float = float(dimensions.get("dome_radius_m",w*0.265))
+	var dome_height: float = float(dimensions.get("dome_height_m",h*0.30))
+	var dome_base: float = h-dome_height
+	var gallery: float = float(dimensions.get("gallery_height_m",h*0.31))
+	var wall_height: float = dome_base*0.79
+	var shell_x: float = w*0.46
+	var shell_z: float = d*0.41
+	_solid(Vector3(0,0.18,0),Vector3(w*0.96,0.36,d*0.90),"stone")
+	for side in [-1.0,1.0]:
+		_bands(Vector3(side*shell_x,0,0),0.78,shell_z*2.0,wall_height)
+		for i in range(5):
+			_window(Vector3(side*(shell_x+0.42),gallery+1.2,(i-2)*d*0.14),1.1,2.3,-side*PI*0.5)
+	_door_end(-shell_z,shell_x*2.0,wall_height,4.2)
+	# Eastern sanctuary is one apse, not the later middle-Byzantine triple type.
+	for side in [-1.0,1.0]:
+		_bands(Vector3(side*(shell_x+radius*0.43)*0.5,0,shell_z),(shell_x-radius*0.43),0.78,wall_height)
+	_round_wall_shell(Vector3(0,0,shell_z),radius*0.43,wall_height*0.80,0,PI,0.7)
+	g.dome_section(Vector3(0,wall_height*0.80,shell_z),radius*0.43,2.7,lead,0,PI,"gold")
+	_apse_join(Vector3(0,0,shell_z),shell_x*2.0,wall_height+0.18,radius*0.43,wall_height*0.80,2.7)
+	var previous: RefCounted = g
+	g = Geometry.new(materials)
+	var inner_radius: float = radius*1.07
+	for i in range(8):
+		var aa: float = PI*0.125+i*PI*0.25
+		var ab: float = aa+PI*0.25
+		var a := Vector3(cos(aa)*inner_radius,0,sin(aa)*inner_radius)
+		var b := Vector3(cos(ab)*inner_radius,0,sin(ab)*inner_radius)
+		_solid(a+Vector3.UP*(dome_base*0.43),Vector3(1.05,dome_base*0.86,1.05),"stone",Vector3(0,-aa,0))
+		var direction: Vector3 = (b-a).normalized()
+		var edge: float = a.distance_to(b)
+		var midpoint: Vector3 = (a+b)*0.5
+		var yaw: float = atan2(-direction.z,direction.x)
+		# Lower order is trabeated; the gallery's upper order is arched.
+		for f in [1.0/3.0,2.0/3.0]:
+			_column(a.lerp(b,f)+Vector3.UP*0.36,gallery-0.70,0.30,"green" if i%2 else "stone")
+		g.box(midpoint+Vector3.UP*(gallery-0.14),Vector3(edge+0.30,0.58,0.68),"stone",Vector3(0,yaw,0))
+		_arcade(a+direction*0.25+Vector3.UP*(gallery+0.34),b-direction*0.25+Vector3.UP*(gallery+0.34),3,dome_base-gallery-1.25,0.62)
+		# Gallery slab and aisle roof are rings with a real central void.
+		var outer_a: Vector3 = a*minf(shell_x/absf(a.x),shell_z/absf(a.z))
+		var outer_b: Vector3 = b*minf(shell_x/absf(b.x),shell_z/absf(b.z))
+		g._oriented_quad(a+Vector3.UP*gallery,b+Vector3.UP*gallery,outer_b+Vector3.UP*gallery,outer_a+Vector3.UP*gallery,Vector3.UP,"stone")
+		g._oriented_quad(a+Vector3.UP*(gallery-0.34),outer_a+Vector3.UP*(gallery-0.34),outer_b+Vector3.UP*(gallery-0.34),b+Vector3.UP*(gallery-0.34),Vector3.DOWN,"plaster")
+		# When consecutive radial rays meet different rectangle sides, their
+		# chord cuts off a corner. Complete the floor and roof up to that corner.
+		var corner := Vector3(signf(midpoint.x)*shell_x,0,signf(midpoint.z)*shell_z)
+		if absf(outer_a.x-outer_b.x)>0.1 and absf(outer_a.z-outer_b.z)>0.1:
+			g._oriented_quad(outer_a+Vector3.UP*gallery,corner+Vector3.UP*gallery,outer_b+Vector3.UP*gallery,outer_b+Vector3.UP*gallery,Vector3.UP,"stone")
+			g._oriented_quad(outer_a+Vector3.UP*(gallery-0.34),corner+Vector3.UP*(gallery-0.34),outer_b+Vector3.UP*(gallery-0.34),outer_b+Vector3.UP*(gallery-0.34),Vector3.DOWN,"plaster")
+		g.box(midpoint+Vector3.UP*(gallery+0.72),Vector3(edge-0.35,0.85,0.15),"stone",Vector3(0,yaw,0))
+	_roof_collar(Vector3.ZERO,radius*0.99,shell_x*2.0,shell_z*2.0,dome_base,wall_height+0.18)
+	_part("OctagonalGallery",previous)
+	previous = g
+	g = Geometry.new(materials)
+	# Sixteen segments alternate shallow and recessed curvature. This is an
+	# original approximation, not a transcription of Henderson's measured dome.
+	var sectors: int = int(dimensions.get("dome_compartments",16))
+	for sector in range(sectors):
+		for row in range(12):
+			for col in range(4):
+				var points: Array[Vector3] = []
+				for uv in [Vector2(col,row),Vector2(col+1,row),Vector2(col+1,row+1),Vector2(col,row+1)]:
+					var angle: float = (sector+uv.x/4.0)*TAU/sectors
+					var latitude: float = uv.y*PI/24.0
+					var inset: float = 1.0-(0.050 if sector%2 else 0.010)*sin(uv.x*PI/4.0)*sin(latitude*2.0)
+					points.append(Vector3(cos(angle)*radius*cos(latitude)*inset,dome_base+dome_height*sin(latitude),sin(angle)*radius*cos(latitude)*inset))
+				g._oriented_quad(points[0],points[1],points[2],points[3],(points[0]-Vector3(0,dome_base,0)).normalized(),lead)
+				var inner: Array[Vector3] = []
+				for point in points:
+					inner.append(point-(point-Vector3(0,dome_base,0)).normalized()*0.16)
+				g._oriented_quad(inner[0],inner[1],inner[2],inner[3],-(points[0]-Vector3(0,dome_base,0)).normalized(),"gold")
+	_dome_ribs(Vector3(0,dome_base+0.05,0),radius+0.025,dome_height,sectors,"stone")
+	_cross(Vector3(0,h,0),1.05)
+	_part("SixteenCompartmentDome",previous)
+	# A narrow west gallery stair stays clear of the nave inspection route.
+	for step in range(32):
+		var level: float = gallery*(step+1)/32.0
+		_solid(Vector3(-shell_x+1.55,level*0.5,-shell_z+1.2+step*0.33),Vector3(1.7,level,0.35),"stone")
+	root.set_meta("interior_anchor",Vector3(0,2.0,-radius*0.55))
+
+func _domed_hall(w: float, d: float, h: float) -> void:
+	var radius: float = float(dimensions.get("dome_radius_m",w*0.34))
+	var dome_height: float = float(dimensions.get("dome_height_m",h*0.23))
+	var dome_base: float = h-dome_height
+	var lower: float = dome_base*0.87
+	var count: int = int(dimensions.get("hall_dome_count",1))
+	_solid(Vector3(0,0.18,0),Vector3(w,0.36,d),"stone")
+	for side in [-1.0,1.0]:
+		_bands(Vector3(side*(w*0.5-0.38),0,0),0.76,d,lower)
+		for i in range(5):
+			_window(Vector3(side*(w*0.5+0.03),lower*0.60,(i-2)*d*0.15),minf(1.3,w*0.11),lower*0.19,-side*PI*0.5)
+		g.roof(Vector3(side*(w*0.5+radius)*0.5,lower,0),maxf(0.3,w*0.5-radius),d,0.45,lead)
+		g.box(Vector3(side*(w*0.5+radius)*0.5,lower-0.12,0),Vector3(maxf(0.3,w*0.5-radius),0.24,d),"brick")
+	if bool(dimensions.get("open_inner_end",0)):
+		_door_end(-d*0.5,w,lower,minf(4.8,w*0.33))
+	else:
+		_door_end(-d*0.5,w,lower,minf(3.5,w*0.36))
+		_round_wall_shell(Vector3(0,0,d*0.5-radius*0.45),radius*0.90,lower,0,PI,0.65)
+		g.dome_section(Vector3(0,lower,d*0.5-radius*0.45),radius*0.90,dome_height*0.5,lead,0,PI,"gold")
+		_apse_join(Vector3(0,0,d*0.5-radius*0.45),w,lower+0.08,radius*0.90,lower,dome_height*0.5)
+	for dome_index in range(count):
+		var z: float = (dome_index-(count-1)*0.5)*d*0.36
+		_roof_collar(Vector3(0,0,z),radius*0.98,radius*2.0,radius*2.0,lower+0.08,lower)
+		var previous: RefCounted = g
+		g = Geometry.new(materials)
+		if bool(dimensions.get("windowed_drum",0)):
+			_drum(Vector3(0,lower,z),radius,dome_base-lower,16)
+		else:
+			_closed_drum(Vector3(0,lower,z),radius,dome_base-lower)
+		g.dome_section(Vector3(0,dome_base,z),radius,dome_height,lead,0,TAU,"gold")
+		_dome_ribs(Vector3(0,dome_base+0.03,z),radius+0.03,dome_height,16,"stone")
+		_part("HallDome%s" % dome_index,previous)
+		for sx in [-1.0,1.0]:
+			for sz in [-1.0,1.0]:
+				_column(Vector3(sx*radius*0.85,0.36,z+sz*radius*0.80),lower-0.36,w*0.027,"stone")
+		for side in [-1.0,1.0]:
+			g.arch(Vector3(0,lower-radius,z+side*radius*0.80),radius*1.70,radius*0.85,0.7,0.45,"brick")
+	# Roof the intervals without placing a gable through a dome.
+	var previous_end: float = -d*0.5
+	for dome_index in range(count+1):
+		var next_start: float = d*0.5 if dome_index == count else (dome_index-(count-1)*0.5)*d*0.36-radius
+		if next_start-previous_end > 0.12:
+			g.roof(Vector3(0,lower,(next_start+previous_end)*0.5),radius*2.0,next_start-previous_end,0.6,lead)
+			g.box(Vector3(0,lower-0.12,(next_start+previous_end)*0.5),Vector3(radius*2.0,0.24,next_start-previous_end),"brick")
+		previous_end = next_start+radius*2.0
+	root.set_meta("interior_anchor",Vector3(0,2,-d*0.26))
+
+func _adjoining_sanctuaries(w: float, d: float, h: float) -> void:
+	var center_width: float = w*0.084
+	var center_depth: float = d*0.43
+	var widths: Array[float] = [w*0.19,w*0.24]
+	for index in range(2):
+		var width: float = widths[index]
+		var flank_dims: Dictionary = {"width_m":width,"depth_m":d*(0.41 if index == 0 else 0.49),"height_m":h*(0.88 if index == 0 else 1.0),"dome_radius_m":width*0.215,"dome_height_m":h*0.18}
+		var flank: Node3D = build({"id":"NorthSanctuary" if index == 0 else "SouthSanctuary","kind":"church","dimensions":flank_dims},materials)
+		flank.position = Vector3((-1.0 if index == 0 else 1.0)*(center_width+width)*0.5,0,-d*0.025 if index == 0 else 0)
+		root.add_child(flank)
+	var center_dims: Dictionary = {"width_m":center_width,"depth_m":center_depth,"height_m":h*0.92,"dome_radius_m":center_width*0.45,"dome_height_m":h*0.18,"domed_hall":1,"hall_dome_count":2,"windowed_drum":1}
+	var center: Node3D = build({"id":"FuneraryChapel","kind":"church","dimensions":center_dims},materials)
+	root.add_child(center)
+	# A small, off-axis group of service ranges suggests an institution without
+	# inventing an exact symmetrical cloister for its missing campus.
+	_bands(Vector3(-w*0.39,0,d*0.12),w*0.13,d*0.57,h*0.28,"plaster")
+	g.roof(Vector3(-w*0.39,h*0.28,d*0.12),w*0.14,d*0.58,2.5,"roof")
+	_bands(Vector3(w*0.25,0,-d*0.39),w*0.37,d*0.10,h*0.25,"plaster")
+	g.roof(Vector3(w*0.25,h*0.25,-d*0.39),w*0.38,d*0.11,2.3,"roof")
+	g.cylinder(Vector3(-w*0.24,0.45,-d*0.29),1.25,0.9,"stone")
+	g.cylinder(Vector3(-w*0.24,0.94,-d*0.29),0.90,0.08,"water")
+	root.set_meta("interior_anchor",Vector3(0,2,-center_depth*0.26))
+
+func _cruciform_five_domes(w: float, d: float, h: float) -> void:
+	var radius: float = float(dimensions.get("dome_radius_m",w*0.0713))
+	var half_crossing: float = radius*1.40
+	var dome_height: float = h*0.23
+	var base: float = h-dome_height
+	var previous: RefCounted = g
+	g = Geometry.new(materials)
+	_solid(Vector3(0,0.18,0),Vector3(half_crossing*2.0,0.36,half_crossing*2.0),"stone")
+	for sx in [-1.0,1.0]:
+		for sz in [-1.0,1.0]:
+			_bands(Vector3(sx*radius*0.96,0,sz*radius*0.96),2.3,2.3,base-radius,"stone")
+	for side in [-1.0,1.0]:
+		g.arch(Vector3(0,base-radius,side*radius*0.96),radius*1.78,radius*0.89,1.8,0.65,"stone")
+		g.arch(Vector3(side*radius*0.96,base-radius,0),radius*1.78,radius*0.89,1.8,0.65,"stone",PI*0.5)
+	_drum(Vector3(0,base-3.0,0),radius,3.0,16)
+	_roof_collar(Vector3.ZERO,radius*0.99,half_crossing*2.0,half_crossing*2.0,base-3.0,h*0.5307)
+	g.dome_section(Vector3(0,base,0),radius,dome_height,lead,0,TAU,"gold")
+	_dome_ribs(Vector3(0,base+0.05,0),radius+0.03,dome_height,16,"stone")
+	_cross(Vector3(0,h,0),1.6)
+	_part("CentralCrossing",previous)
+	var arm_specs: Array = [
+		["WestArm",d*0.46-half_crossing,0.0],
+		["EastArm",d*0.35-half_crossing,PI],
+		["NorthArm",w*0.43-half_crossing,PI*0.5],
+		["SouthArm",w*0.43-half_crossing,-PI*0.5],
+	]
+	for spec in arm_specs:
+		var length: float = float(spec[1])
+		var arm_dims: Dictionary = {"width_m":half_crossing*2.0,"depth_m":length,"height_m":h*0.80,"dome_radius_m":radius*0.91,"dome_height_m":h*0.19,"domed_hall":1,"open_inner_end":1,"windowed_drum":0}
+		var arm: Node3D = build({"id":str(spec[0]),"kind":"church","dimensions":arm_dims},materials)
+		arm.rotation.y = float(spec[2])
+		arm.position = Basis(Vector3.UP,arm.rotation.y)*Vector3(0,0,-half_crossing-length*0.5)
+		root.add_child(arm)
+	# Low external forecourt and isolated service wing are not a invented full
+	# monastery enclosure; the dominant footprint stays visibly cruciform.
+	g.box(Vector3(0,0.05,-d*0.49),Vector3(w*0.34,0.1,d*0.06),"stone")
+	root.set_meta("interior_anchor",Vector3(0,2,-d*0.30))

@@ -13,24 +13,39 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## Independent Constantinople city study
 
-`Castles and Cities/` now contains a standalone **Constantinople circa 1200**
-Godot project, with 26 landmark assemblies, 17,561 reference dwellings,
-fortifications, waterfronts, reservoirs, surrounding terrain, inspected
-interiors and two hypothetical infill variants. A separate creative editor
-saves additions without touching campaign data. Start at its
-[experience guide](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/README.md)
-and [release builder](../Castles%20and%20Cities/BUILDING.md).
-The workspace remains excluded from the main game by `.gdignore`.
-Geometry is original procedural work with explicit historical uncertainty;
-it is not a surveyed or finished photorealistic reconstruction. The model
-export supplies whole-city and individual landmark GLB meshes, not CAD solids.
+`Castles and Cities/` contains the standalone **Constantinople circa 1200**
+Godot project. Phase 2 (0.2.0) adds 16 data-driven architectural types across
+17,561 reference urban plots: courtyard and shop houses, distinct craft courts,
+small churches, wells and markets. Three monument families now have distinct
+assemblies: Sergius and Bacchus, Pantokrator and the Holy Apostles. The two
+hypothetical infill states preserve each reference plot and its type. Separate
+creative saves remain compatible; no campaign code or save keys changed.
 
-Verified October 4: city data/presentation schemas, deterministic layouts,
-actual-scene geometry/editor/persistence checks, real rendering including
-reservoir exclusion and terrain coverage; parent campaign **705 tests,
-0 failures**, data/import and planning/marching/arrival/40× map gates.
-Generated applications, models and verification logs belong under ignored
-`build/`, with QA screenshots outside tracked assets.
+Navigation now has five visible flight speeds (8–1,000 m/s), Shift boost,
+faster wheel/pinch zoom, eight district jumps and double-click terrain travel.
+Ground/porch supports, terrain-conforming streets, roof enclosure, column
+continuity, facade offsets, LOD bounds and procedural shader filtering address
+verified visual defects. The reference chronology remains independent; a future
+campaign adapter is described in the experience guide, not implemented.
+
+Start at the [experience guide](../Castles%20and%20Cities/realms/byzantine_empire/cities/constantinople_1200/experience/README.md)
+and [release builder](../Castles%20and%20Cities/BUILDING.md). The `.gdignore`
+keeps the authoring workspace outside the campaign resource tree. The model
+bundle provides a whole-city GLB, 26 landmarks and 16 detailed architectural
+types. These are meshes and interpretive reconstructions, not CAD solids,
+measured archaeology or finished photorealism; consult `SOURCES.md` and the
+architecture evidence catalogue before extending them.
+
+Verified October 4: parent campaign **705 tests, 0 failures**, clean data/import
+and planning/marching/arrival/40× map gates. City source gates passed **9,045 scene checks, 86 navigation checks, 212 landmark
+checks and 8 terrain checks** (546,664 terrain interior samples). These include
+schema and deterministic layouts, actual-scene geometry/editor/persistence,
+architecture footprints/grounding and paired LOD checks, camera input, landmark
+enclosures and terrain coverage. Release builds repeat those checks against
+the exact packaged app and render 23 views; `provenance.json` and build logs
+record the results and source hashes. Generated applications/models belong in
+ignored `build/`; QA images stay in external temporary directories. Keep an
+ignored `build/.gdignore` so campaign imports do not scan generated GLBs.
 
 ## Roma city development
 

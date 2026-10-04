@@ -7,6 +7,10 @@ const Layout = preload("res://src/layout.gd")
 const VARIANT_FILE := "user://creative_variant_v1.json"
 const MAX_ADDITIONS := 500
 const KIT := ["house", "workshop", "church", "tower"]
+const FLIGHT_SPEEDS := [8.0, 35.0, 120.0, 400.0, 1000.0]
+const FLIGHT_SPEED_KEYS := ["speed_detail", "speed_street", "speed_district", "speed_city", "speed_crossing"]
+const FLIGHT_BOOST := 4.0
+const ZOOM_STEP := 1.3
 enum Navigation { ORBIT, FLY, WALK }
 
 var camera: Camera3D
@@ -34,13 +38,17 @@ var _orbit_yaw := deg_to_rad(35.0)
 var _orbit_pitch := deg_to_rad(42.0)
 var _fly_yaw := 0.0
 var _fly_pitch := -0.3
-var _fly_speed := 65.0
+var _fly_speed := 120.0
+var _outside_fly_speed := 120.0
 var _inside_architecture := false
 var _interior_center := Vector3.ZERO
 var _interior_radius := 100.0
 var _interior_floor := 0.0
 var _orbit_drag := false
 var _pan_drag := false
+var _click_terrain_sample: Variant = null
+var _click_sample_position := Vector2.ZERO
+var _has_click_sample := false
 var _placing := false
 var _editing := false
 var _bounds := Rect2(-5000.0, -5000.0, 10000.0, 10000.0)
@@ -49,11 +57,16 @@ var _environment: Environment
 var _sun: DirectionalLight3D
 var _canvas: CanvasLayer
 var _hud: Control
+var _header_panel: PanelContainer
+var _sidebar_panel: PanelContainer
+var _footer_panel: PanelContainer
 var _status: Label
 var _help: Label
 var _stats_label: Label
 var _stage_picker: OptionButton
 var _nav_picker: OptionButton
+var _speed_picker: OptionButton
+var _district_picker: OptionButton
 var _time_slider: HSlider
 var _time_label: Label
 var _place_list: VBoxContainer
@@ -218,6 +231,7 @@ func _build_ui() -> void:
 	_hud.theme = theme
 
 	var header := _panel()
+	_header_panel = header
 	_hud.add_child(header)
 	header.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	header.offset_left = 18
@@ -244,6 +258,7 @@ func _build_ui() -> void:
 		heading.add_child(header_button)
 
 	var sidebar := _panel()
+	_sidebar_panel = sidebar
 	_hud.add_child(sidebar)
 	sidebar.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
 	sidebar.offset_left = 18
@@ -257,6 +272,16 @@ func _build_ui() -> void:
 	var note := _label(_t("places_note"), 12, Color("bcc5b6"))
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left.add_child(note)
+	_district_picker = OptionButton.new()
+	_district_picker.name = "DistrictJump"
+	_district_picker.custom_minimum_size.y = 34
+	_district_picker.fit_to_longest_item = false
+	_district_picker.tooltip_text = _t("district_hint")
+	_district_picker.add_item(_t("district_placeholder"))
+	for district in data.get("districts", []):
+		_district_picker.add_item(str(district.get("name", district["id"])))
+	_district_picker.item_selected.connect(_on_district_selected)
+	left.add_child(_district_picker)
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -291,6 +316,22 @@ func _build_ui() -> void:
 		_nav_picker.add_item(_t(key))
 	_nav_picker.item_selected.connect(_set_navigation)
 	left.add_child(_nav_picker)
+	var speed_row := HBoxContainer.new()
+	var speed_title := _label(_t("speed_label"), 11, Color("c8ad79"))
+	speed_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	speed_row.add_child(speed_title)
+	speed_row.add_child(_label(_t("speed_boost_hint"), 11, Color("bcc5b6")))
+	left.add_child(speed_row)
+	_speed_picker = OptionButton.new()
+	_speed_picker.name = "FlightSpeed"
+	_speed_picker.custom_minimum_size.y = 30
+	_speed_picker.fit_to_longest_item = false
+	_speed_picker.tooltip_text = _t("speed_hint")
+	for index in range(FLIGHT_SPEEDS.size()):
+		_speed_picker.add_item(_t(FLIGHT_SPEED_KEYS[index]))
+	_speed_picker.item_selected.connect(func(index: int): set_flight_speed(FLIGHT_SPEEDS[index]))
+	left.add_child(_speed_picker)
+	_refresh_speed_picker()
 	var time_row := HBoxContainer.new()
 	var time_title := _label(_t("time_label"), 11, Color("c8ad79"))
 	time_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -373,6 +414,7 @@ func _build_ui() -> void:
 	_build_editor()
 
 	var footer := _panel()
+	_footer_panel = footer
 	_hud.add_child(footer)
 	footer.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	footer.offset_left = 18
@@ -516,7 +558,7 @@ func focus_landmark(identity: String) -> void:
 	_orbit_distance = clampf(float(landmark.get("tour_distance_m", 220.0)), 45.0, 5000.0)
 	_orbit_pitch = deg_to_rad(30.0)
 	_orbit_yaw = deg_to_rad(35.0)
-	_set_navigation(Navigation.ORBIT)
+	_set_navigation(Navigation.ORBIT, false)
 	_apply_orbit()
 	_info_title.text = str(landmark.get("name", identity))
 	_info_description.text = str(landmark.get("description", ""))
@@ -572,7 +614,8 @@ func interior_view(identity: String = "") -> void:
 	camera.look_at(node.to_global(Vector3(0, anchor.y + 3.0, depth * 0.18)), Vector3.UP)
 	_fly_pitch = camera.rotation.x
 	_fly_yaw = camera.rotation.y
-	_fly_speed = 8.0
+	_outside_fly_speed = _fly_speed
+	set_flight_speed(FLIGHT_SPEEDS[0])
 	_inside_architecture = true
 	_interior_center = node.global_position
 	_interior_radius = maxf(float(dimensions.get("width_m", 30.0)), depth) * 0.8 + 8.0
@@ -585,7 +628,7 @@ func set_camera_view(target: Vector3, distance_m: float, yaw_degrees: float, pit
 	_orbit_distance = clampf(distance_m, 8.0, 17000.0)
 	_orbit_yaw = deg_to_rad(yaw_degrees)
 	_orbit_pitch = deg_to_rad(clampf(pitch_degrees, 1.0, 89.0))
-	_set_navigation(Navigation.ORBIT)
+	_set_navigation(Navigation.ORBIT, false)
 	_apply_orbit()
 	_set_status("camera_view")
 
@@ -622,7 +665,7 @@ func overview() -> void:
 	_orbit_distance = maxf(_bounds.size.x, _bounds.size.y) * 1.02
 	_orbit_pitch = deg_to_rad(49.0)
 	_orbit_yaw = deg_to_rad(20.0)
-	_set_navigation(Navigation.ORBIT)
+	_set_navigation(Navigation.ORBIT, false)
 	_apply_orbit()
 
 
@@ -630,6 +673,81 @@ func plan_view() -> void:
 	overview()
 	_orbit_pitch = deg_to_rad(89.0)
 	_orbit_yaw = 0.0
+	_apply_orbit()
+
+
+func _on_district_selected(index: int) -> void:
+	if index > 0:
+		jump_to_district(index - 1)
+	_district_picker.select(0)
+	_district_picker.release_focus()
+
+
+func jump_to_district(index: int) -> void:
+	var districts: Array = data.get("districts", [])
+	if index < 0 or index >= districts.size():
+		return
+	var district: Dictionary = districts[index]
+	var polygon: Array = district.get("polygon_m", [])
+	if polygon.is_empty():
+		return
+	var center := Vector2.ZERO
+	for pair in polygon:
+		center += Vector2(float(pair[0]), float(pair[1]))
+	center /= float(polygon.size())
+	var extent := 0.0
+	for pair in polygon:
+		extent = maxf(extent, center.distance_to(Vector2(float(pair[0]), float(pair[1]))))
+	_jump_to_point(center, clampf(extent * 0.8, 260.0, 1150.0))
+	_set_status_text(_t("district_arrival") % str(district.get("name", district["id"])))
+
+
+func _jump_to_point(point: Vector2, distance_m: float = 180.0) -> void:
+	var continue_flight := _navigation == Navigation.FLY
+	_set_placing(false)
+	set_cutaway(false)
+	_cutaway_toggle.set_pressed_no_signal(false)
+	set_camera_view(Layout.world(data, [point.x, point.y]), distance_m, 35.0, 42.0)
+	if continue_flight:
+		_set_navigation(Navigation.FLY)
+	_set_status("jump_arrival")
+
+
+func set_flight_speed(value: float) -> void:
+	if not is_finite(value):
+		return
+	_fly_speed = clampf(value, FLIGHT_SPEEDS[0], FLIGHT_SPEEDS[-1])
+	_refresh_speed_picker()
+
+
+func _refresh_speed_picker() -> void:
+	if _speed_picker == null:
+		return
+	var nearest := 0
+	for index in range(FLIGHT_SPEEDS.size()):
+		if absf(FLIGHT_SPEEDS[index] - _fly_speed) < absf(FLIGHT_SPEEDS[nearest] - _fly_speed):
+			nearest = index
+	_speed_picker.select(nearest)
+	# The wheel uses the same discrete presets as the visible control.
+	_speed_picker.disabled = _navigation == Navigation.WALK
+
+
+func _step_flight_speed(direction: int) -> void:
+	var next := 0 if direction < 0 else FLIGHT_SPEEDS.size() - 1
+	for index in range(FLIGHT_SPEEDS.size()):
+		if direction > 0 and FLIGHT_SPEEDS[index] > _fly_speed + 0.01:
+			next = index
+			break
+		if direction < 0 and FLIGHT_SPEEDS[index] < _fly_speed - 0.01:
+			next = index
+	set_flight_speed(FLIGHT_SPEEDS[next])
+	_set_status_text(_t("speed_status") % [int(_fly_speed), int(_fly_speed * FLIGHT_BOOST)])
+
+
+func _zoom_orbit(factor: float) -> void:
+	if not is_finite(factor) or factor <= 0.0:
+		return
+	_orbit_distance = clampf(_orbit_distance / factor, 8.0, 17000.0)
 	_apply_orbit()
 
 
@@ -675,11 +793,30 @@ func _set_quality(enabled: bool) -> void:
 		world.call("set_quality", enabled)
 
 
-func _set_navigation(mode: int) -> void:
+func _set_navigation(mode: int, preserve_frame: bool = true) -> void:
 	_release_mouse()
+	if _inside_architecture:
+		set_flight_speed(_outside_fly_speed)
 	_inside_architecture = false
-	_fly_speed = 18.0 if _orbit_distance < 350.0 else 65.0
+	var reframe_orbit := mode == Navigation.ORBIT and _navigation != Navigation.ORBIT and preserve_frame
+	if reframe_orbit:
+		# Re-enter orbit around the current view, not a stale landmark left behind.
+		var point = _terrain_pick(get_viewport().get_visible_rect().size * 0.5)
+		if point != null:
+			_orbit_target = Layout.world(data, [point.x, point.y])
+		else:
+			# A skyward flight view has no ground intersection. Establish a valid
+			# orbit below and ahead now, instead of snapping on the next wheel.
+			var forward := Vector3(-sin(camera.rotation.y), 0.0, -cos(camera.rotation.y))
+			_orbit_target = camera.position + forward * 300.0 - Vector3.UP * 75.0
+		var offset := camera.position - _orbit_target
+		_orbit_distance = clampf(offset.length(), 8.0, 17000.0)
+		_orbit_yaw = atan2(offset.x, offset.z)
+		_orbit_pitch = clampf(asin(clampf(offset.y / _orbit_distance, -1.0, 1.0)), 0.025, 1.553)
 	_navigation = mode
+	if reframe_orbit:
+		_apply_orbit()
+	_refresh_speed_picker()
 	if _nav_picker != null:
 		_nav_picker.select(mode)
 	if camera != null:
@@ -736,6 +873,11 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not ready_for_capture:
 		return
+	# Scroll events may bubble through containers by default. Never let a wheel
+	# over controls also zoom the scene or change flight speed beneath them.
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and (event is InputEventMouseButton or event is InputEventGesture):
+		if _pointer_over_ui(event.position):
+			return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_DELETE and _editing:
 			delete_selected()
@@ -743,20 +885,45 @@ func _unhandled_input(event: InputEvent) -> void:
 			undo_edit()
 		elif event.keycode == KEY_R and _editing:
 			rotate_selected()
+		elif event.keycode == KEY_HOME:
+			_set_placing(false)
+			overview()
+		elif event.keycode in [KEY_BRACKETLEFT, KEY_BRACKETRIGHT] and _navigation != Navigation.WALK:
+			_step_flight_speed(1 if event.keycode == KEY_BRACKETRIGHT else -1)
+	if event is InputEventMagnifyGesture and _navigation == Navigation.ORBIT:
+		_zoom_orbit(pow(event.factor, 1.65))
+		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			_orbit_drag = event.pressed and _navigation == Navigation.ORBIT
 		elif event.button_index == MOUSE_BUTTON_MIDDLE:
 			_pan_drag = event.pressed and _navigation == Navigation.ORBIT
-		elif event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN] and _navigation == Navigation.ORBIT:
-			_orbit_distance = clampf(_orbit_distance * (0.88 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.13), 8.0, 17000.0)
-			_apply_orbit()
+		elif event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			var direction := 1 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1
+			if _navigation == Navigation.ORBIT:
+				var amount := absf(event.factor) if event.factor != 0.0 else 1.0
+				var steps := amount * (2.0 if event.shift_pressed else 1.0)
+				_zoom_orbit(pow(ZOOM_STEP, steps * direction))
+			elif _navigation == Navigation.FLY:
+				_step_flight_speed(direction)
+			get_viewport().set_input_as_handled()
 		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			if _editing and _placing:
 				_place_at_screen(event.position)
 			elif _editing:
 				_pick_design(event.position)
+			elif event.double_click:
+				# The first click can immediately approach a landmark. Keep its
+				# original terrain ray so a double click uses what was clicked,
+				# even after that first-click camera change.
+				var point = _click_terrain_sample if _has_click_sample and _click_sample_position.distance_to(event.position) < 16.0 else _terrain_pick(event.position)
+				_has_click_sample = false
+				if point != null:
+					_jump_to_point(point)
 			else:
+				_click_terrain_sample = _terrain_pick(event.position)
+				_click_sample_position = event.position
+				_has_click_sample = true
 				_pick_landmark(event.position)
 	if event is InputEventMouseMotion and _navigation == Navigation.ORBIT:
 		if _orbit_drag:
@@ -770,6 +937,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			_orbit_target.x = clampf(_orbit_target.x, _bounds.position.x - 1000.0, _bounds.end.x + 1000.0)
 			_orbit_target.z = clampf(_orbit_target.z, -_bounds.end.y - 1000.0, -_bounds.position.y + 1000.0)
 			_apply_orbit()
+
+
+func _pointer_over_ui(position: Vector2) -> bool:
+	if _hud == null or not _hud.visible:
+		return false
+	for panel in [_header_panel, _sidebar_panel, _footer_panel, _inspector_panel, _editor_panel]:
+		if panel != null and panel.is_visible_in_tree() and panel.get_global_rect().has_point(position):
+			return true
+	return false
 
 
 func _physics_process(delta: float) -> void:
@@ -789,9 +965,13 @@ func _physics_process(delta: float) -> void:
 			movement.y += 1.0
 		if Input.is_physical_key_pressed(KEY_Q):
 			movement.y -= 1.0
+	_move_camera(movement, delta, Input.is_physical_key_pressed(KEY_SHIFT))
+
+
+func _move_camera(movement: Vector3, delta: float, boosted: bool) -> void:
 	var speed := _fly_speed if _navigation == Navigation.FLY else 5.0
-	if Input.is_physical_key_pressed(KEY_SHIFT):
-		speed *= 5.0 if _navigation == Navigation.FLY else 2.4
+	if boosted:
+		speed *= FLIGHT_BOOST if _navigation == Navigation.FLY else 2.4
 	var direction := camera.global_basis * movement.normalized()
 	if _navigation == Navigation.WALK:
 		direction.y = 0
@@ -808,7 +988,7 @@ func _physics_process(delta: float) -> void:
 		if _inside_architecture:
 			if Vector2(proposed.x, proposed.z).distance_to(Vector2(_interior_center.x, _interior_center.z)) > _interior_radius:
 				_inside_architecture = false
-				_fly_speed = 18.0
+				set_flight_speed(_outside_fly_speed)
 			else:
 				proposed.y = maxf(proposed.y, _interior_floor + 0.4)
 				if direction.length_squared() > 0.001:
@@ -949,9 +1129,12 @@ func add_design_object(kind: String, position: Vector2, rotation_deg: float = 0.
 func _pick_design(screen: Vector2) -> void:
 	var nearest := 65.0
 	var identity := ""
+	var additions: Node3D = world.get_node_or_null("CreativeVariant") if world != null else null
 	for item in design_objects:
-		var position: Vector3 = Layout.world(data, item["position_m"])
-		position.y += 5.0 * float(item["scale"])
+		var node: Node3D = additions.get_node_or_null(str(item["id"])) if additions != null else null
+		if node == null:
+			continue
+		var position := _design_visual_center(node)
 		if camera.is_position_behind(position):
 			continue
 		var distance := camera.unproject_position(position).distance_to(screen)
@@ -960,6 +1143,30 @@ func _pick_design(screen: Vector2) -> void:
 			identity = str(item["id"])
 	_selected_design = identity
 	_refresh_design_labels()
+
+
+func _design_visual_center(node: Node3D) -> Vector3:
+	# The authored terrain height can differ from the grounded display mesh.
+	# Use the rendered hierarchy (including rotated/scaled child meshes).
+	var found_mesh := false
+	var bounds := AABB()
+	var stack: Array[Node] = [node]
+	while not stack.is_empty():
+		var child: Node = stack.pop_back()
+		stack.append_array(child.get_children())
+		if child is MeshInstance3D and child.mesh != null:
+			var mesh_bounds: AABB = child.global_transform * child.mesh.get_aabb()
+			bounds = bounds.merge(mesh_bounds) if found_mesh else mesh_bounds
+			found_mesh = true
+	if found_mesh:
+		# Deep footings are buried geometry; they must not drag the clickable
+		# center below the visible house. Creative kits all sit above their datum.
+		if bool(node.get_meta("grounded_footings",false)):
+			var top:=bounds.end.y
+			bounds.position.y=maxf(bounds.position.y,node.global_position.y)
+			bounds.size.y=maxf(0.0,top-bounds.position.y)
+		return bounds.get_center()
+	return node.global_position
 
 
 func _selected_index() -> int:

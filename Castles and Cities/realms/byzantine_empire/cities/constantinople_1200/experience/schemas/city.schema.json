@@ -210,6 +210,37 @@
             "height_m": {
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "octagonal_gallery": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "adjoining_sanctuaries": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "cruciform_five_domes": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            },
+            "gallery_height_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "dome_compartments": {
+              "type": "integer",
+              "enum": [
+                16
+              ]
             }
           },
           "required": [

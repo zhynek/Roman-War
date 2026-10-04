@@ -15,11 +15,6 @@
       "minimum": 100,
       "maximum": 2000
     },
-    "detail_distance_m": {
-      "type": "number",
-      "minimum": 100,
-      "maximum": 5000
-    },
     "ocean_extent_m": {
       "type": "number",
       "minimum": 12000,
@@ -39,11 +34,6 @@
       "type": "number",
       "minimum": 100,
       "maximum": 5000
-    },
-    "prototype_count": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 64
     },
     "palette": {
       "type": "object",
@@ -137,12 +127,10 @@
   "required": [
     "terrain_grid_m",
     "chunk_size_m",
-    "detail_distance_m",
     "ocean_extent_m",
     "road_sample_m",
     "population_spacing_m",
     "tree_detail_distance_m",
-    "prototype_count",
     "palette",
     "note"
   ],

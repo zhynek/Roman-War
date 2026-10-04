@@ -20,21 +20,53 @@ historically verified room inventories, animated urban economy, soundscape,
 complete mosaics, or measured cadastral plan. Those limitations remain visible
 in the authoring brief rather than being disguised as historical evidence.
 
+## Architectural variety · 0.2.0
+
+The 17,561 reference urban plots now draw from **16 architectural types**:
+six domestic plans, shop houses, storehouses, weaving/pottery/smithing/baking
+courts, two neighborhood church forms, well courts and market shelters.
+L-shaped and three-sided courts have actual open space, uneven wings and
+independent roofs. Shutters, galleries, stairs, awnings, jars, hand looms,
+hearths and ovens distinguish close inspection. District profiles weight types
+deterministically; the two infill scenarios keep each reference plot's type.
+
+Sergius and Bacchus uses an octagonal, two-level gallery assembly; Pantokrator
+has unequal flanking churches and a narrow double-domed central chapel; the
+Holy Apostles uses a cruciform five-domed interpretation. These are original
+interpretations of cited building forms, not measured reconstructions of every
+lost phase. Domestic comparanda from Corinth are explicitly distinguished from
+Constantinople evidence; later shop remains are not dated to 1200 by analogy.
+See `data/architecture.json` and the parent study's `SOURCES.md`.
+
+Roads and plot surfaces now follow the actual terrain triangles. Matching
+close/distant batches share bounds, detailed geometry remains within its plot,
+and the procedural material patterns are filtered to reduce distant shimmer.
+
 ## Explore
 
 | Control | Action |
 |---|---|
 | Place list / Next place | Approach a landmark and read its evidence |
 | Home view / Whole city / Plan view | Change the camera scale |
-| Right drag / middle drag / wheel or trackpad scroll | Orbit / pan / zoom |
+| Right drag / middle drag / wheel or pinch | Orbit / pan / faster proportional zoom |
+| Shift + wheel | Double the zoom step |
+| Jump to district / double-click terrain | Hop to a neighborhood / approach a chosen spot |
+| Home key | Whole-city overview |
 | Camera menu | Orbit, free flight or ground walking |
 | Tab, then WASD and Q/E | Capture the mouse, move, descend or rise |
-| Shift / Escape | Move faster / release mouse capture |
+| Flight speed menu | Detail 8, street 35, district 120, city 400 or crossing 1,000 metres/second |
+| Wheel in flight / [ and ] | Change flight speed |
+| Shift / Escape | Fourfold flight boost / release mouse capture |
 | Interior or courtyard | Enter the selected architecture at inspection speed |
 | Reservoir cutaway | Reveal or cover the underground cistern |
 | Sun slider | Change daylight and atmosphere |
 | H / inspector − | Hide all panels / collapse the place inspector |
 | F12 | Save a PNG screenshot outside the project |
+
+Flight keeps your selected speed when you change views or jump between districts.
+Entering a landmark slows to inspection speed; leaving restores the travel
+speed. Double-click travel is disabled while using the creative workshop, and
+scrolling over panels does not move the camera.
 
 The first launch constructs the city and compiles its shaders. Give the window
 time to finish. **Enhanced atmosphere** can be disabled on slower computers;
@@ -58,6 +90,17 @@ saving. Baseline architecture is protected; the editor manages your additions.
 and screenshots. Copy the JSON to preserve or share a design. Maximum saved
 additions: 500. The save loader validates every object before replacing a design.
 
+## Future campaign connection
+
+A future integration should open this city through a read-only presentation
+adapter carrying a public settlement identifier, visible development report,
+scenario date and return-camera state. Campaign rules would continue to own
+construction and time; the city would derive appearance from that report.
+The circa-1200 reference needs an explicitly selected historical scenario,
+not an automatic substitution into the Roman campaign chronology. That
+connection is a later phase; this application and its creative saves remain
+independent today.
+
 ## Model and extend
 
 `data/city.json` is the source of landmark dimensions, positions, roads, walls,
@@ -66,12 +109,16 @@ defines its contract. Coordinates are local metres: X east, Y up, **−Z north**
 in Godot and glTF. The authoring JSON stores horizontal `[east, north]` pairs;
 the origin is near Hagia Sophia. There is no certified geodetic datum.
 
-`src/landmarks.gd` and `src/geometry.gd` build the architecture. `src/layout.gd`
+`data/architecture.json` defines the typology catalogue, historical confidence,
+district weights and dimensions; its schema and cross-reference checks reject
+unknown types, evidence and materials. `src/architecture.gd` constructs the
+ordinary architecture. `src/landmarks.gd` and `src/geometry.gd` build the monuments. `src/layout.gd`
 deterministically places the urban fabric. `src/world.gd` assembles it and
 groups repeated meshes for rendering. `data/visuals.json` controls rendering
 budgets and palette. Change these locally and validate before exporting.
 
-The model ZIP contains a whole-city GLB and a separate GLB for each landmark.
+The model ZIP contains **43 GLBs**: a whole-city model, 26 landmarks and 16
+fully detailed nominal architectural prototypes (`type-*.glb`).
 They use neutral PBR materials, economical whole-city houses and metric mesh
 geometry. Procedural application shaders are not baked into those derivatives.
 Import them into Blender or another glTF-capable authoring tool; CAD workflows
@@ -85,6 +132,9 @@ From this experience directory:
 python3 tools/validate_city.py --godot /path/to/godot
 /path/to/godot --headless --path . --import
 /path/to/godot --headless --path . --script res://tools/smoke.gd
+/path/to/godot --headless --path . --script res://tools/navigation_checks.gd
+/path/to/godot --headless --path . --script res://tools/landmark_checks.gd
+/path/to/godot --headless --path . --script res://tools/surface_checks.gd
 /path/to/godot --path . --script res://tools/preview.gd -- out_dir=/tmp/constantinople-qa
 /path/to/godot --headless --path . --script res://tools/export_models.gd -- out_dir=/tmp/constantinople-models
 ```

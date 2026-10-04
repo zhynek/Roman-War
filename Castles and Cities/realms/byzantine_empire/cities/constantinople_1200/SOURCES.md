@@ -256,3 +256,115 @@ Their district extents and building inclusion lists must be checked anew.
   Hagia Sophia, Blachernai, the Great Palace, Holy Apostles, Pantokrator,
   surviving sea walls, and individual cisterns remain necessary for CAD-quality
   work. No complete primary survey or reusable CAD dataset was acquired here.
+
+## Phase 2 — architectural variety and dated typologies
+
+Research access date: **2026-10-04**. The following evidence informs original
+procedural variants. It does not establish the appearance or address of an
+individual ordinary building in Constantinople. A named prototype is an
+authoring category, not a recovered historic property.
+
+### `sanders_corinth_houses` — courtyard houses and chronological controls
+
+- **Source:** Guy D. R. Sanders, *Recent Finds from Ancient Corinth: How
+  Little Things Make Big Differences*, BABESCH Byvanck Lecture 2016,
+  [publisher PDF](https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf).
+- **Read:** printed pp. 3–5 (PDF pp. 13–15); excavation director's account.
+- **Supports:** an eleventh-century Corinth house with rooms around a well
+  court and a stair serving upper rooms. This gives a regional comparison for
+  courts, unequal-height wings and exterior access galleries.
+- **Limit:** Corinth is not Constantinople. The same discussion redates the
+  neighboring “Frankish Area” complex and its shop assemblage substantially
+  later than earlier publications. Its detailed commercial reconstruction
+  must not be treated as direct evidence for 1200. Neither example establishes
+  the ordinary capital household's wealth, facade or parcel size.
+
+### `columbia_pantokrator_typology` — a compound with different churches
+
+- **Source:** Columbia University, Istanbul Documentation Project,
+  [Pantokrator Monastery](https://mcid.mcah.columbia.edu/istanbul-documentation-project/zeyrek-kilise-camii-pantokrator-monastery).
+- **Read:** monument history and cited 1136 typikon discussion; an
+  institutional synthesis, not a new measured survey.
+- **Supports:** three adjoining, functionally different sanctuaries: the south
+  Pantokrator church, north Eleousa church and intervening imperial funerary
+  chapel. The institution also included medical, residential and service uses.
+- **Model consequence:** unequal volumes and a distinct central chapel are
+  preferable to three copies of one church. A complete symmetrical cloister
+  around them is an interpretation, not a documented plan supplied here.
+
+### `van_millingen_church_fabric` — contrasting church structures
+
+- **Source:** Alexander van Millingen with Ramsay Traquair, Walter S. George
+  and A. E. Henderson, *Byzantine Churches in Constantinople: Their History
+  and Architecture* (1912),
+  [public-domain text](https://www.gutenberg.org/cache/epub/29077/pg29077-images.html),
+  introductory architectural discussion and chapters III, XIV and XV.
+- **Read:** descriptive survey text; measured illustrations were not traced.
+- **Supports:** the structural distinction between cross-in-square churches
+  and the octagonal core of Sergius and Bacchus; that church's dome has
+  alternating forms across sixteen compartments. The Pantokrator survey
+  distinguishes two flanking churches and its narrow intervening chapel.
+- **Limit:** observations record fabric surviving into the early twentieth
+  century. Identifications and construction dates require modern review;
+  Ottoman repairs cannot simply be retained in the 1200 baseline. This is
+  useful primary fabric documentation, not an authoritative 1200 survey.
+- **Plan references for later survey work:** Sergius and Bacchus, figures
+  23–24 (p. 80), 25–27 (p. 81), 28–29 (p. 82); Pantepoptes, figure 73
+  (p. 217); Pantokrator, figure 77 (facing p. 240), figures 78–79 (p. 241)
+  and figure 80 (p. 242). The text on pp. 70–78 and 234–239 distinguishes
+  the surviving structural systems from later repairs. These references do
+  not make the present model a tracing or scale transcription of those plans.
+
+### `columbia_myrelaion_phases` and `columbia_lips_phases` — do not flatten time
+
+- **Sources:** Columbia University's
+  [Myrelaion](https://mcid.mcah.columbia.edu/istanbul-documentation-project/bodrum-camii-myrelaion-monastery)
+  and [Constantine Lips](https://mcid.mcah.columbia.edu/istanbul-documentation-project/fenari-isa-camii-constantine-lips-monastery)
+  monument entries, read as institutional architectural histories.
+- **Supports:** Myrelaion reuses older substructures and has later rebuilding;
+  its current appearance cannot be copied wholesale. At Lips, the north church
+  belongs to the tenth century, while the adjoining south church is a late
+  thirteenth-century addition and falls outside this baseline.
+- **Model consequence:** variation can come from terraces, reused foundations,
+  asymmetric additions, narthexes and lower side spaces. Each named landmark
+  still needs its own dated plan; a convenient family of generated churches
+  must not override that building's known structural identity.
+
+### `procopius_apostles` — the Holy Apostles' structural identity
+
+- **Source:** Procopius, *Buildings* I.4.9–17, translated H. B. Dewing (1940),
+  [University of Chicago-hosted LacusCurtius transcription](https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Procopius/Buildings/1B%2A.html).
+- **Read:** the primary sixth-century description of Justinian's church.
+- **Supports:** a cross-shaped building with a central domed crossing and a
+  dome over each of its four arms; the western arm extends farther. The text
+  distinguishes the windowed central dome support from the unwindowed arm
+  supports.
+- **Limit:** this description predates the reference year by centuries and
+  does not certify later repairs, exact dimensions or the 1200 exterior.
+  It supports an explicitly interpretive cruciform massing rather than
+  disguising the landmark as an ordinary courtyard church. The nearby
+  illustration of Saint John at Ephesus is not a plan of the Holy Apostles.
+
+### Implementation guidance and limits
+
+The earlier `ousterhout_secular` entry supports keeping multistory tenements
+alongside courts and larger compounds. For this pass, rectangular dwellings,
+court wings, porch houses and mixed-use shop dwellings are **interpretive
+types**. Variation in roof direction, room-group footprint, storey count,
+stairs, shutters, storage and courtyard access can differentiate them without
+claiming that a random decoration is historical evidence.
+
+Craft variants should read through their use of space: a work shelter and
+bench, protected storage, a loading opening, a small oven or a stall. The
+earlier Book of the Eparch evidence supports research into crafts, but does
+not certify the generated shopfront, equipment, trade location or frequency
+in 1200. Wells and small water points are plausible additions whose exact
+design, supply and placement remain inferred. Use selectively; a city full of
+identical ovens, jars or marble fountains would introduce another uniformity.
+
+Material colors, plaster coverage, timber exposure and roof forms remain
+authored choices. Do not use modern restored surfaces as automatic color
+references. Avoid importing Ottoman minarets, later projecting-bay residential
+streets, post-1261 church annexes, Western Tudor framing or later industrial
+chimney forests into the baseline. These exclusions constrain the visual
+vocabulary; they do not establish a unique alternative facade for every lot.

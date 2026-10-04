@@ -89,7 +89,20 @@
     "close_editor",
     "distance_template",
     "historical_label",
-    "creative_label"
+    "creative_label",
+    "district_placeholder",
+    "district_hint",
+    "district_arrival",
+    "jump_arrival",
+    "speed_label",
+    "speed_boost_hint",
+    "speed_hint",
+    "speed_detail",
+    "speed_street",
+    "speed_district",
+    "speed_city",
+    "speed_crossing",
+    "speed_status"
   ],
   "additionalProperties": {
     "type": "string",

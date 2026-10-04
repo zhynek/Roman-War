@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://roman-war.local/constantinople/architecture.schema.json",
+  "title": "Interpretive Byzantine architectural type library",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dimensions": {
+      "type": "object",
+      "properties": {
+        "plot_width_m": {
+          "const": 10.0
+        },
+        "plot_depth_m": {
+          "const": 12.0
+        },
+        "floor_height_m": {
+          "type": "number",
+          "minimum": 2.8,
+          "maximum": 3.6
+        },
+        "foundation_depth_m": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 12
+        },
+        "near_detail_m": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 1500
+        }
+      },
+      "required": [
+        "plot_width_m",
+        "plot_depth_m",
+        "floor_height_m",
+        "foundation_depth_m",
+        "near_detail_m"
+      ],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_urls": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            }
+          },
+          "confidence": {
+            "enum": [
+              "comparative",
+              "typological",
+              "interpretive"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "claim",
+          "source_urls",
+          "confidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "types": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "home",
+              "workshop",
+              "church",
+              "town_feature"
+            ]
+          },
+          "plan": {
+            "enum": [
+              "hall",
+              "hipped",
+              "l_court",
+              "u_court",
+              "paired",
+              "garden",
+              "shop",
+              "storehouse",
+              "potter",
+              "smith",
+              "weaver",
+              "baker",
+              "basilica",
+              "cross_domed",
+              "water",
+              "market"
+            ]
+          },
+          "wall_material": {
+            "enum": [
+              "stone",
+              "brick",
+              "plaster",
+              "wood"
+            ]
+          },
+          "max_floors": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "plan",
+          "wall_material",
+          "max_floors",
+          "evidence_id"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "district_profiles": {
+      "type": "object",
+      "properties": {
+        "urban": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "merchant": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "workshop": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "courtyard": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "garden": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "type_id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "weight": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "type_id",
+              "weight"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "urban",
+        "merchant",
+        "workshop",
+        "courtyard",
+        "garden"
+      ],
+      "additionalProperties": false
+    },
+    "creative_defaults": {
+      "type": "object",
+      "properties": {
+        "house": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "workshop": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "church": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
+      },
+      "required": [
+        "house",
+        "workshop",
+        "church"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "version",
+    "note",
+    "dimensions",
+    "evidence",
+    "types",
+    "district_profiles",
+    "creative_defaults"
+  ],
+  "additionalProperties": false
+}

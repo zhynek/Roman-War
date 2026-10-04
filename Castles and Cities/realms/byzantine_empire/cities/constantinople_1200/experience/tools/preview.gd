@@ -56,6 +56,23 @@ func _run() -> void:
 	await _capture("13-open-reservoir")
 	app.focus_landmark("valens_aqueduct")
 	await _capture("14-aqueduct")
+	app.focus_landmark("sergius_bacchus")
+	await _capture("15-octagonal-church")
+	app.focus_landmark("pantokrator")
+	await _capture("16-adjoining-churches")
+	app.focus_landmark("holy_apostles")
+	await _capture("17-five-domed-church")
+	app.jump_to_district(0)
+	app.set_flight_speed(400.0)
+	app._set_navigation(app.Navigation.FLY)
+	await _capture("18-district-flight")
+	await _architecture_catalog()
+	app.interior_view("sergius_bacchus")
+	await _capture("21-octagonal-interior")
+	app.interior_view("pantokrator")
+	await _capture("22-pantokrator-chapel")
+	app.interior_view("holy_apostles")
+	await _capture("23-apostles-crossing")
 	app.home_view()
 	var samples:Array[float]=[]
 	for i in range(90):
@@ -68,6 +85,43 @@ func _run() -> void:
 	file.store_string(JSON.stringify(report,"  "))
 	print("CITY_RENDER_QA ",JSON.stringify(report))
 	quit(0)
+
+func _architecture_catalog() -> void:
+	# An inspection sheet of real production prototypes, not an artist's mockup.
+	app.world.hide()
+	app._hud.hide()
+	var gallery:=Node3D.new()
+	app.add_child(gallery)
+	var records:Array=app.world.architecture.config["types"]
+	for index in range(records.size()):
+		var record:Dictionary=records[index]
+		var node:=MeshInstance3D.new()
+		node.mesh=app.world.architecture.mesh(record.id,true,2)
+		node.position=Vector3((index%4-1.5)*22.0,0,(index/4-1.5)*26.0)
+		gallery.add_child(node)
+		var label:=Label3D.new()
+		label.text=str(record.label).replace(" with ","\nwith ").replace(" and ","\nand ")
+		label.font_size=44
+		label.pixel_size=0.030
+		label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
+		label.position=node.position+Vector3(0,1,9)
+		label.modulate=Color("f0e0be")
+		gallery.add_child(label)
+	var floor_node:=MeshInstance3D.new()
+	var floor_mesh:=PlaneMesh.new()
+	floor_mesh.size=Vector2(130,145)
+	floor_node.mesh=floor_mesh
+	floor_node.position.y=-0.02
+	floor_node.material_override=app.world.materials["ground"]
+	gallery.add_child(floor_node)
+	app.set_daytime(14.0)
+	app.set_camera_view(Vector3(0,1,0),126,12,56)
+	await _capture("19-architecture-catalog")
+	app.set_camera_view(Vector3(0,2,13),70,16,42)
+	await _capture("20-craft-courts")
+	gallery.free()
+	app.world.show()
+	app._hud.show()
 
 func _capture(label:String) -> void:
 	for i in range(24): await process_frame

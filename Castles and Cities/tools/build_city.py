@@ -3,7 +3,8 @@
 
 Requires Godot 4.4.1 with matching universal macOS export templates, jsonschema,
 and a clean committed repository. Full campaign regression gates run separately.
-Every generated binary, model, log and screenshot stays under ignored build/.
+Generated binaries, models and logs stay under ignored build/. QA images are
+written to a temporary directory outside the repository.
 """
 import argparse
 from datetime import datetime, timezone
@@ -17,6 +18,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 import zipfile
 
 WORKSPACE = Path(__file__).resolve().parents[1]
@@ -86,7 +88,7 @@ def check_glb(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", required=True)
-    parser.add_argument("--version", default="0.1.0")
+    parser.add_argument("--version", default="0.2.0")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
@@ -129,6 +131,9 @@ def main():
         logs / "city-validation.log", project)
     run(editor + ["--import"], logs / "import.log", project)
     run(editor + ["--script", "res://tools/smoke.gd"], logs / "source-smoke.log", project)
+    focused_gates = ("navigation_checks", "landmark_checks", "surface_checks")
+    for gate in focused_gates:
+        run(editor + ["--script", f"res://tools/{gate}.gd"], logs / f"source-{gate}.log", project)
     provenance["checks"]["source_validation_and_smoke"] = "passed"
     app_zip = out / f"Constantinople-1200-macOS-{args.version}.zip"
     run(editor + ["--export-release", "macOS", app_zip], logs / "export.log", project)
@@ -156,16 +161,23 @@ def main():
                  logs / "packaged-smoke.log", out)
     if "CITY SMOKE PASS" not in output:
         raise SystemExit("Packaged smoke test did not confirm success")
-    run([binary, "--script", "res://tools/preview.gd", "--", f"out_dir={logs / 'renders'}"],
+    for gate in focused_gates:
+        run([binary, "--headless", "--script", f"res://tools/{gate}.gd"],
+            logs / f"packaged-{gate}.log", out)
+    render_dir = Path(tempfile.mkdtemp(prefix=f"constantinople-{args.version}-qa-"))
+    run([binary, "--script", "res://tools/preview.gd", "--", f"out_dir={render_dir}"],
         logs / "packaged-render.log", out)
+    shutil.copy2(render_dir / "render-report.json", logs / "render-report.json")
+    provenance["render_capture_directory"] = str(render_dir)
     provenance["checks"]["exact_packaged_smoke_and_render"] = "passed"
     models = out / "Constantinople-1200-Models"
     run(editor + ["--script", "res://tools/export_models.gd", "--", f"out_dir={models}"],
         logs / "model-export.log", project)
     model_files = sorted(models.glob("*.glb"))
     city_data = json.loads((project / "data/city.json").read_text())
-    if len(model_files) != len(city_data["landmarks"]) + 1:
-        raise SystemExit("Missing city or individual landmark models")
+    architecture = json.loads((project / "data/architecture.json").read_text())
+    if len(model_files) != len(city_data["landmarks"]) + len(architecture["types"]) + 1:
+        raise SystemExit("Missing city, landmark or architectural type models")
     provenance["models"] = {p.name: check_glb(p) for p in model_files}
     provenance["checks"]["glb_structure"] = "passed"
     changed = [name for name, sha in frozen.items() if digest(snapshot / name) != sha]

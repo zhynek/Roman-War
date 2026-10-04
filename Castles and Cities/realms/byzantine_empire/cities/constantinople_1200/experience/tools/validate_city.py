@@ -183,6 +183,52 @@ def validate_presentation(visuals, visual_schema, ui, ui_schema, main_text):
     return errors
 
 
+def validate_architecture(config, schema, city, visuals):
+    """Cross-reference interpretive types, evidence and active ward profiles."""
+    errors = []
+    validator = jsonschema.Draft202012Validator(schema)
+    for error in sorted(validator.iter_errors(config), key=lambda e: str(list(e.path))):
+        path = "/".join(str(part) for part in error.path)
+        errors.append(f"architecture/{path}: {error.message}")
+    if errors:
+        return errors
+    type_ids = [row["id"] for row in config["types"]]
+    evidence_ids = [row["id"] for row in config["evidence"]]
+    if len(type_ids) != len(set(type_ids)):
+        errors.append("architecture/types: duplicate IDs")
+    if len(evidence_ids) != len(set(evidence_ids)):
+        errors.append("architecture/evidence: duplicate IDs")
+    definitions = {row["id"]: row for row in config["types"]}
+    for row in config["types"]:
+        if row["evidence_id"] not in evidence_ids:
+            errors.append(f"architecture/{row['id']}: missing evidence")
+        if row["wall_material"] not in visuals["palette"]:
+            errors.append(f"architecture/{row['id']}: missing material")
+    for district in city["districts"]:
+        if district["style"] not in config["district_profiles"]:
+            errors.append(f"architecture/profiles: missing ward style {district['style']}")
+    for profile, rows in config["district_profiles"].items():
+        ids = [row["type_id"] for row in rows]
+        if len(ids) != len(set(ids)):
+            errors.append(f"architecture/profile/{profile}: repeated type")
+        for row in rows:
+            if row["type_id"] not in definitions:
+                errors.append(f"architecture/profile/{profile}: unknown type {row['type_id']}")
+            if not math.isfinite(row["weight"]):
+                errors.append(f"architecture/profile/{profile}: non-finite weight")
+    for kind, type_id in config["creative_defaults"].items():
+        expected = "home" if kind == "house" else kind
+        if type_id not in definitions or definitions[type_id]["kind"] != expected:
+            errors.append(f"architecture/creative_defaults/{kind}: wrong or missing type")
+    module = (ROOT / "src/architecture.gd").read_text()
+    for row in config["types"]:
+        if f'"{row["plan"]}"' not in module:
+            errors.append(f"architecture/{row['id']}: plan has no geometry reader")
+    if re.search(r"(?<![.\w])(?:randf|randi|randomize|seed)\s*\(", module):
+        errors.append("architecture: unseeded random call is prohibited")
+    return errors
+
+
 GODOT_PROBE = r'''extends SceneTree
 const Layout = preload("res://src/layout.gd")
 var failures: Array[String] = []
@@ -293,6 +339,9 @@ def main():
         ui_schema = json.loads((ROOT / "schemas/ui.schema.json").read_text())
         errors.extend(validate_presentation(visuals, visual_schema, ui, ui_schema,
                                             (ROOT / "src/main.gd").read_text()))
+        architecture = json.loads((ROOT / "data/architecture.json").read_text())
+        architecture_schema = json.loads((ROOT / "schemas/architecture.schema.json").read_text())
+        errors.extend(validate_architecture(architecture, architecture_schema, data, visuals))
     except (OSError, ValueError) as error:
         errors.append(f"presentation configuration: {error}")
     for error in errors:
@@ -300,7 +349,7 @@ def main():
     print(f"City data: {len(data['landmarks'])} landmarks, {len(data['districts'])} districts, {len(data['sources'])} sources; {len(errors)} errors.")
     if errors:
         return 1
-    print("Presentation config: visual budgets, palette and UI vocabulary validated.")
+    print("Presentation config: visual budgets, palette, architecture types/evidence/ward profiles and UI vocabulary validated.")
     if args.godot and not validate_runtime(args.godot):
         return 1
     return 0

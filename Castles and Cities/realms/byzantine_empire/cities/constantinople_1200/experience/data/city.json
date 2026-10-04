@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "constantinople_1200",
-  "title": "Constantinople \u00b7 circa 1200",
+  "title": "Constantinople · circa 1200",
   "subtitle": "An independent city experience",
   "reference_year_ce": 1200,
   "approximation_notice": "Original interpretive reconstruction. Landmark identities follow sources; coastline, relief, street plots, ordinary buildings and many monument dimensions are authored approximations. No survey accuracy, complete historical reconstruction, population or economic simulation is claimed.",
@@ -1407,12 +1407,16 @@
         "depth_m": 35,
         "height_m": 23,
         "dome_radius_m": 8.2,
-        "dome_height_m": 7
+        "dome_height_m": 7,
+        "octagonal_gallery": 1,
+        "gallery_height_m": 7.1,
+        "dome_compartments": 16
       },
-      "description": "A sixth-century domed church in the southern city. The central mass is an original simplified interpretation, with later Ottoman additions excluded.",
+      "description": "Sixth-century church with an octagonal core, lower ambulatory and upper gallery inside a rectangular enclosure. Sixteen alternating dome compartments and a single eastern apse distinguish this original procedural interpretation. Dimensions, diagonal bays, surfaces and the 1200 repair state remain approximate.",
       "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
       "source_ids": [
-        "columbia_sergius"
+        "columbia_sergius",
+        "van_millingen_church_fabric"
       ],
       "tour_distance_m": 128.0,
       "exclusion_margin_m": 22
@@ -1502,12 +1506,14 @@
         "depth_m": 105,
         "height_m": 28,
         "dome_radius_m": 6,
-        "church_count": 3
+        "church_count": 3,
+        "adjoining_sanctuaries": 1
       },
-      "description": "A Komnenian foundation with three adjoining churches, imperial burials and charitable functions. These domed ranges express that compound organization; full campus geometry is interpreted.",
+      "description": "Komnenian foundation with unequal north and south churches and a narrow two-domed funerary chapel between them. The south church is the larger assembly; modest asymmetric service ranges suggest the wider institution. Proportions, missing campus buildings and finishes remain interpreted.",
       "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
       "source_ids": [
-        "columbia_pantokrator"
+        "columbia_pantokrator",
+        "van_millingen_church_fabric"
       ],
       "tour_distance_m": 272.0,
       "exclusion_margin_m": 22
@@ -1526,12 +1532,14 @@
         "depth_m": 122,
         "height_m": 41,
         "dome_radius_m": 8.2,
-        "dome_count": 5
+        "dome_count": 5,
+        "cruciform_five_domes": 1
       },
-      "description": "A lost imperial church and burial complex on the western heights. The five-domed composition is an architectural hypothesis for a monument whose reconstruction remains debated.",
+      "description": "Lost imperial church represented as a cruciform five-domed assembly with a longer western arm. Procopius describes its earlier structural form, including a windowed central dome and unwindowed arm supports. Exact 1200 condition, dimensions, elevations and fittings remain uncertain.",
       "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
       "source_ids": [
-        "doaks_apostles"
+        "doaks_apostles",
+        "procopius_apostles"
       ],
       "tour_distance_m": 284.6,
       "exclusion_margin_m": 22
@@ -1573,7 +1581,7 @@
         "depth_m": 155,
         "height_m": 32
       },
-      "description": "The principal court in the northwest, represented by terraces and reception halls. Its detailed 1200 plan remains unresolved; the later Tekfur Saray\u0131 is absent.",
+      "description": "The principal court in the northwest, represented by terraces and reception halls. Its detailed 1200 plan remains unresolved; the later Tekfur Sarayı is absent.",
       "evidence": "Historical identity supported. Local position, envelope, construction and surface details are interpretive unless explicitly sourced in the description. Not a survey or an exact record of condition in 1200.",
       "source_ids": [
         "westbrook_palace",
@@ -1985,155 +1993,167 @@
   "sources": [
     {
       "id": "met_hagia_sophia",
-      "title": "Metropolitan Museum \u2014 Hagia Sophia",
+      "title": "Metropolitan Museum — Hagia Sophia",
       "url": "https://www.metmuseum.org/essays/hagia-sophia-532-37",
       "accessed": "2026-10-03"
     },
     {
       "id": "asce_hagia_sophia",
-      "title": "ASCE \u2014 Hagia Sophia modern locator and dome diameter",
+      "title": "ASCE — Hagia Sophia modern locator and dome diameter",
       "url": "https://www.asce.org/about-civil-engineering/history-and-heritage/historic-landmarks/hagia-sophia",
       "accessed": "2026-10-03"
     },
     {
       "id": "unesco_istanbul",
-      "title": "UNESCO \u2014 Historic Areas of Istanbul",
+      "title": "UNESCO — Historic Areas of Istanbul",
       "url": "https://whc.unesco.org/en/list/356/",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_walls",
-      "title": "Columbia \u2014 Land Walls",
+      "title": "Columbia — Land Walls",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/land-walls-constantinople",
       "accessed": "2026-10-03"
     },
     {
       "id": "ward_water",
-      "title": "Ward, Crow & Crapper \u2014 Water-supply infrastructure (2017), pp.175\u2013195",
+      "title": "Ward, Crow & Crapper — Water-supply infrastructure (2017), pp.175–195",
       "url": "https://www.pure.ed.ac.uk/ws/files/46577281/Ward_Crow_Crapper_2017_JRA_WaterSupplyConstantinople_AM.pdf",
       "accessed": "2026-10-03"
     },
     {
       "id": "schreiner_harbors",
-      "title": "Schreiner \u2014 Western Landing Stages (2021), p.151, indexed opening consulted",
+      "title": "Schreiner — Western Landing Stages (2021), p.151, indexed opening consulted",
       "url": "https://doi.org/10.11588/propylaeum.911.c12071",
       "accessed": "2026-10-03"
     },
     {
       "id": "preiser_moorings",
-      "title": "Preiser-Kapeller \u2014 Heptaskalon and other moorings, p.150, indexed conclusion consulted",
+      "title": "Preiser-Kapeller — Heptaskalon and other moorings, p.150, indexed conclusion consulted",
       "url": "https://books.ub.uni-heidelberg.de/propylaeum/catalog/view/911/1531/96879",
       "accessed": "2026-10-03"
     },
     {
       "id": "ousterhout_housing",
-      "title": "Ousterhout \u2014 Middle Byzantine secular architecture",
+      "title": "Ousterhout — Middle Byzantine secular architecture",
       "url": "https://smarthistory.org/middle-byzantine-secular-architecture/",
       "accessed": "2026-10-03"
     },
     {
       "id": "westbrook_palace",
-      "title": "Westbrook \u2014 The Great Palace (2026), abstract consulted",
+      "title": "Westbrook — The Great Palace (2026), abstract consulted",
       "url": "https://research-repository.uwa.edu.au/en/publications/the-great-palace/",
       "accessed": "2026-10-03"
     },
     {
       "id": "uchicago_hippodrome",
-      "title": "University of Chicago, Encyclopaedia Romana \u2014 Hippodrome",
+      "title": "University of Chicago, Encyclopaedia Romana — Hippodrome",
       "url": "https://penelope.uchicago.edu/encyclopaedia_romana/circusmaximus/hippodrome.html",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_eirene",
-      "title": "Columbia \u2014 Hagia Eirene",
+      "title": "Columbia — Hagia Eirene",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/hagia-eirene",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_pantokrator",
-      "title": "Columbia \u2014 Pantokrator Monastery",
+      "title": "Columbia — Pantokrator Monastery",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/zeyrek-kilise-camii-pantokrator-monastery",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_myrelaion",
-      "title": "Columbia \u2014 Myrelaion Monastery",
+      "title": "Columbia — Myrelaion Monastery",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/bodrum-camii-myrelaion-monastery",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_sergius",
-      "title": "Columbia \u2014 Saints Sergius and Bacchus",
+      "title": "Columbia — Saints Sergius and Bacchus",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/kucuk-ayasofya-camii-church-sts-sergius-and-bacchus",
       "accessed": "2026-10-03"
     },
     {
       "id": "doaks_apostles",
-      "title": "Dumbarton Oaks \u2014 The Holy Apostles, scholarly volume description",
+      "title": "Dumbarton Oaks — The Holy Apostles, scholarly volume description",
       "url": "https://shop.doaks.org/the-holy-apostles-16513.html",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_stoudios",
-      "title": "Columbia \u2014 Monastery of Saint John Stoudios",
+      "title": "Columbia — Monastery of Saint John Stoudios",
       "url": "https://mcid.mcah.columbia.edu/work/w0001593",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_constantine",
-      "title": "Columbia \u2014 Column of Constantine",
+      "title": "Columbia — Column of Constantine",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/column-constantine",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_theodosius",
-      "title": "Columbia \u2014 Forum of Theodosius",
+      "title": "Columbia — Forum of Theodosius",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/forum-theodosius",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_vefa",
-      "title": "Columbia \u2014 Vefa Kilise Camii",
+      "title": "Columbia — Vefa Kilise Camii",
       "url": "https://mcid.mcah.columbia.edu/istanbul-documentation-project/vefa-kilise-camii",
       "accessed": "2026-10-03"
     },
     {
       "id": "fhw_crafts",
-      "title": "Foundation of the Hellenic World \u2014 Book of the Eparch",
+      "title": "Foundation of the Hellenic World — Book of the Eparch",
       "url": "https://constantinople.ehw.gr/Forms/fLemmaBodyExtended.aspx?lemmaID=11805",
       "accessed": "2026-10-03"
     },
     {
       "id": "columbia_geography",
-      "title": "Columbia Global Centers \u2014 Visiting Istanbul; broad continental and waterway relationship only",
+      "title": "Columbia Global Centers — Visiting Istanbul; broad continental and waterway relationship only",
       "url": "https://globalcenters.columbia.edu/content/visiting-istanbul",
       "accessed": "2026-10-03"
     },
     {
       "id": "walters_galata_view",
-      "title": "Walters Art Museum \u2014 View of Constantinople; broad Galata viewpoint geography only, later painting not a 1200 appearance reference",
+      "title": "Walters Art Museum — View of Constantinople; broad Galata viewpoint geography only, later painting not a 1200 appearance reference",
       "url": "https://art.thewalters.org/detail/1416/view-of-constantinople/",
       "accessed": "2026-10-03"
+    },
+    {
+      "id": "van_millingen_church_fabric",
+      "title": "Van Millingen et al. (1912), Byzantine Churches; ch.III pp70-82, ch.XV pp234-242. Primary surviving-fabric survey, later phases require separation.",
+      "url": "https://www.gutenberg.org/cache/epub/29077/pg29077-images.html",
+      "accessed": "2026-10-04"
+    },
+    {
+      "id": "procopius_apostles",
+      "title": "Procopius, Buildings I.4.9-17; sixth-century Holy Apostles description, not a 1200 survey",
+      "url": "https://penelope.uchicago.edu/Thayer/E/Roman/Texts/Procopius/Buildings/1B%2A.html",
+      "accessed": "2026-10-04"
     }
   ],
   "stages": [
     {
       "id": "reference_1200",
-      "name": "Constantinople \u00b7 1200",
+      "name": "Constantinople · 1200",
       "description": "Historical reference with openly interpretive architecture and urban fabric.",
       "density_multiplier": 1.0,
       "hypothetical": false
     },
     {
       "id": "serviced",
-      "name": "Creative \u00b7 renewed city",
+      "name": "Creative · renewed city",
       "description": "Hypothetical repair and service additions. Retains reference plots and adds limited infill.",
       "density_multiplier": 1.13,
       "hypothetical": true
     },
     {
       "id": "expanded",
-      "name": "Creative \u00b7 expanded city",
+      "name": "Creative · expanded city",
       "description": "Hypothetical denser neighborhoods and inhabited plots; not a later historical date.",
       "density_multiplier": 1.32,
       "hypothetical": true

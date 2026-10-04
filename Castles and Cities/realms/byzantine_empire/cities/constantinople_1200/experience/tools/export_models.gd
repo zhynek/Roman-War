@@ -35,7 +35,16 @@ func _run() -> void:
 			quit(1)
 			return
 		model.free()
-	var manifest:={"reference_year_ce":1200,"coordinate_system":"metres; Godot/glTF X east, Y up, -Z north","city_origin":"Hagia Sophia vicinity; interpretive local frame","source":"Original procedural city source; geometry authored with cited and interpretive dimensions","appearance":"Neutral PBR materials; procedural application shaders are not baked into these models","city_mesh":"Detailed landmarks and economical whole-city dwelling meshes; no claim of cadastral survey or CAD solid history","stats":world.stats,"landmarks":city["landmarks"]}
+	for record in world.architecture.config["types"]:
+		var prototype:=MeshInstance3D.new()
+		prototype.name=record["id"]
+		prototype.mesh=_neutral_mesh(world.architecture.mesh(record["id"],true,2),null)
+		root.add_child(prototype)
+		if not _write(prototype,out_dir.path_join("type-"+String(record["id"])+".glb")):
+			quit(1)
+			return
+		prototype.free()
+	var manifest:={"reference_year_ce":1200,"coordinate_system":"metres; Godot/glTF X east, Y up, -Z north","city_origin":"Hagia Sophia vicinity; interpretive local frame","source":"Original procedural city source; geometry authored with cited and interpretive dimensions","appearance":"Neutral PBR materials; procedural application shaders are not baked into these models","city_mesh":"Detailed landmarks and economical whole-city architecture; additional type- files contain detailed nominal urban prototypes. No claim of cadastral survey or CAD solid history","stats":world.stats,"landmarks":city["landmarks"],"architecture":world.architecture.config}
 	var file:=FileAccess.open(out_dir.path_join("model-provenance.json"),FileAccess.WRITE)
 	file.store_string(JSON.stringify(manifest,"  "))
 	file.close()

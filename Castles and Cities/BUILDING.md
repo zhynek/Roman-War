@@ -12,11 +12,11 @@ export templates, and Python's `jsonschema` installed:
 python3 'Castles and Cities/tools/validate_studies.py'
 python3 'Castles and Cities/tools/build_city.py' \
   --godot /path/to/Godot.app/Contents/MacOS/Godot \
-  --version 0.1.0
+  --version 0.2.0
 ```
 
 The builder requires a clean committed checkout and a fresh output directory.
-It freezes this entire authoring workspace under `build/constantinople-0.1.0/`,
+It freezes this entire authoring workspace under `build/constantinople-0.2.0/`,
 checks data and the actual scene, exports and ad-hoc signs a universal Mac app,
 verifies its signature and Apple Silicon/Intel architectures, and runs both
 headless and rendered checks inside the **exact exported application**.
@@ -28,9 +28,9 @@ Download artifacts are produced only after the checks finish:
 
 | File | Contents |
 |---|---|
-| `Constantinople-1200-macOS-0.1.0.zip` | Universal application and controls/readme |
-| `Constantinople-1200-Models-0.1.0.zip` | Whole-city GLB, 26 local landmark GLBs, model provenance |
-| `Constantinople-1200-Source-0.1.0.zip` | Frozen editable project, historical briefs, schemas and tools |
+| `Constantinople-1200-macOS-0.2.0.zip` | Universal application and controls/readme |
+| `Constantinople-1200-Models-0.2.0.zip` | Whole-city GLB, 26 local landmark GLBs and 16 detailed architectural types, model provenance |
+| `Constantinople-1200-Source-0.2.0.zip` | Frozen editable project, historical briefs, schemas and tools |
 | `provenance.json` | Commit, source hashes, verification results, asset sizes/hashes |
 | `SHA256SUMS.txt` | SHA-256 hashes for all three ZIPs and provenance |
 

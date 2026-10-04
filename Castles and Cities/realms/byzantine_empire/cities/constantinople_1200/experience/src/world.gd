@@ -4,6 +4,7 @@ extends Node3D
 const Layout = preload("res://src/layout.gd")
 const Geometry = preload("res://src/geometry.gd")
 const Landmarks = preload("res://src/landmarks.gd")
+const Architecture = preload("res://src/architecture.gd")
 
 var data: Dictionary = {}
 var visuals: Dictionary = {}
@@ -13,6 +14,8 @@ var landmark_nodes: Dictionary = {}
 var urban := Node3D.new()
 var additions := Node3D.new()
 var _prototypes: Dictionary = {}
+var architecture
+var _architecture_placements: Array = []
 var _layout: Dictionary = {}
 var _obstacles: Dictionary = {}
 var _stage := "reference_1200"
@@ -141,6 +144,28 @@ func _surface_height(east:float,north:float) -> float:
 	if u+v<=1.0:return a*(1.0-u-v)+b*u+c*v
 	return d*(u+v-1.0)+b*(1.0-v)+c*(1.0-u)
 
+func _ground_triangle(builder:RefCounted,a:Vector3,b:Vector3,c:Vector3,clearance:float,material:String,clip_basins:bool=false) -> void:
+	# Sampling only the corners lets a road/apron cut THROUGH a terrain ridge.
+	# Split at the actual grid triangles first, then lift every piece by the
+	# same clearance. Each output triangle is parallel to its ground triangle.
+	var polygon:=PackedVector2Array([Vector2(a.x,-a.z),Vector2(b.x,-b.z),Vector2(c.x,-c.z)])
+	var bounds:=Rect2(polygon[0],Vector2.ZERO).expand(polygon[1]).expand(polygon[2])
+	var step:float=visuals["terrain_grid_m"]
+	var first:=Vector2i(floori((bounds.position.x-_terrain_origin.x)/step),floori((bounds.position.y-_terrain_origin.y)/step))
+	var last:=Vector2i(floori((bounds.end.x-_terrain_origin.x)/step),floori((bounds.end.y-_terrain_origin.y)/step))
+	for j in range(maxi(0,first.y),mini(_terrain_rows-2,last.y)+1):
+		for i in range(maxi(0,first.x),mini(_terrain_stride-2,last.x)+1):
+			var corner:=_terrain_origin+Vector2(i,j)*step
+			for half in [PackedVector2Array([corner,corner+Vector2(step,0),corner+Vector2(0,step)]),PackedVector2Array([corner+Vector2(step,0),corner+Vector2(step,step),corner+Vector2(0,step)])]:
+				for piece in Geometry2D.intersect_polygons(polygon,half):
+					for k in range(1,piece.size()-1):
+						var triangle:Array[Vector3]=[]
+						for index in [0,k,k+1]:
+							var p:Vector2=piece[index]
+							triangle.append(Vector3(p.x,_surface_height(p.x,p.y)+clearance,-p.y))
+						var vertices:Array[Vector3]=_clip_reservoirs(triangle[0],triangle[1],triangle[2]) if clip_basins else triangle
+						for v in range(0,vertices.size(),3):_up_triangle(builder,vertices[v],vertices[v+1],vertices[v+2],material)
+
 func _make_reservoir_cutouts() -> Array:
 	var holes:Array=[]
 	for item in data["landmarks"]:
@@ -221,8 +246,7 @@ func _roads(records:Array=[], parent:Node3D=null) -> int:
 				vc.y=_surface_height(vc.x,-vc.z)+0.22
 				vd.y=_surface_height(vd.x,-vd.z)+0.22
 				for triangle in [[va,vb,vc],[vb,vd,vc]]:
-					var clipped:=_clip_reservoirs(triangle[0],triangle[1],triangle[2])
-					for v in range(0,clipped.size(),3):_up_triangle(builder,clipped[v],clipped[v+1],clipped[v+2],"road")
+					_ground_triangle(builder,triangle[0],triangle[1],triangle[2],0.22,"road",true)
 				stats["road_segments"]+=1
 	_add_mesh(builder.finish(),"StreetsAndProcessionalRoutes",self if parent==null else parent)
 	return int(stats["road_segments"])-count_before
@@ -304,16 +328,19 @@ func _landmarks() -> void:
 		if float(item["dimensions"].get("underground",0))>0.5:
 			var cap:=MeshInstance3D.new()
 			var plane:=PlaneMesh.new()
-			plane.size=Vector2(float(item["dimensions"]["width_m"])+130,float(item["dimensions"]["depth_m"])+130)
+			plane.size=Vector2(float(item["dimensions"]["width_m"]),float(item["dimensions"]["depth_m"]))
 			cap.mesh=plane
 			cap.material_override=materials["ground"]
-			cap.position=node.position+Vector3.UP*0.2
+			cap.name="ReservoirGroundCover"
+			cap.position=node.position+Vector3.UP*0.06
 			cap.rotation.y=node.rotation.y
 			add_child(cap)
 			_cutaway_caps.append(cap)
 
 func set_stage(id:String) -> void:
 	if id==_stage and not _layout.is_empty():return
+	if architecture==null:
+		architecture=Architecture.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/architecture.json")),materials)
 	_stage=id
 	for child in urban.get_children():
 		urban.remove_child(child)
@@ -323,88 +350,85 @@ func set_stage(id:String) -> void:
 	_lane_segments=0
 	if not _layout.get("lanes",[]).is_empty():_lane_segments=_roads(_layout["lanes"],urban)
 	_obstacles.clear()
+	_architecture_placements.clear()
 	var groups:Dictionary={}
-	for item in _layout["buildings"]:
+	var type_counts:Dictionary={}
+	for item:Dictionary in _layout["buildings"]:
 		var p:Vector3=item["position"]
-		var variant:=int(item["seed"])%int(visuals["prototype_count"])
-		var key:="%d_%d_%d_%d" % [floori(p.x/float(visuals["chunk_size_m"])),floori(p.z/float(visuals["chunk_size_m"])),variant,_floors(item)]
+		var type_id:String=architecture.select(item)
+		var floors:int=architecture.floors_for(item,type_id)
+		var key:="%d_%d_%s_%d" % [floori(p.x/float(visuals["chunk_size_m"])),floori(p.z/float(visuals["chunk_size_m"])),type_id,floors]
 		if not groups.has(key):groups[key]=[]
-		groups[key].append(item)
+		var scale_by:Vector3=item["size"]/Vector3(10,architecture.height_for(type_id,floors),12)
+		if architecture.types[type_id]["kind"] in ["church","town_feature"]:scale_by.y=1.0
+		var basis:=Basis(Vector3.UP,float(item["yaw"]))*Basis.from_scale(scale_by)
+		# Reference records stay byte-identical: terrain-conforming presentation
+		# transforms are derived separately. Foundations reach below the lowest edge.
+		var top:=_surface_height(p.x,-p.z)
+		var bottom:=top
+		for x in [-5.0,0.0,5.0]:
+			for z in [-6.0,0.0,6.0]:
+				var corner:Vector3=p+basis*Vector3(x,0,z)
+				var surface:=_surface_height(corner.x,-corner.z)
+				top=maxf(top,surface)
+				bottom=minf(bottom,surface)
+		p.y=top+0.03
+		var placement:Dictionary={"id":item["id"],"type_id":type_id,"floors":floors,"transform":Transform3D(basis,p),"seed":item["seed"],"ground_min":bottom,"ground_max":top}
+		groups[key].append(placement)
+		_architecture_placements.append(placement)
+		type_counts[type_id]=int(type_counts.get(type_id,0))+1
 		var obstacle_key:=Vector2i(floori(p.x/80.0),floori(p.z/80.0))
 		if not _obstacles.has(obstacle_key):_obstacles[obstacle_key]=[]
 		_obstacles[obstacle_key].append(item)
 	for key in groups:
 		var entries:Array=groups[key]
-		var variant:=int(entries[0]["seed"])%int(visuals["prototype_count"])
+		var type_id:String=entries[0]["type_id"]
+		var common_bounds:=AABB()
+		var first_bounds:=true
+		for placement:Dictionary in entries:
+			var mesh_height:float=architecture.height_for(type_id,int(placement["floors"]))+0.4
+			var prototype_bounds:=AABB(Vector3(-5,-6.1,-6),Vector3(10,mesh_height+6.1,12))
+			var instance_bounds:AABB=placement["transform"]*prototype_bounds
+			common_bounds=instance_bounds if first_bounds else common_bounds.merge(instance_bounds)
+			first_bounds=false
 		for detail in [false,true]:
-			var floors:=_floors(entries[0])
-			var mesh:=_house_mesh(variant,detail,floors)
+			var floors:int=entries[0]["floors"]
+			var mesh:ArrayMesh=architecture.mesh(type_id,detail,floors)
 			var batch:=MultiMesh.new()
 			batch.transform_format=MultiMesh.TRANSFORM_3D
 			batch.use_colors=true
 			batch.mesh=mesh
 			batch.instance_count=entries.size()
+			batch.custom_aabb=common_bounds
 			for i in range(entries.size()):
 				var item:Dictionary=entries[i]
-				var scale_by:Vector3=item["size"]/Vector3(10,float(floors)*3.2+2.6,12)
-				var basis:=Basis(Vector3.UP,float(item["yaw"]))*Basis.from_scale(scale_by)
-				batch.set_instance_transform(i,Transform3D(basis,item["position"]))
-				var tint:=0.85+float(int(item["seed"])%31)*0.008
+				batch.set_instance_transform(i,item["transform"])
+				var tint:=0.84+float(posmod(int(item["seed"]),29))*0.009
 				batch.set_instance_color(i,Color(tint,tint*0.985,tint*0.95))
 			var instance:=MultiMeshInstance3D.new()
+			instance.name=key+("_Detail" if detail else "_Silhouette")
 			instance.multimesh=batch
-			if detail:instance.visibility_range_end=float(visuals["detail_distance_m"])
-			else:instance.visibility_range_begin=float(visuals["detail_distance_m"])
+			var detail_distance:float=architecture.config["dimensions"]["near_detail_m"]
+			if detail:instance.visibility_range_end=detail_distance
+			else:instance.visibility_range_begin=detail_distance
 			urban.add_child(instance)
 	_plot_surfaces()
 	_trees(_layout["trees"])
 	stats["building_count"]=_layout["buildings"].size()
 	stats["tree_count"]=_layout["trees"].size()
+	stats["architecture_types"]=type_counts.size()
+	stats["architecture_counts"]=type_counts
 
 func _floors(item:Dictionary) -> int:
 	return clampi(roundi((float(item["size"].y)-1.1)/3.1),1,4)
 
 func _house_mesh(variant:int,detail:bool,floors:int=2) -> ArrayMesh:
-	var key:="house_%d_%s_%d" % [variant,detail,floors]
-	if _prototypes.has(key):return _prototypes[key]
-	var g=Geometry.new(materials)
-	var wall_mat:="plaster" if variant%4!=0 else "brick"
-	var roof_mat:="roof"
-	var h:=float(floors)*3.2
-	g.box(Vector3(0,h*0.5,0),Vector3(10,h,12),wall_mat)
-	g.box(Vector3(0,-0.5,0),Vector3(10.25,1.8,12.25),"stone")
-	if variant%4==1:
-		g.box(Vector3(0,h+0.15,0),Vector3(10.5,0.3,12.5),"wood")
-		g.roof(Vector3(0,h+0.3,0),10.8,12.8,2.3,roof_mat)
-	else:g.roof(Vector3(0,h,0),10.9,12.9,2.6,roof_mat)
-	if detail:
-		for floor_index in range(floors):
-			for side in [-1.0,1.0]:
-				for col in range(3):
-					var x:=(col-1)*3.0
-					var y:=1.9+floor_index*3.2
-					g.box(Vector3(x,y,side*6.02),Vector3(1.12,1.35,0.06),"dark")
-					g.box(Vector3(x,y-0.72,side*6.12),Vector3(1.35,0.14,0.24),"stone")
-					if (col+variant)%2==0:
-						g.box(Vector3(x-0.72,y,side*6.1),Vector3(0.5,1.38,0.12),"wood",Vector3(0,0.12,0))
-				for col in range(3):
-					g.box(Vector3(side*5.03,1.9+floor_index*3.2,(col-1)*3.5),Vector3(0.08,1.2,1.0),"dark")
-		g.box(Vector3(-2.7,1.25,6.08),Vector3(1.5,2.5,0.16),"wood")
-		g.box(Vector3(-2.7,0.08,6.45),Vector3(2.0,0.16,0.9),"stone")
-		g.box(Vector3(2,h+1.3,-2),Vector3(1,2.8,1),"brick")
-		if variant%3==0:
-			# Timber frame, upper floor stringcourse and individual rafters.
-			for x in [-4.8,0.0,4.8]:
-				g.box(Vector3(x,h*0.5,6.08),Vector3(0.18,h,0.18),"wood")
-			g.box(Vector3(0,3.6,6.1),Vector3(10.1,0.2,0.2),"wood")
-			g.box(Vector3(0,h-0.1,6.1),Vector3(10.5,0.18,0.25),"wood")
-		if variant%4==2:
-			g.box(Vector3(1.3,2.4,7.3),Vector3(5.5,0.15,3),"linen",Vector3(0.12,0,0))
-			for x in [-1.3,3.8]:g.cylinder(Vector3(x,1.2,8.5),0.07,2.4,"wood")
-			g.box(Vector3(1.3,0.6,7.4),Vector3(5.0,1.2,1.1),"wood")
-	var mesh:ArrayMesh=g.finish()
-	_prototypes[key]=mesh
-	return mesh
+	if architecture==null:
+		architecture=Architecture.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/architecture.json")),materials)
+	var home_ids:Array=[]
+	for record:Dictionary in architecture.config["types"]:
+		if record["kind"]=="home":home_ids.append(record["id"])
+	return architecture.mesh(home_ids[posmod(variant,home_ids.size())],detail,floors)
 
 func _plot_surfaces() -> void:
 	# Packed-earth aprons connect dwellings visually to their plots. These are
@@ -419,8 +443,8 @@ func _plot_surfaces() -> void:
 			var p:Vector3=center+basis*q
 			p.y=_surface_height(p.x,-p.z)+0.13
 			corners.append(p)
-		_up_triangle(g,corners[0],corners[1],corners[2],"earth")
-		_up_triangle(g,corners[0],corners[2],corners[3],"earth")
+		_ground_triangle(g,corners[0],corners[1],corners[2],0.07,"earth")
+		_ground_triangle(g,corners[0],corners[2],corners[3],0.07,"earth")
 	_add_mesh(g.finish(),"DomesticPackedEarth",urban)
 
 func _fields() -> void:
@@ -444,8 +468,8 @@ func _fields() -> void:
 					var point:Vector2=p+delta
 					corners.append(Vector3(point.x,_surface_height(point.x,point.y)+0.1,-point.y))
 				var mat:="earth" if posmod(north,36)<12 else "cultivation"
-				_up_triangle(g,corners[0],corners[1],corners[2],mat)
-				_up_triangle(g,corners[0],corners[2],corners[3],mat)
+				_ground_triangle(g,corners[0],corners[1],corners[2],0.1,mat)
+				_ground_triangle(g,corners[0],corners[2],corners[3],0.1,mat)
 	_add_mesh(g.finish(),"WesternCultivation",self)
 
 func _context_land() -> void:
@@ -586,7 +610,7 @@ func _street_life() -> void:
 			var count:=int(a.distance_to(b)/float(visuals["population_spacing_m"]))
 			for j in range(count):
 				var p:=a.lerp(b,(float(j)+0.4)/maxi(1,count))
-				var at:=Layout.world(data,[p.x,p.y])
+				var at:=Vector3(p.x,_surface_height(p.x,p.y)+0.24,-p.y)
 				var k:=Vector2i(floori(at.x/400),floori(at.z/400))
 				if not groups.has(k):groups[k]=[]
 				groups[k].append(Transform3D(Basis(Vector3.UP,float(j)*1.7),at))
@@ -610,22 +634,30 @@ func set_design_objects(objects:Array) -> void:
 		child.queue_free()
 	for item in objects:
 		var node:Node3D
-		if item["kind"] in ["house","workshop"]:
+		if architecture.config["creative_defaults"].has(item["kind"]):
 			var instance:=MeshInstance3D.new()
-			instance.mesh=_house_mesh(2 if item["kind"]=="workshop" else 1,true)
+			var type_id:String=architecture.config["creative_defaults"][item["kind"]]
+			instance.mesh=architecture.mesh(type_id,true,2)
 			node=instance
-		elif item["kind"]=="church":
-			node=Landmarks.build({"id":item["id"],"kind":"church","dimensions":{"width_m":18,"depth_m":24,"height_m":22}},materials)
 		else:
 			var g=Geometry.new(materials)
+			var footing:float=architecture.config["dimensions"]["foundation_depth_m"]
+			g.cylinder(Vector3(0,-footing*0.5,0),4.2,footing,"stone")
 			g.cylinder(Vector3(0,9,0),4.2,18,"stone")
 			g.dome(Vector3(0,18,0),4.7,4,"roof")
 			node=MeshInstance3D.new()
 			node.mesh=g.finish()
 		node.name=item["id"]
+		node.set_meta("grounded_footings",true)
 		node.position=Layout.world(data,item["position_m"])
 		node.rotation.y=deg_to_rad(float(item.get("rotation_deg",0)))
 		node.scale=Vector3.ONE*float(item.get("scale",1.0))
+		var top:=_surface_height(node.position.x,-node.position.z)
+		for x in [-5.0,0.0,5.0]:
+			for z in [-6.0,0.0,6.0]:
+				var corner:Vector3=node.position+node.basis*Vector3(x,0,z)
+				top=maxf(top,_surface_height(corner.x,-corner.z))
+		node.position.y=top+0.03
 		additions.add_child(node)
 
 func ground_can_walk(p:Vector3) -> bool:

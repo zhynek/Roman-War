@@ -1,0 +1,530 @@
+{
+  "version": 1,
+  "note": "Original, interpretive architectural types for Constantinople circa 1200. Ordinary building plans, decorative details, craft equipment and frequencies are design analogies; none identifies an excavated parcel or counts the historical population. Surviving Byzantine churches support ecclesiastical vocabulary, but these unnamed neighborhood chapels are invented assemblies.",
+  "dimensions": {
+    "plot_width_m": 10.0,
+    "plot_depth_m": 12.0,
+    "floor_height_m": 3.2,
+    "foundation_depth_m": 6.0,
+    "near_detail_m": 650.0
+  },
+  "evidence": [
+    {
+      "id": "domestic_analogy",
+      "claim": "Asymmetrical courts, small adjoining rooms, mixed use and uneven-height wings are cautiously adapted from medieval Byzantine domestic archaeology. Constantinople ordinary housing is poorly preserved. Hipped and gabled roofs, timber shutters and porches are interpretive choices, not a measured capital-wide building code. Sanders, printed p. 3, supports an eleventh-century Corinth courtyard, well, stair and upper rooms. His adjoining shop complex was redated to the fourteenth century and is not copied as a circa-1200 storefront.",
+      "source_urls": [
+        "https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf"
+      ],
+      "confidence": "comparative"
+    },
+    {
+      "id": "craft_analogy",
+      "claim": "Mixed household and production courts are comparative Byzantine urban types. Pots, storage jars, hand looms, workbenches, covered hearths and bread ovens distinguish activities; their placements, counts and exact equipment forms are illustrative. No industrial chimneys or Ottoman shopfront facades are claimed. Sanders, printed p. 3, supports an eleventh-century Corinth courtyard, well, stair and upper rooms. His adjoining shop complex was redated to the fourteenth century and is not copied as a circa-1200 storefront.",
+      "source_urls": [
+        "https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf"
+      ],
+      "confidence": "comparative"
+    },
+    {
+      "id": "church_analogy",
+      "claim": "Basilican and cross-in-square massing, tiled roofs, raised drums, apses and restrained brick articulation draw on Byzantine architectural vocabulary. Generic chapel layouts, sites and frequencies are invented; they do not reconstruct an identified lost church.",
+      "source_urls": [
+        "https://mcid.mcah.columbia.edu/istanbul-documentation-project/zeyrek-kilise-camii-pantokrator-monastery",
+        "https://mcid.mcah.columbia.edu/istanbul-documentation-project/bodrum-camii-myrelaion-monastery"
+      ],
+      "confidence": "typological"
+    },
+    {
+      "id": "water_analogy",
+      "claim": "Simple wellheads, troughs and covered gathering areas are plausible water-access types. This is interpretive street furniture, not a claim that a named fountain or supply connection existed on the selected plot. Ward, Crow and Crapper discuss the city-scale water infrastructure, not a standard fountain form. Sanders supplies a comparative courtyard well.",
+      "source_urls": [
+        "https://www.pure.ed.ac.uk/ws/files/46577281/Ward_Crow_Crapper_2017_JRA_WaterSupplyConstantinople_AM.pdf",
+        "https://www.babesch.org/new_site/wp-content/uploads/2023/01/BABESCH_Byvanck_Lecture_2016_Sanders.pdf"
+      ],
+      "confidence": "interpretive"
+    }
+  ],
+  "types": [
+    {
+      "id": "narrow_hall",
+      "label": "Narrow hall with service annex",
+      "kind": "home",
+      "plan": "hall",
+      "wall_material": "plaster",
+      "max_floors": 4,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "hipped_house",
+      "label": "Hipped hall and porch",
+      "kind": "home",
+      "plan": "hipped",
+      "wall_material": "stone",
+      "max_floors": 3,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "l_court",
+      "label": "L-shaped domestic court",
+      "kind": "home",
+      "plan": "l_court",
+      "wall_material": "plaster",
+      "max_floors": 3,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "u_court",
+      "label": "Three-wing courtyard household",
+      "kind": "home",
+      "plan": "u_court",
+      "wall_material": "stone",
+      "max_floors": 3,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "paired_halls",
+      "label": "Unequal paired halls",
+      "kind": "home",
+      "plan": "paired",
+      "wall_material": "brick",
+      "max_floors": 4,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "garden_house",
+      "label": "Garden house and covered gallery",
+      "kind": "home",
+      "plan": "garden",
+      "wall_material": "plaster",
+      "max_floors": 2,
+      "evidence_id": "domestic_analogy"
+    },
+    {
+      "id": "shop_house",
+      "label": "Shops below a residential hall",
+      "kind": "workshop",
+      "plan": "shop",
+      "wall_material": "plaster",
+      "max_floors": 4,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "storehouse",
+      "label": "Storehouse and loading porch",
+      "kind": "workshop",
+      "plan": "storehouse",
+      "wall_material": "stone",
+      "max_floors": 3,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "potter_court",
+      "label": "Potter’s working court",
+      "kind": "workshop",
+      "plan": "potter",
+      "wall_material": "brick",
+      "max_floors": 2,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "smith_court",
+      "label": "Smith’s covered working court",
+      "kind": "workshop",
+      "plan": "smith",
+      "wall_material": "stone",
+      "max_floors": 2,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "weaver_court",
+      "label": "Textile household and drying court",
+      "kind": "workshop",
+      "plan": "weaver",
+      "wall_material": "plaster",
+      "max_floors": 3,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "bakehouse",
+      "label": "Bakehouse and sheltered oven",
+      "kind": "workshop",
+      "plan": "baker",
+      "wall_material": "stone",
+      "max_floors": 2,
+      "evidence_id": "craft_analogy"
+    },
+    {
+      "id": "basilican_chapel",
+      "label": "Small basilican chapel",
+      "kind": "church",
+      "plan": "basilica",
+      "wall_material": "brick",
+      "max_floors": 1,
+      "evidence_id": "church_analogy"
+    },
+    {
+      "id": "cross_domed_chapel",
+      "label": "Cross-domed neighborhood church",
+      "kind": "church",
+      "plan": "cross_domed",
+      "wall_material": "brick",
+      "max_floors": 1,
+      "evidence_id": "church_analogy"
+    },
+    {
+      "id": "water_court",
+      "label": "Well and washing court",
+      "kind": "town_feature",
+      "plan": "water",
+      "wall_material": "stone",
+      "max_floors": 1,
+      "evidence_id": "water_analogy"
+    },
+    {
+      "id": "market_court",
+      "label": "Timber market shelters",
+      "kind": "town_feature",
+      "plan": "market",
+      "wall_material": "wood",
+      "max_floors": 1,
+      "evidence_id": "craft_analogy"
+    }
+  ],
+  "district_profiles": {
+    "urban": [
+      {
+        "type_id": "narrow_hall",
+        "weight": 24
+      },
+      {
+        "type_id": "hipped_house",
+        "weight": 16
+      },
+      {
+        "type_id": "l_court",
+        "weight": 18
+      },
+      {
+        "type_id": "u_court",
+        "weight": 8
+      },
+      {
+        "type_id": "paired_halls",
+        "weight": 12
+      },
+      {
+        "type_id": "garden_house",
+        "weight": 2
+      },
+      {
+        "type_id": "shop_house",
+        "weight": 12
+      },
+      {
+        "type_id": "storehouse",
+        "weight": 2
+      },
+      {
+        "type_id": "potter_court",
+        "weight": 1
+      },
+      {
+        "type_id": "smith_court",
+        "weight": 1
+      },
+      {
+        "type_id": "weaver_court",
+        "weight": 2
+      },
+      {
+        "type_id": "bakehouse",
+        "weight": 1
+      },
+      {
+        "type_id": "basilican_chapel",
+        "weight": 0.2
+      },
+      {
+        "type_id": "cross_domed_chapel",
+        "weight": 0.3
+      },
+      {
+        "type_id": "water_court",
+        "weight": 0.3
+      },
+      {
+        "type_id": "market_court",
+        "weight": 0.2
+      }
+    ],
+    "merchant": [
+      {
+        "type_id": "narrow_hall",
+        "weight": 9
+      },
+      {
+        "type_id": "hipped_house",
+        "weight": 8
+      },
+      {
+        "type_id": "l_court",
+        "weight": 13
+      },
+      {
+        "type_id": "u_court",
+        "weight": 8
+      },
+      {
+        "type_id": "paired_halls",
+        "weight": 9
+      },
+      {
+        "type_id": "garden_house",
+        "weight": 1
+      },
+      {
+        "type_id": "shop_house",
+        "weight": 25
+      },
+      {
+        "type_id": "storehouse",
+        "weight": 14
+      },
+      {
+        "type_id": "potter_court",
+        "weight": 2
+      },
+      {
+        "type_id": "smith_court",
+        "weight": 1
+      },
+      {
+        "type_id": "weaver_court",
+        "weight": 5
+      },
+      {
+        "type_id": "bakehouse",
+        "weight": 2
+      },
+      {
+        "type_id": "basilican_chapel",
+        "weight": 0.15
+      },
+      {
+        "type_id": "cross_domed_chapel",
+        "weight": 0.2
+      },
+      {
+        "type_id": "water_court",
+        "weight": 0.25
+      },
+      {
+        "type_id": "market_court",
+        "weight": 0.4
+      }
+    ],
+    "workshop": [
+      {
+        "type_id": "narrow_hall",
+        "weight": 8
+      },
+      {
+        "type_id": "hipped_house",
+        "weight": 8
+      },
+      {
+        "type_id": "l_court",
+        "weight": 10
+      },
+      {
+        "type_id": "u_court",
+        "weight": 7
+      },
+      {
+        "type_id": "paired_halls",
+        "weight": 7
+      },
+      {
+        "type_id": "garden_house",
+        "weight": 2
+      },
+      {
+        "type_id": "shop_house",
+        "weight": 16
+      },
+      {
+        "type_id": "storehouse",
+        "weight": 6
+      },
+      {
+        "type_id": "potter_court",
+        "weight": 10
+      },
+      {
+        "type_id": "smith_court",
+        "weight": 7
+      },
+      {
+        "type_id": "weaver_court",
+        "weight": 10
+      },
+      {
+        "type_id": "bakehouse",
+        "weight": 7
+      },
+      {
+        "type_id": "basilican_chapel",
+        "weight": 0.2
+      },
+      {
+        "type_id": "cross_domed_chapel",
+        "weight": 0.2
+      },
+      {
+        "type_id": "water_court",
+        "weight": 0.6
+      },
+      {
+        "type_id": "market_court",
+        "weight": 1
+      }
+    ],
+    "courtyard": [
+      {
+        "type_id": "narrow_hall",
+        "weight": 10
+      },
+      {
+        "type_id": "hipped_house",
+        "weight": 12
+      },
+      {
+        "type_id": "l_court",
+        "weight": 24
+      },
+      {
+        "type_id": "u_court",
+        "weight": 24
+      },
+      {
+        "type_id": "paired_halls",
+        "weight": 8
+      },
+      {
+        "type_id": "garden_house",
+        "weight": 9
+      },
+      {
+        "type_id": "shop_house",
+        "weight": 4
+      },
+      {
+        "type_id": "storehouse",
+        "weight": 2
+      },
+      {
+        "type_id": "potter_court",
+        "weight": 1
+      },
+      {
+        "type_id": "smith_court",
+        "weight": 1
+      },
+      {
+        "type_id": "weaver_court",
+        "weight": 2
+      },
+      {
+        "type_id": "bakehouse",
+        "weight": 1
+      },
+      {
+        "type_id": "basilican_chapel",
+        "weight": 0.4
+      },
+      {
+        "type_id": "cross_domed_chapel",
+        "weight": 0.8
+      },
+      {
+        "type_id": "water_court",
+        "weight": 0.5
+      },
+      {
+        "type_id": "market_court",
+        "weight": 0.3
+      }
+    ],
+    "garden": [
+      {
+        "type_id": "narrow_hall",
+        "weight": 10
+      },
+      {
+        "type_id": "hipped_house",
+        "weight": 12
+      },
+      {
+        "type_id": "l_court",
+        "weight": 16
+      },
+      {
+        "type_id": "u_court",
+        "weight": 12
+      },
+      {
+        "type_id": "paired_halls",
+        "weight": 5
+      },
+      {
+        "type_id": "garden_house",
+        "weight": 32
+      },
+      {
+        "type_id": "shop_house",
+        "weight": 3
+      },
+      {
+        "type_id": "storehouse",
+        "weight": 2
+      },
+      {
+        "type_id": "potter_court",
+        "weight": 2
+      },
+      {
+        "type_id": "smith_court",
+        "weight": 1
+      },
+      {
+        "type_id": "weaver_court",
+        "weight": 1
+      },
+      {
+        "type_id": "bakehouse",
+        "weight": 1
+      },
+      {
+        "type_id": "basilican_chapel",
+        "weight": 0.3
+      },
+      {
+        "type_id": "cross_domed_chapel",
+        "weight": 0.2
+      },
+      {
+        "type_id": "water_court",
+        "weight": 1
+      },
+      {
+        "type_id": "market_court",
+        "weight": 0.5
+      }
+    ]
+  },
+  "creative_defaults": {
+    "house": "l_court",
+    "workshop": "potter_court",
+    "church": "cross_domed_chapel"
+  }
+}
