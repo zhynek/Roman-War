@@ -11,6 +11,31 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı household life (0.4.0, October 5, 2026)
+
+The optional **Households** chapter begins at village scale, before the existing
+21-season town tutorial. God starts an authored eight-season warning/danger/
+recovery/renewal exercise. Steward orders secure stores, shared care and learning;
+watch orders maintain safe paths. Finite one-time timber investments persist, while
+care/watch staffing and food opportunity cost are checked every season. Household
+stress recovers gradually; a shared practice spreads unevenly. No archaeological
+army, siege, political office or cultural revolution is claimed.
+
+Three hypothetical interior overlays add original furnishings without altering
+the dated reference meshes. Every living citizen has an activity, including
+children outside the workforce. Stable household/station IDs, exact door portals
+and deterministic collision-checked routes connect homes and work. Animation only
+illustrates state; it cannot generate resources, culture, births or threats.
+[Household authoring and controls](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/HOUSEHOLD_LIFE.md)
+describe the reusable adapter and its limits. No armies, tactical siege AI,
+individual inventories, beliefs or campaign integration are implemented.
+
+The additive `households: {}` extension leaves old campaigns inactive. Active
+households use save wrapper 3, including when contacts are also active. Wrappers
+1/2 still load; older apps reject wrapper 3 rather than discarding household
+memories. The reference bookmark and medieval creative saves remain independent.
+Release verification and download records follow once the exact package passes.
+
 ## Yenikapı neighboring communities (0.3.0, October 4, 2026)
 
 The next playable phase adds **optional fictional neighbors** after the town

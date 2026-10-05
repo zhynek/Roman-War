@@ -118,3 +118,76 @@ journey lengths, escort protection and cargo allowances are invented teaching
 rules. The meeting room, its contents and approach path are hypothetical additions
 using the existing construction vocabulary, not a reconstructed market or civic
 office. Contact does not establish a continuous chronology or another urban stage.
+
+## Household interiors, adversity and cultural change
+
+Sources below were read on **2026-10-05**. They refine the material vocabulary;
+they do not turn the authored village into an excavated household plan.
+
+### `ulas_plant_foods` — direct site archaeobotany
+
+Burhan Ulaş, “Reappraisal of the Neolithisation of the Marmara Region Through
+Archaeobotanical Analysis at Pendik Höyük and Yenikapı,” *Arkeoloji ve Sanat*
+164 (2020), 27–41. [Author's institutional record](https://avesis.inonu.edu.tr/yayin/1164799f-ebfb-4619-aee5-6647eb353766/reappraisal-of-the-neolithisation-of-the-marmara-region-througharchaeobotanical-analysis-at-pendik-hoyuk-and-yenikapi);
+[author-uploaded text](https://www.researchgate.net/publication/351660159_Reappraisal_of_the_Neolithisation_of_the_Marmara_Region_Through_Archaeobotanical_Analysis_at_Pendik_Hoyuk_and_Yenikapi).
+Read the sampling method and Yenikapı results, especially pp. 31–34. The study
+identifies cereals and pulses in local Neolithic samples, including wheat and
+lentil. It also reports corner storage features containing charred cereals,
+citing the excavation account. This supports a grain-processing and storage
+vocabulary. Sample frequencies are not household rations, yields or population
+estimates; storage ownership, vessel capacities and the positions of modeled
+containers remain interpretation. The study's discussion of cultural groups is
+not adopted as a one-to-one mapping between pottery and people's identities.
+
+### `kiziltan_wood` — direct site organic material
+
+Zeynep Kızıltan, “A Neolithic Wooden Figurine from the Yenikapı Rescue
+Excavations,” *TÜBA-AR* 14 (2011), 305–308.
+[Excavator's journal account and English abstract](https://dergipark.org.tr/tr/pub/tubaar/article/1723288).
+Read the English abstract. Exceptional organic preservation includes wooden
+implements and a wooden human representation. This reinforces wood as a local
+material, but does not identify a household shrine, deity, festival, workshop
+organization or furniture suite. No figurine is copied or assigned a religious
+meaning in the scene.
+
+### `ozbal_food_practices` — regional analogy for domestic learning
+
+Hadi Özbal et al., “From bowls to pots,” *PLOS ONE* 19 (2024), e0302788.
+[Original residue and pottery research](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0302788).
+Read the Barcın Höyük chronology, pottery development and discussion. Residue
+analysis supports food preparation involving animal and dairy fats at this
+separate Marmara settlement, circa 6600–6000 BCE; pottery forms and production
+changed through its sequence. This is an analogy for practiced skills and
+changing foodways, not proof of dairying in any modeled Yenikapı room. Exact
+recipes, teachers, apprentices and a seasonal rate of adoption cannot be recovered
+from these data. The model may show learning through handwork and shared meals;
+it must not label that activity a documented Yenikapı cultural revolution.
+
+### `larsen_adversity` — distant comparison, not a local siege
+
+Clark Spencer Larsen et al., “Bioarchaeology of Neolithic Çatalhöyük reveals
+fundamental transitions in health, mobility, and lifestyle in early farmers,”
+*PNAS* 116 (2019), 12615–12623.
+[Original research](https://pmc.ncbi.nlm.nih.gov/articles/PMC6601267/).
+Read the abstract, interpersonal-conflict discussion and conclusions. This
+south-central Anatolian comparison documents health burdens, changing workloads
+and healed injuries interpreted as interpersonal violence. It does not establish
+an enemy army, siege, refuge system or particular emotional response at Yenikapı.
+Injury evidence cannot supply citizens' feelings or the cause of every conflict.
+
+**Design interpretation:** warning, danger, recovery and renewal circumstances;
+collective shelter, ration delivery, care, watch duties and teaching activities;
+packed belongings, extra bedding and rearranged working space; and every citizen's
+route, posture, preference or reaction are fictional gameplay choices. Their
+purpose is to make the costs of household decisions visible. No reviewed local
+source establishes a siege or standing army circa 6000 BCE. A future dated siege
+needs its own evidence and appropriate fortifications, logistics and institutions.
+The village scenario must not acquire medieval gates, barracks, siege engines or
+military uniforms merely because a threat state is active.
+
+Cultural change is represented as the possibility of different households
+learning, retaining or adapting practices, not an automatic settlement-wide
+replacement of identities or beliefs. Neither adversity nor innovation implies
+inevitable growth, universal panic, uniform obedience or continuous occupation.
+Interior variants belong to the hypothetical seasonal scenario; the dated
+reference and its original inventories retain their existing identities.

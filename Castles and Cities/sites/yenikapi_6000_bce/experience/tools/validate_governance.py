@@ -69,6 +69,9 @@ if __name__=='__main__':
     if not errors:
         from validate_neighbors import validate as validate_contacts
         errors.extend(validate_contacts(load("neighbors"),load("neighbors_ui"),load("balance"),load("governance")))
+    if not errors:
+        from validate_households import validate as validate_household_life
+        errors.extend(validate_household_life(load("households"),load("balance"),load("governance"),load("settlement")))
     for error in errors:print(error)
     print(f'GOVERNANCE DATA: {len(errors)} errors')
     raise SystemExit(bool(errors))

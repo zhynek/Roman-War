@@ -3,6 +3,8 @@ extends Node3D
 const Fabric = preload("res://src/fabric.gd")
 var actors: Array = []
 var elapsed: float = 0.0
+var life
+const HouseholdView = preload("res://src/household_view.gd")
 
 static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
 	var changes: Array = []
@@ -17,7 +19,17 @@ static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
 	return result
 
 func refresh(state: Dictionary, rules, world) -> void:
+	if rules.households.active(state):
+		actors.clear()
+		for child in get_children():
+			if child!=life:child.free()
+		if not is_instance_valid(life):
+			life=HouseholdView.new();add_child(life)
+		life.refresh(state,rules,world)
+		_project_markers(state,rules,world)
+		return
 	for child in get_children(): child.free()
+	life=null
 	actors.clear()
 	elapsed = 0.0
 	var tasks: Array = state.assignments if not state.assignments.is_empty() else rules.assignments(state,rules.normalize_plan(state,state.plan))
@@ -44,6 +56,9 @@ func refresh(state: Dictionary, rules, world) -> void:
 		b = _safe(b+Vector3((i%3-1)*.8,0,(i%4)*.6),world)
 		actor.position = b if i%3==0 else a
 		actors.append({"node":actor,"limbs":limbs,"a":a,"b":b,"job":task.job,"world":world,"phase":float(i)*.7,"working":i%3==0,"id":task.id})
+	_project_markers(state,rules,world)
+
+func _project_markers(state: Dictionary,rules,world) -> void:
 	for item in state.queue:
 		var project: Dictionary = rules.projects[item.id]
 		var marker := Node3D.new();marker.position=Vector3(project.at[0],world.floor_height(project.at[0],project.at[1]),project.at[1]);add_child(marker)

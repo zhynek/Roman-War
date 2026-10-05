@@ -2,6 +2,8 @@ extends PanelContainer
 const Rules = preload("res://src/core/settlement_rules.gd")
 const Saves = preload("res://src/campaign_save.gd")
 var app
+var household_panel
+const HouseholdPanel=preload("res://src/households_panel.gd")
 var contacts_panel
 const ContactsPanel=preload("res://src/neighbors_panel.gd")
 var rules
@@ -19,7 +21,9 @@ func configure(owner_app) -> void:
 	app = owner_app
 	copy = JSON.parse_string(FileAccess.get_file_as_string("res://data/governance_ui.json"))
 	contacts_panel=ContactsPanel.new(self,JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors_ui.json")))
-	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")))
+	var household_content:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/households.json"))
+	household_panel=HouseholdPanel.new(self,household_content)
+	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content)
 	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
 	offset_left = -638; offset_right = -22; offset_top = 164; offset_bottom = -22
 	var panel_style:StyleBoxFlat=app._style();panel_style.bg_color.a=1.0
@@ -54,9 +58,11 @@ func dispatch(action: Dictionary) -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.command(state,action)
 	if result.has("error"):
-		last_message=copy.get(result.error,contacts_panel.copy.get(result.error,result.error));refresh();return false
+		last_message=copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
-	if action.kind.begins_with("neighbor_"):
+	if action.kind.begins_with("household_"):
+		last_message=household_panel.copy.ui.updated
+	elif action.kind.begins_with("neighbor_"):
 		last_message=contacts_panel.copy.get({"neighbor_begin":"start_success","neighbor_send":"sent","neighbor_escort":"escort_set","neighbor_cancel":"cancelled"}.get(action.kind,""),"")
 	else:
 		last_message=copy.get({"plan":"assigned","commission":"ordered","cancel":"cancelled","appoint":"appointed","policy":"policies_set"}.get(action.kind,"roles_note"),"")
@@ -67,7 +73,7 @@ func dispatch(action: Dictionary) -> bool:
 func resolve_season() -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.advance(state)
-	if result.has("error"): last_message=copy.get(result.error,contacts_panel.copy.get(result.error,result.error));refresh();return false
+	if result.has("error"): last_message=copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
 	last_message=copy.resolved
 	app.show_campaign(state,rules)
@@ -135,6 +141,7 @@ func refresh() -> void:
 		var principles:=_tab(copy.principles);principles.add_child(label(copy.principle_text,15));principles.add_child(label(copy.units_note,14))
 		principles.add_child(button(copy.restart,_confirm_restart,"RestartTutorial"))
 		contacts_panel.build(_tab(contacts_panel.copy.tab))
+		household_panel.build(_tab(household_panel.copy.ui.tab))
 		tabs.current_tab=clampi(selected,0,tabs.get_tab_count()-1)
 		for i in range(mini(scrolls.size(),tabs.get_child_count())):tabs.get_child(i).set_deferred("scroll_vertical",scrolls[i])
 		var advance:=button(copy.end_season,resolve_season,"ResolveSeason");advance.custom_minimum_size.y=40;column.add_child(advance)
@@ -161,6 +168,7 @@ func _guide(body: VBoxContainer) -> void:
 	elif state.phase!="town":body.add_child(label(copy.guide_growth if count<rules.balance.town_population else copy.guide_sustain,17))
 	if state.town_achieved:
 		body.add_child(button(contacts_panel.copy.next,func():tabs.current_tab=5,"OpenNeighbors"))
+	body.add_child(button(household_panel.copy.ui.next,func():tabs.current_tab=6,"OpenHouseholds"))
 	body.add_child(button(copy.suggest,_suggest,"SuggestedWorkforce"))
 	_forecast(body)
 	var b:Dictionary=rules.balance
@@ -263,10 +271,15 @@ func _journal(body: VBoxContainer) -> void:
 		var params:Dictionary=event.params.duplicate(true)
 		if params.has("project"):params.project=rules.projects.get(params.project,{}).get("title",params.project)
 		if params.has("role"):params.role=copy.get(params.role,params.role)
+		if params.has("order") and rules.households.orders.has(params.order):params.order=rules.households.orders[params.order].label
+		if params.has("enabled"):params.enabled=household_panel.copy.ui.enable if params.enabled else household_panel.copy.ui.disable
+		if params.has("stage"):
+			for spec in household_panel.copy.stages:
+				if spec.id==params.stage:params.stage=spec.label;break
 		if params.has("neighbor"):params.neighbor=rules.neighbors.communities.get(params.neighbor,{}).get("name",params.neighbor)
 		for key in ["give","resource"]:
 			if params.has(key):params[key]=contacts_panel.copy.get(params[key],params[key])
-		body.add_child(label(str(copy.events.get(event.kind,contacts_panel.copy.events.get(event.kind,event.kind))).format(params),15))
+		body.add_child(label(str(copy.events.get(event.kind,contacts_panel.copy.events.get(event.kind,household_panel.copy.events.get(event.kind,event.kind)))).format(params),15))
 
 func _confirm_restart() -> void:
 	var confirm:=ConfirmationDialog.new();confirm.dialog_text=copy.restart_confirm;confirm.confirmed.connect(begin);confirm.confirmed.connect(confirm.queue_free);confirm.canceled.connect(confirm.queue_free);app.add_child(confirm);confirm.popup_centered(Vector2i(440,180))

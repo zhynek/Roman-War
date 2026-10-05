@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "id": "household_adversity_renewal",
+  "kind": "hypothetical",
+  "title": "Households through adversity",
+  "disclaimer": "An authored eight-season exercise, not evidence for an attack or siege at Yenikap\u0131 around 6000 BCE. No army, enemy identity or historical cultural revolution is reconstructed. The danger is a fictional warning that restricts travel; the later learning circle models uneven household adoption of a shared craft practice.",
+  "intro": "Follow daily life inside a home, shared store and work room. Prepare finite supplies, support care and keep routes usable. Households remember stress and take up new practices at different rates.",
+  "begin": "Begin the eight-season household chapter",
+  "complete": "The authored danger has passed. Household memories and chosen care or learning routines continue; no city stage is automatically unlocked.",
+  "stages": [
+    {
+      "id": "warning",
+      "label": "Warning arrives",
+      "description": "A fictional warning of hostile movement makes households bring useful goods indoors. The community still gathers outside, but uncertainty costs time.",
+      "hint": "The steward can secure stores and prepare shared care. The watch leader can support safe routes. Keep people assigned to food."
+    },
+    {
+      "id": "danger",
+      "label": "Movement restricted",
+      "description": "The authored danger peaks. Some gathering is forgone and frightened households seek company indoors. Safe routes need watch labor; refuge care needs care labor every season.",
+      "hint": "Check the food forecast before resolving. Paid preparations cannot replace workers. Care lowers the stress that will persist after danger."
+    },
+    {
+      "id": "recovery",
+      "label": "Repair and return",
+      "description": "No attacker is simulated. In this chapter the warning passes, and households begin to resume work. Stress recedes gradually; familiar possessions remain.",
+      "hint": "Keep care staffed while households recover. A learning circle can begin now, at an explicit seasonal food opportunity cost."
+    },
+    {
+      "id": "renewal",
+      "label": "Share a new practice",
+      "description": "Households can visit a small learning circle. Uptake is deliberately uneven: a teaching model of cultural change, not a recovered historical revolution.",
+      "hint": "Learning needs care labor and costs food each season. Compare household practice and stress rather than expecting a uniform upgrade."
+    },
+    {
+      "id": "settled",
+      "label": "Memories remain",
+      "description": "Ordinary movement resumes. Household stress continues to ease and learned practice remains. Standing care and learning orders can be changed or stopped.",
+      "hint": "Continue the town tutorial or explore interiors. Paid preparations remain available, but inactive orders consume no seasonal learning food."
+    }
+  ],
+  "orders": [
+    {
+      "id": "secure_stores",
+      "role": "steward",
+      "label": "Secure shared stores",
+      "description": "Fit reusable covers and lift provisions onto racks. One care worker maintains them; gathering disruption eases during warning and danger.",
+      "station": "household_store"
+    },
+    {
+      "id": "refuge",
+      "role": "steward",
+      "label": "Prepare shared care",
+      "description": "Lay extra mats and ready water and bowls in the home. Two care workers support frightened households and reduce accumulating stress.",
+      "station": "household_home"
+    },
+    {
+      "id": "safe_routes",
+      "role": "watch",
+      "label": "Maintain safe routes",
+      "description": "Set a watch rota for existing paths. Two watch workers mitigate gathering disruption and protect access; no wall or standing army appears.",
+      "station": "household_store"
+    },
+    {
+      "id": "learning",
+      "role": "steward",
+      "label": "Hold a learning circle",
+      "description": "Prepare a small working surface for a shared craft practice. From recovery onward, two care workers support uneven household uptake. Gathering must cover the seasonal food opportunity cost as well as any remaining disruption.",
+      "station": "household_workshop"
+    }
+  ],
+  "stations": [
+    {
+      "id": "household_home",
+      "building": "yk_house_01",
+      "label": "Home and shared care",
+      "use": "home"
+    },
+    {
+      "id": "household_store",
+      "building": "yk_store_01",
+      "label": "Store and provisioning",
+      "use": "store"
+    },
+    {
+      "id": "household_workshop",
+      "building": "yk_house_06",
+      "label": "Work room and learning",
+      "use": "workshop"
+    }
+  ],
+  "ui": {
+    "tab": "Households",
+    "inactive": "Optional chapter: explore a village under pressure, then recovery and uneven cultural renewal. This does not begin a documented siege.",
+    "season": "Chapter season {elapsed} \u00b7 {stage}",
+    "orders": "Preparations and standing orders",
+    "labor": "Existing care and watch assignments provide the labor. The care crew supports shared care, store upkeep and learning in aggregate; these are not extra workers or separate full-time posts. Minimum staffing continues each season. Learning also forgoes food output. Learning waits if gathering cannot cover that cost.",
+    "households": "Household memories",
+    "memory": "{id} \u00b7 stress {stress}/100 \u00b7 shared practice {practice}/100",
+    "cost": "{wood} wood once \u00b7 {role}",
+    "staffing": "Care {care} / watch {watch} required",
+    "paid": "Preparation retained; switching it on again costs no wood.",
+    "enable": "Enable",
+    "disable": "Disable",
+    "active": "Active",
+    "understaffed": "Waiting for required care/watch labor or gathering capacity",
+    "learning_wait": "Learning becomes effective from recovery onward.",
+    "effects": "Next season: {food} food forgone \u00b7 wellbeing {wellbeing} \u00b7 cooperation {cooperation} \u00b7 protection {security}",
+    "visit": "Visit {label}",
+    "interpretation": "Click a nearby visible resident to inspect their activity, or choose a name above. All furnishings, individual routines, care arrangements and practice scores are interpretive. Animation does not advance time.",
+    "next": "Explore household life",
+    "updated": "Household orders updated.",
+    "residents": "Residents and routines",
+    "routine": "{name} \u00b7 {activity}\n{reason}",
+    "inspect": "Visit {name}\u2019s activity",
+    "no_residents": "No residents currently assigned.",
+    "factors": "Why these effects",
+    "lost_food": "Gathering opportunity cost: {value}"
+  },
+  "errors": {
+    "household_started": "This household chapter has already begun.",
+    "household_missing": "Begin the optional household chapter first.",
+    "household_unknown": "This household order is not valid.",
+    "household_labor": "Assign enough care or watch workers before enabling this order.",
+    "household_stock": "There is not enough wood for this preparation.",
+    "household_invalid": "The household state is invalid."
+  },
+  "events": {
+    "household_started": "The optional household chapter begins. Its danger and renewal are authored scenarios.",
+    "household_order": "Household preparation {order}: {enabled}. Wood used: {wood}.",
+    "household_season": "Household season {stage}: {food} food forgone; household stress changed by {stress}; shared practice changed by {practice}."
+  },
+  "factors": {
+    "circumstance": "Authored circumstance",
+    "store": "Maintained stores",
+    "routes": "Staffed safe routes",
+    "care": "Staffed shared care",
+    "stress": "Remembered household stress",
+    "learning": "Learning circle"
+  },
+  "presentation": {
+    "activity_labels": {
+      "home_rest": "Resting at home",
+      "child_near_home": "Staying near the household",
+      "child_learning": "Watching a shared practice",
+      "refuge_care": "Sharing care and company",
+      "store_carry": "Carrying household provisions",
+      "store_sort": "Sorting stored provisions",
+      "route_watch": "Watching a familiar route",
+      "repair": "Repairing household equipment",
+      "learning": "Sharing a craft practice",
+      "food": "Gathering and preparing food",
+      "timber": "Collecting wood",
+      "care": "Supporting household care",
+      "watch": "Keeping watch",
+      "building": "Working on an initiative",
+      "travel": "Serving the neighbor party"
+    },
+    "reason_labels": {
+      "daily": "An ordinary daily routine, shown as interpretation.",
+      "warning": "A fictional warning has changed household priorities.",
+      "danger": "Restricted movement brings activity indoors.",
+      "recovery": "Work resumes while remembered stress eases.",
+      "renewal": "A learning circle offers a practice; uptake differs among households.",
+      "settled": "Ordinary routines resume with household memories retained.",
+      "child": "Remaining near familiar people and household spaces.",
+      "practice": "This household has begun taking up the shared practice.",
+      "hunger": "Food shortage is straining this household."
+    },
+    "station_labels": {
+      "home": "Household interior",
+      "refuge": "Shared care space",
+      "store": "Provisioning store",
+      "workshop": "Work room",
+      "yard": "Household yard",
+      "route": "Familiar route",
+      "food": "Food work",
+      "timber": "Wood gathering",
+      "watch": "Watch position",
+      "building": "Initiative site",
+      "travel": "Neighbor meeting place"
+    }
+  }
+}

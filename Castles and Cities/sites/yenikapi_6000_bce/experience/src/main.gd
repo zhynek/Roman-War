@@ -228,6 +228,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.pressed and event.button_index==MOUSE_BUTTON_WHEEL_DOWN:flight_speed=clampf(flight_speed/1.4,3,120);_update_mode()
 		if event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
 			var point:Vector2=get_viewport().get_visible_rect().size*.5 if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED else event.position
+			if campaign_mode and not campaign.visible and not info.visible and is_instance_valid(campaign_view) and is_instance_valid(campaign_view.life):
+				var resident:String=pick_resident(camera.project_ray_origin(point),camera.project_ray_normal(point))
+				if not resident.is_empty():
+					campaign.household_panel.inspect_resident(resident)
+					return
 			var hit:Dictionary=world.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
 			for record in data.objects:
 				if record.id==hit.id:
@@ -336,3 +341,25 @@ func _rebuild_world(config: Dictionary) -> void:
 	data=config
 	world=Village.new();add_child(world);world.build(data)
 	if not flying:set_flying(false)
+
+func pick_resident(origin:Vector3,direction:Vector3) -> String:
+	if not is_instance_valid(campaign_view) or not is_instance_valid(campaign_view.life):return ""
+	var best:float=12.0
+	# Respect every rendered wall/furnishing collider, including later additions.
+	for box in world.solids:
+		var basis:=Basis(Vector3.UP,-float(box.yaw))
+		var start:Vector3=basis*(origin-box.at)
+		var hit:Variant=AABB(-box.size*.5,box.size).intersects_segment(start,start+basis*direction*best)
+		if hit!=null:best=minf(best,start.distance_to(hit))
+	var selected:String=""
+	for routine in campaign_view.life.routines:
+		var node:Node3D=routine.node
+		var inverse:Transform3D=node.global_transform.affine_inverse()
+		var start:Vector3=inverse*origin
+		var finish:Vector3=inverse*(origin+direction*best)
+		var height:float=1.76 if routine.moving or routine.pose not in ["kneel","sit","rest"] else 1.30
+		var hit:Variant=AABB(Vector3(-.3,0,-.3),Vector3(.6,height,.6)).intersects_segment(start,finish)
+		if hit!=null:
+			var distance:float=origin.distance_to(node.global_transform*hit)
+			if distance<best:best=distance;selected=routine.id
+	return selected

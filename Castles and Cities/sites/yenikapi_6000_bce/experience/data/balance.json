@@ -117,5 +117,71 @@
     "initial_trust": 40,
     "initial_escorts": 1,
     "chapter_home_reserve": 2
+  },
+  "households": {
+    "stage_seasons": 2,
+    "max_stock": 100,
+    "care_minimum": 2,
+    "store_care_minimum": 1,
+    "watch_minimum": 2,
+    "learning_food": 4,
+    "stress_hunger": 10,
+    "refuge_stress": -7,
+    "stress_wellbeing_divisor": 10,
+    "stress_cooperation_divisor": 20,
+    "learning_cooperation": 4,
+    "secure_food_relief": 2,
+    "route_food_relief": 4,
+    "route_security": 6,
+    "store_security": 2,
+    "refuge_wellbeing": 6,
+    "practice_affinity_span": 3,
+    "practice_affinity_step": 4,
+    "recovery_practice": 3,
+    "renewal_practice": 6,
+    "settled_practice": 2,
+    "costs": {
+      "secure_stores": 4,
+      "refuge": 6,
+      "safe_routes": 4,
+      "learning": 4
+    },
+    "stages": {
+      "warning": {
+        "food_penalty": 4,
+        "wellbeing": -5,
+        "cooperation": -2,
+        "security": -4,
+        "stress": 8
+      },
+      "danger": {
+        "food_penalty": 10,
+        "wellbeing": -14,
+        "cooperation": -6,
+        "security": -10,
+        "stress": 16
+      },
+      "recovery": {
+        "food_penalty": 2,
+        "wellbeing": -5,
+        "cooperation": 0,
+        "security": 0,
+        "stress": -8
+      },
+      "renewal": {
+        "food_penalty": 0,
+        "wellbeing": 0,
+        "cooperation": 0,
+        "security": 0,
+        "stress": -5
+      },
+      "settled": {
+        "food_penalty": 0,
+        "wellbeing": 0,
+        "cooperation": 0,
+        "security": 0,
+        "stress": -3
+      }
+    }
   }
 }

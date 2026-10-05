@@ -104,3 +104,24 @@ verification source. Each split member must match it byte for byte, both ZIPs mu
 pass integrity checks, and provenance/artifact hashes must describe the actual
 published downloads. Never modify the tested Mac archive or GLB bytes to work
 around transport failures. See the site's VERIFICATION-0.3.md for this delivery.
+
+
+## Household life release (0.4.0)
+
+Use `build_early_settlement.py --version 0.4.0` with fresh parent gate logs and a
+clean committed checkout. The builder adds household schema/negative tests and
+rules checks, then repeats them inside the exact exported Mac application. It
+captures **48 views**: 14 reference, 12 tutorial, 10 contact and 12 household.
+The last set checks all resident routes at warning, danger, recovery, renewal and
+settled stages; doors, save resume, original reference restoration and small-window
+controls. Inspect every image outside the repository. Benchmark reference, town,
+contacts and household life sequentially with no competing Godot render process.
+
+The model exporter retains all 18 previous GLBs and adds six separately named
+hypothetical furnished rooms (three each at danger and renewal). The builder
+checks all 24 models and packages **Foundation Models** (16), **Contact Models**
+(2) and **Household Models** (6) separately, with source and Mac ZIPs. Model
+partitions are checked against raw exported bytes, avoiding a large combined
+upload. Publish all five ZIPs plus provenance/checksums under
+`yenikapi-early-settlement-v0.4.0`, prerelease and never latest. Verify public
+download hashes and all earlier releases by asset ID, not array order.

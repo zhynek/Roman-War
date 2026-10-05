@@ -516,6 +516,377 @@
           "maximum": 1000000
         }
       }
+    },
+    "households": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage_seasons",
+        "max_stock",
+        "care_minimum",
+        "store_care_minimum",
+        "watch_minimum",
+        "learning_food",
+        "stress_hunger",
+        "refuge_stress",
+        "stress_wellbeing_divisor",
+        "stress_cooperation_divisor",
+        "learning_cooperation",
+        "secure_food_relief",
+        "route_food_relief",
+        "route_security",
+        "store_security",
+        "refuge_wellbeing",
+        "practice_affinity_span",
+        "practice_affinity_step",
+        "recovery_practice",
+        "renewal_practice",
+        "settled_practice",
+        "costs",
+        "stages"
+      ],
+      "properties": {
+        "stage_seasons": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "max_stock": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "care_minimum": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "store_care_minimum": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "watch_minimum": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "learning_food": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "stress_hunger": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "refuge_stress": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "stress_wellbeing_divisor": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "stress_cooperation_divisor": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "learning_cooperation": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "secure_food_relief": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "route_food_relief": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "route_security": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "store_security": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "refuge_wellbeing": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "practice_affinity_span": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "practice_affinity_step": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "recovery_practice": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "renewal_practice": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "settled_practice": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "costs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "secure_stores",
+            "refuge",
+            "safe_routes",
+            "learning"
+          ],
+          "properties": {
+            "secure_stores": {
+              "type": "integer",
+              "minimum": -100,
+              "maximum": 100
+            },
+            "refuge": {
+              "type": "integer",
+              "minimum": -100,
+              "maximum": 100
+            },
+            "safe_routes": {
+              "type": "integer",
+              "minimum": -100,
+              "maximum": 100
+            },
+            "learning": {
+              "type": "integer",
+              "minimum": -100,
+              "maximum": 100
+            }
+          }
+        },
+        "stages": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "warning",
+            "danger",
+            "recovery",
+            "renewal",
+            "settled"
+          ],
+          "properties": {
+            "warning": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "food_penalty",
+                "wellbeing",
+                "cooperation",
+                "security",
+                "stress"
+              ],
+              "properties": {
+                "food_penalty": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "wellbeing": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "cooperation": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "security": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              }
+            },
+            "danger": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "food_penalty",
+                "wellbeing",
+                "cooperation",
+                "security",
+                "stress"
+              ],
+              "properties": {
+                "food_penalty": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "wellbeing": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "cooperation": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "security": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              }
+            },
+            "recovery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "food_penalty",
+                "wellbeing",
+                "cooperation",
+                "security",
+                "stress"
+              ],
+              "properties": {
+                "food_penalty": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "wellbeing": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "cooperation": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "security": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              }
+            },
+            "renewal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "food_penalty",
+                "wellbeing",
+                "cooperation",
+                "security",
+                "stress"
+              ],
+              "properties": {
+                "food_penalty": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "wellbeing": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "cooperation": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "security": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              }
+            },
+            "settled": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "food_penalty",
+                "wellbeing",
+                "cooperation",
+                "security",
+                "stress"
+              ],
+              "properties": {
+                "food_penalty": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "wellbeing": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "cooperation": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "security": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "type": "integer",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "required": [
@@ -590,7 +961,8 @@
     "arrival_age_spread",
     "arrival_child_age",
     "minimum_food_workers",
-    "neighbors"
+    "neighbors",
+    "households"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

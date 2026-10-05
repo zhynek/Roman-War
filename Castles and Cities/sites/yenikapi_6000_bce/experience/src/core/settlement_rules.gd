@@ -4,12 +4,15 @@ var content: Dictionary
 var balance: Dictionary
 var projects: Dictionary = {}
 var neighbors
+var households
+const Households = preload("res://src/core/household_rules.gd")
 const Neighbors = preload("res://src/core/neighbor_rules.gd")
 
-func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}) -> void:
+func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}) -> void:
 	content = canonical(config)
 	balance = canonical(tuning)
 	neighbors = Neighbors.new(canonical(contacts_config),balance.get("neighbors",{}))
+	households = Households.new(canonical(household_config),balance.get("households",{}))
 	for project in content.projects:
 		projects[project.id] = project
 
@@ -24,7 +27,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -33,6 +36,7 @@ func new_state() -> Dictionary:
 
 func ensure_state_keys(state: Dictionary) -> void:
 	if not state.has("contacts"): state.contacts={}
+	if not state.has("households"): state.households={}
 
 func people(state: Dictionary, adults_only: bool = false) -> Array:
 	var result: Array = []
@@ -103,6 +107,7 @@ func permitted(state: Dictionary, role: String) -> bool:
 func command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("household_"): return households.command(state,action,self)
 	if kind.begins_with("neighbor_"): return neighbors.command(state,action,self)
 	var next: Dictionary = state.duplicate(true)
 	match kind:
@@ -171,7 +176,8 @@ func forecast(state: Dictionary) -> Dictionary:
 	var crew:Dictionary=neighbors.crew(state,plan)
 	var cargo:Dictionary=neighbors.arrivals(state,plan)
 	var workers: int = int(plan.food)-int(crew.carriers) + (int(plan.building) if state.queue.is_empty() else 0)
-	var gathered: int = workers * (int(balance.food_yields[int(state.turn) % 4]) + effect(state, "food_yield"))
+	var household_effects: Dictionary = households.forecast(state,self)
+	var gathered: int = maxi(0,workers * (int(balance.food_yields[int(state.turn) % 4]) + effect(state, "food_yield")) - int(household_effects.food_penalty))
 	var used: int = ceili(population * float(balance.tight_rations_percent if state.tight_rations else balance.full_rations_percent) / 100.0) * int(balance.food_per_person)
 	var spoil: int = int(state.food) * int(balance.spoil_percent) / 100
 	var available: int = maxi(0,int(state.food) + gathered - spoil)
@@ -184,6 +190,8 @@ func forecast(state: Dictionary) -> Dictionary:
 		"cooperation": [{"id":"base","value":int(balance.cooperation_base)}, {"id":"care","value":int(plan.care)*int(balance.cooperation_care)}, {"id":"food","value":0 if covered else int(balance.cooperation_hunger)}, {"id":"crowding","value":int(balance.cooperation_crowded) if crowded else 0}, {"id":"ration","value":int(balance.cooperation_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"cooperation")}],
 		"security": [{"id":"base","value":int(balance.security_base)}, {"id":"watch","value":(int(plan.watch)-int(crew.escorts))*int(balance.security_worker)}, {"id":"leadership","value":leader_skill(state,"watch")*int(balance.security_skill)}, {"id":"projects","value":effect(state,"security")}]
 	}
+	for key in ["wellbeing","cooperation","security"]:
+		factors[key].append({"id":"household_life","value":int(household_effects[key])})
 	var stocks: Dictionary = {}
 	for key in factors:
 		var total: int = 0
@@ -196,7 +204,7 @@ func forecast(state: Dictionary) -> Dictionary:
 	remaining += int(cargo.food)
 	var overflow: int = maxi(0,remaining-losses-storage(state))
 	remaining = mini(storage(state), remaining - losses)
-	return {"plan":plan,"population":population,"gathered":gathered,"used":eaten,"unfed":used-eaten,"overflow":overflow,"spoil":spoil,"losses":losses,"food":remaining,"food_delta":remaining-int(state.food),"covered":covered,"stocks":stocks,"factors":factors,"crew":crew,"cargo":cargo,"wood":int(plan.timber)*int(balance.timber_yield)+int(cargo.wood),"work":int(plan.building)*int(balance.work_yield)+leader_skill(state,"steward")/int(balance.steward_work_divisor) if plan.building>0 and not state.queue.is_empty() else 0}
+	return {"households":household_effects,"plan":plan,"population":population,"gathered":gathered,"used":eaten,"unfed":used-eaten,"overflow":overflow,"spoil":spoil,"losses":losses,"food":remaining,"food_delta":remaining-int(state.food),"covered":covered,"stocks":stocks,"factors":factors,"crew":crew,"cargo":cargo,"wood":int(plan.timber)*int(balance.timber_yield)+int(cargo.wood),"work":int(plan.building)*int(balance.work_yield)+leader_skill(state,"steward")/int(balance.steward_work_divisor) if plan.building>0 and not state.queue.is_empty() else 0}
 
 func move_stock(current: int, target: int) -> int:
 	return current + clampi(target - current, -int(balance.stock_step), int(balance.stock_step))
@@ -255,6 +263,7 @@ func advance(state: Dictionary) -> Dictionary:
 			_add_person(next,int(balance.adult_age)+int(next.next_person)%int(balance.arrival_age_spread) if i<int(balance.migration_adults) else int(balance.arrival_child_age))
 		_event(next,"arrival",{"count":int(balance.migration_size)})
 	neighbors.advance(next,state,self)
+	households.advance(next,state,self)
 	next.turn += 1
 	_succession(next)
 	next.plan = normalize_plan(next,next.plan)
@@ -387,6 +396,7 @@ func validate_state(value: Variant) -> bool:
 			if not has_project(state,requirement): return false
 		ordered[item.id]=true
 	if not neighbors.validate(state,self): return false
+	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false
 	if command(state,{"kind":"plan","plan":state.plan}).has("error"): return false
 	if not state.report is Dictionary or not state.assignments is Array or not state.history is Array or state.history.size()>20000: return false

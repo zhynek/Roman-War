@@ -56,7 +56,26 @@ func run() -> void:
 			local.free()
 	if not write_model(contact_scene,out_dir.path_join("Yenikapi-Hypothetical-Contact-Settlement.glb")):quit(1);return
 	FileAccess.open(out_dir.path_join("hypothetical-contact-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"scenario_id":contact_rules.content.scenario_id,"status":"Hypothetical meeting place, not a dated market reconstruction or neighboring village","state":contact_state,"fabric":contact_data.objects},"  "))
-	print("VILLAGE MODEL EXPORT PASS: 18 GLBs")
+	var household_rules=preload("res://src/core/settlement_rules.gd").new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/households.json")))
+	for elapsed in [2,6]:
+		var household_state:Dictionary=preload("res://tools/household_driver.gd").at_season(household_rules,elapsed)
+		var household_world=load("res://src/village.gd").new();root.add_child(household_world);household_world.build(data)
+		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(household_state,household_rules,household_world)
+		var phase:String=household_rules.households.stage(household_state)
+		for station in household_rules.households.content.stations:
+			var building:Dictionary={}
+			for record in household_world.buildings:
+				if record.id==station.building:building=record;break
+			var room:=Node3D.new();room.name=station.id+"_"+phase;root.add_child(room)
+			var origin:Transform3D=household_world.object_nodes[station.building].transform
+			for id in [station.building,"household_interior_"+station.building]:
+				var original:MeshInstance3D=household_world.object_nodes[id]
+				var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*original.transform;copy.mesh=neutral_mesh(original.mesh);room.add_child(copy)
+			if not write_model(room,out_dir.path_join("household-"+phase+"-"+station.building+".glb")):quit(1);return
+			room.free()
+		FileAccess.open(out_dir.path_join("household-"+phase+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical portable interior arrangements; no archaeological inventory or siege reconstruction","state":household_state,"models":"Three furnished rooms centered at original building datum. Citizens, lighting, procedural shaders and simulation are available in the app/source, not these static GLBs."},"  "))
+		view.free();household_world.free()
+	print("VILLAGE MODEL EXPORT PASS: 24 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

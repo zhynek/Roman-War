@@ -1,0 +1,702 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "id",
+    "kind",
+    "title",
+    "disclaimer",
+    "intro",
+    "begin",
+    "complete",
+    "stages",
+    "orders",
+    "stations",
+    "ui",
+    "errors",
+    "events",
+    "factors",
+    "presentation"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "const": "household_adversity_renewal"
+    },
+    "kind": {
+      "const": "hypothetical"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "disclaimer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "intro": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "begin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "complete": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 3000
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "description",
+          "hint"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 100
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "hint": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          }
+        }
+      }
+    },
+    "orders": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "role",
+          "label",
+          "description",
+          "station"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 100
+          },
+          "role": {
+            "enum": [
+              "steward",
+              "watch"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "station": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    "stations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "building",
+          "label",
+          "use"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 100
+          },
+          "building": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 100
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "use": {
+            "enum": [
+              "home",
+              "store",
+              "workshop"
+            ]
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tab",
+        "inactive",
+        "season",
+        "orders",
+        "labor",
+        "households",
+        "memory",
+        "cost",
+        "staffing",
+        "paid",
+        "enable",
+        "disable",
+        "active",
+        "understaffed",
+        "learning_wait",
+        "effects",
+        "visit",
+        "interpretation",
+        "next",
+        "updated",
+        "residents",
+        "routine",
+        "inspect",
+        "no_residents",
+        "factors",
+        "lost_food"
+      ],
+      "properties": {
+        "tab": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "inactive": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "season": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "orders": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "labor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "households": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "memory": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "cost": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "staffing": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "paid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "enable": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "disable": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "active": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "understaffed": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "learning_wait": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "effects": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "visit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "interpretation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "next": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "updated": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "residents": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "routine": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "inspect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "no_residents": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "factors": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "lost_food": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "household_started",
+        "household_missing",
+        "household_unknown",
+        "household_labor",
+        "household_stock",
+        "household_invalid"
+      ],
+      "properties": {
+        "household_started": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_missing": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_unknown": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_labor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_stock": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_invalid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        }
+      }
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "household_started",
+        "household_order",
+        "household_season"
+      ],
+      "properties": {
+        "household_started": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_order": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "household_season": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        }
+      }
+    },
+    "factors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "circumstance",
+        "store",
+        "routes",
+        "care",
+        "stress",
+        "learning"
+      ],
+      "properties": {
+        "circumstance": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "store": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "routes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "care": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "stress": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "learning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activity_labels",
+        "reason_labels",
+        "station_labels"
+      ],
+      "properties": {
+        "activity_labels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "home_rest",
+            "child_near_home",
+            "child_learning",
+            "refuge_care",
+            "store_carry",
+            "store_sort",
+            "route_watch",
+            "repair",
+            "learning",
+            "food",
+            "timber",
+            "care",
+            "watch",
+            "building",
+            "travel"
+          ],
+          "properties": {
+            "home_rest": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "child_near_home": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "child_learning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "refuge_care": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "store_carry": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "store_sort": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "route_watch": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "repair": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "learning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "food": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "timber": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "care": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "watch": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "building": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "travel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            }
+          }
+        },
+        "reason_labels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "daily",
+            "warning",
+            "danger",
+            "recovery",
+            "renewal",
+            "settled",
+            "child",
+            "practice",
+            "hunger"
+          ],
+          "properties": {
+            "daily": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "warning": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "danger": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "recovery": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "renewal": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "settled": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "child": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "practice": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "hunger": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            }
+          }
+        },
+        "station_labels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "home",
+            "refuge",
+            "store",
+            "workshop",
+            "yard",
+            "route",
+            "food",
+            "timber",
+            "watch",
+            "building",
+            "travel"
+          ],
+          "properties": {
+            "home": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "refuge": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "store": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "workshop": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "yard": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "route": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "food": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "timber": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "watch": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "building": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            },
+            "travel": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 3000
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

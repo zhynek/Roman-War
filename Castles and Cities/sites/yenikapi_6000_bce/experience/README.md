@@ -1,4 +1,4 @@
-# Yenikapı — Early Settlement 0.3.0
+# Yenikapı — Early Settlement 0.4.0
 
 Explore an original, interpretive village set around 6000 BCE on Istanbul's
 historic peninsula. This is not a recovered village plan or a population estimate.
@@ -46,3 +46,15 @@ speakers change with seasonal terms. A furnished meeting room is explorable;
 the neighboring villages are not yet modeled. Older tutorial saves load with
 contacts inactive; active-contact saves require this release or a compatible newer
 one. See GOVERNANCE.md for the new rules and save version 2.
+
+
+Open **Play seasonal tutorial → Begin a new tutorial → Households** to start the
+optional eight-season adversity and renewal chapter as God, even before growing
+the village. Secure stores, prepare care, maintain safe routes and later hold a
+learning circle. Follow named residents or visit the home, store and workshop to
+see interpretive furnishings and routines change. Choices draw on existing care
+and watch labor; read the next-season forecast before advancing. Household stress
+recovers gradually and craft uptake varies by household. This is a fictional
+warning exercise, not a reconstructed Neolithic army or siege. See
+[HOUSEHOLD_LIFE.md](HOUSEHOLD_LIFE.md) for controls, evidence limits and extension
+fields. Old inactive saves still load; active household saves require wrapper 3.

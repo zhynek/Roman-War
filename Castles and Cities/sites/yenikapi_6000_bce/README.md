@@ -22,6 +22,24 @@ The circa-1200 Constantinople experience, its 17,561 reference plot records, Pan
 The prehistoric study is organized by site, without assigning a Byzantine realm
 to Neolithic inhabitants. There is no campaign integration.
 
+## Household life in 0.4.0
+
+Start the seasonal tutorial, open **Households**, and begin the optional chapter
+as God. It can start in the first village, before the town or neighbor milestones.
+Over eight explicit seasons, an authored warning leads to restricted movement,
+recovery and a learning circle. Steward preparations and watch duty change the
+forecast; household stress and uptake of a shared practice persist in the save.
+This is fictional adversity and cultural change, not a reconstructed army or siege.
+
+Three interiors gain original procedural racks, covers, tied bundles, woven
+partitions, repair materials and a handwork frame. Every living resident, including
+children, has a named activity and a collision-checked route through real doorways.
+Use the resident picker to visit an activity. Portable furnishings and human poses
+are interpretive, and the original dated reference remains available unchanged.
+[Household controls, rules, evidence and save contract](experience/HOUSEHOLD_LIFE.md)
+explain the distinctions and remaining limits. Active household saves use wrapper 3;
+older inactive tutorials and contact saves still load.
+
 ## Neighbor contact in 0.3.0
 
 After the town milestone, commission **Prepare a meeting and exchange place**,
@@ -67,11 +85,13 @@ reversible town milestone in a separate hypothetical scenario. No date or
 population automatically upgrades buildings.
 
 Run the independent data validators and their tests, Godot import,
-`tools/checks.gd`, `tools/governance_checks.gd` and `tools/neighbor_checks.gd`.
+`tools/checks.gd`, `tools/governance_checks.gd`, `tools/neighbor_checks.gd` and
+`tools/household_checks.gd`. Run the household data validator and negative tests too.
 Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and run
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
 repeats these, the 12-view `tools/governance_preview.gd` tutorial and the
-10-view `tools/neighbor_preview.gd` contact chapter against the exact Mac package. Parent campaign gates remain mandatory.
+10-view `tools/neighbor_preview.gd` contact chapter, and 12-view
+`tools/household_preview.gd` against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
 The [0.3.0 verification record](VERIFICATION-0.3.md) covers the contact chapter,
 exact app, performance, model packaging and six verified public downloads.

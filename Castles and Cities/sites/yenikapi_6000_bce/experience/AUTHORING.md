@@ -82,3 +82,24 @@ backfill and the version-2 wrapper used after contact activation. New downloadab
 models are separated from the original village and hypothetical town. All three
 modes receive standalone performance measurements; all exact-app captures need
 human visual review before publication.
+
+## Optional household circumstances (0.4.0)
+
+[HOUSEHOLD_LIFE.md](HOUSEHOLD_LIFE.md) describes the village-scale adversity and
+renewal chapter: finite preparations, seasonal care/watch staffing, household
+stress and uneven learning, plus procedural interiors and illustrative routines.
+The eight-season fictional episode is separate from the dated snapshot and does
+not reconstruct an army or siege. Settled recovery continues afterward without
+automatically restarting danger or upgrading every building.
+
+`households.json`, its closed schema and `balance.households` own authored content
+and tuning; scene-free rules own decisions and memory. Preserve household IDs
+when adding circumstances or activity destinations, and retain existing reference
+geometry/inventories. Animation and routing must never mutate seasonal state.
+Learning requires both care staffing and enough gathering to pay its opportunity
+cost. The presentation respects readiness; indexed route queries retain the same
+collision shapes as walking and invalidate caches when those shapes change.
+Old saves backfill inactive `households: {}`; active chapters require wrapper 3,
+with versions 1/2 still accepted for inactive households. Keep validation,
+save/replay, actual interior navigation, rendered variants and exact-app release
+checks together when extending this seam.
