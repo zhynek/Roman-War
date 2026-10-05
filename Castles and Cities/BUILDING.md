@@ -120,6 +120,11 @@ The chapter capture tools settle actual rendered frames after mesh/material
 replacement; passive process frames can leave background macOS captures with
 unready materials. Synthetic pointer motion must precede a click after UI layout
 or scrolling. Neither QA accommodation changes simulation or production lighting.
+If Metal captures still show partially initialized material groups, repeat the
+affected exact-app capture script with `--max-fps 10` before `--script`. Its twelve
+drawn settling frames then allow at least 1.2 seconds per capture. Preserve the
+first captures/logs, record the repeat command, and inspect the complete replacement
+set. This pacing is for screenshots only; never apply it to performance benchmarks.
 
 The model exporter retains all 18 previous GLBs and adds six separately named
 hypothetical furnished rooms (three each at danger and renewal). The builder
