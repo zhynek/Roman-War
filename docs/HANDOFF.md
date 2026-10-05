@@ -11,6 +11,34 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı neighboring communities (0.3.0, October 4, 2026)
+
+The next playable phase adds **optional fictional neighbors** after the town
+milestone. Complete the meeting/exchange project, then begin in Neighbors.
+Reedbank and Oakrise have finite stocks, seasonal production/consumption, reserve
+policies, trust and separate speaker terms. Steward dispatches trade/aid; watch
+leader sets escorts; God coordinates both. Cargo is reserved on both sides;
+carriers and escorts reduce home labor/protection during one- or two-season
+journeys. No scenes or timers mutate those ledgers. A furnished meeting room and
+approach path produce 14 buildings/eight paths while retaining the old fabric.
+
+Read the updated [governance guide](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/GOVERNANCE.md)
+for rules, authoring seams and limits. The evidence ledger distinguishes a regional
+obsidian-contact analogy from invented neighbors, exchange terms and offices.
+Neighbor populations are aggregate/fixed; villages, treaties, warfare and a
+regional travel map remain unfinished. There is no new historical snapshot or
+large-town stage. The original 21-season tutorial remains intact.
+
+Old tutorial saves gain inactive `contacts: {}`. Active contacts use a version-2
+save wrapper (base rules remain 1; contact extension version 1). Strict validation
+preserves finite cargo, remaining journey and speaker terms. An older application
+rejects active-contact saves rather than discarding the extension. Medieval and
+parent campaign save formats are untouched. Source contact rules pass 302 checks
+across 80 seasons; existing governance now passes 706 checks. Rendered contact
+acceptance passes 58 checks and writes 10 views, including smaller-window controls,
+all entrances/paths, exact save resume and unchanged reference restoration.
+Release verification/publication results will be recorded after the frozen build.
+
 ## Yenikapı seasonal tutorial (0.2.0, October 4, 2026)
 
 The [governance guide](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/GOVERNANCE.md)

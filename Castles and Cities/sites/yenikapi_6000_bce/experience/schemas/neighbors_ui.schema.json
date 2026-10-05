@@ -1,0 +1,372 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tab",
+    "intro",
+    "hypothesis",
+    "locked",
+    "begin",
+    "next",
+    "at_home",
+    "visit",
+    "guide",
+    "complete",
+    "start_success",
+    "sent",
+    "cancelled",
+    "escort_set",
+    "escort_label",
+    "escort_note",
+    "apply_escort",
+    "trade",
+    "aid",
+    "cancel",
+    "no_mission",
+    "mission",
+    "moving",
+    "waiting",
+    "leader",
+    "stocks",
+    "offer",
+    "risk",
+    "risk_factors",
+    "aid_line",
+    "neighbor_report",
+    "trust_report",
+    "home_labor",
+    "availability",
+    "ready",
+    "food",
+    "wood",
+    "travel",
+    "contact_locked",
+    "contact_started",
+    "contact_missing",
+    "contact_unknown",
+    "contact_busy",
+    "contact_crew",
+    "contact_stock",
+    "contact_reserve",
+    "contact_trust",
+    "contact_aid",
+    "contact_transit",
+    "contact_none",
+    "events",
+    "progress",
+    "cargo_report"
+  ],
+  "properties": {
+    "tab": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "intro": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "hypothesis": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "locked": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "begin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "next": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "at_home": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "visit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "guide": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "complete": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "start_success": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "sent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "cancelled": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "escort_set": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "escort_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "escort_note": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "apply_escort": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "trade": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "aid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "cancel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "no_mission": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "mission": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "moving": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "waiting": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "leader": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "stocks": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "offer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "risk": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "risk_factors": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "aid_line": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "neighbor_report": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "trust_report": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "home_labor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "availability": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "ready": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "food": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "wood": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "travel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_locked": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_started": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_missing": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_unknown": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_busy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_crew": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_stock": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_reserve": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_trust": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_aid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_transit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "contact_none": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contact_started",
+        "contact_sent",
+        "contact_return",
+        "contact_aid",
+        "contact_cancelled",
+        "contact_succession",
+        "contact_complete"
+      ],
+      "properties": {
+        "contact_started": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_sent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_return": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_aid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_cancelled": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_succession": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "contact_complete": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "progress": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "cargo_report": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

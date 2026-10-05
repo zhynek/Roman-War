@@ -1,6 +1,6 @@
 # Village authoring contract and save boundary
 
-`data/settlement.json` is the only rendered snapshot. Its closed JSON schema and
+`data/settlement.json` is the only dated reference snapshot. Its closed JSON schema and
 `tools/validate_settlement.py` check vocabulary, IDs, source links, furnishing
 bounds, route segments and the nominal period. `tools/test_data.py` has negative
 cases. Geometric and route checks are separate; schema validity cannot prove access.
@@ -65,3 +65,20 @@ headlessly. Four furnished interiors are entered with collision in rendered QA.
 Landscape, plan, aerial, street, landing, fields, roof, evidence and 1280×800 UI
 captures complete the 14-image inspection set. The benchmark measures 120 warm-up
 and 180 process-frame intervals at each of four fixed views, excluding captures.
+
+
+## Optional contact authoring (0.3.0)
+
+`neighbors.json` and its closed schema define fictional community identities,
+seasonal stocks, offers, aid conditions and speaker profiles. `balance.neighbors`
+contains rates and thresholds; `neighbors_ui.json` contains all contact prose.
+The meeting commission adds `growth_exchange_house` and `growth_exchange_lane`
+without moving old objects. Furnishings remain namespaced by building ID and
+explicitly interpretive. Build it through completed project state, never by
+editing the dated reference or letting a UI timer change fabric.
+
+See GOVERNANCE.md for contact version 1, mission escrow/IDs, additive old-save
+backfill and the version-2 wrapper used after contact activation. New downloadable
+models are separated from the original village and hypothetical town. All three
+modes receive standalone performance measurements; all exact-app captures need
+human visual review before publication.

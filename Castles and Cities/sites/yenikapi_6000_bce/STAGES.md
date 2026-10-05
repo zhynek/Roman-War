@@ -42,3 +42,11 @@ by ID. Material, geometry and collision generation is repeatable from IDs/data.
 This is a minimal authoring foundation; undo/redo, a full versioned archive,
 general authoring UI remain future work. Tutorial persistence and its bounded
 commissioning UI are documented in [GOVERNANCE.md](experience/GOVERNANCE.md).
+
+
+Release 0.3.0 adds optional contact with two fictional aggregate communities.
+A commissioned meeting room/path uses new explicit IDs; contact progress never
+upgrades other buildings or asserts a new dated snapshot. The contact chapter
+is a relationship achievement after town, not a large-town stage. Finite supplies,
+reserves, separate office terms and mission IDs provide a reusable interaction
+boundary; regional settlement geometry and multi-town growth are still future work.

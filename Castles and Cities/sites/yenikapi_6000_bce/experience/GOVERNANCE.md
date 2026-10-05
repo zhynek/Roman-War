@@ -1,4 +1,4 @@
-# Seasons of the first settlement — playable tutorial 0.2.0
+# Seasons of the first settlement — playable tutorial 0.3.0
 
 Choose **Play seasonal tutorial → Begin a new tutorial**. This creates a separate
 hypothetical settlement; **Return to reference village** restores the unchanged
@@ -88,7 +88,7 @@ Residents belong to explicit households linked to actual dwelling IDs. Newcomers
 fill real vacancies; new household IDs become available only after their homes
 are completed. Shortages cause departures and can return a town to the village
 milestone. Surviving fabric is retained. Explicit demolition, household splitting,
-land abandonment, trade, diplomacy, resource depletion, disease and varied
+land abandonment, treaties, resource depletion, disease and varied
 institutions are future work. There is no automatic building upgrade with age.
 
 The God/leader choice controls authority, not an RPG possession system or free
@@ -161,3 +161,96 @@ bundle contains 16 GLBs: the retained ten reference models, a clearly named
 hypothetical town, four new buildings and the revised store. No citizen animation
 or gameplay is baked into the interchange models. Parent campaign data/import,
 full regression and actual map rendering remain the release gate.
+
+## Chapter two: neighboring communities (0.3.0)
+
+After the town milestone, Guide recommends **Prepare a meeting and exchange
+place**: 18 timber, 24 work points, following the council ground. It adds the
+furnished `growth_exchange_house` and `growth_exchange_lane`, both revision 1.
+Older fabric survives. The village now has 14 buildings and eight paths. Choose
+**Neighbors → Begin neighboring communities** when ready. Their economies do
+not advance before this explicit choice. The dated reference still has nine
+buildings; the original town playthrough still takes 21 seasons.
+
+1. Review the two fictional communities, current speakers, stocks, reserves and
+   offers. Reedbank offers 18 provisions for 8 timber over one season; Oakrise
+   offers 10 timber for 18 provisions over two. These are game units and invented
+   routes, not measured archaeological quantities or distances.
+2. As watch leader, set an escort standing order of zero, one or two. As steward,
+   dispatch an exchange or requested aid. God can coordinate both. An existing
+   mission keeps its committed protection when the standing order changes.
+3. One party can be active. Dispatch reserves both sides' cargo immediately;
+   no unlimited merchant inventory exists. A food payment must leave one season
+   for the home population; a neighbor protects its resource reserve plus the
+   current speaker's reserve margin. Cancellation before departure returns cargo
+   within storage limits. Departed parties cannot be instantly recalled.
+4. Resolve seasons. Two food workers and the committed watch workers serve as
+   rotating carriers/escorts, reducing home gathering and protection. They still
+   consume provisions at home under this abstract relay model. If staffing is
+   insufficient, the party waits with cargo reserved and no progress. Assign
+   workers in Work to resume it. No citizen receives two seasonal assignments.
+5. A fixed dispatch allowance equals seasonal route pressure minus escort and
+   watch-leader protection, bounded to 0–60%. Both delivered cargoes lose that
+   percentage, rounded down. The forecast names each factor. Incoming home cargo
+   arrives after that season's meals and losses and is then capped by storage;
+   it cannot retroactively prevent hunger. Arrival is credited exactly once.
+6. Provide aid when requested. Aid gives no returning cargo, but increases trust
+   by 15; exchange increases it by 8. Otherwise trust drifts down one toward 30.
+   Each neighbor's report names food gathering, eating, unmet need, spoilage,
+   overflow, timber gathering, delivered cargo and the trust factors.
+7. Complete one exchange with each, one aid delivery overall, trust of at least
+   40 with both and two seasons' food at home. This records a relationship
+   achievement, not a city upgrade. `neighbor_driver.gd` demonstrates completion
+   at turn 27 from a fresh tutorial; the rendered playthrough trades with Oakrise
+   first and completes at turn 27 too. Decisions remain available afterward.
+
+Speakers rotate every 16 seasons, with Oakrise offset by eight. Each office has
+its own term, profile index and monotonically increasing speaker serial; a stable
+identity can be formed as `community_id/speaker_serial`. Two reusable fictional
+profiles per community cycle through differing reserve margins. These are
+aggregate offices, not full neighboring family trees. Neighbor population is
+fixed; starvation is reported but does not yet change that population. Home
+household births, deaths, succession and contraction continue normally.
+
+The meeting-place button switches to a safe walking viewpoint. Procedural carrying
+figures illustrate recorded assignments locally. Their animation is preparation,
+not an actual journey to another explorable settlement. Neighbor villages,
+regional navigation, negotiated treaties, warfare, production chains and general
+multi-town control remain unfinished.
+
+### Contact state and compatibility
+
+Old version-1 saves load additively with `contacts: {}`. No resources, terms,
+completed projects or dates change during migration. Empty contacts remain inert.
+The base state's `version` and `rules_version` remain 1. Once enabled, contacts
+have their own version 1 and store start turn, elapsed seasons, escort policy,
+next mission serial, active mission, per-community stocks/terms/trust/counters/
+last report, and chapter achievement. Community IDs are `reedbank` and `oakrise`;
+mission IDs are monotonic `mission_0001` etc. An active mission records kind,
+community, both escrow amounts/resources, committed escorts, fixed allowance,
+duration, remaining seasons and whether departure has occurred.
+
+Active-contact saves use wrapper **version 2**, so older applications reject them
+instead of silently losing escrow or neighbors. This app reads versions 1 and 2,
+requires wrapper/state agreement and strictly validates extension shapes, IDs,
+ranges and authored offers. Version 1 remains used before contact activation;
+a new meeting project also needs 0.3.0's project definitions to load. Loading a
+newer save in an older app is not supported. View bookmarks, medieval creative
+saves and parent campaign saves remain separate. Atomic write/readback is retained.
+
+`neighbor_rules.gd` owns pure quotes, orders, assignments, seasonal ledger updates
+and validation. `neighbors.json` defines fictional communities; `balance.neighbors`
+owns tunable rates; `neighbors_ui.json` owns prose. Closed schemas plus
+`validate_neighbors.py` check IDs, project links, cargo resources, reserves, terms,
+limits and optional chapter separation. To add partners, expand the schema and
+content together and define migration before changing a published community ID.
+
+Run `test_neighbor_data.py`, `neighbor_checks.gd` (302 checks) and
+`neighbor_preview.gd` (10 captures, 58 checks), in addition to every retained gate.
+The 80-season contact replay covers finite escrow, delays, authority, crew costs,
+forecast agreement, cancellation, succession, chapter completion and in-flight
+save replay. Rendered checks use actual viewport clicks, enter/exit all 14 rooms,
+walk all eight curves, exercise smaller-window controls and restore the reference.
+`benchmark.gd -- contacts out_dir=...` measures the enlarged settlement with workers.
+The model download adds the meeting room and a separately named hypothetical
+contact settlement, making 18 GLBs. No neighboring village model is claimed.

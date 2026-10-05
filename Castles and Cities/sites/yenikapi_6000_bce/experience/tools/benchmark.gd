@@ -1,9 +1,11 @@
 extends SceneTree
 var campaign_mode:bool=false
+var contacts_mode:bool=false
 var out_dir:="/tmp/yenikapi-benchmark"
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg=="campaign":campaign_mode=true
+		if arg=="contacts":campaign_mode=true;contacts_mode=true
 		if arg.begins_with("out_dir="):out_dir=arg.trim_prefix("out_dir=")
 	call_deferred("run")
 func run() -> void:
@@ -23,6 +25,10 @@ func run() -> void:
 			state=preload("res://tools/tutorial_driver.gd").orders(app.campaign.rules,state)
 			state=app.campaign.rules.advance(state).state
 			if state.phase=="town":break
+		if contacts_mode:
+			state=preload("res://tools/neighbor_driver.gd").foundation(app.campaign.rules)
+			state=preload("res://tools/neighbor_driver.gd").orders(app.campaign.rules,state)
+			state=app.campaign.rules.advance(state).state
 		app.campaign.state=state
 		app.show_campaign(state,app.campaign.rules,true)
 		report.campaign_ready_ms=Time.get_ticks_msec()-begin
@@ -41,7 +47,7 @@ func run() -> void:
 		else:app.visit(2)
 		if campaign_mode and label=="interior":
 			for building in app.world.buildings:
-				if building.id=="growth_home_north":
+				if building.id==("growth_exchange_house" if contacts_mode else "growth_home_north"):
 					var at:Vector3=app.world.building_position(building,Vector3(0,1.68,1.7))
 					app.set_view(at,app.world.building_position(building,Vector3(0,1.2,-1)),false)
 		for i in range(120):

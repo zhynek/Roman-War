@@ -97,5 +97,25 @@
   "skill_span": 4,
   "arrival_age_spread": 40,
   "arrival_child_age": 20,
-  "minimum_food_workers": 1
+  "minimum_food_workers": 1,
+  "neighbors": {
+    "carriers": 2,
+    "max_escorts": 2,
+    "escort_power": 15,
+    "leader_protection": 2,
+    "max_loss_percent": 60,
+    "trade_trust": 8,
+    "aid_trust": 15,
+    "trust_floor": 30,
+    "trust_decay": 1,
+    "trust_trade_min": 25,
+    "chapter_trust": 40,
+    "min_home_reserve": 1,
+    "neighbor_spoil_percent": 3,
+    "leader_term": 16,
+    "max_stock": 1000000,
+    "initial_trust": 40,
+    "initial_escorts": 1,
+    "chapter_home_reserve": 2
+  }
 }

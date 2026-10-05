@@ -1,0 +1,246 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "kind",
+    "project_id",
+    "meeting_at",
+    "neighbors"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "hypothetical"
+    },
+    "project_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "meeting_at": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -170,
+        "maximum": 170
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "neighbors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "duration",
+          "route",
+          "pressure",
+          "food",
+          "wood",
+          "food_capacity",
+          "wood_capacity",
+          "population",
+          "food_yields",
+          "wood_yield",
+          "food_reserve",
+          "wood_reserve",
+          "term_offset",
+          "leaders",
+          "offer",
+          "aid"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "route": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "pressure": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "food": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "wood": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "food_capacity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "wood_capacity": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "population": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "food_yields": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "wood_yield": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "food_reserve": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "wood_reserve": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "term_offset": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "leaders": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "manner",
+                "reserve_margin"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "manner": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "reserve_margin": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                }
+              }
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "offer": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "give",
+              "give_amount",
+              "receive",
+              "receive_amount"
+            ],
+            "properties": {
+              "give": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "give_amount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "receive": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "receive_amount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              }
+            }
+          },
+          "aid": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "resource",
+              "amount",
+              "below"
+            ],
+            "properties": {
+              "resource": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "amount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              },
+              "below": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000
+              }
+            }
+          }
+        }
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

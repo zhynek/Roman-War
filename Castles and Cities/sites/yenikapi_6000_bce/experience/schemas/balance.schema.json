@@ -400,6 +400,122 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 100
+    },
+    "neighbors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "carriers",
+        "max_escorts",
+        "escort_power",
+        "leader_protection",
+        "max_loss_percent",
+        "trade_trust",
+        "aid_trust",
+        "trust_floor",
+        "trust_decay",
+        "trust_trade_min",
+        "chapter_trust",
+        "min_home_reserve",
+        "neighbor_spoil_percent",
+        "leader_term",
+        "max_stock",
+        "initial_trust",
+        "initial_escorts",
+        "chapter_home_reserve"
+      ],
+      "properties": {
+        "carriers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "max_escorts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "escort_power": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "leader_protection": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "max_loss_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "trade_trust": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "aid_trust": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "trust_floor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "trust_decay": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "trust_trade_min": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "chapter_trust": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "min_home_reserve": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "neighbor_spoil_percent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "leader_term": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "max_stock": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "initial_trust": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "initial_escorts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "chapter_home_reserve": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      }
     }
   },
   "required": [
@@ -473,7 +589,8 @@
     "skill_span",
     "arrival_age_spread",
     "arrival_child_age",
-    "minimum_food_workers"
+    "minimum_food_workers",
+    "neighbors"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

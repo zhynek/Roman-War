@@ -1,4 +1,4 @@
-# Yenikapı — Early Settlement 0.2.0
+# Yenikapı — Early Settlement 0.3.0
 
 Explore an original, interpretive village set around 6000 BCE on Istanbul's
 historic peninsula. This is not a recovered village plan or a population estimate.
@@ -37,3 +37,12 @@ Save campaign / Load campaign use `early_settlement_campaign.json` independently
 of the reference bookmark. Return to reference village preserves the tutorial in
 memory. See GOVERNANCE.md in the editable source for the complete rules, evidence
 limits, save contract and a demonstrated 21-season route to the town milestone.
+
+
+After reaching town, commission the meeting and exchange place and open Neighbors.
+Begin chapter two to exchange finite supplies with fictional Reedbank and Oakrise,
+provide requested aid and balance escorts against watch duty at home. Their
+speakers change with seasonal terms. A furnished meeting room is explorable;
+the neighboring villages are not yet modeled. Older tutorial saves load with
+contacts inactive; active-contact saves require this release or a compatible newer
+one. See GOVERNANCE.md for the new rules and save version 2.

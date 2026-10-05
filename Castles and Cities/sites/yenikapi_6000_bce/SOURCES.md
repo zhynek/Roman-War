@@ -95,3 +95,26 @@ site's architectural evidence. New homes, shelters, storage adaptation, paths,
 screens and gathering space reuse the declared material vocabulary but retain
 explicit hypothetical identities and lineage. Read [GOVERNANCE.md](experience/GOVERNANCE.md)
 for the rules and their limits.
+
+## Neighbor contact added in 0.3.0
+
+Marina Milić, *Obsidian exchange and societies in the Balkans and the Aegean
+from the late 7th to 5th millennia BC*, UCL doctoral thesis (2016).
+[Institutional record and abstract](https://discovery.ucl.ac.uk/id/eprint/1477490/),
+read 2026-10-04. The geochemical and technological study addresses interaction
+across the Aegean, Balkans and western Anatolia. Its discussion of small quantities
+and potentially occasional contacts cautions against treating every transferred
+object as proof of an organized, permanent exchange network.
+
+**Regional analogy only:** this supports exploring contact as a possibility in
+the wider Neolithic setting. It does not locate these partners, document a
+Yenikapı trade route, or establish food-for-timber exchange terms. No new direct
+local evidence is claimed. There is no imported obsidian asset or sourced route
+map in the game.
+
+**Design interpretation:** Reedbank and Oakrise, their modeled populations,
+speakers, reserve policies, four-year terms, trust, aid requests, seasonal outputs,
+journey lengths, escort protection and cargo allowances are invented teaching
+rules. The meeting room, its contents and approach path are hypothetical additions
+using the existing construction vocabulary, not a reconstructed market or civic
+office. Contact does not establish a continuous chronology or another urban stage.

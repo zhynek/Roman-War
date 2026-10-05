@@ -1090,6 +1090,141 @@
           ]
         }
       ]
+    },
+    {
+      "id": "exchange_place",
+      "title": "Prepare a meeting and exchange place",
+      "body": "An enterable room for receiving visitors and keeping bundles. Enables the optional neighbor chapter after reaching town; no automatic trade or historical market is implied.",
+      "role": "steward",
+      "wood": 18,
+      "work": 24,
+      "at": [
+        -28,
+        52
+      ],
+      "requires": [
+        "council_ground"
+      ],
+      "effects": {},
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "growth_exchange_house",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -28,
+                47
+              ],
+              "yaw": 0,
+              "size": [
+                5.6,
+                5.4
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "work",
+              "label": "Meeting and exchange room · hypothetical",
+              "household": "sim_exchange_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.6,
+                    -1.3
+                  ]
+                },
+                {
+                  "id": "basket_a",
+                  "kind": "basket",
+                  "at": [
+                    -1.7,
+                    1.2
+                  ]
+                },
+                {
+                  "id": "basket_b",
+                  "kind": "basket",
+                  "at": [
+                    -1.7,
+                    0.4
+                  ]
+                },
+                {
+                  "id": "pot_a",
+                  "kind": "pot",
+                  "at": [
+                    1.6,
+                    -1.6
+                  ]
+                },
+                {
+                  "id": "pot_b",
+                  "kind": "pot",
+                  "at": [
+                    1.7,
+                    0.9
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.7,
+                    -0.3
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "growth_exchange_lane",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -28,
+                  52
+                ],
+                [
+                  -18,
+                  54
+                ],
+                [
+                  -7,
+                  53
+                ],
+                [
+                  1,
+                  47
+                ]
+              ],
+              "width": 2.2,
+              "label": "Approach to the hypothetical meeting place"
+            }
+          ]
+        }
+      ]
     }
   ],
   "job_sites": {

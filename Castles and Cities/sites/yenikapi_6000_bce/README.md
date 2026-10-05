@@ -17,6 +17,17 @@ The circa-1200 Constantinople experience, its 17,561 reference plot records, Pan
 The prehistoric study is organized by site, without assigning a Byzantine realm
 to Neolithic inhabitants. There is no campaign integration.
 
+## Neighbor contact in 0.3.0
+
+After the town milestone, commission **Prepare a meeting and exchange place**,
+then choose **Neighbors → Begin neighboring communities**. Two fictional partners
+have finite supplies, reserve policies and changing speakers. Exchange and aid
+commit carriers; the watch leader's escorts compete with protection at home.
+God coordinates both offices. An accessible furnished meeting room and its path
+add to the existing settlement; the partners' own villages are not yet modeled.
+[Rules, tutorial and save compatibility](experience/GOVERNANCE.md) explain the
+new chapter. Historical snapshots and the original tutorial remain separate.
+
 ## Explore
 
 The village has six dwelling models, a working room, two stores, a shared outdoor
@@ -50,11 +61,12 @@ adds explicit work projects, fictional household demography, local leaders and a
 reversible town milestone in a separate hypothetical scenario. No date or
 population automatically upgrades buildings.
 
-Run both independent data validators and their tests, Godot import,
-`tools/checks.gd` and `tools/governance_checks.gd`.
+Run the independent data validators and their tests, Godot import,
+`tools/checks.gd`, `tools/governance_checks.gd` and `tools/neighbor_checks.gd`.
 Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and run
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
-repeats these and the 12-view `tools/governance_preview.gd` tutorial against the exact Mac package. Parent campaign gates remain mandatory.
+repeats these, the 12-view `tools/governance_preview.gd` tutorial and the
+10-view `tools/neighbor_preview.gd` contact chapter against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
 The [0.2.0 verification record](VERIFICATION-0.2.md) covers seasonal gameplay and the final package.
 The [0.1.0 verification record](VERIFICATION.md) includes exact-app checks,

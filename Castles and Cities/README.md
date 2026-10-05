@@ -19,8 +19,9 @@ The separate [Yenikapı village, circa 6000 BCE](sites/yenikapi_6000_bce/README.
 now explores a much earlier settlement context on the historic peninsula. Its
 plan and furnishings are interpretive, its evidence is separately classified,
 and its explicit object lineage is a foundation for later authored scenarios.
-Only the village is implemented; no continuous development into the medieval
-capital is asserted. The circa-1200 project and downloads remain available.
+The dated village remains the reference. A separate hypothetical seasonal tutorial
+now reaches town and supports contact with two fictional communities; no continuous
+development into the medieval capital is asserted. The circa-1200 project and downloads remain available.
 
 ## Start here
 

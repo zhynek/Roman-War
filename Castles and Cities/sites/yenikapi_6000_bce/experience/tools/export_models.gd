@@ -42,7 +42,21 @@ func run() -> void:
 	if not write_model(town_scene,out_dir.path_join("Yenikapi-Hypothetical-Town.glb")):quit(1);return
 	FileAccess.open(out_dir.path_join("hypothetical-town-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"scenario_id":rules.content.scenario_id,"status":"Hypothetical playable town milestone, not dated archaeology","state":state,"fabric":town_data.objects,"citizen_meshes":"Not included; application animates original stylized representations"},"  "))
 	FileAccess.open(out_dir.path_join("model-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"snapshot":data,"status":"Original interpretive geometry, not a survey or recovered village plan","coordinates":"metres; X east, Y up, Z south; local sea y=0, no surveyed datum","materials":"Neutral PBR derivatives, no procedural shader, lights, water animation or controller","individual_models":"Nine building models centered at their own ground datum; whole-village model preserves placement"},"  "))
-	print("VILLAGE MODEL EXPORT PASS: 16 GLBs")
+	var contact_rules=preload("res://src/core/settlement_rules.gd").new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")))
+	var contact_state:Dictionary=preload("res://tools/neighbor_driver.gd").foundation(contact_rules)
+	var contact_data:Dictionary=preload("res://src/campaign_view.gd").snapshot(data,contact_state,contact_rules)
+	var contact_world=load("res://src/village.gd").new();root.add_child(contact_world);contact_world.build(contact_data)
+	var contact_scene:=Node3D.new();contact_scene.name="YenikapiHypotheticalContactSettlement";root.add_child(contact_scene)
+	for id in contact_world.object_nodes:
+		var original:MeshInstance3D=contact_world.object_nodes[id]
+		var copy:=MeshInstance3D.new();copy.name=id;copy.transform=original.transform;copy.mesh=neutral_mesh(original.mesh);contact_scene.add_child(copy)
+		if id=="growth_exchange_house":
+			var local:=MeshInstance3D.new();local.name=id;local.mesh=copy.mesh;root.add_child(local)
+			if not write_model(local,out_dir.path_join(id+".glb")):quit(1);return
+			local.free()
+	if not write_model(contact_scene,out_dir.path_join("Yenikapi-Hypothetical-Contact-Settlement.glb")):quit(1);return
+	FileAccess.open(out_dir.path_join("hypothetical-contact-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"scenario_id":contact_rules.content.scenario_id,"status":"Hypothetical meeting place, not a dated market reconstruction or neighboring village","state":contact_state,"fabric":contact_data.objects},"  "))
+	print("VILLAGE MODEL EXPORT PASS: 18 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

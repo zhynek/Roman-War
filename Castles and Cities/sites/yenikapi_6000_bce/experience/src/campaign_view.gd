@@ -21,7 +21,7 @@ func refresh(state: Dictionary, rules, world) -> void:
 	actors.clear()
 	elapsed = 0.0
 	var tasks: Array = state.assignments if not state.assignments.is_empty() else rules.assignments(state,rules.normalize_plan(state,state.plan))
-	var colors := {"food":Color("b4a17a"),"timber":Color("746651"),"care":Color("a28470"),"watch":Color("69725b"),"building":Color("968161")}
+	var colors := {"travel":Color("c49b69"),"food":Color("b4a17a"),"timber":Color("746651"),"care":Color("a28470"),"watch":Color("69725b"),"building":Color("968161")}
 	for i in range(tasks.size()):
 		var task: Dictionary = tasks[i]
 		var actor := Node3D.new()
@@ -31,6 +31,8 @@ func refresh(state: Dictionary, rules, world) -> void:
 		var skin := StandardMaterial3D.new();skin.albedo_color=Color("ad896d");skin.roughness=1
 		var body := MeshInstance3D.new();var capsule := CapsuleMesh.new();capsule.radius=.17;capsule.height=.7;body.mesh=capsule;body.material_override=cloth;body.position.y=1.03;actor.add_child(body)
 		var head := MeshInstance3D.new();var sphere := SphereMesh.new();sphere.radius=.135;sphere.height=.27;head.mesh=sphere;head.material_override=skin;head.position.y=1.59;actor.add_child(head)
+		if task.job=="travel":
+			var bundle:=MeshInstance3D.new();var sack:=BoxMesh.new();sack.size=Vector3(.4,.5,.25);bundle.mesh=sack;bundle.material_override=cloth;bundle.position=Vector3(0,1.05,-.23);actor.add_child(bundle)
 		var limbs: Array = []
 		for side in [-1.0,1.0]:
 			var leg := _limb(cloth,.085,.67);leg.position=Vector3(side*.1,.68,0);actor.add_child(leg);limbs.append(leg)

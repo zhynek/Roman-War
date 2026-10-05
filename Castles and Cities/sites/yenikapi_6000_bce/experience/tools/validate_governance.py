@@ -66,6 +66,9 @@ def validate(content,balance,ui):
     return errors
 if __name__=='__main__':
     errors=validate(load('governance'),load('balance'),load('governance_ui'))
+    if not errors:
+        from validate_neighbors import validate as validate_contacts
+        errors.extend(validate_contacts(load("neighbors"),load("neighbors_ui"),load("balance"),load("governance")))
     for error in errors:print(error)
     print(f'GOVERNANCE DATA: {len(errors)} errors')
     raise SystemExit(bool(errors))

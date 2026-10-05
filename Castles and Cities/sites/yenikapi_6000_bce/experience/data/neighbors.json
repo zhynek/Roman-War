@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "kind": "hypothetical",
+  "project_id": "exchange_place",
+  "meeting_at": [
+    -28,
+    52
+  ],
+  "neighbors": [
+    {
+      "id": "reedbank",
+      "name": "Reedbank",
+      "description": "Fictional riverside community. Food can be exchanged for timber; its winter margin is narrow.",
+      "duration": 1,
+      "route": "Along the stream",
+      "pressure": [
+        10,
+        10,
+        20,
+        35
+      ],
+      "food": 100,
+      "wood": 12,
+      "food_capacity": 140,
+      "wood_capacity": 48,
+      "population": 18,
+      "food_yields": [
+        30,
+        22,
+        42,
+        6
+      ],
+      "wood_yield": 2,
+      "food_reserve": 36,
+      "wood_reserve": 8,
+      "term_offset": 0,
+      "leaders": [
+        {
+          "name": "Seli",
+          "manner": "Careful custodian",
+          "reserve_margin": 8
+        },
+        {
+          "name": "Aren",
+          "manner": "Open-handed coordinator",
+          "reserve_margin": 0
+        }
+      ],
+      "offer": {
+        "give": "wood",
+        "give_amount": 8,
+        "receive": "food",
+        "receive_amount": 18
+      },
+      "aid": {
+        "resource": "wood",
+        "amount": 8,
+        "below": 24
+      }
+    },
+    {
+      "id": "oakrise",
+      "name": "Oakrise",
+      "description": "Fictional woodland community. Timber is available when enough food remains at home.",
+      "duration": 2,
+      "route": "Through the wooded rise",
+      "pressure": [
+        20,
+        15,
+        30,
+        45
+      ],
+      "food": 48,
+      "wood": 60,
+      "food_capacity": 120,
+      "wood_capacity": 120,
+      "population": 16,
+      "food_yields": [
+        18,
+        14,
+        28,
+        4
+      ],
+      "wood_yield": 7,
+      "food_reserve": 24,
+      "wood_reserve": 16,
+      "term_offset": 8,
+      "leaders": [
+        {
+          "name": "Dara",
+          "manner": "Welcoming organizer",
+          "reserve_margin": 0
+        },
+        {
+          "name": "Tavi",
+          "manner": "Reserve-minded keeper",
+          "reserve_margin": 10
+        }
+      ],
+      "offer": {
+        "give": "food",
+        "give_amount": 18,
+        "receive": "wood",
+        "receive_amount": 10
+      },
+      "aid": {
+        "resource": "food",
+        "amount": 18,
+        "below": 60
+      }
+    }
+  ]
+}
