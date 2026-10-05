@@ -82,5 +82,23 @@ Neutral GLB materials do not reproduce app lighting/shaders or citizen animation
 Build: `build/yenikapi-early-settlement-0.4.0-final/`.
 External QA: `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.4.0-exact-qa-b_5ap1we`.
 Parent logs: `build/yenikapi-parent-gates-0.4.0/`.
-No QA image is a repository asset. Public download verification is recorded after
-publication; prior release bytes must not be replaced.
+No QA image is a repository asset. Public download verification appears below;
+prior release bytes must not be replaced.
+
+## Public download verification
+
+Published [Household Life 0.4.0](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0) as a separate prerelease,
+never latest, targeting the frozen payload. Verified 2026-10-05T13:27:03.329560+00:00.
+All seven URLs were fetched anonymously after publication; their bytes match
+local files, GitHub digests and the checksum manifest. All five ZIPs pass integrity.
+All nine earlier release IDs/assets/digests and latest stable `v0.14.2` are unchanged.
+
+| Download | Bytes | SHA-256 |
+|---|---:|---|
+| [provenance.json](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/provenance.json) | 87050 | `b4225f13f8a6d1e1037172f618dff00ba5799d5d9ae94e91e681836114210269` |
+| [SHA256SUMS.txt](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/SHA256SUMS.txt) | 655 | `5a0e14ccb784d9daa55dc01b2eb2dcfe43c415efc6bd5ea7538aaad587f41561` |
+| [Yenikapi-Early-Settlement-Contact-Models-0.4.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Contact-Models-0.4.0.zip) | 21913870 | `dabf200256aa179555483b1cbe2c99a3993af7d53a930ecf2543207a7611d79e` |
+| [Yenikapi-Early-Settlement-Foundation-Models-0.4.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Foundation-Models-0.4.0.zip) | 43556443 | `ed9e0aed5d7ab04538db3285a9824c48091c94d300e3ab57278f546cec177eaa` |
+| [Yenikapi-Early-Settlement-Household-Models-0.4.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Household-Models-0.4.0.zip) | 2736877 | `ea42f2c9e34d83982b88440b22ef82bd19ec5d142bcaf18ddf17ee0cac6bda58` |
+| [Yenikapi-Early-Settlement-macOS-0.4.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-macOS-0.4.0.zip) | 58542037 | `09285aed5bfb7714febfaa306901332c35168258b1922da415364d9166ca3ba0` |
+| [Yenikapi-Early-Settlement-Source-0.4.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Source-0.4.0.zip) | 446354 | `91802fe6003fe9f39c6342bd3762efa58197be8828778ccebbd292289403affb` |

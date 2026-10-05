@@ -34,7 +34,23 @@ The additive `households: {}` extension leaves old campaigns inactive. Active
 households use save wrapper 3, including when contacts are also active. Wrappers
 1/2 still load; older apps reject wrapper 3 rather than discarding household
 memories. The reference bookmark and medieval creative saves remain independent.
-Release verification and download records follow once the exact package passes.
+The [0.4.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0) is public; all seven anonymous downloads match
+the tested bytes. Frozen payload: `797c8ef2204d80237d46075a91498433c60b9f13`. Source and exact universal Mac
+app pass 1,567 rule/save/geometry checks; rendered acceptance passes 85 tutorial,
+58 contact and 714 household checks. All 48 final captures were reviewed. The
+tutorial capture run was paced at 10 FPS after background Metal material setup
+affected fast captures; benchmark measurements remain uncapped and app bytes
+unchanged. Parent 705 tests and actual map inspection pass, with stderr checked.
+All 624 protected campaign/medieval files and 18 retained GLBs are byte-identical.
+The six new furnished-room GLBs bring the total to 24 across three model bundles.
+Household performance on M3 Max: 7.2–8.3 ms median / 9.9–15.3 ms p95; about 11.0 s
+from process start to the prepared household scene. Initial route planning can
+pause the interface. Intel code is included but its performance is unmeasured.
+All nine prior releases and latest stable `v0.14.2` remain unchanged. See
+[verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.4.md).
+Build artifacts are in `build/yenikapi-early-settlement-0.4.0-final/`; QA remains
+outside the repository. Next work can add richer interaction and local avoidance;
+do not treat these authored circumstances as tactical warfare or recovered history.
 
 ## Yenikapı neighboring communities (0.3.0, October 4, 2026)
 

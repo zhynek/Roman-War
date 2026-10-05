@@ -7,16 +7,21 @@ Circa 6000 BCE is an approximate setting within the attested Neolithic occupatio
 not a foundation date or a claim to reconstruct the first village exactly.
 
 Open [experience/project.godot](experience/project.godot) in Godot 4.4.1,
-or use the separate [Yenikapı Early Settlement 0.3.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0).
+or use the separate [Yenikapı Early Settlement 0.4.0 — Household Life prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0).
 Verified downloads:
-[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.3.0/Yenikapi-Early-Settlement-macOS-0.3.0.zip),
-[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.3.0/Yenikapi-Early-Settlement-Foundation-Models-0.3.0.zip),
-[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.3.0/Yenikapi-Early-Settlement-Contact-Models-0.3.0.zip)
-and [editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.3.0/Yenikapi-Early-Settlement-Source-0.3.0.zip).
-The model downloads are split for reliable delivery; together they contain all
-18 verified GLBs. The [0.2.0 seasonal tutorial](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
-remains available.
-The [original 0.1.0 village release](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0) remains available.
+[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-macOS-0.4.0.zip),
+[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Foundation-Models-0.4.0.zip),
+[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Contact-Models-0.4.0.zip),
+[six furnished household models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Household-Models-0.4.0.zip),
+[editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Source-0.4.0.zip).
+All seven public assets were downloaded anonymously and verified against SHA-256
+digests; the three model bundles contain 24 GLBs. The 18 previous GLBs retain
+identical bytes. [Provenance](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/provenance.json) and
+[checksums](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/SHA256SUMS.txt) identify the tested package.
+The [0.3.0 contact chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0),
+[0.2.0 seasonal tutorial](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
+and [original 0.1.0 village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0)
+remain available with unchanged downloads.
 The circa-1200 Constantinople experience, its 17,561 reference plot records, Pantokrator district,
 16 architectural types, 26 landmarks and all earlier downloads remain intact.
 The prehistoric study is organized by site, without assigning a Byzantine realm
@@ -93,6 +98,8 @@ repeats these, the 12-view `tools/governance_preview.gd` tutorial and the
 10-view `tools/neighbor_preview.gd` contact chapter, and 12-view
 `tools/household_preview.gd` against the exact Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
+The [0.4.0 verification record](VERIFICATION-0.4.md) covers household rules, all 48
+reviewed exact-app views, measured performance, preservation and seven public downloads.
 The [0.3.0 verification record](VERIFICATION-0.3.md) covers the contact chapter,
 exact app, performance, model packaging and six verified public downloads.
 The [0.2.0 verification record](VERIFICATION-0.2.md) covers the original seasonal tutorial.
@@ -108,9 +115,10 @@ remain unimplemented. Generic vegetation does not reconstruct
 species or season. The walking controller is analytic and shares rendered wall,
 furniture and floor geometry; free flight intentionally passes through geometry.
 Far countryside is a lower-resolution backdrop beyond the walking envelope.
-The model ZIP contains neutral-material GLBs, not shader appearance, lights,
-walking physics, CAD solids or automatic future stages. The 0.3.0 model downloads retain the 16 foundation GLBs and add an explicitly
-hypothetical contact settlement and meeting room, for 18 in total. Only Apple Silicon
+The model ZIPs contain neutral-material GLBs, not shader appearance, lights,
+walking physics, CAD solids or automatic future stages. The 0.4.0 model downloads
+retain the 16 foundation and two contact GLBs, adding three furnished rooms each
+at danger and renewal for 24 in total. Only Apple Silicon
 rendering/performance is exercised locally; the package also includes Intel code.
 
 The application is ad-hoc signed, not Developer ID notarized. macOS may require
