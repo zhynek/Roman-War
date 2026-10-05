@@ -18,6 +18,9 @@ func active(state: Dictionary) -> bool:
 
 func stage(state: Dictionary) -> String:
 	if not active(state): return "inactive"
+	if not state.get("assets",{}).is_empty():
+		var start: int=int(state.assets.pressure_start)
+		return "settled" if start<0 else _stage(maxi(0,int(state.turn)-start))
 	return _stage(int(state.households.elapsed))
 
 func _stage(elapsed: int) -> String:
@@ -29,14 +32,18 @@ func requirements(id: String) -> Dictionary:
 func ready(state: Dictionary, id: String, rules) -> bool:
 	if not active(state) or not state.households.orders.get(id, false): return false
 	var needed: Dictionary = requirements(id)
-	var plan: Dictionary = rules.normalize_plan(state,state.plan)
+	var plan: Dictionary = rules.effective_plan(state)
 	var crew: Dictionary = rules.neighbors.crew(state,plan)
+	if rules.assets.active(state):
+		var assigned: Dictionary=rules.assets.allocation(state,rules).orders
+		if int(assigned.get(id,0))<maxi(int(needed.care),int(needed.watch)):return false
 	if int(plan.care)<int(needed.care) or int(plan.watch)-int(crew.escorts)<int(needed.watch): return false
 	if id!="learning": return true
 	var current: String=stage(state)
 	if current not in ["recovery","renewal","settled"]: return false
-	var workers: int=int(plan.food)-int(crew.carriers)+(int(plan.building) if state.queue.is_empty() else 0)
+	var workers: int=int(plan.food)-int(crew.carriers)+(int(plan.building) if state.queue.is_empty() and not rules.assets.active(state) else 0)
 	var gathering: int=workers*(int(rules.balance.food_yields[int(state.turn)%4])+rules.effect(state,"food_yield"))
+	if rules.assets.active(state):gathering-=rules.assets.food_penalty(state)
 	return gathering>=int(balance.learning_food)+int(balance.stages[current].food_penalty)
 
 func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:
@@ -61,14 +68,15 @@ func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:
 	var cost: int = 0
 	if action.enabled:
 		var needed: Dictionary = requirements(id)
-		var plan: Dictionary = rules.normalize_plan(state,state.plan)
+		var plan: Dictionary = rules.effective_plan(state)
 		var crew: Dictionary = rules.neighbors.crew(state,plan)
-		if int(plan.care)<int(needed.care) or int(plan.watch)-int(crew.escorts)<int(needed.watch): return {"error":"household_labor"}
+		if not rules.assets.active(state) and (int(plan.care)<int(needed.care) or int(plan.watch)-int(crew.escorts)<int(needed.watch)): return {"error":"household_labor"}
 		if not state.households.investments[id]: cost=int(balance.costs[id])
 		if int(state.wood)<cost: return {"error":"household_stock"}
 		next.wood-=cost
 		next.households.investments[id]=true
 	next.households.orders[id]=action.enabled
+	if rules.assets.active(next):rules.assets._record(next,orders[id].role,"household_order",id,rules,{"enabled":action.enabled})
 	rules._event(next,"household_order",{"order":id,"enabled":action.enabled,"wood":cost})
 	return {"state":next}
 
@@ -171,7 +179,10 @@ func validate(state: Dictionary, rules) -> bool:
 	if not report is Dictionary: return false
 	if extension.elapsed==0: return report.is_empty()
 	if report.size()!=10 or not report.get("stage") is String: return false
-	if report.stage!=_stage(int(extension.elapsed)-1): return false
+	var expected: String=_stage(int(extension.elapsed)-1)
+	if rules.assets.active(state):
+		expected="settled" if int(state.assets.pressure_start)==int(state.turn) else rules.assets.stage(state,int(state.turn)-1)
+	if report.stage!=expected: return false
 	for key in ["care_ready","watch_ready","learning_ready"]:
 		if not report.get(key) is bool: return false
 	for key in ["food_penalty","wellbeing","cooperation","security"]:

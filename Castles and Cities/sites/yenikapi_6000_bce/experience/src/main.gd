@@ -169,6 +169,7 @@ func _interface() -> void:
 	campaign=load("res://src/governance_panel.gd").new()
 	root.add_child(campaign)
 	campaign.configure(self)
+	commands.add_child(_button(campaign.asset_panel.copy.ui.open,campaign.asset_panel.open))
 	commands.add_child(_button(campaign.copy.play,campaign.open))
 
 func set_flying(value: bool) -> void:
@@ -233,10 +234,16 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not resident.is_empty():
 					campaign.household_panel.inspect_resident(resident)
 					return
+			if campaign_mode and campaign.rules.assets.active(campaign.state):
+				var asset_hit: String=pick_asset(camera.project_ray_origin(point),camera.project_ray_normal(point))
+				if not asset_hit.is_empty():campaign.asset_panel.inspect(asset_hit);return
 			var hit:Dictionary=world.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
 			for record in data.objects:
 				if record.id==hit.id:
 					_selected=record.id
+					if campaign_mode and campaign.rules.assets.active(campaign.state):
+						var asset_id: String=campaign.rules.assets.object_asset(record.id)
+						if not asset_id.is_empty():campaign.asset_panel.inspect(asset_id);return
 					location_label.text=record.label
 					note.text="Interpretive design · "+record.id+" · revision "+str(record.revision)+". Plan, roof and furnishing positions are authored."
 	if event is InputEventMouseMotion and (_look_drag or Input.mouse_mode==Input.MOUSE_MODE_CAPTURED):
@@ -318,7 +325,7 @@ func load_view(path: String) -> bool:
 
 func show_campaign(state: Dictionary,rules,force: bool = false) -> void:
 	var View=load("res://src/campaign_view.gd")
-	var key:String=JSON.stringify(state.completed)
+	var key:String=JSON.stringify([state.completed,rules.assets.active(state),state.food==0 if rules.assets.active(state) else false])
 	if force or not campaign_mode or key!=_fabric_key:
 		_rebuild_world(View.snapshot(reference_data,state,rules))
 		_fabric_key=key
@@ -362,4 +369,25 @@ func pick_resident(origin:Vector3,direction:Vector3) -> String:
 		if hit!=null:
 			var distance:float=origin.distance_to(node.global_transform*hit)
 			if distance<best:best=distance;selected=routine.id
+	return selected
+
+func pick_asset(origin: Vector3,direction: Vector3) -> String:
+	# Mesh triangle queries share actual drawing transforms, including roofs,
+	# new fabric and shared outdoor places. Only run on a click, never per frame.
+	var best: float=180.0
+	var selected: String=""
+	for id in world.object_nodes:
+		var asset: String=campaign.rules.assets.object_asset(str(id).trim_prefix("household_interior_"))
+		if asset.is_empty():continue
+		var node: MeshInstance3D=world.object_nodes[id]
+		var inverse: Transform3D=node.global_transform.affine_inverse()
+		var a: Vector3=inverse*origin
+		var dir: Vector3=inverse.basis*direction
+		if node.mesh.get_aabb().intersects_segment(a,a+dir*best)==null:continue
+		var faces: PackedVector3Array=node.mesh.get_faces()
+		for i in range(0,faces.size(),3):
+			var hit: Variant=Geometry3D.ray_intersects_triangle(a,dir,faces[i],faces[i+1],faces[i+2])
+			if hit!=null:
+				var distance: float=origin.distance_to(node.global_transform*hit)
+				if distance<best:best=distance;selected=asset
 	return selected

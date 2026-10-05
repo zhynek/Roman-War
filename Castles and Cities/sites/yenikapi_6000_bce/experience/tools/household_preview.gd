@@ -133,11 +133,12 @@ func click_button(id:String) -> void:
 		for i in range(3):await process_frame
 		at=button.get_global_rect().get_center()
 		var before:String=JSON.stringify(app.campaign.state)
+		var before_tab:int=app.campaign.tabs.current_tab if is_instance_valid(app.campaign.tabs) else -1
 		for pressed in [true,false]:
 			var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0
 			root.push_input(event,true)
 			for i in range(6):await process_frame
-		if JSON.stringify(app.campaign.state)!=before or (id=="FollowResident" and not app.campaign.visible):
+		if JSON.stringify(app.campaign.state)!=before or (is_instance_valid(app.campaign.tabs) and app.campaign.tabs.current_tab!=before_tab) or (id=="FollowResident" and not app.campaign.visible):
 			check(true,"real control responds "+id);return
 	check(false,"real control did not respond "+id)
 func shot(name_:String) -> void:

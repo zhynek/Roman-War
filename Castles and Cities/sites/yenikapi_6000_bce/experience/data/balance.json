@@ -183,5 +183,31 @@
         "stress": -3
       }
     }
+  },
+  "assets": {
+    "initial_condition": 90,
+    "condition_max": 100,
+    "wear": 1,
+    "pressure_wear": 1,
+    "repair_gain": 18,
+    "repair_threshold": 85,
+    "repair_workers": 1,
+    "repair_wood": 1,
+    "condition_threshold": 50,
+    "storage_loss_percent": 30,
+    "food_loss": 6,
+    "wellbeing_loss": 6,
+    "security_loss": 8,
+    "initial_reserve": 2,
+    "initial_watch": 2,
+    "reserve_recovery_seasons": 2,
+    "care_workers": 2,
+    "timber_workers": 3,
+    "default_crew": 3,
+    "max_crew": 8,
+    "default_priority": 2,
+    "minimum_commission_reserve": 1,
+    "work_yield_loss": 1,
+    "cooperation_loss": 4
   }
 }

@@ -134,3 +134,23 @@ partitions are checked against raw exported bytes, avoiding a large combined
 upload. Publish all five ZIPs plus provenance/checksums under
 `yenikapi-early-settlement-v0.4.0`, prerelease and never latest. Verify public
 download hashes and all earlier releases by asset ID, not array order.
+
+## Asset governance release (0.5.0)
+
+Build with `build_early_settlement.py --version 0.5.0` using fresh parent gates.
+It adds asset schema/negative tests, `asset_checks.gd`, and twelve actual-interface
+`asset_preview.gd` captures to all retained gates. Source and exact app each run
+all five rule/geometry suites. The exact app produces **60 captures**; inspect all
+at the external provenance path. Captures are paced at 10 FPS to allow background
+Metal setup, while all five benchmarks remain uncapped and run sequentially.
+Asset capture reports also measure chapter opening, changing orders and route
+rebuilding. Never infer Intel performance from Apple Silicon results.
+
+The exporter preserves 24 existing GLBs and adds three clearly named asset
+specimens: stocked store, empty store and neglected workroom under repair.
+The last two use explicit authored comparison states, documented in provenance.
+These are hypothetical arrangements, not dated inventories. The builder packages
+six ZIPs: Mac, editable source, Foundation (16), Contact (2), Household (6), and
+Asset (3) Models, plus provenance and checksums. Publish as
+`yenikapi-early-settlement-v0.5.0`, prerelease and never latest. Verify public hashes
+and retain all earlier release IDs/assets and campaign stable `v0.14.2`.

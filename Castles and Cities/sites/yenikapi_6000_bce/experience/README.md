@@ -1,5 +1,10 @@
 # Yenikapı — Early Settlement 0.4.0
 
+**New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
+is the primary management path. Choose Manage village assets. Older saves retain
+their existing manual workforce until explicit adoption; active assets use wrapper 4.
+The earlier chapters and instructions below remain available in their original mode.
+
 Explore an original, interpretive village set around 6000 BCE on Istanbul's
 historic peninsula. This is not a recovered village plan or a population estimate.
 The Evidence & limits panel explains direct archaeology, regional analogy and

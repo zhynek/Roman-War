@@ -2,12 +2,14 @@ extends SceneTree
 var campaign_mode:bool=false
 var contacts_mode:bool=false
 var households_mode:bool=false
+var assets_mode:bool=false
 var out_dir:="/tmp/yenikapi-benchmark"
 func _initialize() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg=="campaign":campaign_mode=true
 		if arg=="contacts":campaign_mode=true;contacts_mode=true
 		if arg=="households":households_mode=true
+		if arg=="assets":assets_mode=true
 		if arg.begins_with("out_dir="):out_dir=arg.trim_prefix("out_dir=")
 	call_deferred("run")
 func run() -> void:
@@ -41,6 +43,12 @@ func run() -> void:
 		var state:Dictionary=preload("res://tools/household_driver.gd").at_season(app.campaign.rules,2)
 		app.campaign.state=state;app.show_campaign(state,app.campaign.rules,true)
 		report.household_ready_ms=Time.get_ticks_msec()-begin
+		report.citizens=app.campaign.rules.people(state).size()
+		report.animated_citizens=app.campaign_view.life.routines.size()
+	if assets_mode:
+		var state: Dictionary=preload("res://tools/asset_driver.gd").at_season(app.campaign.rules,6)
+		app.campaign.state=state;app.show_campaign(state,app.campaign.rules,true)
+		report.asset_ready_ms=Time.get_ticks_msec()-begin
 		report.citizens=app.campaign.rules.people(state).size()
 		report.animated_citizens=app.campaign_view.life.routines.size()
 	app.hud.hide()

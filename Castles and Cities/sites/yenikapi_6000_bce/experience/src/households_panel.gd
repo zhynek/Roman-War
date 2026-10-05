@@ -39,8 +39,10 @@ func build(body: VBoxContainer) -> void:
 	for station in copy.stations:
 		body.add_child(panel.button(copy.ui.visit.format(station),func():visit(station.id),"Visit_"+station.id))
 	body.add_child(panel.label(copy.ui.orders,19))
-	body.add_child(panel.label(copy.ui.labor,14))
-	body.add_child(panel.button(panel.copy.suggest,panel._suggest,"HouseholdSuggestedWorkforce"))
+	if rules.assets.active(state):body.add_child(panel.label(panel.asset_panel.copy.ui.allocation_order,14))
+	else:
+		body.add_child(panel.label(copy.ui.labor,14))
+		body.add_child(panel.button(panel.copy.suggest,panel._suggest,"HouseholdSuggestedWorkforce"))
 	for order in copy.orders:
 		body.add_child(HSeparator.new())
 		body.add_child(panel.label(order.label,17))

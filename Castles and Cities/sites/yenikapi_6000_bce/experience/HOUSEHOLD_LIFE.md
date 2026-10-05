@@ -1,5 +1,10 @@
 # Households through adversity — optional seasonal chapter
 
+**New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
+is the primary management path. Choose Manage village assets. Older saves retain
+their existing manual workforce until explicit adoption; active assets use wrapper 4.
+The earlier chapters and instructions below remain available in their original mode.
+
 This chapter brings decisions inside the village's home, store and work room.
 An authored warning interrupts ordinary routines; care and provisioning help
 households through danger, and later learning leaves different memories in each

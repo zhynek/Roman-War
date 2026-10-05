@@ -305,10 +305,10 @@ func _furnishing(item: Dictionary) -> void:
 			_rock(at,Vector3(.3,.19,.44),"stone")
 			solids.append({"at":_origin+Basis(Vector3.UP,_yaw)*(at+Vector3.UP*.095),"size":Vector3(.58,.19,.85),"yaw":_yaw,"owner":_owner})
 			_geo.rod(at+Vector3(-.21,.24,-.04),at+Vector3(.21,.24,-.04),.085,"stone",.065,10)
-			for i in range(18):_geo.box(at+Vector3(hash01(item.id,i)*.35-.18,.21,.15+hash01(item.id,i+31)*.16),Vector3(.012,.015,.027),"grain")
+			for i in range(18 if int(data.get("presentation_food",1))>0 else 0):_geo.box(at+Vector3(hash01(item.id,i)*.35-.18,.21,.15+hash01(item.id,i+31)*.16),Vector3(.012,.015,.027),"grain")
 		"grain":
 			_geo.box(at,Vector3(.9,.025,.9),"mat")
-			_geo.dome(at,.3,.13,"grain")
+			if int(data.get("presentation_food",1))>0:_geo.dome(at,.3,.13,"grain")
 		"clay":
 			_geo.dome(at,.28,.22,"clay")
 			for i in range(4):_pot(at+Vector3(-.5+i*.34,0,.6),.12,.18,"clay")

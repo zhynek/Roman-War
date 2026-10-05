@@ -191,3 +191,22 @@ replacement of identities or beliefs. Neither adversity nor innovation implies
 inevitable growth, universal panic, uniform obedience or continuous occupation.
 Interior variants belong to the hypothetical seasonal scenario; the dated
 reference and its original inventories retain their existing identities.
+
+## Building and shared-asset governance added in 0.5.0
+
+Rechecked 2026-10-05: Mazzucato's [original Çatalhöyük household-network research](https://www.frontiersin.org/journals/digital-humanities/articles/10.3389/fdigh.2019.00008/full),
+abstract and introduction. It distinguishes large settlements from simple assumptions
+of hierarchical centralization. This distant analogy does not establish Yenikapı's
+property arrangements or offices. The existing direct site evidence and regional
+material comparisons above remain the only material vocabulary; no newly documented
+local institution is claimed. Ulaş's institutional page was unavailable on this
+recheck; the earlier documented reading is retained without adding new claims.
+
+**Explicit design interpretation:** seven asset groups, centralized seasonal
+accounting, principles, condition scores, repair rates, crew priorities, coordinated
+housing steps and named decision attribution are game systems. The shared yard is
+not a town hall, the working room is not a guild, and watch/refuge assets are not
+barracks or a fortified gate. Existing geometry supplies these functions without
+claiming a recovered ownership plan. Supply bands and repair finishes illustrate the
+ledger; counts are not archaeological measures. See
+[ASSET_GOVERNANCE.md](experience/ASSET_GOVERNANCE.md) for implementation and limits.

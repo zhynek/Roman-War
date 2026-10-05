@@ -887,6 +887,134 @@
           }
         }
       }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_condition",
+        "condition_max",
+        "wear",
+        "pressure_wear",
+        "repair_gain",
+        "repair_threshold",
+        "repair_workers",
+        "repair_wood",
+        "condition_threshold",
+        "storage_loss_percent",
+        "food_loss",
+        "wellbeing_loss",
+        "security_loss",
+        "initial_reserve",
+        "initial_watch",
+        "reserve_recovery_seasons",
+        "care_workers",
+        "timber_workers",
+        "default_crew",
+        "max_crew",
+        "default_priority",
+        "minimum_commission_reserve",
+        "work_yield_loss",
+        "cooperation_loss"
+      ],
+      "properties": {
+        "initial_condition": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "condition_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wear": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pressure_wear": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_gain": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_threshold": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_workers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "repair_wood": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "condition_threshold": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "storage_loss_percent": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "food_loss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wellbeing_loss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "security_loss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "initial_reserve": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "initial_watch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reserve_recovery_seasons": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "care_workers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timber_workers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "default_crew": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_crew": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "default_priority": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minimum_commission_reserve": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "work_yield_loss": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cooperation_loss": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     }
   },
   "required": [
@@ -962,7 +1090,8 @@
     "arrival_child_age",
     "minimum_food_workers",
     "neighbors",
-    "households"
+    "households",
+    "assets"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

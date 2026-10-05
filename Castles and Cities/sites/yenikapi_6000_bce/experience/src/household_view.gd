@@ -8,6 +8,9 @@ var unreachable: Array = []
 var completed_routes: int = 0
 var elapsed: float = 0.0
 var world
+var _asset_state: Dictionary={}
+var _asset_allocation: Dictionary={}
+var _supply_level: int=-1
 var _signature: String = ""
 var _geometry_signature: String = ""
 var _nav_signature: int = 0
@@ -19,6 +22,7 @@ var _routes: Dictionary = {}
 var _cells: Dictionary = {}
 var _edges: Dictionary = {}
 var _materials: Dictionary = {}
+var _figure_cache: Dictionary = {}
 var _obstacles: Dictionary = {}
 var _heights: Dictionary = {}
 # Presentation grid only: doors retain exact authored coordinates. No pathfinder
@@ -29,6 +33,8 @@ const OVERLAY_PREFIX: String = "household_interior_"
 
 func _exit_tree() -> void:
 	_clear_overlay()
+	for template in _figure_cache.values():template.free()
+	_figure_cache.clear()
 
 func refresh(state: Dictionary, rules, scene_world) -> void:
 	var changed_world: bool = not is_instance_valid(world) or world != scene_world
@@ -38,7 +44,11 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		_geometry_signature=""
 		_signature=""
 		_routes.clear();_cells.clear();_edges.clear();_heights.clear();_nav_signature=0
-	var fingerprint: String=JSON.stringify([state.turn,state.households,state.plan,state.citizens,state.completed,state.queue,state.get("contacts",{}),state.food,state.tight_rations])
+	var visual_assets: Dictionary={}
+	if rules.assets.active(state):
+		var allocation_: Dictionary=rules.assets.allocation(state,rules)
+		visual_assets={"conditions":state.assets.conditions,"repair":allocation_.repair,"requests":allocation_.requests,"stage":rules.households.stage(state)}
+	var fingerprint: String=JSON.stringify([state.turn,state.households,state.plan,state.citizens,state.completed,state.queue,state.get("contacts",{}),state.food,state.tight_rations,visual_assets])
 	if fingerprint==_signature:return
 	_signature=fingerprint
 	for child in get_children():child.free()
@@ -52,7 +62,13 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	var orders: Dictionary=state.households.orders
 	var ready: Dictionary={}
 	for id in orders:ready[id]=rules.households.ready(state,id,rules)
-	var appearance: String=JSON.stringify([stage,orders])
+	_asset_state=state.assets if rules.assets.active(state) else {}
+	_asset_allocation=rules.assets.allocation(state,rules) if not _asset_state.is_empty() else {}
+	_supply_level=mini(4,ceili(float(state.food)/float(rules.storage(state))*4.0)) if not _asset_state.is_empty() else -1
+	var bands: Array=[]
+	if not _asset_state.is_empty():
+		for id in ["homes","stores","workroom"]:bands.append(int(_asset_state.conditions[id])/25)
+	var appearance: String=JSON.stringify([stage,orders,_supply_level,bands,_asset_allocation.get("repair","")])
 	if appearance!=_geometry_signature:
 		_clear_overlay()
 		_interiors(stage,orders)
@@ -67,7 +83,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	var by_person: Dictionary={}
 	# Render current standing orders, including the current party, rather than a
 	# stale last-season assignment after the player changes the work plan.
-	for task in rules.assignments(state,rules.normalize_plan(state,state.plan)):by_person[task.id]=task
+	for task in rules.assignments(state,rules.effective_plan(state)):by_person[task.id]=task
 	var people: Array=rules.people(state)
 	var count_by_home: Dictionary={}
 	var count_by_job: Dictionary={}
@@ -111,14 +127,27 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 				elif ready.learning and stage in ["recovery","renewal","settled"] and job_number==0:
 					target_id="household_workshop";activity="learning";reason="practice";pose="kneel"
 				else:target_id="home_"+home_id;activity="care";pose="kneel"
-			elif job=="food" and job_number%4==0:
-				target_id="household_store";activity="store_carry" if tense and ready.secure_stores else "store_sort";carry=true;pose="work";reason=stage if tense else "daily"
+			elif job=="food" and (job_number%4==0 if _asset_state.is_empty() else (job_number==0 and not orders.secure_stores)):
+				target_id="household_store";activity="store_carry" if tense and ready.secure_stores else "store_sort";carry=true;pose="work" if _asset_state.is_empty() else "kneel";reason=stage if tense else "daily"
 			elif job=="watch" and tense and ready.safe_routes:
 				target_id="household_route";activity="route_watch";reason=stage;pose="stand"
 			elif job=="building" and state.queue.is_empty():
 				target_id="household_workshop";activity="repair";pose="kneel";reason=stage
 			elif job=="travel":carry=true
 			elif job=="timber":carry=true
+			if not _asset_state.is_empty():
+				match task.get("duty",""):
+					"secure_stores":target_id="household_store";activity="store_carry" if tense else "store_sort";carry=state.food>0;pose="kneel"
+					"refuge":
+						if job_number==0 and ready.refuge:target_id="household_home";activity="refuge_care";pose="kneel"
+					"learning":
+						if ready.learning:target_id="household_workshop";activity="learning";reason="practice";pose="kneel"
+						else:target_id="home_"+home_id;activity="care";reason="daily";pose="kneel"
+					"repair":
+						activity="repair";pose="kneel"
+						if task.asset=="workroom":target_id="household_workshop"
+						elif task.asset=="stores":target_id="household_store"
+						elif task.asset=="homes":target_id="household_home"
 			if home_data.stress>=65 and job=="care":reason="hunger" if state.food<people.size() else stage
 		if infant:target_id="home_"+home_id;activity="child_near_home";reason="child";pose="rest";carry=false
 		if not stations.has(target_id):target_id="home_"+home_id
@@ -175,6 +204,7 @@ func _interiors(stage: String,orders: Dictionary) -> void:
 		if id=="yk_house_01":_dwelling(b,stage,orders)
 		elif id=="yk_store_01":_store(b,stage,orders)
 		else:_workroom(b,stage,orders)
+		if not _asset_state.is_empty():_asset_detail(b)
 		world._finish();_owned.append(owner)
 
 func _dwelling(b: Dictionary,stage: String,orders: Dictionary) -> void:
@@ -203,10 +233,10 @@ func _store(b: Dictionary,stage: String,orders: Dictionary) -> void:
 	var geo=world._geo
 	var z: float=-float(b.size[1])*.5+.33
 	_shelf(Vector3(0,0,z),float(b.size[0])-.50,.46,1.11)
-	for i in range(4):
+	for i in range(4 if _supply_level<0 else _supply_level):
 		_bundle(Vector3(-1.05+i*.65,1.20,z),.18,.28,false)
 		geo.rod(Vector3(-1.04+i*.65,1.38,z-.04),Vector3(-.86+i*.65,1.40,z+.04),.012,"wood_dark",.012,5)
-	var secured: bool=orders.secure_stores and stage in ["warning","danger"]
+	var secured: bool=orders.secure_stores and (stage in ["warning","danger"] or not _asset_state.is_empty())
 	for item in b.furniture:
 		if item.kind!="pot":continue
 		var at:=Vector3(item.at[0],.705,item.at[1])
@@ -217,11 +247,11 @@ func _store(b: Dictionary,stage: String,orders: Dictionary) -> void:
 			for i in range(9):geo.rod(at+Vector3(-.16,.027,-.14+i*.035),at+Vector3(.16,.027,-.14+i*.035),.006,"wood_light",.006,4)
 			geo.rod(at+Vector3(-.19,.04,0),at+Vector3(.19,.04,0),.013,"wood_dark",.013,5)
 			geo.rod(at+Vector3(0,.042,-.19),at+Vector3(0,.042,.19),.013,"wood_dark",.013,5)
-		else:
+		elif _supply_level!=0:
 			geo.dome(at-Vector3.UP*.07,.17,.06,"grain")
 		geo.box(Vector3(item.at[0]+.18,.12,item.at[1]-.15),Vector3(.10,.08,.13),"stone")
 	geo.box(Vector3(1.35,.10,1.25),Vector3(.32,.03,.51),"mat")
-	for i in range(5):geo.box(Vector3(1.26+i*.042,.125,1.24),Vector3(.019,.012,.11),"grain")
+	for i in range(5 if _supply_level!=0 else 0):geo.box(Vector3(1.26+i*.042,.125,1.24),Vector3(.019,.012,.11),"grain")
 
 func _workroom(b: Dictionary,stage: String,orders: Dictionary) -> void:
 	var geo=world._geo
@@ -574,6 +604,8 @@ func _actor_materials() -> void:
 		_materials[pair[0]]=material
 
 func _figure(person: Dictionary,child: bool,carry: bool) -> Dictionary:
+	var cache_key: String="infant" if person.age<12 else str([posmod(str(person.id).hash(),3),carry])
+	if _figure_cache.has(cache_key):return _clone_figure(_figure_cache[cache_key],person,child)
 	var actor:=Node3D.new();actor.name=person.id
 	if person.age<12:
 		var bundle_geo=Geometry.new(_materials)
@@ -581,6 +613,7 @@ func _figure(person: Dictionary,child: bool,carry: bool) -> Dictionary:
 		_ellipsoid(bundle_geo,Vector3(0,.17,-.29),Vector3(.066,.071,.064),"skin")
 		for i in range(3):bundle_geo.rod(Vector3(-.12,.19,-.14+i*.13),Vector3(.12,.19,-.14+i*.13),.009,"tie",.009,5)
 		var bundle:=MeshInstance3D.new();bundle.mesh=bundle_geo.finish();actor.add_child(bundle)
+		_figure_cache[cache_key]=actor.duplicate(0)
 		return {"node":actor,"parts":{"body":bundle,"legs":[],"arms":[]}}
 	var variant: int=posmod(str(person.id).hash(),3)
 	var cloth: String=["cloth","light","dark"][variant]
@@ -620,6 +653,16 @@ func _figure(person: Dictionary,child: bool,carry: bool) -> Dictionary:
 		var size: float=clampf(.43+float(person.age)/72.0*.39,.46,.83)
 		actor.scale=Vector3.ONE*size
 	else:actor.scale=Vector3.ONE*(.95+variant*.035)
+	_figure_cache[cache_key]=actor.duplicate(0)
+	return {"node":actor,"parts":parts}
+
+func _clone_figure(template: Node3D,person: Dictionary,child: bool) -> Dictionary:
+	var actor: Node3D=template.duplicate(0);actor.name=person.id
+	var parts: Dictionary={"body":actor.get_child(0),"legs":[],"arms":[]}
+	if person.age>=12:
+		for index in [1,3]:parts.legs.append(actor.get_child(index))
+		for index in [2,4]:parts.arms.append(actor.get_child(index))
+		actor.scale=Vector3.ONE*(clampf(.43+float(person.age)/72.0*.39,.46,.83) if child else .95+posmod(str(person.id).hash(),3)*.035)
 	return {"node":actor,"parts":parts}
 
 func _ellipsoid(geo,at: Vector3,size: Vector3,material: String) -> void:
@@ -704,3 +747,19 @@ func _pose(routine: Dictionary,moving: bool,time: float) -> void:
 		arm.rotation.x=(-.85+phase*.07 if knee else (-.24 if routine.carry else phase*.26*(1 if i==1 else -1))) if moving or knee else -.12
 		if working:arm.rotation.x=-.55+phase*.10
 		arm.rotation.z=(.12 if i==0 else -.12) if knee else 0
+
+func _asset_detail(b: Dictionary) -> void:
+	var asset: String={"yk_house_01":"homes","yk_store_01":"stores","yk_house_06":"workroom"}[b.id]
+	var condition: int=int(_asset_state.conditions[asset])
+	var geo=world._geo
+	# Shallow wall finish changes stay behind the existing collision envelope.
+	var x: float=-float(b.size[0])*.5+.15
+	for i in range(1 if condition>=75 else (3 if condition>=50 else 6)):
+		geo.box(Vector3(x,.55+float(i%3)*.23,-.45-float(i/3)*.65),Vector3(.025,.13,.42),"daub_light" if condition>=75 else "daub_dark")
+	if _asset_allocation.repair==asset:
+		_repair_mat(Vector3(float(b.size[0])*.5-.6,.09,float(b.size[1])*.5-.7),true)
+		for i in range(3):geo.rod(Vector3(x+.22,.12,-1.5+i*.15),Vector3(x+.9,.12,-1.5+i*.15),.035,"wood_light",.028,6)
+	if asset=="homes" and _asset_state.get("pressure_start",-1)<0:
+		# Ordinary shared care is a useful interior arrangement too.
+		if _asset_allocation.orders.get("refuge",0)>0:
+			geo.rod(Vector3(-1.78,.19,-1.9),Vector3(-.83,.19,-1.9),.14,"mat",.14,14)

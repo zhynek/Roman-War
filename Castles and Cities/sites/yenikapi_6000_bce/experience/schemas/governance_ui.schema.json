@@ -482,6 +482,9 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1000
+        },
+        "asset_upkeep": {
+          "type": "string"
         }
       },
       "required": [
@@ -494,7 +497,8 @@
         "projects",
         "watch",
         "leadership",
-        "household_life"
+        "household_life",
+        "asset_upkeep"
       ],
       "additionalProperties": false
     },

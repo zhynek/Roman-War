@@ -2,6 +2,8 @@ extends PanelContainer
 const Rules = preload("res://src/core/settlement_rules.gd")
 const Saves = preload("res://src/campaign_save.gd")
 var app
+var asset_panel
+const AssetPanel=preload("res://src/assets_panel.gd")
 var household_panel
 const HouseholdPanel=preload("res://src/households_panel.gd")
 var contacts_panel
@@ -23,7 +25,9 @@ func configure(owner_app) -> void:
 	contacts_panel=ContactsPanel.new(self,JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors_ui.json")))
 	var household_content:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/households.json"))
 	household_panel=HouseholdPanel.new(self,household_content)
-	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content)
+	var asset_content: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/assets.json"))
+	asset_panel=AssetPanel.new(self,asset_content)
+	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content)
 	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
 	offset_left = -638; offset_right = -22; offset_top = 164; offset_bottom = -22
 	var panel_style:StyleBoxFlat=app._style();panel_style.bg_color.a=1.0
@@ -58,9 +62,11 @@ func dispatch(action: Dictionary) -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.command(state,action)
 	if result.has("error"):
-		last_message=copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+		last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
-	if action.kind.begins_with("household_"):
+	if action.kind.begins_with("asset_"):
+		last_message=asset_panel.copy.ui.checked if action.kind=="asset_review" else ""
+	elif action.kind.begins_with("household_"):
 		last_message=household_panel.copy.ui.updated
 	elif action.kind.begins_with("neighbor_"):
 		last_message=contacts_panel.copy.get({"neighbor_begin":"start_success","neighbor_send":"sent","neighbor_escort":"escort_set","neighbor_cancel":"cancelled"}.get(action.kind,""),"")
@@ -73,7 +79,7 @@ func dispatch(action: Dictionary) -> bool:
 func resolve_season() -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.advance(state)
-	if result.has("error"): last_message=copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+	if result.has("error"): last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
 	last_message=copy.resolved
 	app.show_campaign(state,rules)
@@ -110,7 +116,7 @@ func refresh() -> void:
 		for child in tabs.get_children():scrolls.append(child.scroll_vertical)
 	for child in get_children():remove_child(child);child.queue_free()
 	column=VBoxContainer.new();column.add_theme_constant_override("separation",8);add_child(column)
-	column.add_child(label(copy.panel_title,23))
+	column.add_child(label(asset_panel.copy.title if not state.is_empty() and rules.assets.active(state) else copy.panel_title,23))
 	column.add_child(label(copy.hypothesis,13))
 	var top:=HFlowContainer.new();column.add_child(top)
 	top.add_child(button(copy.close,hide,"ExploreCampaign"))
@@ -121,24 +127,35 @@ func refresh() -> void:
 		var intro_scroll:=ScrollContainer.new();intro_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;intro_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(intro_scroll)
 		var introduction:=VBoxContainer.new();introduction.size_flags_horizontal=Control.SIZE_EXPAND_FILL;introduction.add_theme_constant_override("separation",14);intro_scroll.add_child(introduction)
 		introduction.add_child(label(copy.intro,18))
+		introduction.add_child(button(asset_panel.copy.ui.begin,asset_panel.begin,"BeginAssetGovernance"))
+		introduction.add_child(label(asset_panel.copy.ui.migration,14))
 		introduction.add_child(button(copy.begin,begin,"BeginTutorial"))
 		introduction.add_child(label(copy.principle_text,15))
 		tabs=null
 	else:
 		var role_row:=HBoxContainer.new();column.add_child(role_row)
 		var role_picker:=OptionButton.new();role_picker.name="RolePicker";role_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		for role in ["god","steward","watch"]:role_picker.add_item(copy[role])
+		for role in ["god","steward","watch"]:
+			role_picker.add_item(copy[role]+(" · "+rules.person_by_id(state,state.leaders[role].id).get("name","—") if role!="god" else ""))
 		role_picker.select(["god","steward","watch"].find(state.role))
 		role_picker.item_selected.connect(func(index):dispatch({"kind":"role","role":["god","steward","watch"][index]}))
 		role_row.add_child(role_picker)
 		var season: String=copy.year%[1+int(state.turn)/4,copy.seasons[int(state.turn)%4]]
 		column.add_child(label(season+" · "+copy["phase_"+state.phase],20))
 		tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;tabs.clip_tabs=false;column.add_child(tabs)
-		_guide(_tab(copy.overview))
-		_work(_tab(copy.work))
+		if rules.assets.active(state):
+			asset_panel.guide(_tab(copy.overview))
+			asset_panel.build(_tab(asset_panel.copy.ui.overview))
+		else:
+			_guide(_tab(copy.overview))
+			_work(_tab(copy.work))
 		_leaders(_tab(copy.leaders))
 		_journal(_tab(copy.journal))
-		var principles:=_tab(copy.principles);principles.add_child(label(copy.principle_text,15));principles.add_child(label(copy.units_note,14))
+		var principles:=_tab(asset_panel.copy.ui.principles if rules.assets.active(state) else copy.principles)
+		if rules.assets.active(state):asset_panel.principles(principles)
+		else:
+			principles.add_child(label(copy.principle_text,15));principles.add_child(label(copy.units_note,14))
+			asset_panel.build(principles)
 		principles.add_child(button(copy.restart,_confirm_restart,"RestartTutorial"))
 		contacts_panel.build(_tab(contacts_panel.copy.tab))
 		household_panel.build(_tab(household_panel.copy.ui.tab))
@@ -245,6 +262,11 @@ func _suggest() -> void:
 
 func _leaders(body: VBoxContainer) -> void:
 	body.add_child(label(copy.roles_note,14))
+	if rules.assets.active(state):
+		body.add_child(label(asset_panel.copy.ui.people,14))
+		for asset in rules.assets.content.assets:
+			asset_panel.ownership(body,asset.role)
+			body.add_child(button(asset.title,func():asset_panel.inspect(asset.id),"Responsibility_"+asset.id))
 	for role in ["steward","watch"]:
 		var leader:Dictionary=rules.person_by_id(state,state.leaders[role].id)
 		body.add_child(label(copy.lead_line%[copy[role],leader.get("name","—"),int(leader.get("age",0))/4,rules.leader_skill(state,role),maxi(0,int(rules.balance.term_seasons)-int(state.turn)+int(state.leaders[role].since))],17))
@@ -266,6 +288,7 @@ func _leaders(body: VBoxContainer) -> void:
 		body.add_child(label(copy.citizen_line%[person.name,int(person.age)/4,copy.watch_job if job=="watch" else copy.get(job,contacts_panel.copy.get(job,job)),household_label],14))
 
 func _journal(body: VBoxContainer) -> void:
+	if rules.assets.active(state):asset_panel.journal(body)
 	for i in range(state.history.size()-1,maxi(-1,state.history.size()-101),-1):
 		var event:Dictionary=state.history[i]
 		var params:Dictionary=event.params.duplicate(true)

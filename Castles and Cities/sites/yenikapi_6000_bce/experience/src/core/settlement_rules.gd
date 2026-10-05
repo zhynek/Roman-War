@@ -5,12 +5,16 @@ var balance: Dictionary
 var projects: Dictionary = {}
 var neighbors
 var households
+var assets
+const Assets = preload("res://src/core/asset_rules.gd")
 const Households = preload("res://src/core/household_rules.gd")
 const Neighbors = preload("res://src/core/neighbor_rules.gd")
 
-func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}) -> void:
+func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}) -> void:
 	content = canonical(config)
 	balance = canonical(tuning)
+	assets = Assets.new(canonical(asset_config),balance.get("assets",{}))
+	assets.stage_seasons=int(balance.get("households",{}).get("stage_seasons",2))
 	neighbors = Neighbors.new(canonical(contacts_config),balance.get("neighbors",{}))
 	households = Households.new(canonical(household_config),balance.get("households",{}))
 	for project in content.projects:
@@ -27,7 +31,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -35,6 +39,7 @@ func new_state() -> Dictionary:
 	return state
 
 func ensure_state_keys(state: Dictionary) -> void:
+	if not state.has("assets"): state.assets={}
 	if not state.has("contacts"): state.contacts={}
 	if not state.has("households"): state.households={}
 
@@ -66,7 +71,12 @@ func capacity(state: Dictionary) -> int:
 	return int(balance.base_housing) + effect(state, "housing")
 
 func storage(state: Dictionary) -> int:
-	return int(balance.base_storage) + effect(state, "storage")
+	var total: int=int(balance.base_storage) + effect(state, "storage")
+	if assets.active(state) and state.assets.conditions.stores<assets.balance.condition_threshold:total-=total*int(assets.balance.storage_loss_percent)/100
+	return total
+
+func effective_plan(state: Dictionary) -> Dictionary:
+	return assets.allocation(state,self).plan if assets.active(state) else normalize_plan(state,state.plan)
 
 func normalize_plan(state: Dictionary, requested: Dictionary) -> Dictionary:
 	var remaining: int = people(state, true).size()
@@ -105,8 +115,15 @@ func permitted(state: Dictionary, role: String) -> bool:
 	return state.role == "god" or state.role == role
 
 func command(state: Dictionary, action: Dictionary) -> Dictionary:
+	var result: Dictionary=_command(state,action)
+	if result.has("state") and assets.active(result.state):result.state.plan=effective_plan(result.state)
+	return result
+
+func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("asset_"): return assets.command(state,action,self)
+	if kind=="plan" and assets.active(state):return {"error":"asset_managed"}
 	if kind.begins_with("household_"): return households.command(state,action,self)
 	if kind.begins_with("neighbor_"): return neighbors.command(state,action,self)
 	var next: Dictionary = state.duplicate(true)
@@ -144,8 +161,13 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 			for requirement in project.requires:
 				if not has_project(state, requirement): return {"error": "prerequisite"}
 			if state.wood < project.wood: return {"error": "insufficient_wood"}
+			if assets.active(state) and id in assets.content.housing_steps.slice(1) and int(state.food)<people(state).size()*int(assets.balance.minimum_commission_reserve):return {"error":"asset_supplies"}
 			next.wood -= int(project.wood)
 			next.queue.append({"id": id, "progress": 0})
+			if assets.active(next):
+				next.assets.initiatives[id]=assets.metadata(next,id,self)
+				next.assets.commissioned+=1
+				assets._record(next,project.role,"commission",id,self)
 		"cancel":
 			var found: bool = false
 			for i in range(state.queue.size()):
@@ -156,6 +178,7 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 				var refund: int = int(project.wood) * (int(project.work) - int(item.progress)) / int(project.work)
 				next.wood += refund
 				next.queue.remove_at(i)
+				if assets.active(next):assets._record(next,project.role,"cancel",item.id,self)
 				_event(next, "cancel", {"project": item.id, "wood": refund})
 				found = true
 				break
@@ -172,12 +195,14 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 
 func forecast(state: Dictionary) -> Dictionary:
 	var population: int = people(state).size()
-	var plan: Dictionary = normalize_plan(state, state.plan)
+	var plan: Dictionary = effective_plan(state)
+	var allocation_: Dictionary=assets.allocation(state,self) if assets.active(state) else {}
 	var crew:Dictionary=neighbors.crew(state,plan)
 	var cargo:Dictionary=neighbors.arrivals(state,plan)
-	var workers: int = int(plan.food)-int(crew.carriers) + (int(plan.building) if state.queue.is_empty() else 0)
+	var workers: int = int(plan.food)-int(crew.carriers) + (int(plan.building) if state.queue.is_empty() and not assets.active(state) else 0)
 	var household_effects: Dictionary = households.forecast(state,self)
 	var gathered: int = maxi(0,workers * (int(balance.food_yields[int(state.turn) % 4]) + effect(state, "food_yield")) - int(household_effects.food_penalty))
+	if assets.active(state):gathered=maxi(0,gathered-assets.food_penalty(state))
 	var used: int = ceili(population * float(balance.tight_rations_percent if state.tight_rations else balance.full_rations_percent) / 100.0) * int(balance.food_per_person)
 	var spoil: int = int(state.food) * int(balance.spoil_percent) / 100
 	var available: int = maxi(0,int(state.food) + gathered - spoil)
@@ -192,6 +217,10 @@ func forecast(state: Dictionary) -> Dictionary:
 	}
 	for key in ["wellbeing","cooperation","security"]:
 		factors[key].append({"id":"household_life","value":int(household_effects[key])})
+	if assets.active(state):
+		factors.wellbeing.append({"id":"asset_upkeep","value":-int(assets.balance.wellbeing_loss) if state.assets.conditions.homes<assets.balance.condition_threshold else 0})
+		factors.cooperation.append({"id":"asset_upkeep","value":-int(assets.balance.cooperation_loss) if state.assets.conditions.yard<assets.balance.condition_threshold else 0})
+		factors.security.append({"id":"asset_upkeep","value":-int(assets.balance.security_loss) if state.assets.conditions.watch<assets.balance.condition_threshold else 0})
 	var stocks: Dictionary = {}
 	for key in factors:
 		var total: int = 0
@@ -204,7 +233,12 @@ func forecast(state: Dictionary) -> Dictionary:
 	remaining += int(cargo.food)
 	var overflow: int = maxi(0,remaining-losses-storage(state))
 	remaining = mini(storage(state), remaining - losses)
-	return {"households":household_effects,"plan":plan,"population":population,"gathered":gathered,"used":eaten,"unfed":used-eaten,"overflow":overflow,"spoil":spoil,"losses":losses,"food":remaining,"food_delta":remaining-int(state.food),"covered":covered,"stocks":stocks,"factors":factors,"crew":crew,"cargo":cargo,"wood":int(plan.timber)*int(balance.timber_yield)+int(cargo.wood),"work":int(plan.building)*int(balance.work_yield)+leader_skill(state,"steward")/int(balance.steward_work_divisor) if plan.building>0 and not state.queue.is_empty() else 0}
+	var output: Dictionary={"households":household_effects,"plan":plan,"population":population,"gathered":gathered,"used":eaten,"unfed":used-eaten,"overflow":overflow,"spoil":spoil,"losses":losses,"food":remaining,"food_delta":remaining-int(state.food),"covered":covered,"stocks":stocks,"factors":factors,"crew":crew,"cargo":cargo,"wood":int(plan.timber)*int(balance.timber_yield)+int(cargo.wood),"work":int(plan.building)*int(balance.work_yield)+leader_skill(state,"steward")/int(balance.steward_work_divisor) if plan.building>0 and not state.queue.is_empty() else 0}
+	if assets.active(state):
+		output.assets=allocation_
+		output.work=0
+		for value in allocation_.projects.values():output.work+=int(value.work)
+	return output
 
 func move_stock(current: int, target: int) -> int:
 	return current + clampi(target - current, -int(balance.stock_step), int(balance.stock_step))
@@ -226,6 +260,9 @@ func advance(state: Dictionary) -> Dictionary:
 	for key in f.stocks: next[key] = int(f.stocks[key])
 	next.assignments = assignments(state, f.plan)
 	var work: int = int(f.work)
+	if assets.active(state):
+		assets.advance(next,state,f,self)
+		work=0
 	while work > 0 and not next.queue.is_empty():
 		var item: Dictionary = next.queue[0]
 		var amount: int = mini(work, int(projects[item.id].work) - int(item.progress))
@@ -266,7 +303,7 @@ func advance(state: Dictionary) -> Dictionary:
 	households.advance(next,state,self)
 	next.turn += 1
 	_succession(next)
-	next.plan = normalize_plan(next,next.plan)
+	next.plan = effective_plan(next)
 	var qualifies: bool = town_conditions(next)
 	next.stable_seasons = int(next.stable_seasons)+1 if qualifies else 0
 	if next.stable_seasons >= balance.town_sustained_seasons:
@@ -316,6 +353,7 @@ func _succession(state: Dictionary) -> void:
 		_event(state,"succession",{"role":role,"name":successor.get("name","—"),"previous":current.get("name","—")})
 
 func assignments(state: Dictionary, plan: Dictionary) -> Array:
+	if assets.active(state):return assets.assignments(state,self)
 	var adults: Array = people(state,true)
 	var result: Array = []
 	var index: int = 0
@@ -396,9 +434,12 @@ func validate_state(value: Variant) -> bool:
 			if not has_project(state,requirement): return false
 		ordered[item.id]=true
 	if not neighbors.validate(state,self): return false
+	if not assets.validate(state,self):return false
 	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false
-	if command(state,{"kind":"plan","plan":state.plan}).has("error"): return false
+	if assets.active(state):
+		if canonical(state.plan)!=effective_plan(state):return false
+	elif command(state,{"kind":"plan","plan":state.plan}).has("error"): return false
 	if not state.report is Dictionary or not state.assignments is Array or not state.history is Array or state.history.size()>20000: return false
 	for task in state.assignments:
 		if not task is Dictionary or not ids.has(task.get("id","")) or task.get("job") not in ["food","timber","care","watch","building","travel"]: return false

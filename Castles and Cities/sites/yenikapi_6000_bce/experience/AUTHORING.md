@@ -1,5 +1,10 @@
 # Village authoring contract and save boundary
 
+**New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
+is the primary management path. Choose Manage village assets. Older saves retain
+their existing manual workforce until explicit adoption; active assets use wrapper 4.
+The earlier chapters and instructions below remain available in their original mode.
+
 `data/settlement.json` is the only dated reference snapshot. Its closed JSON schema and
 `tools/validate_settlement.py` check vocabulary, IDs, source links, furnishing
 bounds, route segments and the nominal period. `tools/test_data.py` has negative

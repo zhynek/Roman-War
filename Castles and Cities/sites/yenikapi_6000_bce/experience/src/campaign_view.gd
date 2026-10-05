@@ -13,6 +13,7 @@ static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
 	var resolved: Dictionary = Fabric.resolve(base,{"id":rules.content.scenario_id,"kind":"hypothetical","base_snapshot_id":base.snapshot_id,"changes":changes})
 	assert(not resolved.has("error"))
 	var result: Dictionary = base.duplicate(true)
+	if rules.assets.active(state):result.presentation_food=state.food
 	result.objects = []
 	for record in resolved.objects:
 		if record.get("active",true): result.objects.append(record)
@@ -63,6 +64,12 @@ func _project_markers(state: Dictionary,rules,world) -> void:
 		var project: Dictionary = rules.projects[item.id]
 		var marker := Node3D.new();marker.position=Vector3(project.at[0],world.floor_height(project.at[0],project.at[1]),project.at[1]);add_child(marker)
 		var mat := StandardMaterial3D.new();mat.albedo_color=Color("b99f69");mat.roughness=1
+		if rules.assets.active(state):
+			var fraction: float=float(item.progress)/float(project.work)
+			for i in range(2+int(fraction*6)):
+				var timber:=MeshInstance3D.new();var log_mesh:=BoxMesh.new();log_mesh.size=Vector3(1.5,.12,.14);timber.mesh=log_mesh;timber.material_override=mat;timber.position=Vector3(1.8,.13+float(i/3)*.13,float(i%3)*.2);marker.add_child(timber)
+			for i in range(int(fraction*4)):
+				var frame:=MeshInstance3D.new();var frame_mesh:=BoxMesh.new();frame_mesh.size=Vector3(.1,.5+fraction,.1);frame.mesh=frame_mesh;frame.material_override=mat;frame.position=Vector3(-1.1,float(.5+fraction)*.5,-1.0+float(i)*.65);marker.add_child(frame)
 		for side in [-1.0,1.0]:
 			var post := MeshInstance3D.new();var mesh := CylinderMesh.new();mesh.top_radius=.05;mesh.bottom_radius=.06;mesh.height=1.1;post.mesh=mesh;post.material_override=mat;post.position=Vector3(side*.8,.55,0);marker.add_child(post)
 		var label := Label3D.new();label.text=project.title+"\n%d / %d"%[item.progress,project.work];label.font_size=24;label.pixel_size=.015;label.position.y=1.7;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;marker.add_child(label)

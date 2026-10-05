@@ -50,3 +50,8 @@ upgrades other buildings or asserts a new dated snapshot. The contact chapter
 is a relationship achievement after town, not a large-town stage. Finite supplies,
 reserves, separate office terms and mission IDs provide a reusable interaction
 boundary; regional settlement geometry and multi-town growth are still future work.
+
+Asset governance 0.5.0 changes management of the same hypothetical settlement.
+Its housing coordination invokes existing project/fabric IDs and leaves the dated
+reference unchanged. Maintenance conditions are group-level gameplay state, not new
+archaeological phases. There is no new urban category or population threshold.

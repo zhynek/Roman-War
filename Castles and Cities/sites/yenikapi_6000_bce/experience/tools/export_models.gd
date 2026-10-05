@@ -75,7 +75,25 @@ func run() -> void:
 			room.free()
 		FileAccess.open(out_dir.path_join("household-"+phase+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical portable interior arrangements; no archaeological inventory or siege reconstruction","state":household_state,"models":"Three furnished rooms centered at original building datum. Citizens, lighting, procedural shaders and simulation are available in the app/source, not these static GLBs."},"  "))
 		view.free();household_world.free()
-	print("VILLAGE MODEL EXPORT PASS: 24 GLBs")
+	var asset_rules=preload("res://src/core/settlement_rules.gd").new(_read("governance"),_read("balance"),_read("neighbors"),_read("households"),_read("assets"))
+	for specimen in ["stocked-store","empty-store","repair-workroom"]:
+		var asset_state: Dictionary=preload("res://tools/asset_driver.gd").at_season(asset_rules,9)
+		if specimen=="empty-store":asset_state.food=0
+		if specimen=="repair-workroom":asset_state.assets.conditions.workroom=35
+		asset_state.plan=asset_rules.effective_plan(asset_state)
+		var asset_data: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,asset_state,asset_rules)
+		var asset_world=load("res://src/village.gd").new();root.add_child(asset_world);asset_world.build(asset_data)
+		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(asset_state,asset_rules,asset_world)
+		var building_id: String="yk_house_06" if specimen=="repair-workroom" else "yk_store_01"
+		var room:=Node3D.new();room.name="asset_"+specimen;root.add_child(room)
+		var origin: Transform3D=asset_world.object_nodes[building_id].transform
+		for id in [building_id,"household_interior_"+building_id]:
+			var original: MeshInstance3D=asset_world.object_nodes[id]
+			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*original.transform;copy.mesh=neutral_mesh(original.mesh);room.add_child(copy)
+		if not write_model(room,out_dir.path_join("asset-"+specimen+".glb")):quit(1);return
+		FileAccess.open(out_dir.path_join("asset-"+specimen+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical management specimen; empty supplies and neglected workroom are explicitly authored comparison states, not a playthrough or archaeological inventory","state":asset_state},"  "))
+		room.free();view.free();asset_world.free()
+	print("VILLAGE MODEL EXPORT PASS: 27 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()
@@ -96,3 +114,6 @@ func write_model(scene:Node3D,path:String) -> bool:
 	if result!=OK:push_error("GLB export failed "+path);return false
 	print("EXPORTED ",path)
 	return true
+
+func _read(id: String) -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://data/"+id+".json"))

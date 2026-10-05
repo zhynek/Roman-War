@@ -1,5 +1,10 @@
 # Seasons of the first settlement — playable tutorial 0.3.0
 
+**New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
+is the primary management path. Choose Manage village assets. Older saves retain
+their existing manual workforce until explicit adoption; active assets use wrapper 4.
+The earlier chapters and instructions below remain available in their original mode.
+
 Choose **Play seasonal tutorial → Begin a new tutorial**. This creates a separate
 hypothetical settlement; **Return to reference village** restores the unchanged
 circa-6000 BCE scene. Reopen the tutorial to resume the settlement in memory.

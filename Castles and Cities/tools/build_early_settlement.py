@@ -21,7 +21,7 @@ PROJECT=Path('sites/yenikapi_6000_bce/experience')
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot',required=True)
-    parser.add_argument('--version',default='0.4.0')
+    parser.add_argument('--version',default='0.5.0')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--parent-gates',type=Path,required=True)
     args=parser.parse_args()
@@ -59,6 +59,8 @@ def main():
     run([sys.executable,project/'tools/test_neighbor_data.py'],logs/'neighbor-data-tests.log',project)
     run([sys.executable,project/'tools/validate_households.py'],logs/'household-data.log',project)
     run([sys.executable,project/'tools/test_household_data.py'],logs/'household-data-tests.log',project)
+    run([sys.executable,project/'tools/validate_assets.py'],logs/'asset-data.log',project)
+    run([sys.executable,project/'tools/test_asset_data.py'],logs/'asset-data-tests.log',project)
     run(editor+['--import'],logs/'import.log',project)
     checked=run(editor+['--script','res://tools/checks.gd'],logs/'source-checks.log',project)
     if not re.search(r'VILLAGE CHECKS: \d+ checks, 0 failures',checked):raise SystemExit('Missing source success marker')
@@ -68,6 +70,8 @@ def main():
     if not re.search(r'NEIGHBOR CHECKS: \d+ checks, 0 failures',neighbor):raise SystemExit('Missing contact success marker')
     household=run(editor+['--script','res://tools/household_checks.gd'],logs/'source-households.log',project)
     if not re.search(r'HOUSEHOLD CHECKS: \d+ checks, 0 failures',household):raise SystemExit('Missing household success marker')
+    assets=run(editor+['--script','res://tools/asset_checks.gd'],logs/'source-assets.log',project)
+    if not re.search(r'ASSET CHECKS: \d+ checks, 0 failures',assets):raise SystemExit('Missing asset success marker')
     render_dir=Path(tempfile.mkdtemp(prefix=f'yenikapi-{args.version}-exact-qa-'))
     # Source performance uses the same script/cameras as the exact application.
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--',f'out_dir={render_dir / "source-benchmark"}'],logs/'source-benchmark.log',project)
@@ -78,6 +82,8 @@ def main():
     shutil.copy2(render_dir/'source-contact-benchmark/benchmark.json',logs/'source-contact-benchmark.json')
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--','households',f'out_dir={render_dir / "source-household-benchmark"}'],logs/'source-household-benchmark.log',project)
     shutil.copy2(render_dir/'source-household-benchmark/benchmark.json',logs/'source-household-benchmark.json')
+    run([godot,'--path',project,'--script','res://tools/benchmark.gd','--','assets',f'out_dir={render_dir / "source-asset-benchmark"}'],logs/'source-asset-benchmark.log',project)
+    shutil.copy2(render_dir/'source-asset-benchmark/benchmark.json',logs/'source-asset-benchmark.json')
     prefix='Yenikapi-Early-Settlement'
     app_zip=out/f'{prefix}-macOS-{args.version}.zip'
     run(editor+['--export-release','macOS',app_zip],logs/'export.log',project)
@@ -105,36 +111,44 @@ def main():
     if not re.search(r'NEIGHBOR CHECKS: \d+ checks, 0 failures',packaged_neighbor):raise SystemExit('Missing packaged contact success marker')
     packaged_household=run([binary,'--headless','--script','res://tools/household_checks.gd'],logs/'packaged-households.log',out)
     if not re.search(r'HOUSEHOLD CHECKS: \d+ checks, 0 failures',packaged_household):raise SystemExit('Missing packaged household success marker')
-    rendered=run([binary,'--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
+    packaged_assets=run([binary,'--headless','--script','res://tools/asset_checks.gd'],logs/'packaged-assets.log',out)
+    if not re.search(r'ASSET CHECKS: \d+ checks, 0 failures',packaged_assets):raise SystemExit('Missing packaged asset success marker')
+    rendered=run([binary,'--max-fps','10','--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
     if 'VILLAGE RENDER PASS: 14 captures' not in rendered:raise SystemExit('Incomplete rendered gate')
     shutil.copy2(render_dir/'render-report.json',logs/'render-report.json')
     run([binary,'--script','res://tools/benchmark.gd','--',f'out_dir={render_dir / "benchmark"}'],logs/'packaged-benchmark.log',out)
     shutil.copy2(render_dir/'benchmark/benchmark.json',logs/'packaged-benchmark.json')
-    tutorial_render=run([binary,'--script','res://tools/governance_preview.gd','--',f'out_dir={render_dir / "tutorial"}'],logs/'packaged-tutorial-render.log',out)
+    tutorial_render=run([binary,'--max-fps','10','--script','res://tools/governance_preview.gd','--',f'out_dir={render_dir / "tutorial"}'],logs/'packaged-tutorial-render.log',out)
     if not re.search(r'GOVERNANCE RENDER: 12 captures; \d+ checks, 0 failures',tutorial_render):raise SystemExit('Tutorial render gate failed')
     shutil.copy2(render_dir/'tutorial/render-report.json',logs/'tutorial-render-report.json')
     run([binary,'--script','res://tools/benchmark.gd','--','campaign',f'out_dir={render_dir / "campaign-benchmark"}'],logs/'packaged-campaign-benchmark.log',out)
     shutil.copy2(render_dir/'campaign-benchmark/benchmark.json',logs/'packaged-campaign-benchmark.json')
-    neighbor_render=run([binary,'--script','res://tools/neighbor_preview.gd','--',f'out_dir={render_dir / "neighbors"}'],logs/'packaged-neighbor-render.log',out)
+    neighbor_render=run([binary,'--max-fps','10','--script','res://tools/neighbor_preview.gd','--',f'out_dir={render_dir / "neighbors"}'],logs/'packaged-neighbor-render.log',out)
     if not re.search(r'NEIGHBOR RENDER: 10 captures; \d+ checks, 0 failures',neighbor_render):raise SystemExit('Contact render gate failed')
     shutil.copy2(render_dir/'neighbors/render-report.json',logs/'neighbor-render-report.json')
     run([binary,'--script','res://tools/benchmark.gd','--','contacts',f'out_dir={render_dir / "contact-benchmark"}'],logs/'packaged-contact-benchmark.log',out)
     shutil.copy2(render_dir/'contact-benchmark/benchmark.json',logs/'packaged-contact-benchmark.json')
-    household_render=run([binary,'--script','res://tools/household_preview.gd','--',f'out_dir={render_dir / "households"}'],logs/'packaged-household-render.log',out)
+    household_render=run([binary,'--max-fps','10','--script','res://tools/household_preview.gd','--',f'out_dir={render_dir / "households"}'],logs/'packaged-household-render.log',out)
     if not re.search(r'HOUSEHOLD RENDER: 12 captures; \d+ checks, 0 failures',household_render):raise SystemExit('Household render gate failed')
     shutil.copy2(render_dir/'households/render-report.json',logs/'household-render-report.json')
     run([binary,'--script','res://tools/benchmark.gd','--','households',f'out_dir={render_dir / "household-benchmark"}'],logs/'packaged-household-benchmark.log',out)
     shutil.copy2(render_dir/'household-benchmark/benchmark.json',logs/'packaged-household-benchmark.json')
+    asset_render=run([binary,'--max-fps','10','--script','res://tools/asset_preview.gd','--',f'out_dir={render_dir / "assets"}'],logs/'packaged-asset-render.log',out)
+    if not re.search(r'ASSET RENDER: 12 captures; \d+ checks, 0 failures',asset_render):raise SystemExit('Asset render gate failed')
+    shutil.copy2(render_dir/'assets/render-report.json',logs/'asset-render-report.json')
+    run([binary,'--script','res://tools/benchmark.gd','--','assets',f'out_dir={render_dir / "asset-benchmark"}'],logs/'packaged-asset-benchmark.log',out)
+    shutil.copy2(render_dir/'asset-benchmark/benchmark.json',logs/'packaged-asset-benchmark.json')
+    provenance['asset_performance']={'source':json.loads((logs/'source-asset-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-asset-benchmark.json').read_text())}
     provenance['household_performance']={'source':json.loads((logs/'source-household-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-household-benchmark.json').read_text())}
     provenance['contact_performance']={'source':json.loads((logs/'source-contact-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-contact-benchmark.json').read_text())}
     provenance['render_capture_directory']=str(render_dir)
     provenance['performance']={'source':json.loads((logs/'source-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-benchmark.json').read_text())}
     provenance['campaign_performance']={'source':json.loads((logs/'source-campaign-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-campaign-benchmark.json').read_text())}
-    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1; save wrappers 1 (inactive) / 2 (contacts) / 3 (households); separate campaign slot'
+    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1, assets 1; wrappers 1 (inactive) / 2 (contacts) / 3 (households) / 4 (assets); separate campaign slot'
     models=out/f'{prefix}-Models'
     run(editor+['--script','res://tools/export_models.gd','--',f'out_dir={models}'],logs/'models.log',project)
     glbs=sorted(models.glob('*.glb'))
-    if len(glbs)!=24:raise SystemExit('Expected reference, hypothetical town and individual models')
+    if len(glbs)!=27:raise SystemExit('Expected reference, hypothetical town and individual models')
     provenance['models']={p.name:check_glb(p) for p in glbs}
     for name,sha in frozen.items():
         if digest(snapshot/name)!=sha:raise SystemExit(f'Frozen source changed: {name}')
@@ -143,10 +157,10 @@ def main():
     # Small independent archives preserve existing GLBs and avoid oversized uploads.
     contact={'growth_exchange_house.glb','Yenikapi-Hypothetical-Contact-Settlement.glb','hypothetical-contact-provenance.json'}
     artifacts=[app_zip,source_zip]
-    for group,count in [('Foundation',16),('Contact',2),('Household',6)]:
+    for group,count in [('Foundation',16),('Contact',2),('Household',6),('Asset',3)]:
         members=[]
         for path in models.iterdir():
-            category='Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
+            category='Asset' if path.name.startswith('asset-') else 'Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
             if path.is_file() and category==group:members.append(path)
         if len([p for p in members if p.suffix=='.glb'])!=count:raise SystemExit('Wrong model partition '+group)
         target=out/f'{prefix}-{group}-Models-{args.version}.zip'
@@ -159,7 +173,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':'48 written (14 reference + 12 tutorial + 10 contact + 12 household); manual visual review required before publication','glb_structure':'24 passed','zip_integrity':'5 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':'60 written (14 reference + 12 tutorial + 10 contact + 12 household + 12 assets); manual visual review required before publication','glb_structure':'27 passed','zip_integrity':'6 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))
