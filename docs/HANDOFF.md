@@ -37,7 +37,13 @@ parent campaign save formats are untouched. Source contact rules pass 302 checks
 across 80 seasons; existing governance now passes 706 checks. Rendered contact
 acceptance passes 58 checks and writes 10 views, including smaller-window controls,
 all entrances/paths, exact save resume and unchanged reference restoration.
-Release verification/publication results will be recorded after the frozen build.
+The payload is frozen at `a7cd121467f576e8fdd587f8bc981755575a8a9e`. The exact Mac app passes
+all three suites (1,256 checks), the original 85-check rendered tutorial and the
+58-check contact chapter. All 36 views were reviewed; prior 16 GLBs remain
+byte-identical in the expanded 18-model bundle. Contact performance on M3 Max is
+8.19–8.36 ms median / 9.34–9.62 ms p95. Parent 705 tests and map inspection pass;
+624 campaign/medieval files match starting main. See
+[verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.3.md).
 
 ## Yenikapı seasonal tutorial (0.2.0, October 4, 2026)
 
