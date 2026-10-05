@@ -44,6 +44,12 @@ byte-identical in the expanded 18-model bundle. Contact performance on M3 Max is
 8.19–8.36 ms median / 9.34–9.62 ms p95. Parent 705 tests and map inspection pass;
 624 campaign/medieval files match starting main. See
 [verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.3.md).
+The [0.3.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0) is public. All six anonymous download
+links match the tested files; the models are split into 16 foundation and two
+contact GLBs without changing their bytes. All eight older releases and latest
+stable `v0.14.2` remain unchanged. Main includes the frozen payload and subsequent
+documentation records; build artifacts are in `build/yenikapi-early-settlement-0.3.0-final/`.
+
 
 ## Yenikapı seasonal tutorial (0.2.0, October 4, 2026)
 

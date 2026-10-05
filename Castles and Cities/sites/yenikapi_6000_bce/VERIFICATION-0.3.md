@@ -4,6 +4,20 @@ Verified October 4, 2026. Frozen payload commit:
 `a7cd121467f576e8fdd587f8bc981755575a8a9e`. Later documentation commits record these results without
 changing the frozen app, model or editable-source ZIPs.
 
+## Public downloads
+
+The [0.3.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0) is published with its tag targeting the
+frozen commit above. All **six anonymous browser download URLs** were fetched:
+the Mac app, editable source, two model ZIPs, provenance and SHA-256 manifest.
+Downloaded hashes match GitHub's asset digests and the tested local files; all
+four delivered ZIPs pass integrity checks. The two model archives preserve every
+verified member. The [study README](README.md) links the four content downloads.
+
+All **eight previous releases** retain their original IDs, prerelease status and
+asset IDs/names/sizes/digests. Latest stable remains **`v0.14.2`**. Local publication
+evidence is `verification/publication.json` inside the final build directory;
+anonymous downloads are at `/tmp/yenikapi-published-downloads-0.3.0`.
+
 ## Gates and preservation
 
 - Village, governance and contact schemas/cross-references pass; the data suites
@@ -26,7 +40,7 @@ changing the frozen app, model or editable-source ZIPs.
   for byte. The dated village mesh remains
   `7f1edbf6ec717d61357b58ffd2237806139cdb59950b9fe5c18c16ee172c689a`.
 - Universal arm64/x86_64 structure and strict ad-hoc signature checks pass.
-  All **18 GLBs** and **three ZIPs** pass structural/integrity checks. The prior
+  All **18 GLBs** and **four published ZIPs** pass structural/integrity checks. The prior
   **16 GLBs are byte-identical** to 0.2.0; the meeting room and hypothetical
   contact settlement are the only added GLBs.
 
@@ -107,3 +121,16 @@ are independently versioned at 1. Reserved cargo, remaining seasons, office term
 and stable community/mission identifiers survive exact replay. See
 [GOVERNANCE.md](experience/GOVERNANCE.md) for the contract, original tutorial and
 new chapter. Medieval creative and parent campaign saves are never migrated.
+
+
+## Model download packaging
+
+The tested combined 62.4 MiB model archive repeatedly failed GitHub upload with
+TLS/connection errors. Publication therefore splits it into **Foundation Models**
+(16 retained GLBs and their provenance) and **Contact Models** (two new GLBs and
+contact provenance). Both ZIPs were integrity-tested and every extracted member
+compared byte for byte with the tested combined archive. No GLB geometry or
+material changed, and the Mac and editable-source archives are unchanged.
+The final provenance and checksum manifest describe four published ZIPs and retain
+the original combined archive's hash for traceability. The release builder still
+produces that combined archive locally; this is a delivery packaging step.

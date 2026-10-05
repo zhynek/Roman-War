@@ -95,3 +95,12 @@ Preserve 0.1.0 bytes and downloads; that tag remains the original village releas
 The contact chapter also has closed data schemas, five negative-case test groups,
 58 rendered interaction/navigation checks and in-flight save replay. Keep all
 0.1.0 and 0.2.0 release assets unchanged. Wrapper v2 is for active contacts only.
+
+
+For the 0.3.0 public release, repeated TLS upload failures on the combined model
+ZIP required two delivery archives: Foundation Models (the retained 16 GLBs) and
+Contact Models (the two additions). The local builder's combined ZIP remains the
+verification source. Each split member must match it byte for byte, both ZIPs must
+pass integrity checks, and provenance/artifact hashes must describe the actual
+published downloads. Never modify the tested Mac archive or GLB bytes to work
+around transport failures. See the site's VERIFICATION-0.3.md for this delivery.
