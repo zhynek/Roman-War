@@ -27,6 +27,27 @@ The circa-1200 Constantinople experience, its 17,561 reference plot records, Pan
 The prehistoric study is organized by site, without assigning a Byzantine realm
 to Neolithic inhabitants. There is no campaign integration.
 
+## Governing the village in 0.5.0
+
+Choose **Manage village assets → Begin asset governance** to start ordinary life
+in the early village. Inspect any building/shared asset or use the same **Assets**
+list from anywhere. Set six standing principles, commission finite initiatives,
+set crew budgets/priorities, inspect automatic allocation and resolve a season.
+Named stewards and watch leaders have separate authority; God coordinates both.
+Residents remain inspectable and receive work automatically, without citizen orders.
+
+The eight-step guide covers reserves, principles, commissioning, work allocation,
+forecast/results, optional pressure, recovery/learning and coordinated growth
+readiness. Stores, care arrangements, condition repairs and paid project staging
+respond to the same economy and household state. Existing town requirements remain
+authoritative. The optional warning remains authored fiction.
+
+Older saves keep manual allocation until **Adopt asset governance** is explicitly
+chosen in Rules. Their workforce plan, stocks, projects, paid orders and memories
+are preserved; active asset saves use wrapper 4. See the
+[gameplay, allocation and save contract](experience/ASSET_GOVERNANCE.md) and
+[0.5.0 verification](VERIFICATION-0.5.md). The original chapters below remain available.
+
 ## Household life in 0.4.0
 
 Start the seasonal tutorial, open **Households**, and begin the optional chapter
@@ -91,12 +112,14 @@ population automatically upgrades buildings.
 
 Run the independent data validators and their tests, Godot import,
 `tools/checks.gd`, `tools/governance_checks.gd`, `tools/neighbor_checks.gd` and
-`tools/household_checks.gd`. Run the household data validator and negative tests too.
+`tools/household_checks.gd` and `tools/asset_checks.gd`. Run the household and asset
+data validators and negative tests too.
 Run `tools/preview.gd` with an external `out_dir`, inspect its 14 captures, and run
 `tools/benchmark.gd` alone. The separate [release builder](../../tools/build_early_settlement.py)
 repeats these, the 12-view `tools/governance_preview.gd` tutorial and the
 10-view `tools/neighbor_preview.gd` contact chapter, and 12-view
-`tools/household_preview.gd` against the exact Mac package. Parent campaign gates remain mandatory.
+`tools/household_preview.gd` and 12-view `tools/asset_preview.gd` against the exact
+Mac package. Parent campaign gates remain mandatory.
 See [BUILDING.md](../../BUILDING.md) for the command and publication identity.
 The [0.4.0 verification record](VERIFICATION-0.4.md) covers household rules, all 48
 reviewed exact-app views, measured performance, preservation and seven public downloads.

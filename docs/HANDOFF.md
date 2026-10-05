@@ -11,6 +11,48 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı asset governance (0.5.0, October 5, 2026)
+
+**Manage village assets → Begin asset governance** starts ordinary village life.
+Seven groups of existing buildings/shared spaces expose one authoritative command
+system through world picking, the asset overview and an eight-step playable guide.
+Six persistent principles steer finite automatic adult work. Carriers/escorts,
+food, care, watch, repairs, learning and project crews compete; children never
+join the workforce. No civilian command/possession interface or tactical battle
+is introduced. Fictional steward/watch offices carry authority, ability and tenure;
+project authorship and unresolved responsibilities survive succession.
+
+Existing project IDs, queue, costs, refunds and completed fabric remain the single
+construction ledger. Initiatives add priority/crew/pause metadata. Coordinated
+housing advances cultivation, access and homes using ordinary commands and supply
+requirements. Asset condition/wear/repair has real named effects. Supply bands,
+repair areas, care and learning arrangements reflect authoritative state.
+[ASSET_GOVERNANCE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/ASSET_GOVERNANCE.md)
+is the detailed gameplay, authoring and save contract. All new offices, numerical
+policies and asset groupings are explicitly interpretive.
+
+Old saves gain inactive `assets: {}` and keep manual semantics until explicit
+adoption. Adoption retains the old workforce plan, paid orders, ongoing projects,
+stocks, people, contacts and household memory. Active assets require wrapper 4;
+wrappers 1/2/3 remain accepted. There is no active-to-manual switch. The dated
+reference, medieval creative saves and parent campaign remain independent.
+
+Frozen payload `7d7de8dc3828a2cc1797fae34bbd909b1ab2c0c3` passes 2,176 source and
+exact-app rule/save/geometry checks, 1,334 rendered chapter checks, 60 reviewed
+captures and four additional construction/repair/empty-stock views. Parent 705
+tests and rendered map pass, with stderr checked. All 641 protected files and
+24 retained GLBs are byte-identical. Three new asset specimens bring the total to
+27 across four model archives. Exact-app asset frame medians are 8.2–8.5 ms,
+p95 9.0–9.2 ms on M3 Max. Prepared scene readiness is 11.8 s from process start;
+order change 1.194 s, forced route rebuild 276 ms, unchanged refresh 0 ms. Cached
+figures and relevant-state fingerprints reduce avoidable rebuilds; first setup
+and some orders still pause. Intel rendering is unmeasured. See
+[verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.5.md).
+Build: `build/yenikapi-early-settlement-0.5.0-final/`; external QA paths are in that
+record. Future work can improve stalls and crowd avoidance; preserve the finite
+allocation and institutional continuity boundary. No warfare or continuous
+prehistoric-to-medieval chronology is implied.
+
 ## Yenikapı household life (0.4.0, October 5, 2026)
 
 The optional **Households** chapter begins at village scale, before the existing
