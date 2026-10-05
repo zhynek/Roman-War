@@ -7,21 +7,25 @@ Circa 6000 BCE is an approximate setting within the attested Neolithic occupatio
 not a foundation date or a claim to reconstruct the first village exactly.
 
 Open [experience/project.godot](experience/project.godot) in Godot 4.4.1,
-or use the separate [Yenikapı Early Settlement 0.4.0 — Household Life prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0).
+or use [Yenikapı Early Settlement 0.5.0 — Governing the Village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.5.0).
 Verified downloads:
-[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-macOS-0.4.0.zip),
-[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Foundation-Models-0.4.0.zip),
-[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Contact-Models-0.4.0.zip),
-[six furnished household models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Household-Models-0.4.0.zip),
-[editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/Yenikapi-Early-Settlement-Source-0.4.0.zip).
-All seven public assets were downloaded anonymously and verified against SHA-256
-digests; the three model bundles contain 24 GLBs. The 18 previous GLBs retain
-identical bytes. [Provenance](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/provenance.json) and
-[checksums](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.4.0/SHA256SUMS.txt) identify the tested package.
-The [0.3.0 contact chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0),
+[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-macOS-0.5.0.zip),
+[editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Source-0.5.0.zip),
+[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Foundation-Models-0.5.0.zip),
+[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Contact-Models-0.5.0.zip),
+[six household models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Household-Models-0.5.0.zip),
+[three asset-use models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Asset-Models-0.5.0.zip).
+All eight public assets were downloaded anonymously and verified against the
+local tested files, GitHub SHA-256 digests and the checksum manifest. Four model
+bundles contain 27 GLBs; all 24 previous models retain identical bytes.
+[Provenance](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/provenance.json) and
+[checksums](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/SHA256SUMS.txt) identify the exact package.
+The [0.4.0 household chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0),
+[0.3.0 contact chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0),
 [0.2.0 seasonal tutorial](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
 and [original 0.1.0 village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0)
-remain available with unchanged downloads.
+remain available with unchanged downloads. This separate prerelease leaves the
+campaign's stable latest release at `v0.14.2`.
 The circa-1200 Constantinople experience, its 17,561 reference plot records, Pantokrator district,
 16 architectural types, 26 landmarks and all earlier downloads remain intact.
 The prehistoric study is organized by site, without assigning a Byzantine realm
@@ -139,9 +143,9 @@ species or season. The walking controller is analytic and shares rendered wall,
 furniture and floor geometry; free flight intentionally passes through geometry.
 Far countryside is a lower-resolution backdrop beyond the walking envelope.
 The model ZIPs contain neutral-material GLBs, not shader appearance, lights,
-walking physics, CAD solids or automatic future stages. The 0.4.0 model downloads
-retain the 16 foundation and two contact GLBs, adding three furnished rooms each
-at danger and renewal for 24 in total. Only Apple Silicon
+walking physics, CAD solids or automatic future stages. The 0.5.0 model downloads
+retain all 24 earlier models and add stocked/empty store and repair-workroom
+specimens for 27 in total. Only Apple Silicon
 rendering/performance is exercised locally; the package also includes Intel code.
 
 The application is ad-hoc signed, not Developer ID notarized. macOS may require

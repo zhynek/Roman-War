@@ -104,3 +104,27 @@ Parent gates: `build/yenikapi-parent-gates-0.5.0/`; map QA:
 
 Public verification is recorded after publication below. The release target is
 this frozen payload; subsequent documentation commits do not change the archive.
+
+## Public download verification
+
+Published [Governing the Village 0.5.0](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.5.0) as a separate prerelease,
+never latest, targeting the frozen payload. Verified 2026-10-05T14:57:24.719779+00:00.
+All eight URLs were fetched anonymously after publication and match local tested
+bytes, GitHub digests and the checksum manifest; all six ZIPs pass integrity.
+All 10 earlier release IDs, asset IDs, names, sizes, digests and download URLs
+remain unchanged. Stable latest remains `v0.14.2`.
+
+The initial concurrent upload returned a duplicate-name response after accepting
+four correct files. Their digests were checked before uploading only the missing
+files. No uploaded or previous release asset was overwritten.
+
+| Download | Bytes | SHA-256 |
+|---|---:|---|
+| [provenance.json](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/provenance.json) | 71897 | `5b46010f1aecff23bb99e8a8a3d315766be66020011d302a419c2b8cd3512769` |
+| [SHA256SUMS.txt](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/SHA256SUMS.txt) | 770 | `d4a1ab0dd1715ba64499b25100bc347fbde1240d259bc643742bcff473218351` |
+| [Yenikapi-Early-Settlement-Asset-Models-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Asset-Models-0.5.0.zip) | 1460092 | `175c50a9df46cb01da3bbc689cda4d6f30de4e09b4fd6f489541839627ab28da` |
+| [Yenikapi-Early-Settlement-Contact-Models-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Contact-Models-0.5.0.zip) | 21913874 | `a9a20bac155aa4146389162a31a165623841707f70f20b23985f048fedf6440a` |
+| [Yenikapi-Early-Settlement-Foundation-Models-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Foundation-Models-0.5.0.zip) | 43556447 | `ef097e5a5a3cb6895eacb1c9780e34b678b2427b630ebca1e849b37559994ace` |
+| [Yenikapi-Early-Settlement-Household-Models-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Household-Models-0.5.0.zip) | 2736886 | `b8dccfd57aa3db9031ae86d0e7a8887d6a1b4fcdd6da18c494aa5b328e6b866b` |
+| [Yenikapi-Early-Settlement-macOS-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-macOS-0.5.0.zip) | 58601101 | `3912d76043ad8f046d1c7a70705b109a50798db000c409f4bdb07bf5d247e4e1` |
+| [Yenikapi-Early-Settlement-Source-0.5.0.zip](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Source-0.5.0.zip) | 488896 | `51e7c6aaf92914fbf024f7343b235b006a76250ed8d9b015e9537b01f0a0cd8c` |

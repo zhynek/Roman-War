@@ -37,6 +37,11 @@ stocks, people, contacts and household memory. Active assets require wrapper 4;
 wrappers 1/2/3 remain accepted. There is no active-to-manual switch. The dated
 reference, medieval creative saves and parent campaign remain independent.
 
+The [0.5.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.5.0) is public. All eight anonymous downloads
+match the tested files and digests. All ten previous releases/assets and stable
+latest `v0.14.2` are unchanged. Main contains the payload and subsequent verification
+and publication documentation; the release tag identifies the frozen app/source.
+
 Frozen payload `7d7de8dc3828a2cc1797fae34bbd909b1ab2c0c3` passes 2,176 source and
 exact-app rule/save/geometry checks, 1,334 rendered chapter checks, 60 reviewed
 captures and four additional construction/repair/empty-stock views. Parent 705
