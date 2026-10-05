@@ -141,8 +141,9 @@ func click_button(id:String) -> void:
 			check(true,"real control responds "+id);return
 	check(false,"real control did not respond "+id)
 func shot(name_:String) -> void:
-	for i in range(12):await process_frame
-	RenderingServer.force_draw(false)
+	for i in range(12):
+		await process_frame
+		RenderingServer.force_draw(true)
 	check(root.get_texture().get_image().save_png(out_dir.path_join(name_+".png"))==OK,"capture "+name_)
 	captures.append(name_);print("CAPTURE ",name_)
 

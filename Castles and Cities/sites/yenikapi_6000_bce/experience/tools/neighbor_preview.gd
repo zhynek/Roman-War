@@ -81,21 +81,27 @@ func run() -> void:
 	print("NEIGHBOR RENDER: ",captures.size()," captures; ",checks," checks, ",failures," failures")
 	quit(1 if failures else 0)
 func click_button(id:String) -> void:
-	for i in range(3):await process_frame
+	for i in range(6):await process_frame
 	var button:Button=app.campaign.find_child(id,true,false)
 	if button==null:check(false,"missing button "+id);return
 	var parent:Node=button.get_parent()
 	while parent!=null:
 		if parent is ScrollContainer:parent.ensure_control_visible(button)
 		parent=parent.get_parent()
-	for i in range(3):await process_frame
+	for i in range(6):await process_frame
 	var at:Vector2=button.get_global_rect().get_center()
+	# Scrolling/rebuilding changes the hovered control. Move the synthetic pointer
+	# before pressing, just as an actual player does, and let layout settle.
+	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;root.push_input(motion,true)
+	for i in range(3):await process_frame
+	at=button.get_global_rect().get_center()
 	for pressed in [true,false]:
 		var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0
 		root.push_input(event,true)
-		for i in range(3):await process_frame
+		for i in range(6):await process_frame
 func shot(name_:String) -> void:
-	for i in range(12):await process_frame
-	RenderingServer.force_draw(false)
+	for i in range(12):
+		await process_frame
+		RenderingServer.force_draw(true)
 	check(root.get_texture().get_image().save_png(out_dir.path_join(name_+".png"))==OK,"capture "+name_)
 	captures.append(name_);print("CAPTURE ",name_)

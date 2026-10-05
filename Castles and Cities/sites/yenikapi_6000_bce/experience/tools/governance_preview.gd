@@ -107,7 +107,10 @@ func click_button(id:String) -> void:
 		for i in range(3):await process_frame
 
 func shot(name_:String) -> void:
-	for i in range(12):await process_frame
-	RenderingServer.force_draw(false)
+	# Background macOS windows can process frames without drawing. Settle actual
+	# rendered frames after mesh/material replacement before reading the viewport.
+	for i in range(12):
+		await process_frame
+		RenderingServer.force_draw(true)
 	check(root.get_texture().get_image().save_png(out_dir.path_join(name_+".png"))==OK,"capture "+name_)
 	captures.append(name_);print("CAPTURE ",name_)

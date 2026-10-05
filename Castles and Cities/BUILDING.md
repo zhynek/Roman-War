@@ -116,6 +116,10 @@ The last set checks all resident routes at warning, danger, recovery, renewal an
 settled stages; doors, save resume, original reference restoration and small-window
 controls. Inspect every image outside the repository. Benchmark reference, town,
 contacts and household life sequentially with no competing Godot render process.
+The chapter capture tools settle actual rendered frames after mesh/material
+replacement; passive process frames can leave background macOS captures with
+unready materials. Synthetic pointer motion must precede a click after UI layout
+or scrolling. Neither QA accommodation changes simulation or production lighting.
 
 The model exporter retains all 18 previous GLBs and adds six separately named
 hypothetical furnished rooms (three each at danger and renewal). The builder
