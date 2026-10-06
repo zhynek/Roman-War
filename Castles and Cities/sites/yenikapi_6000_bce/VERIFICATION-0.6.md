@@ -181,4 +181,34 @@ Frozen payload: `b97106278e96d3561df63de800d2fc89edeebbd1`. Build time: `2026-10
 
 QA directory (outside git): `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.6.0-exact-qa-7q37a6ow`.
 Verification logs: `build/yenikapi-early-settlement-0.6.0-final/verification/`.
-Public download verification is recorded below after publication.
+Public download verification follows.
+
+
+## Public publication and preservation
+
+Published **2026-10-06T01:28:29Z** as
+[Yenikapı Early Settlement 0.6.0 — Land, Growth, and Lasting Consequences](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.6.0).
+Release ID `404219295`, tag `yenikapi-early-settlement-v0.6.0`, prerelease true,
+draft false. Its target is frozen payload `b97106278e96d3561df63de800d2fc89edeebbd1`;
+main additionally carries the verification and publication record. All nine
+uploads matched local size and GitHub digest before publication.
+
+All **nine public files** were then downloaded through ordinary unauthenticated
+HTTPS requests. Every byte count and SHA-256 matches the tested local artifact
+and GitHub digest; all seven downloaded ZIPs pass integrity checks, and all eight
+checksum-manifest entries match. The public Mac ZIP is therefore the exact app
+that passed the gates, and the source/model ZIPs are the tested frozen exports.
+The two manifest files have these identities:
+
+- `provenance.json`: 81490 bytes, SHA-256 `cbc70a04d3cee304db2ba6ab2bec52cb74d17e00e02ef880afd5c68a22c6b3c0`.
+- `SHA256SUMS.txt`: 884 bytes, SHA-256 `dc37ab46b874bbb7309bddcdc53581b4ec316a394b6f5dd12208482f27ee089f`.
+
+All **11 previous releases** retain their IDs, tags, names, bodies, prerelease
+status and every asset's ID, name, size, digest, timestamps and download URL.
+The stable latest endpoint still returns **`v0.14.2`**. No older release was edited
+or replaced. Medieval creative saves and village/campaign user saves were not
+opened or overwritten; QA used explicit temporary save paths.
+
+Public verification artifacts/logs: `/tmp/yenikapi-public-0.6.0/verification.json`
+and `/tmp/yenikapi-0.6-public-verification.log`. Earlier release metadata and
+protected-file hashes were captured before implementation and compared afterward.

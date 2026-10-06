@@ -19,20 +19,22 @@ Circa 6000 BCE is an approximate setting within the attested Neolithic occupatio
 not a foundation date or a claim to reconstruct the first village exactly.
 
 Open [experience/project.godot](experience/project.godot) in Godot 4.4.1,
-or use [Yenikapı Early Settlement 0.5.0 — Governing the Village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.5.0).
+or use [Yenikapı Early Settlement 0.6.0 — Land, Growth, and Lasting Consequences](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.6.0).
 Verified downloads:
-[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-macOS-0.5.0.zip),
-[editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Source-0.5.0.zip),
-[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Foundation-Models-0.5.0.zip),
-[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Contact-Models-0.5.0.zip),
-[six household models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Household-Models-0.5.0.zip),
-[three asset-use models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/Yenikapi-Early-Settlement-Asset-Models-0.5.0.zip).
-All eight public assets were downloaded anonymously and verified against the
-local tested files, GitHub SHA-256 digests and the checksum manifest. Four model
-bundles contain 27 GLBs; all 24 previous models retain identical bytes.
-[Provenance](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/provenance.json) and
-[checksums](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.5.0/SHA256SUMS.txt) identify the exact package.
-The [0.4.0 household chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0),
+[Mac application](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-macOS-0.6.0.zip),
+[editable source](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Source-0.6.0.zip),
+[16 foundation models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Foundation-Models-0.6.0.zip),
+[two contact models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Contact-Models-0.6.0.zip),
+[six household models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Household-Models-0.6.0.zip),
+[three asset-use models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Asset-Models-0.6.0.zip),
+[three land-growth models](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/Yenikapi-Early-Settlement-Land-Models-0.6.0.zip).
+All nine public assets were downloaded anonymously and verified against the
+local tested files, GitHub SHA-256 digests and the checksum manifest. Five model
+bundles contain 30 GLBs; all 27 previous models retain identical bytes.
+[Provenance](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/provenance.json) and
+[checksums](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.6.0/SHA256SUMS.txt) identify the exact package.
+The [0.5.0 governing chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.5.0),
+[0.4.0 household chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.4.0),
 [0.3.0 contact chapter](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.3.0),
 [0.2.0 seasonal tutorial](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.2.0)
 and [original 0.1.0 village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.1.0)

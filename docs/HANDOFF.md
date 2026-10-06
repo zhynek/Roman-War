@@ -55,8 +55,10 @@ their bytes; three new models bring the total to 30. Exact-app comparison is
 profile. Fabric-completion resolution still takes 7.7 seconds. Asset opening
 improves from the published 13.58 to 9.49 seconds; its representative order still
 takes 1.077 seconds. These measurements are M3 Max observations, not universal
-performance promises. Publication and anonymous-download hashes follow in the
-verification record; the release tag targets the frozen payload, not later docs.
+performance promises. The [0.6.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.6.0) is public. All nine anonymous downloads
+match the tested artifacts and GitHub digests. All 11 prior releases and stable
+latest `v0.14.2` are unchanged. The release tag targets the frozen payload; main
+also carries the verification and publication documentation.
 
 ## Yenikapı asset governance (0.5.0, October 5, 2026)
 
