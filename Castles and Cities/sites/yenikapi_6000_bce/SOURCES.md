@@ -231,3 +231,30 @@ harvest adjustments, two-household choice, access upkeep and repair benefits are
 **explicit gameplay interpretation**. They explain consequences, not historical
 optimization. Repair retains original fabric and identity; it does not imply
 that every early settlement grew into a later city or followed one ideal plan.
+
+## Work, relationships and preparedness (0.7.0)
+
+Read 2026-10-06: Ingrid Bertin et al., “First evidence of early neolithic archery
+from Cueva de los Murciélagos (Albuñol, Granada) revealed through combined chemical
+and morphological analysis,” *Scientific Reports* 14, 29247 (2024).
+[Original research](https://www.nature.com/articles/s41598-024-77224-w).
+The abstract, dating and material-identification sections describe reed/wood
+shafts, bindings, adhesives, feathers and probable sinew bowstrings. Studied
+Neolithic objects date to the late sixth/early fifth millennium BCE; one object
+is Bronze Age. This is a distant Iberian comparison, later than the nominal
+village, and not proof of a Yenikapı bow recipe or defensive organization.
+The phase therefore defers bows and arrows instead of treating timber as finished
+archery equipment. No exact material species or manufacturing recipe is imported.
+
+The existing direct-site wood evidence and regional domestic-learning/household
+comparisons remain the basis for using wood and practical shared activity.
+**Gameplay interpretation:** named woodland areas, seasonal recovery/extraction,
+fuel amounts, shaping experience, household pairing, shared-room schedules,
+plant-binding preparation, wooden watch kits, posts, practice, wear and protection
+values are authored. The kit is a shaped staff with carrying/repair bindings, not
+a recovered weapon assemblage or claim about a local army. Its finite materials
+and labor expose investment and maintenance. Prepared sets bundle wood and
+bindings; preparation work includes gathering and working those bindings.
+The two work sites were selected beside the existing procedural woodland, not
+from a recovered resource map. No dated reference object or medieval fabric is
+replaced. There is no claimed continuous chronology into Constantinople.

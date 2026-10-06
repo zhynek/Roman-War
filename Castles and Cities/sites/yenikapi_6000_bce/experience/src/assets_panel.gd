@@ -23,6 +23,7 @@ func inspect(id: String) -> void:
 	panel.tabs.current_tab=1
 
 func reason(error: String) -> String:
+	if panel.living_panel!=null and panel.living_panel.copy.errors.has(error):return panel.living_panel.copy.errors[error]
 	if panel.land_panel.copy.errors.has(error):return panel.land_panel.copy.errors[error]
 	return str(copy.ui.errors.get(error,panel.copy.get(error,panel.household_panel.copy.errors.get(error,error))))
 
@@ -131,7 +132,7 @@ func allocation(body: VBoxContainer,f: Dictionary,asset: String="") -> void:
 	body.add_child(panel.label(copy.ui.allocation,18))
 	for request in f.assets.requests:
 		if asset!="" and request.asset!=asset:continue
-		var title: String=panel.rules.projects.get(request.id,{}).get("title",copy.ui.jobs.get(request.id,request.id))
+		var title: String=panel.rules.projects.get(request.id,{}).get("title",panel.living_panel.copy.activities.get(request.id,copy.ui.jobs.get(request.id,request.id)))
 		body.add_child(panel.label(copy.ui.request.format({"title":title,"filled":request.filled,"wanted":request.wanted,"reason":copy.ui.get(request.reason,request.reason)}),14))
 	body.add_child(panel.label(copy.ui.allocation_order,13))
 

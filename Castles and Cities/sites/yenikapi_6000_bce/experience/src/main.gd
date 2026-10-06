@@ -234,6 +234,17 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not resident.is_empty():
 					campaign.household_panel.inspect_resident(resident)
 					return
+			if campaign_mode and campaign.rules.living.active(campaign.state):
+				var subject: String=campaign_view.living_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
+				if subject.is_empty():
+					var picked: Dictionary=world.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
+					var object_id: String=picked.get("id","")
+					if object_id=="yk_house_06":subject="workroom"
+					elif object_id.begins_with("yk_store"):subject="store"
+					else:
+						for home in campaign.rules.content.households:
+							if home.building_id==object_id and campaign.rules.living.subjects.has(home.id):subject=home.id
+				if not subject.is_empty():campaign.living_panel.inspect(subject);return
 			if campaign_mode and campaign.rules.land.active(campaign.state) and is_instance_valid(campaign_view.land_view):
 				var site: String=campaign_view.land_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
 				if not site.is_empty():campaign.land_panel.inspect(site);return
@@ -337,7 +348,9 @@ func show_campaign(state: Dictionary,rules,force: bool = false) -> void:
 	var key: String=JSON.stringify([state.completed,staging,empty_supplies])
 	var reference_matches: bool=not campaign_mode and state.completed.is_empty() and staging.is_empty() and not empty_supplies
 	if not reference_matches and (force or not campaign_mode or key!=_fabric_key):
-		_rebuild_world(View.snapshot(reference_data,state,rules))
+		var config: Dictionary=View.snapshot(reference_data,state,rules)
+		if not world.update_fabric(config):_rebuild_world(config)
+		else:data=config
 	_fabric_key=key
 	campaign_mode=true
 	if not is_instance_valid(campaign_view):

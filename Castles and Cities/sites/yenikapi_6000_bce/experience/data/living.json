@@ -1,0 +1,314 @@
+{
+  "version": 1,
+  "title": "A Living, Readable Village",
+  "areas": [
+    {
+      "id": "west_wood",
+      "title": "West woodland edge",
+      "at": [
+        -88,
+        -28
+      ],
+      "capacity": 60,
+      "recovery": 6,
+      "yield": 3,
+      "distance_cost": 0,
+      "body": "The nearer woodland supplies ordinary construction, repairs and fuel. Six abstract units recover each season; extraction is limited by standing material. No individual tree represents a stock unit. The outline marks a working clearing beside the wider stand, not a tree-by-tree harvesting boundary."
+    },
+    {
+      "id": "north_wood",
+      "title": "Upper woodland",
+      "at": [
+        -42,
+        -82
+      ],
+      "capacity": 72,
+      "recovery": 6,
+      "yield": 5,
+      "distance_cost": 2,
+      "body": "More usable wood, but the longer unmaintained approach costs two units per worker. A staffed northern post supports the approach and removes that loss. Heavy use still depletes this stand. The outline marks the work clearing; trees and usable material belong to the surrounding stand."
+    }
+  ],
+  "households": [
+    {
+      "id": "sim_household_02",
+      "woodland": 2,
+      "shaping": 0,
+      "body": "We have experience choosing usable branches. Working beside people who shape them could reduce rejected pieces."
+    },
+    {
+      "id": "sim_household_04",
+      "woodland": 0,
+      "shaping": 2,
+      "body": "We practice shaping wood and checking bindings. Suitable pieces and repeated shared work matter more than owning a room."
+    }
+  ],
+  "posts": [
+    {
+      "id": "landing_post",
+      "title": "Landing watch",
+      "at": [
+        27,
+        -8
+      ],
+      "project": "watch_shelter",
+      "body": "The shelter observes the landing approach. Watch condition, ordinary watch staffing and maintained kits determine preparedness."
+    },
+    {
+      "id": "north_post",
+      "title": "Northern approach watch",
+      "at": [
+        -32,
+        -48
+      ],
+      "project": "living_north_post",
+      "body": "A supported observation point links the village to upper woodland. Two home watch workers support its longer approach; those adults cannot gather or build."
+    }
+  ],
+  "projects": [
+    {
+      "id": "living_shared_room",
+      "title": "Prepare shared wood work",
+      "body": "Adapt the use of the existing working room with a sorting rack and two working places. Shared sessions occupy two construction places and need two adults plus one timber for support each season. The room alone teaches nobody.",
+      "role": "steward",
+      "wood": 8,
+      "work": 12,
+      "at": [
+        -26,
+        -9
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": []
+    },
+    {
+      "id": "living_watch_kits",
+      "title": "Equip the local watch",
+      "body": "Commission four wooden watch kits: shaped staffs, carrying bindings and repair pieces. Pay two prepared sets as well as timber; finite project labor assembles and checks them. This is hypothetical preparedness, not evidence of an excavated weapon type.",
+      "role": "watch",
+      "wood": 2,
+      "work": 12,
+      "at": [
+        27,
+        -8
+      ],
+      "requires": [
+        "watch_shelter"
+      ],
+      "effects": {},
+      "changes": []
+    },
+    {
+      "id": "living_north_post",
+      "title": "Support the northern observation point",
+      "body": "Prepare a modest observation and approach station. It needs two ordinary home watch workers and maintained watch facilities to improve upper-woodland access.",
+      "role": "watch",
+      "wood": 6,
+      "work": 12,
+      "at": [
+        -32,
+        -48
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "living_woodland_approach",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -10,
+                  -48
+                ],
+                [
+                  -30,
+                  -43
+                ],
+                [
+                  -38,
+                  -57
+                ],
+                [
+                  -42,
+                  -82
+                ]
+              ],
+              "width": 2.4,
+              "label": "Supported upper woodland approach"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "discoveries": [
+    {
+      "id": "woodland_interest",
+      "subjects": [
+        "sim_household_02",
+        "west_wood"
+      ],
+      "condition": "woodland",
+      "title": "Choosing workable wood",
+      "body": "The west yard household has practical woodland experience. Their knowledge is useful when paired with shaping practice; inspection itself produces nothing."
+    },
+    {
+      "id": "shaping_interest",
+      "subjects": [
+        "sim_household_04",
+        "workroom"
+      ],
+      "condition": "shaping",
+      "title": "Shaping and checking",
+      "body": "The upper household has shaping experience. A shared session in the working room can bring these complementary practices together."
+    },
+    {
+      "id": "cooperation",
+      "subjects": [
+        "sim_household_02",
+        "sim_household_04",
+        "workroom"
+      ],
+      "condition": "meeting",
+      "title": "A shared preparation proposal",
+      "body": "After working together, the two households propose sustained sorting and shaping. Authorize cooperative sessions; after two supported seasons, the same two timber can yield two prepared sets instead of one. Two adults and one support timber remain necessary."
+    },
+    {
+      "id": "north_access",
+      "subjects": [
+        "north_wood",
+        "north_post"
+      ],
+      "condition": "always",
+      "title": "The longer approach",
+      "body": "The upper stand loses two units per worker to its unsupported approach. A northern post and two home watch workers can remove that limit, but extra extraction depletes the stand. Compare retained woodland with the nearer sustainable harvest."
+    },
+    {
+      "id": "equipment_wear",
+      "subjects": [
+        "landing_post",
+        "north_post",
+        "store"
+      ],
+      "condition": "wear",
+      "title": "Bindings and shafts need care",
+      "body": "Deployed kits lose one serviceable set every fourth season. A repair worker consumes one prepared set and one opening timber to restore one kit; training and repairs compete with other work."
+    }
+  ],
+  "ui": {
+    "begin": "Begin living village",
+    "adopt": "Adopt work and preparedness",
+    "tab": "Village",
+    "intro": "Govern from above, investigate any subject here or in the world, then invest through ordinary commands. Every result resolves seasonally. Looking and waiting give no supplies.",
+    "migration": "Explicit adoption adds finite woodland, two-timber seasonal fuel demand, preparation, household experience and kit wear. Existing stocks, layouts, paid queues, principles and memories survive. Older modes remain unchanged until adoption. Save a backup for comparison.",
+    "inspect": "Ask about current work",
+    "visit": "Visit this place",
+    "overview": "Current commitments and next season",
+    "timing": "Standing orders can change before resolution. Commissioned timber and prepared sets are already paid; cancellation refunds only the unused share. Forecast uses opening stock for fuel, preparation and repairs; new gathering cannot fund those bills this season.",
+    "summary": "Opening timber {wood} \u00b7 prepared sets {blanks} \u00b7 serviceable kits {kits}\nAssigned timber adults {workers} \u00b7 extraction {harvest} \u00b7 fuel {fuel}/{fuel_need} \u00b7 preparation timber {prepare_wood} \u00b7 shared support {support} \u00b7 kit repair timber {repair_wood}\nExpected prepared sets +{prepared}; kits +{repaired}, wear \u2212{wear}; equipped watch {equipped}; readiness {training}/4.",
+    "area": "Standing material {stock}/{capacity} \u00b7 expected extraction {harvest} \u00b7 recovery {recovery} \u00b7 next standing {next_stock}\nYield per adult {yield}; approach loss {distance}. Current assigned adults: {names}.",
+    "household": "Woodland practice {woodland}/8 \u00b7 shaping practice {shaping}/8. Grows only through assigned work; these are shared practical experiences, not permanent professions.",
+    "relationship": "Supported meetings {meetings}; cooperative seasons {practice}/2. Both participating households must retain an available adult.",
+    "report": "Resolved season {turn}: timber gathered {harvest}; fuel {fuel}; prepared sets {prepared}; repaired kits {repaired}; kits worn {wear}; equipped watch {equipped}.",
+    "journal": "Planning record \u2014 retained discoveries",
+    "none": "No discovery recorded for this subject yet. Ask again after meaningful seasonal work, not repeated clicks.",
+    "orders": "Standing work and watch decisions",
+    "area_order": "Woodland allocation",
+    "prepare_order": "Preparation schedule",
+    "prepare_options": [
+      "No preparation",
+      "Ordinary household preparation",
+      "Shared room sessions"
+    ],
+    "cooperate": "Support the discovered cooperation",
+    "train": "Commit an additional watch adult to training",
+    "repair": "Maintain watch kits",
+    "patrol": "Watch focus",
+    "on": "On",
+    "off": "Off",
+    "recover": "Recovery: suspend preparation/training, pause unfinished commissions and restore reserve priority. Keep ordinary food, care and watch. Fuel is capped by opening timber; missed fuel costs wellbeing, never creates debt. Cancel unfinished kit work to recover its unused material share.",
+    "growth": "The existing town milestone and land growth-readiness review still apply. Explore Land for compact/outward choices.",
+    "ready": "Review this step",
+    "done": "Observation chapter complete. Continue governing, inspect the planning record, or review land growth.",
+    "workroom": "Shared working room",
+    "store": "Material store",
+    "workers": "Assigned adults",
+    "cost": "{wood} timber \u00b7 {work} work points",
+    "kits_cost": "Plus 2 prepared sets paid now; project work assembles 4 kits.",
+    "knowledge": "Conversation and observations",
+    "busy": "Updating village presentation\u2026",
+    "training": "Commit an additional watch adult to training",
+    "store_note": "Prepared sets bundle selected wood and gathered plant bindings. One full preparation duty includes collecting and working the bindings; no unlimited purchased parts exist. Store miniatures are stock markers, not individual inventories. Kits here record the whole inventory; the post shows its allocation."
+  },
+  "errors": {
+    "living_missing": "Adopt work and preparedness first, after land planning.",
+    "living_started": "This village already uses these rules.",
+    "living_unknown": "That subject or order is unavailable.",
+    "living_room": "Complete the shared working-room preparation first.",
+    "living_materials": "Two prepared sets are needed in opening stores.",
+    "living_discovery": "Investigate the relevant subject and support a real shared session first.",
+    "living_review": "Complete the described action before reviewing this step."
+  },
+  "factors": {
+    "living_fuel": "Household fuel shortfall",
+    "living_equipment": "Maintained equipment and practice",
+    "living_coverage": "Staffed observation coverage"
+  },
+  "activities": {
+    "living_prepare": "Selecting, shaping and preparing bindings",
+    "living_repair": "Checking staffs and renewing bindings",
+    "living_training": "Shared watch practice",
+    "timber": "Obtaining usable wood",
+    "watch": "Observing the assigned approach"
+  },
+  "tutorial": [
+    {
+      "title": "1 \u00b7 Follow the wood",
+      "body": "Inspect either woodland area. Read its assigned adults, stock and next-season extraction; the overview and the world tell the same story.",
+      "condition": "area"
+    },
+    {
+      "title": "2 \u00b7 Compare competing uses",
+      "body": "Inspect the material store. Construction is paid now; fuel, repairs and preparation use opening stock at resolution. Revise standing work before committing.",
+      "condition": "store"
+    },
+    {
+      "title": "3 \u00b7 Meet practical knowledge",
+      "body": "Ask about woodland and shaping work at the west yard and upper households, or their work areas. Find a complementary interest.",
+      "condition": "interests"
+    },
+    {
+      "title": "4 \u00b7 Make room for cooperation",
+      "body": "Commission the shared room and schedule a shared session. After a real staffed season, ask at the working room and support the proposal. It costs places, material and finite adults.",
+      "condition": "cooperate"
+    },
+    {
+      "title": "5 \u00b7 Prepare the watch",
+      "body": "Prepare material sets, commission the watch shelter and its kit initiative. Compare landing coverage with the northern approach; train only when reserves permit.",
+      "condition": "kits"
+    },
+    {
+      "title": "6 \u00b7 Compare expectation and result",
+      "body": "Resolve a season with equipment. Read actual extraction, fuel and wear beside the next forecast. Watching the activities grants no additional output.",
+      "condition": "result"
+    },
+    {
+      "title": "7 \u00b7 Keep a way back",
+      "body": "Turn preparation off and review freed workers before resuming it. Pausing queues and training can also restore food reserves without erasing completed fabric.",
+      "condition": "recover"
+    }
+  ]
+}

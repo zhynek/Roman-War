@@ -10,12 +10,16 @@ var elapsed: float = 0.0
 var last_refresh_profile: Dictionary={}
 var world
 var _asset_state: Dictionary={}
+var _living_state: Dictionary={}
+var _shared_room: bool=false
+var _living_wood: int=0
 var _asset_allocation: Dictionary={}
 var _land_adapted: bool=false
 var _supply_level: int=-1
 var _signature: String = ""
 var _geometry_signature: String = ""
 var _nav_signature: int = 0
+var _world_revision: int=-1
 var _owned: Array = []
 var _buildings: Dictionary = {}
 var _homes: Dictionary = {}
@@ -63,7 +67,8 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	# Only actual duties, visible preparations, stock bands and household memory
 	# invalidate actors. A changed target or priority with identical assignments
 	# no longer replans every citizen or rebuilds their geometry.
-	var fingerprint: String=JSON.stringify([tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
+	var life_visual: Array=[state.living.get("blanks",0),state.living.get("kits",0),rules.has_project(state,"living_shared_room"),hash(world.solids),mini(6,int(state.wood)/10) if rules.living.active(state) else 0]
+	var fingerprint: String=JSON.stringify([life_visual,world.revision,tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
 	if fingerprint==_signature:
 		last_refresh_profile={"unchanged":true};return
 	_signature=fingerprint
@@ -74,11 +79,14 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	for home in rules.content.households:
 		if _buildings.has(home.building_id):_homes[home.id]=home.building_id
 	_text=rules.households.content.get("presentation",{})
+	_living_state=state.living if rules.living.active(state) else {}
+	_shared_room=rules.has_project(state,"living_shared_room")
+	_living_wood=int(life_visual[4])
 	_asset_state=state.assets if rules.assets.active(state) else {}
 	_asset_allocation=allocation_
 	_land_adapted=rules.has_project(state,"land_adapt_workroom")
 	_supply_level=supply
-	var appearance: String=JSON.stringify([_land_adapted,stage,orders,_supply_level,bands,_asset_allocation.get("repair","")])
+	var appearance: String=JSON.stringify([[life_visual[0],life_visual[1],life_visual[2],life_visual[4]],world.revision,_land_adapted,stage,orders,_supply_level,bands,_asset_allocation.get("repair","")])
 	if appearance!=_geometry_signature:
 		_clear_overlay()
 		_interiors(stage,orders)
@@ -88,6 +96,10 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 			_routes.clear();_cells.clear();_edges.clear();_segments.clear()
 			_index_obstacles()
 			_nav_signature=collider_signature
+	# External work/post colliders may change without interior appearance changing.
+	if hash(world.solids)!=_nav_signature:
+		_routes.clear();_cells.clear();_edges.clear();_segments.clear();_heights.clear()
+		_index_obstacles();_nav_signature=hash(world.solids)
 	_make_stations(rules)
 	_actor_materials()
 	var by_person: Dictionary={}
@@ -160,6 +172,10 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 						if task.asset=="workroom":target_id="household_workshop"
 						elif task.asset=="stores":target_id="household_store"
 						elif task.asset=="homes":target_id="household_home"
+			if rules.living.active(state):
+				if task.get("duty","") == "living_prepare":target_id="household_workshop";activity="living_prepare";pose="work";carry=false
+				elif task.get("duty","") in ["living_repair","living_training"]:activity=task.duty;target_id="task_"+person.id;pose="work";carry=false
+				elif job=="watch":target_id="task_"+person.id;activity="watch"
 			if home_data.stress>=65 and job=="care":reason="hunger" if state.food<people.size() else stage
 		if infant:target_id="home_"+home_id;activity="child_near_home";reason="child";pose="rest";carry=false
 		if not stations.has(target_id):target_id="home_"+home_id
@@ -186,6 +202,9 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		var figure: Dictionary=_figure(person,child,carry)
 		var node: Node3D=figure.node
 		add_child(node)
+		if rules.living.active(state) and not child and job=="timber":
+			var tool:=MeshInstance3D.new();var shape:=BoxMesh.new();shape.size=Vector3(.055,.45,.05);tool.mesh=shape;tool.material_override=_materials.get("skin");tool.position=Vector3(.25,.86,.22);node.add_child(tool)
+			var head:=MeshInstance3D.new();var stone:=BoxMesh.new();stone.size=Vector3(.18,.09,.07);head.mesh=stone;head.material_override=world.materials.stone;head.position=Vector3(.29,1.06,.22);node.add_child(head)
 		var begin_at_goal: bool=child or i%3!=1
 		var departure_index: int=mini(2,route.size()-1)
 		node.position=route[-1] if begin_at_goal else route[departure_index]
@@ -195,6 +214,8 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		routines.append(routine)
 		_pose(routine,false,0)
 		figure_us+=Time.get_ticks_usec()-figure_start
+	life_visual[3]=hash(world.solids)
+	_signature=JSON.stringify([life_visual,world.revision,tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
 	last_refresh_profile={"setup_us":setup_us,"journey_us":journey_us,"figure_us":figure_us,"total_us":Time.get_ticks_usec()-profile_start}
 
 func _label(table: String,key: String) -> String:
@@ -270,6 +291,13 @@ func _store(b: Dictionary,stage: String,orders: Dictionary) -> void:
 	geo.box(Vector3(1.35,.10,1.25),Vector3(.32,.03,.51),"mat")
 	for i in range(5 if _supply_level!=0 else 0):geo.box(Vector3(1.26+i*.042,.125,1.24),Vector3(.019,.012,.11),"grain")
 
+	if not _living_state.is_empty():
+		for i in range(_living_wood):geo.rod(Vector3(-1.1,.74+i*.065,z),Vector3(1.1,.74+i*.065,z),.035,"wood",.03,6)
+		for i in range(int(_living_state.blanks)):
+			geo.rod(Vector3(-.8+i*.13,1.0,z-.1),Vector3(-.8+i*.13,1.0,z+.25),.025,"wood_light",.023,6)
+		for i in range(int(_living_state.kits)):
+			geo.rod(Vector3(-.7+i*.25,.48,z-.1),Vector3(-.7+i*.25,.48,z+.3),.025,"wood",.025,6)
+
 func _workroom(b: Dictionary,stage: String,orders: Dictionary) -> void:
 	var geo=world._geo
 	_shelf(Vector3(-1.91,0,-.85),.47,1.5,1.25)
@@ -300,6 +328,21 @@ func _workroom(b: Dictionary,stage: String,orders: Dictionary) -> void:
 		for i in range(3):
 			geo.box(Vector3(1.82,.095,1.42-i*.21),Vector3(.27,.027,.17),"mat")
 			geo.dome(Vector3(1.82,.11,1.42-i*.21),.065,.055,"clay")
+
+	_living_workroom()
+
+func _living_workroom() -> void:
+	if _living_state.is_empty():return
+	var geo=world._geo
+	# Preparation pieces stay along the wall, outside circulation and original mats.
+	if _shared_room:
+		world._solid_box(Vector3(-1.87,.39,-1.0),Vector3(.25,.12,1.1),"wood")
+		for i in range(mini(6,int(_living_state.blanks))):
+			geo.rod(Vector3(-1.87,.50+i*.06,-1.45),Vector3(-1.87,.50+i*.06,-.58),.024,"wood_light",.021,6)
+		for i in range(3):
+			for j in range(8):
+				var a: float=j*TAU/8;var b: float=(j+1)*TAU/8
+				geo.rod(Vector3(-1.85+cos(a)*.07,.5,-1.3+i*.24+sin(a)*.07),Vector3(-1.85+cos(b)*.07,.5,-1.3+i*.24+sin(b)*.07),.008,"mat",.008,4)
 
 func _screen(at: Vector3,width: float,height: float) -> void:
 	var geo=world._geo

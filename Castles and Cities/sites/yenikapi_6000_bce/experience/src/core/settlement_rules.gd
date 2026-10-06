@@ -7,14 +7,18 @@ var neighbors
 var households
 var assets
 var land
+var living
+const Living=preload("res://src/core/living_rules.gd")
 const Land = preload("res://src/core/land_rules.gd")
 const Assets = preload("res://src/core/asset_rules.gd")
 const Households = preload("res://src/core/household_rules.gd")
 const Neighbors = preload("res://src/core/neighbor_rules.gd")
 
-func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}, land_config: Dictionary = {}) -> void:
+func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}, land_config: Dictionary = {}, living_config: Dictionary = {}) -> void:
 	content = canonical(config)
 	balance = canonical(tuning)
+	living=Living.new(canonical(living_config),balance.get("living",{}))
+	content.projects.append_array(living.content.get("projects",[]))
 	land = Land.new(canonical(land_config),balance.get("land",{}))
 	content.projects.append_array(land.content.get("projects",[]))
 	content.households.append_array(land.content.get("households",[]))
@@ -23,6 +27,7 @@ func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary =
 	neighbors = Neighbors.new(canonical(contacts_config),balance.get("neighbors",{}))
 	households = Households.new(canonical(household_config),balance.get("households",{}))
 	for proposal in land.content.get("proposals",[]):assets.project_assets[proposal.id]=proposal.asset
+	for project in living.content.get("projects",[]):assets.project_assets[project.id]="watch" if project.role=="watch" else "workroom"
 	for project in content.projects:
 		projects[project.id] = project
 
@@ -37,7 +42,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}, "living": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -45,6 +50,7 @@ func new_state() -> Dictionary:
 	return state
 
 func ensure_state_keys(state: Dictionary) -> void:
+	if not state.has("living"):state.living={}
 	if not state.has("land"):state.land={}
 	if not state.has("assets"): state.assets={}
 	if not state.has("contacts"): state.contacts={}
@@ -133,6 +139,7 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("living_"):return living.command(state,action,self)
 	if kind.begins_with("land_"):return land.command(state,action,self)
 	if kind.begins_with("asset_"): return assets.command(state,action,self)
 	if kind=="plan" and assets.active(state):return {"error":"asset_managed"}
@@ -174,8 +181,11 @@ func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 				if not has_project(state, requirement): return {"error": "prerequisite"}
 			var land_error: String=land.blocked(state,id,self)
 			if not land_error.is_empty():return {"error":land_error}
+			var living_error: String=living.blocked(state,id,self)
+			if not living_error.is_empty():return {"error":living_error}
 			if state.wood < project.wood: return {"error": "insufficient_wood"}
 			if assets.active(state) and id in assets.content.housing_steps.slice(1) and int(state.food)<people(state).size()*int(assets.balance.minimum_commission_reserve):return {"error":"asset_supplies"}
+			living.commission(next,id)
 			next.wood -= int(project.wood)
 			next.queue.append({"id": id, "progress": 0})
 			if assets.active(next):
@@ -190,6 +200,7 @@ func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 				var project: Dictionary = projects[item.id]
 				if not permitted(state, project.role): return {"error": "authority"}
 				var refund: int = int(project.wood) * (int(project.work) - int(item.progress)) / int(project.work)
+				living.cancel(next,item,self)
 				next.wood += refund
 				next.queue.remove_at(i)
 				if assets.active(next):assets._record(next,project.role,"cancel",item.id,self)
@@ -240,6 +251,11 @@ func forecast(state: Dictionary) -> Dictionary:
 		factors.wellbeing.append({"id":"asset_upkeep","value":-int(assets.balance.wellbeing_loss) if state.assets.conditions.homes<assets.balance.condition_threshold else 0})
 		factors.cooperation.append({"id":"asset_upkeep","value":-int(assets.balance.cooperation_loss) if state.assets.conditions.yard<assets.balance.condition_threshold else 0})
 		factors.security.append({"id":"asset_upkeep","value":-int(assets.balance.security_loss) if state.assets.conditions.watch<assets.balance.condition_threshold else 0})
+	var life: Dictionary=living.forecast(state,allocation_,self) if living.active(state) else {}
+	if not life.is_empty():
+		factors.wellbeing.append({"id":"living_fuel","value":int(life.fuel_penalty)})
+		factors.security.append({"id":"living_equipment","value":int(life.equipment_security)})
+		factors.security.append({"id":"living_coverage","value":int(life.coverage)})
 	var stocks: Dictionary = {}
 	for key in factors:
 		var total: int = 0
@@ -265,6 +281,9 @@ func forecast(state: Dictionary) -> Dictionary:
 		output.work=0
 		for value in allocation_.projects.values():output.work+=int(value.work)
 	if land.active(state):output.land=land_effects
+	if living.active(state):
+		output.living=life
+		output.wood=int(life.harvest)+int(cargo.wood)
 	return output
 
 func move_stock(current: int, target: int) -> int:
@@ -290,6 +309,7 @@ func advance(state: Dictionary) -> Dictionary:
 	if assets.active(state):
 		assets.advance(next,state,f,self)
 		land.advance(next,state,f)
+		living.advance(next,state,f,self)
 		work=0
 	while work > 0 and not next.queue.is_empty():
 		var item: Dictionary = next.queue[0]
@@ -464,6 +484,7 @@ func validate_state(value: Variant) -> bool:
 	if not neighbors.validate(state,self): return false
 	if not assets.validate(state,self):return false
 	if not land.validate(state,self):return false
+	if not living.validate(state,self):return false
 	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false
 	if assets.active(state):

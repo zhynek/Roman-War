@@ -11,6 +11,31 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı living village (0.7.0, October 2026)
+
+**Begin living village** connects finite woodland, opening-stock fuel/preparation,
+shared household work and maintained watch equipment to the existing automatic
+allocator, paid queue and seasonal command boundary. Targeted overview and world
+inspection share stable subjects and a persistent discovery record. No camera,
+idle time, animation or individual citizen commands can generate production.
+Two fictional households can recognize and support complementary practice through
+a paid shared-room initiative and sustained staffed sessions. Local watch focus,
+finite wooden kits, practice and wear compete with productive work. Bows remain
+deferred after reviewing distant archery evidence; all watch institutions and
+quantities are explicitly hypothetical.
+
+Older saves add only inactive `living: {}`. Explicit adoption preserves layout,
+queues, principles, offices and memories but introduces finite woodland and fuel.
+Active living saves use wrapper 6; older wrappers retain their meanings. Parent,
+medieval and reference saves remain independent. Read
+[LIVING_VILLAGE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIVING_VILLAGE.md)
+and [verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.7.md).
+The release builder includes all old gates plus living checks, actual-input guide,
+rendered layouts and exact-app performance, and retains all earlier model bytes.
+Terrain sampling is cached exactly; unchanged footprints support incremental
+fabric replacement. Footprint changes still rebuild the terrain and can pause.
+Publication status and measured limits belong in the verification record.
+
 ## Yenikapı land planning (0.6.0, October 2026)
 
 **Manage village assets → Begin land planning** starts the same finite village.

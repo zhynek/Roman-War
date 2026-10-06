@@ -1053,6 +1053,146 @@
         "minimum_reserve"
       ],
       "additionalProperties": false
+    },
+    "living": {
+      "type": "object",
+      "properties": {
+        "fuel": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "fuel_penalty": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "prepare_wood": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "prepare_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "shared_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "support_wood": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "cooperative_yield": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "practice_needed": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "experience_max": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "initial_blanks": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "blank_capacity": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "kit_capacity": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "kit_inputs": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "repair_wood": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "repair_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "training_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "training_max": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "wear_period": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "equipment_security": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "coverage_security": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "north_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "fuel",
+        "fuel_penalty",
+        "prepare_wood",
+        "prepare_workers",
+        "shared_workers",
+        "support_wood",
+        "cooperative_yield",
+        "practice_needed",
+        "experience_max",
+        "initial_blanks",
+        "blank_capacity",
+        "kit_capacity",
+        "kit_inputs",
+        "repair_wood",
+        "repair_workers",
+        "training_workers",
+        "training_max",
+        "wear_period",
+        "equipment_security",
+        "coverage_security",
+        "north_workers",
+        "priority"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -1130,7 +1270,8 @@
     "neighbors",
     "households",
     "assets",
-    "land"
+    "land",
+    "living"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

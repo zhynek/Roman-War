@@ -115,7 +115,26 @@ func run() -> void:
 			room.free()
 		FileAccess.open(out_dir.path_join("land-"+layout+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical spatial strategy from the same village, 32 real seasons; no resource grants. Dated reference is separate.","state":land_state,"fabric":land_data.objects,"models":"Neutral static geometry; original shaders, autonomous citizens and seasonal rules remain in application/source."},"  "))
 		model.free();view.free();land_world.free()
-	print("VILLAGE MODEL EXPORT PASS: 30 GLBs")
+	var living_rules=preload("res://src/core/settlement_rules.gd").new(_read("governance"),_read("balance"),_read("neighbors"),_read("households"),_read("assets"),_read("land"),_read("living"))
+	var living_state: Dictionary=preload("res://tools/living_driver.gd").at_season(living_rules,20)
+	var living_data: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,living_state,living_rules)
+	var living_world=load("res://src/village.gd").new();root.add_child(living_world);living_world.build(living_data)
+	var living_view=preload("res://src/campaign_view.gd").new();root.add_child(living_view);living_view.refresh(living_state,living_rules,living_world)
+	for specimen in ["village","working-room","northern-post"]:
+		var model:=Node3D.new();model.name="LivingVillage";root.add_child(model)
+		var origin:=Transform3D.IDENTITY
+		if specimen=="working-room":origin=living_world.object_nodes.yk_house_06.transform
+		if specimen=="northern-post":origin=living_world.object_nodes.living_detail_north_post.transform
+		for id in living_world.object_nodes:
+			if specimen=="working-room" and id not in ["yk_house_06","household_interior_yk_house_06"]:continue
+			if specimen=="northern-post" and id!="living_detail_north_post":continue
+			var original: MeshInstance3D=living_world.object_nodes[id]
+			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*original.transform;copy.mesh=neutral_mesh(original.mesh);model.add_child(copy)
+		if not write_model(model,out_dir.path_join("living-"+specimen+".glb")):quit(1);return
+		model.free()
+	FileAccess.open(out_dir.path_join("living-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical paid work, shared preparation and wooden watch kits; not archaeological weapon reconstruction","state":living_state,"fabric":living_data.objects,"models":"Neutral geometry only. Citizens, seasonal rules and original shaders remain in the app/source."},"  "))
+	living_view.free();living_world.free()
+	print("VILLAGE MODEL EXPORT PASS: 33 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

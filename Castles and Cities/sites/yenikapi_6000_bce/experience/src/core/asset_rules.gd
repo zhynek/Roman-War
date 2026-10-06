@@ -182,10 +182,14 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 		if not spec.paused:_request(requests,item.id,"building",int(spec.crew),3+int(spec.priority),project_assets[item.id])
 	_request(requests,"timber","timber",int(balance.timber_workers),5,"workroom")
 	if state.households.orders.learning:_request(requests,"learning","care",int(rules.households.balance.care_minimum),6,"workroom")
+	rules.living.requests(state,requests,rules)
 	requests.sort_custom(func(a,b):return a.priority<b.priority if a.priority!=b.priority else a.id<b.id)
 	var remaining: int=adults
 	var places: int=int(land_effects.work) if rules.land.active(state) else adults
 	var timber_left: int=int(state.wood)
+	if rules.living.active(state):
+		rules.living.prepare_allocation(state,result)
+		timber_left-=int(result.living.fuel)
 	for request in requests:
 		var count: int=mini(remaining,int(request.wanted))
 		request.reason="allocated" if count==request.wanted else "labor"
@@ -200,6 +204,9 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 			if rules.land.proposals.has(request.id) and rules.land.proposals[request.id].requires_access and not rules.land.access_ready(state,result,rules):count=0;request.reason="access"
 			if count>places:count=places;request.reason="space"
 			places-=count
+		if rules.living.active(state) and request.id.begins_with("living_") and not result.projects.has(request.id):
+			var allocated: Dictionary=rules.living.allocate(state,request,count,timber_left,places,result,rules)
+			count=int(allocated.count);timber_left=int(allocated.wood);places=int(allocated.places)
 		# Partial special crews contribute ordinary care, but cannot activate an order.
 		request.filled=count;remaining-=count
 		result.plan[request.job]+=count
@@ -258,12 +265,23 @@ func assignments(state: Dictionary,rules) -> Array:
 	var adults: Array=rules.people(state,true)
 	var result: Array=[]
 	var index: int=0
+	var ordered: Array=[]
+	for i in range(adults.size()):ordered.append(adults[(i+int(state.turn))%adults.size()])
+	if rules.living.active(state) and state.living.prepare==2 and allocation_.living.shared:
+		var start: int=0
+		for request in allocation_.requests:
+			if request.id=="living_prepare":break
+			start+=int(request.filled)
+		for i in range(rules.living.content.households.size()):
+			for j in range(ordered.size()):
+				if ordered[j].household==rules.living.content.households[i].id:
+					var person: Dictionary=ordered[start+i];ordered[start+i]=ordered[j];ordered[j]=person;break
 	for request in allocation_.requests:
 		for i in range(int(request.filled)):
-			var person: Dictionary=adults[(index+int(state.turn))%adults.size()]
+			var person: Dictionary=ordered[index]
 			result.append(_task(state,person,request,rules));index+=1
 	while index<adults.size():
-		result.append(_task(state,adults[(index+int(state.turn))%adults.size()],{"id":"food","job":"food","asset":"fields"},rules));index+=1
+		result.append(_task(state,ordered[index],{"id":"food","job":"food","asset":"fields"},rules));index+=1
 	return result
 
 func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Dictionary:
@@ -280,6 +298,7 @@ func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Di
 	if request.id in ["carriers","escorts"]:job="travel";destination=rules.neighbors.content.meeting_at
 	# A bounded subset of ordinary food duty illustrates existing waterside work.
 	if request.id=="food" and int(person.id.trim_prefix("citizen_"))%4==0:destination=assets.landing.at
+	destination=rules.living.destination(state,request,destination)
 	return {"id":person.id,"job":job,"from":home.duplicate(),"to":destination.duplicate(),"duty":request.id,"asset":request.asset}
 
 func validate(state: Dictionary,rules) -> bool:
@@ -323,7 +342,15 @@ func validate(state: Dictionary,rules) -> bool:
 		if not rules.whole(decision.get("turn"),0,int(state.turn)) or decision.get("office") not in ["steward","watch"] or not decision.get("author") is String or not decision.get("kind") is String or not decision.get("target") is String:return false
 		if decision.author!="" and rules.person_by_id(state,decision.author).is_empty():return false
 		if not decision.get("details") is Dictionary:return false
-		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access"]:return false
+		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access","living_order"]:return false
+		if decision.kind=="living_order":
+			if decision.target not in ["area","prepare","cooperate","training","repair","patrol"] or not decision.details.has("value"):return false
+			var value_: Variant=decision.details.value
+			if decision.target=="area" and value_ not in rules.living.areas:return false
+			if decision.target=="patrol" and value_ not in ["landing_post","north_post"]:return false
+			if decision.target=="prepare" and not rules.whole(value_,0,2):return false
+			if decision.target in ["cooperate","training","repair"] and not value_ is bool:return false
+			continue
 		for value in decision.details.values():
 			if not value is bool and not rules.whole(value,0,int(balance.max_crew)):return false
 	if not a.report is Dictionary:return false

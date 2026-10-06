@@ -1,5 +1,7 @@
 # Land, Growth, and Lasting Consequences — 0.6.0
 
+**0.7.0:** [A Living, Readable Village](LIVING_VILLAGE.md) connects wood, household knowledge, shared work and local preparedness. Old saves adopt explicitly; active rules use wrapper 6.
+
 Choose **Manage village assets → Begin land planning**. This starts the same
 30-person hypothetical village with its original 100 provisions and 30 timber.
 God governs both fictional offices; a selected steward governs civic land and

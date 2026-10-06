@@ -187,3 +187,20 @@ and the unchanged stable latest. Never replace previously published bytes.
 The active spatial save is wrapper 5. Old saves remain inactive until explicit
 adoption and retain their old fixed-location projects, paid work and workforce
 mode. See the site's `experience/LAND_GROWTH.md` and `VERIFICATION-0.6.md`.
+
+## A Living, Readable Village (0.7.0)
+
+Use `build_early_settlement.py --version 0.7.0` with fresh parent gates and a clean
+committed checkout. The builder adds living schema/negative tests, deterministic
+comparison/save checks, 21 actual-input chapter captures and source/exact-app
+interaction and frame profiles. Every earlier gate remains required. Inspect all
+100 captures; check both compact/outward full paths and the woodland/post picking.
+The exact Mac app must exercise the seven-step guide with visible controls.
+
+The exporter retains all 30 previous GLBs and adds a hypothetical living village,
+shared working room and northern post (33 total). The Living Models archive is
+separate from the five older model groups. Eight ZIPs plus provenance and checksums
+make ten downloads. Compare retained models byte-for-byte with 0.6.0, publish as
+`yenikapi-early-settlement-v0.7.0` with `--prerelease --latest=false`, and verify
+anonymous downloads, all previous release metadata/assets and stable `v0.14.2`.
+Wrapper 6 applies only after explicit living-rule adoption. See LIVING_VILLAGE.md.

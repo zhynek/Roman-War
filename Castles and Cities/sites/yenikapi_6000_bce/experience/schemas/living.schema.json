@@ -1,0 +1,680 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 10000
+    },
+    "areas": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "at": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            }
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "recovery": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "yield": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "distance_cost": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "at",
+          "capacity",
+          "recovery",
+          "yield",
+          "distance_cost",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "households": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "woodland": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "shaping": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "id",
+          "woodland",
+          "shaping",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "posts": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "at": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            }
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "at",
+          "project",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projects": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "role": {
+            "enum": [
+              "steward",
+              "watch"
+            ]
+          },
+          "wood": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            },
+            "maxItems": 2048
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "effects": {
+            "type": "object",
+            "properties": {
+              "food_yield": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "storage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "security": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "wellbeing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "cooperation": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "housing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              }
+            },
+            "additionalProperties": false
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "added",
+                    "altered",
+                    "retained",
+                    "replaced",
+                    "removed",
+                    "abandoned",
+                    "subdivided"
+                  ]
+                },
+                "before": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "after": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "before",
+                "after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "role",
+          "wood",
+          "work",
+          "at",
+          "requires",
+          "effects",
+          "changes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "discoveries": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "subjects": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "string",
+              "maxLength": 10000
+            }
+          },
+          "condition": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "id",
+          "subjects",
+          "condition",
+          "title",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "begin": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "adopt": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "tab": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "intro": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "migration": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "inspect": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "visit": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "overview": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "timing": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "area": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "household": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "relationship": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "report": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "journal": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "none": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "orders": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "area_order": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "prepare_order": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "prepare_options": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "cooperate": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "train": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "repair": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "patrol": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "on": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "off": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "recover": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "growth": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "ready": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "done": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "workroom": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "store": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "workers": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "cost": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "kits_cost": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "knowledge": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "busy": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "training": {
+          "type": "string"
+        },
+        "store_note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "begin",
+        "adopt",
+        "tab",
+        "intro",
+        "migration",
+        "inspect",
+        "visit",
+        "overview",
+        "timing",
+        "summary",
+        "area",
+        "household",
+        "relationship",
+        "report",
+        "journal",
+        "none",
+        "orders",
+        "area_order",
+        "prepare_order",
+        "prepare_options",
+        "cooperate",
+        "train",
+        "repair",
+        "patrol",
+        "on",
+        "off",
+        "recover",
+        "growth",
+        "ready",
+        "done",
+        "workroom",
+        "store",
+        "workers",
+        "cost",
+        "kits_cost",
+        "knowledge",
+        "busy",
+        "training",
+        "store_note"
+      ],
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "living_missing": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_started": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_unknown": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_room": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_materials": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_discovery": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_review": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "living_missing",
+        "living_started",
+        "living_unknown",
+        "living_room",
+        "living_materials",
+        "living_discovery",
+        "living_review"
+      ],
+      "additionalProperties": false
+    },
+    "factors": {
+      "type": "object",
+      "properties": {
+        "living_fuel": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_equipment": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_coverage": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "living_fuel",
+        "living_equipment",
+        "living_coverage"
+      ],
+      "additionalProperties": false
+    },
+    "activities": {
+      "type": "object",
+      "properties": {
+        "living_prepare": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_repair": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "living_training": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "timber": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "watch": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "living_prepare",
+        "living_repair",
+        "living_training",
+        "timber",
+        "watch"
+      ],
+      "additionalProperties": false
+    },
+    "tutorial": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "condition": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "title",
+          "body",
+          "condition"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "title",
+    "areas",
+    "households",
+    "posts",
+    "projects",
+    "discoveries",
+    "ui",
+    "errors",
+    "factors",
+    "activities",
+    "tutorial"
+  ],
+  "additionalProperties": false
+}

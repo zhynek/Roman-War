@@ -1,5 +1,9 @@
 # Yenikapı · early settlement, circa 6000 BCE
 
+**0.7.0 — A Living, Readable Village: Work, Relationships, and Preparedness.**
+Choose Begin living village. [Gameplay and save contract](experience/LIVING_VILLAGE.md).
+
+
 ## Land, Growth, and Lasting Consequences — 0.6.0
 
 Choose **Manage village assets → Begin land planning**. Compare compact homes

@@ -216,5 +216,29 @@
     "access_priority": 3,
     "unserved_wellbeing": 8,
     "minimum_reserve": 1
+  },
+  "living": {
+    "fuel": 2,
+    "fuel_penalty": 4,
+    "prepare_wood": 2,
+    "prepare_workers": 1,
+    "shared_workers": 2,
+    "support_wood": 1,
+    "cooperative_yield": 2,
+    "practice_needed": 2,
+    "experience_max": 8,
+    "initial_blanks": 0,
+    "blank_capacity": 12,
+    "kit_capacity": 4,
+    "kit_inputs": 2,
+    "repair_wood": 1,
+    "repair_workers": 1,
+    "training_workers": 1,
+    "training_max": 4,
+    "wear_period": 4,
+    "equipment_security": 3,
+    "coverage_security": 4,
+    "north_workers": 2,
+    "priority": 4
   }
 }

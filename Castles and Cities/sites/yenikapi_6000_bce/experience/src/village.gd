@@ -9,6 +9,8 @@ var floors: Array = []
 var object_nodes: Dictionary = {}
 var stats: Dictionary = {}
 var _geo
+var _height_samples: Dictionary={}
+var revision: int=0
 var _origin := Vector3.ZERO
 var _yaw: float = 0.0
 var _owner: String = ""
@@ -64,12 +66,15 @@ func natural_height(x: float, z: float) -> float:
 	return lerpf(-.6+maxf(0,(-z-40)*.03),land,bank)
 
 func height_raw(x: float,z: float) -> float:
+	var key:=Vector2(x,z)
+	if _height_samples.has(key):return _height_samples[key]
 	var h: float = natural_height(x,z)
 	for b in buildings:
 		var p: Vector2 = Vector2(x-float(b.at[0]),z-float(b.at[1])).rotated(deg_to_rad(float(b.yaw)))
 		var excess: float = maxf(absf(p.x)-float(b.size[0])*.5,absf(p.y)-float(b.size[1])*.5)
 		var blend: float = 1.0-smoothstep(.5,3.1,excess)
 		if blend>0.0: h=lerpf(h,natural_height(b.at[0],b.at[1]),blend)
+	_height_samples[key]=h
 	return h
 
 func surface_height(x: float,z: float) -> float:
@@ -566,3 +571,48 @@ func pick(origin: Vector3,direction: Vector3,max_distance: float = 180.0) -> Dic
 			var distance:float=start.distance_to(hit)
 			if distance<best:best=distance;selected=box.owner
 	return {"id":selected,"distance":best}
+
+# Reuse unchanged fabric when the ground terraces are identical. Changed footprints
+# still take the complete terrain path; caches cannot outlive their geometry.
+func update_fabric(config: Dictionary) -> bool:
+	var old_ground: Array=[]
+	var new_ground: Array=[]
+	for b in buildings:old_ground.append([b.id,b.at,b.size,b.yaw])
+	for b in config.objects:
+		if b.kind=="building":new_ground.append([b.id,b.at,b.size,b.yaw])
+	old_ground.sort_custom(func(a,b):return a[0]<b[0])
+	new_ground.sort_custom(func(a,b):return a[0]<b[0])
+	if old_ground!=new_ground:return false
+	var old: Dictionary={}
+	var fresh: Dictionary={}
+	for item in data.objects:old[item.id]=item
+	for item in config.objects:fresh[item.id]=item
+	var changed: Array=[]
+	for id in old:
+		if not fresh.has(id) or fresh[id]!=old[id]:changed.append(id)
+	for id in fresh:
+		if not old.has(id):changed.append(id)
+	if data.get("presentation_food",-1)==0 or config.get("presentation_food",-1)==0:
+		if data.get("presentation_food",-1)!=config.get("presentation_food",-1):
+			for b in buildings:
+				if b.use=="storage" and b.id not in changed:changed.append(b.id)
+	for id in changed:
+		if object_nodes.has(id):object_nodes[id].free();object_nodes.erase(id)
+	solids=solids.filter(func(box):return box.owner not in changed)
+	floors=floors.filter(func(floor_):return floor_.record.id not in changed)
+	data=config;buildings=[]
+	for b in config.objects:
+		if b.kind=="building":buildings.append(b)
+	for id in changed:
+		if not fresh.has(id):continue
+		var record: Dictionary=fresh[id]
+		match record.kind:
+			"building":_building(record)
+			"path":_path(record)
+			"boundary":_boundary(record)
+			"field":_field(record)
+			"work_area":_work_area(record)
+			"landing":_landing(record)
+	revision+=1
+	stats={"authored_objects":data.objects.size(),"buildings":buildings.size(),"collision_pieces":solids.size(),"mesh_instances":object_nodes.size()}
+	return true

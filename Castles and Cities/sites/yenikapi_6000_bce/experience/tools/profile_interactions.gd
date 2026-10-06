@@ -19,6 +19,14 @@ func run() -> void:
 	measure("priority",{"kind":"asset_project","id":"land_adapt_workroom","priority":1,"crew":4,"paused":false})
 	measure("compare",{"kind":"land_inspect","id":"north_west"})
 	start=Time.get_ticks_msec();p.resolve_season();results.season_ms=Time.get_ticks_msec()-start
+	start=Time.get_ticks_msec();p.living_panel.begin();results.open_living_ms=Time.get_ticks_msec()-start
+	measure("living_household",{"kind":"living_inspect","id":"sim_household_02"})
+	measure("living_area",{"kind":"living_inspect","id":"north_wood"})
+	measure("living_post",{"kind":"living_inspect","id":"north_post"})
+	measure("living_relationship",{"kind":"living_inspect","id":"workroom"})
+	measure("living_priority",{"kind":"living_order","id":"prepare","value":1})
+	start=Time.get_ticks_msec();p.resolve_season();results.living_ordinary_season_ms=Time.get_ticks_msec()-start
+	start=Time.get_ticks_msec();app.campaign_view.life._routes.clear();app.campaign_view.life._signature="";app.show_campaign(p.state,p.rules);results.living_routes_ms=Time.get_ticks_msec()-start
 	print("INTERACTION PROFILE ",JSON.stringify(results))
 	quit()
 func measure(id: String,action: Dictionary) -> void:
