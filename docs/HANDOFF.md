@@ -40,7 +40,11 @@ supplemental checks and three journal/store views. All data and parent 705-test/
 gates pass. Thirty retained GLBs remain byte-identical; three new specimens bring
 the total to 33. Exact-app adaptation completion improved from 7.711 to 3.177 s;
 ordinary living seasons measured 598 ms, inspections about 13 ms, routes 126 ms.
-Remaining synchronous pauses and publication status are in the verification record.
+Remaining synchronous pauses are detailed in the verification record.
+The [0.7.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.7.0)
+is public: all ten anonymous downloads match tested bytes and GitHub digests;
+all 12 prior releases / 65 assets and stable latest `v0.14.2` remain unchanged.
+The tag pins the frozen implementation; main also contains the completed record.
 
 ## Yenikapı land planning (0.6.0, October 2026)
 

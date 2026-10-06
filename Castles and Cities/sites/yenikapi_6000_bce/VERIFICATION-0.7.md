@@ -56,7 +56,7 @@ script errors as well as nonzero status. All 643 protected non-document files
 remain unchanged; the protected build guide has its intended new release section.
 
 Frozen exact-application and retained-model verification passed as recorded below.
-Public download checks follow publication separately.
+Public downloads and preservation also pass; the publication record follows below.
 
 
 ## Exact packaged application
@@ -155,3 +155,37 @@ Logs: `build/yenikapi-early-settlement-0.7.0-final/verification/`.
 The release tag targets the frozen payload; main additionally records completed
 verification and publication. No tactical combat, individual hauling, bow recipe,
 new population milestone or continuous historical development is claimed.
+
+
+## Public publication and preservation
+
+Published **2026-10-06T03:12:21Z** as
+[Yenikapı Early Settlement 0.7.0 — A Living, Readable Village](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.7.0).
+Release ID `404272867`, tag `yenikapi-early-settlement-v0.7.0`, prerelease true,
+draft false. The remote tag and release target both identify frozen payload
+`041c161c708969b06f9599beda37029c62bd9f94`. Main additionally carries verification and this
+publication record; release bytes remain frozen.
+
+All **ten uploads** matched the tested local size and GitHub SHA-256 digest before
+publication. GitHub interrupted several uploads with TLS/connection errors;
+retries completed in the new draft, without editing older releases or changing
+local artifacts. All **ten public files** were then downloaded by unauthenticated
+HTTPS. Their byte counts and SHA-256 values match the tested local artifacts and
+GitHub digests. All eight downloaded ZIPs pass integrity tests and all nine
+checksum-manifest entries match. Thus the public Mac app, models and editable
+source are exactly the tested downloads. Manifest identities:
+
+- `provenance.json`: 89790 bytes, SHA-256 `4a1d914ac4926e35975a805f2d787d251b3596cecfbbbd9197b11b909570392a`.
+- `SHA256SUMS.txt`: 1000 bytes, SHA-256 `333b5d8cf237594874074a39dbdd1d0a8e26356e434ad6d927552bb12f3563ba`.
+
+All **12 previous releases and 65 previous assets** retain their IDs, names,
+bodies, tags, publication flags, sizes, digests, timestamps and download URLs
+(where applicable). The stable latest endpoint still returns **`v0.14.2`**.
+The new tag targets the frozen payload rather than the later documentation commit.
+No earlier download was replaced. Parent, medieval creative and village saves
+were never opened or overwritten; acceptance used explicit temporary save paths.
+
+Anonymous verification: `/tmp/yenikapi-public-0.7.0/verification.json`.
+Preservation snapshots: `/tmp/yenikapi-0.7-baseline/releases.json`,
+`/tmp/yenikapi-0.7-releases-after.json`, and
+`/tmp/yenikapi-0.7-latest-after.json`.
