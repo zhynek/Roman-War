@@ -136,18 +136,18 @@ func run() -> void:
 	living_view.free();living_world.free()
 	var incident_rules=preload("res://src/core/settlement_rules.gd").new(_read("governance"),_read("balance"),_read("neighbors"),_read("households"),_read("assets"),_read("land"),_read("living"),_read("incidents"))
 	for season in [6,8,10]:
-		var state: Dictionary=preload("res://tools/incident_driver.gd").at_season(incident_rules,season)
-		var snapshot_: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,state,incident_rules)
-		var scene=load("res://src/village.gd").new();root.add_child(scene);scene.build(snapshot_)
-		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(state,incident_rules,scene)
+		var incident_state: Dictionary=preload("res://tools/incident_driver.gd").at_season(incident_rules,season)
+		var snapshot_: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,incident_state,incident_rules)
+		var incident_world=load("res://src/village.gd").new();root.add_child(incident_world);incident_world.build(snapshot_)
+		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(incident_state,incident_rules,incident_world)
 		var model:=Node3D.new();model.name="IncidentPlace";root.add_child(model)
-		for id in scene.object_nodes:
+		for id in incident_world.object_nodes:
 			if not id.begins_with("incident_detail_"):continue
-			var original: MeshInstance3D=scene.object_nodes[id]
+			var original: MeshInstance3D=incident_world.object_nodes[id]
 			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=original.transform;copy.mesh=neutral_mesh(original.mesh);model.add_child(copy)
 		if not write_model(model,out_dir.path_join("incident-approach-%d.glb"%season)):quit(1);return
-		FileAccess.open(out_dir.path_join("incident-%d-provenance.json"%season),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical approach signs, disruption and repair; no documented disaster claimed","state":state,"models":"Original neutral procedural signs; rules and animated citizens remain in app/source."},"  "))
-		model.free();view.free();scene.free()
+		FileAccess.open(out_dir.path_join("incident-%d-provenance.json"%season),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical approach signs, disruption and repair; no documented disaster claimed","state":incident_state,"models":"Original neutral procedural signs; rules and animated citizens remain in app/source."},"  "))
+		model.free();view.free();incident_world.free()
 	print("VILLAGE MODEL EXPORT PASS: 36 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
