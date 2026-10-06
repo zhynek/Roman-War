@@ -1,4 +1,4 @@
-# Yenikapı — Early Settlement 0.4.0
+# Yenikapı — Early Settlement 0.7.0
 
 **0.7.0:** [A Living, Readable Village](LIVING_VILLAGE.md) connects wood, household knowledge, shared work and local preparedness. Old saves adopt explicitly; active rules use wrapper 6.
 

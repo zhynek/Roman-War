@@ -34,7 +34,13 @@ The release builder includes all old gates plus living checks, actual-input guid
 rendered layouts and exact-app performance, and retains all earlier model bytes.
 Terrain sampling is cached exactly; unchanged footprints support incremental
 fabric replacement. Footprint changes still rebuild the terrain and can pause.
-Publication status and measured limits belong in the verification record.
+Frozen payload `041c161c708969b06f9599beda37029c62bd9f94` passes 5,769 source
+and exact-app checks, 3,090 rendered checks with 100 reviewed views, plus seven
+supplemental checks and three journal/store views. All data and parent 705-test/map
+gates pass. Thirty retained GLBs remain byte-identical; three new specimens bring
+the total to 33. Exact-app adaptation completion improved from 7.711 to 3.177 s;
+ordinary living seasons measured 598 ms, inspections about 13 ms, routes 126 ms.
+Remaining synchronous pauses and publication status are in the verification record.
 
 ## Yenikapı land planning (0.6.0, October 2026)
 
