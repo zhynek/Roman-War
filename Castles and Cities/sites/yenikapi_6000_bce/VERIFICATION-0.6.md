@@ -1,9 +1,8 @@
 # Land, Growth, and Lasting Consequences — 0.6.0 verification
 
 Baseline: clean main, fetched origin at
-`211f7ec4ee4ba3507fc9c13bc708f3cbb4b65518`. This record accompanies the payload
-freeze; exact-package and public-download results are completed in the subsequent
-publication record on main. No unrun release gate is claimed here.
+`211f7ec4ee4ba3507fc9c13bc708f3cbb4b65518`. Frozen payload: `b97106278e96d3561df63de800d2fc89edeebbd1`.
+The build and subsequent publication checks below identify the exact artifacts.
 
 ## Implemented acceptance
 
@@ -40,7 +39,7 @@ small-window upkeep recovery, both layouts and the provisioning conversion.
 The paced input run records opening 11.157 s, comparison 10–11 ms, commission
 3.208 s (including click/settling waits), ordinary reserve change 12 ms, unchanged
 refresh 1 ms, route rebuild 336 ms and the sampled noncompletion season 1.731 s.
-These are source observations; exact-app results are still a separate release gate.
+These source observations are distinct from the exact-app results below.
 
 Parent data and import pass; the full campaign suite reports 705 tests, zero
 failures. The rendered map gate passes. Logs retain stdout/stderr and require
@@ -80,3 +79,106 @@ separated in SOURCES.md and LAND_GROWTH.md. No recovered land tenure, continuous
 city genealogy, new monarchy or tactical combat is implied. General relocation,
 free placement, household negotiation, individual hauling and crowd avoidance
 remain outside this phase. Mac signing is ad hoc; it is not notarized.
+
+
+## Exact packaged application
+
+Frozen source and the exact exported universal Mac app each pass **3,394 checks**:
+248 reference + 709 governance + 302 neighbor + 310 household + 608 asset +
+779 land + 438 spatial geometry. All retained and new schema/negative tests pass.
+The parent has 705 passing tests and a passing rendered map. The exact app's
+ad-hoc signature and both `arm64` / `x86_64` architectures were verified.
+All final logs were scanned for script errors, including stderr on zero exits.
+
+Exact-app acceptance passes **2,252 interaction/navigation checks** (85 tutorial,
+58 contact, 714 household, 477 asset, 918 land), plus the dated-reference render
+gate. All **79 captures** were manually inspected: 14 reference, 12 tutorial,
+10 contact, 12 household, 12 asset and 19 land. They cover both spatial layouts,
+paid staging, adaptation and retained furnishings, paths/entrances, ordinary life,
+pressure, recovery, lost cultivation and restored food margin, and 1280×800
+controls. Final captures required no fallback or packaged-code modification.
+
+The source/packaged reference mesh hash is unchanged:
+`7f1edbf6ec717d61357b58ffd2237806139cdb59950b9fe5c18c16ee172c689a`.
+The 572-file protected hash manifest passes. A complete diff boundary check also
+confirms no parent code/data/test or medieval source changes. All **27 retained
+GLBs are byte-identical** to 0.5.0. Three new neutral specimens bring the total to
+30. Seven ZIPs pass integrity checks; model partition members match raw exports.
+
+A supplemental external driver ran against the unchanged exact app and passed
+**12 further checks and two reviewed captures** at 1280×800. It built the compact
+settlement using public commands, reviewed all five planning steps through actual
+buttons, and displayed growth readiness and guide completion. No project, resource
+or tutorial progress was injected into the state. Driver/log/captures are under
+`/tmp/yenikapi-land-guide-acceptance.gd` and `/tmp/yenikapi-0.6-exact-guide*`.
+
+## Final interaction measurements
+
+Same M3 Max, Godot 4.4.1 Forward+, 1600×1000. These are observations, not universal
+requirements. Paced acceptance uses 10 FPS to settle background Metal materials;
+benchmark frame timing is uncapped with 120 warmup and 180 measured intervals per
+view and screenshot readback excluded. The runs used no competing Godot renderer.
+
+| Asset observation | Published exact 0.5 | Exact 0.6 |
+|---|---:|---:|
+| Prepared sample from process start | 11.814 s | 11.506 s |
+| Actual-input chapter opening, including waits | 13.582 s | 9.491 s |
+| Representative reserve order | 1.194 s | 1.077 s |
+| Forced route rebuild | 276 ms | 170 ms |
+| Unchanged refresh | 0 ms | 1 ms |
+
+The fresh source baseline was 13.868 s to the prepared asset sample; frozen 0.6
+source was 13.800 s. Opening an ordinary chapter benefits from reusing unchanged
+reference geometry; constructing a different prepared sample still requires a
+full rebuild. Changed duties remain substantially slower than inspection or an
+order whose resulting assignments are unchanged.
+
+Land actual-input timings: `{"change_order_ms": 10, "commission_input_ms": 3074, "compare_grown_ms": 8, "compare_ms": 9, "open_ready_ms": 9548, "route_rebuild_ms": 273, "season_ms": 1413, "unchanged_refresh_ms": 1}` (milliseconds).
+Commission includes click and frame-settling waits; the sampled season does not
+complete a building.
+
+Direct interaction profiles separate command, world and UI work. Totals below
+exclude scripted click waits.
+
+| Action | Source ms | Exact app ms |
+|---|---:|---:|
+| Open assets after reference startup | 3740.000 | 3053.000 |
+| Compare a site | 7.800 | 6.683 |
+| Commission retained workroom adaptation | 649.435 | 534.381 |
+| Change project crew/priority | 99.139 | 82.464 |
+| Reserve change with unchanged assignments | 11.804 | 9.707 |
+| Watch change with reassignment | 963.790 | 774.558 |
+| Season completing adaptation / rebuilding fabric | 9414.000 | 7711.000 |
+
+The outward 48-resident land sample has the following frame results. Steady
+frames do not remove the startup, reassignment or completion stalls above.
+
+| View | Source median / p95 ms | Exact app median / p95 ms |
+|---|---:|---:|
+| landscape | 8.109 / 9.389 | 8.192 / 9.069 |
+| aerial | 8.146 / 9.290 | 8.423 / 8.932 |
+| street | 8.115 / 9.400 | 8.193 / 9.251 |
+| interior | 8.696 / 9.143 | 8.572 / 8.959 |
+
+Land sample readiness from process start: source **20.367 s**,
+exact app **16.648 s**. The direct completion profile demonstrates
+a remaining synchronous geometry/route stall; further incremental rebuilding is
+future work. Intel rendering and performance remain unmeasured.
+
+## Artifact identity
+
+Frozen payload: `b97106278e96d3561df63de800d2fc89edeebbd1`. Build time: `2026-10-06T01:01:58.826474+00:00`.
+
+| Download | Bytes | SHA-256 |
+|---|---:|---|
+| Yenikapi-Early-Settlement-macOS-0.6.0.zip | 58649918 | `38b095181a25fbdbc6f39a25f027fdbf76232f5d3a7dc73138016188dee3c70f` |
+| Yenikapi-Early-Settlement-Source-0.6.0.zip | 534697 | `2ab346718c67f601cf6186dfc94058b9540df009703c090756f1839211ec9e08` |
+| Yenikapi-Early-Settlement-Foundation-Models-0.6.0.zip | 43556451 | `5141b82e8b693b3956175d92e3da997b6c9f7322c1471cfcb23daafd0d2e32ee` |
+| Yenikapi-Early-Settlement-Contact-Models-0.6.0.zip | 21913878 | `7d0e2ad1830c07d21065ed78988b1cb266d23858766af02bb568c18a0b0bbdb0` |
+| Yenikapi-Early-Settlement-Household-Models-0.6.0.zip | 2736899 | `a97b4b50101742c7efebd3a947e83d487b110ad4e0b62b6661769b5221f60140` |
+| Yenikapi-Early-Settlement-Asset-Models-0.6.0.zip | 1460163 | `c805ea1cbbe36f3ff774ab29ac13b96eba5f38b9f05035aa81781f59da386260` |
+| Yenikapi-Early-Settlement-Land-Models-0.6.0.zip | 40375868 | `c84b60e0b12ad46ae88de040da5d085e620dca0df05cd36fa77727ba883e6a7e` |
+
+QA directory (outside git): `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.6.0-exact-qa-7q37a6ow`.
+Verification logs: `build/yenikapi-early-settlement-0.6.0-final/verification/`.
+Public download verification is recorded below after publication.

@@ -46,6 +46,18 @@ records source/exact-app gates, honest before/after timings and download integri
 The release builder produces a separate universal Mac app, editable source and
 five model archives; all earlier release bytes and campaign latest must be retained.
 
+Frozen payload `b97106278e96d3561df63de800d2fc89edeebbd1` passes 3,394
+source and exact-app rule/geometry checks each, 2,252 rendered chapter checks,
+79 reviewed captures and 12 supplemental guide checks with two extra views.
+All data and parent 705-test/rendered-map gates pass. The 27 retained GLBs keep
+their bytes; three new models bring the total to 30. Exact-app comparison is
+6.7 ms, commissioning 534 ms, priority 82 ms and reassignment 775 ms in the direct
+profile. Fabric-completion resolution still takes 7.7 seconds. Asset opening
+improves from the published 13.58 to 9.49 seconds; its representative order still
+takes 1.077 seconds. These measurements are M3 Max observations, not universal
+performance promises. Publication and anonymous-download hashes follow in the
+verification record; the release tag targets the frozen payload, not later docs.
+
 ## Yenikapı asset governance (0.5.0, October 5, 2026)
 
 **Manage village assets → Begin asset governance** starts ordinary village life.
