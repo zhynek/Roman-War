@@ -48,6 +48,12 @@ Exact-app warning inspection is 11.601 ms; incident resolution 602 ms; recovery
 commission 624.610 ms. Ordinary living seasons are 589 ms; physical adaptation
 still pauses for 3.296 s. Details and limits are in the verification record.
 
+The [0.8.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.8.0)
+is public. All eleven anonymous downloads match tested bytes and GitHub digests;
+nine ZIPs pass readback checks. All 13 previous releases / 75 assets and stable
+latest `v0.14.2` remain unchanged. The release tag pins the frozen payload; main
+also contains the final verification and publication record.
+
 ## Yenikapı living village (0.7.0, October 2026)
 
 **Begin living village** connects finite woodland, opening-stock fuel/preparation,

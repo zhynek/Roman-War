@@ -148,3 +148,22 @@ The completed build ran without resumed or skipped gates. The contact harness pa
 Control-anchor warning, with no script errors. Archive readback confirms that every
 app member matches the tested bundle and every editable-source member matches the
 frozen hash inventory. The visual review ledger is `/tmp/yenikapi08-review.json`.
+
+## Public release verification — 2026-10-06
+
+[The separate 0.8.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.8.0)
+is public. The tag resolves to frozen payload
+`afe8e09897e9d41cf271c3416349a1b2eae1782e`; main also carries this final record.
+All **11 anonymous downloads** match the tested local artifacts in size and SHA-256,
+including GitHub's asset digests. All **nine downloaded ZIPs** pass integrity checks;
+the downloaded checksum manifest verifies the app, editable source, seven model
+bundles and provenance. Public readback is recorded in
+`/tmp/yenikapi-0.8-public/public-verification.json`.
+
+All **13 previous releases / 75 previous assets** retain their metadata, IDs,
+byte sizes and digests (ordinary download counters excluded). Stable latest remains
+**v0.14.2**. Protected tracked-file hashes show only the intended village/building
+documentation changes outside the independent implementation; parent campaign,
+medieval creative project, dated village reference and their saves were not changed.
+The draft upload required one retry after a transport error; only the absent file
+was retried, and no prior or verified asset was replaced.
