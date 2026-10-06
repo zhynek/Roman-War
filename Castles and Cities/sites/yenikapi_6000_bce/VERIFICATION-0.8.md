@@ -40,8 +40,8 @@ payments/refunds, malformed active saves, no passive recovery, and bounded overl
 
 ## Development checks and inspection
 
-All retained independent-project schemas/negative tests and 5,769 earlier rule/
-geometry checks passed. The parent data/import/full **705-test** suite passed with
+All retained independent-project schemas/negative tests and earlier rule/geometry
+checks passed. The parent data/import/full **705-test** suite passed with
 stderr scanned. The final incident suite passed **6,323 checks**, including explicit outcome/JSON
 regression cases after correcting integer-factor validation across JSON readback
 (JSON numbers are floats). Exact-app results are recorded below after freezing.
@@ -102,3 +102,49 @@ waits for that tab and keeps the native pointer aligned with its synthetic press
 and release, without retries or direct state edits. The corrected source contact
 run passed 58 checks / 10 captures. No seasonal rule was changed; the replacement
 payload repeats the full frozen build instead of accepting the failed gate.
+
+## Frozen release verification
+
+Payload commit: `afe8e09897e9d41cf271c3416349a1b2eae1782e`. Build: `build/yenikapi-early-settlement-0.8.0-final4`.
+
+All source and exact-app schemas/negative cases and **12,093 rule/geometry checks per executable** passed. The exact Mac application passed **3,767 rendered checks / 125 captures**, including **676 incident checks / 25 captures** and the lit-interior regression checks. Parent data/import/full **705 tests** and map playtest passed; every log was scanned for script errors, including zero-exit errors. The app is universal `arm64` / `x86_64` and passes strict ad-hoc signature verification.
+
+External rendered acceptance: `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.8.0-exact-qa-6ak6ty9s`. All 125 views were inspected, including warning, paid response, outcomes, recovery, both layouts, four viewing scales and smaller-window controls. Large 3D labels can still crowd at oblique angles; the persistent inspector provides full costs and outcome factors. No screenshot is a game asset.
+
+The guide uses actual input controls and opening resources. The extended same-start comparison checks save/load at every season through warning, commitments, impact, recovery and quiet intervals, plus succession at resolution, duplicate charges/refunds, no passive recovery, no inspection/animation rewards, and bounded overlap. Repeated presentation steps at 0.001–1.0-second deltas and camera changes leave authoritative state unchanged.
+
+## Final interaction measurements
+
+Single-run observations on this M3 Max, Godot 4.4.1 Forward+, 1600×1000, with no competing Godot process. Command rows sum command, world refresh and UI refresh; timings are not universal guarantees. Quote comparison is explicitly rule-only.
+
+| Interaction | Frozen source ms | Exact Mac app ms |
+|---|---:|---:|
+| Open incident chapter | 1517.000 | 1122.000 |
+| Inspect warning | 15.526 | 11.601 |
+| Compare two response quotes (rules only) | 0.355 | 0.291 |
+| Commit paid response | 1526.777 | 1130.602 |
+| Change watch priority | 564.669 | 420.614 |
+| Change preparation priority | 171.934 | 130.623 |
+| Resolve warning season | 641.000 | 469.000 |
+| Resolve incident season | 790.000 | 602.000 |
+| Commission recovery | 821.705 | 624.610 |
+| Resolve recovery work | 472.000 | 360.000 |
+| Resolve completed recovery | 241.000 | 186.000 |
+| Force incident route rebuild | 345.000 | 266.000 |
+
+| Existing interaction | Fresh 0.7 source baseline ms | Final source ms | Published 0.7 exact-app ms | Final exact-app ms |
+|---|---:|---:|---:|---:|
+| Adaptation completion | 3890 | 3993 | 3177 | 3296 |
+| Ordinary living season | 731 | 739 | 598 | 589 |
+| Forced living routes | 153 | 156 | 126 | 127 |
+| Targeted woodland inspection | 16.196–16.543 (all four subjects) | 17.269 | approximately 13 | 13.581 |
+
+Unchanged inspections retain routes and geometry. Rule calculations are a small fraction of the longer commands; route refresh dominates response/recovery commissioning. Full footprint changes still pause synchronously. The season button draws feedback and blocks duplicate queued input; repeated paid commissions are rejected by the authoritative ledger. Presentation never advances a season or resolves an incident.
+
+All **36 GLBs** passed structural checks; the **33 prior model files** match 0.7.0 byte-for-byte. Nine ZIPs passed integrity checks, model partitions match exported bytes, and frozen-source hashes were rechecked. Eleven release files comprise the app, editable source, seven model partitions, provenance and checksums.
+
+The completed build ran without resumed or skipped gates. The contact harness passed
+58 exact-app checks. Seventy logs were scanned; the parent suite retains its existing
+Control-anchor warning, with no script errors. Archive readback confirms that every
+app member matches the tested bundle and every editable-source member matches the
+frozen hash inventory. The visual review ledger is `/tmp/yenikapi08-review.json`.

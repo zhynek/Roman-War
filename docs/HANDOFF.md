@@ -39,6 +39,15 @@ acceptance and exact-app interaction profiles while retaining all previous gates
 and 33 model bytes. Three new neutral incident specimens are separate. Bows,
 tactical combat, individual commands and a continuous chronology remain deferred.
 
+Frozen payload `afe8e09897e9d41cf271c3416349a1b2eae1782e` passes **12,093**
+source and exact-app rule/geometry checks, **3,767** rendered checks with **125**
+manually inspected captures, all data gates and the parent **705-test**/map gates.
+The 33 previous GLBs are byte-identical; three incident specimens bring the total
+to 36. The earlier rejected shader and UI-harness candidates are documented.
+Exact-app warning inspection is 11.601 ms; incident resolution 602 ms; recovery
+commission 624.610 ms. Ordinary living seasons are 589 ms; physical adaptation
+still pauses for 3.296 s. Details and limits are in the verification record.
+
 ## Yenikapı living village (0.7.0, October 2026)
 
 **Begin living village** connects finite woodland, opening-stock fuel/preparation,
