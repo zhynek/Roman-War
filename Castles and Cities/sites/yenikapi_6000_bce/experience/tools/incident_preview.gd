@@ -1,5 +1,17 @@
 extends "res://tools/land_preview.gd"
 const IncidentDriver=preload("res://tools/incident_driver.gd")
+func shot(name_: String) -> void:
+	await super.shot(name_)
+	if name_.ends_with("household-recovery") or name_.ends_with("repaired-materials") or name_=="09-prepared-store-interior":
+		# Detect the black-material rebuild failure that geometry/input checks miss.
+		# These fixed, HUD-free interior cameras must retain visible lit furnishings.
+		var pixels: Image=root.get_texture().get_image()
+		var luminance: float=0.0
+		for y in range(8):
+			for x in range(8):
+				var c: Color=pixels.get_pixel(pixels.get_width()*(x+4)/16,pixels.get_height()*(y+4)/16)
+				luminance+=(c.r+c.g+c.b)/3.0
+		check(luminance/64.0>.12,"lit material interiors survive rebuild: "+name_)
 func _initialize() -> void:
 	out_dir="/tmp/yenikapi-incident-qa"
 	for arg in OS.get_cmdline_user_args():

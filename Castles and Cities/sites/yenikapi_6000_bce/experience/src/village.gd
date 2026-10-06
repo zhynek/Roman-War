@@ -1,6 +1,11 @@
 extends Node3D
 ## Original procedural settlement. One authored record owns rendering and picking.
 const Geometry = preload("res://src/geometry.gd")
+# Keep compiled shader resources alive when a complete layout replaces the world.
+# A packaged Metal run showed black materials after a rebuild; avoid resource churn.
+const EarthShader = preload("res://src/earth.gdshader")
+const WaterShader = preload("res://src/water.gdshader")
+const GroundShader = preload("res://src/ground.gdshader")
 var data: Dictionary
 var materials: Dictionary = {}
 var buildings: Array = []
@@ -35,17 +40,17 @@ func _materials() -> void:
 	var colors := {"earth":Color("8c7658"),"soil":Color("615743"),"grass":Color("717957"),"sand":Color("b1a486"),"silt":Color("5b6653"),"path":Color("897655"),"daub":Color("b6a38c"),"daub_light":Color("c3b39b"),"daub_dark":Color("a29680"),"thatch":Color("847454"),"thatch_light":Color("a18c60"),"thatch_dark":Color("6b644d"),"wood":Color("64513b"),"wood_light":Color("9c8159"),"wood_dark":Color("3b3328"),"stone":Color("89877a"),"pottery":Color("776052"),"pottery_red":Color("9b7257"),"inside":Color("423a32"),"mat":Color("aa9062"),"leaf":Color("4d6146"),"leaf_light":Color("66744d"),"reed":Color("8a9460"),"grain":Color("c1ab74"),"charcoal":Color("383830"),"clay":Color("9f806b")}
 	for id in colors:
 		var m := ShaderMaterial.new()
-		m.shader = load("res://src/earth.gdshader")
+		m.shader = EarthShader
 		m.set_shader_parameter("pigment",colors[id])
 		m.set_shader_parameter("scale", 12.0 if id.begins_with("daub") else 5.0)
 		m.set_shader_parameter("grain", .36 if id in ["earth","grass","path","soil"] else .16)
 		m.set_shader_parameter("fabric",1 if id.begins_with("thatch") else (2 if id in ["wood","mat"] else 0))
 		materials[id] = m
 	var water := ShaderMaterial.new()
-	water.shader = load("res://src/water.gdshader")
+	water.shader = WaterShader
 	materials.water = water
 	var ground:=ShaderMaterial.new()
-	ground.shader=load("res://src/ground.gdshader")
+	ground.shader=GroundShader
 	materials.ground=ground
 
 func hash01(text: String, salt: int = 0) -> float:

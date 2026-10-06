@@ -71,3 +71,25 @@ Final source/exact-app profiles and public artifact verification follow after th
 frozen build. No Intel performance, Developer ID notarization, hydraulic simulation,
 archaeologically documented incident or continuing Neolithic-to-medieval chronology
 is claimed.
+
+## Release-candidate rendering investigation
+
+The first frozen attempt stopped on a model-exporter variable collision despite
+Godot returning exit zero. The corrected candidate at `b0ceafe` then passed every
+rule and actual-input assertion, but manual inspection rejected its outward-layout
+views: earth-shader surfaces became black after a full world replacement. It was
+never published. A focused six-rebuild probe retained shader identity when a
+material reference was held; without it, shader resources were recreated each
+time (CPU pigment values remained valid). The fault was intermittent rather than
+a reproducible seasonal-state change.
+
+The village now retains its three original shaders across world replacement.
+No geometry, pigments or seasonal rules change. Five fixed, HUD-free interior
+cameras also assert visible material luminance; this new regression check rejects
+the two failed recovery interiors (sample means 0.067/0.065, versus 0.276–0.338
+for the lit reference captures). The final build repeats all gates and manual
+inspection; passing input checks alone do not authorize publication.
+
+The corrected source acceptance completed **25 captures / 676 checks, zero
+failures**. The outward landscape and both recovery interiors were reinspected
+and retained their lit materials. Final frozen-app verification follows below.
