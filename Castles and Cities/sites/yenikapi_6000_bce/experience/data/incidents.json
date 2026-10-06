@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "title": "Preparedness Put to the Test",
+  "incidents": [
+    {
+      "id": "approach_01",
+      "kind": "approach",
+      "title": "The upper approach is wearing through",
+      "place": "north_wood",
+      "post": "north_post",
+      "asset": "yard",
+      "at": [
+        -42,
+        -82
+      ],
+      "households": [
+        "sim_household_02",
+        "sim_household_04"
+      ],
+      "subjects": [
+        "north_wood",
+        "north_post",
+        "workroom",
+        "sim_household_02",
+        "sim_household_04"
+      ],
+      "prepare": "incident_approach_prepare",
+      "repair": "incident_approach_repair",
+      "strength": 6,
+      "signs": "Crews report loose bindings and soft footing along the upper woodland approach. Loaded passage may be interrupted; walking remains possible. This is a hypothetical local maintenance failure, not a reconstructed flood.",
+      "detail": "Experienced wood workers recognize repeated wear at the loaded turn. Maintain northern access, prepare a timber-and-binding patch, or restrict upper gathering and use the west woodland. Northern observation gives earlier notice; watch equipment cannot mend a path.",
+      "result": "Loaded upper access is impaired until the repair initiative finishes. Northern timber loses yield; outward households and unfinished outer projects depend on this connection. The western approach and pedestrian access remain usable.",
+      "marker": "Upper approach"
+    },
+    {
+      "id": "stores_01",
+      "kind": "stores",
+      "title": "Uncertain activity near the waterside stores",
+      "place": "landing",
+      "post": "landing_post",
+      "asset": "landing",
+      "at": [
+        40,
+        21
+      ],
+      "households": [
+        "sim_household_01",
+        "sim_household_03"
+      ],
+      "subjects": [
+        "landing",
+        "landing_post",
+        "store",
+        "workroom",
+        "sim_household_01",
+        "sim_household_03"
+      ],
+      "prepare": "incident_stores_prepare",
+      "repair": "incident_stores_repair",
+      "strength": 7,
+      "signs": "Unfamiliar movement has been reported beyond the landing. Intent and identity are not established. A bounded hypothetical attempt to take supplies is possible; no army or documented Yenikapı attack is implied.",
+      "detail": "The landing crew points to supplies left during waterside work. Focus a maintained post here, equip and train the ordinary watch, prepare covered handling for a bounded portion of stores, or restrict waterside work at a food cost. Northern coverage cannot guard the landing.",
+      "result": "An attempted taking disrupted the waterside work area. Loss is bounded by available provisions. Damaged handling arrangements reduce gathering until repair; households retain a dated memory. No resident or dwelling is removed by the incident.",
+      "marker": "Waterside handling"
+    }
+  ],
+  "projects": [
+    {
+      "id": "incident_approach_prepare",
+      "title": "Prepare the upper approach",
+      "body": "A paid timber and binding commitment; seasonal crews must finish before resolution.",
+      "role": "steward",
+      "wood": 3,
+      "blanks": 1,
+      "work": 8,
+      "at": [
+        -42,
+        -82
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": []
+    },
+    {
+      "id": "incident_approach_repair",
+      "title": "Restore the upper approach",
+      "body": "Restore loaded access or productive handling without replacing older fabric. Pause or cancel unfinished work through the ordinary ledger.",
+      "role": "steward",
+      "wood": 4,
+      "blanks": 1,
+      "work": 16,
+      "at": [
+        -42,
+        -82
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": []
+    },
+    {
+      "id": "incident_stores_prepare",
+      "title": "Prepare waterside handling",
+      "body": "A paid timber and binding commitment; seasonal crews must finish before resolution.",
+      "role": "steward",
+      "wood": 3,
+      "blanks": 1,
+      "work": 8,
+      "at": [
+        40,
+        21
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": []
+    },
+    {
+      "id": "incident_stores_repair",
+      "title": "Restore waterside handling",
+      "body": "Restore loaded access or productive handling without replacing older fabric. Pause or cancel unfinished work through the ordinary ledger.",
+      "role": "steward",
+      "wood": 4,
+      "blanks": 1,
+      "work": 16,
+      "at": [
+        40,
+        21
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": []
+    }
+  ],
+  "ui": {
+    "begin": "Begin warning, response and recovery",
+    "tab": "Incidents",
+    "adopt": "Adopt incident seasons",
+    "intro": "Govern two hypothetical local pressures through ordinary seasonal work. Protect reserves, compare specific factors, and fund recovery. No reflexes or individual commands are required.",
+    "migration": "Explicit adoption replaces the old repeating abstract supply loss with two local incidents. All people, layouts, paid work, memories and orders remain. A fresh four-season grace period precedes signs; each incident occurs once. Only one can be unresolved, followed by eight quiet seasons. The older eight-season household lesson must be settled first.",
+    "exposure": "Exposure is developing. No actionable signs have reached the village yet. Keep reserves, prepared sets and productive capacity available.",
+    "notice": "{title} · {phase} · resolution after season {due}. {lead} governing seasons remain.",
+    "early": "Local observations identified signs early. The overview warning is guaranteed two seasons before resolution.",
+    "public": "The village has received an actionable warning. Local inspection explains the weak point; inspection never reduces damage.",
+    "inspect": "Record local findings",
+    "visit": "Visit affected place",
+    "restriction": "Restrict exposed work",
+    "reopen": "Reopen ordinary work",
+    "restriction_note": "Revisable standing order: upper timber crews use the west woodland and smaller loads forgo 2 timber per season; restricted waterside work forgoes 4 food. Restriction reduces incident severity by one. It creates no supplies. This temporary restriction ends when the incident resolves.",
+    "commitment": "Paid initiatives reserve timber and prepared sets immediately. They still need finite seasonal crews. Pause, change priority or cancel unfinished work in Assets. Only work finished before resolution protects this incident.",
+    "cost": "{wood} timber + {blanks} prepared sets; {work} seasonal work. Materials already in the queue cannot be spent twice.",
+    "forecast": "Expected if current work finishes: severity {severity}; provisions at risk {loss}. After resolution, northern timber loses {timber_penalty} and gathering loses {food_penalty} each season until repair. Actual loss is capped by available provisions.",
+    "actual": "Resolved in season {turn}: severity {severity}; {lost} provisions lost; {kit_loss} kit worn. Recovery {recovered}.",
+    "factors": "Named factors (negative values reduce severity)",
+    "known": "Known conditions and expected effects",
+    "record": "Persistent planning record",
+    "record_entry": "{id} · {kind} · season {turn}",
+    "memories": "Affected households retain this incident and its outcome after repairs. Care still competes with other work; repair restores function without granting expertise or resources.",
+    "recovery": "Recovery needs paid work. Commission the essential repair, prepare its materials, pause less urgent construction and retain food/fuel/care. Established supported household cooperation adds two work to a staffed recovery crew. No timer restores the place.",
+    "quiet": "No incident is currently unresolved. A recovery interval protects productive rebuilding. Each of these two incidents happens at most once in this release.",
+    "summary": "Incident preparedness: {phase}. Open Incidents for warning, commitments, expected factors and retained outcomes.",
+    "done": "The connected loop is complete. Incident histories remain. Continue governing the village and use the existing growth-readiness review; no new population threshold or historical transition is added.",
+    "ready": "Review this step",
+    "busy": "Resolving seasonal decisions…",
+    "return_living": "Work, materials and watch orders",
+    "guidance": "The guide accepts any affordable preparation and either layout. Reserves, west woodland and smaller crews remain legitimate alternatives.",
+    "recovery_notice": "{title} · resolved in season {turn}, severity {severity}. Function remains impaired until paid repair finishes.",
+    "prepared_paid": "Prepared sets paid: {paid}; unused sets returned if cancelled now: {refund}."
+  },
+  "phases": {
+    "exposure": "developing exposure",
+    "signs": "early signs",
+    "warning": "warning",
+    "recovery": "recovery",
+    "recovered": "restored",
+    "quiet": "quiet interval"
+  },
+  "factors": {
+    "exposure": "Local exposure",
+    "outer": "Outward households depend on this approach",
+    "access": "Staffed access maintenance",
+    "experience": "Practiced woodland households",
+    "preparation": "Completed material preparation",
+    "restriction": "Restricted exposed activity",
+    "coverage": "Staffed and maintained local post",
+    "equipment": "Serviceable kits with practiced watch",
+    "stores": "Staffed shared-store order",
+    "incident_disruption": "Local incident disruption"
+  },
+  "errors": {
+    "incident_missing": "Adopt living rules first, then incident seasons.",
+    "incident_started": "Incident seasons are already active.",
+    "incident_phase": "This action is not available in the current incident phase.",
+    "incident_unknown": "This incident or subject is unknown.",
+    "incident_materials": "Prepare enough wood-and-binding sets before commissioning.",
+    "incident_review": "Complete the step through ordinary commands first.",
+    "incident_lesson": "Finish the older household lesson before adopting; it cannot overlap incident seasons."
+  },
+  "tutorial": [
+    {
+      "condition": "warning",
+      "title": "1 · Recognize the exposure",
+      "body": "Keep the overview visible as seasons pass. Signs emerge after the grace period; every village receives two full governing seasons of warning. A staffed relevant post or experienced local crew can report two seasons earlier."
+    },
+    {
+      "condition": "inspect",
+      "title": "2 · Ask about the affected place",
+      "body": "Record local findings at the place, a linked household or the working room. World picking and targeted inspection use the same subject. Read which investment helps and which cannot."
+    },
+    {
+      "condition": "commit",
+      "title": "3 · Compare and pay",
+      "body": "Compare the named factors and material/crew costs. Commission the incident preparation using real timber and prepared sets. Fund ordinary preparation in Village if needed. Watch, gathering, care and construction share the same adults."
+    },
+    {
+      "condition": "resolved",
+      "title": "4 · Resolve and read the result",
+      "body": "Resolve warning seasons. A paid preparation must finish in time; paused or under-staffed work gives no promised benefit. Compare the actual severity, losses and named factors with the forecast."
+    },
+    {
+      "condition": "recovery",
+      "title": "5 · Restore essential function",
+      "body": "Commission repair at the affected place. Its materials are paid now and its crew works in future seasons. Existing shared household practice improves staffed recovery. The place keeps its identity."
+    },
+    {
+      "condition": "paused",
+      "title": "6 · Recover from overcommitment",
+      "body": "Pause the unfinished repair once in Assets; this preserves paid materials and progress while releasing its crew. Reduce preparation or training, protect reserves, and then resume the repair when affordable. If repair is already complete, review the retained result instead."
+    },
+    {
+      "condition": "restored",
+      "title": "7 · Retain the lesson",
+      "body": "Finish a repair through seasonal work. Read the retained incident and household memory. The next incident waits until recovery and eight quiet seasons. Keep the original town milestone and growth-readiness review."
+    }
+  ]
+}

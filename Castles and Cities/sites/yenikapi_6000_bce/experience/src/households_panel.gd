@@ -78,6 +78,8 @@ func build(body: VBoxContainer) -> void:
 			params.activity=panel.living_panel.copy.activities.get(routine.activity,copy.presentation.activity_labels.get(routine.activity,routine.activity))
 			params.reason=copy.presentation.reason_labels.get(routine.reason,routine.reason)
 			body.add_child(panel.label(copy.ui.routine.format(params),16))
+			var incident: Dictionary=rules.incidents.current(state)
+			if not incident.is_empty() and routine.household in rules.incidents.specs[incident.id].subjects:body.add_child(panel.button(panel.incident_panel.copy.ui.inspect,func():panel.incident_panel.inspect(routine.household),"ResidentIncident"))
 			if rules.living.active(state):
 				body.add_child(panel.label(panel.living_panel.copy.ui.household.format(state.living.experience[routine.household]),14))
 				if rules.living.subjects.has(routine.household):body.add_child(panel.button(panel.living_panel.copy.ui.inspect,func():panel.living_panel.inspect(routine.household),"ResidentKnowledge"))

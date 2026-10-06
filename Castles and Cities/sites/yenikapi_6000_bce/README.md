@@ -1,5 +1,9 @@
 # Yenikapı · early settlement, circa 6000 BCE
 
+**0.8.0 — Preparedness Put to the Test:** [Gameplay, warning, recovery and wrapper-7 save contract](experience/PREPAREDNESS.md). Choose **Begin warning, response and recovery**. Older living saves adopt explicitly from Incidents; earlier chapters remain available.
+
+[0.8.0 prerelease and downloads](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.8.0): universal Mac app, editable source and seven model bundles (36 GLBs). [Verification and interaction timings](VERIFICATION-0.8.md). Earlier download links below remain preserved.
+
 **0.7.0 — A Living, Readable Village: Work, Relationships, and Preparedness.**
 Choose Begin living village. [Gameplay and save contract](experience/LIVING_VILLAGE.md).
 

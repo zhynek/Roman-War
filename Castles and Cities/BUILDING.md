@@ -204,3 +204,25 @@ make ten downloads. Compare retained models byte-for-byte with 0.6.0, publish as
 `yenikapi-early-settlement-v0.7.0` with `--prerelease --latest=false`, and verify
 anonymous downloads, all previous release metadata/assets and stable `v0.14.2`.
 Wrapper 6 applies only after explicit living-rule adoption. See LIVING_VILLAGE.md.
+
+## Preparedness Put to the Test (0.8.0)
+
+Run the current builder with `--version 0.8.0`, a clean committed checkout and
+fresh parent gates. It retains every earlier schema/rules/render gate and adds
+incident relationship/negative checks, same-start public-command strategies,
+wrapper-7 lifecycle replay, 25 actual-input incident captures and separate source/
+exact-app interaction profiles. Inspect all **125** captures, including both
+layouts, warning signs, paid preparation, interrupted loaded access, waterside
+watch/handling, paused/resumed repairs, household interiors and small controls.
+The app still uses the independent village namespace; acceptance uses temporary
+save paths. Scan stderr as well as exit statuses and success markers.
+
+The exporter keeps all **33 earlier GLBs byte-identical** and adds three original
+neutral approach specimens for warning, damage and recovery. They have their own
+Incident Models archive; existing partitions remain separate. Nine ZIPs plus
+provenance and SHA256SUMS make eleven downloads. Use
+`yenikapi-early-settlement-v0.8.0`, prerelease, `--latest=false`, and the frozen
+payload commit. Verify anonymous downloads and ZIP integrity against tested bytes,
+all 13 prior releases / 75 assets, and unchanged stable latest `v0.14.2`. Do not
+replace prior release metadata, tags or artifacts. Read the site's PREPAREDNESS.md
+and VERIFICATION-0.8.md for limits and measured interaction latency.

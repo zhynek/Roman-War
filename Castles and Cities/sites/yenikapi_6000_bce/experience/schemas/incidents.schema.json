@@ -1,0 +1,636 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "incidents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "enum": [
+              "approach",
+              "stores"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "place": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "post": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "asset": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -150,
+              "maximum": 150
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "households": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "prepare": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "repair": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "strength": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "signs": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "marker": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "place",
+          "post",
+          "asset",
+          "at",
+          "households",
+          "subjects",
+          "prepare",
+          "repair",
+          "strength",
+          "signs",
+          "detail",
+          "result",
+          "marker"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "wood": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "blanks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -150,
+              "maximum": 150
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "requires": {
+            "type": "array",
+            "maxItems": 0
+          },
+          "effects": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "additionalProperties": false
+          },
+          "changes": {
+            "type": "array",
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "role",
+          "wood",
+          "blanks",
+          "work",
+          "at",
+          "requires",
+          "effects",
+          "changes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "begin": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "tab": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "adopt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "intro": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "migration": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "exposure": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "notice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "early": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "public": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "inspect": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "visit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "restriction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "reopen": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "restriction_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "commitment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "cost": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "forecast": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "actual": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "factors": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "known": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "record": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "record_entry": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "memories": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "recovery": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "quiet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "done": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "ready": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "busy": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "return_living": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "guidance": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "recovery_notice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "prepared_paid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "begin",
+        "tab",
+        "adopt",
+        "intro",
+        "migration",
+        "exposure",
+        "notice",
+        "early",
+        "public",
+        "inspect",
+        "visit",
+        "restriction",
+        "reopen",
+        "restriction_note",
+        "commitment",
+        "cost",
+        "forecast",
+        "actual",
+        "factors",
+        "known",
+        "record",
+        "record_entry",
+        "memories",
+        "recovery",
+        "quiet",
+        "summary",
+        "done",
+        "ready",
+        "busy",
+        "return_living",
+        "guidance",
+        "recovery_notice",
+        "prepared_paid"
+      ],
+      "additionalProperties": false
+    },
+    "phases": {
+      "type": "object",
+      "properties": {
+        "exposure": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "signs": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "warning": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "recovery": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "recovered": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "quiet": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "exposure",
+        "signs",
+        "warning",
+        "recovery",
+        "recovered",
+        "quiet"
+      ],
+      "additionalProperties": false
+    },
+    "factors": {
+      "type": "object",
+      "properties": {
+        "exposure": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "outer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "access": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "experience": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "preparation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "restriction": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "coverage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "equipment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "stores": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_disruption": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "exposure",
+        "outer",
+        "access",
+        "experience",
+        "preparation",
+        "restriction",
+        "coverage",
+        "equipment",
+        "stores",
+        "incident_disruption"
+      ],
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "incident_missing": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_started": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_phase": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_unknown": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_materials": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_review": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "incident_lesson": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "incident_missing",
+        "incident_started",
+        "incident_phase",
+        "incident_unknown",
+        "incident_materials",
+        "incident_review",
+        "incident_lesson"
+      ],
+      "additionalProperties": false
+    },
+    "tutorial": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "enum": [
+              "warning",
+              "inspect",
+              "commit",
+              "resolved",
+              "recovery",
+              "paused",
+              "restored"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "condition",
+          "title",
+          "body"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "title",
+    "incidents",
+    "projects",
+    "ui",
+    "phases",
+    "factors",
+    "errors",
+    "tutorial"
+  ],
+  "additionalProperties": false
+}

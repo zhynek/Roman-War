@@ -1,4 +1,6 @@
-# Yenikapı — Early Settlement 0.7.0
+# Yenikapı — Early Settlement 0.8.0
+
+**0.8.0 — Preparedness Put to the Test:** [Gameplay, warning, recovery and wrapper-7 save contract](PREPAREDNESS.md). Choose **Begin warning, response and recovery**. Older living saves adopt explicitly from Incidents; earlier chapters remain available.
 
 **0.7.0:** [A Living, Readable Village](LIVING_VILLAGE.md) connects wood, household knowledge, shared work and local preparedness. Old saves adopt explicitly; active rules use wrapper 6.
 

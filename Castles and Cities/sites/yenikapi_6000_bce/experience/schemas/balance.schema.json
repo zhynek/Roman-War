@@ -1193,6 +1193,182 @@
         "priority"
       ],
       "additionalProperties": false
+    },
+    "incidents": {
+      "type": "object",
+      "properties": {
+        "grace": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "public_delay": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "warning_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "quiet_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "maximum_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "minimum_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "outer_exposure": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "access_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "experience_needed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "experience_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "preparation_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "restriction_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "coverage_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "coverage_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "training_needed": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "equipment_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "store_relief": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "loss_per_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "protected_food": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "timber_per_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "food_per_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "restriction_food": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "access_threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "kit_loss_threshold": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cooperation_work": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "stress_per_severity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "recovery_strain": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "restriction_timber": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "grace",
+        "public_delay",
+        "warning_seasons",
+        "quiet_seasons",
+        "maximum_severity",
+        "minimum_severity",
+        "outer_exposure",
+        "access_relief",
+        "experience_needed",
+        "experience_relief",
+        "preparation_relief",
+        "restriction_relief",
+        "coverage_workers",
+        "coverage_relief",
+        "training_needed",
+        "equipment_relief",
+        "store_relief",
+        "loss_per_severity",
+        "protected_food",
+        "timber_per_severity",
+        "food_per_severity",
+        "restriction_food",
+        "access_threshold",
+        "kit_loss_threshold",
+        "cooperation_work",
+        "stress_per_severity",
+        "recovery_strain",
+        "restriction_timber"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -1271,7 +1447,8 @@
     "households",
     "assets",
     "land",
-    "living"
+    "living",
+    "incidents"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

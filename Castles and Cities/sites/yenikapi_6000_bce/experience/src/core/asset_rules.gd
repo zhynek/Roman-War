@@ -78,6 +78,7 @@ func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:
 			if not rules.permitted(state,rules.projects[id].role):return {"error":"authority"}
 			if not rules.whole(action.get("priority"),1,3) or not rules.whole(action.get("crew"),0,int(balance.max_crew)) or not action.get("paused") is bool:return {"error":"asset_unknown"}
 			for key in ["priority","crew","paused"]:next.assets.initiatives[id][key]=action[key]
+			if rules.incidents.active(next) and id in rules.incidents.project_specs and id.ends_with("_repair") and action.paused:next.incidents.paused=true
 			_record(next,rules.projects[id].role,kind,id,rules,{"priority":int(action.priority),"crew":int(action.crew),"paused":action.paused})
 		"asset_maintenance":
 			if not assets.has(id) or not action.get("enabled") is bool:return {"error":"asset_unknown"}
@@ -85,6 +86,7 @@ func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:
 			next.assets.maintenance[id]=action.enabled
 			_record(next,assets[id].role,kind,id,rules,{"enabled":action.enabled})
 		"asset_pressure":
+			if rules.incidents.active(state):return {"error":"incident_lesson"}
 			if state.role!="god":return {"error":"authority"}
 			if state.assets.pressure_start>=0:return {"error":"asset_pressure"}
 			next.assets.pressure_start=int(state.turn)
@@ -160,7 +162,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	average+=rules.effect(state,"food_yield")
 	var spoil: int=int(state.food)*int(rules.balance.spoil_percent)/100
 	var land_effects: Dictionary=rules.land.totals(state,rules)
-	var disruption: int=int(rules.households.balance.stages[stage(state)].food_penalty)+food_penalty(state)-int(land_effects.food)
+	var disruption: int=int(rules.households.balance.stages[stage(state)].food_penalty)+food_penalty(state)+rules.incidents.food_penalty(state)-int(land_effects.food)
 	var essential: int=maxi(ceili(float(population)/average),ceili(float(eaten+spoil+disruption-int(state.food))/yield_))
 	_request(requests,"food","food",maxi(1,essential),1,"fields")
 	_request(requests,"refuge" if state.households.orders.refuge else "care","care",int(balance.care_workers),2,"homes")
@@ -214,7 +216,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 		if request.id=="watch":result.orders.safe_routes=count
 		if result.projects.has(request.id):
 			result.projects[request.id].crew=count
-			result.projects[request.id].work=count*maxi(0,int(rules.balance.work_yield)-(int(balance.work_yield_loss) if state.assets.conditions.workroom<balance.condition_threshold else 0))
+			result.projects[request.id].work=(rules.incidents.work_bonus(state,request.id,rules) if count>0 else 0)+count*maxi(0,int(rules.balance.work_yield)-(int(balance.work_yield_loss) if state.assets.conditions.workroom<balance.condition_threshold else 0))
 		if request.id=="repair" and count==request.wanted:
 			timber_left-=int(balance.repair_wood)
 			result.repair=request.asset;result.repair_cost=int(balance.repair_wood);result.repair_workers=count
@@ -299,6 +301,8 @@ func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Di
 	# A bounded subset of ordinary food duty illustrates existing waterside work.
 	if request.id=="food" and int(person.id.trim_prefix("citizen_"))%4==0:destination=assets.landing.at
 	destination=rules.living.destination(state,request,destination)
+	if rules.incidents.restricted(state,"approach") and request.id=="timber":destination=rules.living.areas.west_wood.at
+	if rules.incidents.restricted(state,"stores") and request.id=="food" and destination==assets.landing.at:destination=assets.fields.at
 	return {"id":person.id,"job":job,"from":home.duplicate(),"to":destination.duplicate(),"duty":request.id,"asset":request.asset}
 
 func validate(state: Dictionary,rules) -> bool:
@@ -342,7 +346,7 @@ func validate(state: Dictionary,rules) -> bool:
 		if not rules.whole(decision.get("turn"),0,int(state.turn)) or decision.get("office") not in ["steward","watch"] or not decision.get("author") is String or not decision.get("kind") is String or not decision.get("target") is String:return false
 		if decision.author!="" and rules.person_by_id(state,decision.author).is_empty():return false
 		if not decision.get("details") is Dictionary:return false
-		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access","living_order"]:return false
+		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access","living_order","incident_restrict"]:return false
 		if decision.kind=="living_order":
 			if decision.target not in ["area","prepare","cooperate","training","repair","patrol"] or not decision.details.has("value"):return false
 			var value_: Variant=decision.details.value

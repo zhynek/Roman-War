@@ -1,5 +1,7 @@
 # A Living, Readable Village — 0.7.0
 
+**0.8.0 — Preparedness Put to the Test:** [Gameplay, warning, recovery and wrapper-7 save contract](PREPAREDNESS.md). Choose **Begin warning, response and recovery**. Older living saves adopt explicitly from Incidents; earlier chapters remain available.
+
 Choose **Begin living village** from the management introduction. This begins the
 same 30 residents, 100 provisions and 30 timber. Existing chapters remain available.
 For an existing land-planning save, **Village → Adopt work and preparedness** is an

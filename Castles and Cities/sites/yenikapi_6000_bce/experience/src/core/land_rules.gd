@@ -44,7 +44,7 @@ func needs_access(state: Dictionary,rules) -> bool:
 	return active(state) and rules.has_project(state,"land_outer_access")
 
 func access_ready(state: Dictionary,allocation_: Dictionary,rules) -> bool:
-	return needs_access(state,rules) and int(allocation_.get("access_workers",0))==int(balance.access_workers) and int(allocation_.get("access_cost",0))==int(balance.access_wood)
+	return not rules.incidents.access_impaired(state) and needs_access(state,rules) and int(allocation_.get("access_workers",0))==int(balance.access_workers) and int(allocation_.get("access_cost",0))==int(balance.access_wood)
 
 func occupied_outer(state: Dictionary,rules) -> bool:
 	for person in rules.people(state):

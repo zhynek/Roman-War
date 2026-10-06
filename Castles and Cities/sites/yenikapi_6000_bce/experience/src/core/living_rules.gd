@@ -109,7 +109,8 @@ func allocate(s: Dictionary,request: Dictionary,count: int,wood_left: int,places
 func forecast(s: Dictionary,allocation_: Dictionary,r) -> Dictionary:
 	var f: Dictionary=allocation_.living.duplicate(true)
 	var l: Dictionary=s.living
-	var area: Dictionary=areas[l.area]
+	var area_id: String="west_wood" if r.incidents.restricted(s,"approach") else l.area
+	var area: Dictionary=areas[area_id]
 	var watch: int=0
 	for request in allocation_.requests:
 		if request.id=="watch":watch=int(request.filled)
@@ -120,8 +121,10 @@ func forecast(s: Dictionary,allocation_: Dictionary,r) -> Dictionary:
 	var supported: bool=covered and l.patrol=="north_post" and watch>=balance.north_workers
 	var distance: int=0 if supported else int(area.distance_cost)
 	f.workers=int(allocation_.plan.timber)
-	f.harvest=mini(int(l.woodland[l.area]),f.workers*maxi(0,int(area.yield)-distance))
-	f.area=l.area;f.distance=distance;f.yield=int(area.yield);f.next_stock=mini(int(area.capacity),int(l.woodland[l.area])-int(f.harvest)+int(area.recovery))
+	f.harvest=mini(int(l.woodland[area_id]),f.workers*maxi(0,int(area.yield)-distance))
+	if area_id=="north_wood":f.harvest=maxi(0,int(f.harvest)-r.incidents.timber_penalty(s))
+	f.harvest=maxi(0,int(f.harvest)-r.incidents.restriction_timber(s))
+	f.area=area_id;f.distance=distance;f.yield=int(area.yield);f.next_stock=mini(int(area.capacity),int(l.woodland[area_id])-int(f.harvest)+int(area.recovery))
 	f.fuel_need=int(balance.fuel)
 	f.equipped=mini(watch,int(l.kits))
 	f.wear=1 if f.equipped>0 and (int(s.turn)-int(l.started)+1)%int(balance.wear_period)==0 else 0

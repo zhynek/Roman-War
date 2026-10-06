@@ -83,6 +83,9 @@ func build(body: VBoxContainer) -> void:
 			if proposal.asset==selected:
 				body.add_child(panel.button(panel.land_panel.copy.ui.inspect+" · "+rules.land.sites[proposal.site].title,func():panel.land_panel.inspect(proposal.site),"AssetLand_"+proposal.id))
 				if rules.land.committed(state,proposal.id,rules):project(body,proposal.id,f)
+	if rules.incidents.active(state):
+		for id in rules.incidents.project_specs:
+			if rules.assets.project_assets[id]==selected and rules.land.committed(state,id,rules):project(body,id,f)
 	if selected in ["yard","homes"]:housing(body)
 	body.add_child(HSeparator.new())
 	allocation(body,f,selected)
@@ -120,10 +123,14 @@ func project(body: VBoxContainer,id: String,f: Dictionary,details: bool=true) ->
 	var priority:=SpinBox.new();priority.name="Priority_"+id;priority.min_value=1;priority.max_value=3;priority.value=spec.priority;priority.prefix=copy.ui.priority
 	var crew:=SpinBox.new();crew.name="Crew_"+id;crew.min_value=0;crew.max_value=rules.assets.balance.max_crew;crew.value=spec.crew;crew.prefix=copy.ui.crew
 	priority.editable=rules.permitted(state,p.role);crew.editable=priority.editable
+	priority.custom_minimum_size.x=210;crew.custom_minimum_size.x=220
 	row.add_child(priority);row.add_child(crew)
 	priority.value_changed.connect(func(value):panel.dispatch({"kind":"asset_project","id":id,"priority":int(value),"crew":spec.crew,"paused":spec.paused}))
 	crew.value_changed.connect(func(value):panel.dispatch({"kind":"asset_project","id":id,"priority":spec.priority,"crew":int(value),"paused":spec.paused}))
 	action(body,copy.ui.resume if spec.paused else copy.ui.pause,{"kind":"asset_project","id":id,"priority":spec.priority,"crew":spec.crew,"paused":not spec.paused},"AssetPause_"+id)
+	if rules.incidents.project_specs.has(id):
+		var paid: int=int(rules.incidents.project_specs[id].blanks)
+		body.add_child(panel.label(panel.incident_panel.copy.ui.prepared_paid.format({"paid":paid,"refund":paid*(int(p.work)-int(queued.progress))/int(p.work)}),13))
 	var refund: int=int(p.wood)*(int(p.work)-int(queued.progress))/int(p.work)
 	body.add_child(panel.label(copy.ui.refund.format({"wood":refund}),13))
 	action(body,copy.ui.cancel,{"kind":"cancel","id":id},"AssetCancel_"+id)

@@ -21,7 +21,7 @@ PROJECT=Path('sites/yenikapi_6000_bce/experience')
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot',required=True)
-    parser.add_argument('--version',default='0.7.0')
+    parser.add_argument('--version',default='0.8.0')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--parent-gates',type=Path,required=True)
     args=parser.parse_args()
@@ -65,6 +65,8 @@ def main():
     run([sys.executable,project/'tools/test_land_data.py'],logs/'land-data-tests.log',project)
     run([sys.executable,project/'tools/validate_living.py'],logs/'living-data.log',project)
     run([sys.executable,project/'tools/test_living_data.py'],logs/'living-data-tests.log',project)
+    run([sys.executable,project/'tools/validate_incidents.py'],logs/'incident-data.log',project)
+    run([sys.executable,project/'tools/test_incident_data.py'],logs/'incident-data-tests.log',project)
     run(editor+['--import'],logs/'import.log',project)
     checked=run(editor+['--script','res://tools/checks.gd'],logs/'source-checks.log',project)
     if not re.search(r'VILLAGE CHECKS: \d+ checks, 0 failures',checked):raise SystemExit('Missing source success marker')
@@ -82,6 +84,8 @@ def main():
     if not re.search(r'LAND GEOMETRY CHECKS: \d+ checks, 0 failures',geometry):raise SystemExit('Missing land geometry success marker')
     living=run(editor+['--script','res://tools/living_checks.gd'],logs/'source-living.log',project)
     if not re.search(r'LIVING CHECKS: \d+ checks, 0 failures',living):raise SystemExit('Missing living success marker')
+    incidents=run(editor+['--script','res://tools/incident_checks.gd'],logs/'source-incidents.log',project)
+    if not re.search(r'INCIDENT CHECKS: \d+ checks, 0 failures',incidents):raise SystemExit('Missing incident success marker')
     render_dir=Path(tempfile.mkdtemp(prefix=f'yenikapi-{args.version}-exact-qa-'))
     # Source performance uses the same script/cameras as the exact application.
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--',f'out_dir={render_dir / "source-benchmark"}'],logs/'source-benchmark.log',project)
@@ -100,6 +104,7 @@ def main():
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--','living',f'out_dir={render_dir / "source-living-benchmark"}'],logs/'source-living-benchmark.log',project)
     shutil.copy2(render_dir/'source-living-benchmark/benchmark.json',logs/'source-living-benchmark.json')
     prefix='Yenikapi-Early-Settlement'
+    run([godot,'--path',project,'--script','res://tools/incident_profile.gd'],logs/'source-incident-interactions.log',project)
     app_zip=out/f'{prefix}-macOS-{args.version}.zip'
     run(editor+['--export-release','macOS',app_zip],logs/'export.log',project)
     with zipfile.ZipFile(app_zip,'a',zipfile.ZIP_DEFLATED) as archive:
@@ -132,6 +137,8 @@ def main():
     if not re.search(r'LAND CHECKS: \d+ checks, 0 failures',packaged_land):raise SystemExit('Missing packaged land success marker')
     packaged_geometry=run([binary,'--headless','--script','res://tools/land_geometry_checks.gd'],logs/'packaged-land-geometry.log',out)
     if not re.search(r'LAND GEOMETRY CHECKS: \d+ checks, 0 failures',packaged_geometry):raise SystemExit('Missing packaged land geometry success marker')
+    packaged_incidents=run([binary,'--headless','--script','res://tools/incident_checks.gd'],logs/'packaged-incidents.log',out)
+    if not re.search(r'INCIDENT CHECKS: \d+ checks, 0 failures',packaged_incidents):raise SystemExit('Missing packaged incident success marker')
     packaged_living=run([binary,'--headless','--script','res://tools/living_checks.gd'],logs/'packaged-living.log',out)
     if not re.search(r'LIVING CHECKS: \d+ checks, 0 failures',packaged_living):raise SystemExit('Missing packaged living success marker')
     rendered=run([binary,'--max-fps','10','--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
@@ -170,6 +177,10 @@ def main():
     shutil.copy2(render_dir/'living/render-report.json',logs/'living-render-report.json')
     run([binary,'--script','res://tools/benchmark.gd','--','living',f'out_dir={render_dir / "living-benchmark"}'],logs/'packaged-living-benchmark.log',out)
     shutil.copy2(render_dir/'living-benchmark/benchmark.json',logs/'packaged-living-benchmark.json')
+    incident_render=run([binary,'--max-fps','10','--script','res://tools/incident_preview.gd','--',f'out_dir={render_dir / "incidents"}'],logs/'packaged-incident-render.log',out)
+    if not re.search(r'INCIDENT RENDER: \d+ captures; \d+ checks, 0 failures',incident_render):raise SystemExit('Incident render gate failed')
+    shutil.copy2(render_dir/'incidents/render-report.json',logs/'incident-render-report.json')
+    run([binary,'--script','res://tools/incident_profile.gd'],logs/'packaged-incident-interactions.log',out)
     provenance['living_performance']={'source':json.loads((logs/'source-living-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-living-benchmark.json').read_text())}
     provenance['land_performance']={'source':json.loads((logs/'source-land-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-land-benchmark.json').read_text())}
     provenance['asset_performance']={'source':json.loads((logs/'source-asset-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-asset-benchmark.json').read_text())}
@@ -178,11 +189,11 @@ def main():
     provenance['render_capture_directory']=str(render_dir)
     provenance['performance']={'source':json.loads((logs/'source-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-benchmark.json').read_text())}
     provenance['campaign_performance']={'source':json.loads((logs/'source-campaign-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-campaign-benchmark.json').read_text())}
-    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1, assets 1, land 1, living 1; wrappers 1 (inactive) / 2 (contacts) / 3 (households) / 4 (assets) / 5 (land) / 6 (living); separate campaign slot'
+    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1, assets 1, land 1, living 1, incidents 1; wrappers 1 (inactive) / 2 (contacts) / 3 (households) / 4 (assets) / 5 (land) / 6 (living) / 7 (incidents); separate campaign slot'
     models=out/f'{prefix}-Models'
     run(editor+['--script','res://tools/export_models.gd','--',f'out_dir={models}'],logs/'models.log',project)
     glbs=sorted(models.glob('*.glb'))
-    if len(glbs)!=33:raise SystemExit('Expected reference, hypothetical town and individual models')
+    if len(glbs)!=36:raise SystemExit('Expected reference, hypothetical town and individual models')
     provenance['models']={p.name:check_glb(p) for p in glbs}
     for name,sha in frozen.items():
         if digest(snapshot/name)!=sha:raise SystemExit(f'Frozen source changed: {name}')
@@ -191,10 +202,10 @@ def main():
     # Small independent archives preserve existing GLBs and avoid oversized uploads.
     contact={'growth_exchange_house.glb','Yenikapi-Hypothetical-Contact-Settlement.glb','hypothetical-contact-provenance.json'}
     artifacts=[app_zip,source_zip]
-    for group,count in [('Foundation',16),('Contact',2),('Household',6),('Asset',3),('Land',3),('Living',3)]:
+    for group,count in [('Foundation',16),('Contact',2),('Household',6),('Asset',3),('Land',3),('Living',3),('Incident',3)]:
         members=[]
         for path in models.iterdir():
-            category='Living' if path.name.startswith('living-') else 'Land' if path.name.startswith('land-') else 'Asset' if path.name.startswith('asset-') else 'Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
+            category='Incident' if path.name.startswith('incident-') else 'Living' if path.name.startswith('living-') else 'Land' if path.name.startswith('land-') else 'Asset' if path.name.startswith('asset-') else 'Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
             if path.is_file() and category==group:members.append(path)
         if len([p for p in members if p.suffix=='.glb'])!=count:raise SystemExit('Wrong model partition '+group)
         target=out/f'{prefix}-{group}-Models-{args.version}.zip'
@@ -207,7 +218,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':'100 written (14 reference + 12 tutorial + 10 contact + 12 household + 12 assets + 19 land + 21 living); manual visual review required before publication','glb_structure':'33 passed','zip_integrity':'8 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':'125 written (14 reference + 12 tutorial + 10 contact + 12 household + 12 assets + 19 land + 21 living + 25 incidents); manual visual review required before publication','glb_structure':'36 passed','zip_integrity':'9 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))

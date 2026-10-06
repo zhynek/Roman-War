@@ -11,9 +11,13 @@ func begin() -> void:
 	panel.tabs.current_tab=8
 func inspect(id: String) -> void:
 	selected=id
+	var e: Dictionary=panel.rules.incidents.current(panel.state)
+	if not e.is_empty() and id in panel.rules.incidents.specs[e.id].subjects:
+		panel.incident_panel.inspect(id);return
 	panel.dispatch({"kind":"living_inspect","id":id})
 	panel.app.hud.show();panel.show();panel.tabs.current_tab=8
 func title(id: String) -> String:
+	if panel.rules.assets.assets.has(id):return panel.rules.assets.assets[id].title
 	if id in ["workroom","store"]:return copy.ui[id]
 	for h in panel.rules.content.households:
 		if h.id==id:return h.label
@@ -103,4 +107,4 @@ func guide(body: VBoxContainer) -> void:
 	body.add_child(panel.label(copy.ui.recover,14))
 	panel.asset_panel.forecast(body,panel.rules.forecast(s))
 	body.add_child(panel.label(copy.ui.growth,15));panel.asset_panel.growth(body)
-	if s.assets.pressure_start<0:panel.asset_panel.action(body,panel.asset_panel.copy.ui.begin_pressure,{"kind":"asset_pressure"},"AssetPressure")
+	if s.assets.pressure_start<0 and not panel.rules.incidents.active(s):panel.asset_panel.action(body,panel.asset_panel.copy.ui.begin_pressure,{"kind":"asset_pressure"},"AssetPressure")

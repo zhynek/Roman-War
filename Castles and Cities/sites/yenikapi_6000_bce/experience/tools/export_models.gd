@@ -134,7 +134,21 @@ func run() -> void:
 		model.free()
 	FileAccess.open(out_dir.path_join("living-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical paid work, shared preparation and wooden watch kits; not archaeological weapon reconstruction","state":living_state,"fabric":living_data.objects,"models":"Neutral geometry only. Citizens, seasonal rules and original shaders remain in the app/source."},"  "))
 	living_view.free();living_world.free()
-	print("VILLAGE MODEL EXPORT PASS: 33 GLBs")
+	var incident_rules=preload("res://src/core/settlement_rules.gd").new(_read("governance"),_read("balance"),_read("neighbors"),_read("households"),_read("assets"),_read("land"),_read("living"),_read("incidents"))
+	for season in [6,8,10]:
+		var state: Dictionary=preload("res://tools/incident_driver.gd").at_season(incident_rules,season)
+		var snapshot_: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,state,incident_rules)
+		var scene=load("res://src/village.gd").new();root.add_child(scene);scene.build(snapshot_)
+		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(state,incident_rules,scene)
+		var model:=Node3D.new();model.name="IncidentPlace";root.add_child(model)
+		for id in scene.object_nodes:
+			if not id.begins_with("incident_detail_"):continue
+			var original: MeshInstance3D=scene.object_nodes[id]
+			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=original.transform;copy.mesh=neutral_mesh(original.mesh);model.add_child(copy)
+		if not write_model(model,out_dir.path_join("incident-approach-%d.glb"%season)):quit(1);return
+		FileAccess.open(out_dir.path_join("incident-%d-provenance.json"%season),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical approach signs, disruption and repair; no documented disaster claimed","state":state,"models":"Original neutral procedural signs; rules and animated citizens remain in app/source."},"  "))
+		model.free();view.free();scene.free()
+	print("VILLAGE MODEL EXPORT PASS: 36 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

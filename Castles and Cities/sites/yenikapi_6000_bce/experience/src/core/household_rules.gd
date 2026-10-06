@@ -120,7 +120,7 @@ func advance(next: Dictionary, before: Dictionary, rules) -> void:
 		var memory: Dictionary = next.households.homes[id]
 		var stress_before: int = int(memory.stress)
 		var practice_before: int = int(memory.practice)
-		var delta: int = int(balance.stages[current].stress)
+		var delta: int = int(balance.stages[current].stress)+rules.incidents.household_strain(before,next.report,id)
 		if effect.care_ready: delta+=int(balance.refuge_stress)
 		if int(next.report.get("unfed",0))>0: delta+=int(balance.stress_hunger)
 		memory.stress=clampi(stress_before+delta,0,int(balance.max_stock))

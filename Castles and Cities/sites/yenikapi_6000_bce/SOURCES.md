@@ -258,3 +258,31 @@ bindings; preparation work includes gathering and working those bindings.
 The two work sites were selected beside the existing procedural woodland, not
 from a recovered resource map. No dated reference object or medieval fabric is
 replaced. There is no claimed continuous chronology into Constantinople.
+
+## Preparedness put to the test (0.8.0)
+
+Rechecked 2026-10-06: Algan et al.'s [original 2011 site study](https://www.sciencedirect.com/science/article/abs/pii/S0033589411000457),
+indexed publisher abstract and introduction. Direct page retrieval returned 403;
+the accessible publisher search text identifies a coastal plain beside a stream
+and long-term coastal change. This **direct geoarchaeology** supports the broad
+landscape vocabulary, not a seasonal flood, particular path failure, date, repair
+technique or reconstructed northern woodland location. The new approach incident
+is ordinary hypothetical wear under local use, not a reenactment of inundation.
+
+Larsen et al.'s [original 2019 Çatalhöyük research](https://pmc.ncbi.nlm.nih.gov/articles/PMC6601267/)
+was rechecked through its indexed abstract/bibliographic text; direct retrieval
+was blocked by the host's browser challenge. The fuller 0.4 reading above remains
+the basis for the distant comparison of interpersonal adversity. **Regional analogy
+only:** it supplies no evidence of theft, an outside raiding party, watch equipment,
+a local attack or an army at Yenikapı. The waterside attempt and its uncertain
+warning are expressly fictional and introduce no claimed attacker identity.
+
+**Gameplay interpretation:** two one-time pressures, four-season development,
+two-season guaranteed warning, named local factors, loaded-access disruption,
+bounded supply loss, wooden equipment wear, temporary work restrictions,
+material/crew costs and recovery intervals are authored rules. No source establishes
+these offices, counts, timings, household reactions or risk frequencies. Existing
+wood and storage evidence supports the material vocabulary; source plans and images
+were not copied. Pedestrian connections, dwellings, occupants and older fabric
+survive. Bows remain deferred. The distinction between direct evidence, distant
+analogy and hypothetical governing decisions is retained in the guide and UI.

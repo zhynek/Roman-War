@@ -11,6 +11,34 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı preparedness under pressure (0.8.0, October 2026)
+
+**Begin warning, response and recovery** connects two hypothetical local incidents
+to the existing material chain, maintained posts, trained equipped watch, household
+cooperation, paid queue and finite adult allocation. Approach wear impairs northern
+loaded access; uncertain waterside activity tests local observation and protected
+handling. All players receive two full warning seasons. Local investigation or
+relevant coverage can give two more. Inspection records knowledge but resolves
+nothing. Repairs need paid materials and seasonal crews; history and homes survive.
+
+Only one incident can remain unresolved, followed by eight quiet seasons. Each
+of the two types occurs once in this release. Old living saves explicitly adopt
+wrapper 7 and receive a fresh grace period; no legacy economy is silently changed.
+The earlier eight-season household lesson remains separate and cannot overlap.
+[PREPAREDNESS.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/PREPAREDNESS.md)
+contains the gameplay, authoring and save contract; the
+[verification record](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.8.md)
+records comparisons, rendering, interaction latency and publication status.
+
+Normal-stock comparisons keep both competent strategies fed. Local information
+and a costly restriction reduce first-incident severity from 3 to 2; both competent
+strategies protect waterside food. Underprepared play loses 28 provisions but can
+recover without grants. Compact/outward growth retains different workspace and
+access consequences. The release builder adds incident checks, actual-input guide
+acceptance and exact-app interaction profiles while retaining all previous gates
+and 33 model bytes. Three new neutral incident specimens are separate. Bows,
+tactical combat, individual commands and a continuous chronology remain deferred.
+
 ## Yenikapı living village (0.7.0, October 2026)
 
 **Begin living village** connects finite woodland, opening-stock fuel/preparation,

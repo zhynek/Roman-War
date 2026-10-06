@@ -234,6 +234,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not resident.is_empty():
 					campaign.household_panel.inspect_resident(resident)
 					return
+			if campaign_mode and campaign.rules.incidents.active(campaign.state):
+				var subject: String=campaign_view.incident_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
+				var e: Dictionary=campaign.rules.incidents.current(campaign.state)
+				if subject.is_empty() and not e.is_empty():
+					var object_id: String=world.pick(camera.project_ray_origin(point),camera.project_ray_normal(point)).get("id","")
+					if object_id=="yk_house_06":subject="workroom"
+					elif object_id.begins_with("yk_store"):subject="store"
+					else:
+						for home in campaign.rules.content.households:
+							if home.building_id==object_id:subject=home.id
+					if subject.is_empty():subject=campaign.rules.assets.object_asset(object_id)
+				if not subject.is_empty() and not e.is_empty() and subject in campaign.rules.incidents.specs[e.id].subjects:campaign.incident_panel.inspect(subject);return
 			if campaign_mode and campaign.rules.living.active(campaign.state):
 				var subject: String=campaign_view.living_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
 				if subject.is_empty():

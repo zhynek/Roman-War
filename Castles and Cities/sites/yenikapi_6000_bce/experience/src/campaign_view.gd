@@ -5,6 +5,7 @@ var actors: Array = []
 var elapsed: float = 0.0
 var life
 var land_view
+var incident_view
 var living_view
 var markers: Node3D
 var _marker_key: String=""
@@ -33,6 +34,10 @@ func refresh(state: Dictionary, rules, world) -> void:
 		if not is_instance_valid(living_view):living_view=preload("res://src/living_view.gd").new();add_child(living_view)
 		living_view.refresh(state,rules,world)
 	elif is_instance_valid(living_view):living_view.free();living_view=null
+	if rules.incidents.active(state):
+		if not is_instance_valid(incident_view):incident_view=preload("res://src/incident_view.gd").new();add_child(incident_view)
+		incident_view.refresh(state,rules,world)
+	elif is_instance_valid(incident_view):incident_view.free();incident_view=null
 	if rules.households.active(state):
 		actors.clear()
 		if not is_instance_valid(life):
