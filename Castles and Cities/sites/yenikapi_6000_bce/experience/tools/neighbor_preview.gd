@@ -20,6 +20,8 @@ func run() -> void:
 	var panel=app.campaign
 	panel.save_path=out_dir.path_join("contacts-test.json")
 	panel.begin();panel.open();panel.tabs.current_tab=5
+	# Tab content is built by a deferred refresh in the current interface.
+	await process_frame;await process_frame
 	check(panel.find_child("BeginNeighbors",true,false).disabled,"new chapter locked for starting village")
 	await shot("01-locked-chapter")
 	panel.state=Driver.foundation(panel.rules);panel.open();panel.tabs.current_tab=5
@@ -92,10 +94,14 @@ func click_button(id:String) -> void:
 	var at:Vector2=button.get_global_rect().get_center()
 	# Scrolling/rebuilding changes the hovered control. Move the synthetic pointer
 	# before pressing, just as an actual player does, and let layout settle.
+	# Keep the native pointer there too: desktop hover updates between frames can
+	# otherwise replace the synthetic hover while this test holds the button down.
+	root.warp_mouse(at)
 	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;root.push_input(motion,true)
 	for i in range(3):await process_frame
 	at=button.get_global_rect().get_center()
 	for pressed in [true,false]:
+		root.warp_mouse(at)
 		var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0
 		root.push_input(event,true)
 		for i in range(6):await process_frame

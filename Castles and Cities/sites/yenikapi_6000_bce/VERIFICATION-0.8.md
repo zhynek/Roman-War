@@ -93,3 +93,12 @@ inspection; passing input checks alone do not authorize publication.
 The corrected source acceptance completed **25 captures / 676 checks, zero
 failures**. The outward landscape and both recovery interiors were reinspected
 and retained their lit materials. Final frozen-app verification follows below.
+
+The next candidate stopped twice in the older contact UI harness because its
+synthetic season click left the journey unchanged. Two instrumented runs on the
+same app delivered the click and passed all 57 checks. Source execution also
+exposed an immediate assertion before deferred tab construction. The harness now
+waits for that tab and keeps the native pointer aligned with its synthetic press
+and release, without retries or direct state edits. The corrected source contact
+run passed 58 checks / 10 captures. No seasonal rule was changed; the replacement
+payload repeats the full frozen build instead of accepting the failed gate.
