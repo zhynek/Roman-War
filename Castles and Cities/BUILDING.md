@@ -160,7 +160,7 @@ and retain all earlier release IDs/assets and campaign stable `v0.14.2`.
 
 Use the current builder with `--version 0.6.0`, fresh parent logs and a clean
 committed checkout. It validates the land schema, relationship/negative cases,
-773 land rule checks, and 438 full-path/door/citizen geometry checks, in addition
+779 land rule checks, and 438 full-path/door/citizen geometry checks, in addition
 to every retained suite. Both source and the exact universal Mac app run the
 rule and geometry gates. Actual-input acceptance adds 19 land captures to the
 60 earlier views: **79 images** outside the repository, all requiring inspection.

@@ -114,9 +114,16 @@ func run() -> void:
 	s=command(s,{"kind":"cancel","id":"land_adapt_workroom"})
 	check(s.wood==paid.wood+refund and not rules.has_project(s,"land_adapt_workroom"),"partial cancellation refunds only unused timber and preserves old room")
 	# Missing access resources cannot be borrowed from later seasonal output.
-	s=Driver.at_season(rules,false,12)
+	s=command(Driver.initial(rules),{"kind":"commission","id":"land_outer_access"})
+	for i in range(8):
+		if rules.has_project(s,"land_outer_access"):break
+		s=rules.advance(s).state
+	check(rules.has_project(s,"land_outer_access"),"access fixture completed through paid seasons")
 	s=command(s,{"kind":"land_access","enabled":false})
 	check(rules.command(s,{"kind":"commission","id":"land_outer_east"}).get("error")=="land_access","disabled upkeep refuses dependent commission")
+	s=command(s,{"kind":"land_access","enabled":true})
+	s=command(s,{"kind":"commission","id":"land_outer_west"})
+	check(not s.queue.is_empty() and s.queue[0].id=="land_outer_west","dependent project exists before unsupported-work check")
 	var unserved: Dictionary=s.duplicate(true);unserved.wood=0;unserved.land.access_enabled=true;unserved.plan=rules.effective_plan(unserved)
 	f=rules.forecast(unserved)
 	check(f.assets.access_cost==0 and not f.land.access,"zero opening timber cannot service access")

@@ -30,7 +30,7 @@ projects, priority/pause/cancellation, forecast identity, adaptation lineage,
 residential accommodation rejection, office authority and succession, legacy
 paid queues, additive opt-in saves, deterministic replay, poor-choice recovery,
 and presentation independence. The source gates pass 248 reference, 709 governance,
-302 neighbor, 310 household, 608 asset, 773 land checks and 438 land geometry checks.
+302 neighbor, 310 household, 608 asset, 779 land checks and 438 land geometry checks.
 Land negative tests exercise 13 malformed relationships/content mutations and four
 invalid seasonal tuning values. Every retained data gate also passes.
 
@@ -52,6 +52,10 @@ obstructing the actual curved west/field paths. Full path walking was added to t
 gate, alongside household doorway and citizen route checks. Both corrected
 layouts and the converted provisioning yard pass 438 geometry checks. These
 failures are retained in external development logs rather than hidden as passes.
+The first packaging attempt also caught an access-test fixture that had not yet
+completed its prerequisite. It now constructs access through paid seasons before
+testing disabled upkeep, then commissions a real outer project before asserting
+zero work without opening timber. The corrected land suite passes 779 checks.
 
 ## Performance baseline and limits
 
