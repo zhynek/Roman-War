@@ -1015,6 +1015,44 @@
           "minimum": 0
         }
       }
+    },
+    "land": {
+      "type": "object",
+      "properties": {
+        "access_workers": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "access_wood": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "access_priority": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "unserved_wellbeing": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        },
+        "minimum_reserve": {
+          "type": "integer",
+          "minimum": -1000,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "access_workers",
+        "access_wood",
+        "access_priority",
+        "unserved_wellbeing",
+        "minimum_reserve"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -1091,7 +1129,8 @@
     "minimum_food_workers",
     "neighbors",
     "households",
-    "assets"
+    "assets",
+    "land"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

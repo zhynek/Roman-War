@@ -6,17 +6,23 @@ var projects: Dictionary = {}
 var neighbors
 var households
 var assets
+var land
+const Land = preload("res://src/core/land_rules.gd")
 const Assets = preload("res://src/core/asset_rules.gd")
 const Households = preload("res://src/core/household_rules.gd")
 const Neighbors = preload("res://src/core/neighbor_rules.gd")
 
-func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}) -> void:
+func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}, land_config: Dictionary = {}) -> void:
 	content = canonical(config)
 	balance = canonical(tuning)
+	land = Land.new(canonical(land_config),balance.get("land",{}))
+	content.projects.append_array(land.content.get("projects",[]))
+	content.households.append_array(land.content.get("households",[]))
 	assets = Assets.new(canonical(asset_config),balance.get("assets",{}))
 	assets.stage_seasons=int(balance.get("households",{}).get("stage_seasons",2))
 	neighbors = Neighbors.new(canonical(contacts_config),balance.get("neighbors",{}))
 	households = Households.new(canonical(household_config),balance.get("households",{}))
+	for proposal in land.content.get("proposals",[]):assets.project_assets[proposal.id]=proposal.asset
 	for project in content.projects:
 		projects[project.id] = project
 
@@ -31,7 +37,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -39,6 +45,7 @@ func new_state() -> Dictionary:
 	return state
 
 func ensure_state_keys(state: Dictionary) -> void:
+	if not state.has("land"):state.land={}
 	if not state.has("assets"): state.assets={}
 	if not state.has("contacts"): state.contacts={}
 	if not state.has("households"): state.households={}
@@ -114,6 +121,10 @@ func suggested_plan(state: Dictionary) -> Dictionary:
 func permitted(state: Dictionary, role: String) -> bool:
 	return state.role == "god" or state.role == role
 
+func quote(state: Dictionary, action: Dictionary) -> Dictionary:
+	# Validation uses the exact command path but need not materialize a new plan.
+	return _command(state,action)
+
 func command(state: Dictionary, action: Dictionary) -> Dictionary:
 	var result: Dictionary=_command(state,action)
 	if result.has("state") and assets.active(result.state):result.state.plan=effective_plan(result.state)
@@ -122,6 +133,7 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("land_"):return land.command(state,action,self)
 	if kind.begins_with("asset_"): return assets.command(state,action,self)
 	if kind=="plan" and assets.active(state):return {"error":"asset_managed"}
 	if kind.begins_with("household_"): return households.command(state,action,self)
@@ -160,6 +172,8 @@ func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 			if state.queue.size() >= balance.queue_limit: return {"error": "queue_full"}
 			for requirement in project.requires:
 				if not has_project(state, requirement): return {"error": "prerequisite"}
+			var land_error: String=land.blocked(state,id,self)
+			if not land_error.is_empty():return {"error":land_error}
 			if state.wood < project.wood: return {"error": "insufficient_wood"}
 			if assets.active(state) and id in assets.content.housing_steps.slice(1) and int(state.food)<people(state).size()*int(assets.balance.minimum_commission_reserve):return {"error":"asset_supplies"}
 			next.wood -= int(project.wood)
@@ -203,6 +217,11 @@ func forecast(state: Dictionary) -> Dictionary:
 	var household_effects: Dictionary = households.forecast(state,self)
 	var gathered: int = maxi(0,workers * (int(balance.food_yields[int(state.turn) % 4]) + effect(state, "food_yield")) - int(household_effects.food_penalty))
 	if assets.active(state):gathered=maxi(0,gathered-assets.food_penalty(state))
+	var land_effects: Dictionary=land.totals(state,self)
+	if land.active(state):
+		land_effects.access=land.access_ready(state,allocation_,self)
+		land_effects.food=int(land_effects.food) if workers>0 else 0
+		gathered=maxi(0,gathered+int(land_effects.food))
 	var used: int = ceili(population * float(balance.tight_rations_percent if state.tight_rations else balance.full_rations_percent) / 100.0) * int(balance.food_per_person)
 	var spoil: int = int(state.food) * int(balance.spoil_percent) / 100
 	var available: int = maxi(0,int(state.food) + gathered - spoil)
@@ -233,11 +252,19 @@ func forecast(state: Dictionary) -> Dictionary:
 	remaining += int(cargo.food)
 	var overflow: int = maxi(0,remaining-losses-storage(state))
 	remaining = mini(storage(state), remaining - losses)
+	if land.active(state):
+		factors.wellbeing.append({"id":"land_access","value":-int(land.balance.unserved_wellbeing) if land.occupied_outer(state,self) and not land_effects.access else 0})
+		factors.cooperation.append({"id":"land_access","value":int(land_effects.cooperation)})
+		for key in ["wellbeing","cooperation","security"]:
+			var total: int=0
+			for factor in factors[key]:total+=int(factor.value)
+			stocks[key]=move_stock(int(state[key]),clampi(total,0,100))
 	var output: Dictionary={"households":household_effects,"plan":plan,"population":population,"gathered":gathered,"used":eaten,"unfed":used-eaten,"overflow":overflow,"spoil":spoil,"losses":losses,"food":remaining,"food_delta":remaining-int(state.food),"covered":covered,"stocks":stocks,"factors":factors,"crew":crew,"cargo":cargo,"wood":int(plan.timber)*int(balance.timber_yield)+int(cargo.wood),"work":int(plan.building)*int(balance.work_yield)+leader_skill(state,"steward")/int(balance.steward_work_divisor) if plan.building>0 and not state.queue.is_empty() else 0}
 	if assets.active(state):
 		output.assets=allocation_
 		output.work=0
 		for value in allocation_.projects.values():output.work+=int(value.work)
+	if land.active(state):output.land=land_effects
 	return output
 
 func move_stock(current: int, target: int) -> int:
@@ -262,6 +289,7 @@ func advance(state: Dictionary) -> Dictionary:
 	var work: int = int(f.work)
 	if assets.active(state):
 		assets.advance(next,state,f,self)
+		land.advance(next,state,f)
 		work=0
 	while work > 0 and not next.queue.is_empty():
 		var item: Dictionary = next.queue[0]
@@ -322,7 +350,7 @@ func migration_supported(state: Dictionary) -> bool:
 
 func town_conditions(state: Dictionary) -> bool:
 	for id in balance.town_required_projects:
-		if not has_project(state,id): return false
+		if not land.foundation(state,id,self): return false
 	return people(state).size() >= balance.town_population and capacity(state)/int(balance.people_per_dwelling) >= balance.town_dwellings and state.food >= people(state).size()*int(balance.town_reserve_seasons) and state.wellbeing >= balance.town_wellbeing and state.cooperation >= balance.town_cooperation and state.security >= balance.town_security
 
 func _add_person(state: Dictionary, age: int) -> void:
@@ -435,6 +463,7 @@ func validate_state(value: Variant) -> bool:
 		ordered[item.id]=true
 	if not neighbors.validate(state,self): return false
 	if not assets.validate(state,self):return false
+	if not land.validate(state,self):return false
 	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false
 	if assets.active(state):

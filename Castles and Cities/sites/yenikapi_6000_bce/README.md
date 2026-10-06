@@ -1,5 +1,17 @@
 # Yenikapı · early settlement, circa 6000 BCE
 
+## Land, Growth, and Lasting Consequences — 0.6.0
+
+Choose **Manage village assets → Begin land planning**. Compare compact homes
+on shared working ground with an outward cluster requiring seasonal access upkeep.
+Renew cultivation or convert it to provisioning space; repair and adapt the old
+workroom. Paid staging, scarce crews, changed land uses and household placement
+persist. Both layouts can sustain the existing town milestone. The
+[planning guide and save contract](experience/LAND_GROWTH.md) explain tradeoffs,
+recovery and explicit adoption for old saves. No dated reference or medieval save
+is replaced. [Verification record](VERIFICATION-0.6.md).
+
+
 A separate, walkable first village on the site of Istanbul's historic peninsula.
 It is a **dated interpretive scenario**, with evidence and uncertainty available
 inside the app. Read [SOURCES.md](SOURCES.md) before changing historical claims.

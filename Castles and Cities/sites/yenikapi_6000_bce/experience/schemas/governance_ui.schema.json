@@ -485,6 +485,9 @@
         },
         "asset_upkeep": {
           "type": "string"
+        },
+        "land_access": {
+          "type": "string"
         }
       },
       "required": [
@@ -498,7 +501,8 @@
         "watch",
         "leadership",
         "household_life",
-        "asset_upkeep"
+        "asset_upkeep",
+        "land_access"
       ],
       "additionalProperties": false
     },

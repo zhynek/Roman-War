@@ -55,3 +55,10 @@ Asset governance 0.5.0 changes management of the same hypothetical settlement.
 Its housing coordination invokes existing project/fabric IDs and leaves the dated
 reference unchanged. Maintenance conditions are group-level gameplay state, not new
 archaeological phases. There is no new urban category or population threshold.
+
+Land planning 0.6.0 introduces bounded hypothetical alternatives within the same
+village. Completed projects retain their original ledger and explicit lineage.
+The repaired workroom keeps its ID at revision 2; converted fields/work areas
+remain inactive tombstones. Household additions do not replace occupied homes.
+The original town criteria accept equivalent spatial foundations, without a new
+population threshold or any claim of continuous prehistoric-to-medieval growth.

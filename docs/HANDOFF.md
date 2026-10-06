@@ -11,6 +11,41 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı land planning (0.6.0, October 2026)
+
+**Manage village assets → Begin land planning** starts the same finite village.
+Seven authored sites and eight initiatives make compact and outward growth
+mechanically different. Compact homes replace working yards; outward homes keep
+those yards but require a northern connection staffed by one adult and one opening
+timber each season. A field can become better cultivation or a provisioning yard,
+never both. Adapting `yk_house_06` preserves its identity and furnishings while
+adding construction places. Every project uses the existing paid queue, finite
+adult allocation and authoritative commands; citizens remain autonomous.
+
+Both QA strategies start identically, reach the original town milestone in season
+24 and remain fed through season 80. Compact development has six crew places
+(after adaptation) and a four-point cooperation opportunity cost. Outward growth
+retains eight places and pays access upkeep. There is no new town threshold or
+historical transition to medieval Constantinople. Site bounds, yields and offices
+are explicitly interpretive; a regional building-continuity comparison is recorded
+in the evidence ledger.
+
+Older saves gain only inactive `land: {}`. Explicit God adoption enables the new
+rules while retaining old locations, completed fabric, paid queues, standing
+orders, household memories and workforce history. Active land uses wrapper 5;
+wrappers 1–4 retain their meanings. The dated reference and parent/medieval saves
+remain independent. The detailed play, save and authoring contract is
+[LAND_GROWTH.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LAND_GROWTH.md).
+
+UI panels now build the visible tab only. Geometry refresh depends on actual
+fabric changes; presentation refresh depends on actual assignments/visible state.
+Cached route segments are invalidated by collider geometry. This removes avoidable
+inspection/order rebuilds; major fabric changes still stall and remain a limit.
+[Verification and publication status](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.6.md)
+records source/exact-app gates, honest before/after timings and download integrity.
+The release builder produces a separate universal Mac app, editable source and
+five model archives; all earlier release bytes and campaign latest must be retained.
+
 ## Yenikapı asset governance (0.5.0, October 5, 2026)
 
 **Manage village assets → Begin asset governance** starts ordinary village life.

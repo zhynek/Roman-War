@@ -1,5 +1,7 @@
 # Yenikapı — Early Settlement 0.4.0
 
+**0.6.0 — Land, Growth, and Lasting Consequences.** Start with **Begin land planning** in the management panel. Read [LAND_GROWTH.md](LAND_GROWTH.md) for spatial choices, real upkeep, recovery and compatible saves.
+
 **New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
 is the primary management path. Choose Manage village assets. Older saves retain
 their existing manual workforce until explicit adoption; active assets use wrapper 4.

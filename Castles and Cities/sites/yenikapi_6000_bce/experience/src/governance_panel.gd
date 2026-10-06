@@ -2,6 +2,8 @@ extends PanelContainer
 const Rules = preload("res://src/core/settlement_rules.gd")
 const Saves = preload("res://src/campaign_save.gd")
 var app
+var land_panel
+const LandPanel=preload("res://src/land_panel.gd")
 var asset_panel
 const AssetPanel=preload("res://src/assets_panel.gd")
 var household_panel
@@ -27,7 +29,9 @@ func configure(owner_app) -> void:
 	household_panel=HouseholdPanel.new(self,household_content)
 	var asset_content: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/assets.json"))
 	asset_panel=AssetPanel.new(self,asset_content)
-	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content)
+	var land_content: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/land.json"))
+	land_panel=LandPanel.new(self,land_content)
+	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content,land_content)
 	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
 	offset_left = -638; offset_right = -22; offset_top = 164; offset_bottom = -22
 	var panel_style:StyleBoxFlat=app._style();panel_style.bg_color.a=1.0
@@ -55,16 +59,18 @@ func open() -> void:
 func begin() -> void:
 	state=rules.new_state()
 	last_message=copy.new_campaign
-	app.show_campaign(state,rules,true)
+	app.show_campaign(state,rules)
 	refresh()
 
 func dispatch(action: Dictionary) -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.command(state,action)
 	if result.has("error"):
-		last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+		last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") or result.error.begins_with("land_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
-	if action.kind.begins_with("asset_"):
+	if action.kind.begins_with("land_"):
+		last_message=""
+	elif action.kind.begins_with("asset_"):
 		last_message=asset_panel.copy.ui.checked if action.kind=="asset_review" else ""
 	elif action.kind.begins_with("household_"):
 		last_message=household_panel.copy.ui.updated
@@ -79,7 +85,7 @@ func dispatch(action: Dictionary) -> bool:
 func resolve_season() -> bool:
 	if state.is_empty(): return false
 	var result: Dictionary=rules.advance(state)
-	if result.has("error"): last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+	if result.has("error"): last_message=asset_panel.reason(result.error) if result.error.begins_with("asset_") or result.error.begins_with("land_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
 	state=result.state
 	last_message=copy.resolved
 	app.show_campaign(state,rules)
@@ -116,7 +122,7 @@ func refresh() -> void:
 		for child in tabs.get_children():scrolls.append(child.scroll_vertical)
 	for child in get_children():remove_child(child);child.queue_free()
 	column=VBoxContainer.new();column.add_theme_constant_override("separation",8);add_child(column)
-	column.add_child(label(asset_panel.copy.title if not state.is_empty() and rules.assets.active(state) else copy.panel_title,23))
+	column.add_child(label(land_panel.copy.title if not state.is_empty() and rules.land.active(state) else asset_panel.copy.title if not state.is_empty() and rules.assets.active(state) else copy.panel_title,21))
 	column.add_child(label(copy.hypothesis,13))
 	var top:=HFlowContainer.new();column.add_child(top)
 	top.add_child(button(copy.close,hide,"ExploreCampaign"))
@@ -127,6 +133,8 @@ func refresh() -> void:
 		var intro_scroll:=ScrollContainer.new();intro_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;intro_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(intro_scroll)
 		var introduction:=VBoxContainer.new();introduction.size_flags_horizontal=Control.SIZE_EXPAND_FILL;introduction.add_theme_constant_override("separation",14);intro_scroll.add_child(introduction)
 		introduction.add_child(label(copy.intro,18))
+		introduction.add_child(button(land_panel.copy.ui.begin,land_panel.begin,"BeginLandPlanning"))
+		introduction.add_child(label(land_panel.copy.ui.intro,15))
 		introduction.add_child(button(asset_panel.copy.ui.begin,asset_panel.begin,"BeginAssetGovernance"))
 		introduction.add_child(label(asset_panel.copy.ui.migration,14))
 		introduction.add_child(button(copy.begin,begin,"BeginTutorial"))
@@ -142,25 +150,32 @@ func refresh() -> void:
 		role_row.add_child(role_picker)
 		var season: String=copy.year%[1+int(state.turn)/4,copy.seasons[int(state.turn)%4]]
 		column.add_child(label(season+" · "+copy["phase_"+state.phase],20))
-		tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;tabs.clip_tabs=false;column.add_child(tabs)
-		if rules.assets.active(state):
-			asset_panel.guide(_tab(copy.overview))
-			asset_panel.build(_tab(asset_panel.copy.ui.overview))
-		else:
-			_guide(_tab(copy.overview))
-			_work(_tab(copy.work))
-		_leaders(_tab(copy.leaders))
-		_journal(_tab(copy.journal))
-		var principles:=_tab(asset_panel.copy.ui.principles if rules.assets.active(state) else copy.principles)
-		if rules.assets.active(state):asset_panel.principles(principles)
-		else:
-			principles.add_child(label(copy.principle_text,15));principles.add_child(label(copy.units_note,14))
-			asset_panel.build(principles)
-		principles.add_child(button(copy.restart,_confirm_restart,"RestartTutorial"))
-		contacts_panel.build(_tab(contacts_panel.copy.tab))
-		household_panel.build(_tab(household_panel.copy.ui.tab))
+		tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;tabs.clip_tabs=true;column.add_child(tabs)
+		var bodies: Array=[]
+		for title in [copy.overview,asset_panel.copy.ui.overview if rules.assets.active(state) else copy.work,copy.leaders,copy.journal,asset_panel.copy.ui.principles if rules.assets.active(state) else copy.principles,contacts_panel.copy.tab,household_panel.copy.ui.tab,land_panel.copy.ui.tab]:bodies.append(_tab(title))
+		# Only the visible tab builds controls and quotations. Changing tabs uses
+		# the same builder; hidden pages no longer multiply ordinary order cost.
+		match selected:
+			0:
+				if rules.land.active(state):land_panel.guide(bodies[0])
+				elif rules.assets.active(state):asset_panel.guide(bodies[0])
+				else:_guide(bodies[0])
+			1:
+				if rules.assets.active(state):asset_panel.build(bodies[1])
+				else:_work(bodies[1])
+			2:_leaders(bodies[2])
+			3:_journal(bodies[3])
+			4:
+				if rules.assets.active(state):asset_panel.principles(bodies[4])
+				else:
+					bodies[4].add_child(label(copy.principle_text,15));bodies[4].add_child(label(copy.units_note,14));asset_panel.build(bodies[4])
+				bodies[4].add_child(button(copy.restart,_confirm_restart,"RestartTutorial"))
+			5:contacts_panel.build(bodies[5])
+			6:household_panel.build(bodies[6])
+			7:land_panel.build(bodies[7])
 		tabs.current_tab=clampi(selected,0,tabs.get_tab_count()-1)
 		for i in range(mini(scrolls.size(),tabs.get_child_count())):tabs.get_child(i).set_deferred("scroll_vertical",scrolls[i])
+		tabs.tab_changed.connect(func(_index):if not _refreshing:refresh.call_deferred())
 		var advance:=button(copy.end_season,resolve_season,"ResolveSeason");advance.custom_minimum_size.y=40;column.add_child(advance)
 		column.add_child(label(copy.pause_notice,12))
 	notice=label(last_message,13);notice.add_theme_color_override("font_color",Color("d6c794"));column.add_child(notice)

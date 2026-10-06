@@ -44,6 +44,7 @@ func ready(state: Dictionary, id: String, rules) -> bool:
 	var workers: int=int(plan.food)-int(crew.carriers)+(int(plan.building) if state.queue.is_empty() and not rules.assets.active(state) else 0)
 	var gathering: int=workers*(int(rules.balance.food_yields[int(state.turn)%4])+rules.effect(state,"food_yield"))
 	if rules.assets.active(state):gathering-=rules.assets.food_penalty(state)
+	if rules.land.active(state) and workers>0:gathering+=int(rules.land.totals(state,rules).food)
 	return gathering>=int(balance.learning_food)+int(balance.stages[current].food_penalty)
 
 func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:

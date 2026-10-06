@@ -209,5 +209,12 @@
     "minimum_commission_reserve": 1,
     "work_yield_loss": 1,
     "cooperation_loss": 4
+  },
+  "land": {
+    "access_workers": 1,
+    "access_wood": 1,
+    "access_priority": 3,
+    "unserved_wellbeing": 8,
+    "minimum_reserve": 1
   }
 }

@@ -7,9 +7,11 @@ var stations: Dictionary = {}
 var unreachable: Array = []
 var completed_routes: int = 0
 var elapsed: float = 0.0
+var last_refresh_profile: Dictionary={}
 var world
 var _asset_state: Dictionary={}
 var _asset_allocation: Dictionary={}
+var _land_adapted: bool=false
 var _supply_level: int=-1
 var _signature: String = ""
 var _geometry_signature: String = ""
@@ -21,6 +23,7 @@ var _text: Dictionary = {}
 var _routes: Dictionary = {}
 var _cells: Dictionary = {}
 var _edges: Dictionary = {}
+var _segments: Dictionary = {}
 var _materials: Dictionary = {}
 var _figure_cache: Dictionary = {}
 var _obstacles: Dictionary = {}
@@ -37,19 +40,32 @@ func _exit_tree() -> void:
 	_figure_cache.clear()
 
 func refresh(state: Dictionary, rules, scene_world) -> void:
+	var profile_start: int=Time.get_ticks_usec()
+	var journey_us: int=0
+	var figure_us: int=0
 	var changed_world: bool = not is_instance_valid(world) or world != scene_world
 	if changed_world:
 		_clear_overlay()
 		world=scene_world
 		_geometry_signature=""
 		_signature=""
-		_routes.clear();_cells.clear();_edges.clear();_heights.clear();_nav_signature=0
-	var visual_assets: Dictionary={}
+		_routes.clear();_cells.clear();_edges.clear();_segments.clear();_heights.clear();_nav_signature=0
+	var stage: String=rules.households.stage(state)
+	var orders: Dictionary=state.households.orders
+	var ready: Dictionary={}
+	for id in orders:ready[id]=rules.households.ready(state,id,rules)
+	var tasks: Array=rules.assignments(state,rules.effective_plan(state))
+	var allocation_: Dictionary=rules.assets.allocation(state,rules) if rules.assets.active(state) else {}
+	var bands: Array=[]
 	if rules.assets.active(state):
-		var allocation_: Dictionary=rules.assets.allocation(state,rules)
-		visual_assets={"conditions":state.assets.conditions,"repair":allocation_.repair,"requests":allocation_.requests,"stage":rules.households.stage(state)}
-	var fingerprint: String=JSON.stringify([state.turn,state.households,state.plan,state.citizens,state.completed,state.queue,state.get("contacts",{}),state.food,state.tight_rations,visual_assets])
-	if fingerprint==_signature:return
+		for id in ["homes","stores","workroom"]:bands.append(int(state.assets.conditions[id])/25)
+	var supply: int=mini(4,ceili(float(state.food)/float(rules.storage(state))*4.0)) if rules.assets.active(state) else -1
+	# Only actual duties, visible preparations, stock bands and household memory
+	# invalidate actors. A changed target or priority with identical assignments
+	# no longer replans every citizen or rebuilds their geometry.
+	var fingerprint: String=JSON.stringify([tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
+	if fingerprint==_signature:
+		last_refresh_profile={"unchanged":true};return
 	_signature=fingerprint
 	for child in get_children():child.free()
 	routines.clear();stations.clear();unreachable.clear();completed_routes=0;elapsed=0
@@ -58,24 +74,18 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	for home in rules.content.households:
 		if _buildings.has(home.building_id):_homes[home.id]=home.building_id
 	_text=rules.households.content.get("presentation",{})
-	var stage: String=rules.households.stage(state)
-	var orders: Dictionary=state.households.orders
-	var ready: Dictionary={}
-	for id in orders:ready[id]=rules.households.ready(state,id,rules)
 	_asset_state=state.assets if rules.assets.active(state) else {}
-	_asset_allocation=rules.assets.allocation(state,rules) if not _asset_state.is_empty() else {}
-	_supply_level=mini(4,ceili(float(state.food)/float(rules.storage(state))*4.0)) if not _asset_state.is_empty() else -1
-	var bands: Array=[]
-	if not _asset_state.is_empty():
-		for id in ["homes","stores","workroom"]:bands.append(int(_asset_state.conditions[id])/25)
-	var appearance: String=JSON.stringify([stage,orders,_supply_level,bands,_asset_allocation.get("repair","")])
+	_asset_allocation=allocation_
+	_land_adapted=rules.has_project(state,"land_adapt_workroom")
+	_supply_level=supply
+	var appearance: String=JSON.stringify([_land_adapted,stage,orders,_supply_level,bands,_asset_allocation.get("repair","")])
 	if appearance!=_geometry_signature:
 		_clear_overlay()
 		_interiors(stage,orders)
 		_geometry_signature=appearance
 		var collider_signature: int=hash(world.solids)
 		if collider_signature!=_nav_signature:
-			_routes.clear();_cells.clear();_edges.clear()
+			_routes.clear();_cells.clear();_edges.clear();_segments.clear()
 			_index_obstacles()
 			_nav_signature=collider_signature
 	_make_stations(rules)
@@ -83,13 +93,14 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	var by_person: Dictionary={}
 	# Render current standing orders, including the current party, rather than a
 	# stale last-season assignment after the player changes the work plan.
-	for task in rules.assignments(state,rules.effective_plan(state)):by_person[task.id]=task
+	for task in tasks:by_person[task.id]=task
 	var people: Array=rules.people(state)
 	var count_by_home: Dictionary={}
 	var count_by_job: Dictionary={}
 	var occupied_slots: Dictionary={}
 	var refuge_guests: int=0
 	var workshop_children: int=0
+	var setup_us: int=Time.get_ticks_usec()-profile_start
 	for i in range(people.size()):
 		var person: Dictionary=people[i]
 		var child: bool=person.age<rules.balance.adult_age
@@ -137,6 +148,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 			elif job=="timber":carry=true
 			if not _asset_state.is_empty():
 				match task.get("duty",""):
+					"land_adapt_workroom":target_id="household_workshop";activity="repair";pose="kneel"
 					"secure_stores":target_id="household_store";activity="store_carry" if tense else "store_sort";carry=state.food>0;pose="kneel"
 					"refuge":
 						if job_number==0 and ready.refuge:target_id="household_home";activity="refuge_care";pose="kneel"
@@ -164,10 +176,13 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		var goal_facing: float=_station_facing(destination,target_building)
 
 		var destination_building: String=target_building if _inside_building(destination,target_building) else ""
+		var route_start: int=Time.get_ticks_usec()
 		var route: Array=[destination] if infant else _journey(origin,destination,str(stations[home_station].building),destination_building)
 		if route.is_empty():
 			unreachable.append(person.id)
 			route=[origin]
+		journey_us+=Time.get_ticks_usec()-route_start
+		var figure_start: int=Time.get_ticks_usec()
 		var figure: Dictionary=_figure(person,child,carry)
 		var node: Node3D=figure.node
 		add_child(node)
@@ -179,6 +194,8 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		var routine: Dictionary={"id":person.id,"name":person.name,"household":home_id,"age":int(person.age),"child":child,"infant":infant,"job":"child" if child else job,"activity":activity,"reason":reason,"station":target_id,"route":route,"node":node,"parts":figure.parts,"carry":carry,"pose":pose,"stress":int(home_data.stress),"practice":int(home_data.practice),"target_index":target_index,"direction":-1 if begin_at_goal else 1,"pause":float(i%5)*1.4+4.0 if begin_at_goal else float(i%3)*.7,"phase":float(i)*.79,"arrivals":0,"moving":false,"goal_facing":goal_facing,"home_facing":_station_facing(origin,str(stations[home_station].building))}
 		routines.append(routine)
 		_pose(routine,false,0)
+		figure_us+=Time.get_ticks_usec()-figure_start
+	last_refresh_profile={"setup_us":setup_us,"journey_us":journey_us,"figure_us":figure_us,"total_us":Time.get_ticks_usec()-profile_start}
 
 func _label(table: String,key: String) -> String:
 	return str(_text.get(table,{}).get(key,key))
@@ -442,16 +459,36 @@ func _append_route(target: Array,extra: Array) -> void:
 		if target.is_empty() or target[-1].distance_to(p)>.04:target.append(p)
 
 func _interior_route(a: Vector3,b: Vector3) -> Array:
+	var key: String=str(["interior",a,b])
+	if not _routes.has(key):_routes[key]=_interior_uncached(a,b)
+	return _routes[key].duplicate()
+
+func _interior_uncached(a: Vector3,b: Vector3) -> Array:
 	if _clear(a,b):return [a,b] if a.distance_to(b)>.03 else [a]
 	# Tiny local grid handles furniture corners; exact endpoints retain doorway
 	# clearance even where a global grid would entirely miss a narrow threshold.
 	return _search(a,b,.32,9.0,1800,false)
 
 func _outdoor_route(a: Vector3,b: Vector3) -> Array:
+	var key: String=str(["outdoor",a,b])
+	if not _routes.has(key):_routes[key]=_outdoor_uncached(a,b)
+	return _routes[key].duplicate()
+
+func _outdoor_uncached(a: Vector3,b: Vector3) -> Array:
 	if _clear(a,b):return [a,b]
 	return _search(a,b,GRID,20.0,9000,true)
 
 func _clear(a: Vector3,b: Vector3) -> bool:
+	# Many residents share door segments. Cache the same exact swept samples,
+	# invalidating with collider geometry; this never changes a route result.
+	var key:=Vector4(a.x,a.z,b.x,b.z)
+	if _segments.has(key):return _segments[key]
+	var clear: bool=_clear_uncached(a,b)
+	if _segments.size()>200000:_segments.clear()
+	_segments[key]=clear
+	return clear
+
+func _clear_uncached(a: Vector3,b: Vector3) -> bool:
 	var delta: Vector3=b-a;delta.y=0
 	var steps: int=maxi(1,ceili(delta.length()/.16))
 	var previous: float=_nav_height(a)
@@ -756,6 +793,11 @@ func _asset_detail(b: Dictionary) -> void:
 	var x: float=-float(b.size[0])*.5+.15
 	for i in range(1 if condition>=75 else (3 if condition>=50 else 6)):
 		geo.box(Vector3(x,.55+float(i%3)*.23,-.45-float(i/3)*.65),Vector3(.025,.13,.42),"daub_light" if condition>=75 else "daub_dark")
+	if asset=="workroom" and _land_adapted:
+		# New preparation surface retains old fabric and doorway. All extra
+		# geometry stays against the rear wall, outside circulation.
+		_repair_mat(Vector3(.9,.1,-1.2),true)
+		for i in range(4):geo.box(Vector3(x,.6+i*.22,-.8),Vector3(.025,.17,1.6),"daub_light")
 	if _asset_allocation.repair==asset:
 		_repair_mat(Vector3(float(b.size[0])*.5-.6,.09,float(b.size[1])*.5-.7),true)
 		for i in range(3):geo.rod(Vector3(x+.22,.12,-1.5+i*.15),Vector3(x+.9,.12,-1.5+i*.15),.035,"wood_light",.028,6)

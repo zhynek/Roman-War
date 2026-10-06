@@ -1,0 +1,1210 @@
+{
+  "version": 1,
+  "title": "Land, Growth, and Lasting Consequences",
+  "sites": [
+    {
+      "id": "clay_court",
+      "title": "Clay court",
+      "at": [
+        -32,
+        -2
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "objects": [
+        "yk_work_03"
+      ],
+      "connection": "yk_path_craft",
+      "use": "Shared clay working ground",
+      "beneficiaries": "West yard households and building crews",
+      "food": 0,
+      "work": 3,
+      "cooperation": 0
+    },
+    {
+      "id": "hearth_yard",
+      "title": "Hearth yard",
+      "at": [
+        -4,
+        17
+      ],
+      "size": [
+        7,
+        7
+      ],
+      "objects": [
+        "yk_work_01"
+      ],
+      "connection": "yk_path_west",
+      "use": "Shared preparation and gathering ground",
+      "beneficiaries": "Yard households, shared meals and building crews",
+      "food": 0,
+      "work": 3,
+      "cooperation": 4
+    },
+    {
+      "id": "north_west",
+      "title": "Outer west ground",
+      "at": [
+        -22,
+        -59
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "objects": [],
+      "connection": "land_outer_access",
+      "use": "Unbuilt ground beyond the existing north approach",
+      "beneficiaries": "A new household; central working space is retained",
+      "food": 0,
+      "work": 0,
+      "cooperation": 0
+    },
+    {
+      "id": "north_east",
+      "title": "Outer east ground",
+      "at": [
+        4,
+        -60
+      ],
+      "size": [
+        8,
+        8
+      ],
+      "objects": [],
+      "connection": "land_outer_access",
+      "use": "Unbuilt ground beyond the existing north approach",
+      "beneficiaries": "A new household; central working space is retained",
+      "food": 0,
+      "work": 0,
+      "cooperation": 0
+    },
+    {
+      "id": "north_access",
+      "title": "Northern connection",
+      "at": [
+        -10,
+        -50
+      ],
+      "size": [
+        8,
+        6
+      ],
+      "objects": [
+        "yk_path_landing"
+      ],
+      "connection": "yk_path_landing",
+      "use": "End of the existing earth approach",
+      "beneficiaries": "Both outer households and their construction crews",
+      "food": 0,
+      "work": 0,
+      "cooperation": 0
+    },
+    {
+      "id": "west_field",
+      "title": "West cultivation",
+      "at": [
+        -59,
+        12
+      ],
+      "size": [
+        25,
+        28
+      ],
+      "objects": [
+        "yk_field_02"
+      ],
+      "connection": "yk_path_west",
+      "use": "Productive cereal ground",
+      "beneficiaries": "All households through provisions, or crews through a shared yard",
+      "food": 8,
+      "work": 0,
+      "cooperation": 0
+    },
+    {
+      "id": "workroom",
+      "title": "Existing working room",
+      "at": [
+        -26,
+        -9
+      ],
+      "size": [
+        6,
+        6
+      ],
+      "objects": [
+        "yk_house_06"
+      ],
+      "connection": "yk_path_craft",
+      "use": "Occupied working room, with no residential household",
+      "beneficiaries": "Existing makers and construction crews; no resident loses a home",
+      "food": 0,
+      "work": 2,
+      "cooperation": 0
+    }
+  ],
+  "projects": [
+    {
+      "id": "land_court_home",
+      "title": "A home at the clay court",
+      "body": "Short access using existing paths. Paid staging closes this shared ground; completion displaces its contribution. Adapt the working room to regain crew space.",
+      "role": "steward",
+      "wood": 14,
+      "work": 24,
+      "at": [
+        -32,
+        -3
+      ],
+      "requires": [],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "removed",
+          "before": [
+            "yk_work_03"
+          ],
+          "after": []
+        },
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_court_home_building",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -32,
+                -1.5
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "A home at the clay court",
+              "household": "land_court_home_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "land_court_home_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -29,
+                  6
+                ],
+                [
+                  -32,
+                  4
+                ],
+                [
+                  -32,
+                  1.2
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_hearth_home",
+      "title": "A home at the hearth yard",
+      "body": "Short access using existing paths. Paid staging closes this shared ground; completion displaces its contribution. Adapt the working room to regain crew space.",
+      "role": "steward",
+      "wood": 14,
+      "work": 24,
+      "at": [
+        -4,
+        17
+      ],
+      "requires": [],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "removed",
+          "before": [
+            "yk_work_01"
+          ],
+          "after": []
+        },
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_hearth_home_building",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -5,
+                17
+              ],
+              "yaw": 0,
+              "size": [
+                4.2,
+                4.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "A home at the hearth yard",
+              "household": "land_hearth_home_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.092,
+                    -0.84
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    0.966,
+                    -0.84
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.134,
+                    -1.344
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.05,
+                    0.924
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.008,
+                    0.546
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "land_hearth_home_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -1,
+                  20
+                ],
+                [
+                  -5,
+                  21
+                ],
+                [
+                  -5,
+                  19.2
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_outer_west",
+      "title": "A home on outer west ground",
+      "body": "Retain the central working ground; the northern connection needs a staffed, paid maintenance duty every season.",
+      "role": "steward",
+      "wood": 20,
+      "work": 28,
+      "at": [
+        -22,
+        -59
+      ],
+      "requires": [
+        "land_outer_access"
+      ],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_outer_west_building",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -22,
+                -59
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "A home on outer west ground",
+              "household": "land_outer_west_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "land_outer_west_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -10,
+                  -48
+                ],
+                [
+                  -13,
+                  -53
+                ],
+                [
+                  -22,
+                  -55
+                ],
+                [
+                  -22,
+                  -56.3
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_outer_east",
+      "title": "A home on outer east ground",
+      "body": "Retain the central working ground; the northern connection needs a staffed, paid maintenance duty every season.",
+      "role": "steward",
+      "wood": 20,
+      "work": 28,
+      "at": [
+        4,
+        -60
+      ],
+      "requires": [
+        "land_outer_access"
+      ],
+      "effects": {
+        "housing": 6
+      },
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_outer_east_building",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                4,
+                -60
+              ],
+              "yaw": 0,
+              "size": [
+                4.8,
+                5.2
+              ],
+              "wall_height": 2.25,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "dwelling",
+              "label": "A home on outer east ground",
+              "household": "land_outer_east_household",
+              "furniture": [
+                {
+                  "id": "mat",
+                  "kind": "mat",
+                  "at": [
+                    -1.248,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    1.104,
+                    -1.04
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.296,
+                    -1.6640000000000001
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.2,
+                    1.1440000000000001
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    1.152,
+                    0.676
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "land_outer_east_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -10,
+                  -48
+                ],
+                [
+                  -13,
+                  -53
+                ],
+                [
+                  4,
+                  -56
+                ],
+                [
+                  4,
+                  -57.3
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_outer_access",
+      "title": "Prepare the northern connection",
+      "body": "Retain the old approach and extend an earth path. One adult and one timber support it each season. Without support, outer construction waits and occupied outer households lose wellbeing; their homes remain.",
+      "role": "steward",
+      "wood": 12,
+      "work": 20,
+      "at": [
+        -10,
+        -50
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_outer_access_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -10,
+                  -48
+                ],
+                [
+                  -13,
+                  -53
+                ],
+                [
+                  -22,
+                  -55
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            },
+            {
+              "id": "land_access_east_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -13,
+                  -53
+                ],
+                [
+                  -2,
+                  -53
+                ],
+                [
+                  4,
+                  -56
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_cultivate",
+      "title": "Renew the west cultivation",
+      "body": "Retain productive land and renew its working edge. Adds eight provisions to a staffed harvest each season. This prevents using this same plot as a provisioning yard.",
+      "role": "steward",
+      "wood": 12,
+      "work": 20,
+      "at": [
+        -59,
+        12
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_field_02"
+          ],
+          "after": [
+            {
+              "id": "yk_field_02",
+              "kind": "field",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "at": [
+                -59,
+                12
+              ],
+              "yaw": 14,
+              "size": [
+                18,
+                23
+              ],
+              "label": "Renewed west cultivation"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_provisioning",
+      "title": "Make a provisioning yard",
+      "body": "Displace the whole west crop plot: eight fewer provisions per staffed harvest. Gain four construction places and sixty storage. Pause other work and renew reserves if the food margin becomes thin.",
+      "role": "steward",
+      "wood": 10,
+      "work": 18,
+      "at": [
+        -59,
+        12
+      ],
+      "requires": [],
+      "effects": {
+        "storage": 60
+      },
+      "changes": [
+        {
+          "kind": "removed",
+          "before": [
+            "yk_field_02"
+          ],
+          "after": []
+        },
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "land_provisioning_yard",
+              "kind": "work_area",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation",
+                "ozdogan_marmara"
+              ],
+              "at": [
+                -59,
+                12
+              ],
+              "yaw": 0,
+              "size": [
+                8,
+                8
+              ],
+              "use": "hearth",
+              "label": "Provisioning and shared working yard"
+            },
+            {
+              "id": "land_provisioning_path",
+              "kind": "path",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "ozdogan_marmara"
+              ],
+              "points": [
+                [
+                  -67,
+                  26
+                ],
+                [
+                  -65,
+                  22
+                ],
+                [
+                  -59,
+                  20
+                ]
+              ],
+              "width": 1.4,
+              "label": "Household earth approach"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "land_adapt_workroom",
+      "title": "Repair and adapt the working room",
+      "body": "Keep the old room, doorway and working objects. Organize additional shared preparation: four more construction places. Nobody is displaced. The existing workroom maintenance principle still applies.",
+      "role": "steward",
+      "wood": 10,
+      "work": 16,
+      "at": [
+        -26,
+        -9
+      ],
+      "requires": [],
+      "effects": {},
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_house_06"
+          ],
+          "after": [
+            {
+              "id": "yk_house_06",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -26,
+                -9
+              ],
+              "yaw": 5,
+              "size": [
+                4.8,
+                4.2
+              ],
+              "wall_height": 2.49,
+              "roof_rise": 2.1,
+              "roof": "hip",
+              "use": "work",
+              "label": "Repaired and adapted working room",
+              "household": "yk_household_05",
+              "furniture": [
+                {
+                  "id": "working_mat",
+                  "kind": "mat",
+                  "at": [
+                    -0.9,
+                    -0.7
+                  ]
+                },
+                {
+                  "id": "clay",
+                  "kind": "clay",
+                  "at": [
+                    1,
+                    -0.7
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    -1,
+                    0.6
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    0.7,
+                    0.3
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.1,
+                    -1.1
+                  ]
+                },
+                {
+                  "id": "repair_basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.4,
+                    -1.4
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "proposals": [
+    {
+      "id": "land_court_home",
+      "site": "clay_court",
+      "asset": "homes",
+      "requires_access": false,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "west_home",
+      "retain": false
+    },
+    {
+      "id": "land_hearth_home",
+      "site": "hearth_yard",
+      "asset": "homes",
+      "requires_access": false,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "east_home",
+      "retain": false
+    },
+    {
+      "id": "land_outer_west",
+      "site": "north_west",
+      "asset": "homes",
+      "requires_access": true,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "west_home",
+      "retain": false
+    },
+    {
+      "id": "land_outer_east",
+      "site": "north_east",
+      "asset": "homes",
+      "requires_access": true,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "east_home",
+      "retain": false
+    },
+    {
+      "id": "land_outer_access",
+      "site": "north_access",
+      "asset": "yard",
+      "requires_access": false,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true
+    },
+    {
+      "id": "land_cultivate",
+      "site": "west_field",
+      "asset": "fields",
+      "requires_access": false,
+      "food": 16,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true
+    },
+    {
+      "id": "land_provisioning",
+      "site": "west_field",
+      "asset": "yard",
+      "requires_access": false,
+      "food": 0,
+      "work": 4,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": false
+    },
+    {
+      "id": "land_adapt_workroom",
+      "site": "workroom",
+      "asset": "workroom",
+      "requires_access": false,
+      "food": 0,
+      "work": 6,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true
+    }
+  ],
+  "households": [
+    {
+      "id": "land_court_home_household",
+      "building_id": "land_court_home_building",
+      "requires": "land_court_home",
+      "label": "A home at the clay court",
+      "at": [
+        -32,
+        2.5
+      ]
+    },
+    {
+      "id": "land_hearth_home_household",
+      "building_id": "land_hearth_home_building",
+      "requires": "land_hearth_home",
+      "label": "A home at the hearth yard",
+      "at": [
+        -5,
+        21
+      ]
+    },
+    {
+      "id": "land_outer_west_household",
+      "building_id": "land_outer_west_building",
+      "requires": "land_outer_west",
+      "label": "A home on outer west ground",
+      "at": [
+        -22,
+        -55
+      ]
+    },
+    {
+      "id": "land_outer_east_household",
+      "building_id": "land_outer_east_building",
+      "requires": "land_outer_east",
+      "label": "A home on outer east ground",
+      "at": [
+        4,
+        -56
+      ]
+    }
+  ],
+  "legacy_projects": [
+    "north_lane",
+    "north_home",
+    "east_home"
+  ],
+  "alternatives": {
+    "field_extension": [
+      "land_cultivate"
+    ],
+    "north_lane": [
+      "land_outer_access",
+      "land_court_home"
+    ],
+    "north_home": [
+      "land_court_home",
+      "land_outer_west"
+    ],
+    "east_home": [
+      "land_hearth_home",
+      "land_outer_east"
+    ]
+  },
+  "ui": {
+    "tab": "Land",
+    "begin": "Begin land planning",
+    "adopt": "Adopt land planning for this settlement",
+    "intro": "Compare a compact village with an outward cluster. Short connections save upkeep but take shared working ground. Outer homes retain that ground but need continuing access support. Both use the same stores, adults and project ledger.",
+    "migration": "Explicit adoption keeps every existing home, fixed project, queue, order and memory. New housing uses the bounded land choices; old paid projects finish in their original places. Land accounting adds limits to shared construction space and access upkeep. Save a backup to keep the earlier rules.",
+    "inspect": "Inspect land",
+    "visit": "Visit this site",
+    "compare": "Compare alternatives",
+    "now": "Current use: {use}. Objects: {objects}. Connection: {connection}. Beneficiaries: {beneficiaries}.",
+    "cost": "Commit {wood} timber; require {work} work points and one season of provisions held in reserve. No food is granted. Crew budgets share finite adults and {slots} construction places.",
+    "effect": "Completed change: housing {housing}, storage {storage}, seasonal harvest {food}, construction places {work}, cooperation {cooperation}. These are changes from the present full use.",
+    "requirements": "Prerequisites: {requires}. Northern upkeep required: {access}. Existing identities retained: {retain}.",
+    "totals": "Land ledger \u00b7 harvest adjustment {food} \u00b7 construction places {work} \u00b7 northern upkeep {crew} adult / {wood} timber this season \u00b7 access {access}",
+    "upkeep": "Support northern access",
+    "on": "On",
+    "off": "Off",
+    "ready": "operating",
+    "waiting": "waiting for staff/materials",
+    "none": "none",
+    "retained": "retained",
+    "reserved": "Staging / reserved for {project}; its displaced ground is unavailable until cancellation or completion.",
+    "completed": "Completed: {project}. This land use persists.",
+    "review": "Review this planning step",
+    "guide_done": "Planning reviewed. Continue governing through the existing growth-readiness and town review; no automatic building upgrades occur.",
+    "readiness": "Growth readiness: {housing} places for {people} people, {food} provisions; enlarged households need {reserve}. Town criteria remain unchanged; spatial foundations satisfy the original access, cultivation and household requirements.",
+    "report": "Last season: land harvest adjustment {food}; access upkeep {wood} timber; construction places {work}. Compare this with the forecast above.",
+    "recover": "If expansion squeezes reserves, pause a crew, raise the reserve principle, retain productive land or renew cultivation. If shared ground is occupied, adapt the old workroom. An unstaffed northern duty pauses outer work; restore upkeep rather than removing occupied homes.",
+    "blocked_prefix": "Blocked: ",
+    "yes": "yes",
+    "no": "no",
+    "commission": "Commission this proposal",
+    "project": "{title} \u00b7 {wood} timber / {work} work",
+    "factor": "Land and access",
+    "needs_choice": "Choose a location in Land; the former automatic housing sequence is retained only for older modes."
+  },
+  "errors": {
+    "land_missing": "Adopt land planning first.",
+    "land_started": "Land planning is already active.",
+    "land_conflict": "This site or household choice is committed to an incompatible use. Cancel unfinished work to release it; completed uses persist.",
+    "land_access": "Complete the northern connection and allocate its adult and timber upkeep.",
+    "land_choice": "Choose a spatial alternative in Land. Existing paid fixed projects remain valid.",
+    "land_accommodation": "This change would displace an occupied household without accommodation.",
+    "land_review": "Complete the planning step through ordinary decisions first.",
+    "land_unknown": "Unknown land proposal or invalid planning order."
+  },
+  "tutorial": [
+    {
+      "title": "Read the ground",
+      "body": "Inspect the clay court and northern ground. Existing working places have real value. Compare the two homes before committing.",
+      "condition": "inspect"
+    },
+    {
+      "title": "Prepare before building",
+      "body": "Choose access, cultivation, or adaptation first. The old workroom can recover shared crew space; northern access must be staffed every season.",
+      "condition": "prepare"
+    },
+    {
+      "title": "Commission a location",
+      "body": "Choose either household location. Staging reserves land immediately. Read displaced uses, finite crews and materials. A second household may use the other approach.",
+      "condition": "commission"
+    },
+    {
+      "title": "Compare forecast with work",
+      "body": "Resolve a season, then compare the land ledger and actual report. Inspect automatic adults and children. Pause expansion if food or working space becomes tight.",
+      "condition": "season"
+    },
+    {
+      "title": "Lasting costs and recovery",
+      "body": "Complete two households and sustain provisions for enlarged households. Keep upkeep operating, restore food priorities and use the existing growth readiness review.",
+      "condition": "growth"
+    }
+  ]
+}

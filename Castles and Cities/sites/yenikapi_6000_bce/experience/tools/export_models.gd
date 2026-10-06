@@ -93,7 +93,29 @@ func run() -> void:
 		if not write_model(room,out_dir.path_join("asset-"+specimen+".glb")):quit(1);return
 		FileAccess.open(out_dir.path_join("asset-"+specimen+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical management specimen; empty supplies and neglected workroom are explicitly authored comparison states, not a playthrough or archaeological inventory","state":asset_state},"  "))
 		room.free();view.free();asset_world.free()
-	print("VILLAGE MODEL EXPORT PASS: 27 GLBs")
+	var land_rules=preload("res://src/core/settlement_rules.gd").new(_read("governance"),_read("balance"),_read("neighbors"),_read("households"),_read("assets"),_read("land"))
+	for compact in [true,false]:
+		var land_state: Dictionary=preload("res://tools/land_driver.gd").at_season(land_rules,compact,32)
+		var layout: String="compact" if compact else "outward"
+		var land_data: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,land_state,land_rules)
+		var land_world=load("res://src/village.gd").new();root.add_child(land_world);land_world.build(land_data)
+		var view=preload("res://src/campaign_view.gd").new();root.add_child(view);view.refresh(land_state,land_rules,land_world)
+		var model:=Node3D.new();model.name="Land"+layout;root.add_child(model)
+		for id in land_world.object_nodes:
+			var original: MeshInstance3D=land_world.object_nodes[id]
+			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=original.transform;copy.mesh=neutral_mesh(original.mesh);model.add_child(copy)
+		if not write_model(model,out_dir.path_join("land-"+layout+"-settlement.glb")):quit(1);return
+		if compact:
+			var room:=Node3D.new();room.name="AdaptedWorkroom";root.add_child(room)
+			var origin: Transform3D=land_world.object_nodes.yk_house_06.transform
+			for id in ["yk_house_06","household_interior_yk_house_06"]:
+				var original: MeshInstance3D=land_world.object_nodes[id]
+				var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*original.transform;copy.mesh=neutral_mesh(original.mesh);room.add_child(copy)
+			if not write_model(room,out_dir.path_join("land-adapted-workroom.glb")):quit(1);return
+			room.free()
+		FileAccess.open(out_dir.path_join("land-"+layout+"-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical spatial strategy from the same village, 32 real seasons; no resource grants. Dated reference is separate.","state":land_state,"fabric":land_data.objects,"models":"Neutral static geometry; original shaders, autonomous citizens and seasonal rules remain in application/source."},"  "))
+		model.free();view.free();land_world.free()
+	print("VILLAGE MODEL EXPORT PASS: 30 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

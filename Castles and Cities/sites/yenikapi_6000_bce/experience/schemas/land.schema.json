@@ -1,0 +1,657 @@
+{
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": -1000,
+      "maximum": 100000
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 10000
+    },
+    "sites": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "at": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            }
+          },
+          "size": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 100000
+            }
+          },
+          "objects": {
+            "type": "array",
+            "maxItems": 2048,
+            "items": {
+              "type": "string"
+            }
+          },
+          "connection": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "use": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "beneficiaries": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "food": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "cooperation": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "at",
+          "size",
+          "objects",
+          "connection",
+          "use",
+          "beneficiaries",
+          "food",
+          "work",
+          "cooperation"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 10000
+          },
+          "role": {
+            "enum": [
+              "steward",
+              "watch"
+            ]
+          },
+          "wood": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "at": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 100000
+            },
+            "maxItems": 2048
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "effects": {
+            "type": "object",
+            "properties": {
+              "food_yield": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "storage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "security": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "wellbeing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "cooperation": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              },
+              "housing": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              }
+            },
+            "additionalProperties": false
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "added",
+                    "altered",
+                    "retained",
+                    "replaced",
+                    "removed",
+                    "abandoned",
+                    "subdivided"
+                  ]
+                },
+                "before": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "after": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              },
+              "required": [
+                "kind",
+                "before",
+                "after"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "body",
+          "role",
+          "wood",
+          "work",
+          "at",
+          "requires",
+          "effects",
+          "changes"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 2048
+    },
+    "proposals": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "site": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "asset": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "requires_access": {
+            "type": "boolean"
+          },
+          "food": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "work": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "cooperation": {
+            "type": "integer",
+            "minimum": -1000,
+            "maximum": 100000
+          },
+          "choice_group": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "retain": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "site",
+          "asset",
+          "requires_access",
+          "food",
+          "work",
+          "cooperation",
+          "choice_group",
+          "retain"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "households": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "building_id": {
+            "type": "string"
+          },
+          "requires": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "at": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number",
+              "minimum": -160,
+              "maximum": 160
+            }
+          }
+        },
+        "required": [
+          "id",
+          "building_id",
+          "requires",
+          "label",
+          "at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "legacy_projects": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "string",
+        "maxLength": 10000
+      }
+    },
+    "alternatives": {
+      "type": "object",
+      "properties": {
+        "field_extension": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "north_lane": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "north_home": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "east_home": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        }
+      },
+      "required": [
+        "field_extension",
+        "north_lane",
+        "north_home",
+        "east_home"
+      ],
+      "additionalProperties": false
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "tab": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "begin": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "adopt": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "intro": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "migration": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "inspect": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "visit": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "compare": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "now": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "cost": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "effect": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "requirements": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "totals": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "upkeep": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "on": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "off": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "ready": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "waiting": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "none": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "retained": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "reserved": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "completed": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "review": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "guide_done": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "readiness": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "report": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "recover": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "blocked_prefix": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "yes": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "no": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "commission": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "project": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "factor": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "needs_choice": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "tab",
+        "begin",
+        "adopt",
+        "intro",
+        "migration",
+        "inspect",
+        "visit",
+        "compare",
+        "now",
+        "cost",
+        "effect",
+        "requirements",
+        "totals",
+        "upkeep",
+        "on",
+        "off",
+        "ready",
+        "waiting",
+        "none",
+        "retained",
+        "reserved",
+        "completed",
+        "review",
+        "guide_done",
+        "readiness",
+        "report",
+        "recover",
+        "blocked_prefix",
+        "yes",
+        "no",
+        "commission",
+        "project",
+        "factor",
+        "needs_choice"
+      ],
+      "additionalProperties": false
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "land_missing": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_started": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_conflict": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_access": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_choice": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_accommodation": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_review": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "land_unknown": {
+          "type": "string",
+          "maxLength": 10000
+        }
+      },
+      "required": [
+        "land_missing",
+        "land_started",
+        "land_conflict",
+        "land_access",
+        "land_choice",
+        "land_accommodation",
+        "land_review",
+        "land_unknown"
+      ],
+      "additionalProperties": false
+    },
+    "tutorial": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 10000
+          },
+          "condition": {
+            "type": "string",
+            "maxLength": 10000
+          }
+        },
+        "required": [
+          "title",
+          "body",
+          "condition"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "title",
+    "sites",
+    "projects",
+    "proposals",
+    "households",
+    "legacy_projects",
+    "alternatives",
+    "ui",
+    "errors",
+    "tutorial"
+  ],
+  "additionalProperties": false
+}

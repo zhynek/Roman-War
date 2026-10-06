@@ -1,5 +1,7 @@
 # Governing the village through buildings and shared assets · 0.5.0
 
+**New in 0.6.0:** [Land, Growth, and Lasting Consequences](LAND_GROWTH.md) adds explicit spatial planning. Begin land planning, or adopt it deliberately from Land. Older layouts and semantics remain inactive until adoption; active land uses wrapper 5.
+
 Choose **Manage village assets → Begin asset governance**. Ordinary village life
 starts immediately, without an attacker. Walk or fly to observe; every decision
 is also available from **Assets**. Clicking actual building or shared-space

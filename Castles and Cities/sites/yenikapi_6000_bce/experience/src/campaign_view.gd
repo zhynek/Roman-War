@@ -4,6 +4,9 @@ const Fabric = preload("res://src/fabric.gd")
 var actors: Array = []
 var elapsed: float = 0.0
 var life
+var land_view
+var markers: Node3D
+var _marker_key: String=""
 const HouseholdView = preload("res://src/household_view.gd")
 
 static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
@@ -14,16 +17,19 @@ static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
 	assert(not resolved.has("error"))
 	var result: Dictionary = base.duplicate(true)
 	if rules.assets.active(state):result.presentation_food=state.food
+	var staging: Array=[]
+	if rules.land.active(state):
+		for item in state.queue:
+			if rules.land.proposals.has(item.id) and not rules.land.proposals[item.id].retain:
+				staging.append_array(rules.land.sites[rules.land.proposals[item.id].site].objects)
 	result.objects = []
 	for record in resolved.objects:
-		if record.get("active",true): result.objects.append(record)
+		if record.get("active",true) and record.id not in staging: result.objects.append(record)
 	return result
 
 func refresh(state: Dictionary, rules, world) -> void:
 	if rules.households.active(state):
 		actors.clear()
-		for child in get_children():
-			if child!=life:child.free()
 		if not is_instance_valid(life):
 			life=HouseholdView.new();add_child(life)
 		life.refresh(state,rules,world)
@@ -60,9 +66,20 @@ func refresh(state: Dictionary, rules, world) -> void:
 	_project_markers(state,rules,world)
 
 func _project_markers(state: Dictionary,rules,world) -> void:
+	var key: String=JSON.stringify([state.queue,rules.land.active(state),state.completed])
+	if key==_marker_key and is_instance_valid(markers):return
+	_marker_key=key
+	if is_instance_valid(markers):markers.free()
+	markers=Node3D.new();add_child(markers)
+	if rules.land.active(state):
+		land_view=preload("res://src/land_view.gd").new();markers.add_child(land_view);land_view.build(state,rules,world)
 	for item in state.queue:
 		var project: Dictionary = rules.projects[item.id]
-		var marker := Node3D.new();marker.position=Vector3(project.at[0],world.floor_height(project.at[0],project.at[1]),project.at[1]);add_child(marker)
+		var at: Vector3=Vector3(project.at[0],world.floor_height(project.at[0],project.at[1]),project.at[1])
+		if rules.land.proposals.has(item.id) and rules.land.proposals[item.id].site=="workroom":
+			for building in world.buildings:
+				if building.id=="yk_house_06":at=world.building_position(building,Vector3(0,0,float(building.size[1])*.5+1.8))
+		var marker := Node3D.new();marker.position=at;markers.add_child(marker)
 		var mat := StandardMaterial3D.new();mat.albedo_color=Color("b99f69");mat.roughness=1
 		if rules.assets.active(state):
 			var fraction: float=float(item.progress)/float(project.work)
@@ -72,7 +89,7 @@ func _project_markers(state: Dictionary,rules,world) -> void:
 				var frame:=MeshInstance3D.new();var frame_mesh:=BoxMesh.new();frame_mesh.size=Vector3(.1,.5+fraction,.1);frame.mesh=frame_mesh;frame.material_override=mat;frame.position=Vector3(-1.1,float(.5+fraction)*.5,-1.0+float(i)*.65);marker.add_child(frame)
 		for side in [-1.0,1.0]:
 			var post := MeshInstance3D.new();var mesh := CylinderMesh.new();mesh.top_radius=.05;mesh.bottom_radius=.06;mesh.height=1.1;post.mesh=mesh;post.material_override=mat;post.position=Vector3(side*.8,.55,0);marker.add_child(post)
-		var label := Label3D.new();label.text=project.title+"\n%d / %d"%[item.progress,project.work];label.font_size=24;label.pixel_size=.015;label.position.y=1.7;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;marker.add_child(label)
+		var label := Label3D.new();label.text=project.title+"\n%d / %d"%[item.progress,project.work];label.font_size=24;label.pixel_size=.015;label.position.y=1.7;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;label.visibility_range_begin=8.0;marker.add_child(label)
 
 func _safe(point: Vector3,world) -> Vector3:
 	if world.blocked(point):

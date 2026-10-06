@@ -23,10 +23,11 @@ func inspect(id: String) -> void:
 	panel.tabs.current_tab=1
 
 func reason(error: String) -> String:
+	if panel.land_panel.copy.errors.has(error):return panel.land_panel.copy.errors[error]
 	return str(copy.ui.errors.get(error,panel.copy.get(error,panel.household_panel.copy.errors.get(error,error))))
 
 func action(body: VBoxContainer,title: String,command: Dictionary,id: String) -> Button:
-	var result: Dictionary=panel.rules.command(panel.state,command)
+	var result: Dictionary=panel.rules.quote(panel.state,command)
 	var control: Button=panel.button(title,func():panel.dispatch(command),id)
 	control.disabled=result.has("error")
 	body.add_child(control)
@@ -73,7 +74,14 @@ func build(body: VBoxContainer) -> void:
 			var memory: Dictionary=state.households.homes.get(home.id,{"stress":0,"practice":0})
 			body.add_child(panel.label(copy.ui.occupied.format({"home":home.label,"people":count,"capacity":rules.balance.people_per_dwelling,"stress":memory.stress,"practice":memory.practice}),14))
 	for id in asset.orders:standing(body,id,f)
-	for id in asset.projects:project(body,id,f)
+	for id in asset.projects:
+		if rules.land.active(state) and id in rules.land.content.legacy_projects and not rules.land.committed(state,id,rules):continue
+		project(body,id,f)
+	if rules.land.active(state):
+		for proposal in rules.land.content.proposals:
+			if proposal.asset==selected:
+				body.add_child(panel.button(panel.land_panel.copy.ui.inspect+" · "+rules.land.sites[proposal.site].title,func():panel.land_panel.inspect(proposal.site),"AssetLand_"+proposal.id))
+				if rules.land.committed(state,proposal.id,rules):project(body,proposal.id,f)
 	if selected in ["yard","homes"]:housing(body)
 	body.add_child(HSeparator.new())
 	allocation(body,f,selected)
@@ -87,19 +95,19 @@ func standing(body: VBoxContainer,id: String,f: Dictionary) -> void:
 	body.add_child(panel.label(copy.ui.paid.format({"paid":copy.ui.yes if state.households.investments[id] else copy.ui.no,"ready":copy.ui.yes if rules.households.ready(state,id,rules) else copy.ui.no,"filled":f.assets.orders.get(id,0),"needed":maxi(requirements.care,requirements.watch),"wood":0 if state.households.investments[id] else rules.households.balance.costs[id]}),14))
 	action(body,copy.ui.disable if state.households.orders[id] else copy.ui.enable,{"kind":"household_order","id":id,"enabled":not state.households.orders[id]},"AssetOrder_"+id)
 
-func project(body: VBoxContainer,id: String,f: Dictionary) -> void:
+func project(body: VBoxContainer,id: String,f: Dictionary,details: bool=true) -> void:
 	var rules=panel.rules;var state: Dictionary=panel.state
 	var p: Dictionary=rules.projects[id]
-	body.add_child(HSeparator.new());body.add_child(panel.label(p.title,18));body.add_child(panel.label(p.body,14))
+	if details:body.add_child(HSeparator.new());body.add_child(panel.label(p.title,18));body.add_child(panel.label(p.body,14))
 	if rules.has_project(state,id):body.add_child(panel.label(copy.ui.done,14));return
 	var queued: Dictionary={}
 	for item in state.queue:
 		if item.id==id:queued=item
 	var requirements: PackedStringArray=[]
 	for key in p.requires:requirements.append(rules.projects[key].title)
-	if not requirements.is_empty():body.add_child(panel.label(copy.ui.dependencies.format({"items":", ".join(requirements)}),14))
+	if details and not requirements.is_empty():body.add_child(panel.label(copy.ui.dependencies.format({"items":", ".join(requirements)}),14))
 	if queued.is_empty():
-		body.add_child(panel.label(panel.copy.project_cost%[p.title,p.wood,p.work],14))
+		if details:body.add_child(panel.label(panel.copy.project_cost%[p.title,p.wood,p.work],14))
 		action(body,copy.ui.commission,{"kind":"commission","id":id},"AssetCommission_"+id)
 		return
 	var spec: Dictionary=state.assets.initiatives[id]
@@ -145,7 +153,7 @@ func principles(body: VBoxContainer) -> void:
 		var choices:=HFlowContainer.new();body.add_child(choices)
 		for i in range(p.options.size()):
 			var option: Button=panel.button(p.options[i],func():panel.dispatch({"kind":"asset_principle","id":p.id,"value":i}),"Principle_"+p.id+"_"+str(i))
-			var quote: Dictionary=panel.rules.command(panel.state,{"kind":"asset_principle","id":p.id,"value":i})
+			var quote: Dictionary=panel.rules.quote(panel.state,{"kind":"asset_principle","id":p.id,"value":i})
 			option.disabled=quote.has("error") or panel.rules.assets.principle(panel.state,p.id)==i
 			if quote.has("error"):option.tooltip_text=reason(quote.error);body.add_child(panel.label(option.tooltip_text,13))
 			choices.add_child(option)
@@ -155,6 +163,8 @@ func principles(body: VBoxContainer) -> void:
 	ration.toggled.connect(func(value):panel.dispatch({"kind":"policy","welcome":panel.state.welcome,"tight_rations":value}));body.add_child(ration)
 
 func housing(body: VBoxContainer) -> void:
+	if panel.rules.land.active(panel.state):
+		body.add_child(panel.label(panel.land_panel.copy.ui.needs_choice,15));return
 	body.add_child(panel.label(copy.ui.group,19));body.add_child(panel.label(copy.ui.group_body,14))
 	action(body,copy.ui.group_stop if panel.state.assets.housing else copy.ui.group_start,{"kind":"asset_housing","enabled":not panel.state.assets.housing},"HousingCoordination")
 	if panel.state.assets.housing:
@@ -183,7 +193,7 @@ func guide(body: VBoxContainer) -> void:
 func growth(body: VBoxContainer) -> void:
 	var r=panel.rules;var s: Dictionary=panel.state;var b: Dictionary=r.balance
 	body.add_child(panel.label(copy.ui.growth.format({"people":r.people(s).size(),"required":b.town_population,"homes":r.capacity(s)/int(b.people_per_dwelling),"dwellings":b.town_dwellings,"food":s.food,"reserve":r.people(s).size()*int(b.town_reserve_seasons),"wellbeing":s.wellbeing,"wellbeing_required":b.town_wellbeing,"cooperation":s.cooperation,"cooperation_required":b.town_cooperation,"security":s.security,"security_required":b.town_security,"stable":s.stable_seasons,"seasons":b.town_sustained_seasons}),15))
-	for id in b.town_required_projects:body.add_child(panel.label(copy.ui.growth_project.format({"title":r.projects[id].title,"status":copy.ui.done if r.has_project(s,id) else copy.ui.status_waiting}),13))
+	for id in b.town_required_projects:body.add_child(panel.label(copy.ui.growth_project.format({"title":r.projects[id].title,"status":copy.ui.done if r.land.foundation(s,id,r) else copy.ui.status_waiting}),13))
 
 func visit() -> void:
 	var at: Array=panel.rules.assets.assets[selected].at

@@ -210,3 +210,24 @@ barracks or a fortified gate. Existing geometry supplies these functions without
 claiming a recovered ownership plan. Supply bands and repair finishes illustrate the
 ledger; counts are not archaeological measures. See
 [ASSET_GOVERNANCE.md](experience/ASSET_GOVERNANCE.md) for implementation and limits.
+
+## Land, growth and retained fabric (0.6.0)
+
+Read 2026-10-05: Maxime Brami, Barbara Horejs and Felix Ostmann, “The ground
+beneath their feet: building continuity at Neolithic Çukuriçi Höyük,” *Anatolian
+Studies* 66 (2016), 1–16. [Publisher abstract and bibliographic record](https://doi.org/10.1017/S0066154616000016).
+Only the abstract was available in HTML. The authors discuss repeated building
+on the same location and interpret continuity as more than practical site choice.
+This is a **regional comparison from the central Anatolian Aegean coast**, not
+proof of Yenikapı household tenure, inheritance or planning institutions. No plan,
+property model or construction rate is transferred from that site.
+
+The earlier Yenikapı excavation, site archaeobotany and Marmara analogies remain
+the material and subsistence evidence. There is no new claim about local roads,
+property boundaries or a surveyed northward expansion. The clay court, hearth
+yard, west field and workroom already exist in the authored village landscape.
+The bounded alternative sites, their opportunity costs, construction places,
+harvest adjustments, two-household choice, access upkeep and repair benefits are
+**explicit gameplay interpretation**. They explain consequences, not historical
+optimization. Repair retains original fabric and identity; it does not imply
+that every early settlement grew into a later city or followed one ideal plan.

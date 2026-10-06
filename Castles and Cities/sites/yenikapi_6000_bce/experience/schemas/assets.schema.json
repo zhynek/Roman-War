@@ -216,7 +216,9 @@
         "crew_choice",
         "enabled_choice",
         "food_upkeep",
-        "decision_actions"
+        "decision_actions",
+        "space",
+        "access"
       ],
       "properties": {
         "open": {
@@ -483,7 +485,8 @@
             "repair",
             "reserve",
             "carriers",
-            "escorts"
+            "escorts",
+            "land_access"
           ],
           "properties": {
             "food": {
@@ -537,6 +540,9 @@
             "escorts": {
               "type": "string",
               "minLength": 1
+            },
+            "land_access": {
+              "type": "string"
             }
           }
         },
@@ -622,7 +628,8 @@
             "asset_housing",
             "household_order",
             "commission",
-            "cancel"
+            "cancel",
+            "land_access"
           ],
           "properties": {
             "asset_principle": {
@@ -645,8 +652,17 @@
             },
             "cancel": {
               "type": "string"
+            },
+            "land_access": {
+              "type": "string"
             }
           }
+        },
+        "space": {
+          "type": "string"
+        },
+        "access": {
+          "type": "string"
         }
       }
     },

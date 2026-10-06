@@ -21,7 +21,7 @@
       "orders": [
         "secure_stores"
       ],
-      "function": "Hold the settlement’s single provision reserve, prepare supplies and improve storage.",
+      "function": "Hold the settlement\u2019s single provision reserve, prepare supplies and improve storage.",
       "beneficiaries": "All occupied households"
     },
     {
@@ -244,15 +244,15 @@
     "initiative": "Initiatives",
     "begin_pressure": "Begin the fictional warning chapter",
     "pressure_note": "An eight-season authored warning, danger, recovery and renewal. Its end is not a military victory. Begin when you choose; ordinary life has no scripted attacker.",
-    "role": "Responsible office: {office} · {name} · since season {since} · ability {skill}/5",
+    "role": "Responsible office: {office} \u00b7 {name} \u00b7 since season {since} \u00b7 ability {skill}/5",
     "god": "God oversees both named offices; each decision records its responsible officeholder.",
-    "condition": "Condition {condition}/100 → {next}/100 next season. Repair enabled: {enabled}.",
+    "condition": "Condition {condition}/100 \u2192 {next}/100 next season. Repair enabled: {enabled}.",
     "ledger": "Provisions {food}/{storage}; reserve objective {target}. Timber {wood}. Adults {adults}; residents {people}/{housing} housing.",
     "benefit": "Benefits: {names}",
     "forecast": "Next season: food {food} ({delta}); gathered {gathered}, eaten {used}, unmet {unfed}, spoilage {spoil}, pressure losses {losses}, overflow {overflow}. Timber gathering {wood}; repair cost {repair}.",
     "actual": "Last season: provisions {food}; unmet {unfed}; construction {work} work points. Inspect the journal and household memory for the consequences.",
-    "allocation": "Automatic work · allocated / requested",
-    "request": "{title}: {filled}/{wanted} · {reason}",
+    "allocation": "Automatic work \u00b7 allocated / requested",
+    "request": "{title}: {filled}/{wanted} \u00b7 {reason}",
     "allocated": "Capacity committed",
     "labor": "Other work took the available adults; reduce higher priorities or crew budgets.",
     "materials": "Repair waits for available timber.",
@@ -277,10 +277,10 @@
     "enable": "Enable",
     "disable": "Disable",
     "growth": "Growth readiness uses the existing town milestone: {people}/{required} residents, {homes}/{dwellings} dwellings, {food}/{reserve} provisions, wellbeing {wellbeing}/{wellbeing_required}, cooperation {cooperation}/{cooperation_required}, protection {security}/{security_required}. Sustained {stable}/{seasons} seasons.",
-    "growth_project": "Foundation: {title} · {status}",
+    "growth_project": "Foundation: {title} \u00b7 {status}",
     "occupied": "{home}: {people}/{capacity} residents; stress {stress}, retained practice {practice}.",
     "group": "Prepare sustainable housing",
-    "group_body": "Coordinate the existing cultivation → north access → north/east housing projects. Materials commit only when each eligible step is commissioned. No second construction ledger. Completion also needs provisions for additional households. Pause or cancel stops further commissions; existing projects remain individually controllable.",
+    "group_body": "Coordinate the existing cultivation \u2192 north access \u2192 north/east housing projects. Materials commit only when each eligible step is commissioned. No second construction ledger. Completion also needs provisions for additional households. Pause or cancel stops further commissions; existing projects remain individually controllable.",
     "group_start": "Coordinate housing preparation",
     "group_stop": "Stop coordinating new housing commissions",
     "next_step": "Commission next eligible housing step",
@@ -309,7 +309,8 @@
       "repair": "Asset repair",
       "reserve": "Reserve objective",
       "carriers": "Neighbor carriers",
-      "escorts": "Neighbor escorts"
+      "escorts": "Neighbor escorts",
+      "land_access": "Northern access upkeep"
     },
     "errors": {
       "asset_missing": "Adopt asset governance first.",
@@ -323,7 +324,7 @@
     },
     "yes": "Yes",
     "no": "No",
-    "decision": "Season {turn} · {office}: {name} · {action} · {target} · {details}",
+    "decision": "Season {turn} \u00b7 {office}: {name} \u00b7 {action} \u00b7 {target} \u00b7 {details}",
     "decision_actions": {
       "asset_principle": "Changed principle",
       "asset_project": "Changed crew",
@@ -331,65 +332,68 @@
       "asset_housing": "Housing coordination",
       "household_order": "Standing preparation",
       "commission": "Commissioned",
-      "cancel": "Cancelled"
+      "cancel": "Cancelled",
+      "land_access": "Changed northern access support"
     },
     "crew_choice": "Priority {priority}, crew {crew}, paused {paused}",
     "enabled_choice": "Enabled: {enabled}",
-    "food_upkeep": "Food forgone through neglected fields and landing: {food}; workroom yield penalty per builder: {work}."
+    "food_upkeep": "Food forgone through neglected fields and landing: {food}; workroom yield penalty per builder: {work}.",
+    "space": "shared working ground is full",
+    "access": "northern access needs upkeep"
   },
   "tutorial": [
     {
       "id": "store",
-      "title": "1 · Understand the shared store",
+      "title": "1 \u00b7 Understand the shared store",
       "asset": "stores",
       "body": "Inspect its provisions and reserve objective. A reserve target allocates effort; it does not create food. Use the asset list or click its building.",
       "condition": "inspect"
     },
     {
       "id": "principle",
-      "title": "2 · Choose standing principles",
+      "title": "2 \u00b7 Choose standing principles",
       "asset": "yard",
       "body": "Change a principle in Principles. Review what it protects and which work may wait; no particular setting is required.",
       "condition": "principle"
     },
     {
       "id": "commission",
-      "title": "3 · Commission work through an asset",
+      "title": "3 \u00b7 Commission work through an asset",
       "asset": "fields",
       "body": "Commission an affordable project. Cultivation is a useful first choice. If blocked, inspect its prerequisite, timber or authority; gather for a season if necessary.",
       "condition": "commission"
     },
     {
       "id": "workers",
-      "title": "4 · Let the settlement assign people",
+      "title": "4 \u00b7 Let the settlement assign people",
       "asset": "fields",
       "body": "Read allocated/requested work below. Compare care, watch, materials and construction with food needs. Citizen inspection explains activities and never issues an errand.",
       "condition": "inspect"
     },
     {
       "id": "season",
-      "title": "5 · Compare forecast and results",
+      "title": "5 \u00b7 Compare forecast and results",
       "asset": "stores",
       "body": "Resolve a season, then compare its actual report with your forecast. Paused or unfilled initiatives retain progress and consume no new construction material.",
       "condition": "season"
     },
     {
       "id": "pressure",
-      "title": "6 · Reconsider priorities under pressure",
+      "title": "6 \u00b7 Reconsider priorities under pressure",
       "asset": "watch",
       "body": "Begin the optional warning when ready, then change a principle, project priority or crew budget. Ready watch and stores can help; resolve seasons to observe costs and delayed work.",
       "condition": "pressure"
     },
     {
       "id": "recovery",
-      "title": "7 · Support recovery and learning",
+      "title": "7 \u00b7 Support recovery and learning",
       "asset": "workroom",
       "body": "From recovery onward, prepare learning and leave room for its two dedicated workers and gathering cost. Reduce project crews or reserve ambition if it waits. Resolve a learning season.",
       "condition": "learning"
     },
     {
       "id": "growth",
-      "title": "8 · Prepare supported growth",
+      "title": "8 \u00b7 Prepare supported growth",
       "asset": "yard",
       "body": "Coordinate cultivation, north access and the two existing homes. Keep two seasons of provisions for the enlarged population, then review town readiness. Welcoming remains your choice; no automatic upgrade follows.",
       "condition": "growth"

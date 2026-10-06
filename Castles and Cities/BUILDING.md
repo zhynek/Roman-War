@@ -154,3 +154,36 @@ six ZIPs: Mac, editable source, Foundation (16), Contact (2), Household (6), and
 Asset (3) Models, plus provenance and checksums. Publish as
 `yenikapi-early-settlement-v0.5.0`, prerelease and never latest. Verify public hashes
 and retain all earlier release IDs/assets and campaign stable `v0.14.2`.
+
+
+## Land, growth and lasting consequences (0.6.0)
+
+Use the current builder with `--version 0.6.0`, fresh parent logs and a clean
+committed checkout. It validates the land schema, relationship/negative cases,
+773 land rule checks, and 438 full-path/door/citizen geometry checks, in addition
+to every retained suite. Both source and the exact universal Mac app run the
+rule and geometry gates. Actual-input acceptance adds 19 land captures to the
+60 earlier views: **79 images** outside the repository, all requiring inspection.
+These include both sustained layouts at landscape, aerial, street and interior
+scales; paid construction, adaptation, retained fabric, pressure, recovery,
+provisioning conversion and 1280×800 planning controls. Walk the actual curved
+paths as well as citizen routes; reachable destinations alone do not establish
+that a building leaves the drawn footpath clear.
+
+The source and exact-app benchmarks add a 48-resident outward settlement and a
+separate interaction profile (opening, comparison, commission, priority, ordinary
+principles and season resolution). UI input runs include frame settling and must
+not be presented as pure command timings. Do not run competing Godot processes
+while recording release benchmarks. Scan stderr even on a zero exit status.
+
+Thirty GLBs are packaged as Foundation (16), Contact (2), Household (6), Asset
+(3) and Land (3) model ZIPs. Compare the earlier 27 exports byte-for-byte with
+0.5.0. Together with Mac and Source ZIPs, provenance and SHA256SUMS there are
+**nine downloads**. Publish to `yenikapi-early-settlement-v0.6.0` as a separate
+prerelease with `--latest=false`, targeting the frozen payload commit. Verify
+anonymous public bytes, ZIP integrity, GitHub asset digests, every earlier release
+and the unchanged stable latest. Never replace previously published bytes.
+
+The active spatial save is wrapper 5. Old saves remain inactive until explicit
+adoption and retain their old fixed-location projects, paid work and workforce
+mode. See the site's `experience/LAND_GROWTH.md` and `VERIFICATION-0.6.md`.

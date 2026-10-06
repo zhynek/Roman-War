@@ -1,5 +1,7 @@
 # Households through adversity — optional seasonal chapter
 
+**New in 0.6.0:** [Land, Growth, and Lasting Consequences](LAND_GROWTH.md) adds explicit spatial planning. Begin land planning, or adopt it deliberately from Land. Older layouts and semantics remain inactive until adoption; active land uses wrapper 5.
+
 **New in 0.5.0:** [Governing the village through buildings and shared assets](ASSET_GOVERNANCE.md)
 is the primary management path. Choose Manage village assets. Older saves retain
 their existing manual workforce until explicit adoption; active assets use wrapper 4.

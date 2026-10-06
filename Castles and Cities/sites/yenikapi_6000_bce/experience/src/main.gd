@@ -234,6 +234,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not resident.is_empty():
 					campaign.household_panel.inspect_resident(resident)
 					return
+			if campaign_mode and campaign.rules.land.active(campaign.state) and is_instance_valid(campaign_view.land_view):
+				var site: String=campaign_view.land_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
+				if not site.is_empty():campaign.land_panel.inspect(site);return
 			if campaign_mode and campaign.rules.assets.active(campaign.state):
 				var asset_hit: String=pick_asset(camera.project_ray_origin(point),camera.project_ray_normal(point))
 				if not asset_hit.is_empty():campaign.asset_panel.inspect(asset_hit);return
@@ -325,10 +328,17 @@ func load_view(path: String) -> bool:
 
 func show_campaign(state: Dictionary,rules,force: bool = false) -> void:
 	var View=load("res://src/campaign_view.gd")
-	var key:String=JSON.stringify([state.completed,rules.assets.active(state),state.food==0 if rules.assets.active(state) else false])
-	if force or not campaign_mode or key!=_fabric_key:
+	var staging: Array=[]
+	if rules.land.active(state):
+		for item in state.queue:
+			if rules.land.proposals.has(item.id) and not rules.land.proposals[item.id].retain:staging.append(item.id)
+	staging.sort()
+	var empty_supplies: bool=rules.assets.active(state) and state.food==0
+	var key: String=JSON.stringify([state.completed,staging,empty_supplies])
+	var reference_matches: bool=not campaign_mode and state.completed.is_empty() and staging.is_empty() and not empty_supplies
+	if not reference_matches and (force or not campaign_mode or key!=_fabric_key):
 		_rebuild_world(View.snapshot(reference_data,state,rules))
-		_fabric_key=key
+	_fabric_key=key
 	campaign_mode=true
 	if not is_instance_valid(campaign_view):
 		campaign_view=View.new();add_child(campaign_view)

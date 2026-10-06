@@ -89,11 +89,13 @@ func command(state: Dictionary, action: Dictionary, rules) -> Dictionary:
 			if state.assets.pressure_start>=0:return {"error":"asset_pressure"}
 			next.assets.pressure_start=int(state.turn)
 		"asset_housing":
+			if rules.land.active(state):return {"error":"land_choice"}
 			if not rules.permitted(state,"steward"):return {"error":"authority"}
 			if not action.get("enabled") is bool:return {"error":"asset_unknown"}
 			next.assets.housing=action.enabled
 			_record(next,"steward",kind,"homes",rules,{"enabled":action.enabled})
 		"asset_housing_step":
+			if rules.land.active(state):return {"error":"land_choice"}
 			if not state.assets.housing:return {"error":"asset_growth"}
 			var step: String=housing_next(state,rules)
 			if step.is_empty():return {"error":"asset_growth"}
@@ -134,6 +136,7 @@ func tutorial_ready(state: Dictionary,rules) -> bool:
 		"pressure":return state.assets.pressure_start>=0 and state.assets.pressure_decisions>0
 		"learning":return state.assets.learning_seasons>0 and stage(state) in ["recovery","renewal","settled"]
 		"growth":
+			if rules.land.active(state):return rules.land.growth_ready(state,rules)
 			for id in content.housing_steps:
 				if not rules.has_project(state,id):return false
 			return state.food>=(rules.people(state).size()+int(rules.balance.migration_size))*int(rules.balance.migration_reserve_seasons)
@@ -141,6 +144,7 @@ func tutorial_ready(state: Dictionary,rules) -> bool:
 
 func allocation(state: Dictionary, rules) -> Dictionary:
 	var result := {"plan":{"food":0,"timber":0,"care":0,"watch":0,"building":0},"requests":[],"projects":{},"orders":{},"repair":"","repair_cost":0,"repair_workers":0,"target":mini(rules.storage(state),rules.people(state).size()*int(state.assets.reserve))}
+	result.access_workers=0;result.access_cost=0
 	var requests: Array=[]
 	var adults: int=rules.people(state,true).size()
 	var mission: Dictionary=state.get("contacts",{}).get("mission",{})
@@ -155,7 +159,8 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	for value in rules.balance.food_yields:average+=float(value)/4.0
 	average+=rules.effect(state,"food_yield")
 	var spoil: int=int(state.food)*int(rules.balance.spoil_percent)/100
-	var disruption: int=int(rules.households.balance.stages[stage(state)].food_penalty)+food_penalty(state)
+	var land_effects: Dictionary=rules.land.totals(state,rules)
+	var disruption: int=int(rules.households.balance.stages[stage(state)].food_penalty)+food_penalty(state)-int(land_effects.food)
 	var essential: int=maxi(ceili(float(population)/average),ceili(float(eaten+spoil+disruption-int(state.food))/yield_))
 	_request(requests,"food","food",maxi(1,essential),1,"fields")
 	_request(requests,"refuge" if state.households.orders.refuge else "care","care",int(balance.care_workers),2,"homes")
@@ -164,6 +169,8 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	var reserve_need: int=ceili(float(maxi(0,int(result.target)-int(state.food)))/int(balance.reserve_recovery_seasons))
 	var desired: int=ceili(float(eaten+spoil+disruption+reserve_need)/yield_)
 	_request(requests,"reserve","food",maxi(0,desired-essential),3 if state.assets.reserve>=2 else 7,"stores")
+	if rules.land.needs_access(state,rules) and state.land.access_enabled:
+		_request(requests,"land_access","building",int(rules.land.balance.access_workers),int(rules.land.balance.access_priority),"yard")
 	var repair: String=""
 	var ids: Array=assets.keys();ids.sort()
 	for id in ids:
@@ -177,12 +184,22 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	if state.households.orders.learning:_request(requests,"learning","care",int(rules.households.balance.care_minimum),6,"workroom")
 	requests.sort_custom(func(a,b):return a.priority<b.priority if a.priority!=b.priority else a.id<b.id)
 	var remaining: int=adults
+	var places: int=int(land_effects.work) if rules.land.active(state) else adults
+	var timber_left: int=int(state.wood)
 	for request in requests:
 		var count: int=mini(remaining,int(request.wanted))
 		request.reason="allocated" if count==request.wanted else "labor"
 		if request.id in ["carriers","escorts"] and adults<int(rules.neighbors.balance.carriers)+int(mission.escorts):count=0;request.reason="labor"
 		if request.id=="learning" and stage(state) in ["warning","danger"]:count=0;request.reason="phase"
-		if request.id=="repair" and state.wood<int(balance.repair_wood):count=0;request.reason="materials"
+		if request.id=="land_access":
+			if timber_left<int(rules.land.balance.access_wood):count=0;request.reason="materials"
+			if count==request.wanted:
+				result.access_workers=count;result.access_cost=int(rules.land.balance.access_wood);timber_left-=int(result.access_cost)
+		if request.id=="repair" and timber_left<int(balance.repair_wood):count=0;request.reason="materials"
+		if result.projects.has(request.id):
+			if rules.land.proposals.has(request.id) and rules.land.proposals[request.id].requires_access and not rules.land.access_ready(state,result,rules):count=0;request.reason="access"
+			if count>places:count=places;request.reason="space"
+			places-=count
 		# Partial special crews contribute ordinary care, but cannot activate an order.
 		request.filled=count;remaining-=count
 		result.plan[request.job]+=count
@@ -192,6 +209,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 			result.projects[request.id].crew=count
 			result.projects[request.id].work=count*maxi(0,int(rules.balance.work_yield)-(int(balance.work_yield_loss) if state.assets.conditions.workroom<balance.condition_threshold else 0))
 		if request.id=="repair" and count==request.wanted:
+			timber_left-=int(balance.repair_wood)
 			result.repair=request.asset;result.repair_cost=int(balance.repair_wood);result.repair_workers=count
 	result.plan.food+=remaining
 	result.requests=requests
@@ -254,6 +272,9 @@ func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Di
 		if item.id==person.household:home=item.at
 	var destination: Array=assets[request.asset].at
 	if request.id=="timber":destination=rules.content.job_sites.timber
+	if rules.land.active(state):
+		if request.id=="land_access":destination=rules.land.sites.north_access.at
+		if request.id=="food" and rules.land.use_at(state,"west_field",rules)=="land_cultivate" and int(person.id.trim_prefix("citizen_"))%2==0:destination=rules.land.sites.west_field.at
 	if rules.projects.has(request.id):destination=rules.projects[request.id].at
 	var job: String=request.job
 	if request.id in ["carriers","escorts"]:job="travel";destination=rules.neighbors.content.meeting_at
@@ -302,7 +323,7 @@ func validate(state: Dictionary,rules) -> bool:
 		if not rules.whole(decision.get("turn"),0,int(state.turn)) or decision.get("office") not in ["steward","watch"] or not decision.get("author") is String or not decision.get("kind") is String or not decision.get("target") is String:return false
 		if decision.author!="" and rules.person_by_id(state,decision.author).is_empty():return false
 		if not decision.get("details") is Dictionary:return false
-		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel"]:return false
+		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access"]:return false
 		for value in decision.details.values():
 			if not value is bool and not rules.whole(value,0,int(balance.max_crew)):return false
 	if not a.report is Dictionary:return false
@@ -319,5 +340,5 @@ func validate(state: Dictionary,rules) -> bool:
 			if not request is Dictionary or request.size()!=7:return false
 			if not request.get("id") is String or not assets.has(request.get("asset","")) or request.get("job") not in ["food","timber","care","watch","building"]:return false
 			if not rules.whole(request.get("wanted"),0,2048) or not rules.whole(request.get("filled"),0,int(request.wanted)) or not rules.whole(request.get("priority"),0,8):return false
-			if request.get("reason") not in ["allocated","labor","phase","materials"]:return false
+			if request.get("reason") not in ["allocated","labor","phase","materials","space","access"]:return false
 	return true
