@@ -81,3 +81,11 @@ regression check covers it. Showing a previously hidden ledger also rebuilds its
 current content, covering direct place inspection after visual play. Godot exited zero; stderr inspection rejected the
 candidate. It was never exported or published. The fresh final build repeats all
 gates after this correction.
+
+The second candidate at `c04e995` passed 12,160 source and exact-app checks, export,
+signing and reference rendering. The retained tutorial input harness then clicked
+its start button below the introduction's scrolled viewport after the extra return
+to visual controls shifted the layout. It now scrolls the actual button into view
+and synchronizes the native pointer before its single press/release, as the other
+chapter harnesses already do. No gameplay state or extra click is injected. This
+candidate was not published; the next frozen build repeats all release gates.

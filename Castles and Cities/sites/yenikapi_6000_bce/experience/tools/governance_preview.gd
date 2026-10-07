@@ -98,10 +98,17 @@ func click_button(id:String) -> void:
 	for i in range(3):await process_frame
 	var button:Button=app.campaign.find_child(id,true,false)
 	if button==null:check(false,"missing button "+id);return
+	var parent:Node=button.get_parent()
+	while parent!=null:
+		if parent is ScrollContainer:parent.ensure_control_visible(button)
+		parent=parent.get_parent()
+	for i in range(3):await process_frame
 	var at:Vector2=button.get_global_rect().get_center()
+	root.warp_mouse(at)
 	print("CLICK ",id," ",at," rect ",button.get_global_rect())
 	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;root.push_input(motion)
 	for pressed in [true,false]:
+		root.warp_mouse(at)
 		var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0
 		root.push_input(event)
 		for i in range(3):await process_frame
