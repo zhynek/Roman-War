@@ -27,6 +27,14 @@ are reused. Cold-build geometry equivalence and full path walking guard this sea
 The release builder adds exact-app construction acceptance and five separate model
 specimens while retaining every earlier gate and 36 prior model bytes.
 
+Frozen payload `60d9106` passes **13,006 assertions** on both source and the exact
+universal Mac app; **185 captures** were inspected, including 34 construction
+views and 672 actual-input checks. Parent data, **705 tests** and map rendering
+pass. All 36 retained GLBs are byte-identical; five new specimens bring the total
+to 41. On the local M3 Max, comparable adaptation completion fell from 3.062 s to
+0.668 s. New-building completion remains 1.452 s; commissioning rose to 0.509 s.
+The verification record reports every measured operation and remaining limits.
+
 ## Yenikapı visual governing (0.9.0, October 2026)
 
 The village now starts with an illustrated bottom dock. Building/place selection

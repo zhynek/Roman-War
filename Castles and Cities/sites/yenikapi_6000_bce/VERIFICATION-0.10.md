@@ -106,3 +106,84 @@ so later commissioning cannot move a paused project. Five additional checks prov
 coexisting workroom displays are distinct and individually selectable (846 total
 construction checks); the rendered gate adds their normal-stock coexistence view.
 The first candidate build was stopped before publication and superseded.
+
+
+## Exact universal Mac acceptance
+
+Frozen payload `60d91066975e1143252ce24a4fe34bf40d082664`, built as **0.10.0**. Both source and the exact
+application pass **13,006 assertions**, including **846 construction checks**.
+The bundle contains `arm64` and `x86_64` and passes `codesign --verify --deep
+--strict`. It is ad-hoc signed, not Developer ID notarized. The dated reference
+mesh hash remains `7f1edbf6ec717d61357b58ffd2237806139cdb59950b9fe5c18c16ee172c689a`.
+
+| Exact-app rendered suite | Captures | Checks | Failures |
+|---|---:|---:|---:|
+| asset | 12 | 477 | 0 |
+| construction | 34 | 672 | 0 |
+| household | 12 | 714 | 0 |
+| incident | 25 | 676 | 0 |
+| land | 19 | 918 | 0 |
+| living | 21 | 839 | 0 |
+| neighbor | 10 | 58 | 0 |
+| reference | 14 | — | 0 |
+| tutorial | 12 | 85 | 0 |
+| visual | 26 | 392 | 0 |
+
+All **185 captures** were inspected, with full-size review of the new plan,
+site-stage and small-window controls. Every retained layout, path, interior and
+new construction/incident sequence passes. Screenshots are outside the repository:
+`/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.10.0-exact-qa-2tqskzy2`.
+Logs, benchmark JSON and local/public artifact checks are in
+`build/yenikapi-early-settlement-0.10.0-final2/verification/`.
+
+## Exact-app responsiveness
+
+Same local Apple M3 Max / Metal 3.2 / 1600×1000 procedure as the baseline.
+Callback time is synchronous work; readiness includes two rendered frames.
+No competing Godot process ran during these samples.
+
+| New construction operation | Callback ms | Ready ms |
+|---|---:|---:|
+| select site | 14.624 | 45.448 |
+| central oversight | 16.241 | 101.791 |
+| enter room | 2.546 | 33.506 |
+| select board plan | 1.158 | 32.752 |
+| enlarge easel | 38.356 | 68.856 |
+| compare project | 37.365 | 68.260 |
+| crew limit | 47.539 | 82.551 |
+| priority | 6.821 | 35.801 |
+| pause | 20.292 | 51.716 |
+| resume | 20.318 | 51.093 |
+| construction season | 835.556 | 867.708 |
+| new building completion | 1410.565 | 1451.526 |
+| adaptation completion | 512.691 | 546.293 |
+| ordinary season | 469.134 | 499.288 |
+
+| Retained comparable visual-profile operation | 0.9 ready ms | 0.10 ready ms |
+|---|---:|---:|
+| select place | 37.987 | 33.218 |
+| preview cached | 19.461 | 36.547 |
+| compare growth | 38.009 | 39.096 |
+| priority | 53.149 | 78.454 |
+| commission | 226.352 | 509.452 |
+| completion season | 3061.817 | 667.616 |
+| fresh living season | 670.770 | 150.420 |
+| ordinary season | 189.971 | 173.348 |
+| open | 1240.588 | 1194.289 |
+
+The comparable adaptation completion is 78.2% faster in this sample.
+This is not a claim that every operation improved: commissioning now creates real
+site collision and routes, and its measured delay increased. New-building
+completion still takes 1.45 seconds. Its citizen refresh
+takes 0.81 seconds, including 0.69 seconds in journeys;
+these are presentation costs, not authoritative seasonal work. Static inspection
+and plan controls remain much cheaper. Intel performance has not been measured.
+
+## Artifact preservation
+
+All 36 prior GLBs are byte-identical to 0.9.0; five new Construction specimens
+bring the total to 41. Ten ZIPs pass integrity checks. Every file in the editable
+source archive matches the frozen source hash map. Parent core/data, medieval
+Constantinople, dated village data, village core and save reader are identical
+Git objects to the baseline. Twelve artifacts are prepared for a separate village prerelease; public download
+and preservation results follow after upload.
