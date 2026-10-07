@@ -76,6 +76,9 @@ func run() -> void:
 	await click_button("VisualCancel")
 	check(p.state.wood==wood+refund.refund_wood,"shared controls refund only unused commitment")
 	await click_button("VisualClose")
+	for id in ["land_adapt_workroom","living_shared_room"]:
+		await build_review(id);await click_button("VisualCommission");await click_button("VisualPause");await click_button("VisualClose")
+	await site_shot("land_adapt_workroom","14a-distinct-workroom-projects")
 	# Locked prerequisite and an existing working room remain honest.
 	await build_review("land_outer_west");await shot("15-required-access")
 	check(ui.find_child("VisualCommission",true,false).disabled,"missing northern access is shown")

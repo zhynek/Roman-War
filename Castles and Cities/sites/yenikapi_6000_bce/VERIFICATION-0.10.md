@@ -82,3 +82,27 @@ The new profile records each required site, oversight, board, easel, comparison,
 staffing, priority, pause/resume, seasonal, completion and route operation.
 Exact-package measurements and final acceptance/public byte results are appended
 after the frozen build. No Intel performance or Developer ID notarization is claimed.
+
+
+## Source candidate and parent acceptance
+
+Initial feature candidate: `0f44d23`. Source validation and all retained suites pass
+**13,001 assertions**, including **841 construction checks**. The final normal-stock
+construction input sequence passed **661 checks / 33 captures**. Parent data
+validation reports zero errors/warnings; import, all **705 tests**, and the rendered
+map playtest pass. Planning, marching, arrival and maximum zoom were inspected.
+Every log was scanned for script errors independently of exit status.
+
+Logs are under `build/yenikapi-0.10-source-gates/` and
+`build/yenikapi-0.10-parent-gates/`; source screenshots are outside the repository
+at `/tmp/yenikapi-construction-final-source/` and `/tmp/yenikapi-0.10-parent-map/`.
+The clean release source is `/tmp/yenikapi-0.10-release-source/`. Source UI
+inspection covered all 33 views; exact packaged acceptance remains the release gate.
+
+A final coexistence review separated two workroom adaptations onto opposite sides
+of the retained building, and incident preparation/repair displays along their
+shared site edge. Their positions depend on stable identity, never queue order,
+so later commissioning cannot move a paused project. Five additional checks prove
+coexisting workroom displays are distinct and individually selectable (846 total
+construction checks); the rendered gate adds their normal-stock coexistence view.
+The first candidate build was stopped before publication and superseded.

@@ -63,11 +63,12 @@ static func build_site(id: String,d: Dictionary,rules,w) -> Dictionary:
 			for existing in w.buildings:
 				if existing.id=="yk_house_06":b=existing;break
 		if not b.is_empty():
-			at=w.building_position(b,Vector3(float(b.size[0])*.5+1.0,0,-.6));yaw_=deg_to_rad(float(b.yaw))
+			var side: float=-1.0 if id=="living_shared_room" else 1.0
+			at=w.building_position(b,Vector3(side*(float(b.size[0])*.5+1.0),0,-.6));yaw_=deg_to_rad(float(b.yaw))
 			half=Vector2(.6,1.1)
 	elif d.treatment in ["repair","equipment","path"]:
 		# Edge work leaves the actual pedestrian route usable.
-		at+=Vector3(3.0,0,-2.0);at.y=w.floor_height(at.x,at.z);half=Vector2(1.0,1.1)
+		at+=Vector3(3.0,0,-4.5 if id.ends_with("_prepare") else -2.0);at.y=w.floor_height(at.x,at.z);half=Vector2(1.0,1.1)
 	elif d.treatment=="ground":half=Vector2(2.4,2.0)
 	var owner: String="construction_"+id
 	w._begin(owner,at,yaw_)

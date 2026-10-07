@@ -74,6 +74,15 @@ func run() -> void:
 	var target: Vector3=app.world.building_position(store_record,Vector3(0,1,0))
 	var origin: Vector3=target+Vector3(0,10,12)
 	check(app.visual_commands.pick(origin,(target-origin).normalized()) and app.visual_commands.detail.get("id")=="shared_store","occupied building opens its exact adaptation project")
+	var together: Dictionary=preload("res://tools/living_driver.gd").initial(r)
+	for id in ["land_adapt_workroom","living_shared_room"]:together=cmd(together,{"kind":"commission","id":id})
+	app.campaign.state=together;app.show_campaign(together,r);app.visual_commands.open()
+	var sites: Dictionary=app.campaign_view.construction_view.sites
+	check(sites.land_adapt_workroom.at.distance_to(sites.living_shared_room.at)>3,"simultaneous workroom projects have distinct material displays")
+	for id in ["land_adapt_workroom","living_shared_room"]:
+		var at: Vector3=sites[id].at+Basis(Vector3.UP,float(sites[id].yaw))*Vector3(sites[id].half.x-.28,.22,-sites[id].half.y+.8)
+		var eye: Vector3=at+Vector3(0,6,0)
+		check(app.campaign_view.construction_view.pick(eye,(at-eye).normalized())==id,"each workroom project remains individually selectable "+id)
 	# Competing paid projects, pause, exact refund, no duplicate credit.
 	s=preload("res://tools/living_driver.gd").initial(r)
 	for id in ["shared_store","care_shelter"]:s=cmd(s,{"kind":"commission","id":id});s=staffing(s,id,4)
