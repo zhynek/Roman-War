@@ -22,10 +22,13 @@ func test_map_changes_hands(t) -> void:
 			rebel_regions_at_start += 1
 
 	var total_ms := 0
+	var peak_ms := 0
 	for i in range(LONG_TURNS):
 		var started := Time.get_ticks_msec()
 		game.end_turn()
-		total_ms += Time.get_ticks_msec() - started
+		var elapsed := Time.get_ticks_msec() - started
+		total_ms += elapsed
+		peak_ms = maxi(peak_ms, elapsed)
 
 	var changed := 0
 	var rebel_regions_now := 0
@@ -116,6 +119,11 @@ func test_map_changes_hands(t) -> void:
 	t.check(top_rank >= 5, "a consul or censor sits by turn 60 (top rank %d)" % top_rank)
 
 	var average_ms := float(total_ms) / float(LONG_TURNS)
+	# Emit on passing runs too: shared-runner variation needs comparable evidence.
+	print("AI CAMPAIGN TIMING ", JSON.stringify({"turns": LONG_TURNS,
+		"average_ms": average_ms, "peak_ms": peak_ms, "budget_ms": 600,
+		"godot": Engine.get_version_info().string, "os": OS.get_name(),
+		"processors": OS.get_processor_count(), "cpu": OS.get_processor_name()}))
 	# Raised from 250 ms with the merge, not to hide a regression: a turn now
 	# runs the societal stocks, the knowledge layer, campaign agents and an
 	# attitude-driven diplomacy pass that no single branch ran together, and
