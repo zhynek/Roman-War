@@ -185,5 +185,37 @@ All 36 prior GLBs are byte-identical to 0.9.0; five new Construction specimens
 bring the total to 41. Ten ZIPs pass integrity checks. Every file in the editable
 source archive matches the frozen source hash map. Parent core/data, medieval
 Constantinople, dated village data, village core and save reader are identical
-Git objects to the baseline. Twelve artifacts are prepared for a separate village prerelease; public download
-and preservation results follow after upload.
+Git objects to the baseline. Twelve artifacts are published as the separate village prerelease. Public byte
+verification and prior-release preservation are recorded below.
+
+
+## Public release and preservation
+
+The [0.10.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.10.0) is public. Its tag pins the exact tested payload
+`60d91066975e1143252ce24a4fe34bf40d082664`; main also records final acceptance
+and publication. All **12 artifacts** were downloaded anonymously and match
+local SHA-256 hashes, sizes and GitHub digests. All **10 ZIPs** pass integrity
+checks; every entry in the downloaded checksum manifest matches its file.
+
+All **15 previous releases / 97 assets** retain their metadata, identities and
+digests (download counters excluded). The parent campaign's stable latest remains
+**v0.14.2**. The frozen-source comparison, retained GLB comparison and public
+verification reports are in the build's `verification/` directory. The downloaded
+files are at `/tmp/yenikapi-0.10-public-downloads/`. No old archive, dated reference,
+medieval city or save contract was replaced. Unrelated city-lifecycle drafts remain
+uncommitted and untouched.
+
+| Public artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `SHA256SUMS.txt` | 1,250 | `c588d76702550a978a7329e3695b69020f55f0cd9c58d76ec734ddf153588092` |
+| `Yenikapi-Early-Settlement-Asset-Models-0.10.0.zip` | 1,460,205 | `594ed8b1e98d3bad772f71843a8fc9de5a655df29bde49fc95cd205067efe626` |
+| `Yenikapi-Early-Settlement-Construction-Models-0.10.0.zip` | 437,808 | `d55df3f7cb6564eb111e423bfafa9dd981e64f8c8e85233c4c0aec7cdec85803` |
+| `Yenikapi-Early-Settlement-Contact-Models-0.10.0.zip` | 21,913,893 | `ad77259bf1d89653e340a67943d1a68490583c18fe1257222ff11c2035582907` |
+| `Yenikapi-Early-Settlement-Foundation-Models-0.10.0.zip` | 43,556,467 | `efdda314bbefafe76d701ad6cb77ce903a1960439973cb6dd60b32f01ae5dc73` |
+| `Yenikapi-Early-Settlement-Household-Models-0.10.0.zip` | 2,736,923 | `fd5af3a96fe5e81ea7fa54f68a1c24a634f31840ab48ab241f3ef431634100aa` |
+| `Yenikapi-Early-Settlement-Incident-Models-0.10.0.zip` | 20,445 | `f1a92a66675ca47540994ef359db3f9e4d7fdcc481fbba1b7c08faedae9e3435` |
+| `Yenikapi-Early-Settlement-Land-Models-0.10.0.zip` | 40,375,897 | `45fd0497f937c70e9d0c8194f653034a852f937314555ceefa583be101ad5346` |
+| `Yenikapi-Early-Settlement-Living-Models-0.10.0.zip` | 20,610,371 | `1b9d12f18eb69a104312dbc2f1347677b32092dcd2afda939e45a6cbacc8212e` |
+| `Yenikapi-Early-Settlement-Source-0.10.0.zip` | 693,688 | `ba93f7ab640c32e5b329509fa8d6346ce6c842d8a91ac90cb9a67fb028d02045` |
+| `Yenikapi-Early-Settlement-macOS-0.10.0.zip` | 58,851,669 | `67a23a094868a6c5c320203ba9cfbbb81fe5fc76bee014de9096e549dbcf9def` |
+| `provenance.json` | 105,650 | `c1e101173b1ecb9ec6d7c1114105198931d31acaaf2255d1391bf967d05cf3ba` |

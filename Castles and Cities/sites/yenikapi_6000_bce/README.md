@@ -1,5 +1,9 @@
 # Yenikapı · early settlement, circa 6000 BCE
 
+**0.10.0 — Buildings That Show Their Work:** visible construction stages, committed materials, actual crews and specific blockers, with the same project controls at each site, in the main interface and in an interpretive shared planning room. Choose **Village projects**; room access is available from the start. [Gameplay, authoring and unchanged save contract](experience/CONSTRUCTION.md).
+
+[Download the 0.10.0 Mac app](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.10.0/Yenikapi-Early-Settlement-macOS-0.10.0.zip) · [All twelve downloads](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.10.0) · [Verified results and timings](VERIFICATION-0.10.md). The universal application, editable source and eight model bundles were downloaded anonymously and matched the tested artifacts. The app is ad-hoc signed, not Developer ID notarized. All previous releases remain available; parent stable latest is unchanged.
+
 **0.9.0 — A Village at Your Fingertips:** illustrated bottom commands, building improvements, current/planned models and a connected growth guide. Choose **New village** or **Load saved village**. [Controls and unchanged save contract](experience/VISUAL_COMMANDS.md).
 
 [Download the 0.9.0 Mac app](https://github.com/zhynek/Roman-War/releases/download/yenikapi-early-settlement-v0.9.0/Yenikapi-Early-Settlement-macOS-0.9.0.zip) · [All 0.9.0 downloads](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.9.0) · [Verified results and timings](VERIFICATION-0.9.md). Unzip and move the universal application to Applications. The app is ad-hoc signed, not Developer ID notarized. All eleven public assets match the tested files; every previous release remains available.

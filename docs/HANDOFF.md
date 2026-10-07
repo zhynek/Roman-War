@@ -35,6 +35,11 @@ to 41. On the local M3 Max, comparable adaptation completion fell from 3.062 s t
 0.668 s. New-building completion remains 1.452 s; commissioning rose to 0.509 s.
 The verification record reports every measured operation and remaining limits.
 
+The [0.10.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.10.0) is public. All twelve anonymous downloads match
+tested bytes and GitHub digests; all ten ZIPs pass integrity checks. All fifteen
+previous releases / 97 assets and stable latest `v0.14.2` remain unchanged.
+The tag pins the frozen payload; main also holds the acceptance/publication record.
+
 ## Yenikapı visual governing (0.9.0, October 2026)
 
 The village now starts with an illustrated bottom dock. Building/place selection
