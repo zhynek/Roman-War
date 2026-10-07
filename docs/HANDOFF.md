@@ -28,8 +28,12 @@ No core rule, save wrapper, dated reference or previous model changes. Old saves
 retain all semantics and explicit adoption boundaries. New villages use living
 rules; the incident chapter is deliberately opted into. The release builder adds
 visual data, purity/save checks, actual-input playthrough and interaction profiles
-to every existing gate. Frozen-app and public verification are recorded below in
-the verification file once complete.
+to every existing gate. Frozen payload `1d4e49a` passed 12,160 checks on each
+executable, 4,159 rendered checks and 151 inspected captures. Parent data, 705 tests,
+map rendering and GitHub CI passed. All 36 GLBs match 0.8.0 byte for byte.
+Exact-app place selection was 34.492 ms to rendered readiness; a cached preview
+34.461 ms; physical adaptation 2,972.180 ms. These are local M3 Max observations.
+The verification file records the full profiles and rejected candidates.
 
 ## Yenikapı preparedness under pressure (0.8.0, October 2026)
 

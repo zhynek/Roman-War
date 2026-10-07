@@ -89,3 +89,73 @@ to visual controls shifted the layout. It now scrolls the actual button into vie
 and synchronizes the native pointer before its single press/release, as the other
 chapter harnesses already do. No gameplay state or extra click is injected. This
 candidate was not published; the next frozen build repeats all release gates.
+
+
+## Parent CI
+
+[GitHub CI on the frozen payload](https://github.com/zhynek/Roman-War/actions/runs/37580508467)
+passed both data validation and the complete parent suite. The preceding
+[c04e995 run](https://github.com/zhynek/Roman-War/actions/runs/37579317693)
+passed 704 tests but missed the existing parent turn-time limit: 604 ms average
+against 600 ms. Parent code, test limits and campaign data were unchanged; no
+threshold was relaxed. The local complete suite also passed all 705 tests.
+
+
+## Frozen exact-app acceptance
+
+Frozen payload: `1d4e49a0772f486c8efac8d507a13ebef34a77e4`. The fresh build passed **12,160**
+rule/geometry/UI checks on each executable, every schema and malformed-data gate,
+**4,159** rendered checks and **151 captures** (125 retained
+views plus the expanded 26-view visual playthrough). All captures were inspected.
+Logs include stderr and were scanned independently. The universal app's signature,
+Apple Silicon/Intel architectures, packed content and source hashes were verified.
+
+All **36 GLBs remain byte-identical to 0.8.0**. The nine ZIPs pass integrity and
+member readback: the app ZIP matches the actual tested bundle; the source ZIP
+matches frozen hashes; model partitions match tested exports. The checksum manifest
+and provenance match all nine ZIPs. No failed candidate was published.
+
+The exact-app visual flow uses real pointer controls and ordinary resources for
+improvements, standing choices, finite labor, warnings, paid repair, saved state,
+compact/outward homes, current/planned models, unbuilt sites and restart confirmation.
+It checks canonical order labels, disabled prerequisites, authority, duplicate
+payments, state purity and retained reference boundaries. Small-window review uses
+1024×768; retained acceptance also covers 1280×800. The scene-free core and save
+reader are unchanged from 0.8.0.
+
+## Final interaction measurements
+
+Godot 4.4.1, M3 Max, Metal 3.2 Forward+, 1600×1000. Values below are single local
+observations. Callback includes synchronous rules/world/UI work; rendered ready
+includes two actual drawn settling frames. Neither is inferred from frame rate.
+The source and exact app use the same profile scenario and commands.
+
+| Interaction | Source callback / rendered ready | Exact app callback / rendered ready |
+|---|---:|---:|
+| Start living village | 1400.579 / 1480.056 ms | 1104.547 / 1184.826 ms |
+| Choose a place | 5.820 / 35.579 ms | 3.987 / 34.492 ms |
+| First building preview | 39.334 / 70.471 ms | 33.728 / 64.125 ms |
+| Cached building preview | 6.614 / 36.624 ms | 5.004 / 34.461 ms |
+| Open growth guide | 16.890 / 47.802 ms | 17.080 / 47.711 ms |
+| Local knowledge | 17.389 / 47.375 ms | 14.188 / 44.432 ms |
+| Change material preparation | 70.355 / 99.578 ms | 59.491 / 88.658 ms |
+| Commission adaptation | 250.943 / 284.847 ms | 204.364 / 238.159 ms |
+| Change project priority | 51.451 / 80.894 ms | 41.390 / 70.369 ms |
+| Complete physical adaptation | 3630.309 / 3673.507 ms | 2929.669 / 2972.180 ms |
+| Following season | 210.594 / 240.956 ms | 173.255 / 202.836 ms |
+| Change watch priority | 6.899 / 36.140 ms | 5.091 / 33.462 ms |
+| Fresh living season with ordinary preparation | 792.328 / 823.470 ms | 642.645 / 673.905 ms |
+
+The old ledger profile also remains available for comparison: exact-app opening
+living 3,647 ms; ordinary living season
+595 ms; adaptation completion
+3,185 ms; forced living route rebuild
+128 ms. The fresh pre-change source sample
+above uses that same retained profile. The visual opening batches the existing
+adoption commands before one presentation refresh. Cached model menus are cheap;
+physical changes and complete reloads still pause while geometry/routes rebuild.
+Different rows contain different settlement states and should not be treated as
+universal speedup ratios. No Intel timing or notarization is claimed.
+
+Build output: `build/yenikapi-early-settlement-0.9.0-final3/`.
+Exact-app captures: `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.9.0-exact-qa-f_ut5d8z`.
