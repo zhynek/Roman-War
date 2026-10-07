@@ -4,8 +4,10 @@ Architecture and implementation sequence, 7 October 2026. The baseline audit use
 `origin/main` `257fb72149a9db3d05cab079a5c640175231f4c1`. **Slices A and B are now
 implemented in source:** ordered building continuity, explicit lifecycle adoption,
 a paid small-to-large-village civic transition and two paid building improvements.
-Verification is being completed; no new release is published. Later transitions
-and neighboring-city work remain planned. The detailed implemented contract is
+The local 0.11.0 Mac build is verified; this work does not publish a release.
+Later transitions and neighboring-city work remain planned. Read the
+[verification record](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.11.md).
+The detailed implemented contract is
 [LIFECYCLE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIFECYCLE.md).
 The [shared architecture contract](../CLAUDE.md) remains authoritative.
 

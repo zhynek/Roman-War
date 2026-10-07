@@ -123,4 +123,6 @@ The release builder runs lifecycle data/negative checks before export, then both
 new rule suites and the rendered sequence on source and the exact app. It preserves
 the existing 41 neutral model exports. Packaging requires a clean committed
 checkout, fresh parent logs, exact-app checks and manual image inspection. This
-implementation does not itself publish a release or claim packaged verification.
+implementation has a verified local 0.11.0 build; see the
+[acceptance record](../VERIFICATION-0.11.md) for exact-app results and limits.
+It does not publish a release.

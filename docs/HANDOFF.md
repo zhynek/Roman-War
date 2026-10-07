@@ -40,7 +40,7 @@ tested bytes and GitHub digests; all ten ZIPs pass integrity checks. All fifteen
 previous releases / 97 assets and stable latest `v0.14.2` remain unchanged.
 The tag pins the frozen payload; main also holds the acceptance/publication record.
 
-## City lifecycle implementation (October 7, 2026; verification in progress)
+## City lifecycle (0.11.0 local build, October 7, 2026)
 
 [CITY_LIFECYCLE.md](CITY_LIFECYCLE.md) maps small village through metropolis.
 Slices A+B now provide ordered building revisions, explicit site successors,
@@ -55,9 +55,15 @@ assets → land → living adoption requirements. Read
 [LIFECYCLE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIFECYCLE.md)
 for controls, authoring, save boundaries and isolated stage recipes. New data,
 negative, rule/save, lineage and rendered gates are integrated into the clean-source
-builder for source and exact app. Integrated verification is in progress; this is
-not a publication or an exact-app acceptance claim. The dated Yenikapı and medieval
-city studies remain separate. Neighboring-city expansion follows local progression.
+builder for source and exact app. Frozen payload `227eca3` passes **25,334 checks
+on each**, plus the parent **705-test**/data/import/map gates. The exact app passes
+**5,268 rendered checks**; all **214 app captures and 29 source lifecycle captures**
+were reviewed. All 41 previous GLBs are byte-identical and ten ZIPs pass integrity
+checks. Read [0.11 verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.11.md)
+for artifacts, generated stage saves and measured scene-rebuild pauses. The local
+universal Mac app is in `build/yenikapi-early-settlement-0.11.0-local/`; no public
+release was created. The dated Yenikapı and medieval city studies remain separate.
+Neighboring-city expansion follows local progression.
 
 ## Yenikapı visual governing (0.9.0, October 2026)
 
