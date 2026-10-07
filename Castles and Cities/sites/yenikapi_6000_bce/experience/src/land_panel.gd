@@ -37,11 +37,13 @@ func build(body: VBoxContainer) -> void:
 	totals.crew=f.assets.access_workers;totals.wood=f.assets.access_cost
 	totals.access=copy.ui.none if not rules.land.needs_access(state,rules) else copy.ui.ready if f.land.access else copy.ui.waiting
 	body.add_child(panel.label(copy.ui.totals.format(totals),15))
+	var sites: Array=rules.land.content.sites.filter(func(site):return not site.get("lifecycle",false) or rules.lifecycle.active(state))
+	if not sites.any(func(site):return site.id==selected):selected=sites[0].id
 	var picker:=OptionButton.new();picker.name="LandPicker"
-	for site in copy.sites:
+	for site in sites:
 		picker.add_item(site.title)
 		if site.id==selected:picker.select(picker.item_count-1)
-	picker.item_selected.connect(func(index):inspect(copy.sites[index].id));body.add_child(picker)
+	picker.item_selected.connect(func(index):inspect(sites[index].id));body.add_child(picker)
 	var site: Dictionary=rules.land.sites[selected]
 	var use: String=rules.land.use_at(state,selected,rules)
 	var fields: Dictionary=site.duplicate()
@@ -55,18 +57,20 @@ func build(body: VBoxContainer) -> void:
 	body.add_child(panel.label(copy.ui.now.format(fields),15))
 	if use!="":body.add_child(panel.label((copy.ui.completed if rules.has_project(state,use) else copy.ui.reserved).format({"project":rules.projects[use].title}),15))
 	body.add_child(panel.button(copy.ui.visit,visit,"VisitLand"))
-	for proposal in copy.proposals:
+	for proposal in rules.land.content.proposals:
+		if proposal.get("lifecycle",false) and not rules.lifecycle.active(state):continue
 		if proposal.site!=selected:continue
 		var p: Dictionary=rules.projects[proposal.id]
-		body.add_child(panel.label(p.title,19));body.add_child(panel.label(p.body,15))
+		body.add_child(panel.label(p.title,19));body.add_child(panel.label(panel.project_body(proposal.id),15))
+		var prior_use: Dictionary=rules.land.proposals.get(proposal.get("predecessor",""),site)
 		var cost: Dictionary=p.duplicate();cost.slots=f.land.work
 		body.add_child(panel.label(copy.ui.cost.format(cost),14))
-		body.add_child(panel.label(copy.ui.effect.format({"housing":p.effects.get("housing",0),"storage":p.effects.get("storage",0),"food":int(proposal.food)-int(site.food),"work":int(proposal.work)-int(site.work),"cooperation":int(proposal.cooperation)-int(site.cooperation)}),14))
+		body.add_child(panel.label(copy.ui.effect.format({"housing":p.effects.get("housing",0),"storage":p.effects.get("storage",0),"food":int(proposal.food)-int(prior_use.food),"work":int(proposal.work)-int(prior_use.work),"cooperation":int(proposal.cooperation)-int(prior_use.cooperation)}),14))
 		body.add_child(panel.label(copy.ui.requirements.format({"requires":", ".join(p.requires) if not p.requires.is_empty() else copy.ui.none,"access":copy.ui.yes if proposal.requires_access else copy.ui.no,"retain":copy.ui.yes if proposal.retain else copy.ui.no}),14))
 		panel.asset_panel.project(body,proposal.id,f,false)
 	panel.asset_panel.action(body,copy.ui.upkeep+" · "+(copy.ui.off if state.land.access_enabled else copy.ui.on),{"kind":"land_access","enabled":not state.land.access_enabled},"LandAccess")
 	body.add_child(panel.label(copy.ui.compare,19))
-	for alternative in copy.sites:
+	for alternative in sites:
 		if alternative.id==selected:continue
 		body.add_child(panel.button(alternative.title+" · "+alternative.use,func():inspect(alternative.id),"LandInspect_"+alternative.id))
 	panel.asset_panel.allocation(body,f)

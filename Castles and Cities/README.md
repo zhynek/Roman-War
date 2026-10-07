@@ -27,6 +27,7 @@ development into the medieval capital is asserted. The circa-1200 project and do
 
 | Resource | Use |
 |---|---|
+| [City lifecycle architecture plan](../docs/CITY_LIFECYCLE.md) | Plan persistent village-to-city gameplay, civic upgrades and independently testable stages; implementation remains future work |
 | [Standalone city project](realms/byzantine_empire/cities/constantinople_1200/experience/project.godot) | Open the independent 3D experience in Godot 4.4 |
 | [City catalog](CATALOG.md) | Find cities by realm, period and design role |
 | [Constantinople brief](realms/byzantine_empire/cities/constantinople_1200/README.md) | Understand the selected city and reconstruction boundary |

@@ -62,3 +62,20 @@ The repaired workroom keeps its ID at revision 2; converted fields/work areas
 remain inactive tombstones. Household additions do not replace occupied homes.
 The original town criteria accept equivalent spatial foundations, without a new
 population threshold or any claim of continuous prehistoric-to-medieval growth.
+
+
+The next lifecycle candidate implements **Small village → Large village** in the
+same hypothetical scenario. A paid assembly shelter earns the civic achievement;
+separately paid store and workroom projects alter their existing IDs from revision
+2 to 3. Town through Metropolis remain planned lifecycle metadata. The earlier
+reversible town-support milestone and explicit recognition of old town saves
+remain separate from physical civic buildings. Read
+[LIFECYCLE.md](experience/LIFECYCLE.md).
+
+`src/core/fabric_projection.gd` now replays completed project transactions in ledger
+order. New projects declare `expected_revisions`, reject duplicate mutation within
+a transaction, and allow a later valid revision of the same object. Commands and
+saves validate the same projection used by rendering. New provenance names project
+and revision. Explicit land successor links preserve prior use during retained
+adaptation and select the latest completed use afterward; unrelated site conflicts
+and occupied-home protections remain. Legacy outputs retain their prior semantics.

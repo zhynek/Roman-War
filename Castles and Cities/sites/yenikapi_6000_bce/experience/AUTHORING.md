@@ -143,3 +143,30 @@ model exports must not silently acquire plan furniture or construction overlays.
 Five new Construction models show the four unfinished care-shelter stages and
 planning furniture in the working room; their provenance uses normal public
 commands and calls out the gameplay interpretation. Retain all 36 prior GLBs.
+
+
+## City lifecycle (next candidate 0.11.0)
+
+[LIFECYCLE.md](LIFECYCLE.md) defines the implemented small-to-large-village
+transition, paid individual upgrades and wrapper-8 adoption contract. Later stages
+are metadata for future work. The dated snapshot and parent level enums stay
+unchanged; no ordinary frame, preview or load can advance civic achievement.
+
+Keep the lifecycle profile's semantics stable. Prices, work and reserves come
+from `balance.lifecycle`; stages, closed predicates and explicit project/fabric
+links come from `lifecycle.json`. An active save carries the semantic definition
+hash. Retain a published profile or write an explicit migration before changing
+paid contracts. Copy-only edits do not require a migration.
+
+Each lifecycle change declares every expected predecessor revision, including an
+empty map for additions. Ordered project replay must pass at the command and save
+boundaries, before rendering. Preserve unique project IDs, full predecessor
+furnishings and coordinates. Store effects are incremental, while successor land
+uses replace the earlier site's contribution with an authored total. Neither
+path repairs condition or restores compact development's occupied working ground.
+
+Use the public-command compact/outward recipes and temporary saves for isolated
+stage work. Extend data/negative, rule/save, lineage and rendered checks together.
+The release builder includes these gates on source and exact app; existing neutral
+model exports remain unchanged. No later stage is accepted until its full entry,
+operation, stress/recovery and continuation path work from the preceding stage.

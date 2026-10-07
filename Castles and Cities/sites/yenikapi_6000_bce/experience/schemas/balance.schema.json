@@ -1369,6 +1369,196 @@
         "restriction_timber"
       ],
       "additionalProperties": false
+    },
+    "lifecycle": {
+      "type": "object",
+      "properties": {
+        "readiness": {
+          "type": "object",
+          "properties": {
+            "population": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "housing": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "reserve_seasons": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "wellbeing": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "cooperation": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "security": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "shaping": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "sustained_seasons": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            }
+          },
+          "required": [
+            "population",
+            "housing",
+            "reserve_seasons",
+            "wellbeing",
+            "cooperation",
+            "security",
+            "shaping",
+            "sustained_seasons"
+          ],
+          "additionalProperties": false
+        },
+        "projects": {
+          "type": "object",
+          "properties": {
+            "lifecycle_assembly": {
+              "type": "object",
+              "properties": {
+                "wood": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "work": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "effects": {
+                  "type": "object",
+                  "properties": {},
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "wood",
+                "work",
+                "effects"
+              ],
+              "additionalProperties": false
+            },
+            "lifecycle_store": {
+              "type": "object",
+              "properties": {
+                "wood": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "work": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "effects": {
+                  "type": "object",
+                  "properties": {
+                    "storage": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100000
+                    }
+                  },
+                  "required": [
+                    "storage"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "wood",
+                "work",
+                "effects"
+              ],
+              "additionalProperties": false
+            },
+            "lifecycle_workroom": {
+              "type": "object",
+              "properties": {
+                "wood": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100000
+                },
+                "work": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000
+                },
+                "effects": {
+                  "type": "object",
+                  "properties": {},
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "wood",
+                "work",
+                "effects"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "lifecycle_assembly",
+            "lifecycle_store",
+            "lifecycle_workroom"
+          ],
+          "additionalProperties": false
+        },
+        "commission_reserve_seasons": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "commission_wood_reserve": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "civic_workers": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "civic_priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "readiness",
+        "projects",
+        "commission_reserve_seasons",
+        "commission_wood_reserve",
+        "civic_workers",
+        "civic_priority"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
@@ -1448,7 +1638,8 @@
     "assets",
     "land",
     "living",
-    "incidents"
+    "incidents",
+    "lifecycle"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

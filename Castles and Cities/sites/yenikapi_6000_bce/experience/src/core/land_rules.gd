@@ -21,9 +21,32 @@ func committed(state: Dictionary,id: String,rules) -> bool:
 	return false
 
 func use_at(state: Dictionary,site: String,rules) -> String:
+	if _lifecycle_site(state,site):
+		var latest: String=completed_use_at(state,site)
+		for item in state.queue:
+			if proposals.has(item.id) and proposals[item.id].site==site:
+				# Retaining a completed use keeps its existing yield during work.
+				if not proposals[item.id].retain or latest.is_empty():return item.id
+		return latest
 	for p in content.proposals:
 		if p.site==site and committed(state,p.id,rules):return p.id
 	return ""
+
+func completed_use_at(state: Dictionary,site: String) -> String:
+	var result: String=""
+	for item in state.completed:
+		if proposals.has(item.id) and proposals[item.id].site==site:result=item.id
+	return result
+
+func _lifecycle_site(state: Dictionary,site: String) -> bool:
+	if not _lifecycle_active(state):return false
+	for proposal in content.proposals:
+		if proposal.site==site and proposal.get("lifecycle",false):return true
+	return false
+
+func _lifecycle_active(state: Dictionary) -> bool:
+	var extension: Variant=state.get("lifecycle",{})
+	return extension is Dictionary and not extension.is_empty()
 
 func totals(state: Dictionary,rules) -> Dictionary:
 	var result: Dictionary={"food":0,"work":0,"cooperation":0}
@@ -57,9 +80,17 @@ func blocked(state: Dictionary,id: String,rules) -> String:
 		return ""
 	if not active(state):return "land_missing"
 	var proposal: Dictionary=proposals[id]
+	var successor: bool=proposal.get("lifecycle",false) and _lifecycle_active(state)
+	if proposal.get("lifecycle",false) and not successor:return "lifecycle_missing"
+	if successor and proposal.get("predecessor","")!=completed_use_at(state,proposal.site):return "land_conflict"
 	for other in content.proposals:
 		if other.id==id or not committed(state,other.id,rules):continue
-		if other.site==proposal.site or (proposal.choice_group!="" and proposal.choice_group==other.choice_group):return "land_conflict"
+		# A successor may coexist with the historical completion entries at its
+		# own site, but never with another paid reservation or another site's
+		# exclusive household choice.
+		if other.site==proposal.site:
+			if not successor or not rules.has_project(state,other.id):return "land_conflict"
+		elif proposal.choice_group!="" and proposal.choice_group==other.choice_group:return "land_conflict"
 	if proposal.requires_access and not access_ready(state,rules.assets.allocation(state,rules),rules):return "land_access"
 	if int(state.food)<rules.people(state).size()*int(balance.minimum_reserve):return "asset_supplies"
 	# A future removal cannot silently erase an occupied home. This phase only
@@ -115,6 +146,7 @@ func command(state: Dictionary,action: Dictionary,rules) -> Dictionary:
 		"land_inspect":
 			var id: String=action.get("id","")
 			if not sites.has(id):return {"error":"land_unknown"}
+			if sites[id].get("lifecycle",false) and not _lifecycle_active(state):return {"error":"lifecycle_missing"}
 			if id not in next.land.inspected:next.land.inspected.append(id)
 		"land_access":
 			if not rules.permitted(state,"steward"):return {"error":"authority"}
@@ -145,13 +177,26 @@ func validate(state: Dictionary,rules) -> bool:
 	var seen: Array=[]
 	for id in l.inspected:
 		if not sites.has(id) or id in seen:return false
+		if sites[id].get("lifecycle",false) and not _lifecycle_active(state):return false
 		seen.append(id)
-	var used: Array=[]
-	var groups: Array=[]
-	for p in content.proposals:
-		if not committed(state,p.id,rules):continue
-		if p.site in used or (p.choice_group!="" and p.choice_group in groups):return false
-		used.append(p.site);groups.append(p.choice_group)
+	var used: Dictionary={}
+	var groups: Dictionary={}
+	# Replay the same ordered ledger as the fabric projection. Only explicit
+	# lifecycle successors can supersede a completed use; queue entries reserve
+	# the latest use without erasing it and cannot chain through unpaid futures.
+	for item in state.completed:
+		if not proposals.has(item.id):continue
+		var p: Dictionary=proposals[item.id]
+		if not _valid_successor(state,p,used,groups):return false
+		used[p.site]=p.id
+		if p.choice_group!="":groups[p.choice_group]=p.site
+	var reserved: Dictionary={}
+	for item in state.queue:
+		if not proposals.has(item.id):continue
+		var p: Dictionary=proposals[item.id]
+		if reserved.has(p.site) or not _valid_successor(state,p,used,groups):return false
+		reserved[p.site]=p.id
+		if p.choice_group!="":groups[p.choice_group]=p.site
 	var occupants: Dictionary={}
 	for person in rules.people(state):occupants[person.household]=int(occupants.get(person.household,0))+1
 	for home in rules.content.households:
@@ -163,3 +208,9 @@ func validate(state: Dictionary,rules) -> bool:
 		for key in ["food","wood","work"]:
 			if not rules.whole(l.report.get(key),-1000,1000):return false
 	return true
+
+func _valid_successor(state: Dictionary,proposal: Dictionary,used: Dictionary,groups: Dictionary) -> bool:
+	if proposal.choice_group!="" and groups.has(proposal.choice_group) and groups[proposal.choice_group]!=proposal.site:return false
+	if proposal.get("lifecycle",false):
+		return _lifecycle_active(state) and proposal.get("predecessor","")==used.get(proposal.site,"")
+	return not used.has(proposal.site)

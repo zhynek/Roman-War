@@ -49,5 +49,49 @@ func run() -> void:
 	check(not p.rules.assets.active(p.state) and not p.rules.living.active(p.state),"opening older save never adopts rules")
 	ui.legacy();check(not ui.enabled,"detailed ledger remains available")
 	check(p.rules.validate_state(p.state),"old save remains valid")
+	benefit_copy(p.rules,p.state)
 	app.queue_free();await process_frame
 	print("VISUAL CHECKS: ",checks," checks, ",failures," failures");quit(1 if failures else 0)
+
+func benefit_copy(rules,state: Dictionary) -> void:
+	var model=preload("res://src/project_presentation.gd")
+	var frozen: String=JSON.stringify(state)
+	for id in ["lifecycle_store","lifecycle_workroom"]:
+		var spec: Dictionary=rules.projects[id]
+		var values: Dictionary=model.benefit_values(rules,id)
+		check(values.total==spec.benefit_target.total,"benefit matches validated cumulative target "+id)
+		for template in [spec.body,spec.presentation.benefit]:
+			var rendered: String=model.text_for(rules,id,template)
+			check("{delta}" not in rendered and "{total}" not in rendered,"project prose resolves benefit placeholders "+id)
+	check(model.text_for(rules,"shared_store",rules.projects.shared_store.body)==rules.projects.shared_store.body,"legacy project copy is unchanged")
+	# Change only a private rules projection to prove the display reads numeric
+	# effects/capacities instead of the authored assertion or hardcoded prose.
+	var original_projects: Dictionary=rules.projects
+	rules.projects=original_projects.duplicate(true)
+	rules.projects.lifecycle_store.effects.storage+=7
+	var storage: Dictionary=model.benefit_values(rules,"lifecycle_store")
+	check(storage.delta==int(original_projects.lifecycle_store.effects.storage)+7,"displayed storage delta follows actual effects")
+	check(storage.total==int(original_projects.shared_store.effects.storage)+storage.delta,"displayed storage total sums predecessor and new delta")
+	rules.projects=original_projects
+	var original_proposals: Dictionary=rules.land.proposals
+	rules.land.proposals=original_proposals.duplicate(true)
+	rules.land.proposals.lifecycle_workroom.work+=3
+	var places: Dictionary=model.benefit_values(rules,"lifecycle_workroom")
+	check(places.total==int(original_proposals.lifecycle_workroom.work)+3,"displayed workroom total follows actual site capacity")
+	check(places.delta==places.total-int(original_proposals.land_adapt_workroom.work),"displayed workroom delta compares predecessor use")
+	rules.land.proposals=original_proposals
+	check(JSON.stringify(state)==frozen,"benefit reads do not mutate authoritative state")
+	var config: Dictionary=rules.lifecycle.content.duplicate(true)
+	config.transitions[0].to="town"
+	for project in config.projects:
+		if project.id=="lifecycle_store":project.stage_requires="town"
+	var alternate=preload("res://src/core/lifecycle_rules.gd").new(config,rules.lifecycle.balance)
+	var preview: Dictionary=alternate.status(state,rules)
+	check("lifecycle_store" in preview.unlocks and "lifecycle_workroom" not in preview.unlocks,"inactive unlock preview follows authored transition target")
+
+	config.transitions.append({"id":"later_test","from":"town","to":"large_town","project":"future_civic","readiness":config.transitions[0].readiness.duplicate(true)})
+	var future=preload("res://src/core/lifecycle_rules.gd").new(config,rules.lifecycle.balance)
+	var recognized: Dictionary=state.duplicate(true)
+	recognized.lifecycle={"recognition":"town"}
+	recognized.completed.append({"id":"future_civic","turn":int(state.turn)})
+	check(future.stage(recognized,rules)=="large_town","legacy recognition is a starting rank for later authored civic work")

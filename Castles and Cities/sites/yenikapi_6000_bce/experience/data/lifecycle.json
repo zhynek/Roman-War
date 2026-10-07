@@ -1,0 +1,602 @@
+{
+  "version": 1,
+  "profile": "village_lifecycle_v1",
+  "initial_stage": "village_foundation",
+  "recognized_stage": "town",
+  "civic_project": "lifecycle_assembly",
+  "stages": [
+    {
+      "id": "village_foundation",
+      "title": "Small village",
+      "status": "playable"
+    },
+    {
+      "id": "village_established",
+      "title": "Large village",
+      "status": "playable"
+    },
+    {
+      "id": "town",
+      "title": "Town",
+      "status": "planned"
+    },
+    {
+      "id": "large_town",
+      "title": "Large town",
+      "status": "planned"
+    },
+    {
+      "id": "minor_city",
+      "title": "Small city",
+      "status": "planned"
+    },
+    {
+      "id": "large_city",
+      "title": "Large city",
+      "status": "planned"
+    },
+    {
+      "id": "huge_city",
+      "title": "Metropolis",
+      "status": "planned"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "establish_village",
+      "from": "village_foundation",
+      "to": "village_established",
+      "project": "lifecycle_assembly",
+      "readiness": {
+        "all": [
+          {
+            "id": "population",
+            "kind": "population",
+            "tuning": "population"
+          },
+          {
+            "id": "housing",
+            "kind": "housing",
+            "tuning": "housing"
+          },
+          {
+            "id": "reserves",
+            "kind": "reserves",
+            "tuning": "reserve_seasons"
+          },
+          {
+            "id": "wellbeing",
+            "kind": "stock",
+            "tuning": "wellbeing"
+          },
+          {
+            "id": "cooperation",
+            "kind": "stock",
+            "tuning": "cooperation"
+          },
+          {
+            "id": "security",
+            "kind": "stock",
+            "tuning": "security"
+          },
+          {
+            "id": "shaping",
+            "kind": "knowledge",
+            "tuning": "shaping"
+          },
+          {
+            "id": "council",
+            "kind": "project",
+            "project": "council_ground"
+          },
+          {
+            "id": "store",
+            "kind": "project",
+            "project": "shared_store"
+          },
+          {
+            "id": "site",
+            "kind": "site",
+            "site": "assembly_ground"
+          }
+        ],
+        "any": [
+          {
+            "id": "food_foundation",
+            "predicates": [
+              {
+                "id": "field",
+                "kind": "project",
+                "project": "field_extension"
+              },
+              {
+                "id": "cultivate",
+                "kind": "project",
+                "project": "land_cultivate"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "projects": [
+    {
+      "id": "lifecycle_assembly",
+      "title": "Build an assembly shelter",
+      "body": "Commission a modest shelter beside the existing meeting ground. Completion recognizes a large village and permits two separately paid improvements. One adult serves civic duties in later seasons. This institution and its chronology are fictional.",
+      "role": "steward",
+      "at": [
+        -23,
+        36
+      ],
+      "requires": [
+        "council_ground",
+        "shared_store"
+      ],
+      "changes": [
+        {
+          "kind": "added",
+          "before": [],
+          "after": [
+            {
+              "id": "lifecycle_assembly_shelter",
+              "kind": "building",
+              "revision": 1,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -23,
+                36
+              ],
+              "yaw": 180,
+              "size": [
+                4,
+                3
+              ],
+              "wall_height": 2.1,
+              "roof_rise": 1.6,
+              "roof": "gable",
+              "use": "work",
+              "label": "Hypothetical assembly shelter",
+              "furniture": [
+                {
+                  "id": "assembly_mat",
+                  "kind": "mat",
+                  "at": [
+                    0,
+                    0
+                  ]
+                }
+              ],
+              "household": "sim_shared_household"
+            }
+          ],
+          "expected_revisions": {}
+        }
+      ],
+      "lifecycle": true,
+      "tuning": "lifecycle_assembly",
+      "stage_requires": "village_foundation",
+      "asset": "yard",
+      "presentation": {
+        "treatment": "building",
+        "benefit": "Unlock further store and workroom improvements; one adult has ongoing civic duties."
+      }
+    },
+    {
+      "id": "lifecycle_store",
+      "title": "Organize the enlarged store",
+      "body": "Retain the existing store, its position and furnishings. Add {delta} provision places through raised storage. Existing stock and condition carry forward; ordinary maintenance remains necessary.",
+      "role": "steward",
+      "at": [
+        -3,
+        31
+      ],
+      "requires": [
+        "shared_store"
+      ],
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_store_01"
+          ],
+          "after": [
+            {
+              "id": "yk_store_01",
+              "kind": "building",
+              "revision": 3,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -3,
+                27
+              ],
+              "yaw": -6,
+              "size": [
+                4.2,
+                4.8
+              ],
+              "wall_height": 2.7,
+              "roof_rise": 2.1,
+              "roof": "gable",
+              "use": "storage",
+              "label": "Organized raised storage",
+              "household": "yk_household_01",
+              "furniture": [
+                {
+                  "id": "jar_0",
+                  "kind": "pot",
+                  "at": [
+                    -0.918,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_1",
+                  "kind": "pot",
+                  "at": [
+                    0.918,
+                    -1.064
+                  ]
+                },
+                {
+                  "id": "jar_2",
+                  "kind": "pot",
+                  "at": [
+                    -0.918,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "jar_3",
+                  "kind": "pot",
+                  "at": [
+                    0.918,
+                    0.2659999999999998
+                  ]
+                },
+                {
+                  "id": "basket",
+                  "kind": "basket",
+                  "at": [
+                    -0.7,
+                    0.3
+                  ]
+                },
+                {
+                  "id": "mat",
+                  "kind": "grain",
+                  "at": [
+                    0.6,
+                    -0.2
+                  ]
+                },
+                {
+                  "id": "reserve_basket",
+                  "kind": "basket",
+                  "at": [
+                    1.3,
+                    -1.4
+                  ]
+                },
+                {
+                  "id": "lifecycle_store_rack",
+                  "kind": "basket",
+                  "at": [
+                    1.25,
+                    0.9
+                  ]
+                }
+              ]
+            }
+          ],
+          "expected_revisions": {
+            "yk_store_01": 2
+          }
+        }
+      ],
+      "lifecycle": true,
+      "tuning": "lifecycle_store",
+      "stage_requires": "village_established",
+      "asset": "stores",
+      "benefit_target": {
+        "kind": "effect_total",
+        "key": "storage",
+        "predecessor": "shared_store",
+        "total": 180
+      },
+      "presentation": {
+        "treatment": "adapt",
+        "benefit": "Add {delta} provision places; total improvement over the original store is {total}."
+      }
+    },
+    {
+      "id": "lifecycle_workroom",
+      "title": "Organize the adapted working room",
+      "body": "Retain the room and its doorway, furnishings and condition. Provide {delta} further construction places without displacing residents or restoring yards already used for homes.",
+      "role": "steward",
+      "at": [
+        -26,
+        -9
+      ],
+      "requires": [
+        "land_adapt_workroom"
+      ],
+      "changes": [
+        {
+          "kind": "altered",
+          "before": [
+            "yk_house_06"
+          ],
+          "after": [
+            {
+              "id": "yk_house_06",
+              "kind": "building",
+              "revision": 3,
+              "change": {
+                "kind": "added",
+                "predecessors": []
+              },
+              "evidence": "interpretation",
+              "source_ids": [
+                "yenikapi_excavation"
+              ],
+              "at": [
+                -26,
+                -9
+              ],
+              "yaw": 5,
+              "size": [
+                4.8,
+                4.2
+              ],
+              "wall_height": 2.49,
+              "roof_rise": 2.1,
+              "roof": "hip",
+              "use": "work",
+              "label": "Organized shared working room",
+              "household": "yk_household_05",
+              "furniture": [
+                {
+                  "id": "working_mat",
+                  "kind": "mat",
+                  "at": [
+                    -0.9,
+                    -0.7
+                  ]
+                },
+                {
+                  "id": "clay",
+                  "kind": "clay",
+                  "at": [
+                    1,
+                    -0.7
+                  ]
+                },
+                {
+                  "id": "quern",
+                  "kind": "quern",
+                  "at": [
+                    -1,
+                    0.6
+                  ]
+                },
+                {
+                  "id": "bowl",
+                  "kind": "bowl",
+                  "at": [
+                    0.7,
+                    0.3
+                  ]
+                },
+                {
+                  "id": "pot",
+                  "kind": "pot",
+                  "at": [
+                    1.1,
+                    -1.1
+                  ]
+                },
+                {
+                  "id": "repair_basket",
+                  "kind": "basket",
+                  "at": [
+                    -1.4,
+                    -1.4
+                  ]
+                },
+                {
+                  "id": "lifecycle_work_mat",
+                  "kind": "mat",
+                  "at": [
+                    0,
+                    1.1
+                  ]
+                }
+              ]
+            }
+          ],
+          "expected_revisions": {
+            "yk_house_06": 2
+          }
+        }
+      ],
+      "lifecycle": true,
+      "tuning": "lifecycle_workroom",
+      "stage_requires": "village_established",
+      "asset": "workroom",
+      "benefit_target": {
+        "kind": "site_total",
+        "key": "work",
+        "predecessor": "land_adapt_workroom",
+        "total": 8
+      },
+      "presentation": {
+        "treatment": "adapt",
+        "benefit": "Add {delta} construction places; completed room capacity: {total} places."
+      }
+    }
+  ],
+  "sites": [
+    {
+      "id": "assembly_ground",
+      "title": "Assembly shelter ground",
+      "at": [
+        -23,
+        36
+      ],
+      "size": [
+        5,
+        4
+      ],
+      "objects": [],
+      "connection": "yk_path_yard",
+      "use": "Unbuilt ground beside the seasonal meeting place",
+      "beneficiaries": "The same continuing settlement",
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "lifecycle": true
+    },
+    {
+      "id": "lifecycle_stores",
+      "title": "Existing store plot",
+      "at": [
+        -3,
+        27
+      ],
+      "size": [
+        5,
+        6
+      ],
+      "objects": [
+        "yk_store_01"
+      ],
+      "connection": "yk_path_yard",
+      "use": "Enlarged shared storage",
+      "beneficiaries": "The same continuing settlement",
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "lifecycle": true
+    }
+  ],
+  "proposals": [
+    {
+      "id": "lifecycle_assembly",
+      "site": "assembly_ground",
+      "asset": "yard",
+      "requires_access": false,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true,
+      "lifecycle": true,
+      "predecessor": ""
+    },
+    {
+      "id": "lifecycle_store",
+      "site": "lifecycle_stores",
+      "asset": "stores",
+      "requires_access": false,
+      "food": 0,
+      "work": 0,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true,
+      "lifecycle": true,
+      "predecessor": ""
+    },
+    {
+      "id": "lifecycle_workroom",
+      "site": "workroom",
+      "asset": "workroom",
+      "requires_access": false,
+      "food": 0,
+      "work": 8,
+      "cooperation": 0,
+      "choice_group": "",
+      "retain": true,
+      "lifecycle": true,
+      "predecessor": "land_adapt_workroom"
+    }
+  ],
+  "factors": {
+    "population": "Residents",
+    "housing": "Housing capacity",
+    "reserves": "Provisions held",
+    "wellbeing": "Wellbeing",
+    "cooperation": "Cooperation",
+    "security": "Security",
+    "shaping": "Practiced wood shaping",
+    "council": "Seasonal meeting ground",
+    "store": "Enlarged shared store",
+    "food_foundation": "Cultivation capability",
+    "sustained": "Consecutive qualifying seasons",
+    "site": "Available civic site",
+    "field": "Extended cultivation",
+    "cultivate": "Improved west cultivation"
+  },
+  "strings": {
+    "title": "City lifecycle",
+    "adopt": "Begin city lifecycle",
+    "adoption": "Adopt a persistent civic ladder. Demonstrate support, pay for an assembly shelter, then choose individual improvements. Existing people, stores, condition, land decisions and paid work continue. Only the first transition is implemented.",
+    "continuity": "One continuing settlement: people, practice, condition, land choices and paid work carry forward.",
+    "stage": "Civic achievement",
+    "recognized": "Earlier town achievement recognized; no civic building or resources granted.",
+    "requirements": "Readiness requirements",
+    "sustained": "Consecutive qualifying seasons",
+    "next": "Next civic project",
+    "unlocks": "Separately paid improvements",
+    "planned": "Planned stage \u00b7 not yet playable",
+    "unavailable": "No further civic transition is implemented in this profile.",
+    "cost": "Timber %d \u00b7 Work %d",
+    "upkeep": "%d civic worker(s) each season after completion",
+    "lineage": "{object} \u00b7 revision {from} \u2192 {to}",
+    "live_support": "Legacy town support remains a separate live milestone.",
+    "factor": "{name}: {current} / {required}",
+    "readiness": "{seasons} / {required} consecutive qualifying seasons",
+    "stage_line": "Civic achievement \u00b7 {stage}",
+    "predecessor": "Requires physical revision {revision}",
+    "missing_extensions": "Adopt these existing chapters through their detailed-ledger tabs before beginning the lifecycle:",
+    "assets": "Asset governance",
+    "land": "Land planning",
+    "living": "Living village",
+    "any_of": "Any one: {alternatives}",
+    "lifecycle_civic": "Civic duties",
+    "reserve_after": "After immediate payment, retain at least {food} provisions and {wood} timber."
+  },
+  "errors": {
+    "lifecycle_missing": "Begin city lifecycle before commissioning this project.",
+    "lifecycle_started": "City lifecycle has already begun.",
+    "lifecycle_assets": "First begin asset governance through the detailed ledger.",
+    "lifecycle_land": "First begin land planning through the detailed ledger.",
+    "lifecycle_living": "First begin living village through the detailed ledger.",
+    "lifecycle_definition": "The saved lifecycle profile does not match these definitions.",
+    "lifecycle_unknown": "This lifecycle command or profile is unavailable.",
+    "lifecycle_readiness": "Meet each readiness condition for the required consecutive seasons.",
+    "lifecycle_stage": "Complete the civic achievement before commissioning this improvement.",
+    "lifecycle_reserves": "Keep the quoted provision and fuel reserve after immediate payment.",
+    "lifecycle_fabric": "The current building revision or reserved site does not match this project.",
+    "lifecycle_planned": "This later civic transition is planned, not implemented."
+  },
+  "events": {
+    "lifecycle_adopted": "City lifecycle adopted. Existing achievement and investment continue.",
+    "lifecycle_promoted": "Assembly shelter completed; large-village improvements are now eligible."
+  }
+}

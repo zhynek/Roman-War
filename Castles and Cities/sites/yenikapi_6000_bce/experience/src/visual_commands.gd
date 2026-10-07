@@ -25,6 +25,7 @@ var return_view: Dictionary={}
 var expanded_details: bool=false
 var _forecast_key: int=0
 var _project_meshes: Dictionary={}
+func lw(id: String) -> String:return p.rules.lifecycle.content.strings.get(id,id)
 func cw(id: String) -> String:return projects.copy.ui.get(id,id)
 func room():return app.campaign_view.planning_room if is_instance_valid(app.campaign_view) else null
 func construction():return app.campaign_view.construction_view if is_instance_valid(app.campaign_view) else null
@@ -164,6 +165,8 @@ func build_header() -> void:
 	r.add_child(button(w("save"),save,"VisualSave"));r.add_child(button(w("load"),load_saved,"VisualLoad"));r.add_child(button(w("menu"),show_overlay.bind("menu"),"VisualMenu"))
 	var controls:=HFlowContainer.new();v.add_child(controls)
 	controls.add_child(button(cw("oversight"),show_overlay.bind("oversight"),"VisualOversight"))
+	var civic_title: String=p.rules.lifecycle.stages[p.rules.lifecycle.stage(p.state,p.rules)].title if p.rules.lifecycle.active(p.state) else lw("title")
+	var civic:=button(civic_title,show_overlay.bind("lifecycle"),"VisualLifecycle");civic.tooltip_text=lw("title");controls.add_child(civic)
 	for c in [["expand","growth"],["learn","help"],["incident","incident"],["report","report"]]:controls.add_child(button(w(c[0]),show_overlay.bind(c[1]),"Visual_"+c[1]))
 	controls.add_child(button(w("overview"),app.overview,"VisualAerial"))
 	var next:=button(w("season"),advance,"VisualSeason");next.size_flags_horizontal=Control.SIZE_EXPAND_FILL;next.add_theme_stylebox_override("normal",style("617055"));controls.add_child(next)
@@ -177,6 +180,7 @@ func build_header() -> void:
 func project_ids(asset: String) -> Array:
 	var ids: Array=[]
 	for id in p.rules.projects:
+		if p.rules.lifecycle.project_specs.has(id) and not p.rules.lifecycle.active(p.state):continue
 		if p.rules.assets.project_assets.get(id,"")!=asset:continue
 		if p.rules.land.active(p.state) and id in p.rules.land.content.legacy_projects and not p.rules.land.committed(p.state,id,p.rules):continue
 		if id in p.rules.living.content.projects.map(func(a):return a.id) and not p.rules.living.active(p.state):continue
@@ -204,6 +208,12 @@ func project_status(id: String) -> String:
 func project_card(id: String) -> Button:
 	var spec: Dictionary=p.rules.projects[id]
 	var b:=icon_button(copy.project_labels.get(id,spec.title),project_icon(id),project_status(id),show_project.bind(id),"VisualProject_"+id)
+	if p.rules.lifecycle.project_specs.has(id):
+		b.custom_minimum_size=Vector2(270,158)
+		var title: Label=b.get_child(0).get_child(1)
+		title.text=spec.title
+		title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		title.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
 	b.tooltip_text=spec.title+"\n"+w("cost").format({"wood":spec.wood,"blanks":project_blanks(id)})+"\n"+w("effort").format(spec)
 	return b
 func project_blanks(id: String) -> int:
@@ -214,7 +224,7 @@ func select_place(id: String) -> void:
 	selected=id;detail={};overlay="";room_mode=false;refresh()
 func choose_page(id: String) -> void:page=id;detail={};overlay="";refresh()
 func show_project(id: String) -> void:
-	preview_stage="current" if not queued(id).is_empty() else "planned"
+	preview_stage="current" if not queued(id).is_empty() or p.rules.has_project(p.state,id) else "planned"
 	expanded_details=false;selected=p.rules.assets.project_assets[id];page="projects";detail={"kind":"project","id":id};overlay=""
 	if is_instance_valid(construction()):construction().select(id)
 	if room_mode and is_instance_valid(room()):room().choose(id)
@@ -243,13 +253,14 @@ func build_sheet() -> void:
 	header.resized.connect(layout_sheet)
 	layout_sheet.call_deferred()
 	var v:=VBoxContainer.new();sheet.add_child(v)
-	var r:=row(v);var title:=label(cw(overlay) if overlay=="oversight" else (w(overlay) if overlay!="" else w("details")),20);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;r.add_child(title);r.add_child(button(w("close"),close_sheet,"VisualClose"))
+	var r:=row(v);var title:=label(lw("title") if overlay=="lifecycle" else (cw(overlay) if overlay=="oversight" else (w(overlay) if overlay!="" else w("details"))),20);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;r.add_child(title);r.add_child(button(w("close"),close_sheet,"VisualClose"))
 	var body:=scroller(v)
 	if not detail.is_empty():
 		if detail.kind=="project":project_detail(body,detail.id)
 		else:order_detail(body,detail.kind,detail.id)
 	elif overlay=="oversight":project_overview(body)
 	elif overlay=="growth":growth(body)
+	elif overlay=="lifecycle":lifecycle(body)
 	elif overlay=="help":help(body)
 	elif overlay=="incident":incidents(body)
 	elif overlay=="knowledge":knowledge(body)
@@ -266,7 +277,7 @@ func command_button(parent: Node,text_: String,action: Dictionary,id: String) ->
 	var quote: Dictionary=p.rules.quote(p.state,action)
 	var b:=button(text_,execute.bind(action),id);parent.add_child(b)
 	if quote.has("error"):
-		b.disabled=true;b.tooltip_text=p.asset_panel.reason(quote.error);paragraph(parent,b.tooltip_text,14)
+		b.disabled=true;b.tooltip_text=p.reason(quote.error);paragraph(parent,b.tooltip_text,14)
 	return b
 func project_detail(body: VBoxContainer,id: String) -> void:
 	var spec: Dictionary=p.rules.projects[id]
@@ -275,7 +286,7 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 	var mesh: Mesh=site_preview(id) if d.queued and preview_stage=="current" else preview_mesh(id,preview_stage=="planned")
 	if mesh!=null:
 		var model_column:=VBoxContainer.new();top.add_child(model_column)
-		var model=preload("res://src/place_preview.gd").new();model_column.add_child(model);model.show_mesh(mesh)
+		var model=preload("res://src/place_preview.gd").new();model.name="ProjectModel";model_column.add_child(model);model.show_mesh(mesh)
 		paragraph(model_column,d.stage_label if d.queued and preview_stage=="current" else (w("model_future") if has_building_change(id) and preview_stage=="planned" else w("model_current")),12)
 
 	else:
@@ -293,6 +304,7 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 		for stage in ["current","planned"]:
 			var b:=button(w("view_"+stage),func():preview_stage=stage;refresh(),"VisualStage_"+stage);b.disabled=preview_stage==stage;stages.add_child(b)
 		if mesh==null:paragraph(body,w("model_empty"),14)
+	if p.rules.lifecycle.project_specs.has(id):lifecycle_project(body,id)
 	if not spec.requires.is_empty():
 		paragraph(body,cw("prerequisites"),14)
 		var dependencies:=HFlowContainer.new();body.add_child(dependencies)
@@ -301,7 +313,7 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 		body.add_child(button(cw("helpful").format({"title":p.rules.projects.land_adapt_workroom.title}),show_project.bind("land_adapt_workroom"),"ProjectHelpful"))
 	body.add_child(button(cw("less_details") if expanded_details else cw("details"),func():expanded_details=not expanded_details;refresh(),"ProjectMore"))
 	if expanded_details:
-		paragraph(body,spec.body,15);paragraph(body,cw("investment"),14);paragraph(body,projects.copy.interpretation,13)
+		paragraph(body,projects.text_for(p.rules,id,spec.body),15);paragraph(body,cw("investment"),14);paragraph(body,projects.copy.interpretation,13)
 		paragraph(body,str(d.affected),13)
 		for citizen in p.state.citizens:
 			if citizen.id in d.assigned:paragraph(body,citizen.name+" · "+citizen.household,13)
@@ -344,6 +356,8 @@ func order_detail(body: VBoxContainer,kind: String,id: String) -> void:
 		var a: Dictionary=command.duplicate();a["value" if kind in ["living","principle"] else "enabled"]=values[i]
 		var b:=command_button(body,options[i]+(" · "+w("current") if values[i]==current else ""),a,"VisualChoice_"+str(i));b.disabled=b.disabled or values[i]==current
 func growth(body: VBoxContainer) -> void:
+	lifecycle(body)
+	body.add_child(HSeparator.new())
 	paragraph(body,w("growth_note"))
 	if not p.rules.land.active(p.state):paragraph(body,w("legacy"));return
 	for chain in copy.chains:
@@ -353,6 +367,82 @@ func growth(body: VBoxContainer) -> void:
 			if i>0:r.add_child(label(w(chain.links[i-1]),23))
 			r.add_child(project_card(chain.projects[i]))
 	var review:=button(w("growth_review"),func():legacy(0),"VisualGrowthReview");body.add_child(review)
+func lifecycle(body: VBoxContainer) -> void:
+	var life=p.rules.lifecycle
+	if overlay=="growth":paragraph(body,lw("title"),21)
+	if not life.active(p.state):
+		paragraph(body,lw("adoption"),17)
+		var missing: Array=[]
+		for extension in [["assets",p.rules.assets.active(p.state),4],["land",p.rules.land.active(p.state),7],["living",p.rules.living.active(p.state),8]]:
+			if not extension[1]:missing.append(extension)
+		if not missing.is_empty():
+			paragraph(body,lw("missing_extensions"),15)
+			for extension in missing:body.add_child(button(lw(extension[0]),legacy.bind(extension[2]),"LifecycleExtension_"+extension[0]))
+		command_button(body,lw("adopt"),{"kind":"lifecycle_begin"},"VisualBeginLifecycle")
+		lifecycle_ladder(body,"")
+		return
+	var status: Dictionary=life.status(p.state,p.rules)
+	paragraph(body,lw("stage_line").format({"stage":status.stage_name}),23)
+	paragraph(body,lw("continuity"),15)
+	if status.recognition!="":paragraph(body,lw("recognized"),16)
+	if status.project!="":
+		if queued(status.project).is_empty():lifecycle_factors(body,status)
+		else:paragraph(body,cw("investment"),15)
+		paragraph(body,lw("next"),19)
+		body.add_child(project_card(status.project))
+		paragraph(body,lw("upkeep")%int(status.upkeep),14)
+	else:paragraph(body,lw("unavailable"),16)
+	paragraph(body,lw("unlocks"),19)
+	var offers:=HFlowContainer.new();offers.add_theme_constant_override("h_separation",8);body.add_child(offers)
+	for id in life.project_specs:
+		if life.project_specs[id].stage_requires!=life.content.initial_stage:offers.add_child(project_card(id))
+	paragraph(body,lw("live_support"),14)
+	body.add_child(button(w("growth_review"),func():legacy(0),"LifecycleSupportReview"))
+	lifecycle_ladder(body,status.stage)
+
+func lifecycle_factors(body: VBoxContainer,status: Dictionary) -> void:
+	paragraph(body,lw("requirements"),19)
+	var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",26);grid.add_theme_constant_override("v_separation",6);body.add_child(grid)
+	for factor in status.factors:
+		var fields: Dictionary=factor.duplicate()
+		fields.name=p.rules.lifecycle.content.factors.get(factor.id,factor.id)
+		var line:=paragraph(grid,("✓ " if factor.met else "○ ")+lw("factor").format(fields),14)
+		line.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		line.add_theme_color_override("font_color",Color("c5d6b5") if factor.met else Color("edc490"))
+		if factor.has("alternatives"):
+			var alternatives: PackedStringArray=[]
+			for option in factor.alternatives:alternatives.append(("✓ " if option.met else "○ ")+p.rules.lifecycle.content.factors.get(option.id,option.id))
+			line.text+="\n"+lw("any_of").format({"alternatives":", ".join(alternatives)})
+	paragraph(body,lw("readiness").format({"seasons":status.seasons,"required":status.required_seasons}),16)
+
+func lifecycle_ladder(body: VBoxContainer,current: String) -> void:
+	body.add_child(HSeparator.new())
+	var ladder:=HFlowContainer.new();ladder.add_theme_constant_override("h_separation",14);body.add_child(ladder)
+	for stage in p.rules.lifecycle.content.stages:
+		var title: String=stage.title
+		if stage.id==current:title="✓ "+title
+		if stage.status=="planned":title+=" · "+lw("planned")
+		var line:=label(title,14);ladder.add_child(line)
+		if stage.status=="planned":line.add_theme_color_override("font_color",Color("b4b8ad"))
+
+func lifecycle_project(body: VBoxContainer,id: String) -> void:
+	var spec: Dictionary=p.rules.projects[id]
+	var status: Dictionary=p.rules.lifecycle.status(p.state,p.rules)
+	paragraph(body,lw("continuity"),14)
+	paragraph(body,lw("reserve_after").format({"food":p.rules.people(p.state).size()*int(p.rules.balance.food_per_person)*int(p.rules.lifecycle.balance.commission_reserve_seasons),"wood":p.rules.lifecycle.balance.commission_wood_reserve}),14)
+	if status.project==id:
+		paragraph(body,lw("upkeep")%int(status.upkeep),15)
+		if queued(id).is_empty() and not p.rules.has_project(p.state,id):lifecycle_factors(body,status)
+		var titles: PackedStringArray=[]
+		for next_id in p.rules.lifecycle.project_specs:
+			if p.rules.lifecycle.project_specs[next_id].stage_requires!=p.rules.lifecycle.content.initial_stage:titles.append(p.rules.projects[next_id].title)
+		paragraph(body,lw("unlocks")+": "+", ".join(titles),14)
+	for change in spec.changes:
+		for record in change.after:
+			if record.kind!="building":continue
+			paragraph(body,lw("lineage").format({"object":record.label,"from":change.get("expected_revisions",{}).get(record.id,0),"to":record.revision}),14)
+			if not p.rules.has_project(p.state,id) and change.get("expected_revisions",{}).has(record.id):paragraph(body,lw("predecessor").format({"revision":change.expected_revisions[record.id]}),13)
+
 func help(body: VBoxContainer) -> void:
 	var step: Dictionary=copy.lessons[lesson]
 	paragraph(body,w("guide_step").format({"number":lesson+1}),15);paragraph(body,step.title,24);paragraph(body,step.body,18)
@@ -487,6 +577,10 @@ func preview_mesh(id: String,planned: bool=true) -> Mesh:
 				var model=preload("res://src/village.gd").new();model.data=app.data;model.materials=app.world.materials;model._building(record)
 				preview_meshes[id]=model.object_nodes[record.id].mesh;model.free()
 			return preview_meshes[id]
+	if not planned and p.rules.has_project(p.state,id):
+		for change in p.rules.projects[id].changes:
+			for record in change.after:
+				if record.kind=="building" and app.world.object_nodes.has(record.id):return app.world.object_nodes[record.id].mesh
 	for change in p.rules.projects[id].changes:
 		for object_id in change.before:
 			if app.world.object_nodes.has(object_id):return app.world.object_nodes[object_id].mesh
@@ -515,7 +609,7 @@ func layout_sheet() -> void:
 	if is_instance_valid(sheet) and is_instance_valid(header):sheet.offset_top=header.position.y+header.size.y+12
 
 func project_cause(d: Dictionary) -> String:
-	if d.refusal!="":return p.asset_panel.reason(d.refusal)
+	if d.refusal!="":return p.reason(d.refusal)
 	return cw("manual") if d.cause=="manual" else cw("cause_"+d.cause)
 
 func project_flow(body: VBoxContainer,d: Dictionary) -> void:

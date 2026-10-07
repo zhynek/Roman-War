@@ -21,7 +21,7 @@ PROJECT=Path('sites/yenikapi_6000_bce/experience')
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot',required=True)
-    parser.add_argument('--version',default='0.10.0')
+    parser.add_argument('--version',default='0.11.0')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--parent-gates',type=Path,required=True)
     args=parser.parse_args()
@@ -69,6 +69,8 @@ def main():
     run([sys.executable,project/'tools/test_incident_data.py'],logs/'incident-data-tests.log',project)
     run([sys.executable,project/'tools/validate_visual_commands.py'],logs/'visual-data.log',project)
     run([sys.executable,project/'tools/validate_construction.py'],logs/'construction-data.log',project)
+    run([sys.executable,project/'tools/validate_lifecycle.py'],logs/'lifecycle-data.log',project)
+    run([sys.executable,project/'tools/test_lifecycle_data.py'],logs/'lifecycle-data-tests.log',project)
     run(editor+['--import'],logs/'import.log',project)
     visual=run(editor+['--script','res://tools/visual_checks.gd'],logs/'source-visual.log',project)
     if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',visual):raise SystemExit('Visual command checks failed')
@@ -92,7 +94,14 @@ def main():
     if not re.search(r'LIVING CHECKS: \d+ checks, 0 failures',living):raise SystemExit('Missing living success marker')
     incidents=run(editor+['--script','res://tools/incident_checks.gd'],logs/'source-incidents.log',project)
     if not re.search(r'INCIDENT CHECKS: \d+ checks, 0 failures',incidents):raise SystemExit('Missing incident success marker')
+    fabric_lifecycle=run(editor+['--script','res://tools/fabric_lifecycle_checks.gd'],logs/'source-fabric-lifecycle.log',project)
+    if not re.search(r'Fabric lifecycle checks: \d+ checks, 0 failures',fabric_lifecycle):raise SystemExit('Missing fabric lifecycle success marker')
+    lifecycle=run(editor+['--script','res://tools/lifecycle_checks.gd','--',f'out_dir={logs / "source-lifecycle-states"}'],logs/'source-lifecycle.log',project)
+    if not re.search(r'LIFECYCLE CHECKS: \d+ checks, 0 failures',lifecycle):raise SystemExit('Missing lifecycle success marker')
     render_dir=Path(tempfile.mkdtemp(prefix=f'yenikapi-{args.version}-exact-qa-'))
+    source_lifecycle_render=run([godot,'--path',project,'--max-fps','10','--script','res://tools/lifecycle_preview.gd','--',f'out_dir={render_dir / "source-lifecycle"}'],logs/'source-lifecycle-render.log',project)
+    if not re.search(r'LIFECYCLE RENDER: \d+ captures; \d+ checks, 0 failures',source_lifecycle_render):raise SystemExit('Source lifecycle render gate failed')
+    shutil.copy2(render_dir/'source-lifecycle/render-report.json',logs/'source-lifecycle-render-report.json')
     # Source performance uses the same script/cameras as the exact application.
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--',f'out_dir={render_dir / "source-benchmark"}'],logs/'source-benchmark.log',project)
     shutil.copy2(render_dir/'source-benchmark/benchmark.json',logs/'source-benchmark.json')
@@ -153,6 +162,12 @@ def main():
     if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',packaged_visual):raise SystemExit('Packaged visual checks failed')
     packaged_construction=run([binary,'--headless','--script','res://tools/construction_checks.gd'],logs/'packaged-construction.log',out)
     if not re.search(r'CONSTRUCTION CHECKS: \d+ checks, 0 failures',packaged_construction):raise SystemExit('Packaged construction checks failed')
+    packaged_fabric_lifecycle=run([binary,'--headless','--script','res://tools/fabric_lifecycle_checks.gd'],logs/'packaged-fabric-lifecycle.log',out)
+    if not re.search(r'Fabric lifecycle checks: \d+ checks, 0 failures',packaged_fabric_lifecycle):raise SystemExit('Missing packaged fabric lifecycle success marker')
+    packaged_lifecycle=run([binary,'--headless','--script','res://tools/lifecycle_checks.gd','--',f'out_dir={logs / "packaged-lifecycle-states"}'],logs/'packaged-lifecycle.log',out)
+    if not re.search(r'LIFECYCLE CHECKS: \d+ checks, 0 failures',packaged_lifecycle):raise SystemExit('Missing packaged lifecycle success marker')
+    for name in ['compact-recipe.json','outward-recipe.json','strategies.json']:
+        if (logs/'source-lifecycle-states'/name).read_bytes()!=(logs/'packaged-lifecycle-states'/name).read_bytes():raise SystemExit('Source/package lifecycle replay differs: '+name)
     rendered=run([binary,'--max-fps','10','--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
     if 'VILLAGE RENDER PASS: 14 captures' not in rendered:raise SystemExit('Incomplete rendered gate')
     shutil.copy2(render_dir/'render-report.json',logs/'render-report.json')
@@ -201,6 +216,10 @@ def main():
     if not re.search(r'CONSTRUCTION RENDER: \d+ captures; \d+ checks, 0 failures',construction_render):raise SystemExit('Construction rendered gate failed')
     shutil.copy2(render_dir/'construction/render-report.json',logs/'construction-render-report.json')
     run([binary,'--script','res://tools/construction_profile.gd'],logs/'packaged-construction-interactions.log',out)
+    lifecycle_render=run([binary,'--max-fps','10','--script','res://tools/lifecycle_preview.gd','--',f'out_dir={render_dir / "lifecycle"}'],logs/'packaged-lifecycle-render.log',out)
+    if not re.search(r'LIFECYCLE RENDER: \d+ captures; \d+ checks, 0 failures',lifecycle_render):raise SystemExit('Lifecycle rendered gate failed')
+    shutil.copy2(render_dir/'lifecycle/render-report.json',logs/'lifecycle-render-report.json')
+    provenance['lifecycle']={'profile':'village_lifecycle_v1','wrapper':8,'scope':'small village to large village; later civic transitions planned','source_render_report':'verification/source-lifecycle-render-report.json','exact_app_render_report':'verification/lifecycle-render-report.json','source_fixtures':'verification/source-lifecycle-states','exact_app_fixtures':'verification/packaged-lifecycle-states','replay':'source and exact-app command recipes, state digests and strategy summaries match'}
     provenance['living_performance']={'source':json.loads((logs/'source-living-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-living-benchmark.json').read_text())}
     provenance['land_performance']={'source':json.loads((logs/'source-land-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-land-benchmark.json').read_text())}
     provenance['asset_performance']={'source':json.loads((logs/'source-asset-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-asset-benchmark.json').read_text())}
@@ -209,7 +228,7 @@ def main():
     provenance['render_capture_directory']=str(render_dir)
     provenance['performance']={'source':json.loads((logs/'source-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-benchmark.json').read_text())}
     provenance['campaign_performance']={'source':json.loads((logs/'source-campaign-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-campaign-benchmark.json').read_text())}
-    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1, assets 1, land 1, living 1, incidents 1; wrappers 1 (inactive) / 2 (contacts) / 3 (households) / 4 (assets) / 5 (land) / 6 (living) / 7 (incidents); separate campaign slot'
+    provenance['campaign_scenario']='yenikapi_seasons_tutorial; hypothetical; base rules 1, optional contacts 1, households 1, assets 1, land 1, living 1, incidents 1, lifecycle 1; wrappers 1 (inactive) / 2 (contacts) / 3 (households) / 4 (assets) / 5 (land) / 6 (living) / 7 (incidents) / 8 (lifecycle); separate campaign slot'
     models=out/f'{prefix}-Models'
     run(editor+['--script','res://tools/export_models.gd','--',f'out_dir={models}'],logs/'models.log',project)
     glbs=sorted(models.glob('*.glb'))
@@ -238,7 +257,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures']))+' written (125 retained views plus visual-command and construction playthroughs); manual visual review required before publication','glb_structure':'41 passed','zip_integrity':'10 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction/fabric-lifecycle/lifecycle checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures'])+len(json.loads((logs/'lifecycle-render-report.json').read_text())['captures']))+' exact-app captures plus '+str(len(json.loads((logs/'source-lifecycle-render-report.json').read_text())['captures']))+' source lifecycle captures written; manual visual review required before publication','glb_structure':'41 passed','zip_integrity':'10 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))

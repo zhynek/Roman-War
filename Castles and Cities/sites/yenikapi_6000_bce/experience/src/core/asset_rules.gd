@@ -185,6 +185,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	_request(requests,"timber","timber",int(balance.timber_workers),5,"workroom")
 	if state.households.orders.learning:_request(requests,"learning","care",int(rules.households.balance.care_minimum),6,"workroom")
 	rules.living.requests(state,requests,rules)
+	rules.lifecycle.requests(state,requests,rules)
 	requests.sort_custom(func(a,b):return a.priority<b.priority if a.priority!=b.priority else a.id<b.id)
 	var remaining: int=adults
 	var places: int=int(land_effects.work) if rules.land.active(state) else adults
@@ -296,6 +297,7 @@ func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Di
 		if request.id=="land_access":destination=rules.land.sites.north_access.at
 		if request.id=="food" and rules.land.use_at(state,"west_field",rules)=="land_cultivate" and int(person.id.trim_prefix("citizen_"))%2==0:destination=rules.land.sites.west_field.at
 	if rules.projects.has(request.id):destination=rules.projects[request.id].at
+	if request.id=="lifecycle_civic":destination=rules.projects[rules.lifecycle.content.civic_project].at
 	var job: String=request.job
 	if request.id in ["carriers","escorts"]:job="travel";destination=rules.neighbors.content.meeting_at
 	# A bounded subset of ordinary food duty illustrates existing waterside work.

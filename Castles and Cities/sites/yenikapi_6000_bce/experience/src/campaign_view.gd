@@ -1,6 +1,7 @@
 extends Node3D
 ## Presentation adapter: never resolves a season, grants resources or changes people.
 const Fabric = preload("res://src/fabric.gd")
+const FabricProjection = preload("res://src/core/fabric_projection.gd")
 var actors: Array = []
 var elapsed: float = 0.0
 var life
@@ -14,10 +15,7 @@ var _marker_key: String=""
 const HouseholdView = preload("res://src/household_view.gd")
 
 static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
-	var changes: Array = []
-	for item in state.completed:
-		changes.append_array(rules.projects[item.id].changes.duplicate(true))
-	var resolved: Dictionary = Fabric.resolve(base,{"id":rules.content.scenario_id,"kind":"hypothetical","base_snapshot_id":base.snapshot_id,"changes":changes})
+	var resolved: Dictionary = FabricProjection.resolve(base, state.completed, rules.projects, rules.content.scenario_id)
 	assert(not resolved.has("error"))
 	var result: Dictionary = base.duplicate(true)
 	if rules.assets.active(state):result.presentation_food=state.food

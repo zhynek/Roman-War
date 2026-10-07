@@ -40,6 +40,25 @@ tested bytes and GitHub digests; all ten ZIPs pass integrity checks. All fifteen
 previous releases / 97 assets and stable latest `v0.14.2` remain unchanged.
 The tag pins the frozen payload; main also holds the acceptance/publication record.
 
+## City lifecycle implementation (October 7, 2026; verification in progress)
+
+[CITY_LIFECYCLE.md](CITY_LIFECYCLE.md) maps small village through metropolis.
+Slices A+B now provide ordered building revisions, explicit site successors,
+lifecycle adoption, sustained readiness, a paid assembly shelter and two separately
+paid store/workroom improvements. The first civic transition is playable; later
+stages are planned. Earlier land choices, people, resources, condition and paid
+contracts continue. Legacy town achievement receives explicit recognition without
+free civic fabric; the older town-support milestone remains unchanged.
+
+Active lifecycle saves use wrapper 8, with a semantic profile hash and explicit
+assets → land → living adoption requirements. Read
+[LIFECYCLE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIFECYCLE.md)
+for controls, authoring, save boundaries and isolated stage recipes. New data,
+negative, rule/save, lineage and rendered gates are integrated into the clean-source
+builder for source and exact app. Integrated verification is in progress; this is
+not a publication or an exact-app acceptance claim. The dated Yenikapı and medieval
+city studies remain separate. Neighboring-city expansion follows local progression.
+
 ## Yenikapı visual governing (0.9.0, October 2026)
 
 The village now starts with an illustrated bottom dock. Building/place selection

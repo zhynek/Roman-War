@@ -1,0 +1,945 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 80
+    },
+    "initial_stage": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 80
+    },
+    "recognized_stage": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 80
+    },
+    "civic_project": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "maxLength": 80
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stage"
+      },
+      "maxItems": 7,
+      "minItems": 7
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/transition"
+      },
+      "maxItems": 6,
+      "minItems": 1
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/project"
+      },
+      "maxItems": 32,
+      "minItems": 1
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/site"
+      },
+      "maxItems": 64,
+      "minItems": 0
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proposal"
+      },
+      "maxItems": 64,
+      "minItems": 0
+    },
+    "factors": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 80
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    },
+    "strings": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 80
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    },
+    "errors": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 80
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    },
+    "events": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "maxLength": 80
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    }
+  },
+  "required": [
+    "version",
+    "profile",
+    "initial_stage",
+    "recognized_stage",
+    "civic_project",
+    "stages",
+    "transitions",
+    "projects",
+    "sites",
+    "proposals",
+    "factors",
+    "strings",
+    "errors",
+    "events"
+  ],
+  "$defs": {
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "status": {
+          "enum": [
+            "playable",
+            "planned"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "status"
+      ]
+    },
+    "predicate": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "population"
+            },
+            "tuning": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "tuning"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "housing"
+            },
+            "tuning": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "tuning"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "reserves"
+            },
+            "tuning": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "tuning"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "stock"
+            },
+            "tuning": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "tuning"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "knowledge"
+            },
+            "tuning": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "tuning"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "project"
+            },
+            "project": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "project"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            },
+            "kind": {
+              "const": "site"
+            },
+            "site": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "id",
+            "kind",
+            "site"
+          ]
+        }
+      ]
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/predicate"
+          },
+          "maxItems": 32,
+          "minItems": 1
+        },
+        "any": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "maxLength": 80
+              },
+              "predicates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/predicate"
+                },
+                "maxItems": 16,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "id",
+              "predicates"
+            ]
+          },
+          "maxItems": 16,
+          "minItems": 0
+        }
+      },
+      "required": [
+        "all",
+        "any"
+      ]
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "from": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "project": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "readiness": {
+          "$ref": "#/$defs/readiness"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "project",
+        "readiness"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "body": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "role": {
+          "enum": [
+            "steward",
+            "watch"
+          ]
+        },
+        "at": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -170,
+            "maximum": 170
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 80
+          },
+          "maxItems": 64,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/change"
+          },
+          "maxItems": 16,
+          "minItems": 1
+        },
+        "lifecycle": {
+          "const": true
+        },
+        "tuning": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "stage_requires": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "benefit_target": {
+          "$ref": "#/$defs/benefit_target"
+        },
+        "asset": {
+          "enum": [
+            "yard",
+            "stores",
+            "workroom"
+          ]
+        },
+        "presentation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "treatment": {
+              "enum": [
+                "building",
+                "adapt"
+              ]
+            },
+            "benefit": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "treatment",
+            "benefit"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "role",
+        "at",
+        "requires",
+        "changes",
+        "lifecycle",
+        "tuning",
+        "stage_requires",
+        "asset",
+        "presentation"
+      ]
+    },
+    "benefit_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": ["effect_total", "site_total"]
+        },
+        "key": {
+          "enum": ["storage", "work"]
+        },
+        "predecessor": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      },
+      "required": ["kind", "key", "predecessor", "total"],
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {"const": "effect_total"},
+            "key": {"const": "storage"}
+          }
+        },
+        {
+          "properties": {
+            "kind": {"const": "site_total"},
+            "key": {"const": "work"}
+          }
+        }
+      ]
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "added",
+            "altered"
+          ]
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 80
+          },
+          "maxItems": 64,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "after": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/building"
+          },
+          "maxItems": 1,
+          "minItems": 1
+        },
+        "expected_revisions": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 80
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "before",
+        "after",
+        "expected_revisions"
+      ]
+    },
+    "building": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "kind": {
+          "const": "building"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "change": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "added"
+            },
+            "predecessors": {
+              "type": "array",
+              "maxItems": 0
+            }
+          },
+          "required": [
+            "kind",
+            "predecessors"
+          ]
+        },
+        "evidence": {
+          "const": "interpretation"
+        },
+        "source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          }
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "at": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -200,
+            "maximum": 200
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "yaw": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "size": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 2.5,
+            "maximum": 6
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "wall_height": {
+          "type": "number",
+          "minimum": 2.1,
+          "maximum": 2.8
+        },
+        "roof_rise": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2.8
+        },
+        "roof": {
+          "enum": [
+            "gable",
+            "hip",
+            "round"
+          ]
+        },
+        "use": {
+          "enum": [
+            "dwelling",
+            "storage",
+            "work"
+          ]
+        },
+        "household": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "furniture": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              },
+              "kind": {
+                "enum": [
+                  "mat",
+                  "pot",
+                  "basket",
+                  "bowl",
+                  "quern",
+                  "grain",
+                  "clay"
+                ]
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": -200,
+                  "maximum": 200
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "at"
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "revision",
+        "change",
+        "evidence",
+        "source_ids",
+        "label",
+        "at",
+        "yaw",
+        "size",
+        "wall_height",
+        "roof_rise",
+        "roof",
+        "use",
+        "furniture",
+        "household"
+      ]
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "at": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -170,
+            "maximum": 170
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "size": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 100
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 80
+          },
+          "maxItems": 64,
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "connection": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "use": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "beneficiaries": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "food": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "work": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "cooperation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "lifecycle": {
+          "const": true
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "at",
+        "size",
+        "objects",
+        "connection",
+        "use",
+        "beneficiaries",
+        "food",
+        "work",
+        "cooperation",
+        "lifecycle"
+      ]
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "site": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 80
+        },
+        "asset": {
+          "enum": [
+            "yard",
+            "stores",
+            "workroom"
+          ]
+        },
+        "requires_access": {
+          "type": "boolean"
+        },
+        "food": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "work": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "cooperation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "choice_group": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "retain": {
+          "type": "boolean"
+        },
+        "lifecycle": {
+          "const": true
+        },
+        "predecessor": {
+          "type": "string",
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "id",
+        "site",
+        "asset",
+        "requires_access",
+        "food",
+        "work",
+        "cooperation",
+        "choice_group",
+        "retain",
+        "lifecycle",
+        "predecessor"
+      ]
+    }
+  }
+}

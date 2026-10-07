@@ -1,6 +1,7 @@
 extends PanelContainer
 const Rules = preload("res://src/core/settlement_rules.gd")
 const Saves = preload("res://src/campaign_save.gd")
+const ProjectPresentation = preload("res://src/project_presentation.gd")
 var app
 var land_panel
 var incident_panel
@@ -13,6 +14,7 @@ const HouseholdPanel=preload("res://src/households_panel.gd")
 var contacts_panel
 const ContactsPanel=preload("res://src/neighbors_panel.gd")
 var rules
+var lifecycle_copy: Dictionary
 var copy: Dictionary
 var state: Dictionary = {}
 var tabs: TabContainer
@@ -24,6 +26,9 @@ var last_message: String = ""
 var _refreshing: bool = false
 var _command_busy: bool=false
 var _season_input_locked: bool=false
+
+func project_body(id: String) -> String:
+	return ProjectPresentation.text_for(rules,id,rules.projects[id].body)
 
 func configure(owner_app) -> void:
 	app = owner_app
@@ -39,10 +44,13 @@ func configure(owner_app) -> void:
 	living_panel=preload("res://src/living_panel.gd").new(self,living_content)
 	var incident_content: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/incidents.json"))
 	incident_panel=preload("res://src/incident_panel.gd").new(self,incident_content)
+	lifecycle_copy=JSON.parse_string(FileAccess.get_file_as_string("res://data/lifecycle.json"))
 	copy.factor_names.merge(incident_content.factors)
 	living_content.errors.merge(incident_content.errors)
+	living_content.errors.merge(lifecycle_copy.errors)
+	living_content.activities["lifecycle_civic"]=lifecycle_copy.strings.lifecycle_civic
 	copy.factor_names.merge(living_content.factors)
-	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content,land_content,living_content,incident_content)
+	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content,land_content,living_content,incident_content,lifecycle_copy,JSON.parse_string(FileAccess.get_file_as_string("res://data/settlement.json")))
 	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
 	offset_left = -638; offset_right = -22; offset_top = 164; offset_bottom = -22
 	var panel_style:StyleBoxFlat=app._style();panel_style.bg_color.a=1.0
@@ -81,9 +89,9 @@ func dispatch(action: Dictionary) -> bool:
 	if state.is_empty() or _command_busy: return false
 	var result: Dictionary=rules.command(state,action)
 	if result.has("error"):
-		last_message=living_panel.copy.errors[result.error] if living_panel.copy.errors.has(result.error) else asset_panel.reason(result.error) if result.error.begins_with("asset_") or result.error.begins_with("land_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+		last_message=reason(result.error);refresh();return false
 	state=result.state
-	if action.kind.begins_with("incident_") or action.kind.begins_with("living_") or action.kind.begins_with("land_"):
+	if action.kind.begins_with("lifecycle_") or action.kind.begins_with("incident_") or action.kind.begins_with("living_") or action.kind.begins_with("land_"):
 		last_message=""
 	elif action.kind.begins_with("asset_"):
 		last_message=asset_panel.copy.ui.checked if action.kind=="asset_review" else ""
@@ -96,6 +104,12 @@ func dispatch(action: Dictionary) -> bool:
 	app.show_campaign(state,rules)
 	refresh()
 	return true
+
+func reason(error: String) -> String:
+	if lifecycle_copy.get("errors",{}).has(error):return lifecycle_copy.errors[error]
+	if living_panel.copy.errors.has(error):return living_panel.copy.errors[error]
+	if error.begins_with("asset_") or error.begins_with("land_"):return asset_panel.reason(error)
+	return copy.get(error,contacts_panel.copy.get(error,household_panel.copy.errors.get(error,error)))
 
 func resolve_from_ui() -> void:
 	if _season_input_locked:return
@@ -112,7 +126,7 @@ func resolve_season() -> bool:
 	if DisplayServer.get_name()!="headless":RenderingServer.force_draw(true)
 	var result: Dictionary=rules.advance(state)
 	_command_busy=false
-	if result.has("error"): last_message=living_panel.copy.errors[result.error] if living_panel.copy.errors.has(result.error) else asset_panel.reason(result.error) if result.error.begins_with("asset_") or result.error.begins_with("land_") else copy.get(result.error,contacts_panel.copy.get(result.error,household_panel.copy.errors.get(result.error,result.error)));refresh();return false
+	if result.has("error"): last_message=reason(result.error);refresh();return false
 	state=result.state
 	last_message=copy.resolved
 	app.show_campaign(state,rules)
@@ -232,7 +246,7 @@ func _guide(body: VBoxContainer) -> void:
 	var recommended:String=recommended_project()
 	if not recommended.is_empty():
 		var p:Dictionary=rules.projects[recommended]
-		body.add_child(label(copy.guide_project%[p.title,p.body],17))
+		body.add_child(label(copy.guide_project%[p.title,project_body(p.id)],17))
 		var queued:bool=false
 		for item in state.queue:
 			if item.id==recommended:queued=true
@@ -285,6 +299,7 @@ func _work(body: VBoxContainer) -> void:
 		body.add_child(label(copy.queue_line%[p.title,item.progress,p.work,p.wood],16))
 		var cancel:=button(copy.cancel,func():dispatch({"kind":"cancel","id":item.id}),"Cancel_"+item.id);cancel.disabled=not rules.permitted(state,p.role);body.add_child(cancel)
 	for p in rules.content.projects:
+		if rules.lifecycle.project_specs.has(p.id) and not rules.lifecycle.active(state):continue
 		if rules.has_project(state,p.id):continue
 		var queued:bool=false
 		for item in state.queue:
@@ -292,7 +307,7 @@ func _work(body: VBoxContainer) -> void:
 		if queued:continue
 		body.add_child(HSeparator.new())
 		body.add_child(label(copy.project_cost%[p.title,p.wood,p.work],17))
-		body.add_child(label(p.body,14))
+		body.add_child(label(project_body(p.id),14))
 		var order:=button(copy.queue,func():dispatch({"kind":"commission","id":p.id}),"Commission_"+p.id)
 		order.disabled=not rules.permitted(state,p.role) or state.wood<p.wood or state.queue.size()>=rules.balance.queue_limit
 		for requirement in p.requires:
@@ -359,7 +374,7 @@ func _journal(body: VBoxContainer) -> void:
 		if params.has("neighbor"):params.neighbor=rules.neighbors.communities.get(params.neighbor,{}).get("name",params.neighbor)
 		for key in ["give","resource"]:
 			if params.has(key):params[key]=contacts_panel.copy.get(params[key],params[key])
-		body.add_child(label(str(copy.events.get(event.kind,contacts_panel.copy.events.get(event.kind,household_panel.copy.events.get(event.kind,event.kind)))).format(params),15))
+		body.add_child(label(str(copy.events.get(event.kind,contacts_panel.copy.events.get(event.kind,household_panel.copy.events.get(event.kind,lifecycle_copy.get("events",{}).get(event.kind,event.kind))))).format(params),15))
 
 func _confirm_restart() -> void:
 	var confirm:=ConfirmationDialog.new();confirm.dialog_text=copy.restart_confirm;confirm.confirmed.connect(begin);confirm.confirmed.connect(confirm.queue_free);confirm.canceled.connect(confirm.queue_free);app.add_child(confirm);confirm.popup_centered(Vector2i(440,180))

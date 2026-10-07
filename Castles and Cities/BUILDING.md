@@ -257,3 +257,31 @@ the frozen payload commit. Verify anonymous public downloads against tested
 bytes, all prior release/asset metadata and unchanged stable latest `v0.14.2`.
 Never overwrite a published artifact. No save wrapper or historical reference
 change is part of this phase.
+
+
+## City lifecycle candidate (0.11.0)
+
+The builder defaults to the next unpublished candidate, `0.11.0`. It retains the
+clean-commit requirement, fresh output directory, parent data/import/full-suite/map
+gates and every previous village check. Do not export unrelated draft work or
+publish new bytes under the existing 0.10.0 release.
+
+Lifecycle data and malformed-data checks run before import. Both source and the
+exact app run `fabric_lifecycle_checks.gd` and `lifecycle_checks.gd`; their
+`out_dir` arguments keep command recipes, digests and actual saved-stage fixtures
+in the build verification directories. Both also run `lifecycle_preview.gd` into
+separate external source/exact capture directories. Success markers and stderr are
+checked. Inspect requirements, paid partial work, civic completion, individual
+upgrades, the retained buildings and matching navigation/picking at 1280×800.
+Screenshots are never game assets.
+
+This slice preserves the existing 41 exported neutral GLBs and their archive
+partitions. No new model download is required for the first civic transition.
+Wrapper 8 is only for explicit lifecycle adoption; earlier wrappers and save
+namespaces keep their meanings. Semantic profile changes need a retained old
+definition or an explicit migration. Read the site's `experience/LIFECYCLE.md`.
+
+Building a candidate is separate from publication. No new release is published by
+this implementation; an eventual release still needs the exact packaged checks,
+manual capture review, retained-model comparison and public-download verification
+outlined above.

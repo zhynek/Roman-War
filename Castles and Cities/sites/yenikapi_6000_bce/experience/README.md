@@ -1,4 +1,6 @@
-# Yenikapı — Early Settlement 0.10.0
+# Yenikapı — Early Settlement
+
+**In development — City lifecycle (next candidate 0.11.0):** open **City lifecycle** to adopt paid civic progression. Build an assembly shelter to earn Large village, then separately improve the same store and working room. Earlier people, resources, condition and land choices continue. Later city stages are planned. [Play, continuity and wrapper-8 saves](LIFECYCLE.md). This source change is not a published release.
 
 **0.10.0 — Buildings That Show Their Work:** staged construction, paid-material and worker explanations, and shared project oversight at sites, in the dock and in an early shared planning room. [Gameplay, interpretation and unchanged save contract](CONSTRUCTION.md).
 

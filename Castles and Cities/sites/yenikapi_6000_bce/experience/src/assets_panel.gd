@@ -77,10 +77,12 @@ func build(body: VBoxContainer) -> void:
 			body.add_child(panel.label(copy.ui.occupied.format({"home":home.label,"people":count,"capacity":rules.balance.people_per_dwelling,"stress":memory.stress,"practice":memory.practice}),14))
 	for id in asset.orders:standing(body,id,f)
 	for id in asset.projects:
+		if rules.lifecycle.project_specs.has(id) and not rules.lifecycle.active(state):continue
 		if rules.land.active(state) and id in rules.land.content.legacy_projects and not rules.land.committed(state,id,rules):continue
 		project(body,id,f)
 	if rules.land.active(state):
 		for proposal in rules.land.content.proposals:
+			if proposal.get("lifecycle",false) and not rules.lifecycle.active(state):continue
 			if proposal.asset==selected:
 				body.add_child(panel.button(panel.land_panel.copy.ui.inspect+" · "+rules.land.sites[proposal.site].title,func():panel.land_panel.inspect(proposal.site),"AssetLand_"+proposal.id))
 				if rules.land.committed(state,proposal.id,rules):project(body,proposal.id,f)
@@ -103,7 +105,7 @@ func standing(body: VBoxContainer,id: String,f: Dictionary) -> void:
 func project(body: VBoxContainer,id: String,f: Dictionary,details: bool=true) -> void:
 	var rules=panel.rules;var state: Dictionary=panel.state
 	var p: Dictionary=rules.projects[id]
-	if details:body.add_child(HSeparator.new());body.add_child(panel.label(p.title,18));body.add_child(panel.label(p.body,14))
+	if details:body.add_child(HSeparator.new());body.add_child(panel.label(p.title,18));body.add_child(panel.label(panel.project_body(id),14))
 	if rules.has_project(state,id):body.add_child(panel.label(copy.ui.done,14));return
 	var queued: Dictionary={}
 	for item in state.queue:

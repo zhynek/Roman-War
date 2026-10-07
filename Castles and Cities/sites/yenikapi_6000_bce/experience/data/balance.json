@@ -270,5 +270,40 @@
     "stress_per_severity": 4,
     "recovery_strain": 3,
     "restriction_timber": 2
+  },
+  "lifecycle": {
+    "readiness": {
+      "population": 24,
+      "housing": 36,
+      "reserve_seasons": 2,
+      "wellbeing": 60,
+      "cooperation": 60,
+      "security": 50,
+      "shaping": 4,
+      "sustained_seasons": 2
+    },
+    "projects": {
+      "lifecycle_assembly": {
+        "wood": 14,
+        "work": 24,
+        "effects": {}
+      },
+      "lifecycle_store": {
+        "wood": 12,
+        "work": 20,
+        "effects": {
+          "storage": 60
+        }
+      },
+      "lifecycle_workroom": {
+        "wood": 12,
+        "work": 20,
+        "effects": {}
+      }
+    },
+    "commission_reserve_seasons": 1,
+    "commission_wood_reserve": 2,
+    "civic_workers": 1,
+    "civic_priority": 4
   }
 }

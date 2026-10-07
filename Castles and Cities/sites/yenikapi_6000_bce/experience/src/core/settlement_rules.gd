@@ -9,6 +9,10 @@ var assets
 var land
 var living
 var incidents
+var lifecycle
+var base_snapshot: Dictionary = {}
+const Lifecycle = preload("res://src/core/lifecycle_rules.gd")
+const FabricProjection = preload("res://src/core/fabric_projection.gd")
 const Incidents=preload("res://src/core/incident_rules.gd")
 const Living=preload("res://src/core/living_rules.gd")
 const Land = preload("res://src/core/land_rules.gd")
@@ -16,15 +20,22 @@ const Assets = preload("res://src/core/asset_rules.gd")
 const Households = preload("res://src/core/household_rules.gd")
 const Neighbors = preload("res://src/core/neighbor_rules.gd")
 
-func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}, land_config: Dictionary = {}, living_config: Dictionary = {}, incident_config: Dictionary = {}) -> void:
+func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary = {}, household_config: Dictionary = {}, asset_config: Dictionary = {}, land_config: Dictionary = {}, living_config: Dictionary = {}, incident_config: Dictionary = {}, lifecycle_config: Dictionary = {}, snapshot: Dictionary = {}) -> void:
 	content = canonical(config)
 	balance = canonical(tuning)
+	base_snapshot = canonical(snapshot)
+	lifecycle = Lifecycle.new(canonical(lifecycle_config),balance.get("lifecycle",{}))
+	content.projects.append_array(lifecycle.content.get("projects",[]))
+	var spatial: Dictionary=canonical(land_config)
+	if not spatial.is_empty():
+		spatial.sites.append_array(lifecycle.content.get("sites",[]))
+		spatial.proposals.append_array(lifecycle.content.get("proposals",[]))
 	incidents=Incidents.new(canonical(incident_config),balance.get("incidents",{}))
 	for project in incidents.content.get("projects",[]):
 		var item: Dictionary=project.duplicate(true);item.erase("blanks");content.projects.append(item)
 	living=Living.new(canonical(living_config),balance.get("living",{}))
 	content.projects.append_array(living.content.get("projects",[]))
-	land = Land.new(canonical(land_config),balance.get("land",{}))
+	land = Land.new(spatial,balance.get("land",{}))
 	content.projects.append_array(land.content.get("projects",[]))
 	content.households.append_array(land.content.get("households",[]))
 	assets = Assets.new(canonical(asset_config),balance.get("assets",{}))
@@ -35,6 +46,7 @@ func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary =
 	for project in living.content.get("projects",[]):assets.project_assets[project.id]="watch" if project.role=="watch" else "workroom"
 	for spec in incidents.content.get("incidents",[]):
 		assets.project_assets[spec.prepare]=spec.asset;assets.project_assets[spec.repair]=spec.asset
+	for project in lifecycle.content.get("projects",[]):assets.project_assets[project.id]=project.asset
 	for project in content.projects:
 		projects[project.id] = project
 
@@ -49,7 +61,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}, "living": {}, "incidents": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}, "living": {}, "incidents": {}, "lifecycle": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -57,6 +69,7 @@ func new_state() -> Dictionary:
 	return state
 
 func ensure_state_keys(state: Dictionary) -> void:
+	if not state.has("lifecycle"):state.lifecycle={}
 	if not state.has("incidents"):state.incidents={}
 	if not state.has("living"):state.living={}
 	if not state.has("land"):state.land={}
@@ -137,16 +150,20 @@ func permitted(state: Dictionary, role: String) -> bool:
 
 func quote(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validation uses the exact command path but need not materialize a new plan.
-	return _command(state,action)
+	var result: Dictionary=_command(state,action)
+	if result.has("state") and lifecycle.active(result.state):
+		if FabricProjection.pending(base_snapshot,result.state,projects,content.scenario_id).has("error"):return {"error":"lifecycle_fabric"}
+	return result
 
 func command(state: Dictionary, action: Dictionary) -> Dictionary:
-	var result: Dictionary=_command(state,action)
+	var result: Dictionary=quote(state,action)
 	if result.has("state") and assets.active(result.state):result.state.plan=effective_plan(result.state)
 	return result
 
 func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("lifecycle_"):return lifecycle.command(state,action,self)
 	if kind.begins_with("incident_"):return incidents.command(state,action,self)
 	if kind.begins_with("living_"):return living.command(state,action,self)
 	if kind.begins_with("land_"):return land.command(state,action,self)
@@ -188,6 +205,9 @@ func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 			if state.queue.size() >= balance.queue_limit: return {"error": "queue_full"}
 			for requirement in project.requires:
 				if not has_project(state, requirement): return {"error": "prerequisite"}
+			var lifecycle_error: String=lifecycle.blocked(state,id,self)
+			if not lifecycle_error.is_empty():return {"error":lifecycle_error}
+			if lifecycle.active(state) and FabricProjection.pending(base_snapshot,state,projects,content.scenario_id,id).has("error"):return {"error":"lifecycle_fabric"}
 			var land_error: String=land.blocked(state,id,self)
 			if not land_error.is_empty():return {"error":land_error}
 			var incident_error: String=incidents.blocked(state,id,self)
@@ -380,6 +400,8 @@ func advance(state: Dictionary) -> Dictionary:
 	elif not qualifies and next.phase == "town":
 		next.phase = "village"
 		_event(next,"contracted",{})
+	lifecycle.advance(next,state,self)
+	if lifecycle.active(next) and FabricProjection.pending(base_snapshot,next,projects,content.scenario_id).has("error"):return {"error":"lifecycle_fabric"}
 	_event(next,"season",{"turn":int(next.turn),"food":int(next.food),"population":people(next).size(),"security":int(next.security)})
 	return {"state":next}
 
@@ -505,6 +527,8 @@ func validate_state(value: Variant) -> bool:
 	if not land.validate(state,self):return false
 	if not living.validate(state,self):return false
 	if not incidents.validate(state,self):return false
+	if not lifecycle.validate(state,self):return false
+	if lifecycle.active(state) and FabricProjection.pending(base_snapshot,state,projects,content.scenario_id).has("error"):return false
 	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false
 	if assets.active(state):

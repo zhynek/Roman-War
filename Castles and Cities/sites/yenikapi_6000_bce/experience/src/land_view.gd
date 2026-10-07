@@ -4,6 +4,7 @@ var footprints: Array=[]
 
 func build(state: Dictionary,rules,world) -> void:
 	for site in rules.land.content.sites:
+		if site.get("lifecycle",false) and not rules.lifecycle.active(state):continue
 		var use: String=rules.land.use_at(state,site.id,rules)
 		var done: bool=use!="" and rules.has_project(state,use)
 		var center:=Vector3(site.at[0],world.floor_height(site.at[0],site.at[1]),site.at[1])
