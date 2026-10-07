@@ -25,6 +25,7 @@ var return_view: Dictionary={}
 var expanded_details: bool=false
 var _forecast_key: int=0
 var _project_meshes: Dictionary={}
+var _ui_signature: String=""
 func lw(id: String) -> String:return p.rules.lifecycle.content.strings.get(id,id)
 func cw(id: String) -> String:return projects.copy.ui.get(id,id)
 func room():return app.campaign_view.planning_room if is_instance_valid(app.campaign_view) else null
@@ -90,6 +91,9 @@ func refresh() -> void:
 	if not visible:return
 	app.reference_bottom.hide()
 	var start: int=Time.get_ticks_usec()
+	var signature: String=str([hash(p.state),p.last_message,app.campaign_mode,get_viewport_rect().size,selected,page,detail,overlay,lesson,preview_stage,expanded_details,room_mode,room().selected if is_instance_valid(room()) else "",room().page if is_instance_valid(room()) else 0])
+	if signature==_ui_signature and is_instance_valid(dock):return
+	_ui_signature=signature
 	for child in get_children():remove_child(child);child.queue_free()
 	header=null;sheet=null
 	dock=PanelContainer.new();dock.name="VisualDock";dock.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE);dock.offset_left=18;dock.offset_right=-18;dock.offset_top=-356;dock.offset_bottom=-14;dock.add_theme_stylebox_override("panel",style("142b2e"));add_child(dock)

@@ -26,6 +26,9 @@ var _buildings: Dictionary = {}
 var _homes: Dictionary = {}
 var _text: Dictionary = {}
 var _routes: Dictionary = {}
+# Only searched routes become anchors; connectors never grow chains of detours.
+var _outdoor_anchors: Dictionary = {}
+const ROUTE_REUSE_DISTANCE: float = 4.0
 var _cells: Dictionary = {}
 var _edges: Dictionary = {}
 var _segments: Dictionary = {}
@@ -54,7 +57,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		world=scene_world
 		_geometry_signature=""
 		_signature=""
-		_routes.clear();_cells.clear();_edges.clear();_segments.clear();_heights.clear();_nav_signature=0
+		_routes.clear();_outdoor_anchors.clear();_cells.clear();_edges.clear();_segments.clear();_heights.clear();_nav_signature=0
 	var stage: String=rules.households.stage(state)
 	var orders: Dictionary=state.households.orders
 	var ready: Dictionary={}
@@ -520,8 +523,24 @@ func _interior_uncached(a: Vector3,b: Vector3) -> Array:
 
 func _outdoor_route(a: Vector3,b: Vector3) -> Array:
 	var key: String=str(["outdoor",a,b])
-	if not _routes.has(key):_routes[key]=_outdoor_uncached(a,b)
-	return _routes[key].duplicate()
+	if _routes.has(key):return _routes[key].duplicate()
+	var result: Array=[]
+	if _clear(a,b):result=[a,b]
+	else:
+		var nearest: float=ROUTE_REUSE_DISTANCE*ROUTE_REUSE_DISTANCE
+		for anchor in _outdoor_anchors.get(a,[]):
+			if not _routes.has(anchor):continue
+			var route: Array=_routes[anchor]
+			if route.is_empty():continue
+			var distance: float=route[-1].distance_squared_to(b)
+			if distance<=nearest and _clear(route[-1],b):
+				result=route.duplicate();result.append(b);nearest=distance
+	if result.is_empty():
+		result=_outdoor_uncached(a,b)
+		if not _outdoor_anchors.has(a):_outdoor_anchors[a]=[]
+		_outdoor_anchors[a].append(key)
+	_routes[key]=result
+	return result.duplicate()
 
 func _outdoor_uncached(a: Vector3,b: Vector3) -> Array:
 	if _clear(a,b):return [a,b]
