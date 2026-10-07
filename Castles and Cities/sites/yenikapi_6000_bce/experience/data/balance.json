@@ -305,5 +305,32 @@
     "commission_wood_reserve": 2,
     "civic_workers": 1,
     "civic_priority": 4
+  },
+  "town_lifecycle": {
+    "projects": {
+      "town_civic": {
+        "wood": 22,
+        "work": 36,
+        "effects": {}
+      },
+      "town_preparation": {
+        "wood": 16,
+        "work": 24,
+        "effects": {}
+      },
+      "town_provision": {
+        "wood": 14,
+        "work": 24,
+        "effects": {}
+      }
+    },
+    "civic_workers": 2,
+    "civic_priority": 6,
+    "service_workers": 1,
+    "service_priority": 7,
+    "preparation_bonus": 1,
+    "preparation_wood": 1,
+    "preparation_places": 1,
+    "spoil_reduction": 6
   }
 }

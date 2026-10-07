@@ -178,7 +178,24 @@ func run() -> void:
 		construction_world.free()
 		construction_state=incident_rules.advance(construction_state).state
 	FileAccess.open(out_dir.path_join("construction-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Interpretive plans and saved construction work. No documented planning institution, palace or blueprint practice is claimed.","stages":stages,"models":"Neutral original geometry. Exact counts, assignments, controls and shaders remain in app/source; these are not extra resources."},"  "))
-	print("VILLAGE MODEL EXPORT PASS: 41 GLBs")
+	var civic_rules=preload("res://tools/town_driver.gd").rules()
+	var civic_trace: Dictionary=preload("res://tools/town_driver.gd").town_trace(civic_rules,true,100)
+	if civic_trace.has("error"):push_error("Town model recipe failed");quit(1);return
+	var civic_data: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,civic_trace.state,civic_rules)
+	var civic_world=load("res://src/village.gd").new();root.add_child(civic_world);civic_world.build(civic_data)
+	var civic_view=preload("res://src/campaign_view.gd").new();root.add_child(civic_view);civic_view.refresh(civic_trace.state,civic_rules,civic_world)
+	for specimen in [["civic-house","lifecycle_assembly_shelter"],["material-preparation","yk_house_04"],["provision-service","growth_care_shelter"]]:
+		var model:=Node3D.new();model.name=specimen[1];root.add_child(model)
+		var origin: Transform3D=civic_world.object_nodes[specimen[1]].transform
+		for id in [specimen[1],"household_interior_"+specimen[1]]:
+			if not civic_world.object_nodes.has(id):continue
+			var original: MeshInstance3D=civic_world.object_nodes[id]
+			var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*original.transform;copy.mesh=neutral_mesh(original.mesh);model.add_child(copy)
+		if not write_model(model,out_dir.path_join("town-"+specimen[0]+".glb")):quit(1);return
+		model.free()
+	FileAccess.open(out_dir.path_join("town-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Interpretive civic institution and paid adaptations, not recovered architecture. Normal public-command compact progression at season100.","state":civic_trace.state,"commands":civic_trace.commands,"sha256":JSON.stringify(civic_trace.state).sha256_text(),"models":"Three neutral finished rooms at their original ground datum; retained furnishings and entrances. Workers, rules and shaders remain in app/source."},"  "))
+	civic_view.free();civic_world.free()
+	print("VILLAGE MODEL EXPORT PASS: 44 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

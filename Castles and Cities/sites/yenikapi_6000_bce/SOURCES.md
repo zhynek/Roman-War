@@ -312,3 +312,23 @@ tradition existed at Yenikapı. The accommodation and dated reference are preser
 Existing evidence for the broad material vocabulary remains as cited above; no
 source images or historical plans were copied. The saved projects and bounded
 incidents retain their previous gameplay meaning.
+
+
+## 0.11–0.12 civic growth and specialized local work
+
+**Gameplay interpretation throughout:** the assembly shelter, adapted civic
+house, earned Small village/Large village/Town ranks, required seasons, staffing,
+prices and collective offices are authored institutions. They are not identified
+Neolithic civic buildings or a reconstruction of government at Yenikapı. Likewise,
+the material-preparation store and shared provision service are functional game
+choices fitted to existing hypothetical rooms. No source establishes their room
+plans, roles, seasonal productivity, spoilage reduction or staffing ratios.
+
+The previously cited direct-site evidence for settlement activity, wood and
+storage supports only the broad material vocabulary. The regional household and
+learning comparisons remain analogies, not proof of these institutions. This
+phase introduces no new historical factual claim requiring a new source. It uses
+original procedural models, retains the existing pots, baskets, mats, doorways
+and household relationships, and copies no source plan or artwork. Model and UI
+provenance mark all new civic fabric as interpretation. The dated reference and
+medieval study remain separate; no continuous city genealogy is claimed.

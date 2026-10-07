@@ -77,12 +77,12 @@ func build(body: VBoxContainer) -> void:
 			body.add_child(panel.label(copy.ui.occupied.format({"home":home.label,"people":count,"capacity":rules.balance.people_per_dwelling,"stress":memory.stress,"practice":memory.practice}),14))
 	for id in asset.orders:standing(body,id,f)
 	for id in asset.projects:
-		if rules.lifecycle.project_specs.has(id) and not rules.lifecycle.active(state):continue
+		if rules.lifecycle.project_specs.has(id) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,id)):continue
 		if rules.land.active(state) and id in rules.land.content.legacy_projects and not rules.land.committed(state,id,rules):continue
 		project(body,id,f)
 	if rules.land.active(state):
 		for proposal in rules.land.content.proposals:
-			if proposal.get("lifecycle",false) and not rules.lifecycle.active(state):continue
+			if proposal.get("lifecycle",false) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,proposal.id)):continue
 			if proposal.asset==selected:
 				body.add_child(panel.button(panel.land_panel.copy.ui.inspect+" · "+rules.land.sites[proposal.site].title,func():panel.land_panel.inspect(proposal.site),"AssetLand_"+proposal.id))
 				if rules.land.committed(state,proposal.id,rules):project(body,proposal.id,f)
@@ -142,8 +142,8 @@ func allocation(body: VBoxContainer,f: Dictionary,asset: String="") -> void:
 	body.add_child(panel.label(copy.ui.allocation,18))
 	for request in f.assets.requests:
 		if asset!="" and request.asset!=asset:continue
-		var title: String=panel.rules.projects.get(request.id,{}).get("title",panel.living_panel.copy.activities.get(request.id,copy.ui.jobs.get(request.id,request.id)))
-		body.add_child(panel.label(copy.ui.request.format({"title":title,"filled":request.filled,"wanted":request.wanted,"reason":copy.ui.get(request.reason,request.reason)}),14))
+		var title: String=panel.rules.projects.get(request.id,{}).get("title",panel.living_panel.copy.activities.get(request.id,panel.rules.lifecycle.content.get("strings",{}).get(request.id,copy.ui.jobs.get(request.id,request.id))))
+		body.add_child(panel.label(copy.ui.request.format({"title":title,"filled":request.filled,"wanted":request.wanted,"priority":request.priority,"reason":copy.ui.get(request.reason,request.reason)}),14))
 	body.add_child(panel.label(copy.ui.allocation_order,13))
 
 func forecast(body: VBoxContainer,f: Dictionary) -> void:

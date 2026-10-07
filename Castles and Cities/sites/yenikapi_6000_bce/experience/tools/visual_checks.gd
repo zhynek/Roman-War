@@ -81,7 +81,7 @@ func benefit_copy(rules,state: Dictionary) -> void:
 	check(places.delta==places.total-int(original_proposals.land_adapt_workroom.work),"displayed workroom delta compares predecessor use")
 	rules.land.proposals=original_proposals
 	check(JSON.stringify(state)==frozen,"benefit reads do not mutate authoritative state")
-	var config: Dictionary=rules.lifecycle.content.duplicate(true)
+	var config: Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/lifecycle.json"))
 	config.transitions[0].to="town"
 	for project in config.projects:
 		if project.id=="lifecycle_store":project.stage_requires="town"

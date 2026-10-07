@@ -35,10 +35,39 @@ to 41. On the local M3 Max, comparable adaptation completion fell from 3.062 s t
 0.668 s. New-building completion remains 1.452 s; commissioning rose to 0.509 s.
 The verification record reports every measured operation and remaining limits.
 
-The [0.10.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.10.0) is public. All twelve anonymous downloads match
+The [0.10.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v 0.10.0) is public. All twelve anonymous downloads match
 tested bytes and GitHub digests; all ten ZIPs pass integrity checks. All fifteen
 previous releases / 97 assets and stable latest `v0.14.2` remain unchanged.
 The tag pins the frozen payload; main also holds the acceptance/publication record.
+
+## A Town That Works (0.12.0 local candidate, October 7, 2026)
+
+Slice C continues the existing large village through a paid alteration of the
+assembly shelter into a civic house. Town unlocks separately paid material
+preparation and local provision. Two civic adults replace the earlier one; the
+optional provision service needs another adult. Benefits stop under staffing or
+store-maintenance shortages without erasing rank or paid work. No housing density,
+new clock, project manager, compulsory trade or free promotion upgrade is added.
+
+The original lifecycle profile/hash and wrapper 8 are retained. Explicit town
+adoption adds a separate semantic profile. Recognized older towns retain rank
+and pay through missing civic fabric. Contacts, incidents, household relationships,
+ordered fabric revisions and earlier land costs continue. Read
+[LIFECYCLE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIFECYCLE.md)
+and [0.12 verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.12.md)
+for controls, compatibility, public-command fixtures and delivery evidence.
+
+The candidate passes retained independent source gates and town 100-season compact/
+outward recipes. The final frozen build/parent/exact-app results are recorded in
+that verification document after packaging. Keep the verified 0.11 local build and
+all prior releases. This task produces a local universal Mac build and pushes main;
+it does not publish a release or change the parent stable latest.
+
+Village route reuse reduced matched assembly commissioning from 2.01 s to 0.51 s
+locally; some civic/season refreshes still pause for 1–1.5 s. The parent CI 652 ms
+failure occurred on the unchanged baseline; retain its 600 ms guard. Read
+[the separate investigation](reviews/2026-10-ai-ci-performance.md). Timing
+diagnostics now identify successful samples too; runner cause remains unproven.
 
 ## City lifecycle (0.11.0 local build, October 7, 2026)
 

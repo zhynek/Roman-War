@@ -18,11 +18,22 @@ import sys
 from build_city import ROOT, WORKSPACE, digest, files, archive_tree, run, git, check_glb
 PROJECT=Path('sites/yenikapi_6000_bce/experience')
 
+def profile(command, log, cwd, marker):
+    output=run(command,log,cwd)
+    records=[line[len(marker):] for line in output.splitlines() if line.startswith(marker)]
+    if len(records)!=1:raise SystemExit('Missing interaction profile: '+str(log))
+    measured=json.loads(records[0])
+    if measured.get('completed') is not True:raise SystemExit('Civic profile never completed: '+str(log))
+    for key in ['lifecycle_open','lifecycle_reopen','commission','seasonal_refresh','civic_completion','unchanged_refresh']:
+        if any(measured[key][field]<0 for field in ['callback_us','ready_us']):raise SystemExit('Invalid timing: '+str(log))
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot',required=True)
-    parser.add_argument('--version',default='0.11.0')
+    parser.add_argument('--version',default='0.12.0')
     parser.add_argument('--output',type=Path)
+    parser.add_argument('--retained-build',type=Path,required=True,help='Prior verified build whose model bytes must remain unchanged')
     parser.add_argument('--parent-gates',type=Path,required=True)
     args=parser.parse_args()
     if not re.fullmatch(r'\d+\.\d+\.\d+',args.version):parser.error('Use numeric semantic version')
@@ -71,6 +82,8 @@ def main():
     run([sys.executable,project/'tools/validate_construction.py'],logs/'construction-data.log',project)
     run([sys.executable,project/'tools/validate_lifecycle.py'],logs/'lifecycle-data.log',project)
     run([sys.executable,project/'tools/test_lifecycle_data.py'],logs/'lifecycle-data-tests.log',project)
+    run([sys.executable,project/'tools/validate_town.py'],logs/'town-data.log',project)
+    run([sys.executable,project/'tools/test_town_data.py'],logs/'town-data-tests.log',project)
     run(editor+['--import'],logs/'import.log',project)
     visual=run(editor+['--script','res://tools/visual_checks.gd'],logs/'source-visual.log',project)
     if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',visual):raise SystemExit('Visual command checks failed')
@@ -98,10 +111,15 @@ def main():
     if not re.search(r'Fabric lifecycle checks: \d+ checks, 0 failures',fabric_lifecycle):raise SystemExit('Missing fabric lifecycle success marker')
     lifecycle=run(editor+['--script','res://tools/lifecycle_checks.gd','--',f'out_dir={logs / "source-lifecycle-states"}'],logs/'source-lifecycle.log',project)
     if not re.search(r'LIFECYCLE CHECKS: \d+ checks, 0 failures',lifecycle):raise SystemExit('Missing lifecycle success marker')
+    town=run(editor+['--script','res://tools/town_checks.gd','--',f'out_dir={logs / "source-town-states"}'],logs/'source-town.log',project)
+    if not re.search(r'TOWN CHECKS: \d+ checks, 0 failures',town):raise SystemExit('Missing town success marker')
     render_dir=Path(tempfile.mkdtemp(prefix=f'yenikapi-{args.version}-exact-qa-'))
     source_lifecycle_render=run([godot,'--path',project,'--max-fps','10','--script','res://tools/lifecycle_preview.gd','--',f'out_dir={render_dir / "source-lifecycle"}'],logs/'source-lifecycle-render.log',project)
     if not re.search(r'LIFECYCLE RENDER: \d+ captures; \d+ checks, 0 failures',source_lifecycle_render):raise SystemExit('Source lifecycle render gate failed')
     shutil.copy2(render_dir/'source-lifecycle/render-report.json',logs/'source-lifecycle-render-report.json')
+    source_town_render=run([godot,'--path',project,'--max-fps','10','--script','res://tools/town_preview.gd','--',f'out_dir={render_dir / "source-town"}'],logs/'source-town-render.log',project)
+    if not re.search(r'TOWN RENDER: \d+ captures; \d+ checks, 0 failures',source_town_render):raise SystemExit('Source town render gate failed')
+    shutil.copy2(render_dir/'source-town/render-report.json',logs/'source-town-render-report.json')
     # Source performance uses the same script/cameras as the exact application.
     run([godot,'--path',project,'--script','res://tools/benchmark.gd','--',f'out_dir={render_dir / "source-benchmark"}'],logs/'source-benchmark.log',project)
     shutil.copy2(render_dir/'source-benchmark/benchmark.json',logs/'source-benchmark.json')
@@ -122,6 +140,8 @@ def main():
     run([godot,'--path',project,'--script','res://tools/incident_profile.gd'],logs/'source-incident-interactions.log',project)
     run([godot,'--path',project,'--script','res://tools/visual_profile.gd'],logs/'source-visual-interactions.log',project)
     run([godot,'--path',project,'--script','res://tools/construction_profile.gd'],logs/'source-construction-interactions.log',project)
+    profile([godot,'--path',project,'--script','res://tools/lifecycle_profile.gd'],logs/'source-lifecycle-interactions.log',project,'LIFECYCLE PROFILE ')
+    profile([godot,'--path',project,'--script','res://tools/town_profile.gd'],logs/'source-town-interactions.log',project,'TOWN PROFILE ')
     app_zip=out/f'{prefix}-macOS-{args.version}.zip'
     run(editor+['--export-release','macOS',app_zip],logs/'export.log',project)
     with zipfile.ZipFile(app_zip,'a',zipfile.ZIP_DEFLATED) as archive:
@@ -168,6 +188,10 @@ def main():
     if not re.search(r'LIFECYCLE CHECKS: \d+ checks, 0 failures',packaged_lifecycle):raise SystemExit('Missing packaged lifecycle success marker')
     for name in ['compact-recipe.json','outward-recipe.json','strategies.json']:
         if (logs/'source-lifecycle-states'/name).read_bytes()!=(logs/'packaged-lifecycle-states'/name).read_bytes():raise SystemExit('Source/package lifecycle replay differs: '+name)
+    packaged_town=run([binary,'--headless','--script','res://tools/town_checks.gd','--',f'out_dir={logs / "packaged-town-states"}'],logs/'packaged-town.log',out)
+    if not re.search(r'TOWN CHECKS: \d+ checks, 0 failures',packaged_town):raise SystemExit('Missing packaged town success marker')
+    for path in (logs/'source-town-states').glob('*.json'):
+        if path.read_bytes()!=(logs/'packaged-town-states'/path.name).read_bytes():raise SystemExit('Source/package town state or recipe differs: '+path.name)
     rendered=run([binary,'--max-fps','10','--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
     if 'VILLAGE RENDER PASS: 14 captures' not in rendered:raise SystemExit('Incomplete rendered gate')
     shutil.copy2(render_dir/'render-report.json',logs/'render-report.json')
@@ -219,7 +243,16 @@ def main():
     lifecycle_render=run([binary,'--max-fps','10','--script','res://tools/lifecycle_preview.gd','--',f'out_dir={render_dir / "lifecycle"}'],logs/'packaged-lifecycle-render.log',out)
     if not re.search(r'LIFECYCLE RENDER: \d+ captures; \d+ checks, 0 failures',lifecycle_render):raise SystemExit('Lifecycle rendered gate failed')
     shutil.copy2(render_dir/'lifecycle/render-report.json',logs/'lifecycle-render-report.json')
-    provenance['lifecycle']={'profile':'village_lifecycle_v1','wrapper':8,'scope':'small village to large village; later civic transitions planned','source_render_report':'verification/source-lifecycle-render-report.json','exact_app_render_report':'verification/lifecycle-render-report.json','source_fixtures':'verification/source-lifecycle-states','exact_app_fixtures':'verification/packaged-lifecycle-states','replay':'source and exact-app command recipes, state digests and strategy summaries match'}
+    town_render=run([binary,'--max-fps','10','--script','res://tools/town_preview.gd','--',f'out_dir={render_dir / "town"}'],logs/'packaged-town-render.log',out)
+    if not re.search(r'TOWN RENDER: \d+ captures; \d+ checks, 0 failures',town_render):raise SystemExit('Town rendered gate failed')
+    shutil.copy2(render_dir/'town/render-report.json',logs/'town-render-report.json')
+    source_report=json.loads((logs/'source-town-render-report.json').read_text())
+    app_report=json.loads((logs/'town-render-report.json').read_text())
+    if source_report['commands']!=app_report['commands'] or source_report['sha256']!=app_report['sha256']:raise SystemExit('Actual UI source/package town recipes differ')
+    profile([binary,'--script','res://tools/lifecycle_profile.gd'],logs/'packaged-lifecycle-interactions.log',out,'LIFECYCLE PROFILE ')
+    profile([binary,'--script','res://tools/town_profile.gd'],logs/'packaged-town-interactions.log',out,'TOWN PROFILE ')
+    provenance['town']={'profile':'town_responsibilities_v1','wrapper':8,'adoption':'explicit extension; published village_lifecycle_v1 remains pinned','source_fixtures':'verification/source-town-states','exact_app_fixtures':'verification/packaged-town-states','source_render_report':'verification/source-town-render-report.json','exact_app_render_report':'verification/town-render-report.json','replay':'all fixture bytes and real-UI command recipes/digests match source and exact app'}
+    provenance['lifecycle']={'profile':'village_lifecycle_v1','wrapper':8,'scope':'small village to large village; explicitly adopted town extension; later stages planned','source_render_report':'verification/source-lifecycle-render-report.json','exact_app_render_report':'verification/lifecycle-render-report.json','source_fixtures':'verification/source-lifecycle-states','exact_app_fixtures':'verification/packaged-lifecycle-states','replay':'source and exact-app command recipes, state digests and strategy summaries match'}
     provenance['living_performance']={'source':json.loads((logs/'source-living-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-living-benchmark.json').read_text())}
     provenance['land_performance']={'source':json.loads((logs/'source-land-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-land-benchmark.json').read_text())}
     provenance['asset_performance']={'source':json.loads((logs/'source-asset-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-asset-benchmark.json').read_text())}
@@ -232,8 +265,17 @@ def main():
     models=out/f'{prefix}-Models'
     run(editor+['--script','res://tools/export_models.gd','--',f'out_dir={models}'],logs/'models.log',project)
     glbs=sorted(models.glob('*.glb'))
-    if len(glbs)!=41:raise SystemExit('Expected reference, hypothetical town and individual models')
-    provenance['models']={p.name:check_glb(p) for p in glbs}
+    if len(glbs)!=44:raise SystemExit('Expected reference, hypothetical town and individual models')
+    provenance['models']={p.name:{**check_glb(p),'sha256':digest(p)} for p in glbs}
+    if args.retained_build:
+        previous=args.retained_build.resolve()
+        old_manifest=json.loads((previous/'provenance.json').read_text())
+        old_models=previous/f'{prefix}-Models'
+        expected_retained={p.name for p in glbs if not p.name.startswith('town-')}
+        if len(old_manifest['models'])!=41 or set(old_manifest['models'])!=expected_retained:raise SystemExit('Expected all 41 original model names in retained build')
+        for name in old_manifest['models']:
+            if digest(old_models/name)!=digest(models/name):raise SystemExit('Retained model bytes changed: '+name)
+        provenance['retained_models']={'build':str(previous),'count':len(old_manifest['models']),'result':'byte-identical'}
     for name,sha in frozen.items():
         if digest(snapshot/name)!=sha:raise SystemExit(f'Frozen source changed: {name}')
     source_zip=out/f'{prefix}-Source-{args.version}.zip'
@@ -241,10 +283,10 @@ def main():
     # Small independent archives preserve existing GLBs and avoid oversized uploads.
     contact={'growth_exchange_house.glb','Yenikapi-Hypothetical-Contact-Settlement.glb','hypothetical-contact-provenance.json'}
     artifacts=[app_zip,source_zip]
-    for group,count in [('Foundation',16),('Contact',2),('Household',6),('Asset',3),('Land',3),('Living',3),('Incident',3),('Construction',5)]:
+    for group,count in [('Foundation',16),('Contact',2),('Household',6),('Asset',3),('Land',3),('Living',3),('Incident',3),('Construction',5),('Town',3)]:
         members=[]
         for path in models.iterdir():
-            category='Construction' if path.name.startswith('construction-') else 'Incident' if path.name.startswith('incident-') else 'Living' if path.name.startswith('living-') else 'Land' if path.name.startswith('land-') else 'Asset' if path.name.startswith('asset-') else 'Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
+            category='Town' if path.name.startswith('town-') else 'Construction' if path.name.startswith('construction-') else 'Incident' if path.name.startswith('incident-') else 'Living' if path.name.startswith('living-') else 'Land' if path.name.startswith('land-') else 'Asset' if path.name.startswith('asset-') else 'Household' if path.name.startswith('household-') else ('Contact' if path.name in contact else 'Foundation')
             if path.is_file() and category==group:members.append(path)
         if len([p for p in members if p.suffix=='.glb'])!=count:raise SystemExit('Wrong model partition '+group)
         target=out/f'{prefix}-{group}-Models-{args.version}.zip'
@@ -257,7 +299,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction/fabric-lifecycle/lifecycle checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures'])+len(json.loads((logs/'lifecycle-render-report.json').read_text())['captures']))+' exact-app captures plus '+str(len(json.loads((logs/'source-lifecycle-render-report.json').read_text())['captures']))+' source lifecycle captures written; manual visual review required before publication','glb_structure':'41 passed','zip_integrity':'10 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction/fabric-lifecycle/lifecycle/town checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures'])+len(json.loads((logs/'lifecycle-render-report.json').read_text())['captures']))+' exact-app captures plus '+str(len(json.loads((logs/'source-lifecycle-render-report.json').read_text())['captures']))+' source lifecycle captures plus '+str(len(source_report['captures']))+' source town and '+str(len(app_report['captures']))+' exact-app town captures written; manual visual review required before publication','glb_structure':'44 passed','zip_integrity':'11 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))

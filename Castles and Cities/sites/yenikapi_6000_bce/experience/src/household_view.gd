@@ -179,6 +179,11 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 				if task.get("duty","") == "living_prepare":target_id="household_workshop";activity="living_prepare";pose="work";carry=false
 				elif task.get("duty","") in ["living_repair","living_training"]:activity=task.duty;target_id="task_"+person.id;pose="work";carry=false
 				elif job=="watch":target_id="task_"+person.id;activity="watch"
+			# Civic and service assignments keep the destinations used by the
+			# finite allocator instead of falling back to generic household care.
+			if task.get("duty","")=="lifecycle_civic":target_id="lifecycle_civic";activity="lifecycle_civic";pose="work"
+			if task.get("duty","")=="town_service":target_id="town_provision";activity="town_service";pose="work"
+			if task.get("duty","")=="living_prepare" and rules.lifecycle.town_active(state) and rules.has_project(state,"town_preparation"):target_id="town_preparation"
 			if str(task.get("duty","")).begins_with("incident_"):activity="repair";pose="kneel";target_id="task_"+person.id
 			if home_data.stress>=65 and job=="care":reason="hunger" if state.food<people.size() else stage
 		if infant:target_id="home_"+home_id;activity="child_near_home";reason="child";pose="rest";carry=false
@@ -406,6 +411,12 @@ func _make_stations(rules) -> void:
 	for pair in [["household_home","yk_house_01","refuge"],["household_store","yk_store_01","store"],["household_workshop","yk_house_06","workshop"]]:
 		if not stations.has(pair[0]) and _buildings.has(pair[1]):
 			_station(pair[0],_local_safe(_buildings[pair[1]],Vector3(0,0,.28)),pair[1],_label("station_labels",pair[2]))
+	for pair in [["lifecycle_civic",rules.lifecycle.content.get("civic_project","")],["town_preparation","town_preparation"],["town_provision","town_provision"]]:
+		if not rules.projects.has(pair[1]):continue
+		for change in rules.projects[pair[1]].changes:
+			for record in change.after:
+				if record.kind=="building" and _buildings.has(record.id):
+					_station(pair[0],_local_safe(_buildings[record.id],Vector3(0,0,.28)),record.id,_buildings[record.id].label)
 	_station("household_route",_safe(Vector3(1.4,0,14)),"",_label("station_labels","route"))
 
 func _station(id: String,at: Vector3,building: String,label: String) -> void:

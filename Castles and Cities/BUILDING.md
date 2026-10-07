@@ -285,3 +285,33 @@ Building a candidate is separate from publication. No new release is published b
 this implementation; an eventual release still needs the exact packaged checks,
 manual capture review, retained-model comparison and public-download verification
 outlined above.
+
+
+## A Town That Works — verified local delivery (0.12.0)
+
+The next candidate defaults to 0.12.0. Preserve the 0.11.0 local artifacts and all
+previous releases. Build from a clean frozen commit, with fresh parent logs, using:
+
+```sh
+python3 'Castles and Cities/tools/build_early_settlement.py' \
+  --godot /path/to/Godot.app/Contents/MacOS/Godot --version 0.12.0 \
+  --parent-gates build/yenikapi-0.12-parent-gates \
+  --retained-build build/yenikapi-early-settlement-0.11.0-local \
+  --output build/yenikapi-early-settlement-0.12.0-local
+```
+
+The builder retains every prior independent check, render gate and benchmark.
+It adds town schema/negative tests, public-command fixtures and exact recipe/state
+comparison, real-input town progression on source and the exported app, and
+matched lifecycle/town interaction profiles. All reports scan stderr and success
+markers. Inspect landscape, aerial, street, civic/material/service interiors,
+planning-room and 1024×768 views. Manual inspection remains required after the
+builder completes; its provisional provenance does not claim that review.
+
+The universal ad-hoc signed app must contain arm64 and x86_64 slices; native local
+acceptance runs on Apple Silicon. Models total 44: all 41 previous GLBs must match
+0.11 byte-for-byte, plus three separately named Town room models. Mac, editable
+Source and nine model partitions make eleven ZIPs. Verify archive contents,
+provenance and SHA256SUMS. No public release is authorized for this task; leave
+stable parent `v0.14.2` and every earlier release unchanged. Commit final local
+verification separately from the frozen payload and push both to main.

@@ -109,3 +109,26 @@ replay. Inspect every exact-app capture, including 1024×768 controls and retain
 compact/outward completion views. The profile distinguishes callback time from
 readiness after rendered frames. See `../VERIFICATION-0.10.md` for measured results
 and remaining latency; do not infer Intel performance from Apple Silicon runs.
+
+
+## Civic continuity and town plans (0.11–0.12)
+
+The shared interface also presents lifecycle projects. Wrapper 8 is allocated by
+the lifecycle chapter, not by the planning room. Enable town development explicitly
+in the lifecycle review; all three town proposals then appear on the same board,
+easel, main project cards and active sites. The civic alteration is required for
+new civic fabric; the two follow-on facilities are optional. Dependencies link to
+the actual earlier paid projects, and quotes show remaining food/fuel reserves.
+
+Town adaptations leave the existing occupied buildings and entrances standing.
+Their workers go to the civic house, material-preparation store and care/service
+room identified by the finite allocation. Active and paused town sites retain
+paid materials and progress through both incident outcomes. The working-room
+host still supports planning before and after its earlier adaptations. No town
+project replaces the board or adds a separate manager.
+
+The lifecycle review distinguishes the total two-adult civic duty from the extra
+one-adult provision service, shows actual staffing and store condition, and quotes
+the resulting next-season output. Inspection and animation cannot perform work.
+See [LIFECYCLE.md](LIFECYCLE.md) for prices, operation and recovery, and the town
+render gate for actual site, main-interface and physical-easel inputs.

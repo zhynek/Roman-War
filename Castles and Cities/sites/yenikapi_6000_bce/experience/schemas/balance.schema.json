@@ -1559,6 +1559,95 @@
         "civic_priority"
       ],
       "additionalProperties": false
+    },
+    "town_lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projects": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "wood": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000
+              },
+              "work": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100000
+              },
+              "effects": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "wood",
+              "work",
+              "effects"
+            ],
+            "additionalProperties": false
+          },
+          "minProperties": 3,
+          "maxProperties": 3
+        },
+        "civic_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "civic_priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "service_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "service_priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "preparation_bonus": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "preparation_wood": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "preparation_places": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "spoil_reduction": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "projects",
+        "civic_workers",
+        "civic_priority",
+        "service_workers",
+        "service_priority",
+        "preparation_bonus",
+        "preparation_wood",
+        "preparation_places",
+        "spoil_reduction"
+      ]
     }
   },
   "required": [

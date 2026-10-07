@@ -6,6 +6,10 @@ static func benefit_values(rules,id: String) -> Dictionary:
 	# The target is an authoring assertion. Display the actual incremental
 	# effects/site capacity so prose cannot become a second source of balance.
 	var spec: Dictionary=rules.projects[id]
+	var town: Dictionary=rules.lifecycle.town_balance
+	if id=="town_civic":return {"workers":town.civic_workers}
+	if id=="town_preparation":return {"delta":town.preparation_bonus,"total":1+int(town.preparation_bonus),"shared_total":int(rules.living.balance.cooperative_yield)+int(town.preparation_bonus),"wood":town.preparation_wood,"places":town.preparation_places}
+	if id=="town_provision":return {"delta":town.spoil_reduction,"total":town.spoil_reduction,"workers":town.service_workers}
 	var target: Dictionary=spec.get("benefit_target",{})
 	if target.is_empty():return {}
 	var key: String=target.key
@@ -97,7 +101,7 @@ func describe(state: Dictionary,rules,id: String,forecast: Dictionary={},include
 func ids(state: Dictionary,rules) -> Array:
 	var result: Array=[]
 	for id in rules.projects:
-		if rules.lifecycle.project_specs.has(id) and not rules.lifecycle.active(state):continue
+		if rules.lifecycle.project_specs.has(id) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,id)):continue
 		if rules.land.active(state) and id in rules.land.content.legacy_projects and not rules.land.committed(state,id,rules):continue
 		if rules.land.proposals.has(id) and not rules.land.active(state):continue
 		if id.begins_with("living_") and not rules.living.active(state):continue

@@ -125,13 +125,23 @@ func pick_plan(id: String) -> void:
 			if id in room.page_ids():break
 			await click_button("PlanningNext")
 		await click_button("PlanningBoard")
-	for target in room.targets:
-		if target.id!=id:continue
-		for i in range(3):await process_frame
-		var point: Vector2=app.camera.unproject_position(target.at)
-		check(root.get_visible_rect().has_point(point),"plan target visible "+id)
-		await click_at(point);return
-	check(false,"missing physical plan "+id)
+	# As with button input, native pointer events can supersede a synthetic click.
+	# Verify the presentation result and retry only while simulation is unchanged.
+	var before: Dictionary=app.campaign.state.duplicate(true)
+	for attempt in range(3):
+		for target in room.targets:
+			if target.id!=id:continue
+			for i in range(3):await process_frame
+			var point: Vector2=app.camera.unproject_position(target.at)
+			if not root.get_visible_rect().has_point(point):break
+			await click_at(point)
+			check(app.campaign.state==before,"physical plan selection is presentation only")
+			if app.campaign.state!=before:return
+			if id=="easel":
+				if app.visual_commands.detail.get("id","")==room.selected:return
+			elif room.selected==id and app.camera.global_basis.z.normalized().dot((app.camera.global_position-room.easel_center()).normalized())>.99:return
+			break
+	check(false,"physical plan click did not select visible target "+id)
 func site_shot(id: String,name_: String) -> void:
 	var at: Array=app.campaign.rules.projects[id].at
 	var b: Dictionary=preload("res://src/construction_view.gd").building_record(id,app.campaign.rules)

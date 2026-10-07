@@ -146,6 +146,7 @@ func command(state: Dictionary,action: Dictionary,rules) -> Dictionary:
 		"land_inspect":
 			var id: String=action.get("id","")
 			if not sites.has(id):return {"error":"land_unknown"}
+			if not rules.lifecycle.site_available(state,id):return {"error":"town_missing"}
 			if sites[id].get("lifecycle",false) and not _lifecycle_active(state):return {"error":"lifecycle_missing"}
 			if id not in next.land.inspected:next.land.inspected.append(id)
 		"land_access":
@@ -177,6 +178,7 @@ func validate(state: Dictionary,rules) -> bool:
 	var seen: Array=[]
 	for id in l.inspected:
 		if not sites.has(id) or id in seen:return false
+		if not rules.lifecycle.site_available(state,id):return false
 		if sites[id].get("lifecycle",false) and not _lifecycle_active(state):return false
 		seen.append(id)
 	var used: Dictionary={}

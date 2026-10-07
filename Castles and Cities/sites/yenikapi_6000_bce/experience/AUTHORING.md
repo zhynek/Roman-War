@@ -145,11 +145,11 @@ planning furniture in the working room; their provenance uses normal public
 commands and calls out the gameplay interpretation. Retain all 36 prior GLBs.
 
 
-## City lifecycle (next candidate 0.11.0)
+## City lifecycle (0.11 retained contract)
 
 [LIFECYCLE.md](LIFECYCLE.md) defines the implemented small-to-large-village
-transition, paid individual upgrades and wrapper-8 adoption contract. Later stages
-are metadata for future work. The dated snapshot and parent level enums stay
+transition, paid individual upgrades and wrapper-8 adoption contract. Its town
+extension is described below; stages after Town remain metadata for future work. The dated snapshot and parent level enums stay
 unchanged; no ordinary frame, preview or load can advance civic achievement.
 
 Keep the lifecycle profile's semantics stable. Prices, work and reserves come
@@ -170,3 +170,43 @@ stage work. Extend data/negative, rule/save, lineage and rendered checks togethe
 The release builder includes these gates on source and exact app; existing neutral
 model exports remain unchanged. No later stage is accepted until its full entry,
 operation, stress/recovery and continuation path work from the preceding stage.
+
+
+## Town responsibilities (0.12.0)
+
+Never edit the published base lifecycle's prices, work, predicates or geometry to
+add town. `lifecycle.town` and `balance.town_lifecycle` form a separately adopted
+semantic profile; the original hash is computed before merging the extension.
+UI text is not part of either semantic hash. Save adoption preserves the original
+profile, paid contracts, completed ledger and all unrelated chapters.
+
+The only town projects are the civic-house alteration, material preparation and
+local provision. Their `effects` stay empty: actual benefits are implemented in
+`Lifecycle.apply_allocation` and seasonal spoilage, avoiding passive double
+counting. Civic duty replaces the earlier request under the same stable ID.
+Service requests a separate finite adult; preparation consumes actual extra
+wood and a spare work place after ordinary allocation. Reuse the existing
+condition threshold and town-support factors instead of copying balance values.
+Project text renders real incremental/total values from these readers.
+
+Town alterations retain use, footprint, entrance/yaw, household association and
+all predecessor furniture. They add no dwelling or density. The civic project
+names the paid assembly predecessor and the site successor; work retains the
+previous site use. Validators combine both profile graphs, inspect physical
+revisions, check pre-town reachability and require real tuning readers. Negative
+cases cover erased furniture, changed use/density, bad revisions, dependency
+bypass, successor mismatch, passive duplicate effects and unrendered quantities.
+
+Civic, preparation and service workers derive destinations from these same
+buildings. Near-endpoint route reuse is presentation only: retain a searched
+route from the exact same origin only when the endpoint is within four metres
+and its connector passes the existing collision test. Revalidate paths on world
+geometry changes; never chain reused connectors or alter assignments/RNG.
+The UI keeps unchanged controls when its full state/presentation signature agrees.
+Both optimizations must pass retained cold-geometry and whole-route walking gates.
+
+Retain `tools/fixtures/lifecycle-0.11-paid.json` byte-for-byte as a published
+compatibility fixture. Generate new town fixture saves through public commands,
+never by assigning stock, work or rank. Store QA captures outside the repository.
+The exporter adds only `town-*.glb` and provenance; verify every old model against
+the preserved 0.11 build. Do not rewrite any previous release artifact.

@@ -1,9 +1,9 @@
 # City lifecycle: one continuing settlement
 
-The first lifecycle slice implements **Small village → Large village** through a
-paid assembly shelter, followed by separately commissioned store and workroom
-improvements. The ladder also names Town, Large town, Small city, Large city and
-Metropolis as planned stages. Those later transitions are not playable yet.
+The playable sequence is **Small village → Large village → Town**. Pay for the
+assembly shelter, then adapt that same building into a civic house after sustained
+town support. Both promotions open separately paid investments. Large town, Small
+city, Large city and Metropolis remain planned; town adds no residential density.
 
 This is the hypothetical village scenario. It does not connect the dated Yenikapı
 reference to medieval Constantinople or establish a continuous historical sequence.
@@ -49,10 +49,63 @@ can lose support without losing an earned civic rank. An older save that already
 achieved town receives explicit town recognition on adoption; this grants no
 physical civic building, people, materials or free improvements.
 
+## A Town That Works — 0.12.0
+
+After adopting the lifecycle, choose **Enable town development**. This explicitly
+extends an existing wrapper-8 profile; merely loading or inspecting it changes
+nothing. You can enable it before promotion. The planning room remains available
+through the earlier working-room adaptations.
+
+The town readiness panel reads the existing local town-support rules directly:
+40 residents, eight six-person dwelling equivalents, two seasons of provisions,
+65 wellbeing/cooperation/security, and all seven foundational capabilities
+(including their compact/outward equivalents), sustained for four resolved
+seasons. These are current balance values, not a second definition. A failed
+support season resets the counter; restoring the named factor and sustaining it
+reopens commissioning. Neither overseas supplies nor foreign trade is required.
+
+Pay **22 timber and 36 work** to adapt the assembly shelter into a civic house.
+Commissioning must leave the existing lifecycle food/fuel reserves. The quote
+shows payment, remaining stocks, work and named blockers. This is revision 1 → 2
+of `lifecycle_assembly_shelter`, on the same assembly-ground successor chain.
+The doorway, footprint, mat and shared-household association remain. Ordinary
+crew limits, priorities, pause and proportional cancellation refunds still apply.
+
+The completed house earns Town and replaces the earlier one-adult civic duty
+with **two adults in total** from the existing finite allocator. It does not
+construct the following facilities, grant supplies, repair condition or relocate
+households. Those choices are optional:
+
+| Separate investment | Price / work | Implemented benefit and reason to choose it |
+|---|---|---|
+| Material-preparation store | 16 timber / 24 work | Adapt the existing small store `yk_house_04` without discarding containers. An active preparation order produces **+1 prepared set**: 2 total for basic work, up to 3 with practiced shared work. Each extra set consumes **1 additional timber and 1 additional work place**; existing storage capacity still caps output. Choose it first for equipment and incident preparation. |
+| Shared provision service | 14 timber / 24 work | Fit the existing care shelter `growth_care_shelter`; retain its care use and furnishings. **1 additional adult** protects up to **6 provisions per season** from actual spoilage (6 total reduction, capped at the loss). Choose it first to preserve a substantial reserve. It never creates food. |
+
+Both benefits require the completed civic house, fully staffed civic duty and
+stores condition at least the existing maintenance threshold (currently 50).
+The preparation order also needs its ordinary workers/materials/places; switching
+it off produces nothing. The service must staff its own additional adult.
+Requested duty may remain unfilled because essential food, watch, production,
+maintenance or a higher-priority project uses the same adults. The panel shows
+actual civic staffing, store condition and next-season extra output/saved food.
+
+An understaffed town keeps its earned rank, buildings and paid work, while these
+benefits stop. Reduce construction crews or pause optional work to release adults.
+Enable store maintenance and retain repair timber if condition is the blocker.
+The existing priority numbers are visible in the allocation review. Town duty
+has priority 6 and service 7; large-village duty retains its original priority 4.
+Rank is an achievement; reversible economic support remains a separate measure.
+
+Older saves with recognized town achievement retain that rank. Once they enable
+town development, the readiness view directs them through any missing assembly
+shelter and civic-house fabric in order. They pay the ordinary prices and work;
+recognition waives repeating the earned readiness milestone. Dependencies still
+apply. Recognition supplies no building, duty or duplicate promotion benefit.
+
 ## Content and persistence
 
 `data/lifecycle.json` defines profile `village_lifecycle_v1`, stage metadata, the
-one active transition, an explicit civic-project reference, closed all-of/any-of
+retained first transition, an explicit civic-project reference, closed all-of/any-of
 predicates, three bounded projects,
 site successors and interface copy. Structured benefit targets validate cumulative
 effects and successor capacity; interface quantities derive from the actual
@@ -61,14 +114,32 @@ effects and site records, including both incremental and total values.
 incremental effects, readiness thresholds, reserves and finite civic staffing.
 Projects reuse the existing queue and ordered completion ledger.
 
-The optional `lifecycle` extension stores only profile/version identity, a hash
+The optional `lifecycle.town` **content** block and `balance.town_lifecycle` define
+`town_responsibilities_v1`: one transition referencing `town_support`, three paid
+projects, two additional neutral sites and explicit successor proposals. The
+runtime resolves `town_support` through the same factor function as legacy town
+support; the original values and behavior stay unchanged.
+
+The optional **saved** `lifecycle` extension stores profile/version identity, a hash
 of semantic definitions, adoption turn, explicit legacy recognition and the
 next-transition readiness memory. Civic stage and unlocks are derived from
 recognition plus completed civic projects. The counter is bound to a transition
 and evaluated only after a resolved season. Adoption and promotion reset it;
 queries, saving, loading and rendered frames do not advance it.
 
-Active lifecycle saves use **wrapper 8**. Wrappers 1–7 retain their earlier
+A saved lifecycle without town adoption retains the exact published
+`village_lifecycle_v1` semantic hash
+`a4694114cc755d8f5a2113daabf71370a8b85824acc1317dbe973c3555f1fe35`.
+`lifecycle_town_begin` adds only `{version, profile, definition_hash, started}` in
+`saved_state.lifecycle.town`, records the adoption event, and selects/resets the
+next transition's existing readiness memory if needed. Its separate semantic
+hash includes the retained base hash, town definitions/tuning and authoritative
+town-support values, land equivalents and directly read maintenance/preparation
+values. No paid queue entry or original profile hash is rewritten.
+An actual frozen 0.11 paused paid save is retained as a compatibility fixture.
+Old 0.11 applications reject adopted town saves; use 0.12 to continue them.
+
+Active lifecycle saves still use **wrapper 8**; no new wrapper is needed. Wrappers 1–7 retain their earlier
 meanings. An older save gains only inactive `lifecycle: {}` until adoption.
 Atomic validation, temporary-file readback and rename remain the save boundary.
 The reference bookmark, medieval study and parent campaign keep separate saves.
@@ -122,7 +193,18 @@ village suite and the parent's data/import/full-suite/map gates.
 The release builder runs lifecycle data/negative checks before export, then both
 new rule suites and the rendered sequence on source and the exact app. It preserves
 the existing 41 neutral model exports. Packaging requires a clean committed
-checkout, fresh parent logs, exact-app checks and manual image inspection. This
-implementation has a verified local 0.11.0 build; see the
-[acceptance record](../VERIFICATION-0.11.md) for exact-app results and limits.
-It does not publish a release.
+checkout, fresh parent logs, exact-app checks and manual image inspection. The verified 0.11 build remains preserved. Town acceptance and 0.12 delivery
+are recorded in [the town verification record](../VERIFICATION-0.12.md).
+This work does not publish a release.
+
+Town adds `validate_town.py`, `test_town_data.py`, `town_checks.gd`,
+`town_preview.gd`, `lifecycle_profile.gd` and `town_profile.gd` to those retained
+gates. `town_driver.gd` supplies compact/outward 100-season public-command recipes.
+The checks write saves and replayable recipes for readiness, commissioning,
+partial work, promotion, both investments, civic labor stress and recovery under
+`out_dir=/tmp/yenikapi-town-states`. Every recipe is replayed from the ordinary
+initial state and compared exactly, including its SHA-256 digest. The rendered
+walkthrough records its actual UI commands, rolls back its trace on explicit Load,
+and replays the resulting continuing game. Source and exact-app recipes/digests
+must match. The build retains all 41 existing GLBs and adds three separately named
+Town models of the paid finished rooms.

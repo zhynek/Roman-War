@@ -24,7 +24,16 @@ func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary =
 	content = canonical(config)
 	balance = canonical(tuning)
 	base_snapshot = canonical(snapshot)
-	lifecycle = Lifecycle.new(canonical(lifecycle_config),balance.get("lifecycle",{}))
+	var support: Dictionary={}
+	for key in balance:
+		if String(key).begins_with("town_") and key!="town_lifecycle":support[key]=balance[key]
+	support.people_per_dwelling=balance.people_per_dwelling
+	# Referenced readiness/operating data is part of the adopted town contract.
+	support.foundation_alternatives=canonical(land_config.get("alternatives",{}))
+	support.condition_threshold=balance.get("assets",{}).get("condition_threshold",0)
+	support.preparation={}
+	for key in ["blank_capacity","cooperative_yield","prepare_wood"]:support.preparation[key]=balance.get("living",{}).get(key,0)
+	lifecycle = Lifecycle.new(canonical(lifecycle_config),balance.get("lifecycle",{}),balance.get("town_lifecycle",{}),support)
 	content.projects.append_array(lifecycle.content.get("projects",[]))
 	var spatial: Dictionary=canonical(land_config)
 	if not spatial.is_empty():
@@ -268,7 +277,8 @@ func forecast(state: Dictionary) -> Dictionary:
 		gathered=maxi(0,gathered+int(land_effects.food))
 	gathered=maxi(0,gathered-incidents.food_penalty(state))
 	var used: int = ceili(population * float(balance.tight_rations_percent if state.tight_rations else balance.full_rations_percent) / 100.0) * int(balance.food_per_person)
-	var spoil: int = int(state.food) * int(balance.spoil_percent) / 100
+	var town_operation: Dictionary=lifecycle.operation(state,allocation_,self)
+	var spoil: int = int(state.food) * int(balance.spoil_percent) / 100 - int(town_operation.saved)
 	var available: int = maxi(0,int(state.food) + gathered - spoil)
 	var eaten: int = mini(used,available)
 	var covered: bool = eaten >= used
@@ -322,6 +332,7 @@ func forecast(state: Dictionary) -> Dictionary:
 		output.living=life
 		output.wood=int(life.harvest)+int(cargo.wood)
 	if incidents.active(state):output.incidents=incident_forecast;output.incident_lost=incident_lost
+	if lifecycle.town_active(state):output.town=town_operation
 	return output
 
 func move_stock(current: int, target: int) -> int:
@@ -409,10 +420,23 @@ func migration_supported(state: Dictionary) -> bool:
 	var count: int = people(state).size()
 	return capacity(state)-count >= balance.migration_size and state.food >= (count+int(balance.migration_size))*int(balance.migration_reserve_seasons) and state.wellbeing >= balance.migration_min_wellbeing and state.cooperation >= balance.migration_min_cooperation
 
-func town_conditions(state: Dictionary) -> bool:
+func town_factors(state: Dictionary) -> Array:
+	var factors: Array=[]
+	for pair in [["population",people(state).size(),int(balance.town_population)],["housing",capacity(state)/int(balance.people_per_dwelling),int(balance.town_dwellings)],["reserves",int(state.food),people(state).size()*int(balance.town_reserve_seasons)],["wellbeing",int(state.wellbeing),int(balance.town_wellbeing)],["cooperation",int(state.cooperation),int(balance.town_cooperation)],["security",int(state.security),int(balance.town_security)]]:
+		factors.append({"id":pair[0],"current":pair[1],"required":pair[2],"met":pair[1]>=pair[2]})
 	for id in balance.town_required_projects:
-		if not land.foundation(state,id,self): return false
-	return people(state).size() >= balance.town_population and capacity(state)/int(balance.people_per_dwelling) >= balance.town_dwellings and state.food >= people(state).size()*int(balance.town_reserve_seasons) and state.wellbeing >= balance.town_wellbeing and state.cooperation >= balance.town_cooperation and state.security >= balance.town_security
+		var met: bool=land.foundation(state,id,self)
+		var factor: Dictionary={"id":id,"current":int(met),"required":1,"met":met}
+		if land.active(state) and land.content.alternatives.has(id):
+			factor.alternatives=[]
+			for option in [id]+land.content.alternatives[id]:factor.alternatives.append({"id":option,"current":int(has_project(state,option)),"required":1,"met":has_project(state,option)})
+		factors.append(factor)
+	return factors
+
+func town_conditions(state: Dictionary) -> bool:
+	for factor in town_factors(state):
+		if not factor.met:return false
+	return true
 
 func _add_person(state: Dictionary, age: int) -> void:
 	var household_id: String = ""

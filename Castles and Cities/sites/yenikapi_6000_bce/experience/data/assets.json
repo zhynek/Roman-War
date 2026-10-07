@@ -252,7 +252,7 @@
     "forecast": "Next season: food {food} ({delta}); gathered {gathered}, eaten {used}, unmet {unfed}, spoilage {spoil}, pressure losses {losses}, overflow {overflow}. Timber gathering {wood}; repair cost {repair}.",
     "actual": "Last season: provisions {food}; unmet {unfed}; construction {work} work points. Inspect the journal and household memory for the consequences.",
     "allocation": "Automatic work \u00b7 allocated / requested",
-    "request": "{title}: {filled}/{wanted} \u00b7 {reason}",
+    "request": "{title}: {filled}/{wanted} \u00b7 allocation priority {priority} \u00b7 {reason}",
     "allocated": "Capacity committed",
     "labor": "Other work took the available adults; reduce higher priorities or crew budgets.",
     "materials": "Repair waits for available timber.",

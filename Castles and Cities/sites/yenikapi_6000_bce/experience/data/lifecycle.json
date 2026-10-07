@@ -564,7 +564,7 @@
     "next": "Next civic project",
     "unlocks": "Separately paid improvements",
     "planned": "Planned stage \u00b7 not yet playable",
-    "unavailable": "No further civic transition is implemented in this profile.",
+    "unavailable": "This civic stage is complete. Keep its services working and choose its separately paid improvements.",
     "cost": "Timber %d \u00b7 Work %d",
     "upkeep": "%d civic worker(s) each season after completion",
     "lineage": "{object} \u00b7 revision {from} \u2192 {to}",
@@ -579,7 +579,26 @@
     "living": "Living village",
     "any_of": "Any one: {alternatives}",
     "lifecycle_civic": "Civic duties",
-    "reserve_after": "After immediate payment, retain at least {food} provisions and {wood} timber."
+    "stocks_after": "After payment: {food} provisions and {wood} timber remain.",
+    "reserve_after": "After immediate payment, retain at least {food} provisions and {wood} timber.",
+    "town_adopt": "Enable town development",
+    "town_adoption": "Extend this saved lifecycle explicitly. Existing prices, work, prerequisites and paid contracts remain pinned. Sustain the existing local town-support requirements, then pay to adapt the assembly shelter. The finished civic house replaces its one-adult duty with two adults. Two optional paid facilities depend on that duty and maintained stores. Earlier town achievement keeps its rank and may supply missing civic fabric through the same paid chain.",
+    "town_active": "Town development enabled; earlier contracts retained.",
+    "town_missing_fabric": "Recognized town: pay for the missing civic fabric in order. Rank is already earned; no promotion gift or repeated achievement.",
+    "town_operation": "Civic duty: {filled} / {wanted} adults \u00b7 provision service: {service} / {service_wanted} adults. Stores condition: {condition} / {required}.",
+    "town_operating": "Town facilities can operate when their own workers, materials and places are available.",
+    "town_unstaffed": "Town duty is understaffed: preparation and provision benefits stop. Reduce project crews or pause optional work, restore provisions and allow adults to return to civic duty. Earned town status remains.",
+    "town_condition": "Stores need maintenance: the new facilities cannot deliver their benefits. Enable store maintenance and retain timber for repair.",
+    "town_effects": "Next season: {prepared} extra prepared set(s); {saved} provision(s) protected from spoilage. All output requires a paid, completed facility.",
+    "town_obligation": "After civic completion: {workers} civic adults in total, replacing the earlier {previous}; the optional provision service requests {service} additional adult(s).",
+    "town_required": "Required for civic fabric",
+    "town_optional": "Optional investment",
+    "town_ready_legacy": "Earned town rank is recognized. Pay for the missing fabric; no repeat of the readiness milestone.",
+    "town_foundations": "Completed local foundations",
+    "town_civic": "Town civic duty",
+    "town_service": "Local provision service",
+    "town_dwellings": "Six-person dwelling equivalents",
+    "town_service_unstaffed": "The provision service lacks its additional adult: no provisions are protected from spoilage. Pause optional construction or switch off preparation temporarily to free a worker; seasonal food needs also change the available workforce."
   },
   "errors": {
     "lifecycle_missing": "Begin city lifecycle before commissioning this project.",
@@ -593,10 +612,429 @@
     "lifecycle_stage": "Complete the civic achievement before commissioning this improvement.",
     "lifecycle_reserves": "Keep the quoted provision and fuel reserve after immediate payment.",
     "lifecycle_fabric": "The current building revision or reserved site does not match this project.",
-    "lifecycle_planned": "This later civic transition is planned, not implemented."
+    "lifecycle_planned": "This later civic transition is planned, not implemented.",
+    "town_missing": "Enable town development explicitly before commissioning this project.",
+    "town_started": "Town development is already enabled.",
+    "town_definition": "The saved town definitions do not match this build; retain the pinned profile.",
+    "town_fabric": "Complete the paid assembly shelter and civic house in order."
   },
   "events": {
     "lifecycle_adopted": "City lifecycle adopted. Existing achievement and investment continue.",
-    "lifecycle_promoted": "Assembly shelter completed; large-village improvements are now eligible."
+    "lifecycle_promoted": "Assembly shelter completed; large-village improvements are now eligible.",
+    "town_adopted": "Town development enabled; existing civic contracts and achievement retained.",
+    "town_promoted": "Civic house completed; town investments are now eligible. Continuing civic duty begins next season."
+  },
+  "town": {
+    "version": 1,
+    "profile": "town_responsibilities_v1",
+    "transition": {
+      "id": "establish_town",
+      "from": "village_established",
+      "to": "town",
+      "project": "town_civic",
+      "readiness": "town_support"
+    },
+    "projects": [
+      {
+        "id": "town_civic",
+        "title": "Adapt the assembly shelter into a civic house",
+        "body": "Retain the shelter, its entrance and assembly mat. Pay for a fitted civic house after sustained town support. Town duty replaces the shelter duty: {workers} adults each season in total. Promotion opens two separately paid facilities; it supplies no materials or repairs. This institution and architecture are explicit game interpretation.",
+        "role": "steward",
+        "at": [
+          -23,
+          40
+        ],
+        "requires": [
+          "lifecycle_assembly"
+        ],
+        "changes": [
+          {
+            "kind": "altered",
+            "before": [
+              "lifecycle_assembly_shelter"
+            ],
+            "after": [
+              {
+                "id": "lifecycle_assembly_shelter",
+                "kind": "building",
+                "revision": 2,
+                "change": {
+                  "kind": "added",
+                  "predecessors": []
+                },
+                "evidence": "interpretation",
+                "source_ids": [
+                  "yenikapi_excavation"
+                ],
+                "at": [
+                  -23,
+                  36
+                ],
+                "yaw": 180,
+                "size": [
+                  4,
+                  3
+                ],
+                "wall_height": 2.3,
+                "roof_rise": 1.6,
+                "roof": "gable",
+                "use": "work",
+                "label": "Civic house",
+                "furniture": [
+                  {
+                    "id": "assembly_mat",
+                    "kind": "mat",
+                    "at": [
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "id": "town_civic_basket",
+                    "kind": "basket",
+                    "at": [
+                      -1,
+                      -0.65
+                    ]
+                  }
+                ],
+                "household": "sim_shared_household"
+              }
+            ],
+            "expected_revisions": {
+              "lifecycle_assembly_shelter": 1
+            }
+          }
+        ],
+        "lifecycle": true,
+        "tuning": "town_civic",
+        "stage_requires": "village_established",
+        "asset": "yard",
+        "presentation": {
+          "treatment": "adapt",
+          "benefit": "Earn town civic achievement; unlock paid preparation and provision facilities. Civic duty becomes {workers} adults in total."
+        }
+      },
+      {
+        "id": "town_preparation",
+        "title": "Fit a material-preparation store",
+        "body": "Retain the small store and every existing container. When civic duty and store maintenance are supported, ordinary wood preparation can produce {delta} extra prepared set(s), for {wood} extra timber and {places} extra working place(s). Choose this first for watch equipment and incident preparation; it creates nothing while preparation is off.",
+        "role": "steward",
+        "at": [
+          12.8,
+          6
+        ],
+        "requires": [
+          "town_civic"
+        ],
+        "changes": [
+          {
+            "kind": "altered",
+            "before": [
+              "yk_house_04"
+            ],
+            "after": [
+              {
+                "id": "yk_house_04",
+                "kind": "building",
+                "revision": 2,
+                "change": {
+                  "kind": "added",
+                  "predecessors": []
+                },
+                "evidence": "interpretation",
+                "source_ids": [
+                  "yenikapi_excavation"
+                ],
+                "at": [
+                  12.8,
+                  2
+                ],
+                "yaw": 12,
+                "size": [
+                  3.6,
+                  3.8
+                ],
+                "wall_height": 2.45,
+                "roof_rise": 2.1,
+                "roof": "gable",
+                "use": "storage",
+                "label": "Material-preparation store",
+                "household": "yk_household_03",
+                "furniture": [
+                  {
+                    "id": "jar_0",
+                    "kind": "pot",
+                    "at": [
+                      -0.9720000000000001,
+                      -1.064
+                    ]
+                  },
+                  {
+                    "id": "jar_1",
+                    "kind": "pot",
+                    "at": [
+                      0.9720000000000001,
+                      -1.064
+                    ]
+                  },
+                  {
+                    "id": "jar_2",
+                    "kind": "pot",
+                    "at": [
+                      -0.9720000000000001,
+                      0.2659999999999998
+                    ]
+                  },
+                  {
+                    "id": "jar_3",
+                    "kind": "pot",
+                    "at": [
+                      0.9720000000000001,
+                      0.2659999999999998
+                    ]
+                  },
+                  {
+                    "id": "basket",
+                    "kind": "basket",
+                    "at": [
+                      -0.7,
+                      0.3
+                    ]
+                  },
+                  {
+                    "id": "mat",
+                    "kind": "grain",
+                    "at": [
+                      0.6,
+                      -0.2
+                    ]
+                  },
+                  {
+                    "id": "town_shaping_mat",
+                    "kind": "mat",
+                    "at": [
+                      0,
+                      1.1
+                    ]
+                  }
+                ]
+              }
+            ],
+            "expected_revisions": {
+              "yk_house_04": 1
+            }
+          }
+        ],
+        "lifecycle": true,
+        "tuning": "town_preparation",
+        "stage_requires": "town",
+        "asset": "stores",
+        "presentation": {
+          "treatment": "adapt",
+          "benefit": "Ordinary preparation: +{delta} set(s), {total} total at the basic order, up to {shared_total} with practiced shared work. Each bonus costs {wood} timber and {places} work place(s); civic duty and maintained stores required."
+        }
+      },
+      {
+        "id": "town_provision",
+        "title": "Fit the shared provision service",
+        "body": "Keep the care shelter and its existing care work. An additional {workers} adult(s) sorts and serves existing provisions when civic duty and store maintenance are supported. Save up to {delta} provisions from seasonal spoilage; never more than the actual loss. Choose this first to protect a substantial food reserve. The worker competes with production and construction.",
+        "role": "steward",
+        "at": [
+          -39,
+          8
+        ],
+        "requires": [
+          "town_civic",
+          "care_shelter"
+        ],
+        "changes": [
+          {
+            "kind": "altered",
+            "before": [
+              "growth_care_shelter"
+            ],
+            "after": [
+              {
+                "id": "growth_care_shelter",
+                "kind": "building",
+                "revision": 2,
+                "change": {
+                  "kind": "added",
+                  "predecessors": []
+                },
+                "evidence": "interpretation",
+                "source_ids": [
+                  "yenikapi_excavation"
+                ],
+                "at": [
+                  -39,
+                  4
+                ],
+                "yaw": 0,
+                "size": [
+                  4.8,
+                  5.2
+                ],
+                "wall_height": 2.45,
+                "roof_rise": 2.1,
+                "roof": "hip",
+                "use": "work",
+                "label": "Shared care and provision room",
+                "household": "sim_shared_household",
+                "furniture": [
+                  {
+                    "id": "mat",
+                    "kind": "mat",
+                    "at": [
+                      -1.248,
+                      -1.04
+                    ]
+                  },
+                  {
+                    "id": "bowl",
+                    "kind": "bowl",
+                    "at": [
+                      1.104,
+                      -1.04
+                    ]
+                  },
+                  {
+                    "id": "pot",
+                    "kind": "pot",
+                    "at": [
+                      1.296,
+                      -1.6640000000000001
+                    ]
+                  },
+                  {
+                    "id": "basket",
+                    "kind": "basket",
+                    "at": [
+                      -1.2,
+                      1.1440000000000001
+                    ]
+                  },
+                  {
+                    "id": "quern",
+                    "kind": "quern",
+                    "at": [
+                      1.152,
+                      0.676
+                    ]
+                  },
+                  {
+                    "id": "town_service_basket",
+                    "kind": "basket",
+                    "at": [
+                      0,
+                      -1.3
+                    ]
+                  }
+                ]
+              }
+            ],
+            "expected_revisions": {
+              "growth_care_shelter": 1
+            }
+          }
+        ],
+        "lifecycle": true,
+        "tuning": "town_provision",
+        "stage_requires": "town",
+        "asset": "stores",
+        "presentation": {
+          "treatment": "adapt",
+          "benefit": "Reduce seasonal spoilage by up to {delta} provisions ({total} total reduction), with {workers} additional service worker(s). Civic duty and maintained stores required; no free food."
+        }
+      }
+    ],
+    "sites": [
+      {
+        "id": "town_materials",
+        "title": "Household store",
+        "at": [
+          12.8,
+          2
+        ],
+        "size": [
+          6,
+          6
+        ],
+        "objects": [
+          "yk_house_04"
+        ],
+        "connection": "yk_path_yard",
+        "use": "Existing nonresidential fabric",
+        "beneficiaries": "The same continuing households",
+        "food": 0,
+        "work": 0,
+        "cooperation": 0,
+        "lifecycle": true
+      },
+      {
+        "id": "town_service",
+        "title": "Shared care and food preparation shelter",
+        "at": [
+          -39,
+          4
+        ],
+        "size": [
+          6,
+          6
+        ],
+        "objects": [
+          "growth_care_shelter"
+        ],
+        "connection": "yk_path_craft",
+        "use": "Existing nonresidential fabric",
+        "beneficiaries": "The same continuing households",
+        "food": 0,
+        "work": 0,
+        "cooperation": 0,
+        "lifecycle": true
+      }
+    ],
+    "proposals": [
+      {
+        "id": "town_civic",
+        "site": "assembly_ground",
+        "asset": "yard",
+        "requires_access": false,
+        "food": 0,
+        "work": 0,
+        "cooperation": 0,
+        "choice_group": "",
+        "retain": true,
+        "lifecycle": true,
+        "predecessor": "lifecycle_assembly"
+      },
+      {
+        "id": "town_preparation",
+        "site": "town_materials",
+        "asset": "stores",
+        "requires_access": false,
+        "food": 0,
+        "work": 0,
+        "cooperation": 0,
+        "choice_group": "",
+        "retain": true,
+        "lifecycle": true,
+        "predecessor": ""
+      },
+      {
+        "id": "town_provision",
+        "site": "town_service",
+        "asset": "stores",
+        "requires_access": false,
+        "food": 0,
+        "work": 0,
+        "cooperation": 0,
+        "choice_group": "",
+        "retain": true,
+        "lifecycle": true,
+        "predecessor": ""
+      }
+    ]
   }
 }

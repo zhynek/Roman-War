@@ -1,12 +1,13 @@
 # City lifecycle — growing one continuing settlement
 
 Architecture and implementation sequence, 7 October 2026. The baseline audit used
-`origin/main` `257fb72149a9db3d05cab079a5c640175231f4c1`. **Slices A and B are now
-implemented in source:** ordered building continuity, explicit lifecycle adoption,
-a paid small-to-large-village civic transition and two paid building improvements.
-The local 0.11.0 Mac build is verified; this work does not publish a release.
-Later transitions and neighboring-city work remain planned. Read the
-[verification record](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.11.md).
+`origin/main` `257fb72149a9db3d05cab079a5c640175231f4c1`. **Slices A, B and C are implemented in source:** ordered continuity, paid
+Small village → Large village → Town progression, separately paid improvements
+and continuing civic/service staffing. Slice C began from fetched `138561d`.
+The verified local 0.11.0 build remains preserved; 0.12 town delivery is recorded
+in [its verification record](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.12.md).
+Stages after Town and neighboring-city work remain planned. This work does not
+publish a release.
 The detailed implemented contract is
 [LIFECYCLE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/LIFECYCLE.md).
 The [shared architecture contract](../CLAUDE.md) remains authoritative.
@@ -111,7 +112,7 @@ not active unlocks or historical building claims. Names are working labels.
 |---|---|---|---|
 | Small village / `village_foundation` | Existing household community | Food, stores, shelter, shared work, care and watch | One adult has one seasonal assignment; materials and working ground are finite. |
 | Large village / `village_established` | Complete a modest assembly-shelter project after demonstrating reliable local support | Further store and workroom improvements; coordinated local projects | Civic staffing competes with productive work; expansion keeps the chosen land-use costs. |
-| Town / `town` | Complete a larger civic-house project after sustained town readiness | Additional household sites, specialized work and a locally useful exchange/service place | More mouths, access maintenance and material preparation; no compulsory foreign trade. |
+| Town / `town` | Complete a larger civic-house project after sustained town readiness | Paid material preparation and shared local provision, fitted to existing rooms; no new housing in Slice C | Two civic adults replace the earlier one, plus an optional service adult; existing access and maintenance remain; no compulsory foreign trade. |
 | Large town / `large_town` | Complete a town-hall improvement supported by dependable local services | Bounded neighborhood expansion, service coverage and more specialized production | Longer service obligations and competing use of land; increased scale needs new tests. |
 | Small city / `minor_city` | Complete a civic administration project with functioning neighborhood provision | District management, water/waste services and more substantial public works | Service bottlenecks and maintenance; housing redevelopment needs accommodation rules first. |
 | Large city / `large_city` | Complete expanded civic administration with reliable district coordination | Multiple differentiated districts and larger infrastructure networks | Supply resilience, unequal access and greater coordination demands. |
@@ -365,7 +366,7 @@ and complete continuation path exist.
 |---|---|---|
 | A — continuity foundation | Ordered revision replay, correct incremental effects and explicit site successors, with no new city tier yet | The same store can pass through two paid alterations; old save/geometry outputs remain unchanged; conflicting revisions and site double-booking fail. |
 | B — small to large village | Lifecycle data/rules, explicit adoption, assembly-shelter commission and two individually paid follow-on store/workroom improvements | Both land strategies reach it through normal commands, survive a shortage and continue after save/load. No residential displacement or neighbor requirement. |
-| C — large village to town | Paid civic-house transition linked to sustained town support, with the legacy-recognition route | Existing town saves retain achievement; new games earn it through the civic chain; underlying legacy/contact behavior remains compatible. |
+| C — large village to town | Paid civic-house transition linked to sustained town support, two separate operational investments and the legacy-recognition route | Both strategies sustain town; finite civic/service duty affects actual preparation and spoilage; saves, contacts, incidents and prior fabric survive. |
 | D — large town | More household sites and local service coverage, with scale/performance evidence | Entry, expansion, upkeep and recovery all work from the preceding live stage. |
 | E — city stages | One stage at a time: district services, residential accommodation, then larger infrastructure | Each stage has operational systems, an independent entry fixture and a tested end-to-end continuation. |
 | F — neighboring cities | Reusable settlement identity, connections and regional interaction | Local progression is coherent; regional exchanges preserve finite resources and separate city ownership. |
@@ -413,7 +414,17 @@ It must respect visibility rather than exposing hidden foreign state. Regional
 transactions need finite escrow, ownership and once-only completion; any combat
 continues through the parent `BattleResolver` seam.
 
-**Slices A and B are implemented in source and undergoing integrated verification.**
-They allocate wrapper 8 for active lifecycle saves and retain earlier wrappers.
-Slice C is the next gameplay phase; the remaining rows supply interfaces and
-development order, without claiming later city systems are playable.
+**Slices A, B and C are implemented in source.** Wrapper 8 retains the published
+base lifecycle profile. Explicit `lifecycle_town_begin` adds a separately pinned
+town contract without repricing earlier paid work. The civic house alters the
+assembly shelter; two optional paid facilities adapt the existing small store and
+care shelter. Town readiness reads the authoritative legacy support factors and
+uses the existing transition-bound counter. Legacy recognized towns pay for
+missing civic fabric without losing rank or receiving free promotion benefits.
+
+Town operation requires finite civic staffing and maintained stores. Separate
+preparation and spoilage readers consume real materials/places and service labor.
+Compact and outward 100-season public-command recipes retain their earlier space
+costs; stress and recovery preserve achievement. The same site/dock/planning room
+manages every project. Slice D and later rows remain development plans, not
+playable city systems. No additional residential density is part of Slice C.

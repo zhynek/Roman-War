@@ -37,7 +37,7 @@ func build(body: VBoxContainer) -> void:
 	totals.crew=f.assets.access_workers;totals.wood=f.assets.access_cost
 	totals.access=copy.ui.none if not rules.land.needs_access(state,rules) else copy.ui.ready if f.land.access else copy.ui.waiting
 	body.add_child(panel.label(copy.ui.totals.format(totals),15))
-	var sites: Array=rules.land.content.sites.filter(func(site):return not site.get("lifecycle",false) or rules.lifecycle.active(state))
+	var sites: Array=rules.land.content.sites.filter(func(site):return (not site.get("lifecycle",false) or rules.lifecycle.active(state)) and rules.lifecycle.site_available(state,site.id))
 	if not sites.any(func(site):return site.id==selected):selected=sites[0].id
 	var picker:=OptionButton.new();picker.name="LandPicker"
 	for site in sites:
@@ -58,7 +58,7 @@ func build(body: VBoxContainer) -> void:
 	if use!="":body.add_child(panel.label((copy.ui.completed if rules.has_project(state,use) else copy.ui.reserved).format({"project":rules.projects[use].title}),15))
 	body.add_child(panel.button(copy.ui.visit,visit,"VisitLand"))
 	for proposal in rules.land.content.proposals:
-		if proposal.get("lifecycle",false) and not rules.lifecycle.active(state):continue
+		if proposal.get("lifecycle",false) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,proposal.id)):continue
 		if proposal.site!=selected:continue
 		var p: Dictionary=rules.projects[proposal.id]
 		body.add_child(panel.label(p.title,19));body.add_child(panel.label(panel.project_body(proposal.id),15))

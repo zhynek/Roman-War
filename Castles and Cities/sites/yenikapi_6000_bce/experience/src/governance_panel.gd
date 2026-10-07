@@ -49,6 +49,7 @@ func configure(owner_app) -> void:
 	living_content.errors.merge(incident_content.errors)
 	living_content.errors.merge(lifecycle_copy.errors)
 	living_content.activities["lifecycle_civic"]=lifecycle_copy.strings.lifecycle_civic
+	living_content.activities["town_service"]=lifecycle_copy.strings.town_service
 	copy.factor_names.merge(living_content.factors)
 	rules = Rules.new(JSON.parse_string(FileAccess.get_file_as_string("res://data/governance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/balance.json")),JSON.parse_string(FileAccess.get_file_as_string("res://data/neighbors.json")),household_content,asset_content,land_content,living_content,incident_content,lifecycle_copy,JSON.parse_string(FileAccess.get_file_as_string("res://data/settlement.json")))
 	set_anchors_and_offsets_preset(Control.PRESET_RIGHT_WIDE)
@@ -299,7 +300,7 @@ func _work(body: VBoxContainer) -> void:
 		body.add_child(label(copy.queue_line%[p.title,item.progress,p.work,p.wood],16))
 		var cancel:=button(copy.cancel,func():dispatch({"kind":"cancel","id":item.id}),"Cancel_"+item.id);cancel.disabled=not rules.permitted(state,p.role);body.add_child(cancel)
 	for p in rules.content.projects:
-		if rules.lifecycle.project_specs.has(p.id) and not rules.lifecycle.active(state):continue
+		if rules.lifecycle.project_specs.has(p.id) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,p.id)):continue
 		if rules.has_project(state,p.id):continue
 		var queued:bool=false
 		for item in state.queue:

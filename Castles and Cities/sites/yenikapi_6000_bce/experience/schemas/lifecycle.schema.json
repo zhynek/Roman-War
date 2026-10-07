@@ -117,6 +117,74 @@
         "minLength": 1,
         "maxLength": 2000
       }
+    },
+    "town": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "profile": {
+          "const": "town_responsibilities_v1"
+        },
+        "transition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "const": "establish_town"
+            },
+            "from": {
+              "const": "village_established"
+            },
+            "to": {
+              "const": "town"
+            },
+            "project": {
+              "const": "town_civic"
+            },
+            "readiness": {
+              "const": "town_support"
+            }
+          },
+          "required": [
+            "id",
+            "from",
+            "to",
+            "project",
+            "readiness"
+          ]
+        },
+        "projects": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/project"
+          }
+        },
+        "sites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/site"
+          }
+        },
+        "proposals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/proposal"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "profile",
+        "transition",
+        "projects",
+        "sites",
+        "proposals"
+      ]
     }
   },
   "required": [
@@ -536,10 +604,16 @@
       "additionalProperties": false,
       "properties": {
         "kind": {
-          "enum": ["effect_total", "site_total"]
+          "enum": [
+            "effect_total",
+            "site_total"
+          ]
         },
         "key": {
-          "enum": ["storage", "work"]
+          "enum": [
+            "storage",
+            "work"
+          ]
         },
         "predecessor": {
           "type": "string",
@@ -552,18 +626,31 @@
           "maximum": 100000
         }
       },
-      "required": ["kind", "key", "predecessor", "total"],
+      "required": [
+        "kind",
+        "key",
+        "predecessor",
+        "total"
+      ],
       "oneOf": [
         {
           "properties": {
-            "kind": {"const": "effect_total"},
-            "key": {"const": "storage"}
+            "kind": {
+              "const": "effect_total"
+            },
+            "key": {
+              "const": "storage"
+            }
           }
         },
         {
           "properties": {
-            "kind": {"const": "site_total"},
-            "key": {"const": "work"}
+            "kind": {
+              "const": "site_total"
+            },
+            "key": {
+              "const": "work"
+            }
           }
         }
       ]

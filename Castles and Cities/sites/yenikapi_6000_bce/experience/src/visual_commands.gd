@@ -1,6 +1,9 @@
 extends Control
 ## Presentation adapter: every purchase/order uses the existing public quote/command.
 const Icon=preload("res://src/place_icon.gd")
+# Read-only acceptance observers; all authority remains in public commands.
+signal command_applied(action: Dictionary)
+signal save_finished(writing: bool)
 var app
 var p
 var copy: Dictionary
@@ -184,7 +187,7 @@ func build_header() -> void:
 func project_ids(asset: String) -> Array:
 	var ids: Array=[]
 	for id in p.rules.projects:
-		if p.rules.lifecycle.project_specs.has(id) and not p.rules.lifecycle.active(p.state):continue
+		if p.rules.lifecycle.project_specs.has(id) and (not p.rules.lifecycle.active(p.state) or not p.rules.lifecycle.available(p.state,id)):continue
 		if p.rules.assets.project_assets.get(id,"")!=asset:continue
 		if p.rules.land.active(p.state) and id in p.rules.land.content.legacy_projects and not p.rules.land.committed(p.state,id,p.rules):continue
 		if id in p.rules.living.content.projects.map(func(a):return a.id) and not p.rules.living.active(p.state):continue
@@ -298,6 +301,8 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 	var brief:=VBoxContainer.new();brief.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(brief)
 	paragraph(brief,spec.title,23)
 	paragraph(brief,cw("stage").format({"stage":d.stage_label,"percent":d.progress*100/d.total}) if d.committed else cw("quote").format({"wood":d.cost_wood,"blanks":d.cost_blanks}),17)
+	if p.rules.lifecycle.project_specs.has(id) and not d.committed:
+		var reserves:=paragraph(brief,lw("stocks_after").format({"food":p.state.food,"wood":int(p.state.wood)-int(d.cost_wood)}),15);reserves.name="ProjectReserves"
 	var progress:=ProgressBar.new();progress.name="ProjectProgress";progress.max_value=d.total;progress.value=d.progress;progress.custom_minimum_size.y=18;brief.add_child(progress)
 	paragraph(brief,cw("progress").format({"done":d.progress,"total":d.total}),15)
 	paragraph(brief,project_cause(d),15)
@@ -385,6 +390,9 @@ func lifecycle(body: VBoxContainer) -> void:
 		command_button(body,lw("adopt"),{"kind":"lifecycle_begin"},"VisualBeginLifecycle")
 		lifecycle_ladder(body,"")
 		return
+	if not life.town_active(p.state):
+		paragraph(body,lw("town_adoption"),15)
+		command_button(body,lw("town_adopt"),{"kind":"lifecycle_town_begin"},"VisualBeginTown")
 	var status: Dictionary=life.status(p.state,p.rules)
 	paragraph(body,lw("stage_line").format({"stage":status.stage_name}),23)
 	paragraph(body,lw("continuity"),15)
@@ -396,26 +404,29 @@ func lifecycle(body: VBoxContainer) -> void:
 		body.add_child(project_card(status.project))
 		paragraph(body,lw("upkeep")%int(status.upkeep),14)
 	else:paragraph(body,lw("unavailable"),16)
+	town_operations(body)
 	paragraph(body,lw("unlocks"),19)
 	var offers:=HFlowContainer.new();offers.add_theme_constant_override("h_separation",8);body.add_child(offers)
 	for id in life.project_specs:
-		if life.project_specs[id].stage_requires!=life.content.initial_stage:offers.add_child(project_card(id))
+		if life.available(p.state,id) and life.project_specs[id].stage_requires!=life.content.initial_stage and not life.transitions(p.state).any(func(t):return t.project==id):offers.add_child(project_card(id))
 	paragraph(body,lw("live_support"),14)
 	body.add_child(button(w("growth_review"),func():legacy(0),"LifecycleSupportReview"))
 	lifecycle_ladder(body,status.stage)
 
 func lifecycle_factors(body: VBoxContainer,status: Dictionary) -> void:
+	if status.get("recognized_fabric",false):paragraph(body,lw("town_ready_legacy"),15);return
 	paragraph(body,lw("requirements"),19)
 	var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",26);grid.add_theme_constant_override("v_separation",6);body.add_child(grid)
 	for factor in status.factors:
 		var fields: Dictionary=factor.duplicate()
-		fields.name=p.rules.lifecycle.content.factors.get(factor.id,factor.id)
+		fields.name=p.rules.lifecycle.content.factors.get(factor.id,p.rules.projects.get(factor.id,{}).get("title",factor.id))
+		if status.project=="town_civic" and factor.id=="housing":fields.name=lw("town_dwellings")
 		var line:=paragraph(grid,("✓ " if factor.met else "○ ")+lw("factor").format(fields),14)
 		line.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		line.add_theme_color_override("font_color",Color("c5d6b5") if factor.met else Color("edc490"))
 		if factor.has("alternatives"):
 			var alternatives: PackedStringArray=[]
-			for option in factor.alternatives:alternatives.append(("✓ " if option.met else "○ ")+p.rules.lifecycle.content.factors.get(option.id,option.id))
+			for option in factor.alternatives:alternatives.append(("✓ " if option.met else "○ ")+p.rules.lifecycle.content.factors.get(option.id,p.rules.projects.get(option.id,{}).get("title",option.id)))
 			line.text+="\n"+lw("any_of").format({"alternatives":", ".join(alternatives)})
 	paragraph(body,lw("readiness").format({"seasons":status.seasons,"required":status.required_seasons}),16)
 
@@ -425,9 +436,10 @@ func lifecycle_ladder(body: VBoxContainer,current: String) -> void:
 	for stage in p.rules.lifecycle.content.stages:
 		var title: String=stage.title
 		if stage.id==current:title="✓ "+title
-		if stage.status=="planned":title+=" · "+lw("planned")
+		var planned: bool=stage.status=="planned" and not (stage.id=="town" and p.rules.lifecycle.town_active(p.state))
+		if planned:title+=" · "+lw("planned")
 		var line:=label(title,14);ladder.add_child(line)
-		if stage.status=="planned":line.add_theme_color_override("font_color",Color("b4b8ad"))
+		if planned:line.add_theme_color_override("font_color",Color("b4b8ad"))
 
 func lifecycle_project(body: VBoxContainer,id: String) -> void:
 	var spec: Dictionary=p.rules.projects[id]
@@ -439,8 +451,11 @@ func lifecycle_project(body: VBoxContainer,id: String) -> void:
 		if queued(id).is_empty() and not p.rules.has_project(p.state,id):lifecycle_factors(body,status)
 		var titles: PackedStringArray=[]
 		for next_id in p.rules.lifecycle.project_specs:
-			if p.rules.lifecycle.project_specs[next_id].stage_requires!=p.rules.lifecycle.content.initial_stage:titles.append(p.rules.projects[next_id].title)
+			if next_id in status.unlocks and p.rules.lifecycle.available(p.state,next_id):titles.append(p.rules.projects[next_id].title)
 		paragraph(body,lw("unlocks")+": "+", ".join(titles),14)
+	if p.rules.lifecycle.town_projects.has(id):
+		paragraph(body,lw("town_required") if id=="town_civic" else lw("town_optional"),17)
+		town_operations(body)
 	for change in spec.changes:
 		for record in change.after:
 			if record.kind!="building":continue
@@ -502,7 +517,10 @@ func report(body: VBoxContainer) -> void:
 func execute(action: Dictionary) -> void:
 	if _busy:return
 	_busy=true
-	var start: int=Time.get_ticks_usec();p.dispatch(p.rules.canonical(action));timings[action.kind+"_us"]=Time.get_ticks_usec()-start
+	var start: int=Time.get_ticks_usec()
+	var accepted: bool=p.dispatch(p.rules.canonical(action))
+	timings[action.kind+"_us"]=Time.get_ticks_usec()-start
+	if accepted:command_applied.emit(p.rules.canonical(action))
 	_busy=false;refresh()
 func advance() -> void:
 	if _busy or p._season_input_locked:return
@@ -510,11 +528,16 @@ func advance() -> void:
 	var b: Button=find_child("VisualSeason",true,false)
 	if b!=null:b.disabled=true;b.text=w("busy")
 	if DisplayServer.get_name()!="headless":RenderingServer.force_draw(true)
-	var start: int=Time.get_ticks_usec();p.resolve_from_ui();timings.season_us=Time.get_ticks_usec()-start
+	var start: int=Time.get_ticks_usec();var turn: int=p.state.turn
+	p.resolve_from_ui();timings.season_us=Time.get_ticks_usec()-start
+	if p.state.turn>turn:command_applied.emit({"kind":"advance"})
 	_busy=false;refresh()
-func save() -> void:p.save_campaign();refresh()
+func save() -> void:
+	if p.save_campaign():save_finished.emit(true)
+	refresh()
 func load_saved() -> void:
-	if p.load_campaign():room_mode=false;return_view={};detail={};overlay="";page="projects";open()
+	if p.load_campaign():
+		room_mode=false;return_view={};detail={};overlay="";page="projects";open();save_finished.emit(false)
 	else:refresh()
 func start_new() -> void:
 	if not p.state.is_empty() or FileAccess.file_exists(p.save_path):show_overlay("new_confirm");return
@@ -670,3 +693,13 @@ func leave_room() -> void:
 func site_preview(id: String) -> Mesh:
 	if not is_instance_valid(construction()) or not construction().sites.has(id):return preview_mesh(id,false)
 	return app.world.object_nodes[construction().sites[id].owner].mesh
+
+func town_operations(body: VBoxContainer) -> void:
+	var life=p.rules.lifecycle
+	if not life.town_active(p.state):return
+	paragraph(body,lw("town_obligation").format({"workers":life.town_balance.civic_workers,"previous":life.balance.civic_workers,"service":life.town_balance.service_workers}),14)
+	if p.rules.has_project(p.state,"town_civic"):
+		var op: Dictionary=life.operation(p.state,forecast.get("assets",{}),p.rules)
+		paragraph(body,lw("town_operation").format(op),16)
+		paragraph(body,lw("town_unstaffed" if not op.civic else "town_condition" if not op.maintained else "town_service_unstaffed" if op.service<op.service_wanted else "town_operating"),14)
+		paragraph(body,lw("town_effects").format(op),14)

@@ -15,9 +15,9 @@ def load(name):
     return json.loads((ROOT / 'data' / f'{name}.json').read_text())
 
 
-def validate(data, balance):
+def validate(data, balance, operational=(), check_schema=True):
     errors = []
-    for name, value in [('lifecycle', data), ('balance', balance)]:
+    for name, value in ([('lifecycle', data), ('balance', balance)] if check_schema else []):
         schema = json.loads((ROOT / 'schemas' / f'{name}.schema.json').read_text())
         errors += [f'{name} {e.json_path}: {e.message}' for e in jsonschema.Draft202012Validator(schema).iter_errors(value)]
     if errors:
@@ -163,7 +163,7 @@ def validate(data, balance):
     for project in data['projects']:
         target = project.get('benefit_target')
         if target is None:
-            if project['id'] not in civic_projects: errors.append('improvement lacks benefit target')
+            if project['id'] not in civic_projects and project['id'] not in operational: errors.append('improvement lacks benefit target')
             continue
         key, predecessor = target['key'], target['predecessor']
         if predecessor not in project['requires']: errors.append('benefit predecessor lacks completed prerequisite')

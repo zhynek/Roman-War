@@ -1,0 +1,2754 @@
+{
+  "format": "yenikapi_seasons",
+  "state": {
+    "assets": {
+      "commissioned": 11,
+      "conditions": {
+        "fields": 92,
+        "homes": 93,
+        "landing": 94,
+        "stores": 94,
+        "watch": 94,
+        "workroom": 94,
+        "yard": 94
+      },
+      "decisions": [
+        {
+          "author": "citizen_0001",
+          "details": {
+            "value": 1
+          },
+          "kind": "asset_principle",
+          "office": "steward",
+          "target": "welcome",
+          "turn": 0
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+            "value": 1
+          },
+          "kind": "living_order",
+          "office": "steward",
+          "target": "prepare",
+          "turn": 0
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "land_cultivate",
+          "turn": 0
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "shared_store",
+          "turn": 2
+        },
+        {
+          "author": "citizen_0002",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "watch",
+          "target": "watch_shelter",
+          "turn": 5
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "care_shelter",
+          "turn": 7
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+            "value": 0
+          },
+          "kind": "living_order",
+          "office": "steward",
+          "target": "prepare",
+          "turn": 10
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "land_outer_access",
+          "turn": 10
+        },
+        {
+          "author": "citizen_0001",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "land_outer_west",
+          "turn": 15
+        },
+        {
+          "author": "citizen_0006",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "land_outer_east",
+          "turn": 19
+        },
+        {
+          "author": "citizen_0006",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "land_adapt_workroom",
+          "turn": 23
+        },
+        {
+          "author": "citizen_0006",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "council_ground",
+          "turn": 25
+        },
+        {
+          "author": "citizen_0003",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "watch",
+          "target": "refuge_screen",
+          "turn": 28
+        },
+        {
+          "author": "citizen_0006",
+          "details": {
+
+          },
+          "kind": "commission",
+          "office": "steward",
+          "target": "lifecycle_assembly",
+          "turn": 31
+        },
+        {
+          "author": "citizen_0002",
+          "details": {
+            "crew": 3,
+            "paused": true,
+            "priority": 2
+          },
+          "kind": "asset_project",
+          "office": "steward",
+          "target": "lifecycle_assembly",
+          "turn": 32
+        }
+      ],
+      "housing": false,
+      "initiatives": {
+        "care_shelter": {
+          "author": "citizen_0001",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 7
+        },
+        "council_ground": {
+          "author": "citizen_0006",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 25
+        },
+        "land_adapt_workroom": {
+          "author": "citizen_0006",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 23
+        },
+        "land_cultivate": {
+          "author": "citizen_0001",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 0
+        },
+        "land_outer_access": {
+          "author": "citizen_0001",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 10
+        },
+        "land_outer_east": {
+          "author": "citizen_0006",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 19
+        },
+        "land_outer_west": {
+          "author": "citizen_0001",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 15
+        },
+        "lifecycle_assembly": {
+          "author": "citizen_0006",
+          "crew": 3,
+          "office": "steward",
+          "paused": true,
+          "priority": 2,
+          "turn": 31
+        },
+        "refuge_screen": {
+          "author": "citizen_0003",
+          "crew": 3,
+          "office": "watch",
+          "paused": false,
+          "priority": 2,
+          "turn": 28
+        },
+        "shared_store": {
+          "author": "citizen_0001",
+          "crew": 3,
+          "office": "steward",
+          "paused": false,
+          "priority": 2,
+          "turn": 2
+        },
+        "watch_shelter": {
+          "author": "citizen_0002",
+          "crew": 3,
+          "office": "watch",
+          "paused": false,
+          "priority": 2,
+          "turn": 5
+        }
+      },
+      "inspected": [],
+      "learning_seasons": 0,
+      "maintenance": {
+        "fields": true,
+        "homes": true,
+        "landing": true,
+        "stores": true,
+        "watch": true,
+        "workroom": true,
+        "yard": true
+      },
+      "manual_plan": {
+        "building": 3,
+        "care": 2,
+        "food": 9,
+        "timber": 3,
+        "watch": 2
+      },
+      "pressure_decisions": 0,
+      "pressure_start": -1,
+      "principle_changes": 1,
+      "report": {
+        "projects": {
+          "lifecycle_assembly": {
+            "crew": 3,
+            "work": 14
+          }
+        },
+        "repair": "",
+        "repair_cost": 0,
+        "requests": [
+          {
+            "asset": "fields",
+            "filled": 11,
+            "id": "food",
+            "job": "food",
+            "priority": 1,
+            "reason": "allocated",
+            "wanted": 11
+          },
+          {
+            "asset": "homes",
+            "filled": 2,
+            "id": "care",
+            "job": "care",
+            "priority": 2,
+            "reason": "allocated",
+            "wanted": 2
+          },
+          {
+            "asset": "watch",
+            "filled": 2,
+            "id": "watch",
+            "job": "watch",
+            "priority": 2,
+            "reason": "allocated",
+            "wanted": 2
+          },
+          {
+            "asset": "yard",
+            "filled": 1,
+            "id": "land_access",
+            "job": "building",
+            "priority": 3,
+            "reason": "allocated",
+            "wanted": 1
+          },
+          {
+            "asset": "stores",
+            "filled": 14,
+            "id": "reserve",
+            "job": "food",
+            "priority": 3,
+            "reason": "allocated",
+            "wanted": 14
+          },
+          {
+            "asset": "yard",
+            "filled": 3,
+            "id": "lifecycle_assembly",
+            "job": "building",
+            "priority": 5,
+            "reason": "allocated",
+            "wanted": 3
+          },
+          {
+            "asset": "workroom",
+            "filled": 1,
+            "id": "timber",
+            "job": "timber",
+            "priority": 5,
+            "reason": "labor",
+            "wanted": 3
+          }
+        ],
+        "turn": 31
+      },
+      "reserve": 2,
+      "started": 0,
+      "tutorial": 0,
+      "upkeep": 0,
+      "version": 1,
+      "watch": 1
+    },
+    "assignments": [
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          4,
+          -56
+        ],
+        "id": "citizen_0043",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          4,
+          -56
+        ],
+        "id": "citizen_0046",
+        "job": "food",
+        "to": [
+          -59,
+          12
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          4,
+          -56
+        ],
+        "id": "citizen_0047",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -12,
+          12
+        ],
+        "id": "citizen_0001",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -12,
+          12
+        ],
+        "id": "citizen_0002",
+        "job": "food",
+        "to": [
+          -59,
+          12
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -12,
+          12
+        ],
+        "id": "citizen_0003",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -12,
+          12
+        ],
+        "id": "citizen_0004",
+        "job": "food",
+        "to": [
+          40,
+          21
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -17,
+          12
+        ],
+        "id": "citizen_0006",
+        "job": "food",
+        "to": [
+          -59,
+          12
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -17,
+          12
+        ],
+        "id": "citizen_0007",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -17,
+          12
+        ],
+        "id": "citizen_0008",
+        "job": "food",
+        "to": [
+          40,
+          21
+        ]
+      },
+      {
+        "asset": "fields",
+        "duty": "food",
+        "from": [
+          -17,
+          12
+        ],
+        "id": "citizen_0009",
+        "job": "food",
+        "to": [
+          -54,
+          -19
+        ]
+      },
+      {
+        "asset": "homes",
+        "duty": "care",
+        "from": [
+          8,
+          7
+        ],
+        "id": "citizen_0011",
+        "job": "care",
+        "to": [
+          -12,
+          12
+        ]
+      },
+      {
+        "asset": "homes",
+        "duty": "care",
+        "from": [
+          8,
+          7
+        ],
+        "id": "citizen_0012",
+        "job": "care",
+        "to": [
+          -12,
+          12
+        ]
+      },
+      {
+        "asset": "watch",
+        "duty": "watch",
+        "from": [
+          8,
+          7
+        ],
+        "id": "citizen_0013",
+        "job": "watch",
+        "to": [
+          27,
+          -8
+        ]
+      },
+      {
+        "asset": "watch",
+        "duty": "watch",
+        "from": [
+          8,
+          7
+        ],
+        "id": "citizen_0014",
+        "job": "watch",
+        "to": [
+          27,
+          -8
+        ]
+      },
+      {
+        "asset": "yard",
+        "duty": "land_access",
+        "from": [
+          -9,
+          -10
+        ],
+        "id": "citizen_0016",
+        "job": "building",
+        "to": [
+          -10,
+          -50
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -9,
+          -10
+        ],
+        "id": "citizen_0017",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -9,
+          -10
+        ],
+        "id": "citizen_0018",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -9,
+          -10
+        ],
+        "id": "citizen_0019",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          12,
+          -15
+        ],
+        "id": "citizen_0021",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          12,
+          -15
+        ],
+        "id": "citizen_0022",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          12,
+          -15
+        ],
+        "id": "citizen_0023",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          12,
+          -15
+        ],
+        "id": "citizen_0024",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -28,
+          29
+        ],
+        "id": "citizen_0026",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -28,
+          29
+        ],
+        "id": "citizen_0027",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -28,
+          29
+        ],
+        "id": "citizen_0028",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -28,
+          29
+        ],
+        "id": "citizen_0029",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -12,
+          12
+        ],
+        "id": "citizen_0031",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -17,
+          12
+        ],
+        "id": "citizen_0032",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "stores",
+        "duty": "reserve",
+        "from": [
+          -9,
+          -10
+        ],
+        "id": "citizen_0034",
+        "job": "food",
+        "to": [
+          -3,
+          30
+        ]
+      },
+      {
+        "asset": "yard",
+        "duty": "lifecycle_assembly",
+        "from": [
+          12,
+          -15
+        ],
+        "id": "citizen_0035",
+        "job": "building",
+        "to": [
+          -23,
+          36
+        ]
+      },
+      {
+        "asset": "yard",
+        "duty": "lifecycle_assembly",
+        "from": [
+          -22,
+          -55
+        ],
+        "id": "citizen_0038",
+        "job": "building",
+        "to": [
+          -23,
+          36
+        ]
+      },
+      {
+        "asset": "yard",
+        "duty": "lifecycle_assembly",
+        "from": [
+          -22,
+          -55
+        ],
+        "id": "citizen_0039",
+        "job": "building",
+        "to": [
+          -23,
+          36
+        ]
+      },
+      {
+        "asset": "workroom",
+        "duty": "timber",
+        "from": [
+          -22,
+          -55
+        ],
+        "id": "citizen_0042",
+        "job": "timber",
+        "to": [
+          -88,
+          -28
+        ]
+      }
+    ],
+    "birth_credit": 92,
+    "citizens": [
+      {
+        "active": true,
+        "age": 184,
+        "household": "sim_household_01",
+        "id": "citizen_0001",
+        "name": "Aster",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 216,
+        "household": "sim_household_01",
+        "id": "citizen_0002",
+        "name": "Tala",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 140,
+        "household": "sim_household_01",
+        "id": "citizen_0003",
+        "name": "Neri",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 128,
+        "household": "sim_household_01",
+        "id": "citizen_0004",
+        "name": "Sora",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 60,
+        "household": "sim_household_01",
+        "id": "citizen_0005",
+        "name": "Ilan",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 168,
+        "household": "sim_household_02",
+        "id": "citizen_0006",
+        "name": "Mira",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 156,
+        "household": "sim_household_02",
+        "id": "citizen_0007",
+        "name": "Oren",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 120,
+        "household": "sim_household_02",
+        "id": "citizen_0008",
+        "name": "Luma",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 100,
+        "household": "sim_household_02",
+        "id": "citizen_0009",
+        "name": "Eren",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 48,
+        "household": "sim_household_02",
+        "id": "citizen_0010",
+        "name": "Nara",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 204,
+        "household": "sim_household_03",
+        "id": "citizen_0011",
+        "name": "Tavi",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 188,
+        "household": "sim_household_03",
+        "id": "citizen_0012",
+        "name": "Seli",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 144,
+        "household": "sim_household_03",
+        "id": "citizen_0013",
+        "name": "Runi",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 76,
+        "household": "sim_household_03",
+        "id": "citizen_0014",
+        "name": "Dara",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 56,
+        "household": "sim_household_03",
+        "id": "citizen_0015",
+        "name": "Vela",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 176,
+        "household": "sim_household_04",
+        "id": "citizen_0016",
+        "name": "Arin",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 164,
+        "household": "sim_household_04",
+        "id": "citizen_0017",
+        "name": "Kori",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 112,
+        "household": "sim_household_04",
+        "id": "citizen_0018",
+        "name": "Evi",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 88,
+        "household": "sim_household_04",
+        "id": "citizen_0019",
+        "name": "Pela",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 68,
+        "household": "sim_household_04",
+        "id": "citizen_0020",
+        "name": "Tero",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 232,
+        "household": "sim_household_05",
+        "id": "citizen_0021",
+        "name": "Sani",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 208,
+        "household": "sim_household_05",
+        "id": "citizen_0022",
+        "name": "Meli",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 136,
+        "household": "sim_household_05",
+        "id": "citizen_0023",
+        "name": "Ova",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 80,
+        "household": "sim_household_05",
+        "id": "citizen_0024",
+        "name": "Rali",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 44,
+        "household": "sim_household_05",
+        "id": "citizen_0025",
+        "name": "Leri",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 192,
+        "household": "sim_household_06",
+        "id": "citizen_0026",
+        "name": "Avi",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 172,
+        "household": "sim_household_06",
+        "id": "citizen_0027",
+        "name": "Suri",
+        "steward": 4,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 124,
+        "household": "sim_household_06",
+        "id": "citizen_0028",
+        "name": "Nemi",
+        "steward": 3,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 96,
+        "household": "sim_household_06",
+        "id": "citizen_0029",
+        "name": "Vani",
+        "steward": 2,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 64,
+        "household": "sim_household_06",
+        "id": "citizen_0030",
+        "name": "Aro",
+        "steward": 5,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 134,
+        "household": "sim_household_01",
+        "id": "citizen_0031",
+        "name": "Tala",
+        "steward": 5,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 135,
+        "household": "sim_household_02",
+        "id": "citizen_0032",
+        "name": "Neri",
+        "steward": 2,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 51,
+        "household": "sim_household_03",
+        "id": "citizen_0033",
+        "name": "Sora",
+        "steward": 3,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 133,
+        "household": "sim_household_04",
+        "id": "citizen_0034",
+        "name": "Ilan",
+        "steward": 4,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 134,
+        "household": "sim_household_05",
+        "id": "citizen_0035",
+        "name": "Mira",
+        "steward": 5,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 47,
+        "household": "sim_household_06",
+        "id": "citizen_0036",
+        "name": "Oren",
+        "steward": 2,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 13,
+        "household": "land_outer_west_household",
+        "id": "citizen_0037",
+        "name": "Luma",
+        "steward": 3,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 121,
+        "household": "land_outer_west_household",
+        "id": "citizen_0038",
+        "name": "Eren",
+        "steward": 4,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 122,
+        "household": "land_outer_west_household",
+        "id": "citizen_0039",
+        "name": "Nara",
+        "steward": 5,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 31,
+        "household": "land_outer_west_household",
+        "id": "citizen_0040",
+        "name": "Tavi",
+        "steward": 2,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 8,
+        "household": "land_outer_west_household",
+        "id": "citizen_0041",
+        "name": "Seli",
+        "steward": 3,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 81,
+        "household": "land_outer_west_household",
+        "id": "citizen_0042",
+        "name": "Runi",
+        "steward": 4,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 82,
+        "household": "land_outer_east_household",
+        "id": "citizen_0043",
+        "name": "Dara",
+        "steward": 5,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 27,
+        "household": "land_outer_east_household",
+        "id": "citizen_0044",
+        "name": "Vela",
+        "steward": 2,
+        "watch": 2
+      },
+      {
+        "active": true,
+        "age": 4,
+        "household": "land_outer_east_household",
+        "id": "citizen_0045",
+        "name": "Arin",
+        "steward": 3,
+        "watch": 5
+      },
+      {
+        "active": true,
+        "age": 81,
+        "household": "land_outer_east_household",
+        "id": "citizen_0046",
+        "name": "Kori",
+        "steward": 4,
+        "watch": 4
+      },
+      {
+        "active": true,
+        "age": 82,
+        "household": "land_outer_east_household",
+        "id": "citizen_0047",
+        "name": "Evi",
+        "steward": 5,
+        "watch": 3
+      },
+      {
+        "active": true,
+        "age": 23,
+        "household": "land_outer_east_household",
+        "id": "citizen_0048",
+        "name": "Pela",
+        "steward": 2,
+        "watch": 2
+      }
+    ],
+    "completed": [
+      {
+        "id": "land_cultivate",
+        "turn": 1
+      },
+      {
+        "id": "shared_store",
+        "turn": 4
+      },
+      {
+        "id": "watch_shelter",
+        "turn": 6
+      },
+      {
+        "id": "care_shelter",
+        "turn": 8
+      },
+      {
+        "id": "land_outer_access",
+        "turn": 12
+      },
+      {
+        "id": "land_outer_west",
+        "turn": 17
+      },
+      {
+        "id": "land_outer_east",
+        "turn": 22
+      },
+      {
+        "id": "land_adapt_workroom",
+        "turn": 24
+      },
+      {
+        "id": "council_ground",
+        "turn": 26
+      },
+      {
+        "id": "refuge_screen",
+        "turn": 29
+      }
+    ],
+    "contacts": {
+
+    },
+    "cooperation": 69,
+    "food": 300,
+    "history": [
+      {
+        "kind": "household_started",
+        "params": {
+
+        },
+        "turn": 0
+      },
+      {
+        "kind": "lifecycle_adopted",
+        "params": {
+          "profile": "village_lifecycle_v1",
+          "recognition": ""
+        },
+        "turn": 0
+      },
+      {
+        "kind": "arrival",
+        "params": {
+          "count": 3
+        },
+        "turn": 0
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 0
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 107,
+          "population": 33,
+          "security": 49,
+          "turn": 1
+        },
+        "turn": 1
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "land_cultivate"
+        },
+        "turn": 1
+      },
+      {
+        "kind": "loss",
+        "params": {
+          "count": 3
+        },
+        "turn": 1
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 1
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 108,
+          "population": 33,
+          "security": 49,
+          "turn": 2
+        },
+        "turn": 2
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 2
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 150,
+          "population": 33,
+          "security": 49,
+          "turn": 3
+        },
+        "turn": 3
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 3
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 151,
+          "population": 33,
+          "security": 49,
+          "turn": 4
+        },
+        "turn": 4
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "shared_store"
+        },
+        "turn": 4
+      },
+      {
+        "kind": "arrival",
+        "params": {
+          "count": 3
+        },
+        "turn": 4
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 4
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 177,
+          "population": 36,
+          "security": 49,
+          "turn": 5
+        },
+        "turn": 5
+      },
+      {
+        "kind": "loss",
+        "params": {
+          "count": 15
+        },
+        "turn": 5
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 5
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 181,
+          "population": 36,
+          "security": 49,
+          "turn": 6
+        },
+        "turn": 6
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "watch_shelter"
+        },
+        "turn": 6
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 6
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 232,
+          "population": 36,
+          "security": 49,
+          "turn": 7
+        },
+        "turn": 7
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 7
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 232,
+          "population": 36,
+          "security": 54,
+          "turn": 8
+        },
+        "turn": 8
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "care_shelter"
+        },
+        "turn": 8
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 8
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 273,
+          "population": 36,
+          "security": 59,
+          "turn": 9
+        },
+        "turn": 9
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 9
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 64,
+          "turn": 10
+        },
+        "turn": 10
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 10
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 11
+        },
+        "turn": 11
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 11
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 12
+        },
+        "turn": 12
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "land_outer_access"
+        },
+        "turn": 12
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 12
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 13
+        },
+        "turn": 13
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 13
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 14
+        },
+        "turn": 14
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 14
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 15
+        },
+        "turn": 15
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 15
+      },
+      {
+        "kind": "succession",
+        "params": {
+          "name": "Mira",
+          "previous": "Aster",
+          "role": "steward"
+        },
+        "turn": 16
+      },
+      {
+        "kind": "succession",
+        "params": {
+          "name": "Neri",
+          "previous": "Tala",
+          "role": "watch"
+        },
+        "turn": 16
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 69,
+          "turn": 16
+        },
+        "turn": 16
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 16
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 71,
+          "turn": 17
+        },
+        "turn": 17
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "land_outer_west"
+        },
+        "turn": 17
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 17
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 36,
+          "security": 71,
+          "turn": 18
+        },
+        "turn": 18
+      },
+      {
+        "kind": "birth",
+        "params": {
+          "count": 1
+        },
+        "turn": 18
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 18
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 37,
+          "security": 71,
+          "turn": 19
+        },
+        "turn": 19
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 19
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 37,
+          "security": 71,
+          "turn": 20
+        },
+        "turn": 20
+      },
+      {
+        "kind": "arrival",
+        "params": {
+          "count": 3
+        },
+        "turn": 20
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 20
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 40,
+          "security": 71,
+          "turn": 21
+        },
+        "turn": 21
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 21
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 40,
+          "security": 71,
+          "turn": 22
+        },
+        "turn": 22
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "land_outer_east"
+        },
+        "turn": 22
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 22
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 40,
+          "security": 71,
+          "turn": 23
+        },
+        "turn": 23
+      },
+      {
+        "kind": "birth",
+        "params": {
+          "count": 1
+        },
+        "turn": 23
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 23
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 41,
+          "security": 71,
+          "turn": 24
+        },
+        "turn": 24
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "land_adapt_workroom"
+        },
+        "turn": 24
+      },
+      {
+        "kind": "arrival",
+        "params": {
+          "count": 3
+        },
+        "turn": 24
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 24
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 44,
+          "security": 71,
+          "turn": 25
+        },
+        "turn": 25
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 25
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 44,
+          "security": 71,
+          "turn": 26
+        },
+        "turn": 26
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "council_ground"
+        },
+        "turn": 26
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 26
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 44,
+          "security": 71,
+          "turn": 27
+        },
+        "turn": 27
+      },
+      {
+        "kind": "birth",
+        "params": {
+          "count": 1
+        },
+        "turn": 27
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 27
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 45,
+          "security": 71,
+          "turn": 28
+        },
+        "turn": 28
+      },
+      {
+        "kind": "arrival",
+        "params": {
+          "count": 3
+        },
+        "turn": 28
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 28
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 48,
+          "security": 71,
+          "turn": 29
+        },
+        "turn": 29
+      },
+      {
+        "kind": "completed",
+        "params": {
+          "project": "refuge_screen"
+        },
+        "turn": 29
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 29
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 48,
+          "security": 71,
+          "turn": 30
+        },
+        "turn": 30
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 30
+      },
+      {
+        "kind": "town",
+        "params": {
+
+        },
+        "turn": 31
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 48,
+          "security": 76,
+          "turn": 31
+        },
+        "turn": 31
+      },
+      {
+        "kind": "household_season",
+        "params": {
+          "food": 0,
+          "practice": 0,
+          "stage": "settled",
+          "stress": 0
+        },
+        "turn": 31
+      },
+      {
+        "kind": "succession",
+        "params": {
+          "name": "Tala",
+          "previous": "Mira",
+          "role": "steward"
+        },
+        "turn": 32
+      },
+      {
+        "kind": "succession",
+        "params": {
+          "name": "Oren",
+          "previous": "Neri",
+          "role": "watch"
+        },
+        "turn": 32
+      },
+      {
+        "kind": "season",
+        "params": {
+          "food": 300,
+          "population": 48,
+          "security": 81,
+          "turn": 32
+        },
+        "turn": 32
+      }
+    ],
+    "households": {
+      "elapsed": 32,
+      "homes": {
+        "land_outer_east_household": {
+          "practice": 0,
+          "stress": 0
+        },
+        "land_outer_west_household": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_01": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_02": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_03": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_04": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_05": {
+          "practice": 0,
+          "stress": 0
+        },
+        "sim_household_06": {
+          "practice": 0,
+          "stress": 0
+        }
+      },
+      "investments": {
+        "learning": false,
+        "refuge": false,
+        "safe_routes": false,
+        "secure_stores": false
+      },
+      "orders": {
+        "learning": false,
+        "refuge": false,
+        "safe_routes": false,
+        "secure_stores": false
+      },
+      "report": {
+        "care_ready": false,
+        "cooperation": 0,
+        "food_penalty": 0,
+        "learning_ready": false,
+        "practice_total": 0,
+        "security": 0,
+        "stage": "settled",
+        "stress_total": 0,
+        "watch_ready": false,
+        "wellbeing": 0
+      },
+      "started": 0,
+      "version": 1
+    },
+    "incidents": {
+
+    },
+    "land": {
+      "access_enabled": true,
+      "inspected": [],
+      "report": {
+        "access": true,
+        "food": 8,
+        "turn": 31,
+        "wood": 1,
+        "work": 12
+      },
+      "started": 0,
+      "tutorial": 0,
+      "version": 1
+    },
+    "leaders": {
+      "steward": {
+        "id": "citizen_0002",
+        "since": 32
+      },
+      "watch": {
+        "id": "citizen_0007",
+        "since": 32
+      }
+    },
+    "lifecycle": {
+      "definition_hash": "a4694114cc755d8f5a2113daabf71370a8b85824acc1317dbe973c3555f1fe35",
+      "profile": "village_lifecycle_v1",
+      "readiness": {
+        "last_turn": 32,
+        "seasons": 0,
+        "transition": "establish_village"
+      },
+      "recognition": "",
+      "revision": 1,
+      "started": 0,
+      "version": 1
+    },
+    "living": {
+      "area": "west_wood",
+      "blanks": 8,
+      "cooperate": false,
+      "discoveries": {
+
+      },
+      "experience": {
+        "land_court_home_household": {
+          "shaping": 0,
+          "woodland": 0
+        },
+        "land_hearth_home_household": {
+          "shaping": 0,
+          "woodland": 0
+        },
+        "land_outer_east_household": {
+          "shaping": 0,
+          "woodland": 0
+        },
+        "land_outer_west_household": {
+          "shaping": 0,
+          "woodland": 1
+        },
+        "sim_household_01": {
+          "shaping": 1,
+          "woodland": 8
+        },
+        "sim_household_02": {
+          "shaping": 0,
+          "woodland": 8
+        },
+        "sim_household_03": {
+          "shaping": 0,
+          "woodland": 3
+        },
+        "sim_household_04": {
+          "shaping": 4,
+          "woodland": 8
+        },
+        "sim_household_05": {
+          "shaping": 3,
+          "woodland": 8
+        },
+        "sim_household_06": {
+          "shaping": 2,
+          "woodland": 4
+        },
+        "sim_household_07": {
+          "shaping": 0,
+          "woodland": 0
+        },
+        "sim_household_08": {
+          "shaping": 0,
+          "woodland": 0
+        }
+      },
+      "inspected": [],
+      "kits": 0,
+      "meetings": 0,
+      "patrol": "landing_post",
+      "practice": 0,
+      "prepare": 0,
+      "readiness": 0,
+      "repair": true,
+      "report": {
+        "area": "west_wood",
+        "coverage": 4,
+        "distance": 0,
+        "equipment_security": 0,
+        "equipped": 0,
+        "fuel": 2,
+        "fuel_need": 2,
+        "fuel_penalty": 0,
+        "harvest": 3,
+        "next_stock": 21,
+        "prepare_wood": 0,
+        "prepared": 0,
+        "repair_wood": 0,
+        "repaired": 0,
+        "shared": false,
+        "support": 0,
+        "training": 0,
+        "training_workers": 0,
+        "turn": 31,
+        "wear": 0,
+        "workers": 1,
+        "yield": 3
+      },
+      "started": 0,
+      "training": false,
+      "tutorial": 0,
+      "version": 1,
+      "wear_total": 0,
+      "woodland": {
+        "north_wood": 72,
+        "west_wood": 21
+      }
+    },
+    "next_person": 49,
+    "phase": "town",
+    "plan": {
+      "building": 1,
+      "care": 2,
+      "food": 26,
+      "timber": 3,
+      "watch": 2
+    },
+    "queue": [
+      {
+        "id": "lifecycle_assembly",
+        "progress": 14
+      }
+    ],
+    "report": {
+      "assets": {
+        "access_cost": 1,
+        "access_workers": 1,
+        "living": {
+          "fuel": 2,
+          "prepare_wood": 0,
+          "prepared": 0,
+          "repair_wood": 0,
+          "repaired": 0,
+          "shared": false,
+          "support": 0,
+          "training_workers": 0
+        },
+        "orders": {
+          "safe_routes": 2
+        },
+        "plan": {
+          "building": 4,
+          "care": 2,
+          "food": 25,
+          "timber": 1,
+          "watch": 2
+        },
+        "projects": {
+          "lifecycle_assembly": {
+            "crew": 3,
+            "work": 14
+          }
+        },
+        "repair": "",
+        "repair_cost": 0,
+        "repair_workers": 0,
+        "requests": [
+          {
+            "asset": "fields",
+            "filled": 11,
+            "id": "food",
+            "job": "food",
+            "priority": 1,
+            "reason": "allocated",
+            "wanted": 11
+          },
+          {
+            "asset": "homes",
+            "filled": 2,
+            "id": "care",
+            "job": "care",
+            "priority": 2,
+            "reason": "allocated",
+            "wanted": 2
+          },
+          {
+            "asset": "watch",
+            "filled": 2,
+            "id": "watch",
+            "job": "watch",
+            "priority": 2,
+            "reason": "allocated",
+            "wanted": 2
+          },
+          {
+            "asset": "yard",
+            "filled": 1,
+            "id": "land_access",
+            "job": "building",
+            "priority": 3,
+            "reason": "allocated",
+            "wanted": 1
+          },
+          {
+            "asset": "stores",
+            "filled": 14,
+            "id": "reserve",
+            "job": "food",
+            "priority": 3,
+            "reason": "allocated",
+            "wanted": 14
+          },
+          {
+            "asset": "yard",
+            "filled": 3,
+            "id": "lifecycle_assembly",
+            "job": "building",
+            "priority": 5,
+            "reason": "allocated",
+            "wanted": 3
+          },
+          {
+            "asset": "workroom",
+            "filled": 1,
+            "id": "timber",
+            "job": "timber",
+            "priority": 5,
+            "reason": "labor",
+            "wanted": 3
+          }
+        ],
+        "target": 96
+      },
+      "cargo": {
+        "food": 0,
+        "wood": 0
+      },
+      "covered": true,
+      "crew": {
+        "carriers": 0,
+        "escorts": 0,
+        "ready": false
+      },
+      "factors": {
+        "cooperation": [
+          {
+            "id": "base",
+            "value": 55
+          },
+          {
+            "id": "care",
+            "value": 6
+          },
+          {
+            "id": "food",
+            "value": 0
+          },
+          {
+            "id": "crowding",
+            "value": 0
+          },
+          {
+            "id": "ration",
+            "value": 0
+          },
+          {
+            "id": "overwork",
+            "value": 0
+          },
+          {
+            "id": "projects",
+            "value": 8
+          },
+          {
+            "id": "household_life",
+            "value": 0
+          },
+          {
+            "id": "asset_upkeep",
+            "value": 0
+          },
+          {
+            "id": "land_access",
+            "value": 0
+          }
+        ],
+        "security": [
+          {
+            "id": "base",
+            "value": 25
+          },
+          {
+            "id": "watch",
+            "value": 16
+          },
+          {
+            "id": "leadership",
+            "value": 10
+          },
+          {
+            "id": "projects",
+            "value": 28
+          },
+          {
+            "id": "household_life",
+            "value": 0
+          },
+          {
+            "id": "asset_upkeep",
+            "value": 0
+          },
+          {
+            "id": "living_equipment",
+            "value": 0
+          },
+          {
+            "id": "living_coverage",
+            "value": 4
+          }
+        ],
+        "wellbeing": [
+          {
+            "id": "base",
+            "value": 40
+          },
+          {
+            "id": "care",
+            "value": 12
+          },
+          {
+            "id": "food",
+            "value": 15
+          },
+          {
+            "id": "crowding",
+            "value": 0
+          },
+          {
+            "id": "ration",
+            "value": 0
+          },
+          {
+            "id": "overwork",
+            "value": 0
+          },
+          {
+            "id": "projects",
+            "value": 8
+          },
+          {
+            "id": "household_life",
+            "value": 0
+          },
+          {
+            "id": "asset_upkeep",
+            "value": 0
+          },
+          {
+            "id": "living_fuel",
+            "value": 0
+          },
+          {
+            "id": "land_access",
+            "value": 0
+          }
+        ]
+      },
+      "food": 300,
+      "food_delta": 0,
+      "gathered": 58,
+      "households": {
+        "care_ready": false,
+        "cooperation": 0,
+        "factors": {
+          "cooperation": [
+            {
+              "id": "circumstance",
+              "value": 0
+            },
+            {
+              "id": "stress",
+              "value": 0
+            },
+            {
+              "id": "learning",
+              "value": 0
+            }
+          ],
+          "food_penalty": [
+            {
+              "id": "circumstance",
+              "value": 0
+            },
+            {
+              "id": "store",
+              "value": 0
+            },
+            {
+              "id": "routes",
+              "value": 0
+            },
+            {
+              "id": "learning",
+              "value": 0
+            }
+          ],
+          "security": [
+            {
+              "id": "circumstance",
+              "value": 0
+            },
+            {
+              "id": "routes",
+              "value": 0
+            },
+            {
+              "id": "store",
+              "value": 0
+            }
+          ],
+          "wellbeing": [
+            {
+              "id": "circumstance",
+              "value": 0
+            },
+            {
+              "id": "care",
+              "value": 0
+            },
+            {
+              "id": "stress",
+              "value": 0
+            }
+          ]
+        },
+        "food_penalty": 0,
+        "learning_ready": false,
+        "security": 0,
+        "watch_ready": false,
+        "wellbeing": 0
+      },
+      "land": {
+        "access": true,
+        "cooperation": 0,
+        "food": 8,
+        "work": 12
+      },
+      "living": {
+        "area": "west_wood",
+        "coverage": 4,
+        "distance": 0,
+        "equipment_security": 0,
+        "equipped": 0,
+        "fuel": 2,
+        "fuel_need": 2,
+        "fuel_penalty": 0,
+        "harvest": 3,
+        "next_stock": 21,
+        "prepare_wood": 0,
+        "prepared": 0,
+        "repair_wood": 0,
+        "repaired": 0,
+        "shared": false,
+        "support": 0,
+        "training": 0,
+        "training_workers": 0,
+        "wear": 0,
+        "workers": 1,
+        "yield": 3
+      },
+      "losses": 0,
+      "overflow": 1,
+      "plan": {
+        "building": 4,
+        "care": 2,
+        "food": 25,
+        "timber": 1,
+        "watch": 2
+      },
+      "population": 48,
+      "spoil": 9,
+      "stocks": {
+        "cooperation": 69,
+        "security": 81,
+        "wellbeing": 75
+      },
+      "unfed": 0,
+      "used": 48,
+      "wood": 3,
+      "work": 14
+    },
+    "role": "god",
+    "rules_version": 1,
+    "scenario_id": "yenikapi_seasons_tutorial",
+    "security": 81,
+    "settlement_id": "yenikapi_tutorial",
+    "stable_seasons": 5,
+    "tight_rations": false,
+    "town_achieved": true,
+    "turn": 32,
+    "version": 1,
+    "welcome": true,
+    "wellbeing": 75,
+    "wood": 5
+  },
+  "version": 8
+}

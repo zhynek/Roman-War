@@ -223,6 +223,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 			result.repair=request.asset;result.repair_cost=int(balance.repair_wood);result.repair_workers=count
 	result.plan.food+=remaining
 	result.requests=requests
+	rules.lifecycle.apply_allocation(state,result,timber_left,places,rules)
 	# The steward's coordination bonus is finite: first staffed project only.
 	for request in requests:
 		if result.projects.has(request.id) and result.projects[request.id].crew>0:
@@ -298,6 +299,8 @@ func _task(state: Dictionary,person: Dictionary,request: Dictionary,rules) -> Di
 		if request.id=="food" and rules.land.use_at(state,"west_field",rules)=="land_cultivate" and int(person.id.trim_prefix("citizen_"))%2==0:destination=rules.land.sites.west_field.at
 	if rules.projects.has(request.id):destination=rules.projects[request.id].at
 	if request.id=="lifecycle_civic":destination=rules.projects[rules.lifecycle.content.civic_project].at
+	if request.id=="town_service":destination=rules.projects.town_provision.at
+	if request.id=="living_prepare" and rules.lifecycle.town_active(state) and rules.has_project(state,"town_preparation"):destination=rules.projects.town_preparation.at
 	var job: String=request.job
 	if request.id in ["carriers","escorts"]:job="travel";destination=rules.neighbors.content.meeting_at
 	# A bounded subset of ordinary food duty illustrates existing waterside work.
