@@ -226,3 +226,13 @@ payload commit. Verify anonymous downloads and ZIP integrity against tested byte
 all 13 prior releases / 75 assets, and unchanged stable latest `v0.14.2`. Do not
 replace prior release metadata, tags or artifacts. Read the site's PREPAREDNESS.md
 and VERIFICATION-0.8.md for limits and measured interaction latency.
+
+
+## Visual governing release (0.9.0)
+
+Use the same clean-source builder with `--version 0.9.0` and fresh parent logs.
+It retains every previous gate and 36 GLBs, then adds visual data validation,
+six malformed-data cases, visual command checks on source/exact app, a rendered
+normal-stock dock playthrough and source/exact interaction profiles. Inspect the
+additional `visual` capture folder as well as all 125 retained views. No release
+may replace previous bytes or the parent stable latest release.

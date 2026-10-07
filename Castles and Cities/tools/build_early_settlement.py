@@ -21,7 +21,7 @@ PROJECT=Path('sites/yenikapi_6000_bce/experience')
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--godot',required=True)
-    parser.add_argument('--version',default='0.8.0')
+    parser.add_argument('--version',default='0.9.0')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--parent-gates',type=Path,required=True)
     args=parser.parse_args()
@@ -67,7 +67,10 @@ def main():
     run([sys.executable,project/'tools/test_living_data.py'],logs/'living-data-tests.log',project)
     run([sys.executable,project/'tools/validate_incidents.py'],logs/'incident-data.log',project)
     run([sys.executable,project/'tools/test_incident_data.py'],logs/'incident-data-tests.log',project)
+    run([sys.executable,project/'tools/validate_visual_commands.py'],logs/'visual-data.log',project)
     run(editor+['--import'],logs/'import.log',project)
+    visual=run(editor+['--script','res://tools/visual_checks.gd'],logs/'source-visual.log',project)
+    if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',visual):raise SystemExit('Visual command checks failed')
     checked=run(editor+['--script','res://tools/checks.gd'],logs/'source-checks.log',project)
     if not re.search(r'VILLAGE CHECKS: \d+ checks, 0 failures',checked):raise SystemExit('Missing source success marker')
     governance=run(editor+['--script','res://tools/governance_checks.gd'],logs/'source-governance.log',project)
@@ -105,6 +108,7 @@ def main():
     shutil.copy2(render_dir/'source-living-benchmark/benchmark.json',logs/'source-living-benchmark.json')
     prefix='Yenikapi-Early-Settlement'
     run([godot,'--path',project,'--script','res://tools/incident_profile.gd'],logs/'source-incident-interactions.log',project)
+    run([godot,'--path',project,'--script','res://tools/visual_profile.gd'],logs/'source-visual-interactions.log',project)
     app_zip=out/f'{prefix}-macOS-{args.version}.zip'
     run(editor+['--export-release','macOS',app_zip],logs/'export.log',project)
     with zipfile.ZipFile(app_zip,'a',zipfile.ZIP_DEFLATED) as archive:
@@ -141,6 +145,8 @@ def main():
     if not re.search(r'INCIDENT CHECKS: \d+ checks, 0 failures',packaged_incidents):raise SystemExit('Missing packaged incident success marker')
     packaged_living=run([binary,'--headless','--script','res://tools/living_checks.gd'],logs/'packaged-living.log',out)
     if not re.search(r'LIVING CHECKS: \d+ checks, 0 failures',packaged_living):raise SystemExit('Missing packaged living success marker')
+    packaged_visual=run([binary,'--headless','--script','res://tools/visual_checks.gd'],logs/'packaged-visual.log',out)
+    if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',packaged_visual):raise SystemExit('Packaged visual checks failed')
     rendered=run([binary,'--max-fps','10','--script','res://tools/preview.gd','--',f'out_dir={render_dir}'],logs/'packaged-render.log',out)
     if 'VILLAGE RENDER PASS: 14 captures' not in rendered:raise SystemExit('Incomplete rendered gate')
     shutil.copy2(render_dir/'render-report.json',logs/'render-report.json')
@@ -181,6 +187,10 @@ def main():
     if not re.search(r'INCIDENT RENDER: \d+ captures; \d+ checks, 0 failures',incident_render):raise SystemExit('Incident render gate failed')
     shutil.copy2(render_dir/'incidents/render-report.json',logs/'incident-render-report.json')
     run([binary,'--script','res://tools/incident_profile.gd'],logs/'packaged-incident-interactions.log',out)
+    visual_render=run([binary,'--max-fps','10','--script','res://tools/visual_preview.gd','--',f'out_dir={render_dir / "visual"}'],logs/'packaged-visual-render.log',out)
+    if not re.search(r'VISUAL RENDER: \d+ captures; \d+ checks, 0 failures',visual_render):raise SystemExit('Visual command render gate failed')
+    shutil.copy2(render_dir/'visual/render-report.json',logs/'visual-render-report.json')
+    run([binary,'--script','res://tools/visual_profile.gd'],logs/'packaged-visual-interactions.log',out)
     provenance['living_performance']={'source':json.loads((logs/'source-living-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-living-benchmark.json').read_text())}
     provenance['land_performance']={'source':json.loads((logs/'source-land-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-land-benchmark.json').read_text())}
     provenance['asset_performance']={'source':json.loads((logs/'source-asset-benchmark.json').read_text()),'exact_app':json.loads((logs/'packaged-asset-benchmark.json').read_text())}
@@ -218,7 +228,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':'125 written (14 reference + 12 tutorial + 10 contact + 12 household + 12 assets + 19 land + 21 living + 25 incidents); manual visual review required before publication','glb_structure':'36 passed','zip_integrity':'9 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures']))+' written (125 retained views plus visual-command playthrough); manual visual review required before publication','glb_structure':'36 passed','zip_integrity':'9 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))

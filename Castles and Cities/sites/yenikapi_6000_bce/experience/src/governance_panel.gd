@@ -62,12 +62,14 @@ func button(text: String, callback: Callable, id: String = "") -> Button:
 	return result
 
 func open() -> void:
+	if is_instance_valid(app.visual_commands):app.visual_commands.enabled=false;app.visual_commands.sync()
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	if not state.is_empty(): app.show_campaign(state,rules)
 	show()
 	refresh()
 
 func begin() -> void:
+	if is_instance_valid(app.visual_commands):app.visual_commands.enabled=false;app.visual_commands.sync()
 	state=rules.new_state()
 	last_message=copy.new_campaign
 	app.show_campaign(state,rules)
@@ -137,6 +139,8 @@ func _tab(title: String) -> VBoxContainer:
 	return body
 
 func refresh() -> void:
+	if is_instance_valid(app.visual_commands) and app.visual_commands.enabled and not visible and app.campaign_mode:
+		app.visual_commands.schedule_refresh();return
 	if _refreshing:return
 	_refreshing=true
 	var selected:int=tabs.current_tab if is_instance_valid(tabs) else 0
@@ -149,6 +153,7 @@ func refresh() -> void:
 	column.add_child(label(copy.hypothesis,13))
 	var top:=HFlowContainer.new();column.add_child(top)
 	top.add_child(button(copy.close,hide,"ExploreCampaign"))
+	if is_instance_valid(app.visual_commands):top.add_child(button(app.visual_commands.w("adopt"),app.visual_commands.open,"OpenVisualCommands"))
 	top.add_child(button(copy.reference,func(): app.show_reference();hide(),"ReferenceVillage"))
 	top.add_child(button(copy.save,save_campaign,"SaveCampaign"))
 	top.add_child(button(copy.load,load_campaign,"LoadCampaign"))
@@ -214,6 +219,7 @@ func refresh() -> void:
 		column.add_child(label(copy.pause_notice,12))
 	notice=label(last_message,13);notice.add_theme_color_override("font_color",Color("d6c794"));column.add_child(notice)
 	_refreshing=false
+	if is_instance_valid(app.visual_commands):app.visual_commands.schedule_refresh()
 
 func _guide(body: VBoxContainer) -> void:
 	var count:int=rules.people(state).size()

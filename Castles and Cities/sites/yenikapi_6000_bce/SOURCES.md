@@ -286,3 +286,14 @@ wood and storage evidence supports the material vocabulary; source plans and ima
 were not copied. Pedestrian connections, dwellings, occupants and older fabric
 survive. Bows remain deferred. The distinction between direct evidence, distant
 analogy and hypothetical governing decisions is retained in the guide and UI.
+
+
+## 0.9.0 visual command interface
+
+No historical claim, building type, weapon, incident or economic rule is added.
+The illustrated seven-place grouping and connected growth guide are interface
+interpretations of existing authored relationships. Original vector drawings are
+recognition aids, not archaeological illustrations. Rotatable previews reuse the
+existing production geometry and distinguish current places from planned buildings.
+The direct-evidence, regional-analogy and gameplay-interpretation distinctions above
+remain unchanged. No source artwork or historic plan was copied.

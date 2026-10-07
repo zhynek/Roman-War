@@ -1,5 +1,7 @@
 # Preparedness Put to the Test — Warning, Response, and Recovery · 0.8.0
 
+**0.9.0 — A Village at Your Fingertips:** illustrated bottom commands, building improvements, current/planned models and a connected growth guide. Choose **New village** or **Load saved village**. [Controls and unchanged save contract](VISUAL_COMMANDS.md).
+
 Choose **Begin warning, response and recovery** in the management introduction.
 The starting village still has 30 residents, 100 provisions and 30 timber. Use
 **Incidents**, **Village**, **Assets** and **Guide** to govern through ordinary

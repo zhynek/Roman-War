@@ -1,5 +1,7 @@
 # A Living, Readable Village — 0.7.0
 
+**0.9.0 — A Village at Your Fingertips:** illustrated bottom commands, building improvements, current/planned models and a connected growth guide. Choose **New village** or **Load saved village**. [Controls and unchanged save contract](VISUAL_COMMANDS.md).
+
 **0.8.0 — Preparedness Put to the Test:** [Gameplay, warning, recovery and wrapper-7 save contract](PREPAREDNESS.md). Choose **Begin warning, response and recovery**. Older living saves adopt explicitly from Incidents; earlier chapters remain available.
 
 Choose **Begin living village** from the management introduction. This begins the

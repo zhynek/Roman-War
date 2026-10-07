@@ -1,0 +1,367 @@
+{
+  "version": 1,
+  "title": "A village at your fingertips",
+  "subtitle": "Choose a place. Shape its work. See the season change.",
+  "assets": [
+    {
+      "id": "stores",
+      "label": "Stores",
+      "icon": "stores",
+      "hint": "Reserves & protection"
+    },
+    {
+      "id": "homes",
+      "label": "Homes",
+      "icon": "homes",
+      "hint": "Housing & care"
+    },
+    {
+      "id": "fields",
+      "label": "Fields",
+      "icon": "fields",
+      "hint": "Food & cultivation"
+    },
+    {
+      "id": "landing",
+      "label": "Landing",
+      "icon": "landing",
+      "hint": "Access & recovery"
+    },
+    {
+      "id": "workroom",
+      "label": "Workshop",
+      "icon": "workroom",
+      "hint": "Materials & cooperation"
+    },
+    {
+      "id": "yard",
+      "label": "Village yard",
+      "icon": "yard",
+      "hint": "Growth & connections"
+    },
+    {
+      "id": "watch",
+      "label": "Watch",
+      "icon": "watch",
+      "hint": "Observation & equipment"
+    }
+  ],
+  "ui": {
+    "start": "New village",
+    "resume": "Load saved village",
+    "reference": "Dated reference",
+    "ledger": "Detailed ledger",
+    "expand": "Growth guide",
+    "overview": "Aerial view",
+    "visit": "Visit place",
+    "inspect": "Local knowledge",
+    "close": "Close",
+    "back": "Back",
+    "season": "Next season",
+    "save": "Save",
+    "saved": "Village saved",
+    "load": "Load",
+    "orders": "Daily work",
+    "projects": "Improvements",
+    "queue": "Work underway",
+    "all": "All places",
+    "confirm": "Commission",
+    "paid": "Materials paid once · crews work each season",
+    "standing": "Standing order · applies next season",
+    "work": "work",
+    "wood": "timber",
+    "blanks": "prepared sets",
+    "people": "residents",
+    "food": "provisions",
+    "kits": "watch kits",
+    "condition": "Condition",
+    "ready": "Available",
+    "locked": "Unavailable",
+    "complete": "Completed",
+    "building": "Underway",
+    "paused": "Paused",
+    "pause": "Pause",
+    "unpause": "Resume",
+    "cancel": "Cancel unfinished work",
+    "refund": "Unused materials returned: {wood} timber, {blanks} prepared sets",
+    "next_work": "Next season: {work} work",
+    "crew": "Crew limit",
+    "priority": "Priority",
+    "on": "On",
+    "off": "Off",
+    "maintain": "Maintain place",
+    "maintenance": "One adult and one timber repair the weakest enabled place when allocated.",
+    "access": "Maintain outer access",
+    "access_note": "One adult and one timber each season support the outer connection.",
+    "details": "Why & requirements",
+    "requires": "Requires: {items}",
+    "no_requires": "No earlier building required",
+    "cost": "Pay now: {wood} timber · {blanks} prepared sets",
+    "effort": "Then: {work} work · finite seasonal crews",
+    "progress": "{done} / {total} work",
+    "current": "Current choice",
+    "forecast": "Next season",
+    "actual": "Last season",
+    "food_delta": "{food} provisions ({delta})",
+    "work_total": "{work} construction work",
+    "shortage": "Unfed: {count}",
+    "inspect_note": "Observation records knowledge. It creates no supplies or completed work.",
+    "growth_note": "Choose a route. Cards show real prerequisites and competing uses of the same ground.",
+    "compact": "Compact homes",
+    "outward": "Outward homes",
+    "productive": "Productive places",
+    "prepared": "Watch & materials",
+    "arrow": "→",
+    "or": "OR",
+    "new_note": "30 residents · 100 provisions · 30 timber. Living rules; incidents remain an explicit choice.",
+    "overwrite": "Start a new village? Your saved village stays untouched until you choose Save.",
+    "new_title": "New settlement",
+    "adopt": "Use visual commands",
+    "legacy": "This save retains its existing rules. Adopt later chapters from the detailed ledger when ready.",
+    "incident": "Warning & recovery",
+    "begin_incident": "Begin preparedness chapter",
+    "incident_note": "Adds two bounded incidents to this living save. First guaranteed warning arrives after six seasons; no immediate damage.",
+    "restrict": "Restrict exposed work",
+    "restriction_note": "Fewer productive workers at the affected place; reduce exposure. Revisable before resolution.",
+    "observed": "Recorded knowledge",
+    "no_knowledge": "Ask at the place to add available findings to your planning record.",
+    "role": "Governing as",
+    "report": "Season report",
+    "report_note": "Actual results of the last resolved season.",
+    "preview_note": "Expected effects with current orders. Your later decisions can change them.",
+    "help": "How to play",
+    "growth_review": "Town readiness",
+    "warning": "Attention needed",
+    "no_queue": "No commissioned work",
+    "guide_step": "{number} / 5",
+    "learn": "How to play",
+    "guide_next": "Next",
+    "guide_previous": "Previous",
+    "busy": "Resolving season…",
+    "choice": "Choose an option",
+    "record": "Planning record",
+    "season_index": "Year {year} · {season}",
+    "model_future": "Planned geometry · drag to rotate",
+    "model_current": "Current place · drag to rotate",
+    "plus": "+",
+    "growth": "Growth guide",
+    "knowledge": "Planning record",
+    "condition_line": "Condition {condition}/100 · {workers} adults assigned here",
+    "ask": "Ask here",
+    "household_knowledge": "Household knowledge",
+    "view_current": "Current",
+    "view_planned": "Planned",
+    "seasonal_duty": "{filled}/{wanted} adults · {title}",
+    "help_keys": "Click buildings or their icons · right-drag to look · WASD to move · Tab for mouse look",
+    "visit_site": "View this building site",
+    "menu": "Village menu",
+    "new_confirm": "Start a new village",
+    "model_empty": "No existing building on this site. View the place in the village."
+  },
+  "living_orders": [
+    {
+      "id": "area",
+      "asset": "workroom",
+      "icon": "wood",
+      "label": "Woodland",
+      "detail": "The same timber crew uses one finite woodland. Northern support reduces access losses.",
+      "values": [
+        "west_wood",
+        "north_wood"
+      ],
+      "labels": [
+        "West woodland",
+        "Upper woodland"
+      ]
+    },
+    {
+      "id": "prepare",
+      "asset": "workroom",
+      "icon": "blanks",
+      "label": "Prepare materials",
+      "detail": "Ordinary: 1 adult + 2 timber → 1 set. Shared: 2 adults + 3 timber + 2 working places; needs shared wood work.",
+      "values": [
+        0,
+        1,
+        2
+      ],
+      "labels": [
+        "Off",
+        "Ordinary",
+        "Shared"
+      ]
+    },
+    {
+      "id": "cooperate",
+      "asset": "workroom",
+      "icon": "people",
+      "label": "Support cooperation",
+      "detail": "Requires discovered complementary practice and actual shared sessions. Continuing support costs timber and labor.",
+      "values": [
+        false,
+        true
+      ],
+      "labels": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "id": "patrol",
+      "asset": "watch",
+      "icon": "watch",
+      "label": "Observation focus",
+      "detail": "Coverage follows this place. Northern access needs its post and two ordinary watch adults.",
+      "values": [
+        "landing_post",
+        "north_post"
+      ],
+      "labels": [
+        "Landing",
+        "North approach"
+      ]
+    },
+    {
+      "id": "training",
+      "asset": "watch",
+      "icon": "people",
+      "label": "Watch practice",
+      "detail": "One additional adult trains with existing equipment; that adult cannot gather or build.",
+      "values": [
+        false,
+        true
+      ],
+      "labels": [
+        "Off",
+        "On"
+      ]
+    },
+    {
+      "id": "repair",
+      "asset": "watch",
+      "icon": "kits",
+      "label": "Maintain equipment",
+      "detail": "One adult + one opening timber + one opening prepared set restore one missing kit, up to four.",
+      "values": [
+        false,
+        true
+      ],
+      "labels": [
+        "Off",
+        "On"
+      ]
+    }
+  ],
+  "project_labels": {
+    "shared_store": "Larger stores",
+    "care_shelter": "Shared care",
+    "watch_shelter": "Landing shelter",
+    "refuge_screen": "Refuge screen",
+    "council_ground": "Meeting ground",
+    "exchange_place": "Exchange place",
+    "land_court_home": "Clay court home",
+    "land_hearth_home": "Hearth yard home",
+    "land_outer_west": "Outer west home",
+    "land_outer_east": "Outer east home",
+    "land_outer_access": "Northern path",
+    "land_cultivate": "Renew cultivation",
+    "land_provisioning": "Provisioning yard",
+    "land_adapt_workroom": "Adapt workshop",
+    "living_shared_room": "Shared wood work",
+    "living_watch_kits": "Watch equipment",
+    "living_north_post": "Northern post",
+    "incident_approach_prepare": "Brace approach",
+    "incident_approach_repair": "Restore approach",
+    "incident_stores_prepare": "Protect handling",
+    "incident_stores_repair": "Restore handling"
+  },
+  "chains": [
+    {
+      "id": "compact",
+      "projects": [
+        "land_court_home",
+        "land_hearth_home",
+        "land_adapt_workroom"
+      ],
+      "note": "Keep short paths. Homes replace shared working ground; adapting the room restores space.",
+      "links": [
+        "plus",
+        "plus"
+      ]
+    },
+    {
+      "id": "outward",
+      "projects": [
+        "land_outer_access",
+        "land_outer_west",
+        "land_outer_east"
+      ],
+      "note": "Keep central workspaces. Build and maintain the northern connection.",
+      "links": [
+        "arrow",
+        "plus"
+      ]
+    },
+    {
+      "id": "productive",
+      "projects": [
+        "land_cultivate",
+        "shared_store",
+        "land_adapt_workroom"
+      ],
+      "note": "Food, storage and working space support further growth. These are complementary investments, not prerequisite steps.",
+      "links": [
+        "plus",
+        "plus"
+      ]
+    },
+    {
+      "id": "prepared",
+      "projects": [
+        "watch_shelter",
+        "living_watch_kits",
+        "living_north_post"
+      ],
+      "note": "Shelter enables equipment. The northern post is an independent choice of coverage.",
+      "links": [
+        "arrow",
+        "plus"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "asset": "stores",
+      "title": "Keep the village fed",
+      "body": "Choose Stores, then its reserve objective. A higher target uses real gathering labor. The top strip shows supplies now and the expected seasonal change."
+    },
+    {
+      "asset": "fields",
+      "title": "Choose an improvement",
+      "body": "Click an illustrated improvement. Review timber, work and requirements, then commission it. Materials are paid once; work happens only when you resolve a season."
+    },
+    {
+      "asset": "workroom",
+      "title": "Leave hands for the work",
+      "body": "Projects share adults with food, care, watch and preparation. The Work underway view lets you change crew limits, pause or cancel unfinished work."
+    },
+    {
+      "asset": "homes",
+      "title": "Choose where to grow",
+      "body": "Open the Growth guide. Compact homes consume central workspaces; outer homes need a maintained path. Inspect a card and visit its actual site before paying."
+    },
+    {
+      "asset": "watch",
+      "title": "Prepare, resolve, recover",
+      "body": "Maintain posts and equipment, then start the optional preparedness chapter. Warning and recovery appear at the affected place. Save whenever you want; looking around never advances time."
+    }
+  ],
+  "principle_labels": {
+    "reserve": "Food reserves",
+    "upkeep": "Repair priority",
+    "care": "Shared care",
+    "watch": "Watch staffing",
+    "welcome": "New arrivals",
+    "learning": "Learning circle"
+  }
+}

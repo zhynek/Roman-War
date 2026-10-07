@@ -15,6 +15,9 @@ var mode_label: Label
 var location_label: Label
 var status: Label
 var campaign
+var visual_commands
+var reference_top: PanelContainer
+var reference_bottom: PanelContainer
 var campaign_view
 var campaign_mode: bool = false
 var reference_data: Dictionary
@@ -109,6 +112,7 @@ func _interface() -> void:
 	root.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
 	var top:=PanelContainer.new()
+	reference_top=top
 	top.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	top.offset_left=22;top.offset_right=-22;top.offset_top=20
 	top.add_theme_stylebox_override("panel",_style())
@@ -132,6 +136,7 @@ func _interface() -> void:
 	commands.add_child(_button(data.ui.load,func(): status.text=campaign.copy.reference_save_notice if campaign_mode else (data.ui.loaded if load_view(_save_path) else data.ui.missing)))
 	mode_label=_label("",14,Color("c5bd96"));commands.add_child(mode_label)
 	var bottom:=PanelContainer.new()
+	reference_bottom=bottom
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	bottom.offset_left=22;bottom.offset_right=-22;bottom.offset_top=-166;bottom.offset_bottom=-20
 	bottom.add_theme_stylebox_override("panel",_style())
@@ -171,6 +176,10 @@ func _interface() -> void:
 	campaign.configure(self)
 	commands.add_child(_button(campaign.asset_panel.copy.ui.open,campaign.asset_panel.open))
 	commands.add_child(_button(campaign.copy.play,campaign.open))
+	visual_commands=preload("res://src/visual_commands.gd").new()
+	root.add_child(visual_commands)
+	visual_commands.configure(self)
+	commands.add_child(_button(visual_commands.w("adopt"),visual_commands.open))
 
 func set_flying(value: bool) -> void:
 	if not value:
@@ -217,7 +226,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_TAB: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-			KEY_ESCAPE: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE;info.hide();campaign.hide()
+			KEY_ESCAPE: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE;info.hide();campaign.hide();visual_commands.close_sheet()
 			KEY_F: set_flying(not flying)
 			KEY_H: hud.visible=not hud.visible
 			KEY_I: info.visible=not info.visible
@@ -234,6 +243,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not resident.is_empty():
 					campaign.household_panel.inspect_resident(resident)
 					return
+			if campaign_mode and visual_commands.visible and visual_commands.pick(camera.project_ray_origin(point),camera.project_ray_normal(point)):return
 			if campaign_mode and campaign.rules.incidents.active(campaign.state):
 				var subject: String=campaign_view.incident_view.pick(camera.project_ray_origin(point),camera.project_ray_normal(point))
 				var e: Dictionary=campaign.rules.incidents.current(campaign.state)
@@ -376,6 +386,7 @@ func show_reference() -> void:
 	_rebuild_world(reference_data.duplicate(true))
 	campaign_mode=false
 	_fabric_key=""
+	if is_instance_valid(visual_commands):visual_commands.sync()
 
 func _rebuild_world(config: Dictionary) -> void:
 	if is_instance_valid(campaign_view):campaign_view.free();campaign_view=null

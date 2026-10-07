@@ -114,3 +114,14 @@ Old saves backfill inactive `households: {}`; active chapters require wrapper 3,
 with versions 1/2 still accepted for inactive households. Keep validation,
 save/replay, actual interior navigation, rendered variants and exact-app release
 checks together when extending this seam.
+
+
+## Visual command interface (0.9.0)
+
+Read [VISUAL_COMMANDS.md](VISUAL_COMMANDS.md) for the presentation contract. Place
+icons and growth links reference existing assets/projects. Validate the closed
+visual-command data, including prerequisite arrows. Keep all economy and costs
+behind public rules; canonicalize data-driven choices before dispatch. Model
+previews use production geometry in an isolated viewport and cannot alter state.
+No image assets or new save wrapper are introduced. Retain the detailed ledger
+and old chapters; never make opening a saved village adopt later rules.

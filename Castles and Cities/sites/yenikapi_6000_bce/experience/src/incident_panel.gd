@@ -4,6 +4,7 @@ var copy: Dictionary
 var selected: String=""
 func _init(p,c: Dictionary) -> void:panel=p;copy=c
 func begin() -> void:
+	if is_instance_valid(panel.app.visual_commands):panel.app.visual_commands.enabled=false;panel.app.visual_commands.sync()
 	var s: Dictionary=panel.rules.new_state()
 	for kind in ["asset_begin","land_begin","living_begin","incident_begin"]:s=panel.rules.command(s,{"kind":kind}).state
 	panel.state=s;panel.last_message=""

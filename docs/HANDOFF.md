@@ -11,6 +11,26 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Yenikapı visual governing (0.9.0, October 2026)
+
+The village now starts with an illustrated bottom dock. Building/place selection
+opens its improvements and standing orders; review cards quote payment, finite
+work and prerequisites. Current/planned production geometry can be rotated without
+changing state. A connected growth guide shows compact/outward choices and actual
+prerequisite arrows. Warning, repair, project pause/cancel, local knowledge,
+role choice, saves and actual seasonal reports remain ordinary commands.
+The earlier Roma bottom bar and development viewer were found and informed this
+pattern; the independent village imports no parent UI classes or simulation.
+
+Read [VISUAL_COMMANDS.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/VISUAL_COMMANDS.md)
+and [0.9 verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.9.md).
+No core rule, save wrapper, dated reference or previous model changes. Old saves
+retain all semantics and explicit adoption boundaries. New villages use living
+rules; the incident chapter is deliberately opted into. The release builder adds
+visual data, purity/save checks, actual-input playthrough and interaction profiles
+to every existing gate. Frozen-app and public verification are recorded below in
+the verification file once complete.
+
 ## Yenikapı preparedness under pressure (0.8.0, October 2026)
 
 **Begin warning, response and recovery** connects two hypothetical local incidents
