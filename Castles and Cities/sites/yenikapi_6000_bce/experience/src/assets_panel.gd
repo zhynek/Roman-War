@@ -11,6 +11,7 @@ func open() -> void:
 	if not panel.state.is_empty() and panel.rules.assets.active(panel.state):panel.tabs.current_tab=1
 
 func begin() -> void:
+	if is_instance_valid(panel.app.visual_commands):panel.app.visual_commands.enabled=false;panel.app.visual_commands.sync()
 	panel.state=panel.rules.new_state()
 	panel.dispatch({"kind":"asset_begin"})
 	panel.show()

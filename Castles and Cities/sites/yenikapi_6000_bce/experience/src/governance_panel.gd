@@ -49,6 +49,7 @@ func configure(owner_app) -> void:
 	add_theme_stylebox_override("panel",panel_style)
 	refresh()
 	hide()
+	visibility_changed.connect(func():if visible:refresh())
 
 func label(text: String, size: int = 16) -> Label:
 	var result: Label = app._label(text,size)
@@ -65,8 +66,9 @@ func open() -> void:
 	if is_instance_valid(app.visual_commands):app.visual_commands.enabled=false;app.visual_commands.sync()
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	if not state.is_empty(): app.show_campaign(state,rules)
+	var already_visible: bool=visible
 	show()
-	refresh()
+	if already_visible:refresh()
 
 func begin() -> void:
 	if is_instance_valid(app.visual_commands):app.visual_commands.enabled=false;app.visual_commands.sync()

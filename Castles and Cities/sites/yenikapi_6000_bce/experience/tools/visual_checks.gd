@@ -8,7 +8,12 @@ func check(value: bool,message: String) -> void:
 func run() -> void:
 	var app=load("res://main.tscn").instantiate();root.add_child(app);await process_frame
 	var p=app.campaign;var ui=app.visual_commands
+	p.asset_panel.begin()
+	check(is_instance_valid(p.tabs),"direct legacy asset entry creates its ledger tabs")
 	ui.begin()
+	p.land_panel.inspect("north_west")
+	check(is_instance_valid(p.tabs) and p.tabs.current_tab==7,"legacy world inspection restores hidden ledger content")
+	ui.open()
 	var starting: String=JSON.stringify(p.state)
 	var all: Dictionary={}
 	for place in ui.copy.assets:

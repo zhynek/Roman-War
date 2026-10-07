@@ -67,7 +67,17 @@ injected. Model inspection subsequently caught two presentation edge cases:
 Godot's strict array lookup needed canonical numeric data for the current-order
 label, and an unbuilt site's Current model must not fall back to another home.
 Both have focused regression checks; exact-app acceptance repeats the expanded
-playthrough including these cases. The final visual rule/purity suite has **65**
+playthrough including these cases. The final visual rule/purity suite has **67**
 checks. All previous village gates passed; parent data/import, **705 tests**, and
 rendered planning/marching/arrival/maximum-detail acceptance passed without script
 or error diagnostics. The four map images were inspected.
+
+
+The first frozen attempt at `4157ebf` stopped during the retained source interaction
+profile: direct `asset_panel.begin()` still entered with visual mode enabled, so
+the hidden-ledger optimization skipped creating tabs. The legacy asset entry now
+explicitly selects ledger mode, like the other earlier chapter entry points. A
+regression check covers it. Showing a previously hidden ledger also rebuilds its
+current content, covering direct place inspection after visual play. Godot exited zero; stderr inspection rejected the
+candidate. It was never exported or published. The fresh final build repeats all
+gates after this correction.
