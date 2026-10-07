@@ -19,6 +19,15 @@ var _busy: bool=false
 var timings: Dictionary={}
 var preview_meshes: Dictionary={}
 var preview_stage: String="planned"
+var projects=preload("res://src/project_presentation.gd").new()
+var room_mode: bool=false
+var return_view: Dictionary={}
+var expanded_details: bool=false
+var _forecast_key: int=0
+var _project_meshes: Dictionary={}
+func cw(id: String) -> String:return projects.copy.ui.get(id,id)
+func room():return app.campaign_view.planning_room if is_instance_valid(app.campaign_view) else null
+func construction():return app.campaign_view.construction_view if is_instance_valid(app.campaign_view) else null
 
 func configure(owner_app) -> void:
 	app=owner_app;p=app.campaign
@@ -95,12 +104,22 @@ func refresh() -> void:
 		if not p.state.is_empty():cards.add_child(icon_button(w("adopt"),"yard","",open,"VisualResume"))
 		paragraph(v,w("new_note"),14)
 		return
-	forecast=p.rules.forecast(p.state)
+	var state_key: int=hash(p.state)
+	if state_key!=_forecast_key or forecast.is_empty():forecast=p.rules.forecast(p.state);_forecast_key=state_key
 	app.reference_top.hide();app.reference_bottom.hide()
 	if get_window().content_scale_size!=Vector2i.ZERO:get_window().content_scale_size=Vector2i.ZERO
 	build_header()
-	var compact: bool=not detail.is_empty() or overlay!=""
+	var compact: bool=not detail.is_empty() or overlay!="" or room_mode
 	if compact:dock.offset_top=-126
+	if room_mode and detail.is_empty() and overlay=="":
+		dock.offset_top=-132
+		var heading:=row(v)
+		heading.add_child(button(cw("board"),look_at_board,"PlanningBoard"))
+		heading.add_child(button(cw("previous"),func():room().turn_page(-1);refresh(),"PlanningPrevious"))
+		heading.add_child(button(cw("next"),func():room().turn_page(1);refresh(),"PlanningNext"))
+		heading.add_child(button(cw("all_projects"),show_overlay.bind("oversight"),"PlanningAll"))
+		heading.add_child(button(cw("leave_room"),leave_room,"PlanningLeave"))
+		paragraph(v,cw("room_selected").format({"title":p.rules.projects[room().selected].title})+" · "+cw("plan_hint"),14)
 	if not compact:
 		var heading:=row(v)
 		var title:=label(copy.assets.filter(func(a):return a.id==selected)[0].label,22);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
@@ -123,11 +142,12 @@ func refresh() -> void:
 		else:
 			for item in p.state.queue:cards.add_child(project_card(item.id))
 			if p.state.queue.is_empty():paragraph(cards,w("no_queue"),18)
-	var places:=row(v)
-	for a in copy.assets:
-		var place:=icon_button(a.label,a.icon,a.hint,select_place.bind(a.id),"VisualPlace_"+a.id,false);place.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		if a.id==selected:place.add_theme_stylebox_override("normal",style("496255"))
-		places.add_child(place)
+	if not room_mode or not detail.is_empty() or overlay!="":
+		var places:=row(v)
+		for a in copy.assets:
+			var place:=icon_button(a.label,a.icon,a.hint,select_place.bind(a.id),"VisualPlace_"+a.id,false);place.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			if a.id==selected:place.add_theme_stylebox_override("normal",style("496255"))
+			places.add_child(place)
 	if not detail.is_empty() or overlay!="":build_sheet()
 	timings.refresh_us=Time.get_ticks_usec()-start
 func build_header() -> void:
@@ -142,7 +162,8 @@ func build_header() -> void:
 	for id in ["god","steward","watch"]:role.add_item(p.copy[id])
 	role.select(["god","steward","watch"].find(p.state.role));role.item_selected.connect(func(i):execute({"kind":"role","role":["god","steward","watch"][i]}));r.add_child(role)
 	r.add_child(button(w("save"),save,"VisualSave"));r.add_child(button(w("load"),load_saved,"VisualLoad"));r.add_child(button(w("menu"),show_overlay.bind("menu"),"VisualMenu"))
-	var controls:=row(v)
+	var controls:=HFlowContainer.new();v.add_child(controls)
+	controls.add_child(button(cw("oversight"),show_overlay.bind("oversight"),"VisualOversight"))
 	for c in [["expand","growth"],["learn","help"],["incident","incident"],["report","report"]]:controls.add_child(button(w(c[0]),show_overlay.bind(c[1]),"Visual_"+c[1]))
 	controls.add_child(button(w("overview"),app.overview,"VisualAerial"))
 	var next:=button(w("season"),advance,"VisualSeason");next.size_flags_horizontal=Control.SIZE_EXPAND_FILL;next.add_theme_stylebox_override("normal",style("617055"));controls.add_child(next)
@@ -178,7 +199,7 @@ func queued(id: String) -> Dictionary:
 func project_status(id: String) -> String:
 	if p.rules.has_project(p.state,id):return w("complete")
 	var q:=queued(id)
-	if not q.is_empty():return (w("paused")+" · " if p.state.assets.initiatives[id].paused else "")+w("progress").format({"done":q.progress,"total":p.rules.projects[id].work})
+	if not q.is_empty():return (w("paused")+" · " if p.state.get("assets",{}).get("initiatives",{}).get(id,{}).get("paused",false) else "")+w("progress").format({"done":q.progress,"total":p.rules.projects[id].work})
 	return w("locked") if p.rules.quote(p.state,{"kind":"commission","id":id}).has("error") else w("ready")
 func project_card(id: String) -> Button:
 	var spec: Dictionary=p.rules.projects[id]
@@ -190,9 +211,14 @@ func project_blanks(id: String) -> int:
 	if id=="living_watch_kits":return int(p.rules.balance.living.kit_inputs)
 	return 0
 func select_place(id: String) -> void:
-	selected=id;detail={};overlay="";refresh()
+	selected=id;detail={};overlay="";room_mode=false;refresh()
 func choose_page(id: String) -> void:page=id;detail={};overlay="";refresh()
-func show_project(id: String) -> void:preview_stage="planned";selected=p.rules.assets.project_assets[id];page="projects";detail={"kind":"project","id":id};overlay="";refresh()
+func show_project(id: String) -> void:
+	preview_stage="current" if not queued(id).is_empty() else "planned"
+	expanded_details=false;selected=p.rules.assets.project_assets[id];page="projects";detail={"kind":"project","id":id};overlay=""
+	if is_instance_valid(construction()):construction().select(id)
+	if room_mode and is_instance_valid(room()):room().choose(id)
+	refresh()
 func show_order(kind: String,id: String) -> void:detail={"kind":kind,"id":id};overlay="";refresh()
 func show_overlay(id: String) -> void:overlay=id;detail={};refresh()
 func close_sheet() -> void:
@@ -217,11 +243,12 @@ func build_sheet() -> void:
 	header.resized.connect(layout_sheet)
 	layout_sheet.call_deferred()
 	var v:=VBoxContainer.new();sheet.add_child(v)
-	var r:=row(v);var title:=label(w(overlay) if overlay!="" else w("details"),20);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;r.add_child(title);r.add_child(button(w("close"),close_sheet,"VisualClose"))
+	var r:=row(v);var title:=label(cw(overlay) if overlay=="oversight" else (w(overlay) if overlay!="" else w("details")),20);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;r.add_child(title);r.add_child(button(w("close"),close_sheet,"VisualClose"))
 	var body:=scroller(v)
 	if not detail.is_empty():
 		if detail.kind=="project":project_detail(body,detail.id)
 		else:order_detail(body,detail.kind,detail.id)
+	elif overlay=="oversight":project_overview(body)
 	elif overlay=="growth":growth(body)
 	elif overlay=="help":help(body)
 	elif overlay=="incident":incidents(body)
@@ -244,33 +271,48 @@ func command_button(parent: Node,text_: String,action: Dictionary,id: String) ->
 func project_detail(body: VBoxContainer,id: String) -> void:
 	var spec: Dictionary=p.rules.projects[id]
 	var top:=row(body)
-	var mesh: Mesh=preview_mesh(id,preview_stage=="planned")
+	var d: Dictionary=projects.describe(p.state,p.rules,id,forecast,expanded_details)
+	var mesh: Mesh=site_preview(id) if d.queued and preview_stage=="current" else preview_mesh(id,preview_stage=="planned")
 	if mesh!=null:
 		var model_column:=VBoxContainer.new();top.add_child(model_column)
 		var model=preload("res://src/place_preview.gd").new();model_column.add_child(model);model.show_mesh(mesh)
-		paragraph(model_column,w("model_future") if has_building_change(id) and preview_stage=="planned" else w("model_current"),12)
+		paragraph(model_column,d.stage_label if d.queued and preview_stage=="current" else (w("model_future") if has_building_change(id) and preview_stage=="planned" else w("model_current")),12)
 
 	else:
 		var icon:=Icon.new();icon.kind=project_icon(id);icon.custom_minimum_size=Vector2(125,95);top.add_child(icon)
 	var brief:=VBoxContainer.new();brief.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(brief)
-	paragraph(brief,spec.title,23);paragraph(brief,w("cost").format({"wood":spec.wood,"blanks":project_blanks(id)}),17);paragraph(brief,w("effort").format(spec),16)
+	paragraph(brief,spec.title,23)
+	paragraph(brief,cw("stage").format({"stage":d.stage_label,"percent":d.progress*100/d.total}) if d.committed else cw("quote").format({"wood":d.cost_wood,"blanks":d.cost_blanks}),17)
+	var progress:=ProgressBar.new();progress.name="ProjectProgress";progress.max_value=d.total;progress.value=d.progress;progress.custom_minimum_size.y=18;brief.add_child(progress)
+	paragraph(brief,cw("progress").format({"done":d.progress,"total":d.total}),15)
+	paragraph(brief,project_cause(d),15)
+	project_flow(body,d)
 	body.add_child(button(w("visit_site"),visit_project.bind(id),"VisualVisitProject"))
-	if has_building_change(id):
+	if has_building_change(id) or d.queued:
 		var stages:=row(body)
 		for stage in ["current","planned"]:
 			var b:=button(w("view_"+stage),func():preview_stage=stage;refresh(),"VisualStage_"+stage);b.disabled=preview_stage==stage;stages.add_child(b)
 		if mesh==null:paragraph(body,w("model_empty"),14)
-	paragraph(body,spec.body,15)
-	var req: Array=[]
-	for key in spec.requires:req.append(p.rules.projects[key].title)
-	paragraph(body,w("requires").format({"items":", ".join(req)}) if not req.is_empty() else w("no_requires"),14)
+	if not spec.requires.is_empty():
+		paragraph(body,cw("prerequisites"),14)
+		var dependencies:=HFlowContainer.new();body.add_child(dependencies)
+		for key in spec.requires:dependencies.add_child(button(("✓ " if p.rules.has_project(p.state,key) else "→ ")+p.rules.projects[key].title,show_project.bind(key),"ProjectRequires_"+key))
+	if p.rules.land.active(p.state) and id in ["land_court_home","land_hearth_home"]:
+		body.add_child(button(cw("helpful").format({"title":p.rules.projects.land_adapt_workroom.title}),show_project.bind("land_adapt_workroom"),"ProjectHelpful"))
+	body.add_child(button(cw("less_details") if expanded_details else cw("details"),func():expanded_details=not expanded_details;refresh(),"ProjectMore"))
+	if expanded_details:
+		paragraph(body,spec.body,15);paragraph(body,cw("investment"),14);paragraph(body,projects.copy.interpretation,13)
+		paragraph(body,str(d.affected),13)
+		for citizen in p.state.citizens:
+			if citizen.id in d.assigned:paragraph(body,citizen.name+" · "+citizen.household,13)
 	var q:=queued(id)
-	if p.rules.has_project(p.state,id):paragraph(body,w("complete"),19);return
+	if p.rules.has_project(p.state,id):paragraph(body,cw("completed_rule"),15);return
 	if q.is_empty():command_button(body,w("confirm"),{"kind":"commission","id":id},"VisualCommission");paragraph(body,w("paid"),13)
 	else:
-		paragraph(body,w("progress").format({"done":q.progress,"total":spec.work})+"  ·  "+w("next_work").format(forecast.assets.projects[id]),18)
+		if not p.rules.assets.active(p.state):
+			paragraph(body,cw("manual"));body.add_child(button(w("ledger"),legacy,"ProjectManual"));return
 		var initiative: Dictionary=p.state.assets.initiatives[id]
-		var controls:=row(body)
+		var controls:=HBoxContainer.new();body.add_child(controls)
 		for key in ["crew","priority"]:
 			controls.add_child(label(w(key)))
 			var spin:=SpinBox.new();spin.name="Visual_"+key;spin.min_value=0 if key=="crew" else 1;spin.max_value=p.rules.assets.balance.max_crew if key=="crew" else 3;spin.value=initiative[key];spin.custom_minimum_size.x=110;controls.add_child(spin)
@@ -378,12 +420,13 @@ func advance() -> void:
 	_busy=false;refresh()
 func save() -> void:p.save_campaign();refresh()
 func load_saved() -> void:
-	if p.load_campaign():detail={};overlay="";page="projects";open()
+	if p.load_campaign():room_mode=false;return_view={};detail={};overlay="";page="projects";open()
 	else:refresh()
 func start_new() -> void:
 	if not p.state.is_empty() or FileAccess.file_exists(p.save_path):show_overlay("new_confirm");return
 	begin()
 func begin() -> void:
+	room_mode=false;return_view={}
 	detail={};overlay="";selected="stores";page="projects"
 	var start: int=Time.get_ticks_usec()
 	var state: Dictionary=p.rules.new_state()
@@ -404,14 +447,29 @@ func inspect() -> void:
 	show_overlay("knowledge")
 func pick(origin: Vector3,direction: Vector3) -> bool:
 	if not enabled or p.visible or not app.campaign_mode:return false
+	if is_instance_valid(room()):
+		var plan: String=room().pick(origin,direction)
+		if plan!="":
+			room_mode=true
+			if plan=="easel":show_project(room().selected)
+			else:room().choose(plan);look_at_easel();refresh()
+			return true
+	if is_instance_valid(construction()):
+		var project: String=construction().pick(origin,direction)
+		if project!="":show_project(project);return true
 	var subject: String=""
 	if p.rules.living.active(p.state):subject=app.campaign_view.living_view.pick(origin,direction)
 	if subject!="":
 		selected="watch" if subject.ends_with("post") else "workroom"
 		var e: Dictionary=p.rules.incidents.current(p.state)
 		execute({"kind":"incident_inspect" if not e.is_empty() and subject in p.rules.incidents.specs[e.id].subjects else "living_inspect","id":subject});show_overlay("knowledge");return true
-	var hit: String=app.pick_asset(origin,direction)
-	if hit!="":select_place(hit);return true
+	var object_id: String=app.pick_asset(origin,direction,true)
+	if object_id!="":
+		# An occupied adaptation keeps its ordinary building selectable as its site.
+		for item in p.state.queue:
+			if object_id in projects.describe(p.state,p.rules,item.id,forecast).affected:
+				show_project(item.id);return true
+		select_place(p.rules.assets.object_asset(object_id));return true
 	return false
 
 func has_building_change(id: String) -> bool:
@@ -455,3 +513,62 @@ func visit_project(id: String) -> void:
 
 func layout_sheet() -> void:
 	if is_instance_valid(sheet) and is_instance_valid(header):sheet.offset_top=header.position.y+header.size.y+12
+
+func project_cause(d: Dictionary) -> String:
+	if d.refusal!="":return p.asset_panel.reason(d.refusal)
+	return cw("manual") if d.cause=="manual" else cw("cause_"+d.cause)
+
+func project_flow(body: VBoxContainer,d: Dictionary) -> void:
+	var flow:=HBoxContainer.new();flow.name="ProjectFlow";flow.add_theme_constant_override("separation",10);body.add_child(flow)
+	for kind in ["materials","workers","result"]:
+		if kind!="materials":flow.add_child(label("→",24))
+		var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.size_flags_stretch_ratio=1;panel.add_theme_stylebox_override("panel",style("304846"));flow.add_child(panel)
+		var v:=VBoxContainer.new();panel.add_child(v)
+		var icon:=Icon.new();icon.kind="wood" if kind=="materials" else ("people" if kind=="workers" else project_icon(d.id));icon.custom_minimum_size=Vector2(70,38);v.add_child(icon)
+		paragraph(v,cw(kind),17)
+		if kind=="materials":
+			paragraph(v,cw("paid" if d.committed else "quote").format({"wood":d.paid_wood if d.committed else d.cost_wood,"blanks":d.paid_blanks if d.committed else d.cost_blanks}),14)
+			paragraph(v,cw("stock").format({"wood":p.state.wood,"blanks":p.state.living.get("blanks",0)}),13)
+		elif kind=="workers":
+			paragraph(v,cw("capacity").format(d),14);paragraph(v,cw("adults").format(d),13)
+			paragraph(v,cw("next_work").format(d),15);paragraph(v,cw("remaining").format(d),13)
+		else:paragraph(v,d.benefit,14)
+
+func project_overview(body: VBoxContainer) -> void:
+	paragraph(body,cw("overview_note"),16)
+	var controls:=row(body);controls.add_child(button(cw("enter_room"),enter_room,"EnterPlanningRoom"))
+	paragraph(body,cw("legend"),13)
+	for group in ["active","paused","available","complete"]:
+		var ids: Array=[]
+		for id in projects.ids(p.state,p.rules):
+			var d: Dictionary=projects.describe(p.state,p.rules,id,forecast)
+			var actual: String="complete" if d.complete else ("paused" if d.paused else ("active" if d.queued else "available"))
+			if group==actual:ids.append(id)
+		if ids.is_empty():continue
+		paragraph(body,cw(group),20)
+		var cards:=HFlowContainer.new();body.add_child(cards)
+		for id in ids:
+			var d: Dictionary=projects.describe(p.state,p.rules,id,forecast)
+			var card:=project_card(id)
+			card.tooltip_text=p.rules.projects[id].title+"\n"+d.stage_label+"\n"+project_cause(d)
+			if d.queued:card.get_child(0).get_child(2).text="%d/%d · %d adults · +%d"%[d.progress,d.total,d.crew,d.work]
+			cards.add_child(card)
+
+func enter_room() -> void:
+	if not is_instance_valid(room()):return
+	if not room_mode:return_view={"position":app.camera.position,"rotation":app.camera.rotation,"flying":app.flying}
+	room_mode=true;detail={};overlay="";look_at_board();refresh()
+func look_at_board() -> void:
+	if not is_instance_valid(room()):return
+	app.set_view(room().point(Vector3(.12,1.68,1.24)),room().board_center(),false)
+func look_at_easel() -> void:
+	if not is_instance_valid(room()):return
+	app.set_view(room().point(Vector3(.12,1.68,1.24)),room().easel_center(),false)
+func leave_room() -> void:
+	room_mode=false;detail={};overlay=""
+	if not return_view.is_empty():
+		app.camera.position=return_view.position;app.camera.rotation=return_view.rotation;app.yaw=app.camera.rotation.y;app.pitch=app.camera.rotation.x;app.flying=return_view.flying;app._update_mode()
+	return_view={};refresh()
+func site_preview(id: String) -> Mesh:
+	if not is_instance_valid(construction()) or not construction().sites.has(id):return preview_mesh(id,false)
+	return app.world.object_nodes[construction().sites[id].owner].mesh

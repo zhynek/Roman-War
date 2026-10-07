@@ -377,6 +377,7 @@ func show_campaign(state: Dictionary,rules,force: bool = false) -> void:
 	campaign_mode=true
 	if not is_instance_valid(campaign_view):
 		campaign_view=View.new();add_child(campaign_view)
+	world.set_meta("project_presentation",true)
 	campaign_view.refresh(state,rules,world)
 
 func show_reference() -> void:
@@ -417,7 +418,7 @@ func pick_resident(origin:Vector3,direction:Vector3) -> String:
 			if distance<best:best=distance;selected=routine.id
 	return selected
 
-func pick_asset(origin: Vector3,direction: Vector3) -> String:
+func pick_asset(origin: Vector3,direction: Vector3,return_object: bool=false) -> String:
 	# Mesh triangle queries share actual drawing transforms, including roofs,
 	# new fabric and shared outdoor places. Only run on a click, never per frame.
 	var best: float=180.0
@@ -435,5 +436,5 @@ func pick_asset(origin: Vector3,direction: Vector3) -> String:
 			var hit: Variant=Geometry3D.ray_intersects_triangle(a,dir,faces[i],faces[i+1],faces[i+2])
 			if hit!=null:
 				var distance: float=origin.distance_to(node.global_transform*hit)
-				if distance<best:best=distance;selected=asset
+				if distance<best:best=distance;selected=str(id).trim_prefix("household_interior_") if return_object else asset
 	return selected

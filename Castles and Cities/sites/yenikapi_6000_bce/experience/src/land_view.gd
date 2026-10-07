@@ -13,9 +13,9 @@ func build(state: Dictionary,rules,world) -> void:
 		for side in [-1,1]:
 			_bar(center+Vector3(side*half.x,.07,0),Vector3(.06,.09,half.y*2),mat)
 			_bar(center+Vector3(0,.07,side*half.y),Vector3(half.x*2,.09,.06),mat)
-		if use=="" or done:
+		if (use=="" or done) and not world.get_meta("project_presentation",false):
 			var label:=Label3D.new();label.text=site.title;label.font_size=26;label.pixel_size=.012;label.position=center+Vector3(0,5 if done else 2,0);label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.modulate=Color("e4d9b7");label.visibility_range_begin=12.0;add_child(label)
-		if use!="" and not done and not rules.land.proposals[use].retain:
+		if use!="" and not done and not rules.land.proposals[use].retain and not world.get_meta("project_presentation",false):
 			var progress: int=0
 			for item in state.queue:
 				if item.id==use:progress=int(item.progress)

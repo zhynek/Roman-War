@@ -577,17 +577,24 @@ func pick(origin: Vector3,direction: Vector3,max_distance: float = 180.0) -> Dic
 			if distance<best:best=distance;selected=box.owner
 	return {"id":selected,"distance":best}
 
-# Reuse unchanged fabric when the ground terraces are identical. Changed footprints
-# still take the complete terrain path; caches cannot outlive their geometry.
+# Reuse unchanged buildings and patch terrain locally when a footprint changes.
+# Collision revisions let presentation routes validate retained paths.
 func update_fabric(config: Dictionary) -> bool:
 	var old_ground: Array=[]
 	var new_ground: Array=[]
-	for b in buildings:old_ground.append([b.id,b.at,b.size,b.yaw])
+	for b in buildings:old_ground.append([b.id,Vector2(float(b.at[0]),float(b.at[1])),Vector2(float(b.size[0]),float(b.size[1])),float(b.yaw)])
 	for b in config.objects:
-		if b.kind=="building":new_ground.append([b.id,b.at,b.size,b.yaw])
+		if b.kind=="building":new_ground.append([b.id,Vector2(float(b.at[0]),float(b.at[1])),Vector2(float(b.size[0]),float(b.size[1])),float(b.yaw)])
 	old_ground.sort_custom(func(a,b):return a[0]<b[0])
 	new_ground.sort_custom(func(a,b):return a[0]<b[0])
-	if old_ground!=new_ground:return false
+	var ground_changed: bool=old_ground!=new_ground
+	# Same physical numbers compare equal even when JSON used floats and rule
+	# records canonicalized them to integers. Genuine terrace edits are local.
+	var terrain_regions: Array=[]
+	if ground_changed:
+		for item in old_ground+new_ground:
+			if item in old_ground and item in new_ground:continue
+			terrain_regions.append(Rect2(item[1]-Vector2.ONE*(item[2].length()*.5+5),Vector2.ONE*(item[2].length()+10)))
 	var old: Dictionary={}
 	var fresh: Dictionary={}
 	for item in data.objects:old[item.id]=item
@@ -601,6 +608,11 @@ func update_fabric(config: Dictionary) -> bool:
 		if data.get("presentation_food",-1)!=config.get("presentation_food",-1):
 			for b in buildings:
 				if b.use=="storage" and b.id not in changed:changed.append(b.id)
+	if ground_changed:
+		# Ground-following paths/fields are inexpensive; unchanged buildings, actors,
+		# materials, water and the distant terrain stay alive.
+		for id in fresh:
+			if fresh[id].kind!="building" and id not in changed:changed.append(id)
 	for id in changed:
 		if object_nodes.has(id):object_nodes[id].free();object_nodes.erase(id)
 	solids=solids.filter(func(box):return box.owner not in changed)
@@ -608,6 +620,12 @@ func update_fabric(config: Dictionary) -> bool:
 	data=config;buildings=[]
 	for b in config.objects:
 		if b.kind=="building":buildings.append(b)
+	if ground_changed:
+		_height_samples.clear()
+		_patch_terrain(terrain_regions)
+		for id in ["vegetation","yard_traces"]:
+			if object_nodes.has(id):object_nodes[id].free();object_nodes.erase(id)
+		_countryside()
 	for id in changed:
 		if not fresh.has(id):continue
 		var record: Dictionary=fresh[id]
@@ -621,3 +639,38 @@ func update_fabric(config: Dictionary) -> bool:
 	revision+=1
 	stats={"authored_objects":data.objects.size(),"buildings":buildings.size(),"collision_pieces":solids.size(),"mesh_instances":object_nodes.size()}
 	return true
+
+func _patch_terrain(regions: Array) -> void:
+	# The authored near grid emits six indices per cell in row-major order.
+	# Replace only touched triangles, preserving the distant mesh and its normals.
+	# Appended vertices avoid corrupting indexed neighbours sharing an old normal.
+	var original: ArrayMesh=object_nodes.landscape.mesh
+	var arrays: Array=original.surface_get_arrays(0)
+	var vertices: PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+	var normals: PackedVector3Array=arrays[Mesh.ARRAY_NORMAL]
+	var uvs: PackedVector2Array=arrays[Mesh.ARRAY_TEX_UV]
+	var indices: PackedInt32Array=arrays[Mesh.ARRAY_INDEX]
+	var tangents: PackedFloat32Array=arrays[Mesh.ARRAY_TANGENT] if arrays[Mesh.ARRAY_TANGENT]!=null else PackedFloat32Array()
+	var extent: int=int(data.terrain.extent)
+	var step: int=int(data.terrain.grid)
+	var side: int=extent*2/step
+	var touched: Dictionary={}
+	for region in regions:
+		var low:=Vector2i(maxi(0,floori((region.position.x+extent)/step)),maxi(0,floori((region.position.y+extent)/step)))
+		var high:=Vector2i(mini(side-1,ceili((region.end.x+extent)/step)),mini(side-1,ceili((region.end.y+extent)/step)))
+		for iz in range(low.y,high.y+1):
+			for ix in range(low.x,high.x+1):touched[(iz*side+ix)*6]=true
+	for first in touched:
+		for triangle in [0,3]:
+			var points: Array[Vector3]=[]
+			for j in range(3):
+				var p: Vector3=vertices[indices[first+triangle+j]];p.y=height_raw(p.x,p.z);points.append(p)
+			var normal: Vector3=(points[2]-points[0]).cross(points[1]-points[0]).normalized()
+			for j in range(3):
+				indices[first+triangle+j]=vertices.size();vertices.append(points[j]);normals.append(normal);uvs.append(Vector2(points[j].x,points[j].z))
+				if not tangents.is_empty():
+					var tangent: Vector3=Vector3.RIGHT.slide(normal).normalized()
+					tangents.append_array(PackedFloat32Array([tangent.x,tangent.y,tangent.z,1.0]))
+	arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_NORMAL]=normals;arrays[Mesh.ARRAY_TEX_UV]=uvs;arrays[Mesh.ARRAY_INDEX]=indices
+	if not tangents.is_empty():arrays[Mesh.ARRAY_TANGENT]=tangents
+	var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays);mesh.surface_set_material(0,original.surface_get_material(0));object_nodes.landscape.mesh=mesh

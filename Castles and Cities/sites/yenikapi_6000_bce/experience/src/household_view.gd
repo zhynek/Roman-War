@@ -72,7 +72,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	if rules.incidents.active(state):
 		for e in state.incidents.records:incident_visual.append([e.id,rules.incidents.phase(state,e),rules.has_project(state,rules.incidents.specs[e.id].prepare)])
 	var life_visual: Array=[state.living.get("blanks",0),state.living.get("kits",0),rules.has_project(state,"living_shared_room"),hash(world.solids),mini(6,int(state.wood)/10) if rules.living.active(state) else 0]
-	var fingerprint: String=JSON.stringify([incident_visual,life_visual,world.revision,tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
+	var fingerprint: String=JSON.stringify([incident_visual,life_visual,world.revision,hash(world.solids),tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
 	if fingerprint==_signature:
 		last_refresh_profile={"unchanged":true};return
 	_signature=fingerprint
@@ -96,15 +96,10 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		_clear_overlay()
 		_interiors(stage,orders)
 		_geometry_signature=appearance
-		var collider_signature: int=hash(world.solids)
-		if collider_signature!=_nav_signature:
-			_routes.clear();_cells.clear();_edges.clear();_segments.clear()
-			_index_obstacles()
-			_nav_signature=collider_signature
-	# External work/post colliders may change without interior appearance changing.
+	# Keep collision-safe routes when a local building or prop changes. Clear the
+	# primitive caches first; validating against old segments would hide new walls.
 	if hash(world.solids)!=_nav_signature:
-		_routes.clear();_cells.clear();_edges.clear();_segments.clear();_heights.clear()
-		_index_obstacles();_nav_signature=hash(world.solids)
+		_revalidate_navigation()
 	_make_stations(rules)
 	_actor_materials()
 	var by_person: Dictionary={}
@@ -221,7 +216,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		_pose(routine,false,0)
 		figure_us+=Time.get_ticks_usec()-figure_start
 	life_visual[3]=hash(world.solids)
-	_signature=JSON.stringify([incident_visual,life_visual,world.revision,tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
+	_signature=JSON.stringify([incident_visual,life_visual,world.revision,hash(world.solids),tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
 	last_refresh_profile={"setup_us":setup_us,"journey_us":journey_us,"figure_us":figure_us,"total_us":Time.get_ticks_usec()-profile_start}
 
 func _label(table: String,key: String) -> String:
@@ -859,3 +854,19 @@ func _asset_detail(b: Dictionary) -> void:
 		# Ordinary shared care is a useful interior arrangement too.
 		if _asset_allocation.orders.get("refuge",0)>0:
 			geo.rod(Vector3(-1.78,.19,-1.9),Vector3(-.83,.19,-1.9),.14,"mat",.14,14)
+
+func _revalidate_navigation() -> void:
+	_cells.clear();_edges.clear();_segments.clear();_heights.clear()
+	_index_obstacles()
+	var retained: int=0
+	for key in _routes.keys():
+		var route: Array=_routes[key]
+		var valid: bool=not route.is_empty()
+		for i in range(route.size()):
+			route[i]=_floor(route[i])
+			if _nav_blocked(route[i]):valid=false;break
+			if i>0 and not _clear(route[i-1],route[i]):valid=false;break
+		if not valid:_routes.erase(key)
+		else:retained+=1
+	_nav_signature=hash(world.solids)
+	last_refresh_profile.retained_routes=retained

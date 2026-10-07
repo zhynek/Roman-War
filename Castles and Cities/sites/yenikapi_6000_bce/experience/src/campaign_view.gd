@@ -7,6 +7,8 @@ var life
 var land_view
 var incident_view
 var living_view
+var construction_view
+var planning_room
 var markers: Node3D
 var _marker_key: String=""
 const HouseholdView = preload("res://src/household_view.gd")
@@ -30,6 +32,14 @@ static func snapshot(base: Dictionary, state: Dictionary, rules) -> Dictionary:
 	return result
 
 func refresh(state: Dictionary, rules, world) -> void:
+	# New presentation layers install their actual collision before citizen routes.
+	# The dated reference and retained export specimens can omit these UI props.
+	if world.get_meta("project_presentation",false):
+		var forecast: Dictionary=rules.forecast(state)
+		if not is_instance_valid(construction_view):construction_view=preload("res://src/construction_view.gd").new();add_child(construction_view)
+		construction_view.refresh(state,rules,world,forecast)
+		if not is_instance_valid(planning_room):planning_room=preload("res://src/planning_room.gd").new();add_child(planning_room)
+		planning_room.refresh(state,rules,world,forecast)
 	if rules.living.active(state):
 		if not is_instance_valid(living_view):living_view=preload("res://src/living_view.gd").new();add_child(living_view)
 		living_view.refresh(state,rules,world)
@@ -45,7 +55,8 @@ func refresh(state: Dictionary, rules, world) -> void:
 		life.refresh(state,rules,world)
 		_project_markers(state,rules,world)
 		return
-	for child in get_children(): child.free()
+	for child in get_children():
+		if child not in [construction_view,planning_room]:child.free()
 	life=null
 	actors.clear()
 	elapsed = 0.0
@@ -83,6 +94,7 @@ func _project_markers(state: Dictionary,rules,world) -> void:
 	markers=Node3D.new();add_child(markers)
 	if rules.land.active(state):
 		land_view=preload("res://src/land_view.gd").new();markers.add_child(land_view);land_view.build(state,rules,world)
+	if is_instance_valid(construction_view):return
 	for item in state.queue:
 		var project: Dictionary = rules.projects[item.id]
 		var at: Vector3=Vector3(project.at[0],world.floor_height(project.at[0],project.at[1]),project.at[1])

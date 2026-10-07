@@ -1,5 +1,7 @@
 # A Village at Your Fingertips — 0.9.0
 
+0.10.0 extends these controls with [construction sites and shared planning-room oversight](CONSTRUCTION.md). All three surfaces use the same project review and ordinary commands.
+
 Choose **New village** in the illustrated bottom dock, or **Load saved village**.
 A new village starts with the existing 30 residents, 100 provisions and 30 timber,
 with asset, land and living rules active. Warning and recovery remain an explicit

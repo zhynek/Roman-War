@@ -5,7 +5,7 @@ config_version=5
 config/name="Yenikapı — Early Settlement"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/version="0.9.0"
+config/version="0.10.0"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Roman War Yenikapi Early Settlement"
 

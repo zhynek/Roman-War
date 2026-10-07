@@ -121,27 +121,35 @@ func run() -> void:
 	FileAccess.open(out_dir.path_join("render-report.json"),FileAccess.WRITE).store_string(JSON.stringify({"captures":captures,"checks":checks,"failures":failures,"timings":timings,"ui_timings":ui.timings},"  "))
 	print("VISUAL RENDER: ",captures.size()," captures; ",checks," checks, ",failures," failures; timings ",JSON.stringify(timings));quit(1 if failures else 0)
 func click_button(id: String) -> void:
-	for i in range(3):await process_frame
-	var button: Button=app.find_child(id,true,false)
-	if button==null:check(false,"missing control "+id);return
-	var parent: Node=button.get_parent()
-	while parent!=null:
-		if parent is ScrollContainer:parent.ensure_control_visible(button)
-		parent=parent.get_parent()
-	for i in range(3):await process_frame
-	check(button.is_visible_in_tree() and not button.disabled,"available control "+id)
-	if button.disabled:return
-	var window: Window=button.get_window()
-	if window!=root:window.grab_focus()
-	var at: Vector2=button.get_global_rect().get_center();window.warp_mouse(at)
-	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;window.push_input(motion,true)
-	await process_frame
-	var start: int=Time.get_ticks_usec()
-	for pressed in [true,false]:
-		window.warp_mouse(at)
-		var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0;window.push_input(event,true)
-		await process_frame
-	timings[id]=Time.get_ticks_usec()-start
+	# Native macOS pointer events can arrive between our motion and release.
+	# Retry only a press that never reached the control and changed no state.
+	for attempt in range(3):
+		for i in range(3):await process_frame
+		var button: Button=app.find_child(id,true,false)
+		if button==null:check(false,"missing control "+id);return
+		var parent: Node=button.get_parent()
+		while parent!=null:
+			if parent is ScrollContainer:parent.ensure_control_visible(button)
+			parent=parent.get_parent()
+		for i in range(3):await process_frame
+		# A deferred dock refresh can replace a control while its parent scrolls.
+		button=app.find_child(id,true,false)
+		if button==null or not button.is_visible_in_tree():continue
+		check(not button.disabled,"available control "+id)
+		if button.disabled:return
+		var received: Dictionary={"pressed":false}
+		button.pressed.connect(func():received.pressed=true,CONNECT_ONE_SHOT)
+		var window: Window=button.get_window()
+		var at: Vector2=button.get_global_rect().get_center()
+		var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;window.push_input(motion,true)
+		var start: int=Time.get_ticks_usec()
+		var before: String=JSON.stringify(app.campaign.state)
+		for pressed in [true,false]:
+			var event:=InputEventMouseButton.new();event.position=at;event.global_position=at;event.button_index=MOUSE_BUTTON_LEFT;event.pressed=pressed;event.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0;window.push_input(event,true)
+		for i in range(2):await process_frame
+		timings[id]=Time.get_ticks_usec()-start
+		if received.pressed or before!=JSON.stringify(app.campaign.state):return
+	check(false,"pointer did not reach control "+id)
 
 func build_project(id: String) -> void:
 	var ui=app.visual_commands;var p=app.campaign
@@ -154,8 +162,7 @@ func build_project(id: String) -> void:
 		await click_button("VisualSeason")
 	check(p.rules.has_project(p.state,id),"completed from ordinary stocks "+id)
 func click_at(at: Vector2) -> void:
-	root.warp_mouse(at)
-	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;root.push_input(motion,true);await process_frame
+	var motion:=InputEventMouseMotion.new();motion.position=at;motion.global_position=at;root.push_input(motion,true)
 	for pressed in [true,false]:
-		root.warp_mouse(at)
-		var e:=InputEventMouseButton.new();e.position=at;e.global_position=at;e.button_index=MOUSE_BUTTON_LEFT;e.pressed=pressed;e.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0;root.push_input(e,true);await process_frame
+		var e:=InputEventMouseButton.new();e.position=at;e.global_position=at;e.button_index=MOUSE_BUTTON_LEFT;e.pressed=pressed;e.button_mask=MOUSE_BUTTON_MASK_LEFT if pressed else 0;root.push_input(e,true)
+	for i in range(2):await process_frame

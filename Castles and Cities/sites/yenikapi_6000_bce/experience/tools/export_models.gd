@@ -148,7 +148,37 @@ func run() -> void:
 		if not write_model(model,out_dir.path_join("incident-approach-%d.glb"%season)):quit(1);return
 		FileAccess.open(out_dir.path_join("incident-%d-provenance.json"%season),FileAccess.WRITE).store_string(JSON.stringify({"status":"Hypothetical approach signs, disruption and repair; no documented disaster claimed","state":incident_state,"models":"Original neutral procedural signs; rules and animated citizens remain in app/source."},"  "))
 		model.free();view.free();incident_world.free()
-	print("VILLAGE MODEL EXPORT PASS: 36 GLBs")
+	# Keep every previously released specimen byte-identical. These five additions
+	# illustrate real normal-stock progress and the interpretive planning device.
+	var construction_state: Dictionary=preload("res://tools/living_driver.gd").initial(incident_rules)
+	construction_state=incident_rules.command(construction_state,{"kind":"commission","id":"care_shelter"}).state
+	construction_state=incident_rules.command(construction_state,{"kind":"asset_project","id":"care_shelter","crew":1,"priority":1,"paused":false}).state
+	var read_model=preload("res://src/project_presentation.gd").new()
+	var stages: Array=[]
+	for step in range(4):
+		var config: Dictionary=preload("res://src/campaign_view.gd").snapshot(data,construction_state,incident_rules)
+		var construction_world=load("res://src/village.gd").new();root.add_child(construction_world);construction_world.build(config)
+		var derived: Dictionary=read_model.describe(construction_state,incident_rules,"care_shelter")
+		preload("res://src/construction_view.gd").build_site("care_shelter",derived,incident_rules,construction_world)
+		var original: MeshInstance3D=construction_world.object_nodes.construction_care_shelter
+		var model:=MeshInstance3D.new();model.name="ConstructionStage"+str(derived.stage);model.mesh=neutral_mesh(original.mesh);root.add_child(model)
+		if not write_model(model,out_dir.path_join("construction-stage-%d.glb"%derived.stage)):quit(1);return
+		stages.append({"stage":derived.stage,"state":construction_state})
+		model.free()
+		if step==0:
+			var room_view=preload("res://src/planning_room.gd").new();root.add_child(room_view);room_view.refresh(construction_state,incident_rules,construction_world);room_view.choose("care_shelter")
+			var room:=Node3D.new();room.name="InterpretivePlanningRoom";root.add_child(room)
+			var origin: Transform3D=construction_world.object_nodes.yk_house_06.transform
+			for id in construction_world.object_nodes:
+				if id!="yk_house_06" and not id.begins_with("planning_"):continue
+				var source: MeshInstance3D=construction_world.object_nodes[id]
+				var copy:=MeshInstance3D.new();copy.name=id;copy.transform=origin.affine_inverse()*source.transform;copy.mesh=neutral_mesh(source.mesh);room.add_child(copy)
+			if not write_model(room,out_dir.path_join("construction-planning-room.glb")):quit(1);return
+			room.free();room_view.free()
+		construction_world.free()
+		construction_state=incident_rules.advance(construction_state).state
+	FileAccess.open(out_dir.path_join("construction-provenance.json"),FileAccess.WRITE).store_string(JSON.stringify({"status":"Interpretive plans and saved construction work. No documented planning institution, palace or blueprint practice is claimed.","stages":stages,"models":"Neutral original geometry. Exact counts, assignments, controls and shaders remain in app/source; these are not extra resources."},"  "))
+	print("VILLAGE MODEL EXPORT PASS: 41 GLBs")
 	quit()
 func neutral_mesh(source:ArrayMesh) -> ArrayMesh:
 	var mesh:=ArrayMesh.new()

@@ -297,3 +297,18 @@ recognition aids, not archaeological illustrations. Rotatable previews reuse the
 existing production geometry and distinguish current places from planned buildings.
 The direct-evidence, regional-analogy and gameplay-interpretation distinctions above
 remain unchanged. No source artwork or historic plan was copied.
+
+
+## 0.10.0 sites and shared planning interface
+
+No new archaeological claim is added. Quarter-work construction stages, small
+material piles, status marks, project diagrams, board and easel are explicitly
+**gameplay interpretation**, generated with original procedural geometry. They
+make existing authored work, payment and benefits legible; they are not recovered
+construction sequences, inventories, plans or documented administrative practice.
+The planning area occupies the existing hypothetical working room. It is not a
+palace, governor's residence, architectural office, or claim that a blueprint
+tradition existed at Yenikapı. The accommodation and dated reference are preserved.
+Existing evidence for the broad material vocabulary remains as cited above; no
+source images or historical plans were copied. The saved projects and bounded
+incidents retain their previous gameplay meaning.

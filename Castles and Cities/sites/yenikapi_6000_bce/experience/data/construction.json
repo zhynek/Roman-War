@@ -1,0 +1,234 @@
+{
+  "title": "Buildings That Show Their Work",
+  "interpretation": "The board, portable plan objects and easel are original gameplay devices. They do not claim a documented planning institution or blueprint practice at Yenikapı.",
+  "room": {
+    "building": "yk_house_06",
+    "board_at": [
+      -0.75,
+      1.65,
+      -1.78
+    ],
+    "easel_at": [
+      -1.78,
+      1.1,
+      0.8
+    ],
+    "page_size": 8
+  },
+  "stages": {
+    "building": [
+      "Site laid out",
+      "Footings and supports",
+      "Frame and enclosure",
+      "Roofing and fittings",
+      "Completed use"
+    ],
+    "adapt": [
+      "Materials set aside",
+      "Supporting repairs",
+      "Interior arrangement",
+      "Fittings prepared",
+      "Completed use"
+    ],
+    "path": [
+      "Route set out",
+      "Ground preparation",
+      "Edge supports",
+      "Surface preparation",
+      "Completed use"
+    ],
+    "ground": [
+      "Work ground set out",
+      "Ground prepared",
+      "Working arrangement",
+      "Final preparation",
+      "Completed use"
+    ],
+    "screen": [
+      "Screen laid out",
+      "Supports prepared",
+      "Screen frame",
+      "Ties and finish",
+      "Completed use"
+    ],
+    "repair": [
+      "Repair materials reserved",
+      "Damaged area prepared",
+      "Repair in progress",
+      "Final preparation",
+      "Restored use"
+    ],
+    "equipment": [
+      "Materials reserved",
+      "Pieces prepared",
+      "Assembly",
+      "Fitting and checks",
+      "Ready for use"
+    ]
+  },
+  "projects": {
+    "field_extension": {
+      "treatment": "ground",
+      "benefit": "More food per food worker; needs a staffed harvest."
+    },
+    "shared_store": {
+      "treatment": "adapt",
+      "benefit": "120 more storage places; tending and supplies still needed."
+    },
+    "watch_shelter": {
+      "treatment": "building",
+      "benefit": "A small watch shelter and improved protection with watch workers."
+    },
+    "care_shelter": {
+      "treatment": "building",
+      "benefit": "A shared care room; care and cooperation still need workers."
+    },
+    "north_lane": {
+      "treatment": "path",
+      "benefit": "Access to the earlier northern and eastern household sites."
+    },
+    "north_home": {
+      "treatment": "building",
+      "benefit": "Six housing places; arrivals still need food and wellbeing."
+    },
+    "east_home": {
+      "treatment": "building",
+      "benefit": "Six housing places; arrivals still need food and wellbeing."
+    },
+    "refuge_screen": {
+      "treatment": "screen",
+      "benefit": "A low refuge screen and a gathering point improve protection."
+    },
+    "council_ground": {
+      "treatment": "ground",
+      "benefit": "A shared place for cooperation; no new office or resources."
+    },
+    "exchange_place": {
+      "treatment": "building",
+      "benefit": "A meeting room; optional contacts become available at town readiness."
+    },
+    "land_court_home": {
+      "treatment": "building",
+      "benefit": "Six housing places; closes three shared construction places."
+    },
+    "land_hearth_home": {
+      "treatment": "building",
+      "benefit": "Six housing places; closes three work places and costs four cooperation."
+    },
+    "land_outer_west": {
+      "treatment": "building",
+      "benefit": "Six housing places; retains central work ground. Access needs upkeep."
+    },
+    "land_outer_east": {
+      "treatment": "building",
+      "benefit": "Six housing places; retains central work ground. Access needs upkeep."
+    },
+    "land_outer_access": {
+      "treatment": "path",
+      "benefit": "Enables outer homes; needs one adult and one opening timber each season."
+    },
+    "land_cultivate": {
+      "treatment": "ground",
+      "benefit": "Eight more provisions per staffed harvest. Commits this field."
+    },
+    "land_provisioning": {
+      "treatment": "ground",
+      "benefit": "Four work places and 60 storage; loses eight provisions per staffed harvest."
+    },
+    "land_adapt_workroom": {
+      "treatment": "adapt",
+      "benefit": "Four additional construction places; keeps the room and its doorway."
+    },
+    "living_shared_room": {
+      "treatment": "adapt",
+      "benefit": "Enables two-adult shared preparation. Cooperation needs practice and support."
+    },
+    "living_watch_kits": {
+      "treatment": "equipment",
+      "benefit": "Four serviceable wooden kits; watch staff, practice and upkeep still matter."
+    },
+    "living_north_post": {
+      "treatment": "path",
+      "benefit": "A northern post; two watch adults and maintained facilities support upper timber."
+    },
+    "incident_approach_prepare": {
+      "treatment": "repair",
+      "benefit": "Reduces approach severity by two if finished before resolution."
+    },
+    "incident_approach_repair": {
+      "treatment": "repair",
+      "benefit": "Restores loaded northern access and removes its timber penalty."
+    },
+    "incident_stores_prepare": {
+      "treatment": "repair",
+      "benefit": "Reduces waterside severity by two and protects up to 12 provisions."
+    },
+    "incident_stores_repair": {
+      "treatment": "repair",
+      "benefit": "Restores productive waterside handling; earlier losses remain recorded."
+    }
+  },
+  "ui": {
+    "oversight": "Village projects",
+    "planning_room": "Planning room",
+    "enter_room": "Enter planning room",
+    "leave_room": "Return to village",
+    "room_title": "Shared planning room",
+    "room_note": "Interpretive gameplay plans in the existing working room. Select a plan on the board, then click the easel to manage it.",
+    "room_selected": "On the easel: {title}",
+    "board": "Settlement project board",
+    "easel": "Review the easel plan",
+    "previous": "Previous plans",
+    "next": "Next plans",
+    "all_projects": "All village projects",
+    "active": "Active",
+    "paused": "Paused",
+    "complete": "Completed",
+    "available": "Available",
+    "blocked": "Waiting",
+    "labor": "Short crew",
+    "repair": "Repair",
+    "warning": "Warning",
+    "ready": "Working",
+    "none": "No crew",
+    "materials": "Materials",
+    "workers": "Workers",
+    "result": "Result",
+    "paid": "Paid · {wood} timber + {blanks} prepared",
+    "stock": "Available village stock · {wood} timber + {blanks} prepared",
+    "quote": "To commission · {wood} timber + {blanks} prepared",
+    "remaining": "{remaining} work still needed",
+    "progress": "{done} / {total} work",
+    "capacity": "{crew} / {limit} assigned adults",
+    "adults": "{adults} village adults · {places} construction places",
+    "next_work": "Next season · +{work} work",
+    "finished": "In completed use",
+    "stage": "{stage} · {percent}% worked",
+    "investment": "Paid materials stay committed. Piles illustrate that payment; they are not extra supplies.",
+    "details": "More detail",
+    "less_details": "Hide detail",
+    "prerequisites": "Required earlier work",
+    "helpful": "Helpful support · {title} (not required)",
+    "locate": "Locate this site",
+    "refund": "Cancel returns {wood} timber + {blanks} prepared; completed work is not refunded.",
+    "cause_paused": "Paused by your order; structure and paid materials remain.",
+    "cause_crew": "Crew limit is zero. Allocate a crew to request seasonal work.",
+    "cause_labor": "Adults are allocated to earlier duties. Raise priority, reduce competing work or wait.",
+    "cause_space": "Shared construction places are allocated elsewhere. Pause a project or add working space.",
+    "cause_access_disabled": "Northern access upkeep is switched off. Enable its ordinary upkeep order.",
+    "cause_access_incident": "Approach damage impairs loaded access. Complete the approach repair; pedestrian paths remain open.",
+    "cause_access_materials": "Northern access needs opening timber after household fuel and earlier upkeep.",
+    "cause_access_labor": "Northern access needs its adult upkeep crew before outer work can proceed.",
+    "cause_workroom": "The working room needs maintenance; reduced construction yield applies.",
+    "cause_ready": "Assigned adults will perform the forecast work when you resolve the season.",
+    "cause_complete": "The project is complete. Its normal operating requirements still apply.",
+    "cause_unpaid": "Review requirements, then commission using village stock.",
+    "manual": "This older village uses its saved manual workforce. Manage allocation in the detailed ledger.",
+    "completed_rule": "Completed work cannot be cancelled.",
+    "plan_hint": "Select a plan object, then the easel.",
+    "stage_hint": "Stage reflects saved work, not elapsed time.",
+    "legend": "Hammer: work · II: paused · person: short crew · !: blocked · tool: repair",
+    "no_projects": "No projects in this view.",
+    "overview_note": "Compare paid work, finite crews and next-season progress. Select any plan for the shared project controls."
+  }
+}

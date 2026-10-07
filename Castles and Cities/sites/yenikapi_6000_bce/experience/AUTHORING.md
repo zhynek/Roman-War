@@ -125,3 +125,21 @@ behind public rules; canonicalize data-driven choices before dispatch. Model
 previews use production geometry in an isolated viewport and cannot alter state.
 No image assets or new save wrapper are introduced. Retain the detailed ledger
 and old chapters; never make opening a saved village adopt later rules.
+
+
+## Construction and planning presentation (0.10.0)
+
+Read [CONSTRUCTION.md](CONSTRUCTION.md) before changing site geometry, plan
+objects or status labels. `construction.json` and its closed schema describe
+25 existing projects using seven treatments; they do not own costs or rules.
+The pure read model takes payment, work, crews and blockers from existing
+project/asset/land/living/incident records. Never introduce a delivery ledger,
+architectural institution or construction-damage system for visual effect.
+
+The planning board is portable interpretive furniture in the existing working
+room. Validate its collision and every entrance against citizen routes, including
+adaptations. Keep metadata opt-in for gameplay presentation: retained neutral
+model exports must not silently acquire plan furniture or construction overlays.
+Five new Construction models show the four unfinished care-shelter stages and
+planning furniture in the working room; their provenance uses normal public
+commands and calls out the gameplay interpretation. Retain all 36 prior GLBs.

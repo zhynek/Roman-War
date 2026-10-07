@@ -11,6 +11,22 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Sites, plans and village oversight (0.10.0, October 2026)
+
+The village derives partial structures, committed-material piles, status icons and
+physical plans from the existing project queue and finite asset allocator. The
+shared working room hosts an explicitly interpretive board/easel; site, dock and
+room open the same authoritative review and controls. No new economy, save wrapper
+or historical claim. Paused sites and their paid investment survive both incidents,
+including save/load replay. Read [CONSTRUCTION.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/CONSTRUCTION.md)
+and [0.10 verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.10.md).
+
+Numeric footprint comparison avoids needless full builds. Actual footprint changes
+patch local terrain and retain unchanged buildings; collision-valid cached routes
+are reused. Cold-build geometry equivalence and full path walking guard this seam.
+The release builder adds exact-app construction acceptance and five separate model
+specimens while retaining every earlier gate and 36 prior model bytes.
+
 ## Yenikapı visual governing (0.9.0, October 2026)
 
 The village now starts with an illustrated bottom dock. Building/place selection

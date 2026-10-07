@@ -1,0 +1,478 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "interpretation",
+    "room",
+    "stages",
+    "projects",
+    "ui"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interpretation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "room": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "building",
+        "board_at",
+        "easel_at",
+        "page_size"
+      ],
+      "properties": {
+        "building": {
+          "type": "string",
+          "minLength": 1
+        },
+        "board_at": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "easel_at": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "number"
+          }
+        },
+        "page_size": {
+          "const": 8
+        }
+      }
+    },
+    "stages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "building",
+        "adapt",
+        "path",
+        "ground",
+        "screen",
+        "repair",
+        "equipment"
+      ],
+      "properties": {
+        "building": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "adapt": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "path": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "ground": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "screen": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "repair": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "equipment": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "treatment",
+          "benefit"
+        ],
+        "properties": {
+          "treatment": {
+            "enum": [
+              "building",
+              "adapt",
+              "path",
+              "ground",
+              "screen",
+              "repair",
+              "equipment"
+            ]
+          },
+          "benefit": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "oversight",
+        "planning_room",
+        "enter_room",
+        "leave_room",
+        "room_title",
+        "room_note",
+        "room_selected",
+        "board",
+        "easel",
+        "previous",
+        "next",
+        "all_projects",
+        "active",
+        "paused",
+        "complete",
+        "available",
+        "blocked",
+        "labor",
+        "repair",
+        "warning",
+        "ready",
+        "none",
+        "materials",
+        "workers",
+        "result",
+        "paid",
+        "stock",
+        "quote",
+        "remaining",
+        "progress",
+        "capacity",
+        "adults",
+        "next_work",
+        "finished",
+        "stage",
+        "investment",
+        "details",
+        "less_details",
+        "prerequisites",
+        "helpful",
+        "locate",
+        "refund",
+        "cause_paused",
+        "cause_crew",
+        "cause_labor",
+        "cause_space",
+        "cause_access_disabled",
+        "cause_access_incident",
+        "cause_access_materials",
+        "cause_access_labor",
+        "cause_workroom",
+        "cause_ready",
+        "cause_complete",
+        "cause_unpaid",
+        "manual",
+        "completed_rule",
+        "plan_hint",
+        "stage_hint",
+        "legend",
+        "no_projects",
+        "overview_note"
+      ],
+      "properties": {
+        "oversight": {
+          "type": "string",
+          "minLength": 1
+        },
+        "planning_room": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enter_room": {
+          "type": "string",
+          "minLength": 1
+        },
+        "leave_room": {
+          "type": "string",
+          "minLength": 1
+        },
+        "room_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "room_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "room_selected": {
+          "type": "string",
+          "minLength": 1
+        },
+        "board": {
+          "type": "string",
+          "minLength": 1
+        },
+        "easel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next": {
+          "type": "string",
+          "minLength": 1
+        },
+        "all_projects": {
+          "type": "string",
+          "minLength": 1
+        },
+        "active": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paused": {
+          "type": "string",
+          "minLength": 1
+        },
+        "complete": {
+          "type": "string",
+          "minLength": 1
+        },
+        "available": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocked": {
+          "type": "string",
+          "minLength": 1
+        },
+        "labor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repair": {
+          "type": "string",
+          "minLength": 1
+        },
+        "warning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready": {
+          "type": "string",
+          "minLength": 1
+        },
+        "none": {
+          "type": "string",
+          "minLength": 1
+        },
+        "materials": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workers": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "paid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stock": {
+          "type": "string",
+          "minLength": 1
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remaining": {
+          "type": "string",
+          "minLength": 1
+        },
+        "progress": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capacity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adults": {
+          "type": "string",
+          "minLength": 1
+        },
+        "next_work": {
+          "type": "string",
+          "minLength": 1
+        },
+        "finished": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "investment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1
+        },
+        "less_details": {
+          "type": "string",
+          "minLength": 1
+        },
+        "prerequisites": {
+          "type": "string",
+          "minLength": 1
+        },
+        "helpful": {
+          "type": "string",
+          "minLength": 1
+        },
+        "locate": {
+          "type": "string",
+          "minLength": 1
+        },
+        "refund": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_paused": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_crew": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_labor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_space": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_access_disabled": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_access_incident": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_access_materials": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_access_labor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_workroom": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_ready": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_complete": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cause_unpaid": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manual": {
+          "type": "string",
+          "minLength": 1
+        },
+        "completed_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "plan_hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stage_hint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "legend": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_projects": {
+          "type": "string",
+          "minLength": 1
+        },
+        "overview_note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

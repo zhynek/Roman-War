@@ -1,4 +1,6 @@
-# Yenikapı — Early Settlement 0.9.0
+# Yenikapı — Early Settlement 0.10.0
+
+**0.10.0 — Buildings That Show Their Work:** staged construction, paid-material and worker explanations, and shared project oversight at sites, in the dock and in an early shared planning room. [Gameplay, interpretation and unchanged save contract](CONSTRUCTION.md).
 
 **0.9.0 — A Village at Your Fingertips:** illustrated bottom commands, building improvements, current/planned models and a connected growth guide. Choose **New village** or **Load saved village**. [Controls and unchanged save contract](VISUAL_COMMANDS.md).
 

@@ -236,3 +236,24 @@ six malformed-data cases, visual command checks on source/exact app, a rendered
 normal-stock dock playthrough and source/exact interaction profiles. Inspect the
 additional `visual` capture folder as well as all 125 retained views. No release
 may replace previous bytes or the parent stable latest release.
+
+
+## Sites, plans and village oversight (0.10.0)
+
+Use `build_early_settlement.py --version 0.10.0`, fresh parent gate logs, and
+a clean committed checkout. Use a separate checkout of the verified commit when
+unrelated work is present; never stash, erase or export someone else's draft.
+The builder adds construction data/negative checks, state/geometry/save checks on
+source and exact app, a complete actual-input planning-room/site/incident sequence,
+and source/exact interaction profiles. Every earlier gate remains required.
+Inspect the `construction` captures as well as all retained views. Compare source
+and exact-app timings honestly; building completion may still exceed a second.
+
+The 36 retained GLBs must remain byte-identical to 0.9.0. Five new Construction
+GLBs bring the total to 41. Mac, Source and eight model partitions make ten ZIPs;
+provenance and SHA256SUMS bring the public total to twelve artifacts. Publish
+`yenikapi-early-settlement-v0.10.0` with `--prerelease --latest=false`, targeting
+the frozen payload commit. Verify anonymous public downloads against tested
+bytes, all prior release/asset metadata and unchanged stable latest `v0.14.2`.
+Never overwrite a published artifact. No save wrapper or historical reference
+change is part of this phase.
