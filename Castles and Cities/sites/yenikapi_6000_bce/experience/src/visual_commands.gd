@@ -436,7 +436,9 @@ func lifecycle_ladder(body: VBoxContainer,current: String) -> void:
 	for stage in p.rules.lifecycle.content.stages:
 		var title: String=stage.title
 		if stage.id==current:title="✓ "+title
-		var planned: bool=stage.status=="planned" and not (stage.id=="town" and p.rules.lifecycle.town_active(p.state))
+		var town_available: bool=stage.id=="town" and not p.rules.lifecycle.town.is_empty()
+		var planned: bool=stage.status=="planned" and not town_available
+		if town_available and not p.rules.lifecycle.town_active(p.state):title+=" · "+lw("town_available")
 		if planned:title+=" · "+lw("planned")
 		var line:=label(title,14);ladder.add_child(line)
 		if planned:line.add_theme_color_override("font_color",Color("b4b8ad"))

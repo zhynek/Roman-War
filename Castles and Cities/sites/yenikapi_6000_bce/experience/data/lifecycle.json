@@ -555,7 +555,7 @@
   "strings": {
     "title": "City lifecycle",
     "adopt": "Begin city lifecycle",
-    "adoption": "Adopt a persistent civic ladder. Demonstrate support, pay for an assembly shelter, then choose individual improvements. Existing people, stores, condition, land decisions and paid work continue. Only the first transition is implemented.",
+    "adoption": "Adopt a persistent civic ladder. Demonstrate support, pay for an assembly shelter, then choose individual improvements. Existing people, stores, condition, land decisions and paid work continue. After adoption, enable town development to continue through the second transition.",
     "continuity": "One continuing settlement: people, practice, condition, land choices and paid work carry forward.",
     "stage": "Civic achievement",
     "recognized": "Earlier town achievement recognized; no civic building or resources granted.",
@@ -563,6 +563,7 @@
     "sustained": "Consecutive qualifying seasons",
     "next": "Next civic project",
     "unlocks": "Separately paid improvements",
+    "town_available": "Enable town development to play",
     "planned": "Planned stage \u00b7 not yet playable",
     "unavailable": "This civic stage is complete. Keep its services working and choose its separately paid improvements.",
     "cost": "Timber %d \u00b7 Work %d",
