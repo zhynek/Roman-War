@@ -159,3 +159,34 @@ universal speedup ratios. No Intel timing or notarization is claimed.
 
 Build output: `build/yenikapi-early-settlement-0.9.0-final3/`.
 Exact-app captures: `/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.9.0-exact-qa-f_ut5d8z`.
+
+
+## Public release and preservation
+
+The [0.9.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.9.0)
+is public. The tag pins the tested frozen payload `1d4e49a`; main also contains
+this acceptance and publication record. All eleven assets were downloaded
+anonymously and matched local SHA-256 hashes, sizes and GitHub digests. All nine
+downloaded ZIPs passed integrity checks, and the downloaded manifest matched its
+files. The app archive was previously read back against the exact tested bundle,
+and the editable source against the frozen source inventory.
+
+All **14 previous releases / 86 assets** retain their original metadata and
+digests (download counters excluded). The campaign's stable latest remains
+**v0.14.2**. No earlier download, medieval project, campaign save or village
+reference was replaced. The final public verification report is retained locally
+at `/tmp/yenikapi-0.9-public/public-verification.json`.
+
+| Public artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `Yenikapi-Early-Settlement-Asset-Models-0.9.0.zip` | 1,460,205 | `f3101384fdede075782b211e91142f7c1b9fbb415ff1e03d92272bd31e123493` |
+| `Yenikapi-Early-Settlement-Contact-Models-0.9.0.zip` | 21,913,893 | `833a6477c086da3912dac174a3745cf348a6b941b600338de9b533d352462226` |
+| `Yenikapi-Early-Settlement-Foundation-Models-0.9.0.zip` | 43,556,467 | `4e938e8f5f2c7f7273e8743a4889b8151e37242ff86f254f70191534030d3e10` |
+| `Yenikapi-Early-Settlement-Household-Models-0.9.0.zip` | 2,736,923 | `e8f6c50b57cc41cc6a018c0e8f6dad2144d9a704de10539b12d1df84637ce752` |
+| `Yenikapi-Early-Settlement-Incident-Models-0.9.0.zip` | 20,445 | `ce2207ff0cf5fe4a1ee0380a34c0e084b70eb0ae94e624edebf3c616409e3d7d` |
+| `Yenikapi-Early-Settlement-Land-Models-0.9.0.zip` | 40,375,897 | `0354458a3dad85ab149ae2d80d992f816b835517c211ed560d4f6654d9afe9a0` |
+| `Yenikapi-Early-Settlement-Living-Models-0.9.0.zip` | 20,610,371 | `e6baa20a1fee7e53483dd264ff05b5a503074d75809ddec55b423d583192e74f` |
+| `Yenikapi-Early-Settlement-Source-0.9.0.zip` | 652,205 | `296dffe33552282b74906c81b552b83a036ea1bdd8051ca905ac7347a1a6a1ae` |
+| `Yenikapi-Early-Settlement-macOS-0.9.0.zip` | 58,792,664 | `65d831a661dbcbd6ccf4e7df4e7a959734b50393246c595db6de3adde80aabc2` |
+| `provenance.json` | 100,247 | `07d7a3143ca7dc125789460896cd19b1138ad57d388af4c9bed30f40fab6b23b` |
+| `SHA256SUMS.txt` | 1,118 | `ec3c099025d7af6b6c6d26b15babbf9a557a9a2aece09c101fb463527863c905` |

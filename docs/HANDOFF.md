@@ -35,6 +35,12 @@ Exact-app place selection was 34.492 ms to rendered readiness; a cached preview
 34.461 ms; physical adaptation 2,972.180 ms. These are local M3 Max observations.
 The verification file records the full profiles and rejected candidates.
 
+The [0.9.0 prerelease](https://github.com/zhynek/Roman-War/releases/tag/yenikapi-early-settlement-v0.9.0)
+is public. All eleven anonymous downloads match tested bytes and GitHub digests;
+all nine ZIPs pass integrity. All 14 prior releases / 86 assets and stable latest
+`v0.14.2` remain unchanged. The tag pins the frozen payload; main also records
+acceptance and public verification.
+
 ## Yenikapı preparedness under pressure (0.8.0, October 2026)
 
 **Begin warning, response and recovery** connects two hypothetical local incidents
