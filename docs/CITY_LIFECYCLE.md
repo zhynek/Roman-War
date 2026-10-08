@@ -104,9 +104,10 @@ reviewed adapter; that correspondence is not a save conversion.
 
 ## 4. Full lifecycle, with one stage developed at a time
 
-The entire ladder is a design map. Only the first transition should be made
-playable in the first feature release. Later rows are reserved design scope,
-not active unlocks or historical building claims. Names are working labels.
+Develop one stage at a time. Small village → Large village and Large village →
+Town are playable in the 0.12 local build. Large town and later rows remain
+reserved design scope, not active unlocks or historical building claims. Their
+names remain working labels.
 
 | Stage / proposed scenario ID | Civic anchor and entry | New development focus | Continuing cost or constraint |
 |---|---|---|---|

@@ -261,7 +261,7 @@ change is part of this phase.
 
 ## City lifecycle candidate (0.11.0)
 
-The builder defaults to the next unpublished candidate, `0.11.0`. It retains the
+For the 0.11 local build, the builder default was `0.11.0`. That build retained the
 clean-commit requirement, fresh output directory, parent data/import/full-suite/map
 gates and every previous village check. Do not export unrelated draft work or
 publish new bytes under the existing 0.10.0 release.
@@ -289,15 +289,17 @@ outlined above.
 
 ## A Town That Works — verified local delivery (0.12.0)
 
-The next candidate defaults to 0.12.0. Preserve the 0.11.0 local artifacts and all
-previous releases. Build from a clean frozen commit, with fresh parent logs, using:
+The builder defaults to 0.12.0. Frozen payload `b6e387d` has a verified local build;
+see [the acceptance record](sites/yenikapi_6000_bce/VERIFICATION-0.12.md). Preserve
+that output, the 0.11.0 artifacts and all previous releases. For a new build, use
+a clean frozen commit, fresh parent logs and a fresh output directory:
 
 ```sh
 python3 'Castles and Cities/tools/build_early_settlement.py' \
   --godot /path/to/Godot.app/Contents/MacOS/Godot --version 0.12.0 \
   --parent-gates build/yenikapi-0.12-parent-gates \
   --retained-build build/yenikapi-early-settlement-0.11.0-local \
-  --output build/yenikapi-early-settlement-0.12.0-local
+  --output build/yenikapi-early-settlement-0.12.0-rebuild-01
 ```
 
 The builder retains every prior independent check, render gate and benchmark.

@@ -3,7 +3,7 @@
 This record begins from fetched, clean `origin/main` `138561d`, the verified local
 0.11 record. The 0.11 frozen payload `227eca3` and all existing artifacts are
 preserved. No public release is authorized; the parent stable latest remains
-`v0.14.2`. Final frozen/exact-app results are recorded after packaging below.
+`v0.14.2`. Final frozen/exact-app results and archive audits are recorded below.
 
 ## Playable scope
 
@@ -124,9 +124,123 @@ No speculative AI/cartography optimization or assertion relaxation is included.
 
 ## Frozen delivery and exact application
 
-Pending the clean frozen build and its required exact-app/manual image checks.
-This section is completed in a separate verification commit; the source payload
-must not be edited after freezing. The builder enforces all retained gates, town
-fixture/actual-UI equivalence, universal architecture, 41 retained model bytes,
-three new Town GLBs, archive integrity and source hashes. QA images remain outside
-the repository. No release publication is part of this delivery.
+**Verified local 0.12.0**, frozen from clean commit
+`b6e387de3898f9be90fd364a483c900b901e2d81`. The builder completed every retained data,
+import, rule, rendered and performance gate on source and the exported app.
+The original implementation payload is `e344d81`; the final frozen commit also
+corrects the opening panel's old “first transition only” wording. The interrupted
+first candidate remains under `build/yenikapi-early-settlement-0.12.0-candidate-01`.
+No source was edited inside the final snapshot after freezing.
+
+The app has both **arm64 and x86_64** slices; strict deep signature verification
+passes. It is ad-hoc signed and not notarized. Execution was tested on the local
+M3 Max; no Intel execution or Intel performance claim is made.
+
+Both source and exact app pass **36,908 rule assertions**. Exact-app rendered
+walkthroughs pass **6,981 assertions**. All **267 exact-app captures** and **82
+frozen-source captures** were inspected, plus all six parent map captures.
+Full-size town inspection covered landscape, aerial, street, civic interior,
+preparation store, provision room, planning board/easel and the 1024×768 interface.
+Quotes show payment and actual remaining reserves; shortages show missing civic
+workers, lost output and an attainable recovery while retaining Town rank.
+
+| Exact-app rendered gate | Captures | Assertions |
+|---|---:|---:|
+| Reference | 14 | Render pass |
+| Governance | 12 | 85 |
+| Contacts | 10 | 58 |
+| Households | 12 | 714 |
+| Assets | 12 | 477 |
+| Land | 19 | 918 |
+| Living village | 21 | 839 |
+| Incidents | 25 | 676 |
+| Main interface | 26 | 392 |
+| Construction | 34 | 672 |
+| Original lifecycle | 29 | 437 |
+| Town | 53 | 1713 |
+
+All **60 town save/recipe/summary JSON files match byte for byte** between source
+and exact app. The actual UI walkthrough separately records **87 public commands**,
+ends at turn **49**, and replays exactly on both:
+`77066813e531fb8cfc60dc7c2261f67406c96d264b71eb5ea7404961abe48c64`.
+The fixture table above agrees with the delivered app, including both town-entry
+strategies and the public-command stressed/recovered branches.
+
+### Delivered interaction measurements
+
+Milliseconds below are **callback / ready after rendered frames**. Source and app
+use the same cameras and recipes, sequentially, without another Godot process.
+These measured pauses are retained limitations, not benchmark guarantees.
+
+| Scenario / operation | Frozen source ms | Exact app ms |
+|---|---:|---:|
+| Original lifecycle: open | 25.698 / 60.037 | 23.673 / 63.042 |
+| Original lifecycle: reopen unchanged | 0.092 / 32.978 | 0.091 / 15.072 |
+| Original lifecycle: commission | 499.702 / 546.035 | 436.960 / 472.324 |
+| Original lifecycle: season refresh | 890.120 / 933.242 | 732.307 / 766.858 |
+| Original lifecycle: civic completion | 1211.957 / 1266.389 | 1056.536 / 1080.965 |
+| Original lifecycle: unchanged scene refresh | 16.042 / 33.077 | 14.051 / 24.615 |
+| Town: open | 25.522 / 59.473 | 22.175 / 52.695 |
+| Town: reopen unchanged | 0.121 / 33.215 | 0.101 / 33.212 |
+| Town: commission | 483.882 / 533.349 | 383.800 / 433.539 |
+| Town: season refresh | 1408.859 / 1458.254 | 1129.830 / 1166.728 |
+| Town: civic completion | 1236.590 / 1294.730 | 978.313 / 1016.508 |
+| Town: unchanged scene refresh | 29.135 / 49.657 | 26.574 / 49.519 |
+
+The exact app's town commissioning is 383.800 ms; town seasonal refresh remains
+1,129.830 ms and civic completion 978.313 ms. The frozen-source matched assembly
+commissioning is 499.702 ms versus the unchanged baseline's 2,006.877 ms. Unchanged
+panel reopening is 0.092 ms versus 12.453 ms. Completion is not claimed as a general
+speedup: the matched source sample remains 1,211.957 ms versus 1,128.443 ms before.
+
+Across the retained reference, campaign, contact, household, asset, land and living
+frame samples, exact-app view medians span **8.134–8.443 ms**, with p95 values
+**8.563–10.297 ms**. Source view medians span 8.254–8.364 ms and p95 values
+8.478–9.761 ms. These 1600×1000 frame measurements are separate from the 1280×800
+interaction profiles and the 10-FPS capture pacing. See each benchmark JSON for
+camera, draw count, primitive count, warmup and sampling details.
+
+### Archives and preservation
+
+Local output: `build/yenikapi-early-settlement-0.12.0-local/`.
+It contains the tested app, editable source, nine model archives, `provenance.json`,
+`SHA256SUMS.txt` and all verification logs. All **11 ZIPs** pass integrity checks.
+Every one of the **316** original source members was compared to the frozen Git
+commit; archive members match the recorded frozen hashes, including the explicit
+version overrides. The archived binary, resource pack and plist match the tested
+unpacked application.
+
+There are **44 GLBs**: all **41 retained model files** match the checksum-verified
+0.11 archives byte for byte, plus three new Town room models. The older 0.11 archive
+and provenance checksums still pass. All **16 published releases / 109 assets**
+retain their IDs, names, sizes and digests. Stable latest remains **v0.14.2**.
+No new release, tag or asset was published.
+
+| Local artifact | Bytes | SHA-256 |
+|---|---:|---|
+| `Yenikapi-Early-Settlement-macOS-0.12.0.zip` | 58958475 | `1a97ef03efa4a482a51ca1042e7d1b72d36c12d64c69549a157578aaa94d9b2b` |
+| `Yenikapi-Early-Settlement-Source-0.12.0.zip` | 783277 | `e57cbe8d7f66c5738957080e3c8ae5a4e75d708f7aaf15cfe53799313db2bca5` |
+| `Yenikapi-Early-Settlement-Town-Models-0.12.0.zip` | 986328 | `2c4bfa4c03dca8ee6f16698647394aec9da9c502ad685ccdd0195e6a0ff6c59d` |
+
+The remaining model-archive checksums are in `SHA256SUMS.txt` and provenance.
+Independent readbacks are in `verification/archive-audit.json`,
+`release-preservation.json` and `manual-review.json`. QA images are stored under
+`/var/folders/31/vy1_xpsn5p58y89s48qrckcm0000gn/T/yenikapi-0.12.0-exact-qa-cyncrn57`.
+
+### Review and remaining scope
+
+Three adversarial review lenses covered saves/determinism, data/performance/
+historical claims, and balance/effect readers. Resolved findings include malformed
+adoption guards, pinning directly referenced operating data, readable worker
+priorities, the independent service-worker shortage, actor destinations and strict
+retained-model/completion gates. The final quote audit also added actual remaining
+stocks to the shared panel and checks those values against public payment.
+
+Town is playable; Large town and later city stages remain planned. The institution
+and room adaptations remain explicitly interpretive. Town adds neither residential
+density nor automatic repairs, supplies or upgrades. Current services depend on
+staffing and condition; earned rank survives their failure. Profiles remain pinned
+and old apps reject adopted town saves. Seasonal/completion pauses remain around
+one second in the exact app. The old shared-runner CI timing variability remains
+unexplained; the 600 ms assertion and replay/behavior checks remain intact.
+This verification is committed separately from the frozen downloadable payload.

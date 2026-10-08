@@ -1,6 +1,6 @@
 # Yenikapı — Early Settlement
 
-**0.12.0 local candidate — A Town That Works:** continue Small village → Large village → Town by paying to adapt the same assembly shelter into a civic house. Town opens a material-preparation store and shared provision service, each purchased separately and dependent on finite civic workers and maintained stores. Existing buildings, households, choices and paid work remain yours. [Play, continuing obligations and wrapper-8 compatibility](LIFECYCLE.md). Later city stages remain planned; no public release is published by this task.
+**Verified local 0.12.0 — A Town That Works:** continue Small village → Large village → Town by paying to adapt the same assembly shelter into a civic house. Town opens a material-preparation store and shared provision service, each purchased separately and dependent on finite civic workers and maintained stores. Existing buildings, households, choices and paid work remain yours. [Play, continuing obligations and wrapper-8 compatibility](LIFECYCLE.md). [Verified Mac build, performance and preservation](../VERIFICATION-0.12.md). Later city stages remain planned; this local build is not a public release.
 
 **0.10.0 — Buildings That Show Their Work:** staged construction, paid-material and worker explanations, and shared project oversight at sites, in the dock and in an early shared planning room. [Gameplay, interpretation and unchanged save contract](CONSTRUCTION.md).
 

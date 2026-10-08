@@ -40,7 +40,7 @@ tested bytes and GitHub digests; all ten ZIPs pass integrity checks. All fifteen
 previous releases / 97 assets and stable latest `v0.14.2` remain unchanged.
 The tag pins the frozen payload; main also holds the acceptance/publication record.
 
-## A Town That Works (0.12.0 local candidate, October 7, 2026)
+## A Town That Works (verified local 0.12.0, October 7, 2026)
 
 Slice C continues the existing large village through a paid alteration of the
 assembly shelter into a civic house. Town unlocks separately paid material
@@ -57,14 +57,22 @@ ordered fabric revisions and earlier land costs continue. Read
 and [0.12 verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.12.md)
 for controls, compatibility, public-command fixtures and delivery evidence.
 
-The candidate passes retained independent source gates and town 100-season compact/
-outward recipes. The final frozen build/parent/exact-app results are recorded in
-that verification document after packaging. Keep the verified 0.11 local build and
-all prior releases. This task produces a local universal Mac build and pushes main;
-it does not publish a release or change the parent stable latest.
+Frozen payload `b6e387d` passes **36,908 checks on source and exact universal Mac
+app**, plus all parent data/import/**705-test**/map gates. Exact-app walkthroughs
+pass **6,981 checks**; all **267 app and 82 source captures** were reviewed. The
+87-command town UI recipe and all 60 fixture/recipe JSON files match exactly.
+Both compact and outward public-command strategies sustain town through season 100.
 
-Village route reuse reduced matched assembly commissioning from 2.01 s to 0.51 s
-locally; some civic/season refreshes still pause for 1–1.5 s. The parent CI 652 ms
+The verified output is `build/yenikapi-early-settlement-0.12.0-local/`: app, editable
+source, nine model archives, provenance, checksums and logs. All 11 ZIPs pass; all
+41 retained GLBs match the verified 0.11 archives, with three new Town models.
+The 0.11 build and all 16 published releases / 109 assets remain unchanged.
+No public release was created; stable latest remains `v0.14.2`. The app is ad-hoc
+signed, with both architectures verified and execution tested on M3 Max.
+
+Village route reuse reduced matched source assembly commissioning from 2.01 s to
+0.50 s. The exact app's town commissioning is 0.38 s, season refresh 1.13 s and
+civic completion 0.98 s; material pauses remain. The parent CI 652 ms
 failure occurred on the unchanged baseline; retain its 600 ms guard. Read
 [the separate investigation](reviews/2026-10-ai-ci-performance.md). Timing
 diagnostics now identify successful samples too; runner cause remains unproven.

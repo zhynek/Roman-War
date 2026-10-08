@@ -37,3 +37,9 @@ investigation establishes performance on Intel Macs or shared Ubuntu runners.
 Logs: `build/yenikapi-0.12-baseline/lifecycle-profile.log` and
 `lifecycle-profile-after.log`; final build verification retains the same source
 and exact-app profiles.
+
+The delivered 0.12 payload `b6e387d` passed all source and exact-app gates. Its
+matched source commissioning measured 499.702 ms; exact-app town commissioning
+measured 383.800 ms, season refresh 1129.830 ms and completion 978.313 ms. Full
+callback/frame-ready measurements and retained benchmark ranges are in the
+[verification record](../../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-0.12.md).
