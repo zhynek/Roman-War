@@ -130,6 +130,7 @@ func run() -> void:
 	check(recognized.completed == legacy.completed and not rules.has_project(recognized, "lifecycle_assembly"), "recognition invents no hall")
 	saved(recognized, "recognized-town")
 	extension_continuity()
+	practice_gate_checks()
 	print("LIFECYCLE STRATEGIES ", JSON.stringify(outcomes))
 	FileAccess.open(out_dir.path_join("strategies.json"), FileAccess.WRITE).store_string(JSON.stringify(outcomes, "  "))
 	finish()
@@ -159,6 +160,42 @@ func extension_continuity() -> void:
 		if not result.has("state"): return
 		s = result.state; replay = rules.advance(replay).state
 		check(s == replay and rules.validate_state(s), "warning response and recovery replay with lifecycle")
+
+func practice_gate_checks() -> void:
+	# The shaping gate is earned only by actual preparation or repair duty. Full
+	# prepared stores drop the preparation request, so the readiness factor must
+	# name that cause and ordinary spending must reopen the path.
+	var s: Dictionary = command(Driver.initial(rules), {"kind": "lifecycle_begin"})
+	var shaping := func(state: Dictionary) -> Dictionary:
+		for factor in rules.lifecycle.status(state, rules).factors:
+			if factor.id == "shaping": return factor
+		return {}
+	check(shaping.call(s).get("suspended", "") == "order_off", "an unmet shaping factor explains that practice needs the preparation order")
+	s = command(s, {"kind": "living_order", "id": "prepare", "value": 1})
+	check(not shaping.call(s).has("suspended"), "active preparation carries no suspension")
+	var suspended: Dictionary = {}
+	for i in range(40):
+		s = rules.advance(s).state
+		var factor: Dictionary = shaping.call(s)
+		if factor.get("suspended", "") == "sets_full": suspended = factor; break
+	check(not suspended.is_empty() and s.living.blanks == int(rules.living.balance.blank_capacity) and s.living.prepare == 1 and not suspended.met, "full prepared sets suspend shaping practice and the factor names it")
+	var frozen: int = int(suspended.get("current", -1))
+	for i in range(6): s = rules.advance(s).state
+	check(shaping.call(s).current == frozen, "practice does not advance while sets stay full")
+	var pure: Dictionary = s.duplicate(true)
+	rules.lifecycle.status(s, rules); rules.forecast(s)
+	check(s == pure, "the explanation is a pure query")
+	if not rules.has_project(s, "watch_shelter"): s = command(s, {"kind": "commission", "id": "watch_shelter"})
+	for i in range(12):
+		if rules.has_project(s, "watch_shelter"): break
+		s = rules.advance(s).state
+	s = command(s, {"kind": "commission", "id": "living_watch_kits"})
+	check(s.living.blanks < int(rules.living.balance.blank_capacity) and not shaping.call(s).has("suspended"), "spending prepared sets on equipment reopens practice")
+	var met: bool = false
+	for i in range(16):
+		s = rules.advance(s).state
+		if shaping.call(s).met: met = true; break
+	check(met, "ordinary preparation then satisfies the shaping gate without later-stage content")
 
 func partial_contract(s: Dictionary, id: String) -> void:
 	var metadata: Dictionary = s.assets.initiatives[id]

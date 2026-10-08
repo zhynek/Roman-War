@@ -432,6 +432,7 @@ func lifecycle_factors(body: VBoxContainer,status: Dictionary) -> void:
 			var alternatives: PackedStringArray=[]
 			for option in factor.alternatives:alternatives.append(("✓ " if option.met else "○ ")+p.rules.lifecycle.content.factors.get(option.id,p.rules.projects.get(option.id,{}).get("title",option.id)))
 			line.text+="\n"+lw("any_of").format({"alternatives":", ".join(alternatives)})
+		if factor.has("suspended"):line.text+="\n"+lw("practice_"+factor.suspended).format(factor.get("params",{}))
 	paragraph(body,lw("readiness").format({"seasons":status.seasons,"required":status.required_seasons}),16)
 
 func lifecycle_ladder(body: VBoxContainer,current: String) -> void:

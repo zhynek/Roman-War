@@ -64,12 +64,14 @@ The original town criteria accept equivalent spatial foundations, without a new
 population threshold or any claim of continuous prehistoric-to-medieval growth.
 
 
-The next lifecycle candidate implements **Small village → Large village** in the
-same hypothetical scenario. A paid assembly shelter earns the civic achievement;
-separately paid store and workroom projects alter their existing IDs from revision
-2 to 3. Town through Metropolis remain planned lifecycle metadata. The earlier
-reversible town-support milestone and explicit recognition of old town saves
-remain separate from physical civic buildings. Read
+The lifecycle implements **Small village → Large village → Town** in the same
+hypothetical scenario (0.11–0.12). A paid assembly shelter earns the first civic
+achievement; separately paid store and workroom projects alter their existing IDs
+from revision 2 to 3; a paid alteration of the same shelter into a civic house
+earns Town and opens two separately paid facilities. Large town through
+Metropolis remain planned lifecycle metadata with no transition, project or
+unlock. The earlier reversible town-support milestone and explicit recognition
+of old town saves remain separate from physical civic buildings. Read
 [LIFECYCLE.md](experience/LIFECYCLE.md).
 
 `src/core/fabric_projection.gd` now replays completed project transactions in ledger

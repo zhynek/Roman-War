@@ -443,6 +443,11 @@
           "minLength": 0,
           "maxLength": 10000
         },
+        "civic": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 10000
+        },
         "food": {
           "type": "string",
           "minLength": 0,
@@ -493,6 +498,7 @@
       "required": [
         "base",
         "care",
+        "civic",
         "food",
         "crowding",
         "ration",

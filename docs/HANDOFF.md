@@ -11,9 +11,26 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## City progression and warfare integration — October 2026
+
+The city-progression audit (`8589fe9`) and the preserved warfare checkpoint
+(`5e4a441`) are being integrated on `codex/village-defense`. The audit's civic
+and service factor split and shaping-suspension explanation are retained.
+Read [the audit](reviews/2026-10-city-progression-coherence-audit.md) for its
+measured baseline and [the tutorial log](TUTORIAL_WALKTHROUGH_LOG.md) for the
+guide design. Their original measurements precede warfare; the integration
+follow-up must distinguish those baselines from new measurements.
+
+Town remains the highest playable civic rank. Warfare adds local preparation,
+paid defenses, recurring threats and recovery, without recruitment, conquest,
+Large town or a parent-campaign bridge. Its costs and recovery now give some
+surplus stores and prepared equipment a local use; the combined review checks
+how much that changes the audit's economic conclusions.
+
 ## Village warfare 0.14.0 local milestone — 2026-10-08
 
-All four phases extend the preserved uncommitted `codex/village-defense` work.
+All four phases extend the preserved `codex/village-defense` work, checkpointed
+as `5e4a441` before integrating the city-progression audit.
 No parent campaign engine or BattleResolver changes. The independent warfare
 profile is explicit adoption (wrapper10); older defense/lifecycle/town profiles
 retain their original hashes. See [WARFARE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/WARFARE.md)
@@ -39,15 +56,9 @@ Final delivery evidence belongs in
 [VERIFICATION-WARFARE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-WARFARE.md),
 including complete village/parent gates, rendered map/control checks, exact-app
 verification, timings, local launch instructions, frozen source and checksums.
-QA images stay outside the repository. No existing release is replaced and no
-push or publication is authorized by this milestone.
-
-The checkout remains based on `2885f38`; fetched `origin/main` also contains the
-separate `8589fe9` city-progression explanation audit. It was inspected without
-resetting or merging over this user's preserved local defense implementation.
-That audit does not implement later settlement ranks; Town remains the existing
-settlement progression limit. Integrate its explanation-only changes deliberately
-in a subsequent merge rather than replacing the local warfare worktree.
+QA images stay outside the repository. That local delivery did not replace an
+existing release. The subsequent integration task authorizes source commits and
+a push to main after verification, but no release build or publication.
 
 ## First village defense (local 0.13.0, October 2026)
 
