@@ -474,3 +474,132 @@ the repository.
 - Balance of the parent campaign beyond its existing suite was not re-soaked.
 - The defense branch in the working checkout (`codex/village-defense`,
   uncommitted) was not audited; it was preserved untouched.
+
+
+## 8. Follow-up — 2026-10-08: merged city progression and warfare
+
+This follow-up integrates audit `8589fe9` with the complete preserved defense and
+warfare checkpoint `5e4a441`, merged as `a88ca25`. The original sections above are
+historical measurements. The prioritized [combined implementation plan](2026-10-city-warfare-integration.md)
+was written before the fixes. No historical branch replaced the working village,
+no published hashed profile was edited and no release was built in this follow-up.
+
+### 8.1 Finding-by-finding disposition
+
+| Finding | Effect of the warfare work | Combined decision and evidence |
+|---|---|---|
+| D-1 | Partly alleviated: paid kits and post-combat repairs consume prepared sets, but a quiet full store can still suspend shaping. | Preserve the audit's `sets_full`/`order_off` explanation. Civic guidance names the actual preparation/repair reader. Existing gate and recovery checks remain. |
+| D-2 | Unchanged for civic/service duties; the new watch duties exposed the same presentation convention. | Preserve the civic factor split and unchanged social total; split watch practice and additional home watch separately. Finite named-assignment checks cover all combined duties. |
+| D-3 | Unchanged. | Keep the corrected playable-stage documentation. Town is implemented; later stages remain planned. |
+| H-1 | Unchanged; another gameplay loop made the two Town labels more confusing. | Lifecycle-active headers, support messages, events and guide use **Town support**. Earned civic rank remains a separate value; no phase rule changes. |
+| H-2 | Warfare adds a reason to value reserves but does not overturn the quiet progression measurement. | Keep default two seasons. Principle copy explicitly names priority 3 for two/three-season reserve gathering, before timber (5) and ordinary projects (4–6), versus priority 7 for one season. No rebalance. |
+| H-3 | More optional priority-4 watch duties can displace civic work. | Retain Town civic priority 6 and service 7; show those obligations and competition in civic project copy. No duplicate duty or changed allocation. |
+| H-4 | Partly addressed: paid equipment manufacture/replacement and post-battle condition repair consume prepared sets. Provision losses create occasional reserve demand. | Explain actual consumers and conditions. Full stores can still turn provision-service savings into overflow; idle/full prepared stores still produce nothing. No invented steady-state yield. |
+| H-5 | The economic ceiling is unchanged, but Town now supports continuing local encounters and recovery. | Keep Town/48-resident/360-provision limits. Paid screens and recurring repair/care are bounded sinks; measured mature-town food still refills rapidly. Large town is deliberately not implemented. |
+| H-6 | Unchanged. | Preserve the advantageous legacy layout as compatibility. Compare legacy adoption separately from compact/outward choices; do not rewrite old buildings. |
+| H-7 | Not fixed mechanically by warfare: household learning score remains distinct from real shaping, watch readiness and engaged combat experience. | Relabel the score as illustrative participation with no civic/production/combat bonus. The staffed learning order retains its labor, food and cooperation effects. No new hidden bonus or profile migration. |
+| H-8 | Broadened: additional watch joins the same watch job class as training and ordinary watch. | Separate **Watch practice duty** and **Additional home watch** factors, subtracting their filled adults from **Watch workers** so the old total is unchanged. The allocation remains exclusive. |
+| H-9 | Unchanged. | Show the provision-service card from Homes and Stores through presentation-only related assets. Retain the published `town_provision.asset=stores`, project ID, one quote/queue/completion and semantic hash. |
+| H-10 | Already fixed by warfare. | Development project is `0.14.0-local`; export metadata is `0.14.0`. No export or release is produced here. |
+| H-11 | Broadened to include the new defense choices. | Expand **How to play** from five to eleven data-driven lessons with direct civic/preparation/aftermath destinations. Setup/adoption has a separate note; lessons do not command the game. Tutorial log records implemented scope. |
+| P-1 | Unchanged and independent of village warfare. | Fixed narrowly in parent `KnowledgePanel`: render actual unmet facade blockers from validated glossary templates. Six Godot tests and six Python negative tests cover all kinds, grammar, satisfied requirements and read-only rendering. No parent rules changed. |
+| G-1 | Warfare does not supply Large town. | Remains open and expressly out of scope. Local battles are not another civic tier. |
+| G-2 | No measured evidence justifies changing the reserve default. | Retain two seasons, explain the priority tradeoff and record one/two/three-season results. |
+| G-3 | New treatment makes the distinction between social coordination and medical care more important. | Keep civic adults' existing +6 wellbeing/+3 cooperation contribution per allocated adult and explain it as civic/service coordination. They do not become extra carers or mobilizable residents. |
+| G-4 | Partly addressed by paid screens, mobilization, repair and care; mature-town overflow persists. | Record real costs and finite labor. Future growth still needs an economic outlet; no claim that warfare balances the full Town economy. |
+| G-5 | New local capability and consequence data broaden a future report's possible fields. | Still unimplemented by instruction. A future pure versioned report may expose actual equipment condition, preparedness, participation and recovery alongside civic capability. No parent call, shared save, military transfer or battle authority is introduced. |
+| G-6 | Unchanged. | Apply the H-1 Town support wording while preserving earned rank and legacy mechanics. |
+
+### 8.2 Reverse audit: warfare against the city contract
+
+| Lens | Finding and verification boundary |
+|---|---|
+| One authority; quote equals execution | Seasonal decisions enter `settlement_rules.command/advance`; mobilization quotes use the same finite assignments and actual kit/ration state as execution. Paid screens use existing commission/queue/allocator/fabric rules. Town benefits use existing operation/allocation readers. |
+| Finite adults | Food, care/treatment, ordinary watch, training, extra watch, repair, civic duty, service and construction share one sorted request list. Named assignments are unique; mobilization takes only available watch-class residents. Training/muster factors are an explanation split, not added workers or bonuses. |
+| Additive saves | Defense is wrapper 9; explicitly adopted warfare is wrapper 10. Lifecycle alone remains wrapper 8. Loading adds inactive extension dictionaries only. Lifecycle is optional for warfare; Living village and its prerequisites are required. Frozen paid 0.11 adoption and active/ended/resumed warfare are exercised. |
+| Semantic compatibility | Lifecycle, town, original defense and warfare semantic inputs are unchanged from the merge. Presentation aliases/copy/guide data do not change the paid contracts. The 0.11 paid fixture SHA-256 remains `b0e0af7a47ffe5febe15d189bce0d4ffcb988180112dbf0412da293d607ae872`. |
+| Determinism | Integer 100 ms tactical steps, saved orders, navigation, morale, fatigue, contacts, objectives and director decisions own outcomes. Worker batching changes pacing; normal/quick/save-resume equivalence remains tested. Rendering, animation and camera work consume no simulation RNG. |
+| Reconciliation and recovery | Pending reports lock seasonal/spending/workforce changes. Acceptance applies named consequences exactly once. One recovery ledger excludes injured adults; finite fed treatment and paid ordinary repair restore capability without deleting household history. |
+| Parent boundary | No settlement core calls the parent campaign. Parent `BattleResolver` remains untouched. P-1 changes only presentation/data validation. |
+| Playable versus planned | Civic Town plus repeatable independent village warfare are playable. Large town, permanent combat deaths, army recruitment, conquest and the report/military bridge remain outside this implementation. |
+
+### 8.3 Reproduced measurements and final gates
+
+The retained `integration_audit_driver.gd` and `integration_audit_checks.gd`
+record public-command recipes and per-season snapshots, then replay them. Their
+matched warfare branches use the same reached Town, preparation duration,
+pre-mobilization stop-work orders and delegated policy, with real constructed
+navigation. No rank, stock, roster, skill or saved ledger is edited to create a
+comparison. The resulting comparisons are below; gate results follow in section 8.4.
+
+
+All quiet comparisons explicitly adopt warfare but leave recurring threats off
+while measuring the civic ladder. All remain fed. Every route starts from the
+ordinary opening and retains its exact replayable command recipe.
+
+| Choice | Immediate and opportunity cost | Delayed result | Persistence / ordinary recovery |
+|---|---|---|---|
+| Compact | Paid court/hearth homes and working-room adaptation consume central work ground. | Large village 28, Town 39; season 100: 48 people / 360 food / 225 timber / 8 places. | Identities and completed fabric persist; later paid workroom investment supplies its authored places. |
+| Outward | Pay access and outer homes; access uses one adult and one timber each supported season. | Large 33, Town 46; 48 / 360 / 121 / 14. | More places retain the seasonal access obligation. |
+| Mixed | This retained recipe builds access, court home, east home, then workroom adaptation. | Large 33, Town 45; 48 / 360 / 127 / 11. | The original temporary probe reported 129 timber with different ordering; the new exact recipe is retained, not presented as a balance change. |
+| Reserve one season | Free principle change puts extra gathering at priority 7, releasing earlier labor for projects/timber. | Large 20, Town 32; food 141 versus 151 at season 4 and 282 versus 300 at season 10; timber 229 at 100. | Reversible policy; no observed quiet-game hunger, but not proof of safety against every future loss. |
+| Reserve two / three seasons | Extra gathering stays at priority 3 before projects and timber. | Both Large 28 / Town 39 and timber 225 at 100. | Three has no further measured penalty in this route; retain default two. |
+| Preparation off | Avoid preparation labor and material spending. | Shaping 2; no civic transition through 100, food 300 / timber 329. | Ordinary preparation restores shaping to 5 over the next ten seasons. |
+| Store maintenance off | Avoid repair timber and workers. | Town 38 but condition 0, storage 252, town outputs disabled; timber 233 at 100. | Maintenance restores condition 95 and operations within twelve measured seasons without removing rank. |
+| Welcome off | Forgo newcomer arrivals. | First 40 residents at 59; 47 at 120, shaping 3 still blocks civic progression. | Slow births continue. The old temporary recipe reached 40 at 61; both show the full-set practice stall. |
+| Civic house without optional facilities | Save 16 + 14 timber and both project crews. | Same Town 39 / food 360 at 100; timber 255; no extra preparation or provision service. | Facilities remain optional situational investments, not mandatory rank purchases. |
+
+Prepared and neglected ordinary incidents start at the same reached Town at
+season 60 and receive paid recovery. Approach severity is **2 versus 5**; store
+severity **1 versus 7**, losing **0 versus 28 provisions**. Both recover their
+approach by season 70 and stores by 88. Preparation ends with 140 rather than 176
+timber and uses 856 rather than 938 food-worker seasons over those 28 seasons,
+including paid equipment, observation, preparations and repairs. This is a real
+preparation cost, not free incident relief; both branches retain Town and fabric.
+
+The warfare comparison prepares the same reached Town from seasons 60–100. All
+branches then issue the same public stop-preparation/training/repair orders and
+request four extra watch adults. All mobilize the **same six named residents**
+(`citizen_0018`–`citizen_0023`), pay six provisions and use the same delegated
+store-defense policy. Geometry changes only through actual paid screens.
+
+| Watch investment | Forty-season cost | Fight and consequence |
+|---|---|---|
+| No kits or training | No kit/training/screen investment; prebattle timber 225. | Victory at 571 ticks; three incapacitations and one wound; six actual treatment-worker seasons, all available by season 103. |
+| Equipped and trained | Kit project: 2 timber + 2 sets + 12 work. Across preparation: 12 timber/4 worker seasons preparing sets, 9 timber/9 workers repairing, 4 training workers, 3 project workers. Total **23 extra timber and 20 worker seasons** versus untrained; timber 202. | Three serviceable kits after ordinary wear; readiness 4. Victory at 367 ticks, one wound; one treatment-worker season, available at 101. Kit condition 90. |
+| Equipped, maintained screens | Additional **22 timber and 11 actual construction-worker seasons** for the two screens (12/16 and 10/16 timber/work); timber 180. Watch condition 96. | Victory at 317 ticks, two wounds; one treatment-worker season, available at 101. Kit condition 95. |
+| Same screens, maintenance off | Saves three maintenance timber and three worker seasons; timber 183, watch condition 44. | Prepared-position protection is disabled; paid geometry remains. Victory at 367 ticks, one wound; one treatment-worker season. |
+
+Maintained screens shortened this encounter but **did not guarantee fewer
+wounds**. These are deterministic outcomes for one objective and policy, not
+universal odds. Every active save resumes identically; pending outcomes commit
+once. Residents, household history, Town, paid fabric, land and contacts survive.
+Ordinary repair returns kit condition to 100 during the eight-season recovery
+window. Reenabled watch maintenance raises condition 44 → 61 → 78 → 95 over
+three seasons. Equipped and fortified recovery each consume three preparation
+timber, two repair timber and two repair-worker seasons; treatment consumes
+finite adults without inventing a medicine resource.
+
+All branches refill food **354 → 360 in one season**; quiet mature Town still
+overflows about 146 provisions per season. Warfare gives preparation and recovery
+real downstream value, but this evidence does not establish sustained food
+scarcity or solve the Town economic ceiling.
+
+Older-profile checks load the unchanged paid 0.11 fixture, explicitly adopt town
+and warfare, and preserve its stocks, paid queue, completed fabric, people,
+households, land, living state and contacts. The original tutorial-route adoption
+also preserves stocks and paid work and replays from its public commands.
+
+### 8.4 Final integration verification
+
+The [integration verification record](2026-10-city-warfare-verification.md)
+records source hashes, final suite totals, rendered inspection, hosted CI,
+reproduction commands and source launch. All 17 village validators, 106 Python
+tests and 16 embedded negative cases pass. The final frozen village import and
+all 32 headless suites pass **53,586 checks**, with unchanged source hashes and
+empty stderr. The current parent passes all 711
+tests locally, plus data, import, boot and the four required map views. Village
+walkthroughs pass 3,892 checks, with all 148 captures inspected; parent map has
+six inspected captures. Godot stderr was checked, with only the inherited parent
+anchored-control warning. Hosted timing evidence remains separate from local
+results. No integration release or exported app was built.

@@ -128,8 +128,9 @@ Seasonal advancement and workforce/spending commands refuse while any battle is
 unresolved, including an unaccepted report. The worker owns a detached battle;
 saving pauses it and copies the snapshot through the ordinary save boundary.
 Loading validates the saved navigation against the current village. Closing the
-surface pauses and joins the worker before seasonal access resumes. Reports
-remain unresolved until explicit acceptance, so save/reload cannot double-commit.
+surface pauses and joins the worker before returning to Village. Seasonal changes
+remain locked until explicit outcome acceptance, so save/reload cannot
+double-commit or bypass reconciliation.
 
 ## Scope and verification commands
 
@@ -155,3 +156,18 @@ Run every retained village data/rule/geometry gate as well as parent data,
 import, complete suite and `tools/map_playtest.gd`. Check stderr, not only exit
 status. QA screenshots and isolated saves belong outside the repository.
 Delivery results and launch paths are in `../VERIFICATION-DEFENSE.md`.
+
+## City-progression audit integration — October 2026
+
+The original defense profile remains wrapper 9. Explicit warfare adoption selects
+wrapper 10; loading an old profile does not opt in. City lifecycle is optional:
+Living village and its prerequisite household/asset/land chapters supply actual
+residents, equipment, ordinary labor and preparation. Town facilities are useful
+situational production/recovery investments, not battle prerequisites.
+
+The October integration preserves this baseline and the current warfare loop.
+The in-game guide now distinguishes explicit chapter setup, Town support, earned
+civic rank, paid preparation and the three command modes. The combined review
+uses public-command progression and matched watch/fortification comparisons;
+see [WARFARE.md](WARFARE.md) and the dated follow-up in the city audit. No parent
+military bridge, permanent combat deaths or later civic tier is introduced.

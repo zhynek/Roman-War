@@ -1,5 +1,30 @@
 # Village warfare 0.14.0 — local verification and delivery
 
+## October 8 city-audit source integration addendum
+
+The original local-app evidence below remains tied to its frozen payload. The
+entire worktree was subsequently preserved in `5e4a441`, then integrated with
+audit `8589fe9` in `a88ca25`. Current source adds Town-support and finite-duty
+explanations, honest illustrative-learning copy, related Homes/service discovery,
+eleven guide lessons and reproducible public-command comparisons. Published
+semantic hashes and the paid 0.11 fixture remain unchanged; no new save extension
+was needed. Original defense uses wrapper 9, adopted warfare wrapper 10.
+
+All seven battle walkthroughs were repeated: **1,636 checks, zero failures,
+50 inspected captures, empty stderr**. Lifecycle, Town and the new guide were
+also rendered. Current quick-mode controls measured 300/200/399 ms for
+stores/landing/probe on M3 Max, within the retained two-second target. The matched
+audit demonstrates useful equipment/repair consumers while retaining the mature
+Town food-surplus and civic-ceiling limits.
+
+See [the integration verification](../../../docs/reviews/2026-10-city-warfare-verification.md)
+for all source/parent gates, CI, provenance paths and the updated-source launch.
+This later task authorizes source commits and pushes to main, but builds or
+publishes no release. The app/ZIPs described below are unchanged and do not contain
+the new integration guide/copy. No new exact-export claim is made.
+
+## Original local delivery record
+
 Date: October 8, 2026. This milestone extends the preserved local, uncommitted
 0.13 defense implementation on `codex/village-defense`, based on `2885f38`.
 The separately fetched `origin/main` audit `8589fe9` was inspected; this work did

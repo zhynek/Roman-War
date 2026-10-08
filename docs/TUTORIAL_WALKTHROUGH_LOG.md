@@ -1,13 +1,13 @@
 # Tutorial walkthrough log — one continuing settlement
 
-Planning record kept during the October 2026 city-progression coherence audit
-([the audit report](reviews/2026-10-city-progression-coherence-audit.md)).
-It plans the smallest useful walkthrough of the independent Yenikapı settlement
-(`Castles and Cities/sites/yenikapi_6000_bce/experience`). **Nothing here is
-implemented**; the lessons describe decisions and their consequences so a later
-session can build the tutorial on the existing public commands, check tools and
-guidance. Every number below was measured by replaying ordinary public commands
-on `origin/main` `2885f38` (probe outputs are recorded in the audit report).
+Planning and implementation record begun during the October 2026 city-progression
+coherence audit ([the audit report](reviews/2026-10-city-progression-coherence-audit.md)).
+The independent Yenikapı settlement now implements eleven **How to play** lessons:
+the original five, three civic lessons and three defense lessons. They navigate
+to existing reviews; they never autoplay a recipe or adopt a chapter. Setup and
+adoption are a separate note. The detailed season counts below remain measured
+results from the pre-warfare audit at `2885f38`, not promises about combined play.
+Combined evidence belongs to [the integration review](reviews/2026-10-city-warfare-integration.md).
 
 ## How to read this log
 
@@ -26,7 +26,7 @@ mechanics that do not exist yet and must not be presented as playable.
 
 | Surface | What it already teaches | Where |
 |---|---|---|
-| Illustrated dock "How to play" (5 lessons) | Reserves, a paid improvement, labor opportunity cost, the growth route, warning and recovery | `data/visual_commands.json` `lessons`, `visual_commands.gd::help` |
+| Illustrated dock "How to play" (11 lessons) | Reserves, paid work, labor, land, preparedness; civic readiness, retained rank, operating services; defense preparation, command modes, aftermath | `data/visual_commands.json` `lessons`, `visual_commands.gd::help` |
 | Growth guide | Compact vs outward chains with real prerequisite arrows; opens the lifecycle section first | `visual_commands.json` `chains`, `visual_commands.gd::growth` |
 | City lifecycle review | Named readiness factors with current/required values, the next civic project card, its upkeep, the planned ladder | `visual_commands.gd::lifecycle`, `data/lifecycle.json` `strings` |
 | Asset governance guide (8 steps) | Inspecting a shared asset, standing principles, commissioning through an asset, forecast vs result, pressure, learning, supported growth | `data/assets.json` `tutorial`, `assets_panel.gd::guide` |
@@ -35,10 +35,11 @@ mechanics that do not exist yet and must not be presented as playable.
 | Preparedness guide (7 steps) | Warning, inspection, commitment, resolution, recovery, pausing, restoration | `data/incidents.json` `tutorial`, `incident_panel.gd` |
 | Seasonal tutorial Guide tab | The legacy town-support milestone text and the recommended foundation | `governance_panel.gd::_guide`, `data/governance_ui.json` |
 
-None of the existing guides mentions the civic ladder; the lifecycle review is
-the only in-game explanation of readiness, civic projects and town obligations
-(audit finding H-11). The walkthrough below reuses the existing chapter guides
-for their lessons and adds the civic decisions on top.
+The civic lessons open City lifecycle. Defense lessons open preparation or the
+persistent Battle aftermath review. These destinations retain the real quote,
+workforce, care and command controls. An unresolved battle disables guide links
+that could attach its worker: reading guidance does not restart saved ticks.
+The lesson cursor is transient presentation state; no save extension is needed.
 
 ## A. Setup and adoption (not ordinary leader decisions)
 
@@ -239,9 +240,10 @@ The review says the stage is complete and lists the two facilities; the ladder
 marks Large town onward as planned. At this point the settlement sits at its
 caps (48 residents, 360 provisions), gathers roughly 146 surplus provisions a
 season that overflow, and accumulates timber (225 by season 100) with no sink.
-The remaining real decisions are the preparedness chapter (prepared incidents
-cost 0 provisions against 28 unprepared — probe 2), the neighbors chapter
-(trade as the only resource outlet) and maintenance. Present Large town as
+The original audit exercised preparedness (prepared incidents cost 0 provisions
+against 28 unprepared — probe 2), neighbors and maintenance. The combined game
+also offers optional village warfare, paid defenses and recurring equipment/care
+recovery. These are local decisions, not a new civic rank. Present Large town as
 **future content**.
 
 ## Future content (do not present as playable)
@@ -252,17 +254,45 @@ cost 0 provisions against 28 unprepared — probe 2), the neighbors chapter
   mechanics with effects (shaping, cooperation, woodland experience) and no
   research, adoption or technique system; the parent campaign's techniques are
   a separate experience (audit section 5).
-- **Equipment, recruitment, armies and conquest** — the settlement has watch
-  kits, practice and coverage only; recruitment and battles exist only in the
-  parent campaign behind `BattleResolver` (audit G-5). A lesson "raise and
-  equip a force" must wait for a reviewed bridge, not a local approximation.
+- **Recruitment, armies and conquest** — village defense now mobilizes actual
+  home-watch residents with their paid equipment and experience. Independent
+  live battles, delegation, quick resolution and recovery are playable. Standing
+  armies, recruitment, conquest and a bridge to the parent `BattleResolver`
+  remain future work (audit G-5); village and campaign saves remain separate.
 
-## Open items for the tutorial session
+## Implemented civic and defense guidance
 
-1. Decide whether the civic ladder joins the dock "How to play" lessons or gets
-   its own chapter guide (data-driven like the other guides).
-2. Lesson E1 needs the readiness row to point at the Workshop order when
-   shaping is short (now partly covered by the D-1 explanation).
-3. Lesson B2 depends on finding H-2 (reserve principle wording).
-4. Use the public-command recipes written by `town_checks.gd` (`-recipe.json`
-   files) as the authoritative scripted path; do not autoplay them in-game.
+Lessons 6–8 teach practical shaping, paid civic promotion, current Town support
+versus retained rank, and staffing/maintenance of optional services. The reserve
+principle states its priority change explicitly. Civic/service social contribution
+and actual priorities are formatted from the existing rules. Town facilities are
+situational: prepared sets serve equipment and repair; reduced spoilage may
+overflow at full stores. The provision room is discoverable from Homes and Stores
+through a presentation alias, retaining one paid project and its original owner.
+
+Lessons 9–11 teach finite named watch and equipment, paid screens and saved
+positions, optional recurring warnings, direct/delegated/quick command, coherent
+quick cancellation, report acceptance, care and ordinary repair. They distinguish
+recoverable incapacitation from death and explicitly leave recruitment/conquest
+outside current play. Household learning-circle participation remains an
+illustrative score; its existing staffed sessions retain real labor, food and
+cooperation effects, separate from shaping and combat experience.
+
+`integration_guide_checks.gd` checks published hashes, the frozen paid fixture,
+pure lesson/destination navigation, both provision-card locations, real policy
+contraction at earned Town, learning-score versus session effects, and active
+battle save/clock preservation. `integration_guide_preview.gd` repeats the guide
+and review controls with actual pointer input at 1280×800 and writes captures
+outside the repository. Public-command recipes remain QA evidence, never an
+in-game autoplay or source of free progress.
+
+Verification on 2026-10-08: the focused headless and actual-input rendered guide
+runs each passed 104 checks with no failures and clean stderr. All 14 final
+1280×800 captures were inspected, including the scrolled setup note, both
+provision-service entry points, current Town support contraction, and the
+unresolved-battle navigation guard. The final capture manifest and inspection
+record are outside the repository at
+`/tmp/village-integration-guide-render-verified/`. The new data regression file
+`test_integration_guide_data.py` passed all three tests; the visual-command
+validator passed all eight negative cases. Published defense, lifecycle, town
+and warfare semantic hashes and the paid Town fixture checksum stayed exact.

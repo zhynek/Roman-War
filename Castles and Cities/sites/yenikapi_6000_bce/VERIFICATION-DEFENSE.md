@@ -1,5 +1,27 @@
 # Village defense · local 0.13.0 · October 7, 2026
 
+## October 8 source integration addendum
+
+The original frozen 0.13 local-app record below is historical. Its work was
+preserved in `5e4a441`, merged with the city audit as `a88ca25`, and extended by
+the 0.14 warfare milestone. Current warfare has repeatable threats, paid screens,
+delegated/quick modes and named household recovery; the one-encounter and group
+overlap limits below describe the earlier 0.13 payload.
+
+The subsequent city/warfare integration preserves wrapper-9 defense and adds no
+profile migration. Warfare adoption selects wrapper 10; City lifecycle is
+optional. It improves civic/watch explanations and the eleven-lesson guide.
+The unchanged 95-check/11-capture defense walkthrough passed again through actual
+controls, alongside lifecycle, Town, tactical, fortification, command-mode and
+aftermath gates. The paid 0.11 fixture and all published semantic hashes are intact.
+
+See [the current source verification](../../../docs/reviews/2026-10-city-warfare-verification.md)
+for complete results, CI, evidence paths and updated-source launch. The integration
+authorizes source commits/pushes; no new app, release or model archive was built.
+The source-only gate must not be read as a new exact-export test of these fixes.
+
+## Original local delivery record
+
 The work began from a clean worktree on freshly fetched `origin/main` (`2885f38`)
 and is on `codex/village-defense`. No release, tag, remote push or parent battle
 implementation was changed. This is a local preview with a frozen source manifest.

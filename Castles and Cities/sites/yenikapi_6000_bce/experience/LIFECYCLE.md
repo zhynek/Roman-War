@@ -150,10 +150,13 @@ hash includes the retained base hash, town definitions/tuning and authoritative
 town-support values, land equivalents and directly read maintenance/preparation
 values. No paid queue entry or original profile hash is rewritten.
 An actual frozen 0.11 paused paid save is retained as a compatibility fixture.
-Old 0.11 applications reject adopted town saves; use 0.12 to continue them.
+Old 0.11 applications reject adopted town saves. Town-only saves require 0.12
+or newer; subsequently adopted warfare saves require 0.14 or newer. Do not open
+an adopted wrapper-10 save in an older local app.
 
-Active lifecycle saves still use **wrapper 8**; no new wrapper is needed. Wrappers 1–7 retain their earlier
-meanings. An older save gains only inactive `lifecycle: {}` until adoption.
+Lifecycle/town adoption alone still uses **wrapper 8**; no new wrapper is needed
+for those profiles. Explicit defense adoption selects wrapper 9; warfare selects
+wrapper 10. Wrappers 1–7 retain their earlier meanings. An older save gains only inactive `lifecycle: {}` until adoption.
 Atomic validation, temporary-file readback and rename remain the save boundary.
 The reference bookmark, medieval study and parent campaign keep separate saves.
 
@@ -221,3 +224,35 @@ walkthrough records its actual UI commands, rolls back its trace on explicit Loa
 and replays the resulting continuing game. Source and exact-app recipes/digests
 must match. The build retains all 41 existing GLBs and adds three separately named
 Town models of the paid finished rooms.
+
+## October 2026 warfare integration
+
+The lifecycle-active interface calls the legacy reversible milestone **Town
+support**, including contracted support after a shortage. Earned Town remains
+separate. Town civic duty stays at priority 6 and provision service at 7; both
+retain the existing care-class social contribution (+6 wellbeing/+3 cooperation
+per allocated adult), named **Civic and service duty** in the breakdown. This is
+community coordination, not an additional assignment as a household carer.
+
+Warfare does not require this lifecycle. Its explicit wrapper-10 profile needs
+Living village and its earlier chapters. It uses the same finite allocator for
+ordinary watch, priority-4 training and additional watch, priority-2 treatment,
+food, civic duty and paid work. Training and additional watch have their own
+security factors; their sum preserves the existing watch-class total. No adult
+can be both mobilized and assigned to civic duty or treatment.
+
+The material-preparation facility can supply paid kit replacement and repair
+after a battle. The provision service offsets actual spoilage during recovery;
+when storage is full its benefit can become overflow. These are situational
+consumers, not a new population tier or a guarantee that every facility pays back
+in a quiet village. The provision card is accessible from Homes (its physical
+care room) and Stores (its retained published project association); both quote
+and execute the same single project. Household learning-circle participation is
+explicitly illustrative; practical shaping, watch readiness and engaged combat
+experience remain the separate rule-bearing skills.
+
+The expanded **How to play** dock guide explains civic and defense choices
+without issuing them. Setup/adoption remains explicit; opening a lesson changes
+no village state. Large town and conquest remain future content. See the
+[integration review](../../../../docs/reviews/2026-10-city-warfare-integration.md)
+for the combined plan and evidence.

@@ -52,3 +52,23 @@ the new pass does not isolate the cause or eliminate future shared-runner varian
 The complete log is retained in the local 0.12 build's
 `verification/remote-ci.log`. The following documentation-only commit records this
 result without changing the tested implementation or the frozen Mac payload.
+
+## October 8 city/warfare integration follow-up
+
+The preserved checkpoint `5e4a441` failed
+[run 37775919093](https://github.com/zhynek/Roman-War/actions/runs/37775919093)
+at **657.283 ms average / 935 ms peak**. Integrated source `ad38185` failed
+[run 37780542170](https://github.com/zhynek/Roman-War/actions/runs/37780542170)
+at **637.917 ms / 896 ms**. Both reported Godot 4.4.1, Linux, AMD EPYC 7763,
+four processors. The first completed 705 tests and the second 711; each had
+only the retained campaign timing failure, with behavioral assertions passing.
+Parent core and the campaign timing test remain identical to `8589fe9`.
+
+The final integrated local parent gate passed 711 tests, averaging 322.050 ms
+with a 453 ms peak on M3 Max. An isolated baseline/candidate experiment reused
+one redundant threat calculation and per-sort unit powers. All 60 canonical
+states and report hashes matched, but time improved only 320.385 → 316.918 ms
+(1.08% in one sequential pair). That experiment is **not merged** and does not
+credibly explain or fix the hosted gap. Evidence is retained outside the tree
+at `/tmp/roman-war-ai-pure-probe/`. The 600 ms gate remains unchanged; broader
+profiling must justify any targeted optimization before source integration.

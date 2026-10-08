@@ -1,6 +1,6 @@
 # Village warfare — 0.14.0 local milestone
 
-This continues the uncommitted 0.13 defense implementation on
+This continues the preserved 0.13 defense implementation on
 `codex/village-defense`; it does not replace it with a historical branch. The
 original deterministic village, household and construction engines remain the
 source of people, materials and seasonal labor. The independent village does not
@@ -246,13 +246,16 @@ active saves; named injury, finite care, paid repair and continued development.
 Godot stderr is inspected in addition to process status. QA screenshots remain
 outside the repository and are never game assets.
 
-See [the delivery verification record](../VERIFICATION-WARFARE.md) for the final
-source, parent, rendered and exact-export gates, measured quick-resolution times
-and remaining limits. The [controls guide](WARFARE-CONTROLS.md) gives the playable
+See [the delivery verification record](../VERIFICATION-WARFARE.md) for the original
+local milestone's source, parent, rendered and exact-export gates, measured quick
+times and limits. Its dated integration addendum separates the later source-only
+verification from that unchanged exported app. The [controls guide](WARFARE-CONTROLS.md) gives the playable
 preparation and recovery sequence. The reproducible local packager is
 `Castles and Cities/tools/build_village_warfare_local.py` at the repository root;
 it refuses existing outputs, freezes editable source and emits SHA-256 provenance.
-No release, push, tag or published asset is changed.
+The original local milestone changed no published release. The October source
+integration authorizes a push to main after verification, without a new build,
+release, tag or published binary.
 
 Reproduce from this independent project with Godot 4.4.1 and Python jsonschema:
 
@@ -284,3 +287,32 @@ godot --path . --max-fps 30 --script res://tools/aftermath_preview.gd -- out_dir
 
 These supplement every retained village and parent gate. Run the retained
 validators and suites as well; focused commands alone are not the release gate.
+
+## Civic audit integration
+
+Warfare is available without City lifecycle. It requires explicit Living village
+adoption and watch authority; Town is not a prerequisite and adoption grants no
+civic achievement. The Town preparation facility feeds the existing prepared-set
+path for manufacture/replacement and paid kit-condition repair. The provision
+service protects actual spoilage during reserve recovery, with no benefit beyond
+capacity when stores are already full.
+
+The combined allocator remains authoritative: every adult has one assignment.
+Ordinary watch, watch-practice duty and additional home watch are displayed as
+separate security factors while retaining their previous sum. Town civic duty
+(priority 6), provision service (7), watch practice/additional watch (4), essential
+food (1) and care/treatment (2) compete in the existing priority-then-ID order.
+Civic adults retain their explicit social contribution and cannot also mobilize.
+
+Household learning-circle participation is an illustrative history score, not
+combat aptitude. Its staffed order still has its existing labor, food and
+cooperation effects. Actual resident watch aptitude, paid kit condition, earned
+watch readiness, the participating appointed leader and engaged combat experience
+are the documented tactical inputs. No hidden bonus was attached to household
+practice and no published semantic profile was changed for explanatory copy.
+
+The civic ladder ends at Town; recurring local defenses and recoverable battle
+consequences continue afterward. Large town, recruitment, conquest and the future
+versioned settlement-development report remain outside this integration. The
+report's future design should include current local equipment/recovery and
+provenance, without sharing saves or invoking the parent campaign.

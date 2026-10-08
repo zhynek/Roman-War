@@ -13,19 +13,34 @@ minutes. It deliberately does **not** repeat the other docs:
 
 ## City progression and warfare integration — October 2026
 
-The city-progression audit (`8589fe9`) and the preserved warfare checkpoint
-(`5e4a441`) are being integrated on `codex/village-defense`. The audit's civic
-and service factor split and shaping-suspension explanation are retained.
-Read [the audit](reviews/2026-10-city-progression-coherence-audit.md) for its
-measured baseline and [the tutorial log](TUTORIAL_WALKTHROUGH_LOG.md) for the
-guide design. Their original measurements precede warfare; the integration
-follow-up must distinguish those baselines from new measurements.
+The city-progression audit (`8589fe9`) and the complete warfare checkpoint
+(`5e4a441`) were merged as `a88ca25`, preserving the civic/service factor split,
+shaping-suspension explanation and every local defense change. Implementation
+commits `7024feb`, `4ab4811` and `ad38185` add authoritative parent knowledge
+explanations, the combined village fixes, reproducible measurements and village
+CI gates. Read the [per-finding audit follow-up](reviews/2026-10-city-progression-coherence-audit.md),
+[combined plan](reviews/2026-10-city-warfare-integration.md),
+[implemented tutorial log](TUTORIAL_WALKTHROUGH_LOG.md) and
+[source verification record](reviews/2026-10-city-warfare-verification.md).
+
+The legacy achievement says **Town support** when lifecycle is active. Reserve
+priority, Town civic/service staffing, real equipment/repair consumers and
+illustrative household practice are explained. Watch practice and additional
+home watch have separate factors without changing totals. Provision service is
+discoverable from Homes and Stores without changing its published owner or hash.
+**How to play** has eleven data-driven lessons; explicit adoption stays separate.
+The default reserve and workforce priorities are unchanged. Paid 0.11 saves and
+published profile hashes are preserved; warfare is wrapper 10 and does not
+require lifecycle. Parent `BattleResolver` and campaign rules are unchanged.
 
 Town remains the highest playable civic rank. Warfare adds local preparation,
 paid defenses, recurring threats and recovery, without recruitment, conquest,
-Large town or a parent-campaign bridge. Its costs and recovery now give some
-surplus stores and prepared equipment a local use; the combined review checks
-how much that changes the audit's economic conclusions.
+Large town or a parent-campaign bridge. Measured equipment/training reduced
+recovery, and maintained screens shortened the matched fight without guaranteeing
+fewer wounds. Mature Town still refills food in one season: warfare does not solve
+the surplus-food or civic-ceiling gaps. All measured recipes use public commands.
+No integration release or export was built. Launch updated source using the
+verification record; the earlier 0.14 local app is unchanged.
 
 ## Village warfare 0.14.0 local milestone — 2026-10-08
 

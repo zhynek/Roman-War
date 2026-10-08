@@ -86,3 +86,19 @@ records add one watch-skill point, capped by the authored tactical skill limit. 
 experience is granted merely for mobilizing or practicing. Combat incapacitation
 is recoverable in this milestone. Natural aging and lifecycle history continue;
 combat does not delete residents or households.
+
+
+## Civic progression and the in-game guide
+
+Open **How to play** in the illustrated village dock. Its eleven lessons cover
+ordinary work, civic readiness, earned rank versus current **Town support**, paid
+watch preparation, command modes and recovery. A separate setup note explains
+explicit chapter adoption; browsing or following a lesson link issues no order.
+Town remains the highest civic rank; local warfare can also be enabled without
+City lifecycle after adopting Living village and its prerequisites.
+
+At Town, the optional material-preparation store can supply sets for equipment
+replacement and post-battle repair. Provision service reduces actual spoilage;
+at full storage its savings can overflow. Civic duty (priority 6), service (7),
+practice/additional watch (4), food (1) and care (2) share finite adults. Release
+extra watch or pause optional paid work when civic staffing or care needs hands.
