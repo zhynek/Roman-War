@@ -290,6 +290,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		TurnJournal.add(journal, "campaign_decided", {"faction": String(report["winner"])})
 
 	ReconRules.refresh_contacts(data, state)
+	AdvisorRules.reconcile(data,state)
 	state["journal"] = {"turn": int(state["turn"]), "beats": journal}
 	# The scribes write last: derived records (wars, reigns, alliances,
 	# destructions) against the snapshot, then compaction. No rng.

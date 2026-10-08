@@ -221,9 +221,57 @@ Runtime logs contained no script errors. Live provider audio remains unverified.
 
 Verified by: data/schema validation, Godot imports, rendered advisor walkthrough and direct state/retention checks. Tests: not run (weekly review policy).
 
-Next development phase: one governance specialist unlocked by an existing,
+Proposed governance phase (implemented below): one governance specialist unlocked by an existing,
 explicit building prerequisite, with a visible explanation of the unlock and
 counsel based on reported city factors. Keep the unlock deterministic and its
 counsel advisory; defer a full council and divine mandates until that smaller
 loop is working. Native live text/audio acceptance remains a separate immediate
 integration dependency, not a reason to claim provider behavior already works.
+
+
+## Governance specialist implemented — October 8, 2026
+
+The executable [next-phase prompt](advisors/NEXT_PHASE_PROMPT.txt) was recorded in
+the existing Isengard assignment before development. Lucius now has an original
+procedural portrait, four authored lessons, a selected-city reading, and a
+separate published private ElevenLabs persona with Declan Sage's voice.
+
+`data/advisors.json` supplies the existing government-chain prerequisite:
+completed tier three or above in an owned settlement. `AdvisorRules` awards once
+at creation/season close without RNG. `advisor_unlocks` records the original
+turn and region; save validation is additive and only saves missing the field
+receive legacy backfill. UI status calls never grant unlocks. Losses do not
+remove an earned advisor. The campaign shows locked progress and switches
+explicitly between retained panels; switching stops the prior connection,
+loading clears both conversations and restores Marcus.
+
+Lucius's offline reading contains bounded player-visible factor lists and
+reported societal values for a selected owned settlement. Survey age, missing
+values and truncated lists are labeled. During a city battle, economic reads
+are deferred and only the already-presented detached snapshot is available.
+The broker accepts a strict `marcus`/`lucius` selector mapped to server-held IDs;
+it rejects arbitrary IDs/URLs, duplicates and missing specialist configuration.
+Each agent must remain private on every session mint. Provider keys never enter
+the game process, content, saves or logs.
+
+Evidence: both data validators and Godot imports succeeded. Sixteen focused
+credential checks and three focused migration checks passed under the testing
+policy exceptions. A rendered isolated campaign showed locked tier two with
+one queued project; the season completed tier three and awarded Lucius in turn
+one. Actual switch-button callbacks preserved one distinct transcript entry per
+advisor, a city reading left full campaign state unchanged, and loading a
+locked save reset both to zero/Marcus. The reading contained four sections and
+6,257 context characters, with army context absent. Locked, welcome, reading,
+Roma and village panels were inspected. First-open autowrap overflow was fixed;
+at 1280×800 the locked panel settled at (804,16), size 460×678, with scrolling
+content and connection controls visible. Runtime logs had no script errors.
+
+Live native audio/text acceptance remains pending the private API key. No
+public deployment, broad suite or release push was performed.
+
+Verified by: data validation, Godot imports and rendered walkthrough. Tests: not run (weekly review policy), except 16 credential checks and 3 migration checks, which passed.
+
+Next logical phase: a small season council with Marcus and Lucius presenting
+separate, bounded viewpoints on the latest Dispatch and the selected city's
+reported conditions. Keep it optional and player-controlled, and finish live
+native voice acceptance before expanding to another specialist or divine rules.

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "advisors",
+    "ui",
+    "reading"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "advisors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "unlock"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unlock": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "building_kind",
+              "min_level"
+            ],
+            "properties": {
+              "building_kind": {
+                "const": "government"
+              },
+              "min_level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              }
+            }
+          }
+        }
+      }
+    },
+    "ui": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/copy"
+        }
+      ],
+      "required": [
+        "marcus",
+        "lucius",
+        "locked_button",
+        "locked",
+        "building_example",
+        "qualifying",
+        "available",
+        "battle",
+        "no_seat",
+        "permanent"
+      ]
+    },
+    "reading": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/copy"
+        }
+      ],
+      "required": [
+        "heading",
+        "source",
+        "battle",
+        "no_selection",
+        "survey",
+        "public_order",
+        "growth",
+        "income",
+        "society",
+        "tax",
+        "legitimacy",
+        "grievance",
+        "assimilation",
+        "unrest_state",
+        "unknown",
+        "factor",
+        "total",
+        "limited"
+      ]
+    }
+  },
+  "$defs": {
+    "copy": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      }
+    }
+  }
+}

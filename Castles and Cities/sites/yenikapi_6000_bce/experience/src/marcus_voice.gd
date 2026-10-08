@@ -1,4 +1,5 @@
 extends Node
+var advisor_id: String = "marcus"
 ## Presentation-only ElevenLabs Agents transport. No world state, microphone,
 ## provider keys, save writes, reconnects or game commands belong in this node.
 ## Protocol: https://elevenlabs.io/docs/eleven-agents/api-reference/eleven-agents/websocket
@@ -96,7 +97,7 @@ func connect_agent(context: Dictionary) -> void:
 	_last_packet_at = _connected_at
 	_set_status("connecting")
 	var headers := PackedStringArray(["Content-Type: application/json", "Authorization: Bearer " + token])
-	var error: Error = _http.request(broker.trim_suffix("/") + "/session", headers, HTTPClient.METHOD_POST, "{}")
+	var error: Error = _http.request(broker.trim_suffix("/") + "/session", headers, HTTPClient.METHOD_POST, JSON.stringify({"advisor":advisor_id}))
 	# Credentials remain in request memory only; no URLs, headers or raw errors are logged.
 	if error != OK:
 		_fail("broker_unavailable")

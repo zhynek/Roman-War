@@ -58,6 +58,27 @@ survive ordinary map/city navigation; loading a save clears them. Closing Marcus
 ends the online connection. During a city battle, only its presented snapshot
 is supplied; the battle continues unless you pause it with its own controls.
 
+## Lucius and governing well
+
+Open the advisor panel to see **Lucius**, an elder senator with a separate
+portrait, guide and conversation. He joins when you own a completed government
+building of tier three or higher—**Civic Basilica** for Romans—at campaign
+creation or after a season resolves. Queued work and foreign buildings do not
+count. The panel shows your best completed tier and the required building.
+Once earned, his counsel remains available after losses. Older saves missing
+advisor records receive a one-time eligibility check when loaded.
+
+Select **Lucius** to switch advisors. His four lessons cover public order,
+taxes, trust and civic buildings. **Read the selected city** shows the selected
+owned settlement's reported factors and societal readings, with survey age and
+missing information labeled. These readings work offline; connect to ask about
+tradeoffs. Economic readings wait until an open city battle closes.
+
+Switching ends the previous voice session and retains each advisor's on-screen
+transcript. Reconnecting starts a new provider conversation; retained text is
+not long-term AI memory. Loading a save clears both transcripts and returns to
+Marcus. The village experience still uses Marcus alone.
+
 ## Starting a campaign
 
 You pick a few things and press **BEGIN THE CAMPAIGN**:

@@ -113,10 +113,15 @@ static func _valid_state(state: Variant) -> bool:
 		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
+		"advisor_unlocks": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
 		return false
+	for unlock in state.get("advisor_unlocks", {}).values():
+		if not _fields(unlock, {"turn":TYPE_FLOAT,"region":TYPE_STRING}):return false
+		if not _whole_at_least(unlock.turn,0) or unlock.turn > state.turn:return false
+		if not state.settlements.has(unlock.region):return false
 	for faction in state["factions"].values():
 		if not _fields(faction, {"treasury": TYPE_FLOAT, "capital": TYPE_STRING,
 			"alive": TYPE_BOOL, "era": TYPE_STRING, "diplomacy": TYPE_DICTIONARY,

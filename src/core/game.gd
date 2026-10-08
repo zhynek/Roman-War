@@ -1193,6 +1193,10 @@ func growth_breakdown(region_id: String) -> Array:
 	return GrowthRules.breakdown(data, state, region_id)
 
 
+func advisor_status(advisor_id: String) -> Dictionary:
+	return AdvisorRules.status(data,state,advisor_id)
+
+
 func order_breakdown(region_id: String) -> Array:
 	return PublicOrderRules.breakdown(data, state, region_id)
 

@@ -29,7 +29,8 @@ class FakeProvider:
     def __init__(self):
         self.calls = 0
 
-    def create_session(self):
+    def create_session(self, advisor="marcus"):
+        self.advisor = advisor
         self.calls += 1
         return SIGNED_URL
 
@@ -113,7 +114,7 @@ class LocalBoundaryTests(unittest.TestCase):
                 self.assertEqual(self.request(headers=headers)[0], 403)
         self.assertEqual(self.provider.calls, 0)
 
-    def test_only_empty_json_body_is_accepted(self):
+    def test_arbitrary_provider_ids_and_urls_are_rejected(self):
         for body in (b'{"agent_id":"other"}', b'{"url":"https://other"}', b"[]", b"null", b"bad"):
             with self.subTest(body=body):
                 self.assertEqual(self.request(body=body)[0], 400)
@@ -136,6 +137,16 @@ class LocalBoundaryTests(unittest.TestCase):
         self.assertEqual(errors.getvalue(), "")
         self.assertEqual(self.provider.calls, 1)
 
+    def test_advisor_route_is_allowlisted_and_unambiguous(self):
+        status, _, _ = self.request(body=b'{"advisor":"lucius"}')
+        self.assertEqual(status, 200)
+        self.assertEqual(self.provider.advisor, "lucius")
+        for body in (b'{"advisor":"other"}', b'{"advisor":null}', b'{"advisor":[]}',
+                     b'{"advisor":"lucius","advisor":"marcus"}'):
+            self.assertEqual(self.request(body=body)[0], 400)
+        self.assertEqual(self.provider.calls, 1)
+
+
     def test_global_session_rate_limit(self):
         for _ in range(6):
             self.assertEqual(self.request()[0], 200)
@@ -154,6 +165,23 @@ class LocalBoundaryTests(unittest.TestCase):
 
 
 class ProviderBoundaryTests(unittest.TestCase):
+    def test_lucius_uses_its_own_private_agent_and_rejects_marcus_url(self):
+        provider = ElevenLabs(Config(token=TOKEN, api_key="synthetic", agent_id="agent_synthetic", lucius_agent_id="agent_lucius"))
+        auth = {"platform_settings": {"auth": {"enable_auth": True, "allowlist": []}}}
+        lucius_url = SIGNED_URL.replace("agent_synthetic", "agent_lucius")
+        with patch.object(provider, "_get", side_effect=[auth, {"signed_url":lucius_url}]) as upstream:
+            self.assertEqual(provider.create_session("lucius"), lucius_url)
+            self.assertEqual(upstream.call_args_list[0].args[0], "/agents/agent_lucius")
+        with patch.object(provider, "_get", side_effect=[auth, {"signed_url":SIGNED_URL}]):
+            with self.assertRaises(BrokerError):provider.create_session("lucius")
+        with patch.object(provider, "_get", return_value={"platform_settings":{"auth":{"enable_auth":False}}}) as upstream:
+            with self.assertRaises(BrokerError):provider.create_session("lucius")
+            self.assertEqual(upstream.call_count, 1)
+        unconfigured = ElevenLabs(CONFIG)
+        with patch.object(unconfigured, "_get") as upstream:
+            with self.assertRaises(BrokerError):unconfigured.create_session("lucius")
+            upstream.assert_not_called()
+
     def test_private_auth_is_checked_before_each_single_use_mint(self):
         provider = ElevenLabs(CONFIG)
         with patch.object(provider, "_get", side_effect=[
@@ -246,6 +274,7 @@ class ProviderBoundaryTests(unittest.TestCase):
     def test_launcher_strips_provider_credentials_and_replaces_old_session(self):
         source = {
             "PATH": "/bin", "ELEVENLABS_API_KEY": "secret", "ELEVENLABS_AGENT_ID": "agent",
+            "ELEVENLABS_LUCIUS_AGENT_ID": "lucius-agent",
             "OPENAI_API_KEY": "secret", "ANTHROPIC_AUTH_TOKEN": "secret",
             "AZURE_OPENAI_KEY": "secret", "XI_API_KEY": "secret",
             "MARCUS_BROKER_TOKEN": "old", "MARCUS_BROKER_URL": "http://other",
@@ -260,11 +289,14 @@ class ProviderBoundaryTests(unittest.TestCase):
             with self.subTest(token=token):
                 with self.assertRaises(ConfigurationError):
                     Config.from_environment({"MARCUS_BROKER_TOKEN": token})
-        for name, value in (("ELEVENLABS_API_KEY", "key\r\nInjected: value"), ("ELEVENLABS_AGENT_ID", "../other")):
+        for name, value in (("ELEVENLABS_API_KEY", "key\r\nInjected: value"), ("ELEVENLABS_AGENT_ID", "../other"), ("ELEVENLABS_LUCIUS_AGENT_ID", "../other")):
             with self.subTest(name=name):
                 with self.assertRaises(ConfigurationError):
                     Config.from_environment({"MARCUS_BROKER_TOKEN": TOKEN, name: value})
         self.assertEqual(Config.from_environment({"MARCUS_BROKER_TOKEN": TOKEN}), Config(token=TOKEN))
+        with self.assertRaises(ConfigurationError):
+            Config.from_environment({"MARCUS_BROKER_TOKEN": TOKEN,
+                "ELEVENLABS_AGENT_ID": "same", "ELEVENLABS_LUCIUS_AGENT_ID": "same"})
         self.assertNotIn(TOKEN, repr(CONFIG))
         self.assertNotIn(CONFIG.api_key, repr(CONFIG))
 

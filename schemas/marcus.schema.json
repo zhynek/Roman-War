@@ -20,7 +20,10 @@
       "type": "string"
     },
     "id": {
-      "const": "marcus"
+      "enum": [
+        "marcus",
+        "lucius"
+      ]
     },
     "name": {
       "$ref": "#/$defs/text"

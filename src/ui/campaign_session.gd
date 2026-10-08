@@ -12,6 +12,10 @@ var initial_view := "campaign"
 var active_view := ""
 var marcus
 var marcus_context
+var lucius
+var lucius_context
+var active_advisor := "marcus"
+var _lucius_status: Dictionary = {}
 var _season_review_pending := false
 var _last_season_offered := -1
 
@@ -30,7 +34,7 @@ func _ready() -> void:
 		show_city()
 	else:
 		show_campaign()
-	# Keep one advisor above both retained views, outside their refresh cycles.
+	# Retain advisor conversations above both views, outside their refresh cycles.
 	marcus_context = preload("res://src/ui/advisors/marcus_campaign_context.gd").new(self)
 	var advisor_layer := CanvasLayer.new()
 	advisor_layer.layer = 20
@@ -39,6 +43,16 @@ func _ready() -> void:
 	advisor_layer.add_child(marcus)
 	marcus.opened_changed.connect(_advisor_opened)
 	marcus.configure_context(marcus_context)
+	lucius_context = preload("res://src/ui/advisors/lucius_context.gd").new(self)
+	lucius = preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_panel.gd").new()
+	advisor_layer.add_child(lucius)
+	lucius.configure_context(lucius_context,false)
+	lucius.hide()
+	lucius.opened_changed.connect(_advisor_opened)
+	for advisor in [marcus,lucius]:
+		advisor.advisor_requested.connect(_choose_advisor)
+		advisor.refresh_requested.connect(_refresh_council)
+	_refresh_council()
 
 
 func can_enter_city() -> bool:
@@ -83,7 +97,7 @@ func show_city() -> void:
 	active_view = "city"
 	city.refresh_city()
 	city._refresh_drawer()
-	_advisor_opened(is_instance_valid(marcus) and marcus.is_open())
+	_advisor_opened(is_instance_valid(_active_panel()) and _active_panel().is_open())
 	var battle := game.city_battle_status("latium")
 	if battle.get("active", false) or battle.get("can_defend", false):
 		city.open_battle()
@@ -106,7 +120,7 @@ func show_campaign() -> void:
 	campaign.show()
 	active_view = "campaign"
 	campaign.refresh()
-	_advisor_opened(is_instance_valid(marcus) and marcus.is_open())
+	_advisor_opened(is_instance_valid(_active_panel()) and _active_panel().is_open())
 	if can_enter_city():
 		campaign.map_view.center_on("latium")
 
@@ -135,6 +149,12 @@ func _state_loaded() -> void:
 	if is_instance_valid(marcus):
 		marcus_context.capture_season()
 		marcus.reset_conversation()
+		lucius_context.capture_season()
+		lucius.reset_conversation()
+		lucius.hide()
+		active_advisor = "marcus"
+		marcus.show()
+		_refresh_council()
 	_season_review_pending = false
 	_last_season_offered = int(game.state.turn)
 
@@ -156,6 +176,7 @@ func _battle_view_closed() -> void:
 	if active_view == "city" and game.state["settlements"]["latium"]["owner"] != game.state["player_faction"]:
 		show_campaign()
 	if _season_review_pending:_season_presented()
+	_refresh_council()
 
 
 func _advisor_opened(active: bool) -> void:
@@ -166,7 +187,9 @@ func _advisor_opened(active: bool) -> void:
 
 
 func _season_started() -> void:
-	if is_instance_valid(marcus):marcus.refresh_briefing(false)
+	if is_instance_valid(marcus):
+		marcus.refresh_briefing(false)
+		lucius.refresh_briefing(false)
 	_season_review_pending = true
 
 
@@ -174,13 +197,53 @@ func _season_presented() -> void:
 	if not is_instance_valid(marcus):return
 	_season_review_pending = not marcus_context.capture_season()
 	if not _season_review_pending:
+		lucius_context.capture_season()
+		_refresh_council()
 		var season: Dictionary = marcus_context.season_briefing()
 		var turn: int = int(season.get("turn", -1))
 		if turn != _last_season_offered:
 			_last_season_offered = turn
 			marcus.refresh_briefing()
+			lucius.refresh_briefing()
 
 
 func _exit_tree() -> void:
 	if is_instance_valid(city) and city.battle_panel != null:
 		city.battle_panel.host.stop()
+
+func _active_panel():
+	return lucius if active_advisor == "lucius" else marcus
+
+func _choose_advisor(id: String) -> void:
+	if id not in ["marcus","lucius"] or id == active_advisor:return
+	_refresh_council()
+	if id == "lucius" and not _lucius_status.get("available",false):return
+	var previous = _active_panel()
+	previous.close_panel() # stop streaming before changing the visible speaker
+	previous.hide()
+	active_advisor = id
+	_active_panel().show()
+	_active_panel().open()
+
+func _refresh_council() -> void:
+	if not is_instance_valid(marcus) or not is_instance_valid(lucius):return
+	var words: Dictionary = game.data.advisor_content.ui
+	var detail: String = words.battle
+	# The worker may be mutating campaign state: keep the last safe unlock
+	# reading until the battle closes; no new eligibility read during combat.
+	if not marcus_context._battle_visible():
+		_lucius_status = game.advisor_status("lucius")
+		if _lucius_status.get("available",false):
+			var earned: Dictionary = _lucius_status.unlocked
+			detail = String(words.available).format({"settlement":game.data.regions.get(earned.region,{}).get("settlement_name",earned.region),"turn":earned.turn})
+		else:
+			detail = String(words.locked).format({"required":_lucius_status.get("required_level",0),"current":_lucius_status.get("level",0)})
+			if _lucius_status.get("qualifies",false):detail += " " + String(words.qualifying)
+			if _lucius_status.get("required_building","") != "":
+				detail += " " + String(words.building_example).format({"settlement":game.data.regions[_lucius_status.region].get("settlement_name",_lucius_status.region),"building":_lucius_status.required_building})
+			else:detail += " " + String(words.no_seat)
+	var available: bool = _lucius_status.get("available",false)
+	var choices: Array = [{"id":"marcus","label":words.marcus,"available":true},
+		{"id":"lucius","label":words.lucius if available else words.locked_button,"available":available}]
+	marcus.set_council(choices,detail)
+	lucius.set_council(choices,detail)

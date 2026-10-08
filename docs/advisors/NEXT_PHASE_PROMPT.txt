@@ -1,0 +1,54 @@
+Implement the first unlockable governance advisor in Roman War.
+
+Continue the verified Marcus campaign implementation on codex/marcus-advisor.
+Read CLAUDE.md, AGENTS.md, docs/HANDOFF.md and the map experience review before
+editing. Record this plan in the existing Isengard Marcus assignment first.
+
+Add Lucius, an original elderly Roman senator with a questioning, Greek-inspired
+philosophical manner. Distinguish this fictional composite from historical claims
+about Roman and Greek institutions. Marcus remains the general guide. Lucius
+specializes in public order, taxes, growth, income, legitimacy and grievances.
+Create an original procedural portrait and a separate private ElevenLabs persona.
+
+Unlock rule: own a settlement with a completed tier-three-or-higher government
+building at campaign creation or the close of a season. Queued projects and
+foreign buildings do not count. Use the existing culture-specific government
+chains (Civic Basilica for Romans), with the threshold authored in data. Once
+unlocked, Lucius remains available in that campaign after losses. Add only a
+small unlock record to saves. Older saves missing that record qualify from their
+current owned completed buildings once on load; loading a current save must not
+award new unlocks or consume RNG. Reads and rendering never grant unlocks.
+
+Show Lucius in the advisor panel even while locked, with his actual prerequisite
+and current progress. Permit explicit switching when unlocked, retain separate
+in-memory transcripts across normal view changes, and end the previous voice
+session on switching. Loading a save clears both transcripts and returns to
+Marcus so an earlier campaign's specialist cannot leak into a locked save.
+
+Provide an offline city reading using only the selected owned settlement's
+existing player-visible factor lists and reported societal readings. Label old
+or limited surveys and missing information; do not reveal hidden current stocks,
+foreign management values or tactical rosters. Use current selection when asked.
+During live city battles defer economic reads until the worker is stopped.
+Guide navigation only inspects existing controls and never places an order.
+
+Reuse the established native ElevenLabs transport. Extend the private local
+broker with a strict marcus/lucius identifier allowlist mapped to server-held
+agent IDs, never arbitrary client IDs or URLs. Keep credentials out of source,
+exports, saves, browser forms and logs. Preserve authentication, URL validation,
+origin rejection, limits and timeouts. A missing Lucius configuration must fail
+clearly without silently connecting to Marcus. Configure the private provider
+agent if the signed-in dashboard is accessible; distinguish configuration from
+real native audio/text acceptance, which still requires the private API key.
+
+Keep game prose, thresholds and profiles in validated data; core unlock logic
+must be scene-free and deterministic. No balance changes, divine mandate rules,
+new temples, military specialist, full council, microphone input or deployment.
+
+Verify the changed data and Godot imports once, then inspect the rendered locked
+and unlocked advisor experience. Directly exercise the unlock/save boundary and
+separate conversation switching. Follow the weekly policy: no broad game suite.
+Because the change touches credential routing and additive save migration, add
+and run only focused boundary checks under the policy's explicit exceptions.
+Update setup, play instructions, handoff and Isengard with actual evidence and
+remaining blockers, then save a local source commit without pushing a release.

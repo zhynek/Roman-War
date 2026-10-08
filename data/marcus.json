@@ -4,7 +4,7 @@
   "name": "Marcus",
   "role": "Your companion through the ages",
   "fiction_note": "Marcus is an original, timeless fictional counselor inspired by Stoic philosophy. His presence across different reigns is a storytelling device, not a claim about the historical Marcus Aurelius.",
-  "future_note": "Temples already have their existing campaign effects. Personal divine missions, specialist advisor unlocks and a council of competing voices are future story systems; this guide grants no new powers or rewards.",
+  "future_note": "Lucius is available through completed government development. Temples retain their existing campaign effects. Personal divine missions, military advisors and councils of competing voices remain future story systems.",
   "ui": {
     "launcher": "Ask Marcus",
     "launcher_hint": "A little counsel, whenever you need it",
@@ -59,7 +59,8 @@
     "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection.",
     "presentation_navigation_blocked": "Finish the turn presentation and close Dispatch before following a lesson. Counsel remains available here.",
     "city_view_needed": "Enter Roma with the campaign’s existing controls first, then return to this lesson to open its ledger.",
-    "battle_context_note": "A battle is running or being viewed. Only the already-presented battle snapshot is supplied; no live campaign economy, hidden enemies or tactical rosters are available. Advice does not pause the simulation."
+    "battle_context_note": "A battle is running or being viewed. Only the already-presented battle snapshot is supplied; no live campaign economy, hidden enemies or tactical rosters are available. Advice does not pause the simulation.",
+    "city_reading": "Read the selected city"
   },
   "status": {
     "unconfigured": "The private service needs its ElevenLabs credentials",

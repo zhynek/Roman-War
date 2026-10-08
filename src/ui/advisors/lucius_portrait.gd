@@ -1,0 +1,32 @@
+extends "res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_portrait.gd"
+## Original elder: bald crown, white side hair, angular face and senatorial stripe.
+func _draw() -> void:
+	var edge: float=minf(size.x,size.y)
+	if edge<=0:return
+	draw_set_transform((size-Vector2.ONE*edge)*.5,0,Vector2.ONE*edge/100.0)
+	var skin:=Color("c4a587")
+	var hair:=Color("e4e0cf")
+	draw_circle(Vector2(50,50),48,Color("252538"))
+	draw_arc(Vector2(50,50),46,0,TAU,72,Color("b6a584"),1.2,true)
+	_poly([Vector2(12,96),Vector2(20,77),Vector2(36,68),Vector2(65,68),Vector2(83,78),Vector2(92,96)],Color("ddd7bc"))
+	_poly([Vector2(28,74),Vector2(36,70),Vector2(67,94),Vector2(55,97)],Color("796083"))
+	for i in range(3):draw_line(Vector2(48+i*8,77),Vector2(77+i*4,94),Color("a8a28d"),1.4,true)
+	_poly([Vector2(39,58),Vector2(60,58),Vector2(63,73),Vector2(49,80),Vector2(38,70)],skin.darkened(.15))
+	draw_circle(Vector2(30,45),5,skin)
+	draw_circle(Vector2(70,45),5,skin.darkened(.2))
+	_poly([Vector2(31,30),Vector2(36,21),Vector2(50,17),Vector2(64,23),Vector2(70,36),Vector2(66,56),Vector2(56,70),Vector2(44,71),Vector2(33,58)],skin)
+	_poly([Vector2(54,22),Vector2(67,30),Vector2(67,53),Vector2(56,69),Vector2(50,70),Vector2(57,51)],skin.darkened(.13))
+	for side in [0,1]:
+		for i in range(5):draw_circle(Vector2(30+side*39,30+i*4),3.6,hair)
+	for i in range(3):draw_line(Vector2(39,29+i*3),Vector2(58,29+i*3),skin.darkened(.22),.8,true)
+	draw_line(Vector2(36,42),Vector2(45,40),hair,2,true)
+	draw_line(Vector2(55,40),Vector2(64,42),hair,2,true)
+	draw_line(Vector2(37,45),Vector2(44,45),Color("3b3b38"),1.5,true)
+	draw_line(Vector2(56,45),Vector2(63,45),Color("3b3b38"),1.5,true)
+	draw_line(Vector2(50,43),Vector2(46,56),skin.lightened(.2),2,true)
+	draw_line(Vector2(46,56),Vector2(53,56),skin.darkened(.35),1,true)
+	draw_line(Vector2(36,51),Vector2(41,59),skin.darkened(.24),1,true)
+	draw_line(Vector2(62,51),Vector2(57,60),skin.darkened(.24),1,true)
+	draw_ellipse_mouth(Vector2(50,62),.7+(absf(sin(elapsed*8.0))*1.5 if speaking else 0.0))
+	draw_line(Vector2(44,68),Vector2(54,68),skin.darkened(.25),.8,true)
+	draw_set_transform(Vector2.ZERO,0,Vector2.ONE)

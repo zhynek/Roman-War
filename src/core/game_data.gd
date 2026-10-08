@@ -48,6 +48,9 @@ var guided_stages: Array = []          # guided-campaign stages, authored order
 var guided_stage_index: Dictionary = {}  # stage id -> stage dict
 var effects_glossary: Dictionary = {}  # the player-facing wording for building effects
 
+var advisors: Dictionary = {}
+var advisor_content: Dictionary = {}
+
 var load_errors: PackedStringArray = []
 
 
@@ -63,6 +66,9 @@ func ok() -> bool:
 
 func _load_all(dir: String) -> void:
 	balance = _read_json(dir + "/balance.json")
+	advisor_content = _read_json(dir + "/advisors.json")
+	for advisor in advisor_content.get("advisors", []):
+		advisors[advisor.id] = advisor
 	campaign = _read_json(dir + "/campaign.json")
 	city_governance = _read_json(dir + "/city_governance.json")
 	roma_city = _read_json(dir + "/roma_city.json")

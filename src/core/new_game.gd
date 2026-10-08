@@ -35,6 +35,7 @@ class_name NewGame
 ##      watchpost, construction, turn}}} — dated architecture, never troop rosters
 ##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
 ##      — public identity/count snapshots and only the endpoints seen at the time
+##  advisor_unlocks: {advisor_id: {turn, region}} — permanent player counsel
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
 ##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
@@ -97,6 +98,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"city_governance": {},
 		"city_battles": {},
 		"city_campaign": {},
+		"advisor_unlocks": {},
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -196,6 +198,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	GuidedRules.process_turn(data, state)
 
 	ReconRules.refresh_contacts(data, state)
+	AdvisorRules.reconcile(data,state)
 	state["rng_state"] = rng.state_string()
 	return state
 
@@ -207,6 +210,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	if not state.has("advisor_unlocks") and data != null:
+		AdvisorRules.reconcile(data,state)
 	if not state.has("city_campaign"):
 		state["city_campaign"] = {}
 	if not state.has("city_battles"):

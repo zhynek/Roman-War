@@ -85,6 +85,7 @@ func context_snapshot() -> Dictionary:
 		return result
 	var game: Game = session.game
 	var player: String = game.state.player_faction
+	result.council = {"lucius":session._lucius_status.duplicate(true)}
 	result.calendar = _fields(game.state, ["turn", "year", "season"])
 	result.faction = _fields(game.state.factions[player], ["treasury", "capital"])
 	result.faction.id = player

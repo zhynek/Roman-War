@@ -1,4 +1,4 @@
-# Marcus private voice connection
+# Marcus and Lucius private voice connections
 
 Live credential status: pending. The secure local broker and native client are
 implemented, but an authenticated ElevenLabs conversation has not yet been
@@ -42,6 +42,27 @@ pending the private key and one end-to-end conversation.
 The published prompt now supports both `yenikapi_early_settlement` and
 `roman_campaign`, including partial seasonal reports and the limited live
 battle context. This prompt update does not establish native voice acceptance.
+
+## Lucius governance agent
+
+Created and published October 8, 2026:
+[Lucius — Roman War Governance Advisor](https://elevenlabs.io/app/agents/agents/agent_2101m4eq0t7mfq38ap8prtxm6nqd/agent).
+Nonsecret agent ID: `agent_2101m4eq0t7mfq38ap8prtxm6nqd`.
+Its [governance prompt](../advisors/lucius-agent-prompt.txt) and greeting identify
+an original fictional AI senator. Voice: **Declan Sage — Wise and Captivating**;
+V4 Turbo, expressive mode off. It uses the same Claude Sonnet 5 configuration.
+
+The dashboard confirmed private authentication, PCM 16 kHz, zero retention,
+recording off, 30 daily calls, two concurrent calls, bursting and queuing off.
+The settings were copied from Marcus, including client events and no tools.
+Marcus's published prompt now recognizes Lucius and the actual council status.
+Neither configuration publication nor selecting a voice proves native playback.
+
+The broker maps `marcus` to `ELEVENLABS_AGENT_ID` and `lucius` to
+`ELEVENLABS_LUCIUS_AGENT_ID`. Set both for the campaign. Missing Lucius config
+fails clearly; it never falls back to Marcus. Equal agent IDs are rejected.
+The unlock gates the game UI, not paid multiplayer entitlements; this local
+broker trusts its authorized native process and does not validate saves.
 
 ## Recreate or change the agent
 
@@ -89,7 +110,9 @@ For the **Roman campaign**, supply the parent project path (the key still stays
 in the broker, and the launcher still exits when the game closes):
 
 ```sh
-ELEVENLABS_AGENT_ID=agent_1001m4e1c02ee6p8n4jf0fcj5b6w python3 tools/marcus_broker.py --prompt-credentials --launch build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot --path .
+ELEVENLABS_AGENT_ID=agent_1001m4e1c02ee6p8n4jf0fcj5b6w \
+ELEVENLABS_LUCIUS_AGENT_ID=agent_2101m4eq0t7mfq38ap8prtxm6nqd \
+python3 tools/marcus_broker.py --prompt-credentials --launch build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot --path .
 ```
 
 To specify the village project and Godot executable explicitly:
@@ -108,14 +131,18 @@ with the native game. The launcher is the recommended path.
 
 ## Native client contract
 
-`POST http://127.0.0.1:2270/session` requires exactly:
+`POST http://127.0.0.1:2270/session` requires:
 
 ```text
 Authorization: Bearer <MARCUS_BROKER_TOKEN>
 Content-Type: application/json
 
-{}
+{"advisor":"lucius"}
 ```
+
+Only `marcus` or `lucius` is accepted. An empty object remains compatible with
+older Marcus clients. Unknown identities, duplicate fields, extra fields,
+arbitrary agent IDs and URLs are rejected.
 
 A successful response is `{"signed_url":"wss://api.elevenlabs.io/..."}`.
 Treat the whole URL as a temporary credential: use it only for the WebSocket
@@ -124,13 +151,13 @@ connection, never log or persist it. The broker requests
 connection promptly; ElevenLabs documents a 15-minute connection window.
 
 `GET /health` returns only `{"configured":true}` or `{"configured":false}`;
-this means local values are present, not that the account or agent was verified.
+this means Marcus values are present, not that either agent was verified.
 Every response is `Cache-Control: no-store`. Error responses contain a fixed
 machine-readable `error` code, never a provider response, API key or agent ID.
 
 All browser `Origin` headers, nonliteral loopback Host headers, query-string
-routes, duplicate authentication headers, transfer encoding and request
-overrides are refused. Requests are limited to 128 body bytes, six session
+routes, duplicate authentication headers, transfer encoding and arbitrary
+provider overrides are refused. Requests are limited to 128 body bytes, six session
 attempts per minute, two concurrent provider operations and four HTTP workers.
 Provider requests use a fixed HTTPS origin, certificate validation, no redirects
 and a ten-second socket timeout; proxy environment variables are ignored.
@@ -153,8 +180,9 @@ This isolated security check uses synthetic values and a loopback ephemeral port
 It never contacts ElevenLabs, spends provider credit or runs the campaign suite.
 It is covered by the weekly testing policy's credential-handling exception.
 
-Verified October 8, 2026: all 14 focused checks passed in 3.604 seconds. The
-initial sandbox invocation could not bind its loopback socket; the authorized
-invocation with loopback access passed. This verifies the local credential
-boundary, not a live provider conversation. The existing game suite was not run
-under the weekly review policy.
+Verified October 8, 2026: all 16 focused checks passed in 4.139 seconds,
+including separate Lucius routing, wrong-agent signed URLs, private-agent
+requirements, duplicate selector rejection and child-process credential removal.
+This verifies the local credential boundary with synthetic credentials, not a
+live provider conversation. The broad game suite was not run under the weekly
+review policy.

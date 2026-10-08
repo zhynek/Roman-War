@@ -56,7 +56,8 @@
     "season_title": "What the season has brought",
     "season_help": "These are the latest resolved season’s reports available to you. Read them here, or connect and ask Marcus about the choices ahead. Reviewing them does not advance time.",
     "season_quiet": "There are no dispatch items to summarize for this season.",
-    "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection."
+    "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection.",
+    "city_reading": "Read the selected city"
   },
   "status": {
     "unconfigured": "The private service needs its ElevenLabs credentials",

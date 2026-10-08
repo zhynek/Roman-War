@@ -11,6 +11,36 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Lucius governance phase — October 8, 2026
+
+Implemented the user-authorized [phase prompt](advisors/NEXT_PHASE_PROMPT.txt),
+recorded first in Isengard assignment `43bbb7f8-11f2-4b5c-9d62-cef289a01aae`.
+Lucius is the first specialist: completed owned government tier 3+, permanent
+unlock at creation/season close, additive legacy migration, no RNG or read-side
+awards. His separate procedural portrait, four lessons and offline selected-city
+reading share the retained advisor UI with Marcus. Switching stops the old voice
+session; transcripts stay separate across views. Loading clears both and returns
+to Marcus. Live battle views defer all economic reads.
+
+The local broker now allowlists `marcus`/`lucius` and maps them to distinct
+server-only agent IDs. Missing Lucius config fails without fallback. Both private
+ElevenLabs personas are published; Lucius uses Declan Sage. See
+[setup](marcus/SETUP.md) for the two-ID campaign command. The private API key and
+one real native speech/text conversation remain outstanding; provider
+configuration is not live acceptance. No keys were added to source or saves.
+
+Verification: data validators and both Godot imports clean; 16 credential-boundary
+checks and 3 additive-migration checks passed under explicit policy exceptions.
+The rendered isolated campaign went from locked queued tier 3 to completed/unlocked
+at turn 1. Button switching retained separate transcript counts of 1; a four-section
+city reading left full state unchanged and omitted army context. A locked save
+reset both transcripts to 0 and restored Marcus. Map, Roma and village panels were
+inspected. Fixed first-open autowrap overflow; the 1280×800 panel now fits with a
+scrolling guide and visible connection controls. QA scripts/images remain in
+`/tmp`; runtime logs contain no script errors. No broad suite or push/release.
+
+Verified by: data validation, Godot imports and rendered walkthrough. Tests: not run (weekly review policy), except 16 credential checks and 3 migration checks, which passed.
+
 ## Marcus campaign phase — October 8, 2026
 
 The user authorized the proposed campaign phase, and its plan was recorded in

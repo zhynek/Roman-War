@@ -60,6 +60,15 @@ class Config:
     token: str = field(repr=False)
     api_key: str = field(default="", repr=False)
     agent_id: str = field(default="", repr=False)
+    lucius_agent_id: str = field(default="", repr=False)
+
+    def agent_for(self, advisor: str) -> str:
+        if advisor not in ("marcus", "lucius"):
+            raise BrokerError(400, "unknown_advisor")
+        selected = self.agent_id if advisor == "marcus" else self.lucius_agent_id
+        if not self.api_key or not selected or (advisor == "lucius" and selected == self.agent_id):
+            raise BrokerError(503, "provider_not_configured")
+        return selected
 
     @property
     def configured(self) -> bool:
@@ -87,7 +96,12 @@ class Config:
             raise ConfigurationError("ELEVENLABS_API_KEY has an invalid format.")
         if agent and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", agent):
             raise ConfigurationError("ELEVENLABS_AGENT_ID has an invalid format.")
-        return cls(token=token, api_key=key, agent_id=agent)
+        lucius = env.get("ELEVENLABS_LUCIUS_AGENT_ID", "")
+        if lucius and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", lucius):
+            raise ConfigurationError("ELEVENLABS_LUCIUS_AGENT_ID has an invalid format.")
+        if lucius and lucius == agent:
+            raise ConfigurationError("Lucius requires a different private agent from Marcus.")
+        return cls(token=token, api_key=key, agent_id=agent, lucius_agent_id=lucius)
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -127,12 +141,11 @@ class ElevenLabs:
         except (ValueError, UnicodeError):
             raise BrokerError(502, "provider_response_invalid") from None
 
-    def create_session(self) -> str:
-        if not self.config.configured:
-            raise BrokerError(503, "provider_not_configured")
+    def create_session(self, advisor: str = "marcus") -> str:
+        agent_id = self.config.agent_for(advisor)
         # Verify on EVERY mint, so a later accidental dashboard change from
         # private to public does not silently weaken the intended setup.
-        agent = self._get("/agents/" + self.config.agent_id)
+        agent = self._get("/agents/" + agent_id)
         settings = agent.get("platform_settings")
         auth = settings.get("auth") if isinstance(settings, dict) else None
         if (
@@ -142,7 +155,7 @@ class ElevenLabs:
         ):
             raise BrokerError(503, "agent_must_require_authentication")
         query = urlencode(
-            {"agent_id": self.config.agent_id, "include_conversation_id": "true"}
+            {"agent_id": agent_id, "include_conversation_id": "true"}
         )
         result = self._get("/conversation/get-signed-url?" + query)
         signed_url = result.get("signed_url")
@@ -156,7 +169,7 @@ class ElevenLabs:
                 and parsed.netloc == "api.elevenlabs.io"
                 and parsed.path == "/v1/convai/conversation"
                 and not parsed.fragment
-                and query_values.get("agent_id") == [self.config.agent_id]
+                and query_values.get("agent_id") == [agent_id]
                 and len(query_values.get("conversation_signature", [])) == 1
                 and bool(query_values["conversation_signature"][0])
                 and not any(ord(char) < 33 or ord(char) > 126 for char in signed_url)
@@ -278,7 +291,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
         if not hmac.compare_digest(supplied, expected):
             raise BrokerError(401, "authentication_required")
 
-    def _empty_object(self):
+    def _advisor_request(self) -> str:
         lengths = self.headers.get_all("Content-Length", [])
         if len(lengths) != 1 or not re.fullmatch(r"[0-9]{1,4}", lengths[0]):
             raise BrokerError(400, "invalid_body")
@@ -290,8 +303,20 @@ class BrokerHandler(BaseHTTPRequestHandler):
             raise BrokerError(415, "json_required")
         try:
             body = self.rfile.read(length)
-            if len(body) != length or json.loads(body) != {}:
-                raise BrokerError(400, "empty_object_required")
+            def unique_fields(pairs):
+                result = {}
+                for key, value in pairs:
+                    if key in result:
+                        raise ValueError("duplicate field")
+                    result[key] = value
+                return result
+            request = json.loads(body, object_pairs_hook=unique_fields)
+            if len(body) != length or not isinstance(request, dict) or set(request) - {"advisor"}:
+                raise BrokerError(400, "invalid_body")
+            advisor = request.get("advisor", "marcus")
+            if advisor not in ("marcus", "lucius"):
+                raise BrokerError(400, "unknown_advisor")
+            return advisor
         except (ValueError, UnicodeError):
             raise BrokerError(400, "invalid_body") from None
 
@@ -306,10 +331,10 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if self.command != "POST" or self.path != "/session":
                 raise BrokerError(404, "not_found")
             self._authorize()
-            self._empty_object()
+            advisor = self._advisor_request()
             self.server.gate.enter()
             try:
-                signed_url = self.server.provider.create_session()
+                signed_url = self.server.provider.create_session(advisor)
             finally:
                 self.server.gate.leave()
             self._reply(200, {"signed_url": signed_url})

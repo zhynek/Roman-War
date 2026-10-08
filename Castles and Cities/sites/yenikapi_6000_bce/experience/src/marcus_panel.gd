@@ -4,6 +4,8 @@ extends Control
 const Portrait=preload("marcus_portrait.gd")
 const Voice=preload("marcus_voice.gd")
 signal opened_changed(active: bool)
+signal advisor_requested(advisor_id: String)
+signal refresh_requested
 var adapter
 var preference_path: String
 var voice
@@ -42,8 +44,9 @@ var briefing_button: Button
 var season_offer: Button
 var _offer_pending: bool=false
 var input_shield: Control
+var council_body: VBoxContainer
 
-func configure_context(context_adapter) -> void:
+func configure_context(context_adapter, auto_open: bool=true) -> void:
 	adapter=context_adapter
 	copy=adapter.content
 	lessons=adapter.lessons
@@ -53,6 +56,7 @@ func configure_context(context_adapter) -> void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	name="MarcusAdvisor"
 	voice=Voice.new()
+	voice.advisor_id=String(copy.id)
 	add_child(voice)
 	voice.status_changed.connect(_status_changed)
 	voice.answer_received.connect(_answer_received)
@@ -62,11 +66,15 @@ func configure_context(context_adapter) -> void:
 	_build()
 	get_viewport().size_changed.connect(_layout)
 	panel.minimum_size_changed.connect(_schedule_layout)
+	panel.resized.connect(_schedule_layout)
 	_layout()
 	_schedule_layout()
 	_sync_connection()
 	refresh_briefing(false)
-	if not _intro_seen:open.call_deferred()
+	if auto_open and not _intro_seen:open.call_deferred()
+
+func _new_portrait():
+	return adapter.create_portrait() if adapter.has_method("create_portrait") else Portrait.new()
 
 func w(id: String) -> String:
 	return String(copy.ui.get(id,id))
@@ -115,7 +123,7 @@ func _build() -> void:
 	launcher_row.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	launcher_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	launcher_row.offset_left=8;launcher_row.offset_right=-12;launcher_row.offset_top=4;launcher_row.offset_bottom=-4
-	launcher_portrait=Portrait.new()
+	launcher_portrait=_new_portrait()
 	launcher_portrait.custom_minimum_size=Vector2(60,60)
 	launcher_portrait.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	launcher_row.add_child(launcher_portrait)
@@ -140,7 +148,7 @@ func _build() -> void:
 	var header:=HBoxContainer.new()
 	header.add_theme_constant_override("separation",12)
 	column.add_child(header)
-	panel_portrait=Portrait.new()
+	panel_portrait=_new_portrait()
 	panel_portrait.custom_minimum_size=Vector2(58,58)
 	header.add_child(panel_portrait)
 	var identity:=VBoxContainer.new()
@@ -153,6 +161,9 @@ func _build() -> void:
 	close.custom_minimum_size=Vector2(36,36)
 	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	header.add_child(close)
+	council_body=VBoxContainer.new()
+	column.add_child(council_body)
+	council_body.hide()
 	var tabs:=HBoxContainer.new()
 	column.add_child(tabs)
 	guide_button=_button(w("guide"),_choose_tab.bind("guide"),"MarcusGuide")
@@ -165,6 +176,8 @@ func _build() -> void:
 	briefing_button=_button(w("review_season"),show_briefing,"MarcusSeasonReview")
 	column.add_child(briefing_button)
 	briefing_button.hide()
+	if adapter.has_method("city_reading"):
+		column.add_child(_button(w("city_reading"),show_city_reading,"AdvisorCityReading"))
 	guide_scroll=ScrollContainer.new()
 	guide_scroll.name="MarcusGuideScroll"
 	guide_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -237,12 +250,9 @@ func _layout() -> void:
 	launcher.size=Vector2(182,74)
 	season_offer.position=Vector2(maxf(8,viewport.x-454),maxf(8,viewport.y-70))
 	season_offer.size=Vector2(242,36)
-	panel.position=Vector2(maxf(8,viewport.x-width-16),16)
-	panel.size=Vector2(width,maxf(300.0,viewport.y-122))
-	# A long lesson scrolls inside the panel instead of covering the launcher.
-	if panel.size.y>730:
-		panel.position.y=viewport.y-106-730
-		panel.size.y=730
+	var height:=minf(730.0,maxf(300.0,viewport.y-122))
+	panel.position=Vector2(maxf(8,viewport.x-width-16),maxf(16,viewport.y-106-height))
+	panel.size=Vector2(width,height)
 
 func _schedule_layout() -> void:
 	# Autowrapped labels initially measure at zero width and can enlarge the
@@ -253,13 +263,25 @@ func _schedule_layout() -> void:
 	_flush_layout.call_deferred()
 
 func _flush_layout() -> void:
+	# Let containers sort new council labels at their real width before
+	# reclamping: deferred callbacks alone can precede the final minimum update.
+	await get_tree().process_frame
 	_layout_pending=false
 	_layout()
 
+func _process(_delta: float) -> void:
+	# Deep autowrapped children can settle after the deferred resize without
+	# another parent minimum signal. Correct only a now-shrinkable overflow.
+	if not is_open():return
+	var height:=minf(730.0,maxf(300.0,get_viewport_rect().size.y-122))
+	if panel.size.y>height and panel.get_combined_minimum_size().y<=height:
+		_layout()
+
 func is_open() -> bool:
-	return is_instance_valid(panel) and panel.visible
+	return is_instance_valid(panel) and panel.is_visible_in_tree()
 
 func open() -> void:
+	refresh_requested.emit()
 	adapter.prepare_open()
 	panel.show()
 	input_shield.show()
@@ -328,6 +350,8 @@ func _render_guide() -> void:
 	lesson_speech=null
 	if _mode=="briefing":
 		_render_briefing()
+	elif _mode=="reading":
+		_render_city_reading()
 	elif _mode=="intro":
 		var page: Dictionary=copy.intro[_intro_step]
 		guide_body.add_child(_label(w("intro_tag"),11,"bdb17f"))
@@ -547,6 +571,7 @@ func context_snapshot() -> Dictionary:
 	result.guide={"mode":_mode,"index":_intro_step if _mode=="intro" else _lesson}
 	if _mode=="intro":result.guide.page=copy.intro[_intro_step].duplicate(true)
 	elif _mode=="briefing":result.guide.page=adapter.season_briefing()
+	elif _mode=="reading":result.guide.page=adapter.city_reading()
 	else:
 		result.guide.page=lessons[_lesson].duplicate(true)
 		result.guide.counsel=copy.lesson_counsel[_lesson]
@@ -582,3 +607,32 @@ func _render_briefing() -> void:
 	for line in lines:guide_body.add_child(_label(String(line),15))
 	if briefing.get("omitted",0)>0:guide_body.add_child(_label(w("season_more"),12,"b8ccb9"))
 	guide_body.add_child(_button(w("restart"),_choose_lesson.bind(0),"MarcusReturnLessons"))
+
+func set_council(choices: Array, detail: String) -> void:
+	for child in council_body.get_children():
+		council_body.remove_child(child)
+		child.queue_free()
+	council_body.visible=not choices.is_empty()
+	var row:=HBoxContainer.new()
+	council_body.add_child(row)
+	for choice in choices:
+		var button:=_button(choice.label,func():advisor_requested.emit(choice.id))
+		button.disabled=not choice.available or choice.id==copy.id
+		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		row.add_child(button)
+	council_body.add_child(_label(detail,12,"b8c5b8"))
+	_schedule_layout()
+
+func show_city_reading() -> void:
+	_mode="reading"
+	_choose_tab("guide")
+	open()
+
+func _render_city_reading() -> void:
+	var reading: Dictionary=adapter.city_reading()
+	guide_body.add_child(_label(reading.title,25,"eee3c2"))
+	guide_body.add_child(_label(reading.note,14))
+	for section in reading.get("sections",[]):
+		guide_body.add_child(_label(section.title,18,"b8ccb9"))
+		for line in section.lines:guide_body.add_child(_label(line,15))
+	guide_body.add_child(_button(w("restart"),_choose_lesson.bind(0)))

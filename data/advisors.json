@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/advisors.schema.json",
+  "advisors": [
+    {
+      "id": "lucius",
+      "name": "Lucius",
+      "role": "Counsel on governing well",
+      "unlock": {
+        "building_kind": "government",
+        "min_level": 3
+      }
+    }
+  ],
+  "ui": {
+    "marcus": "Marcus",
+    "lucius": "Lucius",
+    "locked_button": "Lucius · Locked",
+    "locked": "Complete a government building of tier {required} or higher in a settlement you own, then resolve a season. Best completed tier: {current}. Queued work does not count.",
+    "building_example": "At {settlement}, this means {building} or higher.",
+    "qualifying": "Your completed civic seat qualifies. Lucius will join after the season resolves.",
+    "available": "Lucius joined your council at {settlement} in turn {turn}. His counsel remains available after later losses.",
+    "battle": "Council availability and city readings are checked again after the battle view closes.",
+    "no_seat": "No owned government building is reported yet.",
+    "permanent": "Existing qualifying campaigns welcome him at creation or when an older save is first loaded."
+  },
+  "reading": {
+    "heading": "A reading of your city",
+    "source": "These are the game’s reported factors, read when you open this page. This written reading is not an AI reply. Connect to ask Lucius what the tradeoffs mean.",
+    "battle": "Economic reports are unavailable while the battle view is open. Return after the battle to read your city.",
+    "no_selection": "Select one of your own settlements on the map, or enter owned Roma, then return here. Lucius cannot read another faction’s administration.",
+    "survey": "Societal report: {level} · {turns} seasons old. Missing figures are unknown, not zero.",
+    "public_order": "Public order factors · percentage points",
+    "growth": "Growth factors · percentage points",
+    "income": "Income factors · denarii per season",
+    "society": "Reported society",
+    "tax": "Current tax setting: {tax}",
+    "legitimacy": "Legitimacy",
+    "grievance": "Grievance",
+    "assimilation": "Assimilation",
+    "unrest_state": "Reported unrest",
+    "unknown": "Not reported",
+    "factor": "{label}: {value}",
+    "total": "Total of these factors: {value}",
+    "limited": "Only the first {limit} factors are listed. Inspect the settlement panel for the complete breakdown."
+  }
+}

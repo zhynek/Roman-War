@@ -25,6 +25,8 @@ SCHEMAS = ROOT / "schemas"
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
     "marcus.json": "marcus.schema.json",
+    "lucius.json": "marcus.schema.json",
+    "advisors.json": "advisors.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
@@ -127,8 +129,25 @@ def load_tables() -> dict[str, dict]:
     return tables
 
 
-def _marcus_checks(t: dict[str, dict]) -> None:
-    content = t.get("marcus.json", {})
+def _advisor_checks(t: dict[str, dict]) -> None:
+    advisors = t.get("advisors.json", {}).get("advisors", [])
+    ids = [a.get("id") for a in advisors]
+    if len(ids) != len(set(ids)):
+        err("advisors: duplicate advisor id")
+    chains = t.get("buildings.json", {}).get("chains", [])
+    for advisor in advisors:
+        content = t.get(advisor.get("id", "") + ".json", {})
+        if content.get("id") != advisor.get("id") or content.get("name") != advisor.get("name"):
+            err("advisors: missing or mismatched advisor content")
+        unlock = advisor.get("unlock", {})
+        for culture in t.get("cultures.json", {}).get("cultures", []):
+            if not any(c.get("kind") == unlock.get("building_kind") and culture["id"] in c.get("cultures", [])
+                       and len(c.get("levels", [])) >= unlock.get("min_level", 0) for c in chains):
+                err(f"advisors: {advisor.get('id')} prerequisite unreachable for {culture['id']}")
+
+
+def _marcus_checks(t: dict[str, dict], name="marcus.json") -> None:
+    content = t.get(name, {})
     if len(content.get("lesson_counsel", [])) != len(content.get("lessons", [])):
         err("marcus: each campaign lesson needs a counsel entry")
     for section in ("intro", "lessons"):
@@ -150,6 +169,8 @@ def _marcus_checks(t: dict[str, dict]) -> None:
 def cross_checks(t: dict[str, dict]) -> None:
     _city_checks(t)
     _marcus_checks(t)
+    _marcus_checks(t, "lucius.json")
+    _advisor_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 
