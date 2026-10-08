@@ -1,5 +1,15 @@
 # Yenikapı — Early Settlement
 
+**Local 0.14.0 — Village warfare:** paid woven screens and saved defense plans;
+real resident musters; three recurring threats; direct, delegated and quick
+battle modes; named injuries, paid care and equipment repair, experience and
+persistent household consequences. Warfare adopts explicitly and uses independent
+wrapper-10 saves. [Short preparation and controls guide](WARFARE-CONTROLS.md).
+[Architecture and limits](WARFARE.md). [Verification record](../VERIFICATION-WARFARE.md).
+This is an unpublished local build; previous deliveries remain in place.
+
+**Local 0.13.0 — Defend the village:** prepare the existing home watch, deploy on the current village terrain, command a continuous battle, save/resume, accept its consequences and continue seasonal life. A separate practice copy leaves the village unchanged. [Controls, preparation, recovery and wrapper-9 saves](DEFENSE.md). [Local delivery verification](../VERIFICATION-DEFENSE.md).
+
 **Verified local 0.12.0 — A Town That Works:** continue Small village → Large village → Town by paying to adapt the same assembly shelter into a civic house. Town opens a material-preparation store and shared provision service, each purchased separately and dependent on finite civic workers and maintained stores. Existing buildings, households, choices and paid work remain yours. [Play, continuing obligations and wrapper-8 compatibility](LIFECYCLE.md). [Verified Mac build, performance and preservation](../VERIFICATION-0.12.md). Later city stages remain planned; this local build is not a public release.
 
 **0.10.0 — Buildings That Show Their Work:** staged construction, paid-material and worker explanations, and shared project oversight at sites, in the dock and in an early shared planning room. [Gameplay, interpretation and unchanged save contract](CONSTRUCTION.md).
@@ -43,7 +53,7 @@ collision; returning to walking finds safe ground. Far land is a scenic backdrop
 The universal Mac app is ad-hoc signed, not Developer ID notarized. If macOS asks,
 use Finder's Open action. Apple Silicon rendering is tested; Intel performance
 has not been measured. Original procedural citizens illustrate assigned work in the tutorial. Sound,
-combat, detailed crafting/logistics and water simulation remain future work. Models are neutral PBR GLBs; editable
+detailed crafting/logistics and water simulation remain future work. Models are neutral PBR GLBs; editable
 source includes the Godot project, evidence ledger and authoring documentation.
 
 Play seasonal tutorial → Begin a new tutorial. Choose God, settlement steward

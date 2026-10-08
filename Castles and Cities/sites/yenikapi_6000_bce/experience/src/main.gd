@@ -15,6 +15,7 @@ var mode_label: Label
 var location_label: Label
 var status: Label
 var campaign
+var defense_panel
 var visual_commands
 var reference_top: PanelContainer
 var reference_bottom: PanelContainer
@@ -180,6 +181,8 @@ func _interface() -> void:
 	root.add_child(visual_commands)
 	visual_commands.configure(self)
 	commands.add_child(_button(visual_commands.w("adopt"),visual_commands.open))
+	defense_panel=preload("res://src/defense_panel.gd").new();root.add_child(defense_panel);defense_panel.configure(self)
+	commands.add_child(_button(defense_panel.w("entry"),defense_panel.open))
 
 func set_flying(value: bool) -> void:
 	if not value:
@@ -223,6 +226,7 @@ func overview() -> void:
 	note.text=data.evidence_note
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(defense_panel) and defense_panel.active_ui:defense_panel.handle(event);return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
 			KEY_TAB: Input.mouse_mode=Input.MOUSE_MODE_VISIBLE if Input.mouse_mode==Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
@@ -289,6 +293,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not ready_for_capture:return
+	if is_instance_valid(defense_panel) and defense_panel.active_ui:return
 	var focus:Control=get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is SpinBox:return
 	var move:=Vector3.ZERO

@@ -68,7 +68,7 @@ func scroller(parent: Node) -> VBoxContainer:
 	var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;parent.add_child(scroll)
 	var v:=VBoxContainer.new();v.size_flags_horizontal=Control.SIZE_EXPAND_FILL;v.add_theme_constant_override("separation",10);scroll.add_child(v);return v
 func sync() -> void:
-	visible=enabled and not p.visible
+	visible=enabled and not p.visible and not (is_instance_valid(app.defense_panel) and app.defense_panel.active_ui)
 	var modern: bool=visible and app.campaign_mode
 	app.reference_top.visible=not modern
 	app.reference_bottom.visible=not visible
@@ -90,7 +90,7 @@ func flush_refresh() -> void:
 	if _pending:refresh()
 func refresh() -> void:
 	_pending=false
-	visible=enabled and not p.visible
+	visible=enabled and not p.visible and not (is_instance_valid(app.defense_panel) and app.defense_panel.active_ui)
 	if not visible:return
 	app.reference_bottom.hide()
 	var start: int=Time.get_ticks_usec()
@@ -171,6 +171,9 @@ func build_header() -> void:
 	role.select(["god","steward","watch"].find(p.state.role));role.item_selected.connect(func(i):execute({"kind":"role","role":["god","steward","watch"][i]}));r.add_child(role)
 	r.add_child(button(w("save"),save,"VisualSave"));r.add_child(button(w("load"),load_saved,"VisualLoad"));r.add_child(button(w("menu"),show_overlay.bind("menu"),"VisualMenu"))
 	var controls:=HFlowContainer.new();v.add_child(controls)
+	if is_instance_valid(app.defense_panel):
+		controls.add_child(button(app.defense_panel.w("entry"),app.defense_panel.open,"DefenseEntry"))
+		if p.rules.warfare.active(p.state) or not p.state.get("defense",{}).get("reports",[]).is_empty():controls.add_child(button(app.defense_panel.w("aftermath_title"),app.defense_panel.open_aftermath,"VisualAftermath"))
 	controls.add_child(button(cw("oversight"),show_overlay.bind("oversight"),"VisualOversight"))
 	var civic_title: String=p.rules.lifecycle.stages[p.rules.lifecycle.stage(p.state,p.rules)].title if p.rules.lifecycle.active(p.state) else lw("title")
 	var civic:=button(civic_title,show_overlay.bind("lifecycle"),"VisualLifecycle");civic.tooltip_text=lw("title");controls.add_child(civic)
@@ -187,6 +190,7 @@ func build_header() -> void:
 func project_ids(asset: String) -> Array:
 	var ids: Array=[]
 	for id in p.rules.projects:
+		if p.rules.warfare.forts.projects.has(id) and not p.rules.warfare.active(p.state):continue
 		if p.rules.lifecycle.project_specs.has(id) and (not p.rules.lifecycle.active(p.state) or not p.rules.lifecycle.available(p.state,id)):continue
 		if p.rules.assets.project_assets.get(id,"")!=asset:continue
 		if p.rules.land.active(p.state) and id in p.rules.land.content.legacy_projects and not p.rules.land.committed(p.state,id,p.rules):continue
@@ -294,7 +298,7 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 	if mesh!=null:
 		var model_column:=VBoxContainer.new();top.add_child(model_column)
 		var model=preload("res://src/place_preview.gd").new();model.name="ProjectModel";model_column.add_child(model);model.show_mesh(mesh)
-		paragraph(model_column,d.stage_label if d.queued and preview_stage=="current" else (w("model_future") if has_building_change(id) and preview_stage=="planned" else w("model_current")),12)
+		paragraph(model_column,d.stage_label if d.queued and preview_stage=="current" else (w("model_future") if has_fabric_change(id) and preview_stage=="planned" else w("model_current")),12)
 
 	else:
 		var icon:=Icon.new();icon.kind=project_icon(id);icon.custom_minimum_size=Vector2(125,95);top.add_child(icon)
@@ -308,7 +312,7 @@ func project_detail(body: VBoxContainer,id: String) -> void:
 	paragraph(brief,project_cause(d),15)
 	project_flow(body,d)
 	body.add_child(button(w("visit_site"),visit_project.bind(id),"VisualVisitProject"))
-	if has_building_change(id) or d.queued:
+	if has_fabric_change(id) or d.queued:
 		var stages:=row(body)
 		for stage in ["current","planned"]:
 			var b:=button(w("view_"+stage),func():preview_stage=stage;refresh(),"VisualStage_"+stage);b.disabled=preview_stage==stage;stages.add_child(b)
@@ -596,7 +600,45 @@ func has_building_change(id: String) -> bool:
 		for record in change.after:
 			if record.kind=="building":return true
 	return false
+func boundary_records(id: String) -> Array:
+	var result: Array=[]
+	for change in p.rules.projects[id].changes:
+		for record in change.after:
+			if record.kind=="boundary":result.append(record)
+	return result
+func has_fabric_change(id: String) -> bool:
+	return has_building_change(id) or not boundary_records(id).is_empty()
+func boundary_preview(id: String,records: Array,planned: bool) -> Mesh:
+	if not planned and not p.rules.has_project(p.state,id):return null
+	# Both sides of an authored entrance belong to one preview. Each surface
+	# comes from the production boundary builder, preserving its actual gap.
+	var key: String=id+":boundary:"+str(app.world.get_instance_id())+":"+str(app.world.revision)
+	if planned and preview_meshes.has(key):return preview_meshes[key]
+	var nodes: Array=[]
+	var model
+	if planned:
+		model=preload("res://src/village.gd").new()
+		model.data=app.world.data;model.materials=app.world.materials;model.buildings=app.world.buildings
+		for record in records:
+			model._boundary(record);nodes.append(model.object_nodes[record.id])
+	else:
+		for record in records:
+			if app.world.object_nodes.has(record.id):nodes.append(app.world.object_nodes[record.id])
+	if nodes.size()!=records.size():
+		if model!=null:model.free()
+		return null
+	var combined:=ArrayMesh.new()
+	for node in nodes:
+		var mesh: ArrayMesh=node.mesh
+		for surface in range(mesh.get_surface_count()):
+			combined.add_surface_from_arrays(mesh.surface_get_primitive_type(surface),mesh.surface_get_arrays(surface))
+			combined.surface_set_material(combined.get_surface_count()-1,mesh.surface_get_material(surface))
+	if model!=null:model.free()
+	if planned:preview_meshes[key]=combined
+	return combined
 func preview_mesh(id: String,planned: bool=true) -> Mesh:
+	var boundaries:=boundary_records(id)
+	if not boundaries.is_empty():return boundary_preview(id,boundaries,planned)
 	# Authored future buildings are generated once with the production builder.
 	# Other cards show the current place, explicitly labelled; no imagined upgrade.
 	for change in p.rules.projects[id].changes:
@@ -618,7 +660,7 @@ func preview_mesh(id: String,planned: bool=true) -> Mesh:
 		for object_id in site.objects:
 			if app.world.object_nodes.has(object_id):return app.world.object_nodes[object_id].mesh
 		return null
-	if has_building_change(id) or p.rules.incidents.project_specs.has(id):return null
+	if has_fabric_change(id) or p.rules.incidents.project_specs.has(id):return null
 	var asset: String=p.rules.assets.project_assets.get(id,selected)
 	for object_id in p.rules.assets.assets[asset].objects:
 		if app.world.object_nodes.has(object_id):return app.world.object_nodes[object_id].mesh

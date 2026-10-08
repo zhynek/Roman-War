@@ -75,6 +75,9 @@ func build(body: VBoxContainer) -> void:
 				if person.household==home.id:count+=1
 			var memory: Dictionary=state.households.homes.get(home.id,{"stress":0,"practice":0})
 			body.add_child(panel.label(copy.ui.occupied.format({"home":home.label,"people":count,"capacity":rules.balance.people_per_dwelling,"stress":memory.stress,"practice":memory.practice}),14))
+	if selected in ["watch","homes"] and not panel.app.defense_panel.aftermath_data().is_empty():
+		for line in panel.app.defense_panel.aftermath_summary_lines():body.add_child(panel.label(line,14))
+		body.add_child(panel.button(panel.app.defense_panel.w("aftermath_title"),panel.app.defense_panel.open_aftermath,"AssetAftermath"))
 	for id in asset.orders:standing(body,id,f)
 	for id in asset.projects:
 		if rules.lifecycle.project_specs.has(id) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,id)):continue
@@ -143,6 +146,8 @@ func allocation(body: VBoxContainer,f: Dictionary,asset: String="") -> void:
 	for request in f.assets.requests:
 		if asset!="" and request.asset!=asset:continue
 		var title: String=panel.rules.projects.get(request.id,{}).get("title",panel.living_panel.copy.activities.get(request.id,panel.rules.lifecycle.content.get("strings",{}).get(request.id,copy.ui.jobs.get(request.id,request.id))))
+		if request.id=="warfare_muster":title=panel.rules.warfare.content.ui.muster_heading
+		if request.id=="warfare_care":title=panel.rules.warfare.content.ui.aftermath_care_heading
 		body.add_child(panel.label(copy.ui.request.format({"title":title,"filled":request.filled,"wanted":request.wanted,"priority":request.priority,"reason":copy.ui.get(request.reason,request.reason)}),14))
 	body.add_child(panel.label(copy.ui.allocation_order,13))
 
@@ -220,6 +225,16 @@ func journal(body: VBoxContainer) -> void:
 		var name_: String=panel.rules.person_by_id(panel.state,decision.author).get("name","—")
 		var target: String=panel.rules.projects.get(decision.target,{}).get("title",panel.rules.assets.assets.get(decision.target,{}).get("title",panel.rules.households.orders.get(decision.target,{}).get("label",decision.target)))
 		var detail: String=""
+		var action_: String=copy.ui.decision_actions.get(decision.kind,copy.ui.decision_actions.household_order)
+		if decision.kind=="warfare_muster":action_=panel.rules.warfare.content.ui.muster_heading;detail=panel.rules.warfare.content.ui.muster_current.format({"wanted":decision.details.value})
+		elif decision.kind=="warfare_care":action_=panel.rules.warfare.content.ui.aftermath_care_heading
+		elif decision.kind=="living_order":
+			var key: String={"area":"area_order","prepare":"prepare_order","training":"train"}.get(decision.target,decision.target)
+			target=panel.living_panel.copy.ui.get(key,decision.target)
+			var value: Variant=decision.details.get("value","")
+			if value is bool:detail=panel.living_panel.copy.ui.on if value else panel.living_panel.copy.ui.off
+			elif decision.target=="prepare":detail=panel.living_panel.copy.ui.prepare_options[int(value)]
+			else:detail=panel.rules.living.subjects.get(str(value),{}).get("title",str(value))
 		if decision.kind=="asset_principle":
 			for p in copy.principles:
 				if p.id==decision.target:target=p.label;detail=p.options[int(decision.details.value)]
@@ -227,4 +242,4 @@ func journal(body: VBoxContainer) -> void:
 		elif decision.details.has("crew"):
 			var values: Dictionary=decision.details.duplicate();values.paused=copy.ui.yes if values.paused else copy.ui.no
 			detail=copy.ui.crew_choice.format(values)
-		body.add_child(panel.label(copy.ui.decision.format({"turn":int(decision.turn)+1,"office":panel.copy[decision.office],"name":name_,"action":copy.ui.decision_actions[decision.kind],"target":target,"details":detail}),14))
+		body.add_child(panel.label(copy.ui.decision.format({"turn":int(decision.turn)+1,"office":panel.copy[decision.office],"name":name_,"action":action_,"target":target,"details":detail}),14))

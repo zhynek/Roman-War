@@ -56,11 +56,15 @@ func build(body: VBoxContainer) -> void:
 		toggle.disabled=not rules.permitted(state,order.role);body.add_child(toggle)
 	body.add_child(HSeparator.new())
 	body.add_child(panel.label(copy.ui.households,19))
+	if not panel.app.defense_panel.aftermath_data().is_empty():
+		for line in panel.app.defense_panel.aftermath_summary_lines():body.add_child(panel.label(line,14))
+		body.add_child(panel.button(panel.app.defense_panel.w("aftermath_title"),panel.app.defense_panel.open_aftermath,"HouseholdAftermath"))
 	for id in state.households.homes:
 		var home:Dictionary=state.households.homes[id].duplicate();home.id=id
 		for household in rules.content.households:
 			if household.id==id:home.id=household.label
 		body.add_child(panel.label(copy.ui.memory.format(home),14))
+		for line in panel.app.defense_panel.household_aftermath_lines(id):body.add_child(panel.label(line,14))
 	body.add_child(panel.label(copy.ui.residents,19))
 	var view=panel.app.campaign_view
 	if is_instance_valid(view) and is_instance_valid(view.life):
@@ -77,7 +81,11 @@ func build(body: VBoxContainer) -> void:
 			var params:Dictionary=routine.duplicate()
 			params.activity=panel.living_panel.copy.activities.get(routine.activity,copy.presentation.activity_labels.get(routine.activity,routine.activity))
 			params.reason=copy.presentation.reason_labels.get(routine.reason,routine.reason)
+			if routine.activity=="battle_recovery":
+				params.activity=panel.app.defense_panel.w("aftermath_rest")
+				params.reason=panel.app.defense_panel.w("aftermath_recovering").format({"remaining":state.get("defense",{}).get("recovery",{}).get(routine.id,0)})
 			body.add_child(panel.label(copy.ui.routine.format(params),16))
+			for line in panel.app.defense_panel.person_aftermath_lines(routine.id):body.add_child(panel.label(line,15))
 			var incident: Dictionary=rules.incidents.current(state)
 			if not incident.is_empty() and routine.household in rules.incidents.specs[incident.id].subjects:body.add_child(panel.button(panel.incident_panel.copy.ui.inspect,func():panel.incident_panel.inspect(routine.household),"ResidentIncident"))
 			if rules.living.active(state):

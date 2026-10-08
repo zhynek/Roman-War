@@ -74,7 +74,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 	var incident_visual: Array=[]
 	if rules.incidents.active(state):
 		for e in state.incidents.records:incident_visual.append([e.id,rules.incidents.phase(state,e),rules.has_project(state,rules.incidents.specs[e.id].prepare)])
-	var life_visual: Array=[state.living.get("blanks",0),state.living.get("kits",0),rules.has_project(state,"living_shared_room"),hash(world.solids),mini(6,int(state.wood)/10) if rules.living.active(state) else 0]
+	var life_visual: Array=[state.living.get("blanks",0),state.living.get("kits",0),rules.has_project(state,"living_shared_room"),hash(world.solids),mini(6,int(state.wood)/10) if rules.living.active(state) else 0,state.get("defense",{}).get("recovery",{})]
 	var fingerprint: String=JSON.stringify([incident_visual,life_visual,world.revision,hash(world.solids),tasks,state.citizens,state.households.homes,stage,orders,ready,supply,bands,allocation_.get("repair",""),int(state.food)<rules.people(state).size()])
 	if fingerprint==_signature:
 		last_refresh_profile={"unchanged":true};return
@@ -120,6 +120,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		var person: Dictionary=people[i]
 		var child: bool=person.age<rules.balance.adult_age
 		var infant: bool=person.age<12
+		var recovering: bool=rules.defense.unavailable(state,person.id)
 		var home_id: String=person.household
 		var home_number: int=int(count_by_home.get(home_id,0))
 		count_by_home[home_id]=home_number+1
@@ -134,7 +135,9 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		var carry: bool=false
 		var tense: bool=stage in ["warning","danger"]
 		var home_data: Dictionary=state.households.homes.get(home_id,{"stress":0,"practice":0})
-		if child:
+		if recovering:
+			job="rest";target_id="home_"+home_id;activity="battle_recovery";pose="sit";carry=false
+		elif child:
 			if tense and ready.refuge and home_id!="sim_household_01" and refuge_guests<1:
 				target_id="household_home";activity="refuge_care";reason=stage;refuge_guests+=1
 			elif ready.learning and workshop_children<1 and stage in ["recovery","renewal","settled"] and i%4==0:
@@ -202,7 +205,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 
 		var destination_building: String=target_building if _inside_building(destination,target_building) else ""
 		var route_start: int=Time.get_ticks_usec()
-		var route: Array=[destination] if infant else _journey(origin,destination,str(stations[home_station].building),destination_building)
+		var route: Array=[destination] if infant or recovering else _journey(origin,destination,str(stations[home_station].building),destination_building)
 		if route.is_empty():
 			unreachable.append(person.id)
 			route=[origin]
@@ -214,7 +217,7 @@ func refresh(state: Dictionary, rules, scene_world) -> void:
 		if rules.living.active(state) and not child and job=="timber":
 			var tool:=MeshInstance3D.new();var shape:=BoxMesh.new();shape.size=Vector3(.055,.45,.05);tool.mesh=shape;tool.material_override=_materials.get("skin");tool.position=Vector3(.25,.86,.22);node.add_child(tool)
 			var head:=MeshInstance3D.new();var stone:=BoxMesh.new();stone.size=Vector3(.18,.09,.07);head.mesh=stone;head.material_override=world.materials.stone;head.position=Vector3(.29,1.06,.22);node.add_child(head)
-		var begin_at_goal: bool=child or i%3!=1
+		var begin_at_goal: bool=child or recovering or i%3!=1
 		var departure_index: int=mini(2,route.size()-1)
 		node.position=route[-1] if begin_at_goal else route[departure_index]
 		node.rotation.y=goal_facing if begin_at_goal else _station_facing(origin,str(stations[home_station].building))

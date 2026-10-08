@@ -1399,5 +1399,647 @@
         -37
       ]
     }
-  ]
+  ],
+  "defense": {
+    "profile": "village_defense_v1",
+    "scenario": "stores_at_dawn",
+    "title": "Defend the village",
+    "subtitle": "The stores at dawn",
+    "evidence": "Fictional gameplay encounter. The raiders, tactics and injuries are authored; this is not an archaeological claim. Only the existing hypothetical wooden watch kits are used. No bows, metal weapons or army are introduced.",
+    "bounds": [
+      -7000,
+      -8000,
+      125,
+      135
+    ],
+    "places": [
+      {
+        "id": "stores",
+        "title": "Shared stores",
+        "at": [
+          -3,
+          31
+        ]
+      },
+      {
+        "id": "north",
+        "title": "Northern approach",
+        "at": [
+          15,
+          -37
+        ]
+      },
+      {
+        "id": "landing",
+        "title": "Landing approach",
+        "at": [
+          30,
+          12
+        ]
+      },
+      {
+        "id": "refuge",
+        "title": "Household refuge",
+        "at": [
+          -30,
+          16
+        ]
+      }
+    ],
+    "enemy_origins": [
+      [
+        22,
+        -56
+      ],
+      [
+        30,
+        -53
+      ]
+    ],
+    "deployment": [
+      22,
+      -10
+    ],
+    "ui": {
+      "entry": "Defend the village",
+      "practice": "Practice on a copy",
+      "mobilize": "Mobilize home watch",
+      "start": "Begin encounter",
+      "return": "Return to village life",
+      "cancel": "Back to preparations",
+      "pause": "Pause / resume · Space",
+      "speed": "Speed 1× / 2×",
+      "save": "Save battle",
+      "load": "Resume saved battle",
+      "overhead": "Overhead · 0",
+      "close": "Close view · V",
+      "select": "Select all · Ctrl+A",
+      "withdraw_all": "Withdraw everyone",
+      "finish": "Accept report & return",
+      "prepare": "Prepare the watch",
+      "brief": "Two small raiding groups approach from the north and seek the shared stores. Keep them away until they withdraw. Losing the stores or withdrawing costs supplies. Incapacitated defenders need care afterward. There are no civilian combat groups.",
+      "guide": "1  Review your named home-watch adults and equipment.\n2  Deploy on clear ground; face the approach.\n3  Begin, then defend the stores or intercept together.\n4  Read the report, return, and recover through ordinary care and kit repair.",
+      "controls": "Click or drag to select · Shift adds · Right-click orders · M Move · A Advance · T Attack · H Hold · D Defend · R Withdraw · F Face · Space pause · Wheel zoom · Middle drag pan · 0 overhead · V close",
+      "prep_hint": "Only adults on home watch or watch practice can mobilize. Carriers, escorts, care, civic and project crews keep their commitments. Change standing watch priorities in Village before mobilizing. No season can pass during a battle.",
+      "kit_hint": "Preparation uses the existing chain: prepare wood in the working room, build the watch shelter, then commission wooden watch kits. Training and repair each need their own adult. These remain ordinary paid seasonal projects.",
+      "cost": "Mobilization: {food} provisions · {count} adults · {kits} wooden kits · readiness {readiness}/4. Existing watch facilities: {posts}.",
+      "roster": "{name} · {duty} · {kit}",
+      "equipped": "wooden watch kit",
+      "unarmed": "unequipped",
+      "preparation": "PREPARATION",
+      "deployment": "DEPLOYMENT · paused",
+      "fighting": "LIVE DEFENSE",
+      "ended": "ENCOUNTER ENDED",
+      "practice_note": "PRACTICE · a detached copy; village and saves stay unchanged",
+      "status": "{phase} · {time}s · Stores occupied {capture}/{limit}s · {speed}× {paused}",
+      "paused": "PAUSED",
+      "running": "RUNNING",
+      "group": "Watch {n}",
+      "enemy": "Observed raiders",
+      "unknown": "Unseen approach",
+      "group_line": "{name}   {strength}/{total} standing · morale {morale} · {order}",
+      "report": "{outcome}\n{reason}\nDefenders incapacitated: {wounded}. Wooden kits lost: {kits}.\nSupplies protected: {protected}; lost: {lost}; mobilization spent: {cost}.",
+      "recovery": "Recovery: wounded adults leave the available workforce for two fed seasons with at least two care workers. Use Village to protect food and care; kit upkeep consumes the existing prepared sets, timber and repair adult. Paid projects, homes and household history remain.",
+      "saved": "Battle saved, paused. Resume when ready.",
+      "loaded": "Saved battle restored.",
+      "invalid_save": "No compatible battle save in this slot.",
+      "no_defenders": "Assign at least one available adult to home watch first.",
+      "funds": "Insufficient provisions to mobilize.",
+      "completed": "This encounter has already been resolved. Practice remains available.",
+      "authority": "God or the watch leader must authorize mobilization.",
+      "blocked": "Finish the unresolved village defense before changing work or advancing seasons.",
+      "bad_order": "That order has no reachable destination. Choose clear ground.",
+      "waiting": "Choose a command, then right-click the ground or an observed enemy.",
+      "selected_order": "{order}: right-click a destination; Attack needs an observed enemy.",
+      "practice_save": "Practice uses a detached copy and does not write your village slot.",
+      "victory": "Village defended",
+      "defeat": "Stores lost",
+      "withdrawal": "Watch withdrawn",
+      "stalemate": "Encounter dispersed",
+      "enemy_routed": "The raiders lost the will to continue and withdrew.",
+      "stores_taken": "The raiders held the stores long enough to take supplies.",
+      "watch_lost": "No defenders remain able to contest the stores.",
+      "withdrawn": "All defenders reached withdrawal or were forced out.",
+      "time_limit": "The encounter reached its time limit; scattered raiders dispersed.",
+      "unreachable": "Neither force could make progress; the encounter dispersed.",
+      "order_move": "Move",
+      "order_attack": "Attack enemy",
+      "order_advance": "Advance & engage",
+      "order_hold": "Hold position",
+      "order_defend": "Defend place",
+      "order_withdraw": "Withdraw",
+      "order_face": "Face direction",
+      "routed": "WITHDRAWING",
+      "injured": "INCAPACITATED",
+      "preparedness": "Watch preparation & village work",
+      "costs": "Preparation costs: watch shelter {shelter_wood} timber / {shelter_work} work; kits {kit_wood} timber + {blanks} prepared sets / {kit_work} work. Basic preparation uses {prepare_wood} timber and one adult each season.",
+      "prep_prepare": "Prepare material each season",
+      "prep_shelter": "Commission watch shelter",
+      "prep_kits": "Commission wooden kits",
+      "prep_training": "Toggle watch training",
+      "prep_season": "Resolve preparation season",
+      "watch_duty": "Home watch",
+      "training_duty": "Watch practice",
+      "recovery_names": "Recovering residents: {names}",
+      "last_report": "Last encounter: {outcome} · {lost} supplies lost · {wounded} incapacitated.",
+      "living_missing": "This village must explicitly adopt Asset governance, Land planning and Living village through the existing management chapters before mobilizing.",
+      "objective": "PROTECT THE STORES",
+      "progress": "Stores occupied {capture}/{limit}s",
+      "battle_not_saved": "The battle could not be saved. The encounter remains paused.",
+      "live_rules": "Seasons and workforce changes wait until this encounter is resolved.",
+      "place_stores": "Shared stores",
+      "place_north": "Northern approach",
+      "place_landing": "Landing approach",
+      "place_refuge": "Household refuge",
+      "command_budget": "The order limit is reached. You can still start, pause, resume, save, or withdraw. Finish this encounter to return to village life."
+    }
+  },
+  "warfare": {
+    "profile": "village_warfare_v1",
+    "ui": {
+      "adopt": "Enable village warfare",
+      "adoption": "Explicitly adopt tactical movement, fatigue and formation rules for future battles. Your residents, paid work, equipment and previous reports remain. An unfinished older battle keeps its original rules until accepted.",
+      "adopted": "Village warfare enabled. Preparing or viewing does not advance the battle.",
+      "order_width": "Formation width",
+      "column": "Column · narrow",
+      "spread": "Spread · wide",
+      "blocked_destination": "That destination intersects a building or obstacle. Choose open ground.",
+      "unreachable_destination": "No clear route reaches that destination from every selected group.",
+      "no_formation_room": "The selected formation has no room there. Use a column or a wider position.",
+      "target_not_visible": "The target is no longer visible. Advance to its last known position or choose a visible enemy.",
+      "invalid_width": "Choose a column or a spread formation.",
+      "invalid_facing": "Choose a different point to face.",
+      "engaged": "Engaged",
+      "blocked": "Waiting for space",
+      "fatigue": "Fatigue",
+      "morale": "Morale",
+      "tactical_line": "{name}: {order} · morale {morale} · fatigue {fatigue} · {width}\n{state}",
+      "group_ready": "Position ready",
+      "group_moving": "Moving",
+      "order_detail": "Selected order: {order}. Right-click the destination; Space pauses for orders.",
+      "width_hint": "Column fits narrow routes. Spread gives the residents room on open ground. Congested groups queue and seek another clear route.",
+      "old_battle": "Finish and accept the older battle before enabling new warfare rules.",
+      "tactical_congestion": "Waiting for a clear gap",
+      "tactical_no_route": "Route blocked: choose another destination",
+      "tactical_target_lost": "Target lost: searching the last known position",
+      "tactical_formation_narrow": "Narrow passage: forming a column",
+      "tactical_exhausted": "Exhausted: hold safely to recover",
+      "enemy_short": "Raiders",
+      "tactical_factors": "Watch aptitude {skill} · training {training}/4 · serviceable kits {kits}\nNearby {friends} allies / {enemies} enemies · protection {cover}% · ground pace {ground}%",
+      "factor_note": "Fatigue lowers pace and striking power. Front-facing holds and prepared positions reduce incoming damage. Local support steadies morale; flank or rear exposure increases danger.",
+      "fortifications": "Village defenses and plans",
+      "fortification_cost": "Materials: {wood} timber · total work {work}\nProject progress {progress}/{work} · allocated adults {crew} · next season {next} work",
+      "fortification_weakness": "Open entrances preserve village access. Raiders can go through the gap or around either end. A screen cannot defend itself.",
+      "fortification_staffing": "Use actual home-watch residents to Hold or Defend the inner stand. No new defenders are granted.",
+      "fortification_upkeep": "Uses existing watch maintenance: timber and a repair adult compete with food, care and construction. Poor watch condition removes prepared-position protection.",
+      "fortification_ready": "Completed and maintained: the marked inner stand provides protection while holding or defending.",
+      "fortification_worn": "Watch condition is too poor for prepared-position protection. Restore ordinary watch maintenance.",
+      "fortification_unbuilt": "The plan marks clear ground. Its screen provides no protection until the paid project is complete.",
+      "warfare_missing": "Enable village warfare before commissioning these defenses.",
+      "defense_plan": "Saved defense plan",
+      "plan_assembly": "Assembly",
+      "plan_approach": "Defended approach",
+      "plan_important": "Important place",
+      "plan_reserve": "Reserve",
+      "plan_fallback": "Fallback",
+      "plan_hint": "Choose named clear ground for assembly, the threatened approach, the place to protect, reserves and fallback. Plans persist; they grant no buildings, equipment or workers.",
+      "plan_saved": "Defense plan saved. Review actual positions during deployment.",
+      "plan_invalid": "Choose an available named planning position.",
+      "plan_battle_locked": "Finish the unresolved battle before changing the village defense plan.",
+      "save_preparation": "Save village & plans",
+      "load_preparation": "Load village & plans",
+      "saved_preparation": "Village, preparations and defense plan saved.",
+      "command_personally": "Command personally",
+      "delegate_battle": "Delegate command",
+      "resolve_quickly": "Resolve quickly",
+      "take_command": "Take command",
+      "handoff_command": "Hand off command",
+      "cancel_quick": "Stop & pause",
+      "quick_progress": "Resolving · {ticks}/{limit} ticks · {seconds}s elapsed",
+      "quick_hint": "The same orders and battle rules run in batches. Stop & pause keeps the current fight ready to command, save or resume.",
+      "quick_done": "Quick resolution took {seconds}s.",
+      "mode_direct": "PERSONAL COMMAND",
+      "mode_delegated": "DELEGATED COMMAND",
+      "modes_brief": "Command personally deploys the watch and waits for you. Delegated command lets the watch leader issue valid orders. Quick resolution runs that same fight in batches.",
+      "delegated_notice": "The watch leader is issuing orders. Take command to give spatial orders.",
+      "readiness_skills": "Resident watch skill {low}–{high}/{maximum} · leader present: {leader}",
+      "leader_absent": "no",
+      "preparation_advantages": "Paid defenses shape routes. Maintained screens protect their inner stands. Fatigue, facing, morale, training and equipment affect the same fight in every mode.",
+      "threat_enable": "Enable recurring threats",
+      "threat_intro": "Enable a bounded cycle of store raids, landing thefts and northern probes. Each warning leaves two full seasons to prepare. At least eight quiet seasons follow an accepted battle, with further delay during recovery or shortages.",
+      "threat_quiet": "The next possible warning is season {turn}. Life and paid work continue normally.",
+      "threat_warning": "Warning: {title}. Prepare until season {turn}.",
+      "threat_ready": "The threat has reached the village. Prepare your watch, then choose personal command, delegated command or quick resolution. Resolve the encounter before advancing another season.",
+      "threat_contact": "A friendly community with completed trade or aid gave an extra season of warning. This does not identify the raiders.",
+      "threat_unknown": "The objective is an assessment from the approach. Enemy equipment, morale and losses are known only when observed; no numerical odds are promised.",
+      "threat_recovery": "Further threats wait while injured participants recover. Staff ordinary care and keep food available.",
+      "threat_incident": "Further threats wait while a known local incident needs preparation or recovery.",
+      "threat_food": "Further threats wait until reserves cover mobilization and two seasons of food for recovery.",
+      "threat_watch": "Further threats wait until at least one resident is available for watch duty.",
+      "threat_horizon": "There is not enough time left in this village chapter for a full warning and encounter.",
+      "threat_started": "Recurring threats are already enabled.",
+      "objective_held": "The raiders held their objective long enough to complete the attempt.",
+      "supplies_escaped": "The carriers escaped with supplies from the landing.",
+      "supplies_recovered": "The watch stopped the carriers and recovered the supplies.",
+      "deadline_held": "The attackers abandoned their objective after the watch held out.",
+      "threat_not_ready": "Prepare through the warning seasons before mobilizing; resolve any recovery or reserve shortage shown above.",
+      "warfare_guide": "Review the named watch and paid preparations. Deploy on clear ground, then protect the threatened place or intercept together. Read the outcome and restore care, food and equipment afterward.",
+      "objective_status": "{phase} · {time}s · {objective} {capture}/{limit}s · {speed}× {paused}",
+      "objective_occupy": "Store occupation",
+      "objective_snatch": "Landing access",
+      "objective_probe": "Northern approach",
+      "objective_carrying": "Supplies seized · intercept the withdrawing raiders",
+      "objective_secured": "Objective resolved",
+      "defeat": "Objective lost",
+      "victory": "Defense held",
+      "muster_heading": "Additional home watch",
+      "muster_title": "Additional home watch",
+      "muster_hint": "Extra watch uses named adults and competes with paid construction, timber work and reserve building. Essential food, care and existing obligations remain assigned first. Requested residents become available only when the workforce can spare them; no people or equipment are granted.",
+      "muster_current": "Additional residents requested: {wanted}",
+      "muster_status": "Additional watch requested: {requested} · assigned: {filled}",
+      "muster_off": "No additional watch",
+      "muster_two": "Request 2 residents",
+      "muster_four": "Request 4 residents",
+      "muster_saved": "Additional watch request saved. The workforce forecast shows who can be spared.",
+      "threat_enabled": "Repeatable threats enabled. Quiet seasons and warning time come before the first encounter.",
+      "aftermath_title": "Battle aftermath",
+      "aftermath_intro": "Named residents, household recovery and equipment after each encounter.",
+      "aftermath_boundary": "Incapacitated residents recover through food and care. This chapter does not cause permanent combat deaths.",
+      "aftermath_empty": "No accepted battle reports yet.",
+      "aftermath_care_on": "Assign extra treatment care",
+      "aftermath_care_off": "Release treatment workers",
+      "aftermath_release_watch": "Release additional watch",
+      "aftermath_equipment": "Watch equipment condition: {condition}/100 · serviceable sets: {kits}",
+      "aftermath_care": "Treatment workers: {filled}/{wanted} · recovering residents: {patients}",
+      "aftermath_prepare": "Prepare repair materials",
+      "aftermath_repair_on": "Enable ordinary kit repair",
+      "aftermath_repair_off": "Pause ordinary kit repair",
+      "aftermath_recovery_route": "Keep food available, assign treatment care, prepare wooden sets and enable kit repair. Releasing additional watch frees residents for ordinary work.",
+      "aftermath_repair_state": "Prepared sets: {blanks} · kit repair: {state}",
+      "aftermath_record": "Season {turn} · {title} · {outcome}",
+      "aftermath_person": "{name} · {household}",
+      "aftermath_recovering": "Recovering: {remaining} fed treatment seasons remain",
+      "aftermath_ready": "Available for ordinary work",
+      "aftermath_participation": "{battles} battles · watch experience {xp}",
+      "aftermath_care_enabled": "enabled",
+      "aftermath_care_disabled": "disabled",
+      "aftermath_experience_rule": "Only residents whose formation struck or was hit gain experience. Each {step} engaged encounters add one watch skill point, up to the tactical skill limit.",
+      "aftermath_equipment_rule": "Condition describes the existing serviceable kit pool. Repair uses ordinary materials and workers, restores {gain} condition and replaces a missing set when space is available. No equipment is granted by accepting an outcome.",
+      "aftermath_care_rule": "Each allocated treatment worker can help {patients} residents in a fed season. Treatment shares the same finite workforce as food, building and watch duties.",
+      "aftermath_injury_none": "No lasting injury",
+      "aftermath_injury_wounded": "Recoverable wound",
+      "aftermath_injury_incapacitated": "Incapacitated; recoverable",
+      "aftermath_command_blocked": "Resolve the current battle before changing recovery work.",
+      "aftermath_pending": "Consequences awaiting acceptance",
+      "aftermath_result": "{injury} · recovery after this encounter: {recovery} treatment seasons · +{experience} watch experience",
+      "aftermath_engaged": "Fought at close quarters",
+      "aftermath_not_engaged": "Participated without close combat",
+      "aftermath_equipped": "Carried a watch kit",
+      "aftermath_unequipped": "No watch kit assigned",
+      "aftermath_stress": "Added household strain: {stress}",
+      "aftermath_kit_report": "Equipment condition: {before} → {after}/100 · battle wear: {wear}",
+      "aftermath_household": "Household strain: {stress}",
+      "aftermath_fed": "Food reserves cover this season.",
+      "aftermath_unfed": "Food is short: treatment cannot advance this season.",
+      "aftermath_care_short": "Treatment places this season: {capacity} for {patients} recovering residents.",
+      "aftermath_history": "Encounter records",
+      "aftermath_roster": "Residents and recovery",
+      "aftermath_open_work": "Open ordinary village work",
+      "aftermath_readiness": "Preparation and defense plans",
+      "aftermath_newer": "Newer encounters",
+      "aftermath_older": "Older encounters",
+      "aftermath_page": "Showing {shown} of {total} accepted encounters",
+      "aftermath_rest": "Recovering at home",
+      "aftermath_care_heading": "Treatment care",
+      "report": "{outcome}\n{reason}\nResidents needing recovery: {wounded}. Wooden kits lost: {kits}.\nSupplies protected: {protected}; lost: {lost}; mobilization spent: {cost}.",
+      "aftermath_inactive": "No longer in the active village workforce; their record remains.",
+      "last_report": "Last encounter: {outcome} · {lost} supplies lost · {wounded} needing recovery."
+    },
+    "fortifications": {
+      "projects": [
+        {
+          "id": "warfare_store_screen",
+          "tuning": "warfare_store_screen",
+          "title": "Screen the store approach",
+          "body": "Direct eastern approaches around two low woven sections. A maintained screen protects a watch group holding or defending the inner stand beside its open entrance. The entrance stays open for ordinary village work. Raiders can use the gap or go around either end; this is not an enclosing wall. Existing home-watch residents must hold the position. Watch maintenance uses ordinary timber and repair labor; poor watch condition removes the prepared-position benefit. These screens are fictional preparations, not an excavated defensive plan.",
+          "role": "watch",
+          "asset": "watch",
+          "at": [
+            9,
+            31
+          ],
+          "requires": [
+            "watch_shelter"
+          ],
+          "changes": [
+            {
+              "kind": "added",
+              "before": [],
+              "after": [
+                {
+                  "id": "warfare_store_screen_north",
+                  "kind": "boundary",
+                  "revision": 1,
+                  "change": {
+                    "kind": "added",
+                    "predecessors": []
+                  },
+                  "evidence": "interpretation",
+                  "source_ids": [
+                    "ozdogan_marmara"
+                  ],
+                  "label": "Screen the store approach — north section",
+                  "points": [
+                    [
+                      6,
+                      20
+                    ],
+                    [
+                      6,
+                      27
+                    ]
+                  ],
+                  "width": 0.14
+                }
+              ]
+            },
+            {
+              "kind": "added",
+              "before": [],
+              "after": [
+                {
+                  "id": "warfare_store_screen_south",
+                  "kind": "boundary",
+                  "revision": 1,
+                  "change": {
+                    "kind": "added",
+                    "predecessors": []
+                  },
+                  "evidence": "interpretation",
+                  "source_ids": [
+                    "ozdogan_marmara"
+                  ],
+                  "label": "Screen the store approach — south section",
+                  "points": [
+                    [
+                      6,
+                      34
+                    ],
+                    [
+                      6,
+                      40
+                    ]
+                  ],
+                  "width": 0.14
+                }
+              ]
+            }
+          ],
+          "presentation": {
+            "treatment": "screen",
+            "benefit": "Direct eastern approaches around two low woven sections. A maintained screen protects a watch group holding or defending the inner stand beside its open entrance."
+          }
+        },
+        {
+          "id": "warfare_landing_screen",
+          "tuning": "warfare_landing_screen",
+          "title": "Screen the landing approach",
+          "body": "Direct the waterside approach through an open entrance beside the existing yard path. A maintained screen protects a watch group holding or defending the inner landing stand. The entrance stays open for ordinary village work. Raiders can use the gap or go around either end; this is not an enclosing wall. Existing home-watch residents must hold the position. Watch maintenance uses ordinary timber and repair labor; poor watch condition removes the prepared-position benefit. These screens are fictional preparations, not an excavated defensive plan.",
+          "role": "watch",
+          "asset": "watch",
+          "at": [
+            29,
+            9
+          ],
+          "requires": [
+            "watch_shelter"
+          ],
+          "changes": [
+            {
+              "kind": "added",
+              "before": [],
+              "after": [
+                {
+                  "id": "warfare_landing_screen_north",
+                  "kind": "boundary",
+                  "revision": 1,
+                  "change": {
+                    "kind": "added",
+                    "predecessors": []
+                  },
+                  "evidence": "interpretation",
+                  "source_ids": [
+                    "ozdogan_marmara"
+                  ],
+                  "label": "Screen the landing approach — north section",
+                  "points": [
+                    [
+                      26,
+                      5
+                    ],
+                    [
+                      26,
+                      12
+                    ]
+                  ],
+                  "width": 0.14
+                }
+              ]
+            },
+            {
+              "kind": "added",
+              "before": [],
+              "after": [
+                {
+                  "id": "warfare_landing_screen_south",
+                  "kind": "boundary",
+                  "revision": 1,
+                  "change": {
+                    "kind": "added",
+                    "predecessors": []
+                  },
+                  "evidence": "interpretation",
+                  "source_ids": [
+                    "ozdogan_marmara"
+                  ],
+                  "label": "Screen the landing approach — south section",
+                  "points": [
+                    [
+                      26,
+                      20
+                    ],
+                    [
+                      26,
+                      27
+                    ]
+                  ],
+                  "width": 0.14
+                }
+              ]
+            }
+          ],
+          "presentation": {
+            "treatment": "screen",
+            "benefit": "Direct the waterside approach through an open entrance beside the existing yard path. A maintained screen protects a watch group holding or defending the inner landing stand."
+          }
+        }
+      ],
+      "positions": [
+        {
+          "id": "watch_assembly",
+          "title": "Watch assembly",
+          "at": [
+            22,
+            -10
+          ]
+        },
+        {
+          "id": "stores",
+          "title": "Shared stores",
+          "at": [
+            -3,
+            31
+          ]
+        },
+        {
+          "id": "north",
+          "title": "Northern approach",
+          "at": [
+            15,
+            -37
+          ]
+        },
+        {
+          "id": "landing",
+          "title": "Landing approach",
+          "at": [
+            30,
+            12
+          ]
+        },
+        {
+          "id": "refuge",
+          "title": "Household refuge",
+          "at": [
+            -30,
+            16
+          ]
+        },
+        {
+          "id": "store_gate",
+          "title": "Store screen entrance",
+          "at": [
+            6,
+            31
+          ]
+        },
+        {
+          "id": "store_stand",
+          "title": "Inner store stand",
+          "at": [
+            3,
+            31
+          ]
+        },
+        {
+          "id": "landing_gate",
+          "title": "Landing screen entrance",
+          "at": [
+            26,
+            16
+          ]
+        },
+        {
+          "id": "landing_stand",
+          "title": "Inner landing stand",
+          "at": [
+            29,
+            16
+          ]
+        }
+      ],
+      "slots": {
+        "assembly": "watch_assembly",
+        "approach": "north",
+        "important": "stores",
+        "reserve": "refuge",
+        "fallback": "refuge"
+      },
+      "defenses": [
+        {
+          "project": "warfare_store_screen",
+          "position": "store_stand"
+        },
+        {
+          "project": "warfare_landing_screen",
+          "position": "landing_stand"
+        }
+      ],
+      "evidence": "Original hypothetical village preparation using the existing low woven-screen vocabulary. Location, military purpose and battle effects are gameplay interpretation, not archaeological claims. No Roman fortification, gatehouse, metalwork or enclosing wall is introduced."
+    },
+    "threats": {
+      "encounters": [
+        {
+          "id": "stores",
+          "kind": "occupy",
+          "place": "stores",
+          "origins": [
+            [
+              40,
+              30
+            ],
+            [
+              40,
+              36
+            ]
+          ],
+          "title": "A raid on the stores",
+          "brief": "People approach the store yard from the eastern paths. They appear intent on holding the stores long enough to seize food.",
+          "stakes": "Keep them away from the stores. An uncontested occupation can cost up to 16 food; defending the yard, forcing retreat or holding until they abandon the attempt protects it."
+        },
+        {
+          "id": "landing",
+          "kind": "snatch",
+          "place": "landing",
+          "origins": [
+            [
+              40,
+              4
+            ],
+            [
+              40,
+              22
+            ]
+          ],
+          "title": "A theft at the landing",
+          "brief": "A small raiding party approaches the landing. They may try to grab supplies and escape along their arrival route.",
+          "stakes": "Protect the landing or stop the carriers before they leave. Escaping carriers can take up to 12 food; recovering the supplies protects the village reserve."
+        },
+        {
+          "id": "probe",
+          "kind": "probe",
+          "place": "north",
+          "origins": [
+            [
+              8,
+              -45
+            ],
+            [
+              22,
+              -45
+            ]
+          ],
+          "title": "A probe of the northern approach",
+          "brief": "Armed strangers test the northern approach. Their purpose appears to be reaching the approach and assessing the watch.",
+          "stakes": "Deny the northern approach or force them to give up. This probe takes no stored food; injuries and damaged equipment still need care."
+        }
+      ],
+      "evidence": "Original hypothetical encounter configurations for play, not reconstructed historical raids. Approaches use authored village ground; contact reports do not identify raider affiliation."
+    },
+    "aftermath": {
+      "profile": "village_aftermath_v1",
+      "evidence": "Original hypothetical gameplay consequences, not a reconstruction of specific wounds, medical treatments or household responses. Injuries are abstract recoverable conditions; equipment condition represents the existing serviceable kit pool.",
+      "boundary": "Combat cannot permanently kill or delete residents. Incapacitated people remain in their lifecycle, households and history and recover with food and allocated care."
+    }
+  }
 }

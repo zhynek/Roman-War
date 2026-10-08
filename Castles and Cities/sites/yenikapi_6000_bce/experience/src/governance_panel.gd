@@ -94,6 +94,8 @@ func dispatch(action: Dictionary) -> bool:
 	state=result.state
 	if action.kind.begins_with("lifecycle_") or action.kind.begins_with("incident_") or action.kind.begins_with("living_") or action.kind.begins_with("land_"):
 		last_message=""
+	elif action.kind.begins_with("warfare_"):
+		last_message=rules.warfare.content.ui.get("adopted" if action.kind=="warfare_begin" else "care_saved" if action.kind=="warfare_care" else "muster_saved" if action.kind=="warfare_muster" else "threat_enabled" if action.kind=="warfare_threats" else "plan_saved","")
 	elif action.kind.begins_with("asset_"):
 		last_message=asset_panel.copy.ui.checked if action.kind=="asset_review" else ""
 	elif action.kind.begins_with("household_"):
@@ -107,6 +109,8 @@ func dispatch(action: Dictionary) -> bool:
 	return true
 
 func reason(error: String) -> String:
+	if rules.warfare.content.get("ui",{}).has(error):return rules.warfare.content.ui[error]
+	if rules.defense.content.get("ui",{}).has(error):return rules.defense.content.ui[error]
 	if lifecycle_copy.get("errors",{}).has(error):return lifecycle_copy.errors[error]
 	if living_panel.copy.errors.has(error):return living_panel.copy.errors[error]
 	if error.begins_with("asset_") or error.begins_with("land_"):return asset_panel.reason(error)
@@ -135,6 +139,7 @@ func resolve_season() -> bool:
 	return true
 
 func save_campaign() -> bool:
+	if is_instance_valid(app.defense_panel) and app.defense_panel.host!=null:return app.defense_panel.save_battle()
 	var ok: bool=not state.is_empty() and Saves.write(save_path,state,rules)
 	last_message=copy.saved if ok else copy.save_failed
 	refresh()

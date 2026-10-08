@@ -1648,6 +1648,812 @@
         "preparation_places",
         "spoil_reduction"
       ]
+    },
+    "defense": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tick_ms",
+        "cell_cm",
+        "radius_cm",
+        "step_cm",
+        "withdraw_step_cm",
+        "range_cm",
+        "acquire_cm",
+        "defend_cm",
+        "repath_ticks",
+        "hp_per_person",
+        "attack_ticks",
+        "damage",
+        "kit_damage",
+        "readiness_damage",
+        "hold_percent",
+        "rear_percent",
+        "morale_loss",
+        "route_morale",
+        "capture_radius_cm",
+        "capture_ticks",
+        "limit_ticks",
+        "idle_ticks",
+        "rations_per_person",
+        "supply_loss",
+        "recovery_seasons",
+        "care_workers",
+        "group_size",
+        "maximum_defenders",
+        "enemy_people",
+        "enemy_damage",
+        "enemy_morale",
+        "post_morale",
+        "rout_ticks",
+        "morale_damage_divisor",
+        "deployment_depth_cm",
+        "group_spacing_cm",
+        "reveal_cm"
+      ],
+      "properties": {
+        "tick_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "cell_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "radius_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "step_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "withdraw_step_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "range_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "acquire_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "defend_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "repath_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "hp_per_person": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "attack_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "damage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "kit_damage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "readiness_damage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "hold_percent": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "rear_percent": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "morale_loss": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "route_morale": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "capture_radius_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "capture_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "limit_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "idle_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "rations_per_person": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "supply_loss": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "recovery_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "care_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "group_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "maximum_defenders": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "enemy_people": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "enemy_damage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "enemy_morale": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "post_morale": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "rout_ticks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "morale_damage_divisor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "deployment_depth_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "group_spacing_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "reveal_cm": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        }
+      }
+    },
+    "warfare": {
+      "type": "object",
+      "properties": {
+        "tactics": {
+          "type": "object",
+          "properties": {
+            "spacing_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "wide_extra_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "slot_radius_cells": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "contact_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "turn_degrees": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "front_dot": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "side_attack_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "wide_front_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_period_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_move": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_attack": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_rest_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_rest": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_speed_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "fatigue_damage_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "support_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "outnumber_morale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "support_morale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "leadership_morale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "skill_damage": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "morale_rest_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "morale_rest": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "morale_rest_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "blocked_repath_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "yield_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "yield_radius_cells": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "enemy_retreat_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "enemy_objective_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "terrain_min_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "cover_min_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "edge_cover_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "max_skill": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "max_leadership": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "maximum_stat": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "vector_scale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "person_spacing_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "person_radius_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "director_decision_ticks": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "director_retreat_morale": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "director_retreat_fatigue": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "carrier_speed_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "spacing_cm",
+            "wide_extra_cm",
+            "slot_radius_cells",
+            "contact_ticks",
+            "turn_degrees",
+            "front_dot",
+            "side_attack_percent",
+            "wide_front_percent",
+            "fatigue_period_ticks",
+            "fatigue_move",
+            "fatigue_attack",
+            "fatigue_rest_ticks",
+            "fatigue_rest",
+            "fatigue_speed_percent",
+            "fatigue_damage_percent",
+            "support_cm",
+            "outnumber_morale",
+            "support_morale",
+            "leadership_morale",
+            "skill_damage",
+            "morale_rest_ticks",
+            "morale_rest",
+            "morale_rest_cm",
+            "blocked_repath_ticks",
+            "yield_ticks",
+            "yield_radius_cells",
+            "enemy_retreat_percent",
+            "enemy_objective_ticks",
+            "terrain_min_percent",
+            "cover_min_percent",
+            "edge_cover_percent",
+            "max_skill",
+            "max_leadership",
+            "maximum_stat",
+            "vector_scale",
+            "person_spacing_cm",
+            "person_radius_cm",
+            "director_decision_ticks",
+            "director_retreat_morale",
+            "director_retreat_fatigue",
+            "carrier_speed_percent"
+          ],
+          "additionalProperties": false
+        },
+        "fortifications": {
+          "type": "object",
+          "properties": {
+            "projects": {
+              "type": "object",
+              "properties": {
+                "warfare_store_screen": {
+                  "type": "object",
+                  "properties": {
+                    "wood": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "work": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "effects": {
+                      "type": "object",
+                      "maxProperties": 0,
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "wood",
+                    "work",
+                    "effects"
+                  ],
+                  "additionalProperties": false
+                },
+                "warfare_landing_screen": {
+                  "type": "object",
+                  "properties": {
+                    "wood": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "work": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000
+                    },
+                    "effects": {
+                      "type": "object",
+                      "maxProperties": 0,
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "wood",
+                    "work",
+                    "effects"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "warfare_store_screen",
+                "warfare_landing_screen"
+              ],
+              "additionalProperties": false
+            },
+            "radius_cm": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            },
+            "protection": {
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 99
+            }
+          },
+          "required": [
+            "projects",
+            "radius_cm",
+            "protection"
+          ],
+          "additionalProperties": false
+        },
+        "threats": {
+          "type": "object",
+          "properties": {
+            "quiet_seasons": {
+              "type": "integer",
+              "minimum": 8,
+              "maximum": 20
+            },
+            "warning_seasons": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4
+            },
+            "contact_warning": {
+              "const": 1
+            },
+            "recovery_food_seasons": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "encounters": {
+              "type": "object",
+              "properties": {
+                "stores": {
+                  "type": "object",
+                  "properties": {
+                    "capture_ticks": {
+                      "type": "integer",
+                      "minimum": 20,
+                      "maximum": 1000
+                    },
+                    "deadline_ticks": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 3500
+                    },
+                    "supply_loss": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 24
+                    }
+                  },
+                  "required": [
+                    "capture_ticks",
+                    "deadline_ticks",
+                    "supply_loss"
+                  ],
+                  "additionalProperties": false
+                },
+                "landing": {
+                  "type": "object",
+                  "properties": {
+                    "capture_ticks": {
+                      "type": "integer",
+                      "minimum": 20,
+                      "maximum": 1000
+                    },
+                    "deadline_ticks": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 3500
+                    },
+                    "supply_loss": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 24
+                    }
+                  },
+                  "required": [
+                    "capture_ticks",
+                    "deadline_ticks",
+                    "supply_loss"
+                  ],
+                  "additionalProperties": false
+                },
+                "probe": {
+                  "type": "object",
+                  "properties": {
+                    "capture_ticks": {
+                      "type": "integer",
+                      "minimum": 20,
+                      "maximum": 1000
+                    },
+                    "deadline_ticks": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 3500
+                    },
+                    "supply_loss": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 24
+                    }
+                  },
+                  "required": [
+                    "capture_ticks",
+                    "deadline_ticks",
+                    "supply_loss"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "stores",
+                "landing",
+                "probe"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "quiet_seasons",
+            "warning_seasons",
+            "contact_warning",
+            "recovery_food_seasons",
+            "encounters"
+          ],
+          "additionalProperties": false
+        },
+        "muster": {
+          "type": "object",
+          "properties": {
+            "maximum": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "priority": {
+              "const": 4
+            }
+          },
+          "required": [
+            "maximum",
+            "priority"
+          ],
+          "additionalProperties": false
+        },
+        "aftermath": {
+          "type": "object",
+          "properties": {
+            "experience_per_engagement": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2
+            },
+            "experience_per_skill": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 10
+            },
+            "maximum_experience": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 100
+            },
+            "mild_recovery_seasons": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "incapacitated_recovery_seasons": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 5
+            },
+            "patients_per_worker": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "care_priority": {
+              "const": 2
+            },
+            "equipment_initial_condition": {
+              "const": 100
+            },
+            "equipment_wear_engaged": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "equipment_wear_incapacitated": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "equipment_repair_gain": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "household_stress_injury": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "household_stress_incapacitated": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "mild_injury_hp_loss": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 999
+            }
+          },
+          "required": [
+            "experience_per_engagement",
+            "experience_per_skill",
+            "maximum_experience",
+            "mild_recovery_seasons",
+            "incapacitated_recovery_seasons",
+            "patients_per_worker",
+            "care_priority",
+            "equipment_initial_condition",
+            "equipment_wear_engaged",
+            "equipment_wear_incapacitated",
+            "equipment_repair_gain",
+            "household_stress_injury",
+            "household_stress_incapacitated",
+            "mild_injury_hp_loss"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tactics",
+        "fortifications",
+        "threats",
+        "muster",
+        "aftermath"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

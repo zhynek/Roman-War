@@ -50,6 +50,7 @@ static func building_record(id: String,rules) -> Dictionary:
 
 static func build_site(id: String,d: Dictionary,rules,w) -> Dictionary:
 	var spec: Dictionary=rules.projects[id]
+	if rules.warfare.forts.projects.has(id) and d.treatment=="screen":return _screen_site(id,d,rules,w)
 	var b: Dictionary=building_record(id,rules)
 	var at:=Vector3(spec.at[0],w.floor_height(spec.at[0],spec.at[1]),spec.at[1])
 	var yaw_: float=0
@@ -84,6 +85,53 @@ static func build_site(id: String,d: Dictionary,rules,w) -> Dictionary:
 		w._geo.box(Vector3(half.x-.9,.15+float(i)*.09,-half.y+.65),Vector3(.32,.07,.6),"mat")
 	w._finish()
 	return {"owner":owner,"at":at,"yaw":yaw_,"half":half,"stage":d.stage,"treatment":d.treatment}
+
+static func _screen_site(id: String,d: Dictionary,rules,w) -> Dictionary:
+	var records: Array=[]
+	for change in rules.projects[id].changes:
+		for record in change.after:
+			if record.kind=="boundary":records.append(record)
+	var owner: String="construction_"+id
+	w._begin(owner)
+	var low:=Vector2(INF,INF);var high:=Vector2(-INF,-INF)
+	for record in records:
+		for point in record.points:
+			low=low.min(Vector2(point[0],point[1]));high=high.max(Vector2(point[0],point[1]))
+		for i in range(1,record.points.size()):
+			var start: Array=record.points[i-1];var end: Array=record.points[i]
+			var a:=Vector3(start[0],w.surface_height(start[0],start[1]),start[1])
+			var b:=Vector3(end[0],w.surface_height(end[0],end[1]),end[1])
+			var length: float=Vector2(b.x-a.x,b.z-a.z).length()
+			w._geo.rod(a+Vector3.UP*.025,b+Vector3.UP*.025,.026,"wood_light",.026,5)
+			if int(d.stage)==0:continue
+			var steps: int=maxi(1,int(length/.6))
+			for j in range(steps+1):
+				var at: Vector3=a.lerp(b,float(j)/steps)
+				w._solid_box(at+Vector3.UP*.43,Vector3(.075,.86,.075),"wood")
+			if int(d.stage)<2:continue
+			var height_: float=.4 if int(d.stage)==2 else .72
+			# Woven material and the physical envelope agree at every stage;
+			# separate boundary records never receive a connecting cross-piece.
+			w.solids.append({"at":(a+b)*.5+Vector3.UP*height_*.5,"size":Vector3(length,height_,.14),"yaw":-atan2(b.z-a.z,b.x-a.x),"owner":owner})
+			var spans: int=maxi(1,int(length/.3))
+			for row in range(int(height_/.06)):
+				for j in range(spans):
+					var aa: Vector3=a.lerp(b,float(j)/spans)+Vector3(0,.07+row*.06,sin(j*PI*.5)*.025)
+					var bb: Vector3=a.lerp(b,float(j+1)/spans)+Vector3(0,.07+row*.06,sin((j+1)*PI*.5)*.025)
+					w._geo.rod(aa,bb,.018,"wood_light",.018,5)
+	# Reserve timber directly on an authored segment, outside its open entrance.
+	# This avoids the old generic workbench occupying the middle of a new gate.
+	var first: Array=records[0].points[0];var second: Array=records[0].points[1]
+	var direction:=Vector3(float(second[0])-float(first[0]),0,float(second[1])-float(first[1])).normalized()
+	var across:=Vector3(-direction.z,0,direction.x)
+	var pile:=Vector3(first[0],w.surface_height(first[0],first[1]),first[1])+direction*.8
+	for i in range(mini(8,int(d.paid_wood))):
+		var point: Vector3=pile+across*(float(i%2)*.08-.04)+Vector3.UP*(.10+float(i/2)*.09)
+		w._geo.rod(point,point+direction*.8,.042,"wood_light",.035,6)
+	if int(d.paid_wood)>0:w.solids.append({"at":pile+direction*.4+Vector3.UP*.20,"size":Vector3(.18,.4,.9),"yaw":atan2(direction.x,direction.z),"owner":owner})
+	w._finish()
+	var center: Vector2=(low+high)*.5
+	return {"owner":owner,"at":Vector3(center.x,w.floor_height(center.x,center.y),center.y),"yaw":0.0,"half":Vector2(maxf(.4,(high.x-low.x)*.5),maxf(.4,(high.y-low.y)*.5)),"stage":d.stage,"treatment":d.treatment}
 
 static func _new_building(w,b: Dictionary,stage: int) -> void:
 	var x: float=float(b.size[0])*.5
@@ -160,9 +208,24 @@ func select(id: String) -> void:
 		if not b.is_empty():s={"at":world.building_position(b),"half":Vector2(b.size[0],b.size[1])*.5,"yaw":deg_to_rad(float(b.yaw))}
 	var geo=preload("res://src/geometry.gd").new(world.materials)
 	var basis:=Basis(Vector3.UP,float(s.yaw))
-	for side in [-1,1]:
-		geo.rod(s.at+basis*Vector3(side*(s.half.x+.2),.09,-s.half.y-.2),s.at+basis*Vector3(side*(s.half.x+.2),.09,s.half.y+.2),.045,"mat",.045,5)
-		geo.rod(s.at+basis*Vector3(-s.half.x-.2,.09,side*(s.half.y+.2)),s.at+basis*Vector3(s.half.x+.2,.09,side*(s.half.y+.2)),.045,"mat",.045,5)
+	if _rules.warfare.forts.projects.has(id):
+		# Keep the authored entrance visibly open, even in its selection outline.
+		# The same screen segments remain selected after construction completes.
+		for change in _rules.projects[id].changes:
+			for record in change.after:
+				if record.kind!="boundary":continue
+				for i in range(1,record.points.size()):
+					var start: Array=record.points[i-1];var end: Array=record.points[i]
+					var a:=Vector3(start[0],world.floor_height(start[0],start[1])+.09,start[1])
+					var b:=Vector3(end[0],world.floor_height(end[0],end[1])+.09,end[1])
+					var direction: Vector3=(b-a).normalized()
+					var lateral:=Vector3(-direction.z,0,direction.x)*.25
+					for side in [-1,1]:geo.rod(a+lateral*side,b+lateral*side,.035,"mat",.035,5)
+					for at in [a,b]:geo.rod(at-lateral,at+lateral,.035,"mat",.035,5)
+	else:
+		for side in [-1,1]:
+			geo.rod(s.at+basis*Vector3(side*(s.half.x+.2),.09,-s.half.y-.2),s.at+basis*Vector3(side*(s.half.x+.2),.09,s.half.y+.2),.045,"mat",.045,5)
+			geo.rod(s.at+basis*Vector3(-s.half.x-.2,.09,side*(s.half.y+.2)),s.at+basis*Vector3(s.half.x+.2,.09,side*(s.half.y+.2)),.045,"mat",.045,5)
 	# Trace actual authored connection curves; helpful investments use UI plus signs.
 	var path_ids: Array=[]
 	if _rules.land.proposals.has(id):

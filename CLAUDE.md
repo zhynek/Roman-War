@@ -110,3 +110,15 @@ first; battles behind a `BattleResolver` interface. Full design rationale:
   provenance. Invented history is a bug — see `docs/DESIGN.md` §12.
 - Clean-room: original names/descriptions/values only; historical terms
   (hastati, Latium, Jupiter) are fine, copied game text/data/assets are not.
+
+## Independent village warfare
+
+The Yenikapı experience under `Castles and Cities/sites/yenikapi_6000_bce/experience`
+has its own scene-free rules, schemas, explicit profile adoption and atomic save
+wrappers. Its fixed-tick village defense is independent of the parent campaign;
+it does not bypass or replace the parent `BattleResolver` contract. Follow
+`experience/WARFARE.md` for its boundaries and `VERIFICATION-WARFARE.md` for the
+local milestone evidence. Direct, delegated and quick modes call the same battle
+step and serialized command boundary. Animation and worker pacing never own
+combat outcomes. Named aftermath reconciles once through existing household,
+living-work and lifecycle contracts; combat deaths are not currently supported.

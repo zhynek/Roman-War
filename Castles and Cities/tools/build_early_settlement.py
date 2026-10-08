@@ -84,7 +84,11 @@ def main():
     run([sys.executable,project/'tools/test_lifecycle_data.py'],logs/'lifecycle-data-tests.log',project)
     run([sys.executable,project/'tools/validate_town.py'],logs/'town-data.log',project)
     run([sys.executable,project/'tools/test_town_data.py'],logs/'town-data-tests.log',project)
+    run([sys.executable,project/'tools/validate_defense.py'],logs/'defense-data.log',project)
+    run([sys.executable,project/'tools/test_defense_data.py'],logs/'defense-data-tests.log',project)
     run(editor+['--import'],logs/'import.log',project)
+    defense=run(editor+['--script','res://tools/defense_checks.gd'],logs/'source-defense.log',project)
+    if not re.search(r'VILLAGE DEFENSE: \d+ checks, 0 failures',defense):raise SystemExit('Defense rule checks failed')
     visual=run(editor+['--script','res://tools/visual_checks.gd'],logs/'source-visual.log',project)
     if not re.search(r'VISUAL CHECKS: \d+ checks, 0 failures',visual):raise SystemExit('Visual command checks failed')
     construction=run(editor+['--script','res://tools/construction_checks.gd'],logs/'source-construction.log',project)
@@ -114,6 +118,9 @@ def main():
     town=run(editor+['--script','res://tools/town_checks.gd','--',f'out_dir={logs / "source-town-states"}'],logs/'source-town.log',project)
     if not re.search(r'TOWN CHECKS: \d+ checks, 0 failures',town):raise SystemExit('Missing town success marker')
     render_dir=Path(tempfile.mkdtemp(prefix=f'yenikapi-{args.version}-exact-qa-'))
+    defense_render=run([godot,'--path',project,'--max-fps','30','--script','res://tools/defense_preview.gd','--',f'out_dir={render_dir / "source-defense"}'],logs/'source-defense-render.log',project)
+    if not re.search(r'DEFENSE RENDER: \d+ checks, 0 failures',defense_render):raise SystemExit('Source defense render failed')
+    shutil.copy2(render_dir/'source-defense/report.json',logs/'source-defense-render-report.json')
     source_lifecycle_render=run([godot,'--path',project,'--max-fps','10','--script','res://tools/lifecycle_preview.gd','--',f'out_dir={render_dir / "source-lifecycle"}'],logs/'source-lifecycle-render.log',project)
     if not re.search(r'LIFECYCLE RENDER: \d+ captures; \d+ checks, 0 failures',source_lifecycle_render):raise SystemExit('Source lifecycle render gate failed')
     shutil.copy2(render_dir/'source-lifecycle/render-report.json',logs/'source-lifecycle-render-report.json')
@@ -159,6 +166,11 @@ def main():
     if set(architectures)!={'arm64','x86_64'}:raise SystemExit('Missing universal architecture')
     provenance['architectures']=architectures
     provenance['signature']='Ad-hoc signed, not Developer ID notarized'
+    packaged_defense=run([binary,'--headless','--script','res://tools/defense_checks.gd'],logs/'packaged-defense.log',out)
+    if not re.search(r'VILLAGE DEFENSE: \d+ checks, 0 failures',packaged_defense):raise SystemExit('Packaged defense rule checks failed')
+    packaged_defense_render=run([binary,'--max-fps','30','--script','res://tools/defense_preview.gd','--',f'out_dir={render_dir / "packaged-defense"}'],logs/'packaged-defense-render.log',out)
+    if not re.search(r'DEFENSE RENDER: \d+ checks, 0 failures',packaged_defense_render):raise SystemExit('Packaged defense render failed')
+    shutil.copy2(render_dir/'packaged-defense/report.json',logs/'packaged-defense-render-report.json')
     packaged=run([binary,'--headless','--script','res://tools/checks.gd'],logs/'packaged-checks.log',out)
     if not re.search(r'VILLAGE CHECKS: \d+ checks, 0 failures',packaged):raise SystemExit('Missing packaged success marker')
     if re.search(r'mesh ([a-f0-9]+)',checked).group(1)!=re.search(r'mesh ([a-f0-9]+)',packaged).group(1):raise SystemExit('Source/package geometry differs')
@@ -299,7 +311,7 @@ def main():
     for path in artifacts:
         with zipfile.ZipFile(path) as archive:
             if archive.testzip():raise SystemExit(f'Corrupt ZIP {path}')
-    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction/fabric-lifecycle/lifecycle/town checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures'])+len(json.loads((logs/'lifecycle-render-report.json').read_text())['captures']))+' exact-app captures plus '+str(len(json.loads((logs/'source-lifecycle-render-report.json').read_text())['captures']))+' source lifecycle captures plus '+str(len(source_report['captures']))+' source town and '+str(len(app_report['captures']))+' exact-app town captures written; manual visual review required before publication','glb_structure':'44 passed','zip_integrity':'11 passed; model partitions match exported bytes'}
+    provenance['checks']={'parent_campaign':'passed; logs copied','schema_and_negative_cases':'passed','source_and_exact_app':'All reference/governance/contact/household/asset/land/living/incident/visual/construction/fabric-lifecycle/lifecycle/town/defense checks passed on source and exact app; counts in verification logs; identical reference mesh hash','render_captures':str(125+len(json.loads((logs/'visual-render-report.json').read_text())['captures'])+len(json.loads((logs/'construction-render-report.json').read_text())['captures'])+len(json.loads((logs/'lifecycle-render-report.json').read_text())['captures']))+' exact-app captures plus '+str(len(json.loads((logs/'source-lifecycle-render-report.json').read_text())['captures']))+' source lifecycle captures plus '+str(len(source_report['captures']))+' source town and '+str(len(app_report['captures']))+' exact-app town captures written; manual visual review required before publication','glb_structure':'44 passed','zip_integrity':'11 passed; model partitions match exported bytes'}
     provenance['artifacts']={p.name:{'bytes':p.stat().st_size,'sha256':digest(p)} for p in artifacts}
     manifest=out/'provenance.json';manifest.write_text(json.dumps(provenance,indent=2)+'\n')
     (out/'SHA256SUMS.txt').write_text(''.join(f'{digest(p)}  {p.name}\n' for p in [*artifacts,manifest]))

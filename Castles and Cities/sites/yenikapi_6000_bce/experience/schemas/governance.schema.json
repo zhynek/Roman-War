@@ -369,6 +369,1808 @@
         ],
         "additionalProperties": false
       }
+    },
+    "defense": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "scenario",
+        "title",
+        "subtitle",
+        "evidence",
+        "bounds",
+        "places",
+        "enemy_origins",
+        "deployment",
+        "ui"
+      ],
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scenario": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bounds": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -10000,
+            "maximum": 100000
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title",
+              "at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -10000,
+                  "maximum": 100000
+                },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "enemy_origins": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -10000,
+              "maximum": 100000
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "deployment": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": -10000,
+            "maximum": 100000
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "ui": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "entry",
+            "practice",
+            "mobilize",
+            "start",
+            "return",
+            "cancel",
+            "pause",
+            "speed",
+            "save",
+            "load",
+            "overhead",
+            "close",
+            "select",
+            "withdraw_all",
+            "finish",
+            "prepare",
+            "brief",
+            "guide",
+            "controls",
+            "prep_hint",
+            "kit_hint",
+            "cost",
+            "roster",
+            "equipped",
+            "unarmed",
+            "preparation",
+            "deployment",
+            "fighting",
+            "ended",
+            "practice_note",
+            "status",
+            "paused",
+            "running",
+            "group",
+            "enemy",
+            "unknown",
+            "group_line",
+            "report",
+            "recovery",
+            "saved",
+            "loaded",
+            "invalid_save",
+            "no_defenders",
+            "funds",
+            "completed",
+            "authority",
+            "blocked",
+            "bad_order",
+            "waiting",
+            "selected_order",
+            "practice_save",
+            "victory",
+            "defeat",
+            "withdrawal",
+            "stalemate",
+            "enemy_routed",
+            "stores_taken",
+            "watch_lost",
+            "withdrawn",
+            "time_limit",
+            "unreachable",
+            "order_move",
+            "order_attack",
+            "order_advance",
+            "order_hold",
+            "order_defend",
+            "order_withdraw",
+            "order_face",
+            "routed",
+            "injured",
+            "preparedness",
+            "costs",
+            "prep_prepare",
+            "prep_shelter",
+            "prep_kits",
+            "prep_training",
+            "prep_season",
+            "watch_duty",
+            "training_duty",
+            "recovery_names",
+            "last_report",
+            "living_missing",
+            "objective",
+            "progress",
+            "battle_not_saved",
+            "live_rules",
+            "place_stores",
+            "place_north",
+            "place_landing",
+            "place_refuge",
+            "command_budget"
+          ],
+          "properties": {
+            "entry": {
+              "type": "string",
+              "minLength": 1
+            },
+            "practice": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mobilize": {
+              "type": "string",
+              "minLength": 1
+            },
+            "start": {
+              "type": "string",
+              "minLength": 1
+            },
+            "return": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cancel": {
+              "type": "string",
+              "minLength": 1
+            },
+            "pause": {
+              "type": "string",
+              "minLength": 1
+            },
+            "speed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "save": {
+              "type": "string",
+              "minLength": 1
+            },
+            "load": {
+              "type": "string",
+              "minLength": 1
+            },
+            "overhead": {
+              "type": "string",
+              "minLength": 1
+            },
+            "close": {
+              "type": "string",
+              "minLength": 1
+            },
+            "select": {
+              "type": "string",
+              "minLength": 1
+            },
+            "withdraw_all": {
+              "type": "string",
+              "minLength": 1
+            },
+            "finish": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prepare": {
+              "type": "string",
+              "minLength": 1
+            },
+            "brief": {
+              "type": "string",
+              "minLength": 1
+            },
+            "guide": {
+              "type": "string",
+              "minLength": 1
+            },
+            "controls": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "kit_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cost": {
+              "type": "string",
+              "minLength": 1
+            },
+            "roster": {
+              "type": "string",
+              "minLength": 1
+            },
+            "equipped": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unarmed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "preparation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deployment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fighting": {
+              "type": "string",
+              "minLength": 1
+            },
+            "ended": {
+              "type": "string",
+              "minLength": 1
+            },
+            "practice_note": {
+              "type": "string",
+              "minLength": 1
+            },
+            "status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "paused": {
+              "type": "string",
+              "minLength": 1
+            },
+            "running": {
+              "type": "string",
+              "minLength": 1
+            },
+            "group": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enemy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unknown": {
+              "type": "string",
+              "minLength": 1
+            },
+            "group_line": {
+              "type": "string",
+              "minLength": 1
+            },
+            "report": {
+              "type": "string",
+              "minLength": 1
+            },
+            "recovery": {
+              "type": "string",
+              "minLength": 1
+            },
+            "saved": {
+              "type": "string",
+              "minLength": 1
+            },
+            "loaded": {
+              "type": "string",
+              "minLength": 1
+            },
+            "invalid_save": {
+              "type": "string",
+              "minLength": 1
+            },
+            "no_defenders": {
+              "type": "string",
+              "minLength": 1
+            },
+            "funds": {
+              "type": "string",
+              "minLength": 1
+            },
+            "completed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authority": {
+              "type": "string",
+              "minLength": 1
+            },
+            "blocked": {
+              "type": "string",
+              "minLength": 1
+            },
+            "bad_order": {
+              "type": "string",
+              "minLength": 1
+            },
+            "waiting": {
+              "type": "string",
+              "minLength": 1
+            },
+            "selected_order": {
+              "type": "string",
+              "minLength": 1
+            },
+            "practice_save": {
+              "type": "string",
+              "minLength": 1
+            },
+            "victory": {
+              "type": "string",
+              "minLength": 1
+            },
+            "defeat": {
+              "type": "string",
+              "minLength": 1
+            },
+            "withdrawal": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stalemate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enemy_routed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stores_taken": {
+              "type": "string",
+              "minLength": 1
+            },
+            "watch_lost": {
+              "type": "string",
+              "minLength": 1
+            },
+            "withdrawn": {
+              "type": "string",
+              "minLength": 1
+            },
+            "time_limit": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unreachable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_move": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_attack": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_advance": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_hold": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_defend": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_withdraw": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_face": {
+              "type": "string",
+              "minLength": 1
+            },
+            "routed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "injured": {
+              "type": "string",
+              "minLength": 1
+            },
+            "preparedness": {
+              "type": "string",
+              "minLength": 1
+            },
+            "costs": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_prepare": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_shelter": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_kits": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_training": {
+              "type": "string",
+              "minLength": 1
+            },
+            "prep_season": {
+              "type": "string",
+              "minLength": 1
+            },
+            "watch_duty": {
+              "type": "string",
+              "minLength": 1
+            },
+            "training_duty": {
+              "type": "string",
+              "minLength": 1
+            },
+            "recovery_names": {
+              "type": "string",
+              "minLength": 1
+            },
+            "last_report": {
+              "type": "string",
+              "minLength": 1
+            },
+            "living_missing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective": {
+              "type": "string",
+              "minLength": 1
+            },
+            "progress": {
+              "type": "string",
+              "minLength": 1
+            },
+            "battle_not_saved": {
+              "type": "string",
+              "minLength": 1
+            },
+            "live_rules": {
+              "type": "string",
+              "minLength": 1
+            },
+            "place_stores": {
+              "type": "string",
+              "minLength": 1
+            },
+            "place_north": {
+              "type": "string",
+              "minLength": 1
+            },
+            "place_landing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "place_refuge": {
+              "type": "string",
+              "minLength": 1
+            },
+            "command_budget": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "warfare": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "ui": {
+          "type": "object",
+          "properties": {
+            "adopt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "adoption": {
+              "type": "string",
+              "minLength": 1
+            },
+            "adopted": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_width": {
+              "type": "string",
+              "minLength": 1
+            },
+            "column": {
+              "type": "string",
+              "minLength": 1
+            },
+            "spread": {
+              "type": "string",
+              "minLength": 1
+            },
+            "blocked_destination": {
+              "type": "string",
+              "minLength": 1
+            },
+            "unreachable_destination": {
+              "type": "string",
+              "minLength": 1
+            },
+            "no_formation_room": {
+              "type": "string",
+              "minLength": 1
+            },
+            "target_not_visible": {
+              "type": "string",
+              "minLength": 1
+            },
+            "invalid_width": {
+              "type": "string",
+              "minLength": 1
+            },
+            "invalid_facing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "engaged": {
+              "type": "string",
+              "minLength": 1
+            },
+            "blocked": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fatigue": {
+              "type": "string",
+              "minLength": 1
+            },
+            "morale": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_line": {
+              "type": "string",
+              "minLength": 1
+            },
+            "group_ready": {
+              "type": "string",
+              "minLength": 1
+            },
+            "group_moving": {
+              "type": "string",
+              "minLength": 1
+            },
+            "order_detail": {
+              "type": "string",
+              "minLength": 1
+            },
+            "width_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "old_battle": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_congestion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_no_route": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_target_lost": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_formation_narrow": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_exhausted": {
+              "type": "string",
+              "minLength": 1
+            },
+            "enemy_short": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tactical_factors": {
+              "type": "string",
+              "minLength": 1
+            },
+            "factor_note": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortifications": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_cost": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_weakness": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_staffing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_upkeep": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_ready": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_worn": {
+              "type": "string",
+              "minLength": 1
+            },
+            "fortification_unbuilt": {
+              "type": "string",
+              "minLength": 1
+            },
+            "warfare_missing": {
+              "type": "string",
+              "minLength": 1
+            },
+            "defense_plan": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_assembly": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_approach": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_important": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_reserve": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_fallback": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_saved": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_invalid": {
+              "type": "string",
+              "minLength": 1
+            },
+            "plan_battle_locked": {
+              "type": "string",
+              "minLength": 1
+            },
+            "save_preparation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "load_preparation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "saved_preparation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "command_personally": {
+              "type": "string",
+              "minLength": 1
+            },
+            "delegate_battle": {
+              "type": "string",
+              "minLength": 1
+            },
+            "resolve_quickly": {
+              "type": "string",
+              "minLength": 1
+            },
+            "take_command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "handoff_command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cancel_quick": {
+              "type": "string",
+              "minLength": 1
+            },
+            "quick_progress": {
+              "type": "string",
+              "minLength": 1
+            },
+            "quick_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "quick_done": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode_direct": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mode_delegated": {
+              "type": "string",
+              "minLength": 1
+            },
+            "modes_brief": {
+              "type": "string",
+              "minLength": 1
+            },
+            "delegated_notice": {
+              "type": "string",
+              "minLength": 1
+            },
+            "readiness_skills": {
+              "type": "string",
+              "minLength": 1
+            },
+            "leader_absent": {
+              "type": "string",
+              "minLength": 1
+            },
+            "preparation_advantages": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_enable": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_intro": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_quiet": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_warning": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_ready": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_contact": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_unknown": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_recovery": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_incident": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_food": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_watch": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_horizon": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_started": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_held": {
+              "type": "string",
+              "minLength": 1
+            },
+            "supplies_escaped": {
+              "type": "string",
+              "minLength": 1
+            },
+            "supplies_recovered": {
+              "type": "string",
+              "minLength": 1
+            },
+            "deadline_held": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_not_ready": {
+              "type": "string",
+              "minLength": 1
+            },
+            "warfare_guide": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_occupy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_snatch": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_probe": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_carrying": {
+              "type": "string",
+              "minLength": 1
+            },
+            "objective_secured": {
+              "type": "string",
+              "minLength": 1
+            },
+            "defeat": {
+              "type": "string",
+              "minLength": 1
+            },
+            "victory": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_hint": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_current": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_off": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_two": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_four": {
+              "type": "string",
+              "minLength": 1
+            },
+            "muster_saved": {
+              "type": "string",
+              "minLength": 1
+            },
+            "threat_enabled": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_intro": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_boundary": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_empty": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_on": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_off": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_release_watch": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_equipment": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_prepare": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_repair_on": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_repair_off": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_recovery_route": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_repair_state": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_record": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_person": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_recovering": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_ready": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_participation": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_enabled": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_disabled": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_experience_rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_equipment_rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_rule": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_injury_none": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_injury_wounded": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_injury_incapacitated": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_command_blocked": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_pending": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_result": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_engaged": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_not_engaged": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_equipped": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_unequipped": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_stress": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_kit_report": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_household": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_fed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_unfed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_short": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_history": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_roster": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_open_work": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_readiness": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_newer": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_older": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_page": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_rest": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_care_heading": {
+              "type": "string",
+              "minLength": 1
+            },
+            "report": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aftermath_inactive": {
+              "type": "string",
+              "minLength": 1
+            },
+            "last_report": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "adopt",
+            "adoption",
+            "adopted",
+            "order_width",
+            "column",
+            "spread",
+            "blocked_destination",
+            "unreachable_destination",
+            "no_formation_room",
+            "target_not_visible",
+            "invalid_width",
+            "invalid_facing",
+            "engaged",
+            "blocked",
+            "fatigue",
+            "morale",
+            "tactical_line",
+            "group_ready",
+            "group_moving",
+            "order_detail",
+            "width_hint",
+            "old_battle",
+            "tactical_congestion",
+            "tactical_no_route",
+            "tactical_target_lost",
+            "tactical_formation_narrow",
+            "tactical_exhausted",
+            "enemy_short",
+            "tactical_factors",
+            "factor_note",
+            "fortifications",
+            "fortification_cost",
+            "fortification_weakness",
+            "fortification_staffing",
+            "fortification_upkeep",
+            "fortification_ready",
+            "fortification_worn",
+            "fortification_unbuilt",
+            "warfare_missing",
+            "defense_plan",
+            "plan_assembly",
+            "plan_approach",
+            "plan_important",
+            "plan_reserve",
+            "plan_fallback",
+            "plan_hint",
+            "plan_saved",
+            "plan_invalid",
+            "plan_battle_locked",
+            "save_preparation",
+            "load_preparation",
+            "saved_preparation",
+            "command_personally",
+            "delegate_battle",
+            "resolve_quickly",
+            "take_command",
+            "handoff_command",
+            "cancel_quick",
+            "quick_progress",
+            "quick_hint",
+            "quick_done",
+            "mode_direct",
+            "mode_delegated",
+            "modes_brief",
+            "delegated_notice",
+            "readiness_skills",
+            "leader_absent",
+            "preparation_advantages",
+            "threat_enable",
+            "threat_intro",
+            "threat_quiet",
+            "threat_warning",
+            "threat_ready",
+            "threat_contact",
+            "threat_unknown",
+            "threat_recovery",
+            "threat_incident",
+            "threat_food",
+            "threat_watch",
+            "threat_horizon",
+            "threat_started",
+            "objective_held",
+            "supplies_escaped",
+            "supplies_recovered",
+            "deadline_held",
+            "threat_not_ready",
+            "warfare_guide",
+            "objective_status",
+            "objective_occupy",
+            "objective_snatch",
+            "objective_probe",
+            "objective_carrying",
+            "objective_secured",
+            "defeat",
+            "victory",
+            "muster_heading",
+            "muster_title",
+            "muster_hint",
+            "muster_current",
+            "muster_status",
+            "muster_off",
+            "muster_two",
+            "muster_four",
+            "muster_saved",
+            "threat_enabled",
+            "aftermath_title",
+            "aftermath_intro",
+            "aftermath_boundary",
+            "aftermath_empty",
+            "aftermath_care_on",
+            "aftermath_care_off",
+            "aftermath_release_watch",
+            "aftermath_equipment",
+            "aftermath_care",
+            "aftermath_prepare",
+            "aftermath_repair_on",
+            "aftermath_repair_off",
+            "aftermath_recovery_route",
+            "aftermath_repair_state",
+            "aftermath_record",
+            "aftermath_person",
+            "aftermath_recovering",
+            "aftermath_ready",
+            "aftermath_participation",
+            "aftermath_care_enabled",
+            "aftermath_care_disabled",
+            "aftermath_experience_rule",
+            "aftermath_equipment_rule",
+            "aftermath_care_rule",
+            "aftermath_injury_none",
+            "aftermath_injury_wounded",
+            "aftermath_injury_incapacitated",
+            "aftermath_command_blocked",
+            "aftermath_pending",
+            "aftermath_result",
+            "aftermath_engaged",
+            "aftermath_not_engaged",
+            "aftermath_equipped",
+            "aftermath_unequipped",
+            "aftermath_stress",
+            "aftermath_kit_report",
+            "aftermath_household",
+            "aftermath_fed",
+            "aftermath_unfed",
+            "aftermath_care_short",
+            "aftermath_history",
+            "aftermath_roster",
+            "aftermath_open_work",
+            "aftermath_readiness",
+            "aftermath_newer",
+            "aftermath_older",
+            "aftermath_page",
+            "aftermath_rest",
+            "aftermath_care_heading",
+            "report",
+            "aftermath_inactive",
+            "last_report"
+          ],
+          "additionalProperties": false
+        },
+        "fortifications": {
+          "type": "object",
+          "properties": {
+            "projects": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "maxLength": 80
+                  },
+                  "tuning": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "maxLength": 80
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "body": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "role": {
+                    "const": "watch"
+                  },
+                  "asset": {
+                    "const": "watch"
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -100,
+                      "maximum": 100
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "requires": {
+                    "type": "array",
+                    "items": {
+                      "const": "watch_shelter"
+                    },
+                    "minItems": 1,
+                    "maxItems": 1
+                  },
+                  "changes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "added"
+                        },
+                        "before": {
+                          "type": "array",
+                          "maxItems": 0
+                        },
+                        "after": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "pattern": "^[a-z][a-z0-9_]*$"
+                              },
+                              "kind": {
+                                "const": "boundary"
+                              },
+                              "revision": {
+                                "const": 1
+                              },
+                              "change": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "kind": {
+                                    "const": "added"
+                                  },
+                                  "predecessors": {
+                                    "type": "array",
+                                    "maxItems": 0
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "predecessors"
+                                ]
+                              },
+                              "evidence": {
+                                "const": "interpretation"
+                              },
+                              "source_ids": {
+                                "type": "array",
+                                "minItems": 1,
+                                "uniqueItems": true,
+                                "items": {
+                                  "type": "string",
+                                  "pattern": "^[a-z][a-z0-9_]*$"
+                                }
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "points": {
+                                "type": "array",
+                                "minItems": 2,
+                                "items": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "number",
+                                    "minimum": -200,
+                                    "maximum": 200
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 2
+                                }
+                              },
+                              "width": {
+                                "type": "number",
+                                "minimum": 0.1,
+                                "maximum": 0.2
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "kind",
+                              "revision",
+                              "change",
+                              "evidence",
+                              "source_ids",
+                              "label",
+                              "points",
+                              "width"
+                            ]
+                          },
+                          "minItems": 1,
+                          "maxItems": 1
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "before",
+                        "after"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "presentation": {
+                    "type": "object",
+                    "properties": {
+                      "treatment": {
+                        "const": "screen"
+                      },
+                      "benefit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      }
+                    },
+                    "required": [
+                      "treatment",
+                      "benefit"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "tuning",
+                  "title",
+                  "body",
+                  "role",
+                  "asset",
+                  "at",
+                  "requires",
+                  "changes",
+                  "presentation"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "positions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "maxLength": 80
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  },
+                  "at": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": -100,
+                      "maximum": 100
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "at"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 9,
+              "maxItems": 9
+            },
+            "slots": {
+              "type": "object",
+              "properties": {
+                "assembly": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 80
+                },
+                "approach": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 80
+                },
+                "important": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 80
+                },
+                "reserve": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 80
+                },
+                "fallback": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 80
+                }
+              },
+              "required": [
+                "assembly",
+                "approach",
+                "important",
+                "reserve",
+                "fallback"
+              ],
+              "additionalProperties": false
+            },
+            "defenses": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "project": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "maxLength": 80
+                  },
+                  "position": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]*$",
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "project",
+                  "position"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "projects",
+            "positions",
+            "slots",
+            "defenses",
+            "evidence"
+          ],
+          "additionalProperties": false
+        },
+        "threats": {
+          "type": "object",
+          "properties": {
+            "encounters": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "enum": [
+                      "stores",
+                      "landing",
+                      "probe"
+                    ]
+                  },
+                  "kind": {
+                    "enum": [
+                      "occupy",
+                      "snatch",
+                      "probe"
+                    ]
+                  },
+                  "place": {
+                    "enum": [
+                      "stores",
+                      "landing",
+                      "north"
+                    ]
+                  },
+                  "origins": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number",
+                          "minimum": -60,
+                          "maximum": 60
+                        },
+                        {
+                          "type": "number",
+                          "minimum": -60,
+                          "maximum": 60
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "brief": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "stakes": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "place",
+                  "origins",
+                  "title",
+                  "brief",
+                  "stakes"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "encounters",
+            "evidence"
+          ],
+          "additionalProperties": false
+        },
+        "aftermath": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "const": "village_aftermath_v1"
+            },
+            "evidence": {
+              "type": "string",
+              "minLength": 1
+            },
+            "boundary": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "profile",
+            "evidence",
+            "boundary"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "profile",
+        "ui",
+        "fortifications",
+        "threats",
+        "aftermath"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

@@ -10,6 +10,10 @@ var land
 var living
 var incidents
 var lifecycle
+var defense
+var warfare
+const Warfare = preload("res://src/core/warfare_rules.gd")
+const Defense = preload("res://src/core/defense_rules.gd")
 var base_snapshot: Dictionary = {}
 const Lifecycle = preload("res://src/core/lifecycle_rules.gd")
 const FabricProjection = preload("res://src/core/fabric_projection.gd")
@@ -24,6 +28,10 @@ func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary =
 	content = canonical(config)
 	balance = canonical(tuning)
 	base_snapshot = canonical(snapshot)
+	defense = Defense.new(content.get("defense",{}),balance.get("defense",{}))
+	warfare = Warfare.new(content.get("warfare",{}),balance.get("warfare",{}))
+	defense.tactical_tuning=balance.get("warfare",{}).get("tactics",{})
+	defense.threat_tuning=balance.get("warfare",{}).get("threats",{})
 	var support: Dictionary={}
 	for key in balance:
 		if String(key).begins_with("town_") and key!="town_lifecycle":support[key]=balance[key]
@@ -56,6 +64,14 @@ func _init(config: Dictionary, tuning: Dictionary, contacts_config: Dictionary =
 	for spec in incidents.content.get("incidents",[]):
 		assets.project_assets[spec.prepare]=spec.asset;assets.project_assets[spec.repair]=spec.asset
 	for project in lifecycle.content.get("projects",[]):assets.project_assets[project.id]=project.asset
+	for id in warfare.forts.projects:
+		var project: Dictionary=warfare.forts.projects[id]
+		content.projects.append(project)
+		assets.project_assets[id]="watch"
+		if assets.assets.has("watch"):
+			for change in project.changes:
+				for record in change.after:
+					if record.id not in assets.assets.watch.objects:assets.assets.watch.objects.append(record.id)
 	for project in content.projects:
 		projects[project.id] = project
 
@@ -70,7 +86,7 @@ func new_state() -> Dictionary:
 		"completed": [], "queue": [], "plan": balance.initial_plan.duplicate(true),
 		"welcome": false, "tight_rations": false, "birth_credit": 0,
 		"next_person": content.initial_citizens.size() + 1, "role": "god",
-		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}, "living": {}, "incidents": {}, "lifecycle": {}
+		"history": [], "report": {}, "assignments": [], "contacts": {}, "households": {}, "assets": {}, "land": {}, "living": {}, "incidents": {}, "lifecycle": {}, "defense": {}, "warfare": {}
 	}
 	for role in ["steward", "watch"]:
 		state.leaders[role] = {"id": content.initial_leaders[role], "since": 0}
@@ -78,6 +94,8 @@ func new_state() -> Dictionary:
 	return state
 
 func ensure_state_keys(state: Dictionary) -> void:
+	if not state.has("warfare"):state.warfare={}
+	if not state.has("defense"):state.defense={}
 	if not state.has("lifecycle"):state.lifecycle={}
 	if not state.has("incidents"):state.incidents={}
 	if not state.has("living"):state.living={}
@@ -89,7 +107,7 @@ func ensure_state_keys(state: Dictionary) -> void:
 func people(state: Dictionary, adults_only: bool = false) -> Array:
 	var result: Array = []
 	for person in state.citizens:
-		if person.active and (not adults_only or person.age >= balance.adult_age):
+		if person.active and (not adults_only or person.age >= balance.adult_age and not defense.unavailable(state,person.id)):
 			result.append(person)
 	result.sort_custom(func(a, b): return a.id < b.id)
 	return result
@@ -172,6 +190,9 @@ func command(state: Dictionary, action: Dictionary) -> Dictionary:
 func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 	# Validate before copying or mutating. Rejected orders preserve the complete state.
 	var kind: String = action.get("kind", "")
+	if kind.begins_with("warfare_"):return warfare.command(state,action,self)
+	if kind.begins_with("defense_"):return defense.command(state,action,self)
+	if defense.locked(state):return {"error":"blocked"}
 	if kind.begins_with("lifecycle_"):return lifecycle.command(state,action,self)
 	if kind.begins_with("incident_"):return incidents.command(state,action,self)
 	if kind.begins_with("living_"):return living.command(state,action,self)
@@ -214,6 +235,8 @@ func _command(state: Dictionary, action: Dictionary) -> Dictionary:
 			if state.queue.size() >= balance.queue_limit: return {"error": "queue_full"}
 			for requirement in project.requires:
 				if not has_project(state, requirement): return {"error": "prerequisite"}
+			var fortification_error: String=warfare.forts.blocked(state,id,self)
+			if not fortification_error.is_empty():return {"error":fortification_error}
 			var lifecycle_error: String=lifecycle.blocked(state,id,self)
 			if not lifecycle_error.is_empty():return {"error":lifecycle_error}
 			if lifecycle.active(state) and FabricProjection.pending(base_snapshot,state,projects,content.scenario_id,id).has("error"):return {"error":"lifecycle_fabric"}
@@ -305,7 +328,7 @@ func forecast(state: Dictionary) -> Dictionary:
 		var total: int = 0
 		for factor in factors[key]: total += int(factor.value)
 		stocks[key] = move_stock(int(state[key]), clampi(total, 0, 100))
-	var pressure: int = 0 if incidents.active(state) else int(balance.annual_pressure[int(state.turn) % balance.annual_pressure.size()])
+	var pressure: int = 0 if incidents.active(state) or warfare.threats.enabled(state) else int(balance.annual_pressure[int(state.turn) % balance.annual_pressure.size()])
 	var losses: int = maxi(0, int(balance.pressure_base) + pressure - int(stocks.security)) * int(balance.loss_per_shortfall) if pressure > 0 else 0
 	var remaining: int = maxi(0, int(state.food) + gathered - spoil - used)
 	losses = mini(losses, remaining)
@@ -346,6 +369,8 @@ func eligible(person: Dictionary) -> bool:
 	return not person.is_empty() and person.active and person.age >= balance.adult_age and person.age < balance.retirement_age
 
 func advance(state: Dictionary) -> Dictionary:
+	if defense.locked(state):return {"error":"blocked"}
+	if warfare.threats.ready(state,self):return {"error":"threat_ready"}
 	if state.turn >= balance.max_turns: return {"error":"horizon"}
 	var next: Dictionary = state.duplicate(true)
 	var f: Dictionary = forecast(state)
@@ -359,6 +384,7 @@ func advance(state: Dictionary) -> Dictionary:
 		assets.advance(next,state,f,self)
 		land.advance(next,state,f)
 		living.advance(next,state,f,self)
+		if warfare.active(state):warfare.aftermath.repair(next,state,f,self)
 		incidents.advance(next,state,f,self)
 		work=0
 	while work > 0 and not next.queue.is_empty():
@@ -399,7 +425,10 @@ func advance(state: Dictionary) -> Dictionary:
 		_event(next,"arrival",{"count":int(balance.migration_size)})
 	neighbors.advance(next,state,self)
 	households.advance(next,state,self)
+	if warfare.active(state):warfare.aftermath.recover(next,state,f,self)
+	else:defense.recover(next,state,f)
 	next.turn += 1
+	warfare.threats.advance(next,state,f,self)
 	_succession(next)
 	next.plan = effective_plan(next)
 	var qualifies: bool = town_conditions(next)
@@ -552,6 +581,8 @@ func validate_state(value: Variant) -> bool:
 	if not living.validate(state,self):return false
 	if not incidents.validate(state,self):return false
 	if not lifecycle.validate(state,self):return false
+	if not warfare.validate(state,self):return false
+	if not defense.validate(state,self):return false
 	if lifecycle.active(state) and FabricProjection.pending(base_snapshot,state,projects,content.scenario_id).has("error"):return false
 	if not self.households.validate(state,self): return false
 	if not state.plan is Dictionary: return false

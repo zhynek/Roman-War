@@ -185,6 +185,7 @@ func allocation(state: Dictionary, rules) -> Dictionary:
 	_request(requests,"timber","timber",int(balance.timber_workers),5,"workroom")
 	if state.households.orders.learning:_request(requests,"learning","care",int(rules.households.balance.care_minimum),6,"workroom")
 	rules.living.requests(state,requests,rules)
+	rules.warfare.requests(state,requests,rules)
 	rules.lifecycle.requests(state,requests,rules)
 	requests.sort_custom(func(a,b):return a.priority<b.priority if a.priority!=b.priority else a.id<b.id)
 	var remaining: int=adults
@@ -351,7 +352,13 @@ func validate(state: Dictionary,rules) -> bool:
 		if not rules.whole(decision.get("turn"),0,int(state.turn)) or decision.get("office") not in ["steward","watch"] or not decision.get("author") is String or not decision.get("kind") is String or not decision.get("target") is String:return false
 		if decision.author!="" and rules.person_by_id(state,decision.author).is_empty():return false
 		if not decision.get("details") is Dictionary:return false
-		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access","living_order","incident_restrict"]:return false
+		if decision.kind not in ["asset_principle","asset_project","asset_maintenance","asset_housing","household_order","commission","cancel","land_access","living_order","incident_restrict","warfare_muster","warfare_care"]:return false
+		if decision.kind=="warfare_care":
+			if not rules.warfare.active(state) or decision.office!="steward" or decision.target!="homes" or decision.details.size()!=1 or not decision.details.get("enabled") is bool:return false
+			continue
+		if decision.kind=="warfare_muster":
+			if not rules.warfare.active(state) or decision.office!="watch" or decision.target!="watch" or decision.details.size()!=1 or not rules.whole(decision.details.get("value"),0,int(rules.warfare.tuning.muster.maximum)):return false
+			continue
 		if decision.kind=="living_order":
 			if decision.target not in ["area","prepare","cooperate","training","repair","patrol"] or not decision.details.has("value"):return false
 			var value_: Variant=decision.details.value

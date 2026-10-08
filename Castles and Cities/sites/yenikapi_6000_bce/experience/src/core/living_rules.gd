@@ -82,7 +82,7 @@ func requests(s: Dictionary,list: Array,r) -> void:
 	var l: Dictionary=s.living
 	if l.prepare>0 and l.blanks<balance.blank_capacity:
 		r.assets._request(list,"living_prepare","building",int(balance.shared_workers if l.prepare==2 else balance.prepare_workers),int(balance.priority),"workroom")
-	if l.repair and l.kits<balance.kit_capacity and r.has_project(s,"living_watch_kits"):
+	if l.repair and (l.kits<balance.kit_capacity or r.warfare.active(s) and r.warfare.aftermath.needs_repair(s)) and r.has_project(s,"living_watch_kits"):
 		r.assets._request(list,"living_repair","building",int(balance.repair_workers),3,"watch")
 	if l.training:r.assets._request(list,"living_training","watch",int(balance.training_workers),int(balance.priority),"watch")
 func prepare_allocation(s: Dictionary,result: Dictionary) -> void:
@@ -158,7 +158,7 @@ func advance(n: Dictionary,s: Dictionary,f: Dictionary,r) -> void:
 func destination(s: Dictionary,request: Dictionary,fallback: Array) -> Array:
 	if not active(s):return fallback
 	if request.id=="timber":return areas[s.living.area].at
-	if request.id in ["watch","living_training","living_repair"]:return subjects[s.living.patrol].at
+	if request.id in ["watch","living_training","living_repair","warfare_muster"]:return subjects[s.living.patrol].at
 	return fallback
 func tutorial_ready(s: Dictionary,r) -> bool:
 	var l: Dictionary=s.living

@@ -2,7 +2,7 @@ extends RefCounted
 ## Independent persistence boundary. Never reads the reference bookmark or medieval saves.
 static func write(path: String, state: Dictionary, rules) -> bool:
 	if not rules.validate_state(state): return false
-	var record := {"format":"yenikapi_seasons","version":8 if rules.lifecycle.active(state) else 7 if rules.incidents.active(state) else 6 if rules.living.active(state) else 5 if rules.land.active(state) else 4 if rules.assets.active(state) else (3 if rules.households.active(state) else (2 if rules.neighbors.active(state) else 1)),"state":state}
+	var record := {"format":"yenikapi_seasons","version":10 if rules.warfare.active(state) else 9 if rules.defense.active(state) else 8 if rules.lifecycle.active(state) else 7 if rules.incidents.active(state) else 6 if rules.living.active(state) else 5 if rules.land.active(state) else 4 if rules.assets.active(state) else (3 if rules.households.active(state) else (2 if rules.neighbors.active(state) else 1)),"state":state}
 	var temporary: String = path+".tmp"
 	var file := FileAccess.open(temporary,FileAccess.WRITE)
 	if file == null: return false
@@ -20,11 +20,11 @@ static func read(path: String, rules) -> Dictionary:
 	if file==null or file.get_length()>4194304: return {}
 	var record: Variant = JSON.parse_string(file.get_as_text())
 	if not record is Dictionary: return {}
-	if not record.get("format") is String or not rules.whole(record.get("version"),1,8): return {}
+	if not record.get("format") is String or not rules.whole(record.get("version"),1,10): return {}
 	if record.format!="yenikapi_seasons": return {}
 	if not record.get("state") is Dictionary: return {}
 	rules.ensure_state_keys(record.state)
 	if not rules.validate_state(record.state): return {}
-	var expected: int = 8 if rules.lifecycle.active(record.state) else 7 if rules.incidents.active(record.state) else 6 if rules.living.active(record.state) else 5 if rules.land.active(record.state) else 4 if rules.assets.active(record.state) else (3 if rules.households.active(record.state) else (2 if rules.neighbors.active(record.state) else 1))
+	var expected: int = 10 if rules.warfare.active(record.state) else 9 if rules.defense.active(record.state) else 8 if rules.lifecycle.active(record.state) else 7 if rules.incidents.active(record.state) else 6 if rules.living.active(record.state) else 5 if rules.land.active(record.state) else 4 if rules.assets.active(record.state) else (3 if rules.households.active(record.state) else (2 if rules.neighbors.active(record.state) else 1))
 	if record.version != expected: return {}
 	return rules.canonical(record.state)

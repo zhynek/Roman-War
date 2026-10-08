@@ -11,6 +11,55 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Village warfare 0.14.0 local milestone — 2026-10-08
+
+All four phases extend the preserved uncommitted `codex/village-defense` work.
+No parent campaign engine or BattleResolver changes. The independent warfare
+profile is explicit adoption (wrapper10); older defense/lifecycle/town profiles
+retain their original hashes. See [WARFARE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/WARFARE.md)
+for architecture and [the controls guide](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/WARFARE-CONTROLS.md).
+
+Tactical groups navigate actual paid village geometry with spacing, filing,
+yielding, facing, fatigue, morale, observed contacts and bounded objectives.
+Two paid low woven screens preserve open ordinary entrances and derive protection
+from existing watch maintenance. Five saved plan positions and finite additional
+watch requests use ordinary construction and workforce systems. Three repeating
+threats have warning seasons, resource/recovery deferral and eight quiet seasons
+after acceptance. Direct, delegated and quick modes share fixed ticks and
+serialized orders; quick progress/cancellation is resumable and rendering is
+suppressed only during batching.
+
+Named reports persist injury/care seasons, actual kit losses and paid repair,
+engaged combat experience, household stress and participation history. Finite
+care and missing adults affect ordinary work. Outcomes commit exactly once;
+combat incapacitation remains recoverable and natural lifecycle history remains
+intact. The normal interface retains aftermath, care and equipment controls.
+
+Final delivery evidence belongs in
+[VERIFICATION-WARFARE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-WARFARE.md),
+including complete village/parent gates, rendered map/control checks, exact-app
+verification, timings, local launch instructions, frozen source and checksums.
+QA images stay outside the repository. No existing release is replaced and no
+push or publication is authorized by this milestone.
+
+The checkout remains based on `2885f38`; fetched `origin/main` also contains the
+separate `8589fe9` city-progression explanation audit. It was inspected without
+resetting or merging over this user's preserved local defense implementation.
+That audit does not implement later settlement ranks; Town remains the existing
+settlement progression limit. Integrate its explanation-only changes deliberately
+in a subsequent merge rather than replacing the local warfare worktree.
+
+## First village defense (local 0.13.0, October 2026)
+
+**Defend the village** integrates actual home-watch adults and existing wooden
+kits with one fictional live supply-raid scenario. Preparation, deployment,
+seven spatial orders, pause/speed, independent worker ticks, active saves,
+exactly-once reports and seasonal injury/kit/supply recovery form one continuing
+loop. Practice uses a detached copy. Parent BattleResolver and campaign saves
+remain unchanged; village adoption uses wrapper 9 and preserves older profiles.
+Read [DEFENSE.md](../Castles%20and%20Cities/sites/yenikapi_6000_bce/experience/DEFENSE.md)
+and [the delivery verification](../Castles%20and%20Cities/sites/yenikapi_6000_bce/VERIFICATION-DEFENSE.md).
+
 ## Sites, plans and village oversight (0.10.0, October 2026)
 
 The village derives partial structures, committed-material piles, status icons and

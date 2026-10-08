@@ -93,7 +93,7 @@ func describe(state: Dictionary,rules,id: String,forecast: Dictionary={},include
 	var affected: Array=[]
 	for change in spec.changes:
 		for record in change.after:
-			if record.kind=="building":affected.append(record.id)
+			if record.kind in ["building","boundary"]:affected.append(record.id)
 	if affected.is_empty() and rules.land.proposals.has(id):affected=rules.land.sites[rules.land.proposals[id].site].objects.duplicate()
 	if id=="living_shared_room":affected=[copy.room.building]
 	return {"id":id,"asset":rules.assets.project_assets.get(id,"yard"),"affected":affected,"status":status,"cause":cause,"refusal":refusal,"queued":not q.is_empty(),"complete":done,"committed":committed,"paid_wood":int(spec.wood) if committed else 0,"paid_blanks":blanks if committed else 0,"cost_wood":int(spec.wood),"cost_blanks":blanks,"progress":progress,"total":int(spec.work),"remaining":int(spec.work)-progress,"stage":stage,"stage_label":copy.stages[treatment][stage],"treatment":treatment,"crew":int(allocation_.crew),"limit":int(initiative.get("crew",0)),"work":int(allocation_.work),"priority":int(initiative.get("priority",2)),"paused":initiative.get("paused",false),"adults":rules.people(state,true).size(),"places":int(rules.land.totals(state,rules).work) if rules.land.active(state) else rules.people(state,true).size(),"assigned":assigned,"requires":spec.requires.duplicate(),"benefit":text_for(rules,id,presentation.benefit),"refund_wood":int(spec.wood)*(int(spec.work)-progress)/int(spec.work) if not q.is_empty() else 0,"refund_blanks":blanks*(int(spec.work)-progress)/int(spec.work) if not q.is_empty() else 0}
@@ -101,6 +101,7 @@ func describe(state: Dictionary,rules,id: String,forecast: Dictionary={},include
 func ids(state: Dictionary,rules) -> Array:
 	var result: Array=[]
 	for id in rules.projects:
+		if rules.warfare.forts.projects.has(id) and not rules.warfare.active(state):continue
 		if rules.lifecycle.project_specs.has(id) and (not rules.lifecycle.active(state) or not rules.lifecycle.available(state,id)):continue
 		if rules.land.active(state) and id in rules.land.content.legacy_projects and not rules.land.committed(state,id,rules):continue
 		if rules.land.proposals.has(id) and not rules.land.active(state):continue

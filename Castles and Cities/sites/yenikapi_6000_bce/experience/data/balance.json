@@ -332,5 +332,148 @@
     "preparation_wood": 1,
     "preparation_places": 1,
     "spoil_reduction": 6
+  },
+  "defense": {
+    "tick_ms": 100,
+    "cell_cm": 100,
+    "radius_cm": 45,
+    "step_cm": 24,
+    "withdraw_step_cm": 29,
+    "range_cm": 190,
+    "acquire_cm": 1200,
+    "defend_cm": 650,
+    "repath_ticks": 10,
+    "hp_per_person": 1000,
+    "attack_ticks": 12,
+    "damage": 48,
+    "kit_damage": 42,
+    "readiness_damage": 8,
+    "hold_percent": 75,
+    "rear_percent": 145,
+    "morale_loss": 12,
+    "route_morale": 22,
+    "capture_radius_cm": 350,
+    "capture_ticks": 180,
+    "limit_ticks": 3000,
+    "idle_ticks": 700,
+    "rations_per_person": 1,
+    "supply_loss": 24,
+    "recovery_seasons": 2,
+    "care_workers": 2,
+    "group_size": 2,
+    "maximum_defenders": 8,
+    "enemy_people": 3,
+    "enemy_damage": 53,
+    "enemy_morale": 70,
+    "post_morale": 8,
+    "rout_ticks": 50,
+    "morale_damage_divisor": 25,
+    "deployment_depth_cm": 1000,
+    "group_spacing_cm": 200,
+    "reveal_cm": 2400
+  },
+  "warfare": {
+    "tactics": {
+      "spacing_cm": 100,
+      "wide_extra_cm": 20,
+      "slot_radius_cells": 8,
+      "contact_ticks": 60,
+      "turn_degrees": 12,
+      "front_dot": 500,
+      "side_attack_percent": 65,
+      "wide_front_percent": 115,
+      "fatigue_period_ticks": 10,
+      "fatigue_move": 1,
+      "fatigue_attack": 2,
+      "fatigue_rest_ticks": 4,
+      "fatigue_rest": 1,
+      "fatigue_speed_percent": 65,
+      "fatigue_damage_percent": 65,
+      "support_cm": 380,
+      "outnumber_morale": 2,
+      "support_morale": 1,
+      "leadership_morale": 2,
+      "skill_damage": 3,
+      "morale_rest_ticks": 20,
+      "morale_rest": 1,
+      "morale_rest_cm": 700,
+      "blocked_repath_ticks": 15,
+      "yield_ticks": 30,
+      "yield_radius_cells": 3,
+      "enemy_retreat_percent": 38,
+      "enemy_objective_ticks": 2400,
+      "terrain_min_percent": 50,
+      "cover_min_percent": 50,
+      "edge_cover_percent": 90,
+      "max_skill": 10,
+      "max_leadership": 4,
+      "maximum_stat": 100,
+      "vector_scale": 1000,
+      "person_spacing_cm": 55,
+      "person_radius_cm": 25,
+      "director_decision_ticks": 20,
+      "director_retreat_morale": 30,
+      "director_retreat_fatigue": 85,
+      "carrier_speed_percent": 80
+    },
+    "fortifications": {
+      "projects": {
+        "warfare_store_screen": {
+          "wood": 12,
+          "work": 16,
+          "effects": {}
+        },
+        "warfare_landing_screen": {
+          "wood": 10,
+          "work": 16,
+          "effects": {}
+        }
+      },
+      "radius_cm": 350,
+      "protection": 80
+    },
+    "threats": {
+      "quiet_seasons": 8,
+      "warning_seasons": 2,
+      "contact_warning": 1,
+      "recovery_food_seasons": 2,
+      "encounters": {
+        "stores": {
+          "capture_ticks": 100,
+          "deadline_ticks": 2800,
+          "supply_loss": 16
+        },
+        "landing": {
+          "capture_ticks": 50,
+          "deadline_ticks": 2600,
+          "supply_loss": 12
+        },
+        "probe": {
+          "capture_ticks": 400,
+          "deadline_ticks": 2200,
+          "supply_loss": 0
+        }
+      }
+    },
+    "muster": {
+      "maximum": 4,
+      "priority": 4
+    },
+    "aftermath": {
+      "experience_per_engagement": 1,
+      "experience_per_skill": 3,
+      "maximum_experience": 30,
+      "mild_recovery_seasons": 1,
+      "incapacitated_recovery_seasons": 3,
+      "patients_per_worker": 2,
+      "care_priority": 2,
+      "equipment_initial_condition": 100,
+      "equipment_wear_engaged": 5,
+      "equipment_wear_incapacitated": 5,
+      "equipment_repair_gain": 25,
+      "household_stress_injury": 4,
+      "household_stress_incapacitated": 8,
+      "mild_injury_hp_loss": 250
+    }
   }
 }
