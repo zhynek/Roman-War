@@ -15,6 +15,15 @@ jobs:
           python-version: "3.12"
       - run: pip install jsonschema
       - run: python3 tools/validate_data.py
+      - run: python3 tools/test_knowledge_glossary.py
+      - name: Validate independent village content and negative tests
+        run: python3 "Castles and Cities/tools/verify_village_source.py" --phase data --out /tmp/village-data
+      - name: Preserve village data evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: village-data-evidence
+          path: /tmp/village-data
 
   headless-tests:
     name: Headless engine tests
@@ -48,3 +57,11 @@ jobs:
           set -o pipefail
           ~/godot/godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee /tmp/godot-tests.log
           ! grep -E 'SCRIPT ERROR:|ERROR:' /tmp/godot-tests.log
+      - name: Run independent village import and all headless suites
+        run: python3 "Castles and Cities/tools/verify_village_source.py" --godot ~/godot/godot --phase headless --out /tmp/village-headless
+      - name: Preserve village headless evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: village-headless-evidence
+          path: /tmp/village-headless
