@@ -92,6 +92,7 @@
   "factor_names": {
     "base": "Household baseline",
     "care": "Care workers",
+    "civic": "Civic and service duty",
     "food": "Food coverage",
     "crowding": "Housing pressure",
     "ration": "Ration policy",

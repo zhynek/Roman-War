@@ -177,7 +177,11 @@ operation, stress/recovery and continuation path work from the preceding stage.
 Never edit the published base lifecycle's prices, work, predicates or geometry to
 add town. `lifecycle.town` and `balance.town_lifecycle` form a separately adopted
 semantic profile; the original hash is computed before merging the extension.
-UI text is not part of either semantic hash. Save adoption preserves the original
+UI text is not part of either semantic hash. The base profile's stage list,
+including `town` with `status: "planned"`, is part of the published hash, so that
+status is deliberately left unchanged; the interface derives Town's availability
+from the presence and adoption of the town extension, and later stages must use
+the same explicit-extension pattern rather than editing the hashed stage status. Save adoption preserves the original
 profile, paid contracts, completed ledger and all unrelated chapters.
 
 The only town projects are the civic-house alteration, material preparation and

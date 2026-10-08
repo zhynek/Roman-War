@@ -599,7 +599,9 @@
     "town_civic": "Town civic duty",
     "town_service": "Local provision service",
     "town_dwellings": "Six-person dwelling equivalents",
-    "town_service_unstaffed": "The provision service lacks its additional adult: no provisions are protected from spoilage. Pause optional construction or switch off preparation temporarily to free a worker; seasonal food needs also change the available workforce."
+    "town_service_unstaffed": "The provision service lacks its additional adult: no provisions are protected from spoilage. Pause optional construction or switch off preparation temporarily to free a worker; seasonal food needs also change the available workforce.",
+    "practice_sets_full": "Prepared sets are full ({blanks} / {capacity}): the preparation order does no work and shaping practice has stopped. Spend sets on watch equipment, repairs or incident preparations; preparation then resumes.",
+    "practice_order_off": "Shaping practice advances only while adults prepare materials (Workshop \u00b7 Prepare materials) or repair equipment."
   },
   "errors": {
     "lifecycle_missing": "Begin city lifecycle before commissioning this project.",

@@ -11,6 +11,26 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## City progression coherence audit (October 8, 2026)
+
+An integration audit of the settlement ladder on `2885f38` found the
+Small village → Large village → Town progression coherent and reproducible
+through ordinary public commands (fresh games, frozen 0.11 paid saves, a pure
+0.2-route tutorial save, compact, outward and mixed layouts). Three confirmed
+defects were fixed with regression coverage and no balance change: full
+prepared stores silently froze the wood-shaping readiness gate (the factor now
+names the cause), civic and service adults were credited as "Care workers" in
+the social breakdown (shown as their own factor; the contribution is logged as a
+design question), and `STAGES.md` still called Town planned. **Town is the
+actual playable limit**: after it the settlement sits at 48 residents and 360
+provisions, overflows about 146 provisions a season and accumulates timber with
+no sink; Large town onward is metadata only. The settlement has no recruitment,
+army or conquest; that chain exists only in the parent campaign. Read
+[the audit](reviews/2026-10-city-progression-coherence-audit.md) for the
+integration map, measured strategy comparisons, findings and gates, and
+[the tutorial walkthrough log](TUTORIAL_WALKTHROUGH_LOG.md) for the planned
+lessons (not implemented). Parent sources are unchanged; no release was built.
+
 ## Sites, plans and village oversight (0.10.0, October 2026)
 
 The village derives partial structures, committed-material piles, status icons and

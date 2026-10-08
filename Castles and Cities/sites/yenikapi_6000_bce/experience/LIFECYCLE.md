@@ -19,8 +19,12 @@ chapters. Loading a save, inspecting a place or opening this view adopts nothing
 The readiness view shows named current and required values, including sustained
 support and practical wood-shaping experience earned by actual household work.
 Prepare wood through the ordinary living orders; inspection alone cannot create
-that experience. Meet the food, housing, community and foundation requirements,
-then maintain them for the required resolved seasons.
+that experience. Each season one household gains one point of shaping experience
+when one of its adults actually prepares or repairs; the factor reads the best
+household. When prepared sets are full (12), the preparation order does no work
+and practice stops; the factor then says so. Spend sets on watch equipment,
+repairs or incident preparations to continue. Meet the food, housing, community
+and foundation requirements, then maintain them for the required resolved seasons.
 
 Review **Build an assembly shelter** and commission it when eligible. The quote
 uses the authoritative project price, remaining work, assigned crew, reserves and
@@ -88,6 +92,15 @@ it off produces nothing. The service must staff its own additional adult.
 Requested duty may remain unfilled because essential food, watch, production,
 maintenance or a higher-priority project uses the same adults. The panel shows
 actual civic staffing, store condition and next-season extra output/saved food.
+
+Civic duty and the provision service are allocated as care-class work, so each
+staffed adult also counts in the wellbeing and cooperation factors at the ordinary
+care rates (6 and 3 per adult). The forecast shows that contribution under its own
+**Civic and service duty** factor rather than under household care. This is the
+existing allocator convention, not a separately authored benefit; it is recorded in
+the 2026-10 progression audit as a balance question. The provision service only
+protects provisions from spoilage below the storage cap; at full stores the same
+provisions become overflow, so its measured value is during recovery.
 
 An understaffed town keeps its earned rank, buildings and paid work, while these
 benefits stop. Reduce construction crews or pause optional work to release adults.

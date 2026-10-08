@@ -81,6 +81,7 @@ func run() -> void:
 			if req.id=="lifecycle_civic":civic_count+=1
 		check(civic_count==1,"no duplicate civic duty")
 		operational_checks(s)
+		if compact:legacy_support_contraction(s)
 		fixture(s,prefix+"-town-invested",transcript)
 		outcomes.append({"compact":compact,"milestones":milestones,"food":s.food,"wood":s.wood,"work_places":rules.land.totals(s,rules).work,"population":rules.people(s).size(),"sha256":JSON.stringify(s).sha256_text()})
 	legacy_town()
@@ -115,6 +116,18 @@ func operational_checks(s: Dictionary) -> void:
 	for i in range(10):
 		rules.forecast(preparing);rules.lifecycle.status(preparing,rules);Presentation.new().describe(preparing,rules,"town_preparation")
 	check(preparing==before,"queries cannot create payment work or production")
+	# Civic and service adults are care-class work: their social contribution is
+	# shown under its own factor and never credited to household care.
+	var civic_adults: int=0
+	for req in forecast.assets.requests:
+		if req.id in ["lifecycle_civic","town_service"]:civic_adults+=int(req.filled)
+	var seen: Dictionary={"wellbeing":{},"cooperation":{}}
+	for key in seen:
+		for factor in forecast.factors[key]:seen[key][factor.id]=int(factor.value)
+	check(civic_adults==int(rules.lifecycle.town_balance.civic_workers)+int(rules.lifecycle.town_balance.service_workers),"town staffs civic duty and the service")
+	check(seen.wellbeing.get("civic",-1)==civic_adults*int(rules.balance.wellbeing_care) and seen.cooperation.get("civic",-1)==civic_adults*int(rules.balance.cooperation_care),"civic and service adults appear under their own social factor")
+	check(seen.wellbeing.get("care",-1)==(int(forecast.plan.care)-civic_adults)*int(rules.balance.wellbeing_care),"household care factor excludes civic staff")
+	check(forecast.factors.wellbeing[1].id=="care" and forecast.factors.wellbeing[2].id=="civic","civic factor follows care without displacing later named factors")
 	var damaged: Dictionary=preparing.duplicate(true);damaged.assets.conditions.stores=0
 	var disabled: Dictionary=rules.forecast(damaged)
 	check(disabled.town.prepared==0 and disabled.town.saved==0,"neglected stores suspend both new benefits")
@@ -144,6 +157,23 @@ func operational_checks(s: Dictionary) -> void:
 		var retuned=TownDriver.Rules.new(TownDriver.read("governance"),balance_,TownDriver.read("neighbors"),TownDriver.read("households"),TownDriver.read("assets"),land_,TownDriver.read("living"),TownDriver.read("incidents"),TownDriver.read("lifecycle"),TownDriver.read("settlement"))
 		check(retuned.lifecycle.definition_hash==rules.lifecycle.definition_hash,"dependent town data does not replace the base profile")
 		check(not retuned.validate_state(s),"town semantic hash pins referenced "+field)
+
+func legacy_support_contraction(invested: Dictionary) -> void:
+	# The reversible legacy support milestone and the earned civic rank are
+	# distinct: an ordinary policy can lose support while rank, duty and paid
+	# facility output continue, and ordinary seasons recover it.
+	var s: Dictionary=command(invested,{"kind":"policy","welcome":invested.welcome,"tight_rations":true})
+	var contracted: bool=false
+	for i in range(12):
+		s=rules.advance(s).state
+		if s.phase=="village":contracted=true;break
+	check(contracted,"tight rations contract the legacy support milestone at civic town")
+	check(rules.lifecycle.stage(s,rules)=="town" and s.town_achieved and rules.validate_state(s),"earned civic rank and achievement survive support contraction")
+	var f: Dictionary=rules.forecast(s)
+	check(f.town.filled==int(rules.lifecycle.town_balance.civic_workers) and f.town.saved>0,"civic duty and provision output continue without legacy support")
+	s=command(s,{"kind":"policy","welcome":s.welcome,"tight_rations":false})
+	for i in range(8):s=rules.advance(s).state
+	check(s.phase=="town" and rules.lifecycle.stage(s,rules)=="town","restoring rations recovers legacy support within eight seasons")
 
 func legacy_town() -> void:
 	var s: Dictionary=preload("res://tools/land_driver.gd").at_season(rules,true,28)

@@ -101,7 +101,16 @@ func _factor(state: Dictionary,predicate: Dictionary,rules) -> Dictionary:
 			current=1
 			for proposal in rules.land.content.proposals:
 				if proposal.site==predicate.site and rules.land.committed(state,proposal.id,rules):current=0
-	return {"id":predicate.id,"current":current,"required":required,"met":current>=required}
+	var factor: Dictionary={"id":predicate.id,"current":current,"required":required,"met":current>=required}
+	if predicate.kind=="knowledge" and not factor.met and rules.living.active(state):
+		# Practice only advances while an adult actually prepares or repairs.
+		# Full prepared stores silently drop the preparation request, so name
+		# that cause here instead of letting the factor stall unexplained.
+		var capacity: int=int(rules.living.balance.blank_capacity)
+		if int(state.living.prepare)==0:factor.suspended="order_off"
+		elif int(state.living.blanks)>=capacity:factor.suspended="sets_full"
+		factor.params={"blanks":int(state.living.blanks),"capacity":capacity}
+	return factor
 
 func status(state: Dictionary,rules) -> Dictionary:
 	var current: String=stage(state,rules)

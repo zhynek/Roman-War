@@ -284,11 +284,21 @@ func forecast(state: Dictionary) -> Dictionary:
 	var covered: bool = eaten >= used
 	var crowded: bool = population > capacity(state)
 	var overwork: bool = (int(plan.building) + int(plan.watch)) * 100 > people(state, true).size() * int(balance.overwork_limit_percent)
+	# Civic and service duty are allocated as care-class work. Their social
+	# contribution is unchanged, but it is shown under its own factor so the
+	# breakdown never credits civic clerks as household carers (2026-10 audit).
+	var civic_adults: int = 0
+	for request in allocation_.get("requests", []):
+		if request.id in ["lifecycle_civic", "town_service"]: civic_adults += int(request.filled)
+	var care_adults: int = int(plan.care) - civic_adults
 	var factors := {
-		"wellbeing": [{"id":"base","value":int(balance.wellbeing_base)}, {"id":"care","value":int(plan.care)*int(balance.wellbeing_care)}, {"id":"food","value":int(balance.wellbeing_fed if covered else balance.wellbeing_hunger)}, {"id":"crowding","value":int(balance.wellbeing_crowded) if crowded else 0}, {"id":"ration","value":int(balance.wellbeing_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"wellbeing")}],
-		"cooperation": [{"id":"base","value":int(balance.cooperation_base)}, {"id":"care","value":int(plan.care)*int(balance.cooperation_care)}, {"id":"food","value":0 if covered else int(balance.cooperation_hunger)}, {"id":"crowding","value":int(balance.cooperation_crowded) if crowded else 0}, {"id":"ration","value":int(balance.cooperation_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"cooperation")}],
+		"wellbeing": [{"id":"base","value":int(balance.wellbeing_base)}, {"id":"care","value":care_adults*int(balance.wellbeing_care)}, {"id":"food","value":int(balance.wellbeing_fed if covered else balance.wellbeing_hunger)}, {"id":"crowding","value":int(balance.wellbeing_crowded) if crowded else 0}, {"id":"ration","value":int(balance.wellbeing_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"wellbeing")}],
+		"cooperation": [{"id":"base","value":int(balance.cooperation_base)}, {"id":"care","value":care_adults*int(balance.cooperation_care)}, {"id":"food","value":0 if covered else int(balance.cooperation_hunger)}, {"id":"crowding","value":int(balance.cooperation_crowded) if crowded else 0}, {"id":"ration","value":int(balance.cooperation_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"cooperation")}],
 		"security": [{"id":"base","value":int(balance.security_base)}, {"id":"watch","value":(int(plan.watch)-int(crew.escorts))*int(balance.security_worker)}, {"id":"leadership","value":leader_skill(state,"watch")*int(balance.security_skill)}, {"id":"projects","value":effect(state,"security")}]
 	}
+	if lifecycle.active(state):
+		factors.wellbeing.insert(2,{"id":"civic","value":civic_adults*int(balance.wellbeing_care)})
+		factors.cooperation.insert(2,{"id":"civic","value":civic_adults*int(balance.cooperation_care)})
 	for key in ["wellbeing","cooperation","security"]:
 		factors[key].append({"id":"household_life","value":int(household_effects[key])})
 	if assets.active(state):
