@@ -122,6 +122,16 @@ budget and all replay/behavioral assertions. The final parent gate passed all
 [the investigation](../../../docs/reviews/2026-10-ai-ci-performance.md).
 No speculative AI/cartography optimization or assertion relaxation is included.
 
+Hosted [CI run 37705757701](https://github.com/zhynek/Roman-War/actions/runs/37705757701)
+at `7153211` subsequently passed data, import and **705 tests, 0 failures**.
+The AI campaign averaged **378.933 ms**, with a **527 ms** peak, against the unchanged
+600 ms budget (Linux / AMD EPYC 9V45 / four processors / Godot 4.4.1). Its Ubuntu
+24.04 image was `20260927.320.1`, distinct from the earlier failing image. This is
+a successful hosted sample, not proof of a particular cause or a guarantee against
+future variability. The full log is retained as `verification/remote-ci.log`.
+This result is recorded in a separate documentation-only follow-up; the tested
+implementation and frozen Mac payload are unchanged.
+
 ## Frozen delivery and exact application
 
 **Verified local 0.12.0**, frozen from clean commit

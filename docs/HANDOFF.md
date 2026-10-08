@@ -76,6 +76,10 @@ civic completion 0.98 s; material pauses remain. The parent CI 652 ms
 failure occurred on the unchanged baseline; retain its 600 ms guard. Read
 [the separate investigation](reviews/2026-10-ai-ci-performance.md). Timing
 diagnostics now identify successful samples too; runner cause remains unproven.
+Hosted [run 37705757701](https://github.com/zhynek/Roman-War/actions/runs/37705757701)
+at `7153211` passed all 705 tests: AI average **378.933 ms**, peak **527 ms**, with
+the unchanged 600 ms budget. This documentation-only follow-up records that pass;
+it does not alter the frozen build or resolve future shared-runner variability.
 
 ## City lifecycle (0.11.0 local build, October 7, 2026)
 

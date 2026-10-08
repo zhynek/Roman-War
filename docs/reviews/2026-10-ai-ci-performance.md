@@ -41,3 +41,14 @@ The final local parent gate passed **705 tests, 0 failures** with this diagnosti
 headless import and actual planning/marching/arrival/maximum-zoom rendering passed
 with no script errors. This is consistent with the unchanged local baseline;
 it does not resolve the shared Ubuntu runner limitation.
+
+After pushing the completed implementation and local verification record at
+`7153211`, [run 37705757701](https://github.com/zhynek/Roman-War/actions/runs/37705757701)
+passed data, import and **705 tests, 0 failures**. Its unchanged 60-turn assertion
+measured **378.933 ms average / 527 ms peak**, against the same **600 ms** budget.
+The reported environment was Linux, Godot 4.4.1, AMD EPYC 9V45, four processors,
+Ubuntu 24.04 image `20260927.320.1`. This differs from the earlier failing image;
+the new pass does not isolate the cause or eliminate future shared-runner variance.
+The complete log is retained in the local 0.12 build's
+`verification/remote-ci.log`. The following documentation-only commit records this
+result without changing the tested implementation or the frozen Mac payload.
