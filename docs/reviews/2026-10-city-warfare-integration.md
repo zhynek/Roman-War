@@ -83,3 +83,8 @@ all 21 D/H/P/G findings and records immediate cost, delayed benefit, opportunity
 cost, persistence and recovery. The [verification record](2026-10-city-warfare-verification.md)
 distinguishes final source checks, inspected controls, hosted CI and the original
 unchanged local app. No roadmap bridge or Large-town content was implemented.
+
+Before delivery, Zach replaced the testing policy with weekly/manual execution
+and no post-push CI polling. That later instruction supersedes step 8's final
+CI wait. Completed requested verification is retained; repeated checks stopped,
+and the inherited parent timing failure stays open with its guard unchanged.

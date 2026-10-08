@@ -72,3 +72,22 @@ states and report hashes matched, but time improved only 320.385 → 316.918 ms
 credibly explain or fix the hosted gap. Evidence is retained outside the tree
 at `/tmp/roman-war-ai-pure-probe/`. The 600 ms gate remains unchanged; broader
 profiling must justify any targeted optimization before source integration.
+
+The additional trade experiments also preserved all 60 canonical states and
+reports but showed no useful improvement: connection-first 317.098 → 316.921 ms;
+diplomacy-first 317.098 → 325.897 ms. All candidates remain unmerged. Costs are
+distributed across economy, public order, society and cartography; no persistent
+cache or changed gameplay rule was introduced. The full disposition is retained
+at `/tmp/roman-war-integration-qa/ai-performance-experiment-disposition.md`.
+
+The pre-integration audit main `8589fe9` itself failed
+[run 37734286616](https://github.com/zhynek/Roman-War/actions/runs/37734286616):
+625.733 ms average / 895 ms peak on Xeon Platinum 8370C, four processors. Its
+705-test suite had the same sole timing failure. This is independent evidence
+that the integration did not introduce it, not a passing performance result.
+
+Zach's subsequent weekly testing policy ends further repeated testing and CI
+monitoring in this development cycle. `weekly-tests.yml` retains the unchanged
+600 ms gate for weekly/manual execution; no push/PR test trigger remains.
+The inherited performance limitation is open for weekly review. No candidate
+was merged merely to influence the reported CI status.

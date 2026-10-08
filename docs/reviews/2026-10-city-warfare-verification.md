@@ -142,4 +142,39 @@ parent/village data and negative checks passed; the 711-test parent suite had
 the same sole timing failure, **637.917 ms average / 896 ms peak**, on EPYC 7763.
 The existing sequential workflow skipped village headless after that failure;
 the independent final local 53,586-check result above is not presented as a
-hosted pass. Main is held for further investigation with the 600 ms guard intact.
+hosted pass. Main was held at that checkpoint while the inherited timing issue
+was investigated, with its 600 ms guard intact.
+
+## Final policy change and source delivery
+
+Zach supplied the weekly testing policy before final delivery. It supersedes
+further repeated checks and post-push CI monitoring. `AGENTS.md` contains the
+shared policy; the sole workflow is now `weekly-tests.yml`, scheduled Monday
+13:00 UTC and manually dispatched, with no push/PR trigger. It retains both
+projects' full data/headless gates and diagnostic artifacts. No threshold,
+behavioral assertion or game rule was relaxed.
+
+The audited main commit `8589fe9` had already failed
+[run 37734286616](https://github.com/zhynek/Roman-War/actions/runs/37734286616)
+at 625.733 ms average / 895 ms peak on a four-processor Xeon Platinum 8370C.
+This confirms the hosted failure predates the integration. Isolated profiling
+preserved every full state/report but found no worthwhile small optimization;
+all candidates remain unmerged. Parent core and the timing test are unchanged.
+
+The subsequent expanded push workflow
+[37784725191](https://github.com/zhynek/Roman-War/actions/runs/37784725191),
+at `3726615`, was still running when monitoring stopped. Its final result is
+unverified. Cancellation was rejected by automatic approval review because it
+was not explicitly authorized; the run was left alone. The final policy commit
+will not start another push-triggered suite, and its CI will not be polled.
+
+The redundant `/tmp/roman-war-integration-qa/village-render-frozen/` repetition
+was stopped under the new policy. Only its lifecycle inspection completed;
+it is not an aggregate pass and does not replace the earlier complete inspected
+walkthroughs. All completed local results listed above remain unchanged.
+
+Verified by: Ruby/Psych parse of weekly-tests.yml and direct trigger inspection. Tests: not run (weekly review policy).
+
+This final line applies to the policy/workflow change. Earlier tests were run
+under the user's explicit request and retain their actual results. Source is
+delivered through main and `codex/village-defense`; no app or release is built.

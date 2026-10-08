@@ -11,6 +11,26 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Weekly testing policy — adopted October 8, 2026
+
+`AGENTS.md` now carries Zach's shared weekly review policy, which takes
+precedence over older test-before-handoff instructions. The sole Actions
+workflow is `.github/workflows/weekly-tests.yml`: Mondays at 13:00 UTC and manual
+dispatch, with no push or pull-request trigger. It retains full parent/village
+data and headless gates and failure evidence. Do not poll CI after a push.
+
+The integration checks below were explicitly requested and completed before this
+policy arrived. Further repeated verification and CI monitoring were stopped.
+The redundant final render repetition was interrupted and is not a completed
+gate; its earlier completed walkthroughs remain the evidence. The inherited
+parent hosted timing failure remains open with its 600 ms guard unchanged.
+No speculative performance candidate was merged. No release was built.
+
+Verified by: Ruby/Psych parse of weekly-tests.yml and direct trigger inspection. Tests: not run (weekly review policy).
+
+That line applies to the policy/workflow change; the earlier requested test
+results are recorded separately in the integration verification.
+
 ## City progression and warfare integration — October 2026
 
 The city-progression audit (`8589fe9`) and the complete warfare checkpoint
