@@ -8,6 +8,7 @@
     "headings",
     "effects",
     "blockers",
+    "knowledge",
     "captions",
     "map_commands",
     "city_view",
@@ -226,6 +227,103 @@
           "line": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "required": [
+        "wants",
+        "none",
+        "separator",
+        "unknown",
+        "battle_one",
+        "battle_many",
+        "blockers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "wants": {
+          "type": "string",
+          "minLength": 1
+        },
+        "none": {
+          "type": "string",
+          "minLength": 1
+        },
+        "separator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown": {
+          "type": "string",
+          "minLength": 1
+        },
+        "battle_one": {
+          "type": "string",
+          "minLength": 1
+        },
+        "battle_many": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blockers": {
+          "type": "object",
+          "required": [
+            "tradition",
+            "building",
+            "resource",
+            "hidden_resource",
+            "coastal",
+            "technique",
+            "era",
+            "battles_won",
+            "battles_lost",
+            "faced"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "tradition": {
+              "type": "string",
+              "minLength": 1
+            },
+            "building": {
+              "type": "string",
+              "minLength": 1
+            },
+            "resource": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hidden_resource": {
+              "type": "string",
+              "minLength": 1
+            },
+            "coastal": {
+              "type": "string",
+              "minLength": 1
+            },
+            "technique": {
+              "type": "string",
+              "minLength": 1
+            },
+            "era": {
+              "type": "string",
+              "minLength": 1
+            },
+            "battles_won": {
+              "type": "string",
+              "minLength": 1
+            },
+            "battles_lost": {
+              "type": "string",
+              "minLength": 1
+            },
+            "faced": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       }

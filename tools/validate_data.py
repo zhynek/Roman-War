@@ -1255,6 +1255,8 @@ def cross_checks(t: dict[str, dict]) -> None:
                  "already_built", "no_such_tier", "requires_building"):
         if kind not in blocker_kinds:
             err(f"effects_glossary: no sentence for the '{kind}' blocker")
+    for message in knowledge_wording_errors(glossary.get("knowledge", {})):
+        err(message)
     for note in glossary.get("kind_notes", []):
         if note["kind"] not in built_kinds:
             err(f"effects_glossary: kind_note names unknown building kind '{note['kind']}'")
@@ -1766,6 +1768,34 @@ def main() -> int:
     summary = ", ".join(f"{name.removesuffix('.json')}={count}" for name, count in counts.items() if count)
     print(f"\n{len(errors)} errors, {len(warnings)} warnings [{summary}]")
     return 1 if errors else 0
+
+
+def knowledge_wording_errors(wording: dict) -> list[str]:
+    """Keep the knowledge panel's templates aligned with its actual inputs."""
+    required_tokens = {
+        "tradition": {"factions"},
+        "building": {"building_kind", "level", "have"},
+        "resource": {"resource"}, "hidden_resource": {"resource"},
+        "coastal": set(), "technique": {"name"}, "era": {"era"},
+        "battles_won": {"needs", "battles", "have"},
+        "battles_lost": {"needs", "battles", "have"},
+        "faced": {"needs", "battles", "unit_class", "have"},
+    }
+    found: list[str] = []
+    source = (ROOT / "src/core/rules/knowledge.gd").read_text()
+    emitted = set(re.findall(r'blockers\.append\(\{"kind": "([a-z_]+)"', source))
+    templates = wording.get("blockers", {})
+    if set(templates) != emitted or set(required_tokens) != emitted:
+        found.append("effects_glossary: knowledge wording must cover exactly the emitted blocker kinds")
+    fields = {"wants": {"requirements"}, "none": set(), "separator": set(),
+              "unknown": set(), "battle_one": set(), "battle_many": set()}
+    for key, expected in list(fields.items()) + list(required_tokens.items()):
+        line = str((wording if key in fields else templates).get(key, ""))
+        tokens = set(re.findall(r"\{([a-z_]+)\}", line))
+        remainder = re.sub(r"\{[a-z_]+\}", "", line)
+        if tokens != expected or "{" in remainder or "}" in remainder:
+            found.append(f"effects_glossary: knowledge '{key}' must use exactly {sorted(expected)} tokens")
+    return found
 
 
 def _reader_source() -> str:

@@ -264,6 +264,26 @@
       "line": "Needs a {kind_name} of tier {tier} in this town first."
     }
   ],
+  "knowledge": {
+    "wants": "Wants: {requirements}",
+    "none": "nothing more",
+    "separator": ", ",
+    "unknown": "an unavailable requirement description",
+    "battle_one": "battle",
+    "battle_many": "battles",
+    "blockers": {
+      "tradition": "a tradition practiced by {factions}",
+      "building": "{building_kind} (tier {level}; current tier {have})",
+      "resource": "the {resource} trade",
+      "hidden_resource": "lands of {resource}",
+      "coastal": "a coast",
+      "technique": "practice of {name}",
+      "era": "the {era} era",
+      "battles_won": "{needs} {battles} won ({have} recorded)",
+      "battles_lost": "{needs} {battles} lost ({have} recorded)",
+      "faced": "{needs} {battles} against {unit_class} ({have} recorded)"
+    }
+  },
   "kind_notes": [
     {
       "kind": "education",

@@ -97,7 +97,9 @@ func _build_aware_entry(entry: Dictionary, busy: bool, treasury: int) -> void:
 	var cost := int(entry["cost"])
 	var turns := int(entry["turns"])
 	if not bool(entry["ready"]):
-		_line("    Wants: %s" % _prerequisites_text(entry["id"]), 11, Color(0.75, 0.65, 0.55))
+		var wants := prerequisites_text(game.data, entry["blockers"])
+		_line("    " + _fill(_wording(game.data).get("wants", "{requirements}"),
+			{"requirements": wants}), 11, Color(0.75, 0.65, 0.55))
 	else:
 		var row := HBoxContainer.new()
 		var adopt := Button.new()
@@ -126,37 +128,46 @@ func _build_aware_entry(entry: Dictionary, busy: bool, treasury: int) -> void:
 	_content.add_child(HSeparator.new())
 
 
-func _prerequisites_text(technique_id: String) -> String:
-	## Human-readable unmet-wants line, from the data (not the engine's caches —
-	## a static description suffices for the scroll).
-	var technique: Dictionary = game.data.techniques.get(technique_id, {})
-	var prereq: Dictionary = technique.get("prerequisites", {})
-	var wants: Array = []
-	var kind := String(prereq.get("building_kind", ""))
-	if kind != "":
-		wants.append("%s (tier %d)" % [kind.replace("_", " "), int(prereq.get("building_level", 1))])
-	if String(prereq.get("resource", "")) != "":
-		wants.append("the %s trade" % prereq["resource"])
-	if String(prereq.get("hidden_resource", "")) != "":
-		wants.append("lands of %s" % prereq["hidden_resource"])
-	if bool(prereq.get("coastal", false)):
-		wants.append("a coast")
-	for needed in prereq.get("techniques", []):
-		wants.append(String(game.data.techniques.get(needed, {}).get("name", needed)))
-	# Warcraft learns from the war record: what the court has fought and won.
-	if String(prereq.get("era", "")) != "":
-		wants.append("the %s era" % String(prereq["era"]).replace("_", "-"))
-	if int(prereq.get("battles_won", 0)) > 0:
-		wants.append("%d battle%s won" % [int(prereq["battles_won"]), "" if int(prereq["battles_won"]) == 1 else "s"])
-	if int(prereq.get("battles_lost", 0)) > 0:
-		wants.append("%d battle%s lost" % [int(prereq["battles_lost"]), "" if int(prereq["battles_lost"]) == 1 else "s"])
-	var faced: Dictionary = prereq.get("faced", {})
-	if not faced.is_empty():
-		wants.append("%d battle%s against %s" % [int(faced["battles"]), "" if int(faced["battles"]) == 1 else "s",
-			String(faced["class"]).replace("_", " ")])
-	if not technique.get("factions", []).is_empty():
-		wants.append("a tradition of another people")
-	return ", ".join(wants) if not wants.is_empty() else "nothing more"
+static func prerequisites_text(data: GameData, blockers: Array) -> String:
+	## The facade already evaluated these requirements. Presentation must not
+	## rebuild them or describe a prerequisite the court has already satisfied.
+	var wants: PackedStringArray = []
+	for blocker in blockers:
+		wants.append(blocker_text(data, blocker))
+	var wording := _wording(data)
+	return String(wording.get("separator", ", ")).join(wants) if not wants.is_empty() \
+		else String(wording.get("none", ""))
+
+
+static func blocker_text(data: GameData, blocker: Dictionary) -> String:
+	var wording := _wording(data)
+	var kind := String(blocker.get("kind", ""))
+	var params: Dictionary = blocker.get("params", {}).duplicate(true)
+	for key in ["building_kind", "resource", "unit_class"]:
+		if params.has(key):
+			params[key] = String(params[key]).replace("_", " ")
+	if params.has("era"):
+		params["era"] = String(params["era"]).replace("_", "-")
+	if params.has("factions"):
+		var names: PackedStringArray = []
+		for faction_id in params["factions"]:
+			names.append(String(data.factions.get(faction_id, {}).get("name", faction_id)))
+		params["factions"] = String(wording.get("separator", ", ")).join(names)
+	if params.has("needs"):
+		params["battles"] = wording.get("battle_one" if int(params["needs"]) == 1 else "battle_many", "")
+	var template: String = wording.get("blockers", {}).get(kind,
+		wording.get("unknown", kind.replace("_", " ")))
+	return _fill(template, params)
+
+
+static func _wording(data: GameData) -> Dictionary:
+	return data.effects_glossary.get("knowledge", {})
+
+
+static func _fill(template: String, params: Dictionary) -> String:
+	for key in params:
+		template = template.replace("{%s}" % key, str(params[key]))
+	return template
 
 
 func _war_record_lines(overview: Dictionary) -> void:
