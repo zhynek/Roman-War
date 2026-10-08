@@ -58,7 +58,16 @@ jobs:
           ~/godot/godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee /tmp/godot-tests.log
           ! grep -E 'SCRIPT ERROR:|ERROR:' /tmp/godot-tests.log
       - name: Run independent village import and all headless suites
+        if: ${{ !cancelled() }}
         run: python3 "Castles and Cities/tools/verify_village_source.py" --godot ~/godot/godot --phase headless --out /tmp/village-headless
+      - name: Preserve parent engine evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parent-engine-evidence
+          path: |
+            /tmp/godot-import.log
+            /tmp/godot-tests.log
       - name: Preserve village headless evidence
         if: always()
         uses: actions/upload-artifact@v4
