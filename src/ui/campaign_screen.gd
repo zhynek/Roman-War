@@ -21,6 +21,9 @@ var city_defense_button: Button
 signal main_menu_requested
 signal city_requested
 signal state_loaded
+signal season_presented
+signal season_started
+var advisor_input_blocked := false
 
 const SAVE_PATH := "user://roman_war_save.json"
 const OPTIONS_PATH := "user://roman_war_options.json"
@@ -358,7 +361,7 @@ func _build_options_menu() -> MenuButton:
 func _process(delta: float) -> void:
 	## The coffers count up (or down) to the day's new figure, so the player
 	## watches the money move instead of reading a number that has changed.
-	map_view.camera_input_enabled = not (turn_sequence.is_playing() or dispatch_panel.visible or drawer_open
+	map_view.camera_input_enabled = not (advisor_input_blocked or turn_sequence.is_playing() or dispatch_panel.visible or drawer_open
 		or family_panel.visible or diplomacy_panel.visible or senate_panel.visible or knowledge_panel.visible or annals_panel.visible
 		or (realism_study != null and realism_study.visible)
 		or (battle_screen != null and battle_screen.visible) or (_card_catcher != null and _card_catcher.visible))
@@ -467,6 +470,7 @@ func refresh() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if advisor_input_blocked:return
 	if realism_study != null and realism_study.visible:
 		return
 	## Keyboard camera: the whole map is reachable without a mouse. Arrows or
@@ -1366,6 +1370,7 @@ func _end_turn() -> void:
 
 	_cancel_map_order()
 	map_view.finish_marches()
+	season_started.emit()
 	var turn_result := game.end_turn()
 	if not turn_result.get("ok", true):
 		var reason := String(turn_result.get("reason", "advance_blocked"))
@@ -1445,11 +1450,14 @@ func _faction_name(faction_id: String) -> String:
 func _on_day_played() -> void:
 	if playback_enabled:
 		_show_dispatch()
+	else:
+		season_presented.emit()
 	map_view.center_on_selected()
 
 
 func _on_dispatch_dismissed() -> void:
 	refresh()  # picks up the victory banner if the age closed today
+	season_presented.emit()
 
 
 func _show_dispatch() -> void:

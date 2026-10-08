@@ -1,0 +1,162 @@
+{
+  "$schema": "../schemas/marcus.schema.json",
+  "id": "marcus",
+  "name": "Marcus",
+  "role": "Your companion through the ages",
+  "fiction_note": "Marcus is an original, timeless fictional counselor inspired by Stoic philosophy. His presence across different reigns is a storytelling device, not a claim about the historical Marcus Aurelius.",
+  "future_note": "Temples already have their existing campaign effects. Personal divine missions, specialist advisor unlocks and a council of competing voices are future story systems; this guide grants no new powers or rewards.",
+  "ui": {
+    "launcher": "Ask Marcus",
+    "launcher_hint": "A little counsel, whenever you need it",
+    "close": "Return to the campaign and end online counsel",
+    "guide": "Your first steps",
+    "conversation": "Talk with Marcus",
+    "intro_tag": "A VOICE THROUGH THE AGES",
+    "lesson_tag": "LEARN BY DOING",
+    "progress": "{number} of {total}",
+    "previous": "Back",
+    "next": "Continue",
+    "begin_guide": "Begin the guide",
+    "skip": "Explore on my own",
+    "replay": "Replay the opening",
+    "restart": "Restart the guide",
+    "finish": "Finish the guide",
+    "finished": "The next choice is yours",
+    "finished_body": "Return to any lesson or ask about the choice in front of you. Reading counsel does not issue orders or advance a season. A running city battle continues unless you pause it with its own controls.",
+    "show_me": "Show me this place",
+    "active_village_needed": "Begin or resume your village with the existing village controls, then I can show you this lesson's place. Reading this guide creates nothing.",
+    "battle_navigation_blocked": "Lesson navigation is unavailable during an active battle. You can read and ask for counsel; Marcus does not pause the battle.",
+    "chapter_note": "The city ledger and campaign Dispatch describe the same campaign. A city day and a campaign season are different actions; review the current forecast before advancing either.",
+    "hear": "Ask Marcus about this page",
+    "hear_hint": "When connected, ask Marcus to explain the current page with speech and text.",
+    "explain_prompt": "Explain the current guide page or seasonal briefing using my supplied visible campaign context. Give one practical next step and its tradeoff, without taking any action for me.",
+    "connect": "Connect Marcus",
+    "disconnect": "Disconnect",
+    "mute": "Mute voice",
+    "unmute": "Enable voice",
+    "connection_note": "Connect to send questions and visible campaign facts to ElevenLabs. Replies include text and optional speech. Closing Marcus ends the online session. The written guide and seasonal briefing work offline.",
+    "context_note": "Counsel uses a snapshot taken when you ask. Check current reports and order previews before acting. Running battles continue while you read.",
+    "setup_note": "Online counsel needs the private Marcus service configured for this app. You can use every lesson while it is offline.",
+    "placeholder": "Ask about your campaign or the next decision…",
+    "send": "Ask",
+    "you": "You",
+    "empty_chat": "Connect when you are ready, then ask about your selected settlement, public order, an order preview or the latest resolved season.",
+    "working": "Marcus is considering your question…",
+    "question_too_long": "Please shorten this question to {limit} characters.",
+    "ask_supplies": "What affects public order here?",
+    "ask_building": "What should I check before building?",
+    "ask_next": "What should I look at next?",
+    "reference_mode": "Looking at the reference village",
+    "village_mode": "Playing the seasonal village",
+    "no_history": "No season has been resolved yet.",
+    "no_known_incident": "No discovered incident to discuss.",
+    "not_connected": "Connect Marcus to ask a new question. Your guide and this conversation remain available.",
+    "lesson_source": "From the campaign’s current controls and reports",
+    "review_season": "Review the season with Marcus",
+    "season_title": "What the season has brought",
+    "season_help": "These are the latest resolved season’s reports available to you. Read them here, or connect and ask Marcus about the choices ahead. Reviewing them does not advance time.",
+    "season_quiet": "There are no dispatch items to summarize for this season.",
+    "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection.",
+    "presentation_navigation_blocked": "Finish the turn presentation and close Dispatch before following a lesson. Counsel remains available here.",
+    "city_view_needed": "Enter Roma with the campaign’s existing controls first, then return to this lesson to open its ledger.",
+    "battle_context_note": "A battle is running or being viewed. Only the already-presented battle snapshot is supplied; no live campaign economy, hidden enemies or tactical rosters are available. Advice does not pause the simulation."
+  },
+  "status": {
+    "unconfigured": "The private service needs its ElevenLabs credentials",
+    "disconnected": "Written guide ready",
+    "connecting": "Connecting to Marcus…",
+    "connected": "Marcus is ready",
+    "thinking": "Considering your question…",
+    "speaking": "Marcus is speaking",
+    "muted": "Voice muted · text stays on",
+    "setup_required": "Online counsel is not configured",
+    "broker_unavailable": "Marcus's service is unavailable",
+    "broker_rejected": "The private service could not authorize this session",
+    "agent_private_required": "Marcus must require private authentication in ElevenLabs",
+    "rate_limited": "Too many connection attempts. Wait one minute, then reconnect.",
+    "service_busy": "Marcus's service is busy. Try connecting again shortly.",
+    "connection_failed": "Could not connect to Marcus",
+    "connection_timeout": "The connection took too long",
+    "unsupported_audio": "Session ended: Marcus's audio format needs configuration. The written guide is available.",
+    "protocol_error": "The conversation could not continue",
+    "audio_overflow": "Session ended because speech fell behind. Your conversation remains available.",
+    "response_timeout": "No answer arrived; try connecting again",
+    "idle_timeout": "Session ended after inactivity",
+    "agent_busy": "Marcus is finishing an answer",
+    "unavailable": "Online counsel is unavailable"
+  },
+  "intro": [
+    {
+      "id": "inheritance",
+      "title": "What will outlast your reign?",
+      "body": "Before you lie the roads, cities and obligations of a realm. Soldiers ask where they will march. Families ask whether their homes will endure. A ruler can command a season; a worthy legacy must survive many rulers.",
+      "counsel": "I am Marcus, a companion across the ages. Let us begin with the people and choices already before you."
+    },
+    {
+      "id": "measure",
+      "title": "The measure of a ruler",
+      "body": "In our unfolding story, the gods will disagree over what deserves to endure: order, wisdom, glory, or the care of a home. Their ambitions may differ from yours. Today, the responsibility is concrete: understand your cities, weigh the cost of an order, and attend to what each season brings.",
+      "counsel": "A divine promise can wait while you examine a real consequence. Your judgment remains your own."
+    },
+    {
+      "id": "counsel",
+      "title": "A voice at your side",
+      "body": "Call on me from the corner of either the map or Roma. Read these lessons offline, or connect to ask questions with text and voice. After a season, you may review its reports with me. I offer counsel; you use the game’s controls to decide and act.",
+      "counsel": "First we shall inspect your capital, then its work and public order, then your armies and the passing of time."
+    }
+  ],
+  "lesson_counsel": [
+    "A distant report is a memory, not a promise. Begin with what your own administration can actually tell you.",
+    "A useful building answers a present need. Judge its cost alongside the work and duties you already maintain.",
+    "Discontent has causes. Read them before mistaking a stronger command for a lasting remedy.",
+    "The shortest road is not always the wisest order. Consider the cost, the destination and what you leave unguarded.",
+    "Attend to what happened before deciding what it means. A report can guide the next choice without predicting its outcome.",
+    "A city and an empire share consequences. Keep the scale of your decision clear before you commit the time."
+  ],
+  "limits": {
+    "question_characters": 1600,
+    "conversation_entries": 40,
+    "context_reports": 20,
+    "context_settlements": 8,
+    "context_forces": 8,
+    "context_factors": 16
+  },
+  "lessons": [
+    {
+      "id": "capital",
+      "title": "Read your capital",
+      "destination": "capital",
+      "body": "Select a settlement to inspect its owner, population and development. Your own settlements expose their management controls; foreign reports may be older surveys. Show me focuses your current capital on the map without issuing an order. Watch the date of any report before treating it as current."
+    },
+    {
+      "id": "construction",
+      "title": "Build with a purpose",
+      "destination": "construction",
+      "body": "Open your capital’s management drawer and inspect the available buildings. Compare the displayed cost, prerequisites, benefits and current queue before choosing to build. The treasury supports both new work and continuing obligations. Show me opens the existing drawer; it does not purchase anything."
+    },
+    {
+      "id": "public_order",
+      "title": "Understand public order",
+      "destination": "capital",
+      "body": "Your settlement panel explains public order through named factors. Look at the causes before changing taxes, garrisons or other policies. Population growth and income have their own factors, so a choice can help one measure and hurt another. Ask Marcus about the selected settlement, then check the actual controls before acting."
+    },
+    {
+      "id": "orders",
+      "title": "Examine a march before ordering it",
+      "destination": "orders",
+      "body": "Select your own army to inspect movement and preview a destination. A journey beyond this season opens a plan with its cost and arrival; Issue orders commits that plan. A normal destination click can act immediately, so use the preview carefully. Show me opens the Controls sheet. It never selects a target or moves troops."
+    },
+    {
+      "id": "seasons",
+      "title": "Let a season resolve, then reflect",
+      "destination": "dispatch",
+      "body": "END TURN resolves the campaign. Watch the turn presentation and read Dispatch for the outcomes reported to you. Once it finishes, Review the season with Marcus offers a written briefing and optional conversation. Show me opens the existing Dispatch; it does not end a turn. The briefing contains only the latest season, even after advancing several at once."
+    },
+    {
+      "id": "city_ledger",
+      "title": "Roma and the wider campaign",
+      "destination": "city_ledger",
+      "body": "When you own Roma, enter it with the map’s existing controls. Its campaign ledger connects local life to your wider treasury, troops and seasons. A civic day and a campaign season are separate actions. While already in Roma, Show me opens that ledger. Moving between ordinary views preserves your Marcus conversation; loading a save clears it."
+    }
+  ]
+}

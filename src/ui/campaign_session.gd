@@ -10,6 +10,10 @@ var city: RomaCityScreen
 var campaign: CampaignScreen
 var initial_view := "campaign"
 var active_view := ""
+var marcus
+var marcus_context
+var _season_review_pending := false
+var _last_season_offered := -1
 
 
 static func create(current_game: Game, view: String = "campaign", slot: String = CampaignScreen.SAVE_PATH) -> CampaignSession:
@@ -26,6 +30,15 @@ func _ready() -> void:
 		show_city()
 	else:
 		show_campaign()
+	# Keep one advisor above both retained views, outside their refresh cycles.
+	marcus_context = preload("res://src/ui/advisors/marcus_campaign_context.gd").new(self)
+	var advisor_layer := CanvasLayer.new()
+	advisor_layer.layer = 20
+	add_child(advisor_layer)
+	marcus = preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_panel.gd").new()
+	advisor_layer.add_child(marcus)
+	marcus.opened_changed.connect(_advisor_opened)
+	marcus.configure_context(marcus_context)
 
 
 func can_enter_city() -> bool:
@@ -60,6 +73,8 @@ func show_city() -> void:
 		city.campaign_zoom_requested.connect(show_campaign_from_city, CONNECT_DEFERRED)
 		city.main_menu_requested.connect(return_to_menu, CONNECT_DEFERRED)
 		city.state_loaded.connect(_state_loaded)
+		city.season_presented.connect(_season_presented)
+		city.season_started.connect(_season_started)
 		add_child(city)
 		city.show_city_overview()
 		city.battle_panel.closed.connect(_battle_view_closed, CONNECT_DEFERRED)
@@ -68,6 +83,7 @@ func show_city() -> void:
 	active_view = "city"
 	city.refresh_city()
 	city._refresh_drawer()
+	_advisor_opened(is_instance_valid(marcus) and marcus.is_open())
 	var battle := game.city_battle_status("latium")
 	if battle.get("active", false) or battle.get("can_defend", false):
 		city.open_battle()
@@ -83,11 +99,14 @@ func show_campaign() -> void:
 		campaign.city_requested.connect(show_city, CONNECT_DEFERRED)
 		campaign.main_menu_requested.connect(return_to_menu, CONNECT_DEFERRED)
 		campaign.state_loaded.connect(_state_loaded)
+		campaign.season_presented.connect(_season_presented)
+		campaign.season_started.connect(_season_started)
 		add_child(campaign)
 	campaign.process_mode = Node.PROCESS_MODE_INHERIT
 	campaign.show()
 	active_view = "campaign"
 	campaign.refresh()
+	_advisor_opened(is_instance_valid(marcus) and marcus.is_open())
 	if can_enter_city():
 		campaign.map_view.center_on("latium")
 
@@ -113,6 +132,11 @@ func _state_loaded() -> void:
 	if is_instance_valid(campaign):
 		campaign._restore_loaded_presentation()
 		campaign.refresh()
+	if is_instance_valid(marcus):
+		marcus_context.capture_season()
+		marcus.reset_conversation()
+	_season_review_pending = false
+	_last_season_offered = int(game.state.turn)
 
 
 func return_to_menu() -> void:
@@ -131,6 +155,30 @@ func return_to_menu() -> void:
 func _battle_view_closed() -> void:
 	if active_view == "city" and game.state["settlements"]["latium"]["owner"] != game.state["player_faction"]:
 		show_campaign()
+	if _season_review_pending:_season_presented()
+
+
+func _advisor_opened(active: bool) -> void:
+	if is_instance_valid(campaign):
+		campaign.advisor_input_blocked = active
+		if active:campaign.map_view.camera_input_enabled = false
+	if is_instance_valid(city):city.advisor_input_blocked = active
+
+
+func _season_started() -> void:
+	if is_instance_valid(marcus):marcus.refresh_briefing(false)
+	_season_review_pending = true
+
+
+func _season_presented() -> void:
+	if not is_instance_valid(marcus):return
+	_season_review_pending = not marcus_context.capture_season()
+	if not _season_review_pending:
+		var season: Dictionary = marcus_context.season_briefing()
+		var turn: int = int(season.get("turn", -1))
+		if turn != _last_season_offered:
+			_last_season_offered = turn
+			marcus.refresh_briefing()
 
 
 func _exit_tree() -> void:

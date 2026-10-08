@@ -11,6 +11,43 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Marcus campaign phase — October 8, 2026
+
+The user authorized the proposed campaign phase, and its plan was recorded in
+Isengard assignment `43bbb7f8-11f2-4b5c-9d62-cef289a01aae` before editing.
+Marcus now persists across the parent map and Roma through `CampaignSession`.
+The village and campaign share `marcus_panel.gd`, portrait and transport, with
+separate context adapters, authored content and tutorial preferences. The parent
+loads the shared files from the village project to preserve standalone exports.
+
+The campaign adds three opening pages, six replayable lessons and an optional
+seasonal review after turn playback/Dispatch. Only facade-visible reports,
+own settlement factors, observed enemy presence and own force/order summaries
+enter context. A live city battle supplies only its detached UI snapshot.
+Navigation does not enter/create Roma or issue orders. The panel blocks underlying
+mouse/keyboard controls while open; it does not pause a running battle. Loading
+a save disconnects Marcus and clears the transcript. No core rule, RNG, save
+schema, temple effect or specialist unlock changed.
+
+The private ElevenLabs prompt was published with both experience identifiers,
+stale-survey limits and campaign/battle/season guidance. Native live audio/text
+acceptance remains pending the private key; the offline campaign phase is ready.
+[Setup](marcus/SETUP.md) now includes the explicit campaign launch command.
+
+Direct evidence: both data validators reported zero errors; both Godot projects
+imported without script errors. Rendered city opening, map lesson and seasonal
+briefing were inspected, as was the refactored village panel. Direct function
+output confirmed unchanged campaign state (including RNG) on context reads,
+lesson navigation, briefing and map/city round trip. Conversation count remained
+1 across views and became 0 on load, with connected=false. A turn-1 briefing
+contained 16 visible reports and 4,832 context bytes; its offer was false during
+playback/Dispatch and true after dismissal. Fresh campaigns no longer offer an
+empty season; keyboard focus stays inside the open panel. Runtime logs had no
+script errors. QA files and images are outside the repository. No broad suite,
+push, release or public deployment was made.
+
+Verified by: data/schema validation, Godot imports, rendered advisor walkthrough and direct state/retention checks. Tests: not run (weekly review policy).
+
 ## Marcus advisor first slice — October 8, 2026
 
 The Isengard assignment **Marcus advisor — guided tutorial and private ElevenLabs
@@ -31,8 +68,9 @@ A private ElevenLabs agent was published with Claude Sonnet 5, the Grandfather
 Joe voice and zero retention. No provider credential was available locally or in
 the repository's GitHub Actions secret list. Live native audio/text acceptance
 is pending entry of the key through the launcher's hidden terminal prompt.
-Microphone input, the parent campaign adapter, unlockable specialists, worship
-mechanics and seasonal councils remain future milestones.
+At this first checkpoint, microphone input, the parent campaign adapter,
+unlockable specialists, worship mechanics and seasonal councils remained future
+milestones. The campaign adapter is now implemented in the phase above.
 
 The new Marcus content validates with zero errors. Godot import completed without
 script errors; direct rendering exposed layout issues that were corrected before

@@ -39,6 +39,25 @@ house, its cities, its money, and its armies. Roma offers controllable continuou
 siege defence on its city streets. Other city and field battles use the
 campaign's automatic resolver.
 
+## Ask Marcus
+
+The bottom-right **Ask Marcus** portrait is available on the campaign map and
+in Roma. On first use, a three-page opening leads into six replayable lessons.
+**Show me this place** opens the actual inspection controls; it does not buy,
+move troops or advance time. The written guide works offline.
+
+After a season’s presentation and Dispatch finish, **Review the season with
+Marcus** offers a written account of the latest reports available to you.
+You can revisit it inside Marcus. It includes only the latest season when
+several are advanced together. Reviewing it spends nothing and advances no time.
+
+**Connect Marcus** enables typed questions with ElevenLabs text and optional
+speech using the [private launcher](docs/marcus/SETUP.md). Context is refreshed
+when you ask and includes only bounded player-visible facts. Conversations
+survive ordinary map/city navigation; loading a save clears them. Closing Marcus
+ends the online connection. During a city battle, only its presented snapshot
+is supplied; the battle continues unless you pause it with its own controls.
+
 ## Starting a campaign
 
 You pick a few things and press **BEGIN THE CAMPAIGN**:

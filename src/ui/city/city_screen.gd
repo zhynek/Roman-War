@@ -6,6 +6,9 @@ signal main_menu_requested
 signal state_loaded
 signal campaign_requested
 signal campaign_zoom_requested
+signal season_presented
+signal season_started
+var advisor_input_blocked := false
 
 const REGION := "latium"
 const SURVEY_MIN := 24.0
@@ -279,6 +282,7 @@ func _button(text: String, callback: Callable) -> Button:
 	return button
 
 func _view_input(event: InputEvent) -> void:
+	if advisor_input_blocked:return
 	if (battle_panel != null and battle_panel.visible) or (campaign_panel != null and campaign_panel.visible) or (dawn != null and dawn.visible):
 		return
 	if event is InputEventMagnifyGesture:
@@ -378,6 +382,7 @@ func toggle_walk() -> void:
 	_refresh_position()
 
 func _input(event: InputEvent) -> void:
+	if advisor_input_blocked:return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
 		_survey_dragging = false
 	if battle_panel != null and battle_panel.visible:
@@ -414,6 +419,7 @@ func _input(event: InputEvent) -> void:
 				interact()
 
 func _physics_process(delta: float) -> void:
+	if advisor_input_blocked:return
 	if battle_panel != null and battle_panel.visible:
 		return
 	if campaign_panel != null and campaign_panel.visible:
@@ -988,6 +994,7 @@ func advance_season(count: int = 1) -> void:
 	if battle_panel.visible:
 		return
 	battle_panel.host.stop()
+	season_started.emit()
 	var result := game.city_campaign_advance(REGION, count)
 	refresh_city()
 	_refresh_drawer()
@@ -1009,6 +1016,8 @@ func advance_season(count: int = 1) -> void:
 		campaign_requested.emit()
 	else:
 		campaign_panel.present()
+	if int(result.get("seasons_advanced",0)) > 0:
+		season_presented.emit()
 
 
 func _sync_garrison() -> void:

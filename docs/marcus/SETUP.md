@@ -39,6 +39,10 @@ Claude Sonnet 5 was accepted with that protection enabled. These are provider
 settings, not hardcoded client requirements; the live native connection remains
 pending the private key and one end-to-end conversation.
 
+The published prompt now supports both `yenikapi_early_settlement` and
+`roman_campaign`, including partial seasonal reports and the limited live
+battle context. This prompt update does not establish native voice acceptance.
+
 ## Recreate or change the agent
 
 In the ElevenLabs dashboard, create a dedicated Marcus agent and configure its
@@ -75,13 +79,20 @@ as you type; without `ELEVENLABS_AGENT_ID`, it also asks for the private agent I
 The broker generates a fresh random 256-bit local token, starts Godot and removes
 ElevenLabs, OpenAI and Anthropic environment variables from the game process.
 It passes only `MARCUS_BROKER_URL` and `MARCUS_BROKER_TOKEN` for the connection.
-It opens the **Yenikapı — Early Settlement** project, where this first Marcus
-slice is implemented. It uses `godot` on `PATH`, or the existing
+By default it opens the **Yenikapı — Early Settlement** project. Marcus is
+also available in the parent Roman campaign with the explicit command below. It uses `godot` on `PATH`, or the existing
 `build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot` binary when
 available. The broker exits when the game closes. Nothing is written to disk by
 this tool.
 
-If Godot is not on `PATH`, supply its executable and arguments after `--launch`:
+For the **Roman campaign**, supply the parent project path (the key still stays
+in the broker, and the launcher still exits when the game closes):
+
+```sh
+ELEVENLABS_AGENT_ID=agent_1001m4e1c02ee6p8n4jf0fcj5b6w python3 tools/marcus_broker.py --prompt-credentials --launch build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot --path .
+```
+
+To specify the village project and Godot executable explicitly:
 
 ```sh
 python3 tools/marcus_broker.py --prompt-credentials --launch build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot --path "Castles and Cities/sites/yenikapi_6000_bce/experience"

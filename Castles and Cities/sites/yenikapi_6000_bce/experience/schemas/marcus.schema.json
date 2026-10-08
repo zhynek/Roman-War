@@ -12,7 +12,7 @@
     "future_note": {"$ref": "#/$defs/text"},
     "ui": {
       "type": "object",
-      "required": ["launcher", "launcher_hint", "close", "guide", "conversation", "intro_tag", "lesson_tag", "progress", "previous", "next", "begin_guide", "skip", "replay", "restart", "finish", "finished", "finished_body", "show_me", "active_village_needed", "battle_navigation_blocked", "chapter_note", "hear", "hear_hint", "explain_prompt", "connect", "disconnect", "mute", "unmute", "connection_note", "context_note", "setup_note", "placeholder", "send", "you", "empty_chat", "working", "question_too_long", "ask_supplies", "ask_building", "ask_next", "reference_mode", "village_mode", "no_history", "no_known_incident", "not_connected", "lesson_source"],
+      "required": ["launcher", "launcher_hint", "close", "guide", "conversation", "intro_tag", "lesson_tag", "progress", "previous", "next", "begin_guide", "skip", "replay", "restart", "finish", "finished", "finished_body", "show_me", "active_village_needed", "battle_navigation_blocked", "chapter_note", "hear", "hear_hint", "explain_prompt", "connect", "disconnect", "mute", "unmute", "connection_note", "context_note", "setup_note", "placeholder", "send", "you", "empty_chat", "working", "question_too_long", "ask_supplies", "ask_building", "ask_next", "reference_mode", "village_mode", "no_history", "no_known_incident", "not_connected", "lesson_source", "review_season", "season_title", "season_help", "season_quiet", "season_more"],
       "propertyNames": {"pattern": "^[a-z][a-z0-9_]*$"},
       "additionalProperties": {"$ref": "#/$defs/text"}
     },

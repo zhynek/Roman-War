@@ -51,7 +51,12 @@
     "no_history": "No season has been resolved yet.",
     "no_known_incident": "No discovered incident to discuss.",
     "not_connected": "Connect Marcus to ask a new question. Your guide and this conversation remain available.",
-    "lesson_source": "From the village's How to play guide"
+    "lesson_source": "From the village's How to play guide",
+    "review_season": "Review the season with Marcus",
+    "season_title": "What the season has brought",
+    "season_help": "These are the latest resolved season’s reports available to you. Read them here, or connect and ask Marcus about the choices ahead. Reviewing them does not advance time.",
+    "season_quiet": "There are no dispatch items to summarize for this season.",
+    "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection."
   },
   "status": {
     "unconfigured": "The private service needs its ElevenLabs credentials",

@@ -24,6 +24,7 @@ SCHEMAS = ROOT / "schemas"
 
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
+    "marcus.json": "marcus.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
@@ -126,8 +127,29 @@ def load_tables() -> dict[str, dict]:
     return tables
 
 
+def _marcus_checks(t: dict[str, dict]) -> None:
+    content = t.get("marcus.json", {})
+    if len(content.get("lesson_counsel", [])) != len(content.get("lessons", [])):
+        err("marcus: each campaign lesson needs a counsel entry")
+    for section in ("intro", "lessons"):
+        ids = [page.get("id") for page in content.get(section, [])]
+        if len(ids) != len(set(ids)):
+            err(f"marcus: duplicate {section} id")
+    shared = ROOT / "Castles and Cities/sites/yenikapi_6000_bce/experience/src"
+    for key in re.findall(r'\bw\("([a-z_]+)"\)', (shared / "marcus_panel.gd").read_text()):
+        if key not in content.get("ui", {}):
+            err(f"marcus: missing UI copy {key}")
+    for key in re.findall(r'\b(?:_set_status|_fail)\("([a-z_]+)"\)', (shared / "marcus_voice.gd").read_text()):
+        if key not in content.get("status", {}):
+            err(f"marcus: missing connection status {key}")
+    for key, parameters in {"progress": {"number", "total"}, "question_too_long": {"limit"}}.items():
+        if set(re.findall(r"\{([a-z_]+)\}", content.get("ui", {}).get(key, ""))) != parameters:
+            err(f"marcus: invalid placeholders in {key}")
+
+
 def cross_checks(t: dict[str, dict]) -> None:
     _city_checks(t)
+    _marcus_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 

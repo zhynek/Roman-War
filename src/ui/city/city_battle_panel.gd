@@ -719,6 +719,7 @@ func _notification(what: int) -> void:
 		_cancel_gesture()
 
 func _input(event: InputEvent) -> void:
+	if screen.advisor_input_blocked:return
 	if not visible or (not _selection_press and not _frontage_press and _camera_drag == ""):
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -739,6 +740,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _gui_input(event: InputEvent) -> void:
+	if screen.advisor_input_blocked:return
 	if event is InputEventMouseMotion and (_selection_press or _frontage_press or _camera_drag != ""):
 		_gesture_motion(event.position)
 		accept_event()
@@ -882,7 +884,7 @@ func _process(delta: float) -> void:
 		var latest := host.snapshot()
 		if int(latest.get("tick", -1)) != _view_tick or latest.get("phase", "") != snapshot.get("phase", ""):
 			refresh()
-	if get_window().has_focus() and not _selection_press and _camera_drag == "":
+	if not screen.advisor_input_blocked and get_window().has_focus() and not _selection_press and _camera_drag == "":
 		var focus_owner := get_viewport().gui_get_focus_owner()
 		if focus_owner is not LineEdit and focus_owner is not TextEdit and not Input.is_key_pressed(KEY_CTRL) and not Input.is_key_pressed(KEY_META):
 			var movement := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)), float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -897,6 +899,7 @@ func _process(delta: float) -> void:
 	plan.queue_redraw()
 
 func _unhandled_key_input(event: InputEvent) -> void:
+	if screen.advisor_input_blocked:return
 	if not visible or event is not InputEventKey or not event.pressed or event.echo:
 		return
 	match event.keycode:

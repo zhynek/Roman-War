@@ -21,8 +21,8 @@ claim about Yenikapı or a claim that a Roman emperor lived in 6000 BCE.
 
 The first implementation targets the independent **Yenikapı — Early Settlement**
 project. Its recent playable development and eleven existing lessons provide
-the initial teaching material. The parent Roman campaign remains a separate
-application; a later adapter will connect the same advisor design to that game.
+the initial teaching material. The parent Roman campaign is a separate
+application connected by the campaign adapter described below.
 
 ## Milestones and acceptance
 
@@ -55,7 +55,8 @@ application; a later adapter will connect the same advisor design to that game.
    A seasonal council presents counsel after the deterministic season resolves.
    Neither spoken dialogue nor an LLM decides rewards, outcomes or unlocks.
 
-Milestones 4–6 are future work. The first slice introduces no new temple,
+Milestone 4 is implemented in the campaign phase below. Milestones 5–6 remain
+future work. The advisor introduces no new temple,
 worship, emperor succession, council, or civilization-expansion mechanics.
 
 ## Boundaries
@@ -151,9 +152,11 @@ text and audible speech, then mute and disconnect. Until that succeeds, mileston
 3 and the Isengard assignment remain In progress. No public deployment or
 distribution with shared credentials is part of this development phase.
 
-## Proposed next phase: Marcus across the Roman campaign
+## Campaign phase: Marcus across the Roman campaign
 
-After native voice acceptance, pursue milestone 4 as one bounded phase:
+The user authorized this phase on October 8, 2026. Its plan was appended to
+the existing Isengard assignment before editing. Work proceeded on offline
+campaign integration while private native voice acceptance remained pending:
 
 1. Extract the retained advisor presentation from its village-specific context
    builder so both applications use the same connection and transcript behavior.
@@ -172,3 +175,55 @@ the campaign state and RNG while advising. This establishes the integration
 needed for later governance/military specialists and divine councils. Specialist
 unlocks, new gods/temple rules and multi-advisor conversations belong to the
 following phase; they are not part of this proposed adapter implementation.
+
+## Campaign implementation
+
+`CampaignSession` owns one retained Marcus panel above the map and Roma views.
+The shared presentation, portrait and ElevenLabs transport remain under the
+standalone village project so that its exports remain self-contained. The parent
+loads those same scripts explicitly; each game supplies its own context adapter,
+content and separate preference file. Conversation history stays in memory and
+is cleared when a campaign save is loaded.
+
+The campaign content table and schema author a new opening, six lessons and the
+optional seasonal review. Navigation only inspects the capital, opens an existing
+drawer, Controls or Dispatch, or opens the ledger when already in Roma. It never
+enters Roma automatically, because initial city entry establishes campaign state.
+
+The context adapter uses known settlement surveys, own settlement factor reports,
+observed enemy presence, own force summaries and order previews. It never sends
+full saves, hidden rosters, unknown regions, raw journals or campaign RNG. During
+live city battles it reads only the detached snapshot already used by the UI.
+The presentation blocks underlying camera/command input while open; it does not
+pause or alter the battle worker.
+
+A seasonal offer appears after turn playback and Dispatch are finished, or after
+city season advancement finishes. A pending city battle defers the briefing until
+that view closes. Reopening the same Dispatch does not repeatedly offer it. The
+latest filtered headlines are readable offline; voice still requires explicit
+connection. A new season clears the old offer. No advisor unlock, temple rule,
+divine reward, new simulation system or save migration was introduced.
+
+The private agent prompt was updated and published to distinguish the two games,
+recognize existing campaign temples, respect stale surveys, and explain partial
+season/battle context. Provider credentials remain exclusively in the broker.
+
+Campaign verification: data/schema validators returned zero errors; both Godot
+projects imported cleanly. The campaign opening, map lesson, seasonal review and
+shared village panel were rendered and inspected. Direct output confirmed
+unchanged full campaign state (including RNG) for advisor context, lesson
+navigation, briefing and map/city round trip; conversation count remained 1
+across views and reset to 0/disconnected on load. The seasonal offer stayed
+hidden during playback and Dispatch and appeared after dismissal. The sampled
+briefing contained 16 visible reports in 4,832 context bytes. Fresh-campaign
+season availability and focus confinement were corrected during inspection.
+Runtime logs contained no script errors. Live provider audio remains unverified.
+
+Verified by: data/schema validation, Godot imports, rendered advisor walkthrough and direct state/retention checks. Tests: not run (weekly review policy).
+
+Next development phase: one governance specialist unlocked by an existing,
+explicit building prerequisite, with a visible explanation of the unlock and
+counsel based on reported city factors. Keep the unlock deterministic and its
+counsel advisory; defer a full council and divine mandates until that smaller
+loop is working. Native live text/audio acceptance remains a separate immediate
+integration dependency, not a reason to claim provider behavior already works.

@@ -29,7 +29,7 @@ def validate(content):
             errors.append("Marcus guide references an unknown village place")
         if lesson.get("destination", "asset") not in {"asset", "lifecycle", "defense", "aftermath"}:
             errors.append("Marcus guide references an unsupported destination")
-    source = (ROOT / "src/marcus_advisor.gd").read_text()
+    source = (ROOT / "src/marcus_panel.gd").read_text()
     for key in re.findall(r'\bw\("([a-z_]+)"\)', source):
         if key not in content["ui"]:
             errors.append(f"missing Marcus UI copy: {key}")
