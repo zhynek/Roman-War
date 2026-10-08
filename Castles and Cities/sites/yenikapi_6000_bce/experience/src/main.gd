@@ -16,6 +16,7 @@ var location_label: Label
 var status: Label
 var campaign
 var defense_panel
+var marcus_advisor
 var visual_commands
 var reference_top: PanelContainer
 var reference_bottom: PanelContainer
@@ -183,6 +184,9 @@ func _interface() -> void:
 	commands.add_child(_button(visual_commands.w("adopt"),visual_commands.open))
 	defense_panel=preload("res://src/defense_panel.gd").new();root.add_child(defense_panel);defense_panel.configure(self)
 	commands.add_child(_button(defense_panel.w("entry"),defense_panel.open))
+	marcus_advisor=preload("res://src/marcus_advisor.gd").new()
+	root.add_child(marcus_advisor)
+	marcus_advisor.configure(self)
 
 func set_flying(value: bool) -> void:
 	if not value:
@@ -226,6 +230,9 @@ func overview() -> void:
 	note.text=data.evidence_note
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(marcus_advisor) and marcus_advisor.is_open():
+		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:marcus_advisor.close_panel()
+		return
 	if is_instance_valid(defense_panel) and defense_panel.active_ui:defense_panel.handle(event);return
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:
@@ -293,6 +300,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not ready_for_capture:return
+	if is_instance_valid(marcus_advisor) and marcus_advisor.is_open():return
 	if is_instance_valid(defense_panel) and defense_panel.active_ui:return
 	var focus:Control=get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is SpinBox:return

@@ -11,6 +11,41 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Marcus advisor first slice — October 8, 2026
+
+The Isengard assignment **Marcus advisor — guided tutorial and private ElevenLabs
+voice** (`43bbb7f8-11f2-4b5c-9d62-cef289a01aae`) was created before development.
+Local work is on `codex/marcus-advisor`, based on `869dca1`; no push or release
+was made. See [the plan](MARCUS_ADVISOR.md) and
+[private launch instructions](marcus/SETUP.md).
+
+The independent Yenikapı experience now has a retained bottom-right procedural
+Marcus portrait, a three-page fictional opening, eleven replayable lessons,
+explicit navigation and contextual chat UI. Authored guidance works offline.
+The client implements ElevenLabs streamed text/PCM speech with mute, disconnect,
+limits and timeouts. A loopback Python broker holds the provider key and mints
+single-use conversation credentials. Marcus can read allowlisted visible facts
+and navigate to controls; he cannot execute game actions or see hidden incidents.
+
+A private ElevenLabs agent was published with Claude Sonnet 5, the Grandfather
+Joe voice and zero retention. No provider credential was available locally or in
+the repository's GitHub Actions secret list. Live native audio/text acceptance
+is pending entry of the key through the launcher's hidden terminal prompt.
+Microphone input, the parent campaign adapter, unlockable specialists, worship
+mechanics and seasonal councils remain future milestones.
+
+The new Marcus content validates with zero errors. Godot import completed without
+script errors; direct rendering exposed layout issues that were corrected before
+handoff. The existing game suite was skipped under the weekly policy. Fourteen
+focused broker checks passed under its credential-handling exception.
+
+The implementation follow-up keeps the composer locked through a streamed reply,
+ignores stale completion events and explains known broker failures with fixed
+authored messages. A direct Godot event trace confirmed pending/completed/muted
+transitions; Marcus content validation reports zero errors. The next proposed
+phase is the campaign adapter plus an optional briefing on each resolved season,
+after live native voice acceptance. Details are in the plan above.
+
 ## Weekly testing policy — adopted October 8, 2026
 
 `AGENTS.md` now carries Zach's shared weekly review policy, which takes

@@ -29,6 +29,8 @@ def validate(d):
     return errors
 if __name__=='__main__':
     data=load('visual_commands');errors=validate(data)
+    from validate_marcus import validate as validate_advisor
+    errors.extend(validate_advisor(load('marcus')))
     for error in errors:print(error)
     negative=[]
     for mutate in [lambda d:d['assets'][0].update(id='missing'),lambda d:d['living_orders'][0].update(values=['free']),lambda d:d['chains'][0]['projects'].append('missing'),lambda d:d['assets'][0].update(icon='missing'),lambda d:d['chains'][2]['links'].__setitem__(0,'arrow'),lambda d:d.update(unexpected=True),lambda d:d['lessons'][0].update(destination='advance'),lambda d:d['lessons'][0].update(asset='missing')]:

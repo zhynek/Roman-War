@@ -1,5 +1,15 @@
 # Yenikapı — Early Settlement
 
+**Marcus advisor (source preview):** the bottom-right **Ask Marcus** portrait
+opens a replayable story introduction, all eleven gameplay lessons and contextual
+conversation. **Your first steps** works offline. **Show me this place** opens
+the relevant controls after you begin or load a village. **Connect Marcus**
+enables typed questions with matching text and ElevenLabs speech when the private
+service is configured. Mute keeps text available; closing the panel ends the
+online session. Marcus offers advice and never executes game actions.
+[Private voice setup](../../../../docs/marcus/SETUP.md) ·
+[Development plan and remaining live acceptance](../../../../docs/MARCUS_ADVISOR.md).
+
 **Local 0.14.0 — Village warfare:** paid woven screens and saved defense plans;
 real resident musters; three recurring threats; direct, delegated and quick
 battle modes; named injuries, paid care and equipment repair, experience and
