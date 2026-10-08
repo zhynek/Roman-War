@@ -175,7 +175,7 @@
         "Two seasons",
         "Three seasons"
       ],
-      "body": "Gather toward this reserve over two seasons. A higher objective takes workers from projects and timber; weather, losses and limited hands can still cause shortages."
+      "body": "Gather toward this reserve over two seasons. Two or three seasons put extra gathering at priority 3, before timber (5) and ordinary projects (4\u20136). One season puts it at priority 7. Lower numbers receive adults first. A higher reserve protects against losses but can delay timber and paid work; limited hands can still cause shortages."
     },
     {
       "id": "upkeep",
@@ -230,7 +230,7 @@
         "Retain current practices",
         "Prepare a learning circle"
       ],
-      "body": "Uses the existing preparation (4 timber once), two dedicated care workers and 4 food of gathering opportunity each active season. Waits during warning and danger."
+      "body": "Uses the existing preparation (4 timber once), two dedicated care workers and 4 food of gathering opportunity each active season. Waits during warning and danger. Effective sessions contribute cooperation. The retained household practice score illustrates participation only. It grants no production, civic-readiness or combat bonus; practical wood shaping and watch experience are separate."
     }
   ],
   "ui": {
@@ -243,7 +243,7 @@
     "guide": "Guide",
     "initiative": "Initiatives",
     "begin_pressure": "Begin the fictional warning chapter",
-    "pressure_note": "An eight-season authored warning, danger, recovery and renewal. Its end is not a military victory. Begin when you choose; ordinary life has no scripted attacker.",
+    "pressure_note": "An eight-season authored warning, danger, recovery and renewal. Its end is not a military victory. Begin when you choose. This exercise is separate from optional village warfare and its recurring threats.",
     "role": "Responsible office: {office} \u00b7 {name} \u00b7 since season {since} \u00b7 ability {skill}/5",
     "god": "God oversees both named offices; each decision records its responsible officeholder.",
     "condition": "Condition {condition}/100 \u2192 {next}/100 next season. Repair enabled: {enabled}.",
@@ -276,9 +276,9 @@
     "paid": "Prepared: {paid}; effective next season: {ready}; dedicated workers {filled}/{needed}; timber to enable {wood}.",
     "enable": "Enable",
     "disable": "Disable",
-    "growth": "Growth readiness uses the existing town milestone: {people}/{required} residents, {homes}/{dwellings} dwellings, {food}/{reserve} provisions, wellbeing {wellbeing}/{wellbeing_required}, cooperation {cooperation}/{cooperation_required}, protection {security}/{security_required}. Sustained {stable}/{seasons} seasons.",
+    "growth": "Growth readiness uses the current Town support requirements: {people}/{required} residents, {homes}/{dwellings} dwellings, {food}/{reserve} provisions, wellbeing {wellbeing}/{wellbeing_required}, cooperation {cooperation}/{cooperation_required}, protection {security}/{security_required}. Sustained {stable}/{seasons} seasons.",
     "growth_project": "Foundation: {title} \u00b7 {status}",
-    "occupied": "{home}: {people}/{capacity} residents; stress {stress}, retained practice {practice}.",
+    "occupied": "{home}: {people}/{capacity} residents; stress {stress}, illustrative shared practice {practice}.",
     "group": "Prepare sustainable housing",
     "group_body": "Coordinate the existing cultivation \u2192 north access \u2192 north/east housing projects. Materials commit only when each eligible step is commissioned. No second construction ledger. Completion also needs provisions for additional households. Pause or cancel stops further commissions; existing projects remain individually controllable.",
     "group_start": "Coordinate housing preparation",
@@ -289,7 +289,7 @@
     "inspect": "Inspect",
     "checked": "Reviewed",
     "check": "Review this step",
-    "tutorial_complete": "Governance guide complete. Continue balancing reserves, repairs, learning, protection and supported growth. The town milestone remains a separate sustained achievement.",
+    "tutorial_complete": "Governance guide complete. Continue balancing reserves, repairs, learning, protection and supported growth. Current Town support is separate from earned civic achievement.",
     "people": "Residents are inspectable participants. Work follows assets and offices; selecting a resident gives no civilian orders.",
     "manual": "This settlement uses its retained manual workforce. Adopt asset governance explicitly to change allocation.",
     "no_report": "Resolve a season to record actual results.",

@@ -32,7 +32,12 @@ static func benefit_values(rules,id: String) -> Dictionary:
 
 static func text_for(rules,id: String,template: String) -> String:
 	var values: Dictionary=benefit_values(rules,id)
+	values.merge({"wellbeing":rules.balance.wellbeing_care,"cooperation":rules.balance.cooperation_care})
 	return template.format(values) if not values.is_empty() else template
+
+static func belongs_to(rules,id: String,asset: String) -> bool:
+	# Related places are presentation aliases, never a second allocation owner.
+	return rules.assets.project_assets.get(id,"")==asset or asset in rules.projects[id].get("presentation",{}).get("related_assets",[])
 
 func queued(state: Dictionary,id: String) -> Dictionary:
 	for item in state.queue:

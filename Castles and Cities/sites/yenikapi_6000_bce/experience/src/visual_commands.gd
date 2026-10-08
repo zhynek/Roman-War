@@ -192,7 +192,7 @@ func project_ids(asset: String) -> Array:
 	for id in p.rules.projects:
 		if p.rules.warfare.forts.projects.has(id) and not p.rules.warfare.active(p.state):continue
 		if p.rules.lifecycle.project_specs.has(id) and (not p.rules.lifecycle.active(p.state) or not p.rules.lifecycle.available(p.state,id)):continue
-		if p.rules.assets.project_assets.get(id,"")!=asset:continue
+		if not projects.belongs_to(p.rules,id,asset):continue
 		if p.rules.land.active(p.state) and id in p.rules.land.content.legacy_projects and not p.rules.land.committed(p.state,id,p.rules):continue
 		if id in p.rules.living.content.projects.map(func(a):return a.id) and not p.rules.living.active(p.state):continue
 		if p.rules.incidents.project_specs.has(id):
@@ -471,12 +471,26 @@ func lifecycle_project(body: VBoxContainer,id: String) -> void:
 
 func help(body: VBoxContainer) -> void:
 	var step: Dictionary=copy.lessons[lesson]
-	paragraph(body,w("guide_step").format({"number":lesson+1}),15);paragraph(body,step.title,24);paragraph(body,step.body,18)
-	body.add_child(icon_button(copy.assets.filter(func(a):return a.id==step.asset)[0].label,step.asset,"",select_place.bind(step.asset),"VisualLessonPlace"))
+	paragraph(body,w("guide_step").format({"number":lesson+1,"total":copy.lessons.size()}),15);paragraph(body,step.title,24);paragraph(body,step.body,18)
+	var destination: String=step.get("destination","asset")
+	var destination_title: String=copy.assets.filter(func(a):return a.id==step.asset)[0].label if destination=="asset" else w("guide_destination_"+destination)
+	var visit:=icon_button(destination_title,step.asset,"",guide_destination.bind(step),"VisualLessonPlace")
+	if destination in ["defense","aftermath"] and p.rules.defense.locked(p.state):
+		visit.disabled=true;visit.tooltip_text=app.defense_panel.w("blocked")
+	body.add_child(visit)
 	var r:=row(body)
 	var prev:=button(w("guide_previous"),func():lesson-=1;refresh(),"VisualLessonPrevious");prev.disabled=lesson==0;r.add_child(prev)
 	var next:=button(w("guide_next"),func():lesson+=1;refresh(),"VisualLessonNext");next.disabled=lesson==copy.lessons.size()-1;r.add_child(next)
 	paragraph(body,w("help_keys"),14)
+	paragraph(body,w("guide_setup_title"),18);paragraph(body,w("guide_setup"),14)
+func guide_destination(step: Dictionary) -> void:
+	# Reading guidance cannot restart an unresolved worker or its saved clock.
+	if step.get("destination","asset") in ["defense","aftermath"] and p.rules.defense.locked(p.state):return
+	match step.get("destination","asset"):
+		"lifecycle":show_overlay("lifecycle")
+		"defense":app.defense_panel.open()
+		"aftermath":app.defense_panel.open_aftermath()
+		_:select_place(step.asset)
 func incidents(body: VBoxContainer) -> void:
 	if not p.rules.incidents.active(p.state):
 		paragraph(body,w("incident_note"),18);command_button(body,w("begin_incident"),{"kind":"incident_begin"},"VisualBeginIncidents");return
@@ -742,7 +756,8 @@ func site_preview(id: String) -> Mesh:
 func town_operations(body: VBoxContainer) -> void:
 	var life=p.rules.lifecycle
 	if not life.town_active(p.state):return
-	paragraph(body,lw("town_obligation").format({"workers":life.town_balance.civic_workers,"previous":life.balance.civic_workers,"service":life.town_balance.service_workers}),14)
+	paragraph(body,lw("town_obligation").format({"workers":life.town_balance.civic_workers,"previous":life.balance.civic_workers,"service":life.town_balance.service_workers,"priority":life.town_balance.civic_priority,"previous_priority":life.balance.civic_priority,"service_priority":life.town_balance.service_priority}),14)
+	paragraph(body,lw("town_social").format({"wellbeing":p.rules.balance.wellbeing_care,"cooperation":p.rules.balance.cooperation_care}),14)
 	if p.rules.has_project(p.state,"town_civic"):
 		var op: Dictionary=life.operation(p.state,forecast.get("assets",{}),p.rules)
 		paragraph(body,lw("town_operation").format(op),16)

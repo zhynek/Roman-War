@@ -206,7 +206,7 @@ func refresh() -> void:
 		role_picker.item_selected.connect(func(index):dispatch({"kind":"role","role":["god","steward","watch"][index]}))
 		role_row.add_child(role_picker)
 		var season: String=copy.year%[1+int(state.turn)/4,copy.seasons[int(state.turn)%4]]
-		column.add_child(label(season+" · "+copy["phase_"+state.phase],20))
+		column.add_child(label(season+" · "+support_title(),20))
 		tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;tabs.clip_tabs=true;column.add_child(tabs)
 		var bodies: Array=[]
 		for title in [copy.overview,asset_panel.copy.ui.overview if rules.assets.active(state) else copy.work,copy.leaders,copy.journal,asset_panel.copy.ui.principles if rules.assets.active(state) else copy.principles,contacts_panel.copy.tab,household_panel.copy.ui.tab,land_panel.copy.ui.tab,living_panel.copy.ui.tab,incident_panel.copy.ui.tab]:bodies.append(_tab(title))
@@ -246,8 +246,8 @@ func refresh() -> void:
 func _guide(body: VBoxContainer) -> void:
 	var count:int=rules.people(state).size()
 	body.add_child(label("%s %d / %d   ·   %s %d / %d   ·   %s %d"%[copy.population,count,rules.capacity(state),copy.provisions,state.food,rules.storage(state),copy.wood,state.wood],18))
-	if state.phase=="town":body.add_child(label(copy.complete,17))
-	elif state.town_achieved:body.add_child(label(copy.recovery,17))
+	if state.phase=="town":body.add_child(label(copy.support_complete if rules.lifecycle.active(state) else copy.complete,17))
+	elif state.town_achieved:body.add_child(label(copy.support_recovery if rules.lifecycle.active(state) else copy.recovery,17))
 	elif state.turn==0:body.add_child(label(copy.intro,17))
 	var recommended:String=recommended_project()
 	if not recommended.is_empty():
@@ -267,6 +267,10 @@ func _guide(body: VBoxContainer) -> void:
 	_forecast(body)
 	var b:Dictionary=rules.balance
 	body.add_child(label(copy.milestone%[b.town_population,b.town_dwellings,b.town_reserve_seasons,b.town_wellbeing,b.town_cooperation,b.town_security,state.stable_seasons,b.town_sustained_seasons],14))
+
+func support_title() -> String:
+	if rules.lifecycle.active(state):return copy.support_met if state.phase=="town" else copy.support_missing
+	return copy["phase_"+state.phase]
 
 func recommended_project() -> String:
 	for id in rules.content.tutorial_projects:

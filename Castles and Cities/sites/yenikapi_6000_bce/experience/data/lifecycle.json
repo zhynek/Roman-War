@@ -124,7 +124,7 @@
     {
       "id": "lifecycle_assembly",
       "title": "Build an assembly shelter",
-      "body": "Commission a modest shelter beside the existing meeting ground. Completion recognizes a large village and permits two separately paid improvements. One adult serves civic duties in later seasons. This institution and its chronology are fictional.",
+      "body": "Commission a modest shelter beside the existing meeting ground. Completion recognizes a large village and permits two separately paid improvements. One adult serves civic duties in later seasons. This institution and its chronology are fictional. Each staffed civic or provision-service adult contributes {wellbeing} wellbeing and {cooperation} cooperation through the existing care allocation; the forecast lists Civic and service duty separately.",
       "role": "steward",
       "at": [
         -23,
@@ -569,7 +569,7 @@
     "cost": "Timber %d \u00b7 Work %d",
     "upkeep": "%d civic worker(s) each season after completion",
     "lineage": "{object} \u00b7 revision {from} \u2192 {to}",
-    "live_support": "Legacy town support remains a separate live milestone.",
+    "live_support": "Current Town support is a reversible requirement, separate from earned civic achievement. Losing support does not erase civic rank or paid buildings.",
     "factor": "{name}: {current} / {required}",
     "readiness": "{seasons} / {required} consecutive qualifying seasons",
     "stage_line": "Civic achievement \u00b7 {stage}",
@@ -590,8 +590,8 @@
     "town_operating": "Town facilities can operate when their own workers, materials and places are available.",
     "town_unstaffed": "Town duty is understaffed: preparation and provision benefits stop. Reduce project crews or pause optional work, restore provisions and allow adults to return to civic duty. Earned town status remains.",
     "town_condition": "Stores need maintenance: the new facilities cannot deliver their benefits. Enable store maintenance and retain timber for repair.",
-    "town_effects": "Next season: {prepared} extra prepared set(s); {saved} provision(s) protected from spoilage. All output requires a paid, completed facility.",
-    "town_obligation": "After civic completion: {workers} civic adults in total, replacing the earlier {previous}; the optional provision service requests {service} additional adult(s).",
+    "town_effects": "Next season: {prepared} extra prepared set(s); {saved} provision(s) protected from spoilage. Preparation needs an active order, materials, work places and space for sets. Sets supply watch equipment and post-battle repair. At full food storage, reduced spoilage may become overflow rather than a larger reserve.",
+    "town_obligation": "After civic completion: {workers} civic adults in total at priority {priority}, replacing {previous} at priority {previous_priority}; the optional provision service requests {service} additional adult(s) at priority {service_priority}. Lower priority numbers receive adults first. Timber and higher-priority projects can leave these duties unstaffed.",
     "town_required": "Required for civic fabric",
     "town_optional": "Optional investment",
     "town_ready_legacy": "Earned town rank is recognized. Pay for the missing fabric; no repeat of the readiness milestone.",
@@ -601,7 +601,8 @@
     "town_dwellings": "Six-person dwelling equivalents",
     "town_service_unstaffed": "The provision service lacks its additional adult: no provisions are protected from spoilage. Pause optional construction or switch off preparation temporarily to free a worker; seasonal food needs also change the available workforce.",
     "practice_sets_full": "Prepared sets are full ({blanks} / {capacity}): the preparation order does no work and shaping practice has stopped. Spend sets on watch equipment, repairs or incident preparations; preparation then resumes.",
-    "practice_order_off": "Shaping practice advances only while adults prepare materials (Workshop \u00b7 Prepare materials) or repair equipment."
+    "practice_order_off": "Shaping practice advances only while adults prepare materials (Workshop \u00b7 Prepare materials) or repair equipment.",
+    "town_social": "Each staffed civic or provision-service adult contributes {wellbeing} wellbeing and {cooperation} cooperation, shown separately as Civic and service duty. These adults are part of the same finite workforce."
   },
   "errors": {
     "lifecycle_missing": "Begin city lifecycle before commissioning this project.",
@@ -641,7 +642,7 @@
       {
         "id": "town_civic",
         "title": "Adapt the assembly shelter into a civic house",
-        "body": "Retain the shelter, its entrance and assembly mat. Pay for a fitted civic house after sustained town support. Town duty replaces the shelter duty: {workers} adults each season in total. Promotion opens two separately paid facilities; it supplies no materials or repairs. This institution and architecture are explicit game interpretation.",
+        "body": "Retain the shelter, its entrance and assembly mat. Pay for a fitted civic house after sustained town support. Town duty replaces the shelter duty: {workers} adults each season in total. Promotion opens two separately paid facilities; it supplies no materials or repairs. This institution and architecture are explicit game interpretation. Each staffed civic or provision-service adult contributes {wellbeing} wellbeing and {cooperation} cooperation through the existing care allocation; the forecast lists Civic and service duty separately.",
         "role": "steward",
         "at": [
           -23,
@@ -721,7 +722,7 @@
       {
         "id": "town_preparation",
         "title": "Fit a material-preparation store",
-        "body": "Retain the small store and every existing container. When civic duty and store maintenance are supported, ordinary wood preparation can produce {delta} extra prepared set(s), for {wood} extra timber and {places} extra working place(s). Choose this first for watch equipment and incident preparation; it creates nothing while preparation is off.",
+        "body": "Retain the small store and every existing container. When civic duty and store maintenance are supported, ordinary wood preparation can produce {delta} extra prepared set(s), for {wood} extra timber and {places} extra working place(s). Choose this first for watch equipment and incident preparation; it creates nothing while preparation is off. Useful for watch-kit replacement and post-battle repair. At full prepared-set storage, no extra set is produced.",
         "role": "steward",
         "at": [
           12.8,
@@ -835,13 +836,13 @@
         "asset": "stores",
         "presentation": {
           "treatment": "adapt",
-          "benefit": "Ordinary preparation: +{delta} set(s), {total} total at the basic order, up to {shared_total} with practiced shared work. Each bonus costs {wood} timber and {places} work place(s); civic duty and maintained stores required."
+          "benefit": "Ordinary preparation: +{delta} set(s), {total} total at the basic order, up to {shared_total} with practiced shared work. Each bonus costs {wood} timber and {places} work place(s); civic duty and maintained stores required. Supplies kit replacement and battle recovery; no output when set storage is full."
         }
       },
       {
         "id": "town_provision",
         "title": "Fit the shared provision service",
-        "body": "Keep the care shelter and its existing care work. An additional {workers} adult(s) sorts and serves existing provisions when civic duty and store maintenance are supported. Save up to {delta} provisions from seasonal spoilage; never more than the actual loss. Choose this first to protect a substantial food reserve. The worker competes with production and construction.",
+        "body": "Keep the care shelter and its existing care work. An additional {workers} adult(s) sorts and serves existing provisions when civic duty and store maintenance are supported. Save up to {delta} provisions from seasonal spoilage; never more than the actual loss. Choose this first to protect a substantial food reserve. The worker competes with production and construction. Each staffed civic or provision-service adult contributes {wellbeing} wellbeing and {cooperation} cooperation through the existing care allocation; the forecast lists Civic and service duty separately. At full food storage, saved spoilage can become overflow; its reserve benefit is most useful during recovery.",
         "role": "steward",
         "at": [
           -39,
@@ -948,7 +949,10 @@
         "asset": "stores",
         "presentation": {
           "treatment": "adapt",
-          "benefit": "Reduce seasonal spoilage by up to {delta} provisions ({total} total reduction), with {workers} additional service worker(s). Civic duty and maintained stores required; no free food."
+          "benefit": "Reduce seasonal spoilage by up to {delta} provisions ({total} total reduction), with {workers} additional service worker(s). Civic duty and maintained stores required; no free food. At full stores the saved amount may overflow.",
+          "related_assets": [
+            "homes"
+          ]
         }
       }
     ],

@@ -91,6 +91,8 @@ def validate(data, balance, operational=(), check_schema=True):
         project_error_count = len(errors)
         if project['stage_requires'] not in stages: errors.append('unknown project stage')
         if project['asset'] not in asset_ids: errors.append('unknown asset')
+        related = project['presentation'].get('related_assets', [])
+        if any(a not in asset_ids or a == project['asset'] for a in related): errors.append('invalid related presentation asset')
         if not set(project['requires']) <= projects.keys(): errors.append('unknown prerequisite')
         price = tuning['projects'].get(project['tuning'], {})
         if price.get('wood', 0) <= 0 or price.get('work', 0) <= 0: errors.append('invalid paid project')

@@ -493,6 +493,14 @@
         },
         "land_access": {
           "type": "string"
+        },
+        "living_training": {
+          "type": "string",
+          "minLength": 1
+        },
+        "warfare_muster": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [
@@ -508,7 +516,9 @@
         "leadership",
         "household_life",
         "asset_upkeep",
-        "land_access"
+        "land_access",
+        "living_training",
+        "warfare_muster"
       ],
       "additionalProperties": false
     },
@@ -612,6 +622,22 @@
     "reference_save_notice": {
       "type": "string",
       "minLength": 1
+    },
+    "support_met": {
+      "type": "string",
+      "minLength": 1
+    },
+    "support_missing": {
+      "type": "string",
+      "minLength": 1
+    },
+    "support_complete": {
+      "type": "string",
+      "minLength": 1
+    },
+    "support_recovery": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [
@@ -706,7 +732,11 @@
     "recovery",
     "forecast_losses",
     "project_cost",
-    "reference_save_notice"
+    "reference_save_notice",
+    "support_met",
+    "support_missing",
+    "support_complete",
+    "support_recovery"
   ],
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema"

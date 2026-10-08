@@ -311,14 +311,24 @@ func forecast(state: Dictionary) -> Dictionary:
 	# contribution is unchanged, but it is shown under its own factor so the
 	# breakdown never credits civic clerks as household carers (2026-10 audit).
 	var civic_adults: int = 0
+	var training_adults: int = 0
+	var muster_adults: int = 0
 	for request in allocation_.get("requests", []):
 		if request.id in ["lifecycle_civic", "town_service"]: civic_adults += int(request.filled)
+		elif request.id=="living_training": training_adults += int(request.filled)
+		elif request.id=="warfare_muster": muster_adults += int(request.filled)
 	var care_adults: int = int(plan.care) - civic_adults
 	var factors := {
 		"wellbeing": [{"id":"base","value":int(balance.wellbeing_base)}, {"id":"care","value":care_adults*int(balance.wellbeing_care)}, {"id":"food","value":int(balance.wellbeing_fed if covered else balance.wellbeing_hunger)}, {"id":"crowding","value":int(balance.wellbeing_crowded) if crowded else 0}, {"id":"ration","value":int(balance.wellbeing_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"wellbeing")}],
 		"cooperation": [{"id":"base","value":int(balance.cooperation_base)}, {"id":"care","value":care_adults*int(balance.cooperation_care)}, {"id":"food","value":0 if covered else int(balance.cooperation_hunger)}, {"id":"crowding","value":int(balance.cooperation_crowded) if crowded else 0}, {"id":"ration","value":int(balance.cooperation_tight) if state.tight_rations else 0}, {"id":"overwork","value":int(balance.overwork_cost) if overwork else 0}, {"id":"projects","value":effect(state,"cooperation")}],
-		"security": [{"id":"base","value":int(balance.security_base)}, {"id":"watch","value":(int(plan.watch)-int(crew.escorts))*int(balance.security_worker)}, {"id":"leadership","value":leader_skill(state,"watch")*int(balance.security_skill)}, {"id":"projects","value":effect(state,"security")}]
+		"security": [{"id":"base","value":int(balance.security_base)}, {"id":"watch","value":(int(plan.watch)-int(crew.escorts)-training_adults-muster_adults)*int(balance.security_worker)}, {"id":"leadership","value":leader_skill(state,"watch")*int(balance.security_skill)}, {"id":"projects","value":effect(state,"security")}]
 	}
+	# These are exclusive allocations within the watch job class, not extra
+	# people or a second security bonus. Preserve the published total.
+	if living.active(state):
+		factors.security.insert(2,{"id":"living_training","value":training_adults*int(balance.security_worker)})
+	if warfare.active(state):
+		factors.security.insert(2,{"id":"warfare_muster","value":muster_adults*int(balance.security_worker)})
 	if lifecycle.active(state):
 		factors.wellbeing.insert(2,{"id":"civic","value":civic_adults*int(balance.wellbeing_care)})
 		factors.cooperation.insert(2,{"id":"civic","value":civic_adults*int(balance.cooperation_care)})

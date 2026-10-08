@@ -66,8 +66,8 @@
     "queue": "Work underway",
     "all": "All places",
     "confirm": "Commission",
-    "paid": "Materials paid once · crews work each season",
-    "standing": "Standing order · applies next season",
+    "paid": "Materials paid once \u00b7 crews work each season",
+    "standing": "Standing order \u00b7 applies next season",
     "work": "work",
     "wood": "timber",
     "blanks": "prepared sets",
@@ -96,8 +96,8 @@
     "details": "Why & requirements",
     "requires": "Requires: {items}",
     "no_requires": "No earlier building required",
-    "cost": "Pay now: {wood} timber · {blanks} prepared sets",
-    "effort": "Then: {work} work · finite seasonal crews",
+    "cost": "Pay now: {wood} timber \u00b7 {blanks} prepared sets",
+    "effort": "Then: {work} work \u00b7 finite seasonal crews",
     "progress": "{done} / {total} work",
     "current": "Current choice",
     "forecast": "Next season",
@@ -111,9 +111,9 @@
     "outward": "Outward homes",
     "productive": "Productive places",
     "prepared": "Watch & materials",
-    "arrow": "→",
+    "arrow": "\u2192",
     "or": "OR",
-    "new_note": "30 residents · 100 provisions · 30 timber. Living rules; incidents remain an explicit choice.",
+    "new_note": "30 residents \u00b7 100 provisions \u00b7 30 timber. Living rules; incidents remain an explicit choice.",
     "overwrite": "Start a new village? Your saved village stays untouched until you choose Save.",
     "new_title": "New settlement",
     "adopt": "Use visual commands",
@@ -130,33 +130,38 @@
     "report_note": "Actual results of the last resolved season.",
     "preview_note": "Expected effects with current orders. Your later decisions can change them.",
     "help": "How to play",
-    "growth_review": "Town readiness",
+    "growth_review": "Town support requirements",
     "warning": "Attention needed",
     "no_queue": "No commissioned work",
-    "guide_step": "{number} / 5",
+    "guide_step": "{number} / {total}",
     "learn": "How to play",
     "guide_next": "Next",
     "guide_previous": "Previous",
-    "busy": "Resolving season…",
+    "busy": "Resolving season\u2026",
     "choice": "Choose an option",
     "record": "Planning record",
-    "season_index": "Year {year} · {season}",
-    "model_future": "Planned geometry · drag to rotate",
-    "model_current": "Current place · drag to rotate",
+    "season_index": "Year {year} \u00b7 {season}",
+    "model_future": "Planned geometry \u00b7 drag to rotate",
+    "model_current": "Current place \u00b7 drag to rotate",
     "plus": "+",
     "growth": "Growth guide",
     "knowledge": "Planning record",
-    "condition_line": "Condition {condition}/100 · {workers} adults assigned here",
+    "condition_line": "Condition {condition}/100 \u00b7 {workers} adults assigned here",
     "ask": "Ask here",
     "household_knowledge": "Household knowledge",
     "view_current": "Current",
     "view_planned": "Planned",
-    "seasonal_duty": "{filled}/{wanted} adults · {title}",
-    "help_keys": "Click buildings or their icons · right-drag to look · WASD to move · Tab for mouse look",
+    "seasonal_duty": "{filled}/{wanted} adults \u00b7 {title}",
+    "help_keys": "Click buildings or their icons \u00b7 right-drag to look \u00b7 WASD to move \u00b7 Tab for mouse look",
     "visit_site": "View this building site",
     "menu": "Village menu",
     "new_confirm": "Start a new village",
-    "model_empty": "No existing building on this site. View the place in the village."
+    "model_empty": "No existing building on this site. View the place in the village.",
+    "guide_setup_title": "Setup and optional chapters",
+    "guide_setup": "New village starts household, asset, land and living rules. For an older save, adopt missing chapters in that order. City lifecycle then offers explicit town development; village warfare needs Living village but does not require civic adoption. Recurring threats are a separate opt-in. Opening this guide or a review spends nothing and adopts nothing.",
+    "guide_destination_lifecycle": "Open City lifecycle",
+    "guide_destination_defense": "Open defense preparation",
+    "guide_destination_aftermath": "Open battle aftermath"
   },
   "living_orders": [
     {
@@ -179,7 +184,7 @@
       "asset": "workroom",
       "icon": "blanks",
       "label": "Prepare materials",
-      "detail": "Ordinary: 1 adult + 2 timber → 1 set. Shared: 2 adults + 3 timber + 2 working places; needs shared wood work.",
+      "detail": "Ordinary: 1 adult + 2 timber \u2192 1 set. Shared: 2 adults + 3 timber + 2 working places; needs shared wood work.",
       "values": [
         0,
         1,
@@ -333,7 +338,7 @@
     {
       "asset": "stores",
       "title": "Keep the village fed",
-      "body": "Choose Stores, then its reserve objective. A higher target uses real gathering labor. The top strip shows supplies now and the expected seasonal change."
+      "body": "Choose Stores, then its reserve objective. Two or three seasons give extra gathering priority over timber and ordinary projects; one season leaves it later. The top strip shows supplies now and expected seasonal change. Choose a buffer while leaving adults for the next paid project."
     },
     {
       "asset": "fields",
@@ -354,6 +359,42 @@
       "asset": "watch",
       "title": "Prepare, resolve, recover",
       "body": "Maintain posts and equipment, then start the optional preparedness chapter. Warning and recovery appear at the affected place. Save whenever you want; looking around never advances time."
+    },
+    {
+      "asset": "yard",
+      "destination": "lifecycle",
+      "title": "Practice, sustain, then pay",
+      "body": "City lifecycle shows the next civic requirements and qualifying seasons. Wood shaping comes from actual material preparation or equipment repair, not the illustrative learning-circle score. If prepared sets are full, preparation pauses: spend them on equipment or repairs. Meet the named factors, sustain them through resolved seasons, then commission the assembly shelter. Timber is paid once and finite crews complete the work; promotion grants no free buildings."
+    },
+    {
+      "asset": "yard",
+      "destination": "lifecycle",
+      "title": "Keep achievement and support distinct",
+      "body": "The completed shelter earns Large village. Enable town development explicitly, sustain current Town support, then pay to adapt that same shelter into a civic house. Earned rank and paid fabric remain through shortages; current Town support can fall and recover. Town is the highest playable civic stage. Large town and later ranks remain planned."
+    },
+    {
+      "asset": "stores",
+      "destination": "lifecycle",
+      "title": "Keep town services working",
+      "body": "The civic house replaces one civic adult with two; its later allocation priority means timber or projects can leave it unstaffed. The review shows actual staffing and condition. Optional preparation helps supply watch kits and repairs while sets are needed. Provision service protects actual spoilage; full stores may turn that saving into overflow. Pause optional work or reduce its crew to restore services. Civic and service adults also contribute the separately named social factors."
+    },
+    {
+      "asset": "watch",
+      "destination": "defense",
+      "title": "Prepare residents and their ground",
+      "body": "Enable village warfare deliberately. Build a watch shelter, prepare wooden sets, pay for kits and allow actual watch practice. Additional home watch requests real residents and competes with construction and timber; it grants no people or equipment. Paid woven screens shape routes but keep entrances open and need maintained watch assets. Save assembly, important places and fallback positions before mobilization. Practice on a copy leaves village life unchanged."
+    },
+    {
+      "asset": "watch",
+      "destination": "defense",
+      "title": "Choose how to meet a warning",
+      "body": "Recurring threats are optional and give preparation time: protect the stores, stop landing thieves or deny the northern approach. Command personally begins paused deployment; Delegate command uses the same valid orders; Resolve quickly batches the same battle rules. You can take command back, or stop quick resolution at a coherent paused state. Select, then right-click an order; Space pauses, V selects the close view and 0 returns overhead. Camera gestures do not issue orders."
+    },
+    {
+      "asset": "homes",
+      "destination": "aftermath",
+      "title": "Accept, recover and continue",
+      "body": "An ended encounter waits for acceptance. Read named participation, injuries, supplies and equipment consequences, then accept once. Battle aftermath remains available from village life. Keep food available, staff finite treatment care, prepare sets and enable ordinary kit repair. Release additional watch to free adults for paid work. Incapacitation is recoverable; further threats wait for recovery. This village has no army recruitment or conquest; those remain future connections."
     }
   ],
   "principle_labels": {

@@ -3,8 +3,8 @@
   "id": "household_adversity_renewal",
   "kind": "hypothetical",
   "title": "Households through adversity",
-  "disclaimer": "An authored eight-season exercise, not evidence for an attack or siege at Yenikap\u0131 around 6000 BCE. No army, enemy identity or historical cultural revolution is reconstructed. The danger is a fictional warning that restricts travel; the later learning circle models uneven household adoption of a shared craft practice.",
-  "intro": "Follow daily life inside a home, shared store and work room. Prepare finite supplies, support care and keep routes usable. Households remember stress and take up new practices at different rates.",
+  "disclaimer": "An authored eight-season exercise, not evidence for an attack or siege at Yenikap\u0131 around 6000 BCE. No army, enemy identity or historical cultural revolution is reconstructed. Learning sessions have real labor, food and cooperation effects; their household practice scores illustrate participation and grant no mechanical bonus.",
+  "intro": "Follow daily life inside a home, shared store and work room. Prepare finite supplies, support care and keep routes usable. Household stress affects village life; the separate shared-practice score illustrates uneven participation.",
   "begin": "Begin the eight-season household chapter",
   "complete": "The authored danger has passed. Household memories and chosen care or learning routines continue; no city stage is automatically unlocked.",
   "stages": [
@@ -65,7 +65,7 @@
       "id": "learning",
       "role": "steward",
       "label": "Hold a learning circle",
-      "description": "Prepare a small working surface for a shared craft practice. From recovery onward, two care workers support uneven household uptake. Gathering must cover the seasonal food opportunity cost as well as any remaining disruption.",
+      "description": "Prepare a small working surface for shared sessions. From recovery onward, staffed sessions forgo food and contribute cooperation. The household practice score records illustrative participation only; it does not improve production, civic readiness or combat. Practical wood shaping and watch experience are separate.",
       "station": "household_workshop"
     }
   ],
@@ -96,7 +96,7 @@
     "orders": "Preparations and standing orders",
     "labor": "Existing care and watch assignments provide the labor. The care crew supports shared care, store upkeep and learning in aggregate; these are not extra workers or separate full-time posts. Minimum staffing continues each season. Learning also forgoes food output. Learning waits if gathering cannot cover that cost.",
     "households": "Household memories",
-    "memory": "{id} \u00b7 stress {stress}/100 \u00b7 shared practice {practice}/100",
+    "memory": "{id} \u00b7 stress {stress}/100 \u00b7 illustrative shared practice {practice}/100",
     "cost": "{wood} wood once \u00b7 {role}",
     "staffing": "Care {care} / watch {watch} required",
     "paid": "Preparation retained; switching it on again costs no wood.",
@@ -164,7 +164,7 @@
       "renewal": "A learning circle offers a practice; uptake differs among households.",
       "settled": "Ordinary routines resume with household memories retained.",
       "child": "Remaining near familiar people and household spaces.",
-      "practice": "This household has begun taking up the shared practice.",
+      "practice": "Illustrative shared participation; this score grants no production or combat bonus.",
       "hunger": "Food shortage is straining this household."
     },
     "station_labels": {

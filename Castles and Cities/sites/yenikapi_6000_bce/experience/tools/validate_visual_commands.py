@@ -24,12 +24,14 @@ def validate(d):
     for a in d['living_orders']:
         if a['asset'] not in assets or a['values']!=orders.get(a['id']) or len(a['values'])!=len(a['labels']):errors.append('invalid standing choices')
     if any(a['asset'] not in assets for a in d['lessons']):errors.append('lesson place missing')
+    destinations={'asset','lifecycle','defense','aftermath'}
+    if any(a.get('destination','asset') not in destinations for a in d['lessons']):errors.append('unknown lesson destination')
     return errors
 if __name__=='__main__':
     data=load('visual_commands');errors=validate(data)
     for error in errors:print(error)
     negative=[]
-    for mutate in [lambda d:d['assets'][0].update(id='missing'),lambda d:d['living_orders'][0].update(values=['free']),lambda d:d['chains'][0]['projects'].append('missing'),lambda d:d['assets'][0].update(icon='missing'),lambda d:d['chains'][2]['links'].__setitem__(0,'arrow'),lambda d:d.update(unexpected=True)]:
+    for mutate in [lambda d:d['assets'][0].update(id='missing'),lambda d:d['living_orders'][0].update(values=['free']),lambda d:d['chains'][0]['projects'].append('missing'),lambda d:d['assets'][0].update(icon='missing'),lambda d:d['chains'][2]['links'].__setitem__(0,'arrow'),lambda d:d.update(unexpected=True),lambda d:d['lessons'][0].update(destination='advance'),lambda d:d['lessons'][0].update(asset='missing')]:
         broken=copy.deepcopy(data);mutate(broken);negative.append(bool(validate(broken)))
     if not all(negative):errors.append('negative validation failed')
-    print(f'VISUAL DATA: {len(errors)} errors; {sum(negative)}/6 negative cases rejected');raise SystemExit(bool(errors))
+    print(f'VISUAL DATA: {len(errors)} errors; {sum(negative)}/{len(negative)} negative cases rejected');raise SystemExit(bool(errors))

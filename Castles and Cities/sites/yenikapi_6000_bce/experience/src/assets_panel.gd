@@ -1,5 +1,6 @@
 extends RefCounted
 ## All surfaces dispatch the same public commands; visiting is optional presentation.
+const Presentation=preload("res://src/project_presentation.gd")
 var panel
 var copy: Dictionary
 var selected: String="stores"
@@ -92,6 +93,8 @@ func build(body: VBoxContainer) -> void:
 	if rules.incidents.active(state):
 		for id in rules.incidents.project_specs:
 			if rules.assets.project_assets[id]==selected and rules.land.committed(state,id,rules):project(body,id,f)
+	for id in rules.lifecycle.project_specs:
+		if rules.lifecycle.active(state) and rules.lifecycle.available(state,id) and rules.assets.project_assets[id]!=selected and Presentation.belongs_to(rules,id,selected):project(body,id,f)
 	if selected in ["yard","homes"]:housing(body)
 	body.add_child(HSeparator.new())
 	allocation(body,f,selected)

@@ -576,6 +576,23 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 2000
+            },
+            "related_assets": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 7,
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "stores",
+                  "homes",
+                  "fields",
+                  "landing",
+                  "workroom",
+                  "yard",
+                  "watch"
+                ]
+              }
             }
           },
           "required": [

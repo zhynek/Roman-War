@@ -171,7 +171,12 @@
         "visit_site",
         "menu",
         "new_confirm",
-        "model_empty"
+        "model_empty",
+        "guide_setup_title",
+        "guide_setup",
+        "guide_destination_lifecycle",
+        "guide_destination_defense",
+        "guide_destination_aftermath"
       ],
       "properties": {
         "start": {
@@ -613,6 +618,26 @@
         "model_empty": {
           "type": "string",
           "minLength": 1
+        },
+        "guide_setup_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guide_setup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guide_destination_lifecycle": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guide_destination_defense": {
+          "type": "string",
+          "minLength": 1
+        },
+        "guide_destination_aftermath": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },
@@ -851,6 +876,14 @@
           "body": {
             "type": "string",
             "minLength": 1
+          },
+          "destination": {
+            "enum": [
+              "asset",
+              "lifecycle",
+              "defense",
+              "aftermath"
+            ]
           }
         }
       }
