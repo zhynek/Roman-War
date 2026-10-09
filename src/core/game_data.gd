@@ -15,6 +15,7 @@ var unit_classes: Dictionary = {}      # class id -> {role, matchups, terrain, .
 var unit_attributes: Dictionary = {}   # attribute id -> {effects, ...}
 var regions: Dictionary = {}           # id -> region dict
 var grain_regions: Array = []          # sorted region ids producing grain (hot-path index)
+var ports: Dictionary = {}
 var waterways: Dictionary = {}
 var waterway_links: Dictionary = {}
 var sea_zones: Dictionary = {}         # id -> sea zone dict
@@ -112,6 +113,7 @@ func _load_all(dir: String) -> void:
 		regions[region["id"]] = region
 	for zone in map_data.get("sea_zones", []):
 		sea_zones[zone["id"]] = zone
+	ports = _read_json(dir + "/ports.json")
 	waterways = _read_json(dir + "/waterways.json")
 	for node in waterways.get("river_nodes", []):
 		sea_zones[node["id"]] = {"id": node["id"], "name": node["name"], "position": node["position"], "adjacent": [], "river": true}

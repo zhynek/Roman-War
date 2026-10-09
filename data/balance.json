@@ -1070,5 +1070,176 @@
     "coastal_cost_multiplier": 1,
     "open_cost_multiplier": 1,
     "river_cost_multiplier": 1
+  },
+  "ports": {
+    "legacy_stages": [
+      0,
+      2,
+      3,
+      4
+    ],
+    "commander_passengers": 1,
+    "trade_income_per_cargo": 3,
+    "repair_cost_factor": 0.5,
+    "queue_limit": 6,
+    "stages": [
+      {
+        "cost": 180,
+        "turns": 1,
+        "upkeep": 10,
+        "troop_handling": 600,
+        "cargo_handling": 80,
+        "repair_pct": 10,
+        "support": 1,
+        "defense_pct": 0
+      },
+      {
+        "cost": 550,
+        "turns": 2,
+        "upkeep": 30,
+        "troop_handling": 1200,
+        "cargo_handling": 160,
+        "repair_pct": 15,
+        "support": 2,
+        "defense_pct": 0
+      },
+      {
+        "cost": 1450,
+        "turns": 3,
+        "upkeep": 75,
+        "troop_handling": 2400,
+        "cargo_handling": 300,
+        "repair_pct": 20,
+        "support": 3,
+        "defense_pct": 5
+      },
+      {
+        "cost": 3100,
+        "turns": 4,
+        "upkeep": 150,
+        "troop_handling": 4000,
+        "cargo_handling": 500,
+        "repair_pct": 25,
+        "support": 4,
+        "defense_pct": 15
+      },
+      {
+        "cost": 5800,
+        "turns": 5,
+        "upkeep": 280,
+        "troop_handling": 6500,
+        "cargo_handling": 800,
+        "repair_pct": 30,
+        "support": 6,
+        "defense_pct": 25
+      }
+    ],
+    "facilities": {
+      "depot": {
+        "cost": 650,
+        "turns": 2,
+        "upkeep": 25,
+        "cargo_bonus": 120
+      },
+      "repair_yard": {
+        "cost": 800,
+        "turns": 2,
+        "upkeep": 35,
+        "repair_bonus": 10,
+        "support_bonus": 2
+      },
+      "arsenal": {
+        "cost": 1200,
+        "turns": 3,
+        "upkeep": 60,
+        "defense_bonus": 10
+      }
+    },
+    "vessels": {
+      "river_transports": {
+        "troops": 600,
+        "cargo": 80,
+        "movement": 2,
+        "turns": 1
+      },
+      "river_barges": {
+        "troops": 1100,
+        "cargo": 180,
+        "movement": 1.5,
+        "turns": 2
+      },
+      "river_patrol": {
+        "troops": 180,
+        "cargo": 20,
+        "movement": 2.5,
+        "turns": 2
+      },
+      "coastal_transports": {
+        "troops": 1000,
+        "cargo": 140,
+        "movement": 2,
+        "turns": 2
+      },
+      "merchant_convoy": {
+        "troops": 1300,
+        "cargo": 300,
+        "movement": 2,
+        "turns": 3
+      },
+      "heavy_transports": {
+        "troops": 2400,
+        "cargo": 240,
+        "movement": 2,
+        "turns": 4
+      },
+      "coastal_galley": {
+        "troops": 400,
+        "cargo": 35,
+        "movement": 2.5,
+        "turns": 2
+      },
+      "corvus_quinquereme": {
+        "troops": 650,
+        "cargo": 40,
+        "movement": 2,
+        "turns": 3
+      },
+      "war_trireme": {
+        "troops": 450,
+        "cargo": 40,
+        "movement": 2.5,
+        "turns": 3
+      },
+      "punic_war_quinquereme": {
+        "troops": 650,
+        "cargo": 50,
+        "movement": 2,
+        "turns": 3
+      },
+      "punic_heptereme": {
+        "troops": 850,
+        "cargo": 60,
+        "movement": 2,
+        "turns": 4
+      },
+      "delta_war_galley": {
+        "troops": 500,
+        "cargo": 50,
+        "movement": 2,
+        "turns": 3
+      },
+      "raiding_longboats": {
+        "troops": 300,
+        "cargo": 30,
+        "movement": 2.5,
+        "turns": 2
+      },
+      "imperial_war_squadron": {
+        "troops": 900,
+        "cargo": 70,
+        "movement": 2,
+        "turns": 5
+      }
+    }
   }
 }

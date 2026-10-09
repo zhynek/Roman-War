@@ -2308,6 +2308,227 @@
           "minimum": 0.01
         }
       }
+    },
+    "ports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legacy_stages",
+        "commander_passengers",
+        "trade_income_per_cargo",
+        "repair_cost_factor",
+        "queue_limit",
+        "stages",
+        "facilities",
+        "vessels"
+      ],
+      "properties": {
+        "legacy_stages": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "commander_passengers": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "trade_income_per_cargo": {
+          "type": "number",
+          "minimum": 0
+        },
+        "repair_cost_factor": {
+          "type": "number",
+          "minimum": 0
+        },
+        "queue_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cost",
+              "turns",
+              "upkeep",
+              "troop_handling",
+              "cargo_handling",
+              "repair_pct",
+              "support",
+              "defense_pct"
+            ],
+            "properties": {
+              "cost": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "turns": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "upkeep": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "troop_handling": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cargo_handling": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "repair_pct": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "support": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "defense_pct": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "facilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "depot",
+            "repair_yard",
+            "arsenal"
+          ],
+          "properties": {
+            "depot": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "cost",
+                "turns",
+                "upkeep",
+                "cargo_bonus"
+              ],
+              "properties": {
+                "cost": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "turns": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "upkeep": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "cargo_bonus": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            "repair_yard": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "cost",
+                "turns",
+                "upkeep",
+                "repair_bonus",
+                "support_bonus"
+              ],
+              "properties": {
+                "cost": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "turns": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "upkeep": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "repair_bonus": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "support_bonus": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            },
+            "arsenal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "cost",
+                "turns",
+                "upkeep",
+                "defense_bonus"
+              ],
+              "properties": {
+                "cost": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "turns": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "upkeep": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "defense_bonus": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        },
+        "vessels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "troops",
+              "cargo",
+              "movement",
+              "turns"
+            ],
+            "properties": {
+              "troops": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "cargo": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "movement": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "turns": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

@@ -31,10 +31,10 @@ static func river_access(data: GameData, region: String) -> Array:
 	return out
 
 static func port(data: GameData, state: Dictionary, region: String) -> bool:
-	return state.get("settlements", {}).has(region) and SettlementRules.effect_max(data, state["settlements"][region], "port_level") > 0
+	return MapRules.coastal(data, region) and PortRules.stage(data, state, region) > 0
 
 static func landing(data: GameData, state: Dictionary, region: String) -> bool:
-	return port(data, state, region) or state.get("waterworks", {}).get("landings", {}).has(region)
+	return PortRules.stage(data, state, region) > 0
 
 static func access(data: GameData, state: Dictionary, owner: String, region: String, zone: String, own_only: bool = false) -> bool:
 	var town: Dictionary = state["settlements"].get(region, {})
@@ -48,6 +48,12 @@ static func access(data: GameData, state: Dictionary, owner: String, region: Str
 	return landing(data, state, region) and (river_access(data, region).has(zone) or port(data, state, region))
 
 static func project_quote(data: GameData, state: Dictionary, region: String, kind: String, other: String = "") -> Dictionary:
+	if kind == "landing":
+		if landing(data, state, region) or river_access(data, region).is_empty():
+			return {"ok": false, "error": "not_ready", "cost": 0, "turns": 0}
+		return PortRules.project_quote(data, state, region)
+	if kind == "boat":
+		return PortRules.ship_quote(data, state, region, data.waterways["transport_template"])
 	var town: Dictionary = state["settlements"].get(region, {})
 	var out := {"ok": false, "error": "not_ready", "cost": 0, "turns": 0}
 	if town.is_empty() or town.get("siege") != null or not kind in ["landing", "bridge", "boat"]:
@@ -73,6 +79,14 @@ static func project_quote(data: GameData, state: Dictionary, region: String, kin
 	return out
 
 static func queue_project(data: GameData, state: Dictionary, region: String, kind: String, other: String = "") -> Dictionary:
+	if kind == "landing":
+		var landing_quote := project_quote(data, state, region, kind)
+		return PortRules.queue_project(data, state, region) if landing_quote["ok"] else landing_quote
+	if kind == "boat":
+		var ship_quote := PortRules.ship_quote(data, state, region, data.waterways["transport_template"])
+		if ship_quote["ok"]:
+			ship_quote["ok"] = RecruitmentRules.queue_unit(data, state, region, data.waterways["transport_template"])
+		return ship_quote
 	var quote := project_quote(data, state, region, kind, other)
 	if not quote["ok"]:
 		return quote
@@ -110,7 +124,7 @@ static func advance_projects(data: GameData, state: Dictionary) -> Array:
 	return completed
 
 static func capacity(data: GameData, fleet: Dictionary) -> int:
-	return fleet.get("ships", []).size() * int(rules(data).get("capacity_per_ship", 6))
+	return PortRules.fleet_capacity(data, fleet)
 
 static func cargo_size(fleet: Dictionary) -> int:
 	var army: Dictionary = fleet.get("cargo", {}).get("army", {})
@@ -125,11 +139,15 @@ static func embark(data: GameData, state: Dictionary, fleet_id: String, army_id:
 		return {"ok": false, "error": "cargo_aboard"}
 	if not access(data, state, fleet["owner"], army["region"], fleet["sea_zone"], true):
 		return {"ok": false, "error": "occupied"}
-	if army["units"].size() + (1 if army.get("general") != null else 0) > capacity(data, fleet):
+	var passengers := PortRules.passengers(data, army)
+	if passengers > capacity(data, fleet):
 		return {"ok": false, "error": "capacity_error"}
+	if passengers > PortRules.handling_left(data, state, army["region"]):
+		return {"ok": false, "error": "handling_full"}
 	var cost := float(rules(data)["handling_cost"])
 	if float(army["movement_left"]) < cost or float(fleet["movement_left"]) < cost:
 		return {"ok": false, "error": "no_movement"}
+	PortRules.handle(state, army["region"], passengers)
 	SiegeRules.release(state, army_id)
 	army.erase("march_path")
 	army.erase("march_forced")
@@ -162,6 +180,11 @@ static func disembark(data: GameData, state: Dictionary, fleet_id: String, regio
 		return {"ok": false, "error": "no_movement"}
 	var cargo: Dictionary = fleet["cargo"]
 	var army: Dictionary = cargo["army"]
+	var passengers := PortRules.passengers(data, army)
+	if access(data, state, fleet["owner"], region, fleet["sea_zone"]):
+		if passengers > PortRules.handling_left(data, state, region):
+			return {"ok": false, "error": "handling_full"}
+		PortRules.handle(state, region, passengers)
 	army["region"] = region
 	army["movement_left"] = 0.0
 	state["armies"][cargo["id"]] = army
@@ -185,6 +208,11 @@ static func edge(data: GameData, a: String, b: String) -> Dictionary:
 static func step_cost(data: GameData, fleet: Dictionary, a: String, b: String, mode: String) -> float:
 	var link := edge(data, a, b)
 	if link.is_empty():
+		return INF
+	for ship in fleet.get("ships", []):
+		if not PortRules.permits_water(data, ship, link["kind"]):
+			return INF
+	if not PortRules.supports_zone(data, fleet.get("ships", []), b):
 		return INF
 	if link["kind"] == "open":
 		if mode != "open":
@@ -301,7 +329,7 @@ static func battle(data: GameData, state: Dictionary, attacker_id: String, defen
 	var defender: Dictionary = state["fleets"].get(defender_id, {})
 	if attacker.is_empty() or defender.is_empty() or (not intercept and float(attacker["movement_left"]) <= 0) or not hostiles(state, attacker).has(defender_id):
 		return {}
-	var result := resolver.resolve(data, rng, attacker["ships"], defender["ships"], {"terrain": "plains", "wall_level": 0,
+	var result := resolver.resolve(data, rng, attacker["ships"], defender["ships"], {"terrain": "plains", "wall_level": 0, "fort_defense_pct": PortRules.defense(data, state, defender),
 		"attacker_mods": KnowledgeRules.army_mods(data, state, attacker["owner"]), "defender_mods": KnowledgeRules.army_mods(data, state, defender["owner"])})
 	for id in [attacker_id, defender_id]:
 		var fleet: Dictionary = state["fleets"][id]
@@ -309,7 +337,7 @@ static func battle(data: GameData, state: Dictionary, attacker_id: String, defen
 		fleet["sail_path"] = []
 		fleet["trade_route"] = {}
 		var cargo: Dictionary = fleet.get("cargo", {}).get("army", {})
-		while cargo_size(fleet) > capacity(data, fleet) and not cargo.get("units", []).is_empty():
+		while PortRules.passengers(data, cargo) > capacity(data, fleet) and not cargo.get("units", []).is_empty():
 			cargo["units"].pop_back()
 		if fleet["ships"].is_empty():
 			if cargo.get("general") != null:
@@ -330,6 +358,8 @@ static func assign_trade(data: GameData, state: Dictionary, fleet_id: String, fr
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty() or not fleet.get("cargo", {}).is_empty() or from == to:
 		return {"ok": false, "error": "cargo_aboard"}
+	if PortRules.fleet_capacity(data, fleet, "cargo") <= 0:
+		return {"ok": false, "error": "cargo_empty"}
 	if not access(data, state, fleet["owner"], from, fleet["sea_zone"], true):
 		return {"ok": false, "error": "occupied"}
 	var best := {}
@@ -376,7 +406,8 @@ static func advance_season(data: GameData, state: Dictionary, resolver: BattleRe
 			for resource in data.regions[trade["to"]].get("resources", []):
 				if not origin_resources.has(resource):
 					premium += int(rules(data)["trade_resource_bonus"])
-			var income := (int(rules(data)["trade_delivery_base"]) + premium) * mini(fleet["ships"].size(), int(rules(data)["trade_capacity_limit"]))
+			var volume := PortRules.delivery_capacity(data, state, fleet, trade)
+			var income := int(round(volume * float(PortRules.rules(data)["trade_income_per_cargo"]))) + (premium if volume > 0 else 0)
 			state["factions"][fleet["owner"]]["treasury"] += income
 			trade["paid_turn"] = int(state["turn"])
 			report["income"] = income

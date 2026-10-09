@@ -64,7 +64,10 @@ static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: 
 	var owner := String(fleet["owner"])
 	var naval_pct := KnowledgeRules.faction_effect_total(data, state, owner, "naval_movement_pct") \
 		+ SettlementRules.faction_owns_wonder_effect(data, state, owner, "naval_movement_pct")
-	return float(data.balance["movement"]["base_movement_points"]) * (1.0 + naval_pct / 100.0)
+	var base := INF
+	for ship in fleet.get("ships", []):
+		base = minf(base, float(PortRules.vessel(data, ship["template"]).get("movement", data.balance["movement"]["base_movement_points"])))
+	return SocietyRules.quantize((base if is_finite(base) else 0.0) * (1.0 + naval_pct / 100.0))
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String, from_region: String = "") -> float:

@@ -47,6 +47,9 @@ static func blockers_for(data: GameData, state: Dictionary, region_id: String,
 	var levels: Array = chain["levels"]
 	var blockers: Array = []
 
+	if chain["kind"] in ["port", "naval"]:
+		return [{"kind": "port_development", "params": {}}]
+
 	if tier < 1 or tier > levels.size():
 		return [{"kind": "no_such_tier", "params": {"tier": tier}}]
 

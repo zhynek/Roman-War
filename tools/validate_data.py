@@ -24,6 +24,7 @@ SCHEMAS = ROOT / "schemas"
 
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
+    "ports.json": "ports.schema.json",
     "waterways.json": "waterways.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
@@ -539,6 +540,32 @@ def cross_checks(t: dict[str, dict]) -> None:
         if unreachable:
             err(f"regions: unreachable from {next(iter(regions))}: {sorted(unreachable)[:10]}")
 
+    ports = t.get("ports.json", {})
+    port_balance = t["balance.json"].get("ports", {})
+    if len(ports.get("stages", [])) != 5 or len(port_balance.get("stages", [])) != 5:
+        err("ports: exactly five stages are required")
+    facilities = {f["id"] for f in ports.get("facilities", [])}
+    ship_ids = {u["id"] for u in t["units.json"]["units"] if u["class"] == "ship"}
+    if set(ports.get("vessels", {})) != ship_ids or set(port_balance.get("vessels", {})) != ship_ids:
+        err("ports: every ship requires a capability and balance profile")
+    for region, site in ports.get("sites", {}).items():
+        if region not in regions:
+            err(f"ports: unknown site {region}")
+        if site["deep_water"] and site["setting"] == "riverbank":
+            err(f"ports: inland site cannot have deep sea access {region}")
+    for ship, spec in ports.get("vessels", {}).items():
+        if not set(spec["facilities"]) <= facilities or not 1 <= spec["repair_stage"] <= spec["stage"] <= 5:
+            err(f"ports: invalid vessel requirements {ship}")
+    layout = ports.get("layout", {})
+    seen_port_features = set()
+    for feature in layout.get("structures", []):
+        if feature["id"] in seen_port_features or not 1 <= feature["stage"] <= 5:
+            err(f"ports: duplicate or invalid feature {feature['id']}")
+        seen_port_features.add(feature["id"])
+        if feature["facility"] and feature["facility"] not in facilities:
+            err(f"ports: unknown facility for {feature['id']}")
+        if min(feature["rect"][2:]) <= 0:
+            err(f"ports: invalid footprint {feature['id']}")
     waterways = t.get("waterways.json", {})
     water_nodes = set(zones)
     for node in waterways.get("river_nodes", []):

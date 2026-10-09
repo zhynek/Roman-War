@@ -1,6 +1,7 @@
 class_name WaterwayPanel
 extends VBoxContainer
 ## Map-only shipping controls; all gameplay mutation goes through Game.
+signal port_requested(region: String)
 signal changed
 signal previewed(fleet_id: String, target: String, mode: String)
 signal sailed(fleet_id: String, origin: String, path: Array)
@@ -51,10 +52,12 @@ func setup_region(current_game: Game, region: String) -> void:
 	for project in game.state.get("waterworks", {}).get("projects", []):
 		if project["region"] == region:
 			label(words("project", {"name": words(project["kind"] + "_name"), "turns": project["turns"]}))
-	if not WaterwayRules.river_access(game.data, region).is_empty() and not WaterwayRules.landing(game.data, game.state, region):
-		_project(region, "landing")
-	if WaterwayRules.landing(game.data, game.state, region):
-		_project(region, "boat")
+	var port_words: Dictionary = game.data.effects_glossary["ports"]
+	var rank := PortRules.stage(game.data,game.state,region)
+	var definition := PortRules.stage_spec(game.data,rank)
+	var name: String = port_words["shore"] if rank == 0 else definition["name" if MapRules.coastal(game.data,region) else "inland_name"]
+	label(String(port_words["stage"]).format({"stage":rank,"name":name}))
+	button(port_words["inspect"],func(): port_requested.emit(region))
 	for other in game.data.regions[region].get("adjacent", []):
 		if TerrainRules.crossing_kind(game.data, region, other) == "river" and not game.state.get("waterworks", {}).get("bridges", {}).has(TerrainRules.edge_key(region, other)):
 			_project(region, "bridge", other)
@@ -74,7 +77,9 @@ func setup_fleet(current_game: Game, id: String) -> void:
 	fleet_id = id
 	var fleet: Dictionary = game.state["fleets"][id]
 	label(words("title")).add_theme_color_override("font_color", UiStyle.CAPITAL_GOLD)
-	label(words("capacity", {"used": WaterwayRules.cargo_size(fleet), "capacity": WaterwayRules.capacity(game.data, fleet)}))
+	label(words("capacity", {"used": PortRules.passengers(game.data, fleet.get("cargo", {}).get("army", {})), "capacity": WaterwayRules.capacity(game.data, fleet)}))
+	var port_words: Dictionary = game.data.effects_glossary["ports"]
+	label(String(port_words["fleet_stats"]).format({"crew":CombatRules.soldiers_in(game.data,fleet["ships"]),"cargo":PortRules.fleet_capacity(game.data,fleet,"cargo"),"movement":MovementRules.fleet_movement_points_for(game.data,game.state,fleet)}))
 	status = label("")
 	var report: Dictionary = game.state.get("naval_report", {})
 	if report.get("zone", "") == fleet["sea_zone"]:

@@ -209,6 +209,7 @@ func _ready() -> void:
 	region_panel.unit_info_requested.connect(open_unit_card)
 	region_panel.building_info_requested.connect(open_building_card)
 	region_panel.drawer_requested.connect(open_drawer)
+	region_panel.port_requested.connect(open_port)
 	region_panel.agent_selected.connect(_on_agent_selected)
 	region_panel.scout_requested.connect(_scout_order)
 	region_panel.assassinate_requested.connect(_assassinate_order)
@@ -1917,3 +1918,12 @@ func _enter_roma() -> void:
 	get_parent().add_child(city)
 	if game.city_battle_status("latium").get("can_defend", false):
 		city.open_battle()
+
+
+func open_port(region: String) -> void:
+	if game.state["settlements"].get(region,{}).get("owner","") != game.state["player_faction"]:
+		return
+	var dialog := PortDialog.new()
+	add_child(dialog)
+	dialog.changed.connect(refresh)
+	dialog.open_for(game,region)

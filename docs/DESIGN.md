@@ -1551,3 +1551,13 @@ terrain profiles and route table, and consumes only filtered force presentation
 caches. Detailed troops follow already-resolved march positions. The camera and
 picking use the same terrain mesh; the classic view remains available for review.
 The visual target is realism; current assets remain original procedural geometry.
+
+
+## Port evolution — campaign implementation, October 2026
+
+Five additive waterfront stages and three specialist facilities now govern
+shipbuilding, actual-soldier transport, handling, repairs, maintenance and freight.
+The campaign and close procedural inspector share `PortLayout` footprints,
+reserving gates, surfaces, obstacles and berths for future traversal and battles.
+Ship strength stays behind BattleResolver, and presentation owns no simulation.
+[PORTS.md](PORTS.md) records the implemented balance, compatibility and limits.

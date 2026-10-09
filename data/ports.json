@@ -1,0 +1,1193 @@
+{
+  "description": "Original illustrative harbor plans, not historical site reconstructions. Spatial coordinates are local meters, x east and z waterward. Stage additions retain earlier footprints.",
+  "stages": [
+    {
+      "id": "landing",
+      "inland_name": "River landing",
+      "name": "Waterfront landing",
+      "min_settlement": "village",
+      "description": "A cleared bank, rope moorings and a timber ramp begin the waterborne network."
+    },
+    {
+      "id": "wharf",
+      "inland_name": "Timber wharf",
+      "name": "Timber wharf",
+      "min_settlement": "town",
+      "description": "Pile-supported jetties, boatbuilders and guarded sheds turn a landing into a working port."
+    },
+    {
+      "id": "harbor",
+      "inland_name": "Inland harbor",
+      "name": "Established harbor",
+      "min_settlement": "large_town",
+      "description": "Stone quays, customs offices and warehouses separate cargo handling from troop assembly."
+    },
+    {
+      "id": "fortified",
+      "inland_name": "Fortified river port",
+      "name": "Fortified naval port",
+      "min_settlement": "minor_city",
+      "description": "Protected approaches, watchtowers and military berths support larger operations."
+    },
+    {
+      "id": "imperial",
+      "inland_name": "Imperial river exchange",
+      "name": "Imperial maritime center",
+      "min_settlement": "large_city",
+      "description": "An extensive waterfront connects commercial basins, civic courts and military precincts."
+    }
+  ],
+  "facilities": [
+    {
+      "id": "depot",
+      "name": "Commercial depot",
+      "stage": 2,
+      "description": "Bonded warehouses expand freight handling and merchant construction."
+    },
+    {
+      "id": "repair_yard",
+      "name": "Repair yard",
+      "stage": 2,
+      "description": "Slipways and workshops service more hulls and support advanced construction."
+    },
+    {
+      "id": "arsenal",
+      "name": "Naval arsenal",
+      "stage": 3,
+      "description": "A guarded military precinct unlocks warship production; civilian prosperity alone does not."
+    }
+  ],
+  "sites": {
+    "latium": {
+      "setting": "estuary",
+      "deep_water": true
+    },
+    "etruria": {
+      "setting": "estuary",
+      "deep_water": false
+    },
+    "umbria": {
+      "setting": "estuary",
+      "deep_water": false
+    },
+    "campania": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "apulia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "bruttium": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "liguria": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "venetia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "sicilia_graeca": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "sicilia_punica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "sardinia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "baetica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "lusitania": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "edetania": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "gallaecia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "narbonensis": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "aquitania": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "armorica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "belgica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "britannia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "cimbria": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "illyria": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "moesia": {
+      "setting": "estuary",
+      "deep_water": false
+    },
+    "thracia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "europa": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "macedonia": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "epirus": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "thessalia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "attica": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "achaea": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "laconia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "creta": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "rhodes": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "bithynia": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "ionia": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "caria": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "pontus": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "cilicia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "cyprus": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "scythia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "taurica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "syria": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "phoenicia": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "judaea": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "aegyptus": {
+      "setting": "estuary",
+      "deep_water": true
+    },
+    "cyrenaica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "syrtica": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "africa": {
+      "setting": "sheltered_bay",
+      "deep_water": true
+    },
+    "numidia": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "mauretania": {
+      "setting": "exposed_coast",
+      "deep_water": false
+    },
+    "thebais": {
+      "setting": "riverbank",
+      "deep_water": false
+    },
+    "heptanomis": {
+      "setting": "riverbank",
+      "deep_water": false
+    },
+    "noricum": {
+      "setting": "riverbank",
+      "deep_water": false
+    },
+    "pannonia": {
+      "setting": "riverbank",
+      "deep_water": false
+    },
+    "dacia": {
+      "setting": "riverbank",
+      "deep_water": false
+    }
+  },
+  "vessels": {
+    "river_transports": {
+      "stage": 1,
+      "facilities": [],
+      "deep_water": false,
+      "waters": [
+        "river",
+        "coastal"
+      ],
+      "repair_stage": 1
+    },
+    "river_barges": {
+      "stage": 2,
+      "facilities": [
+        "depot"
+      ],
+      "deep_water": false,
+      "waters": [
+        "river"
+      ],
+      "repair_stage": 1
+    },
+    "river_patrol": {
+      "stage": 2,
+      "facilities": [
+        "repair_yard"
+      ],
+      "deep_water": false,
+      "waters": [
+        "river",
+        "coastal"
+      ],
+      "repair_stage": 1
+    },
+    "coastal_transports": {
+      "stage": 3,
+      "facilities": [],
+      "deep_water": false,
+      "waters": [
+        "coastal"
+      ],
+      "repair_stage": 2
+    },
+    "merchant_convoy": {
+      "stage": 3,
+      "facilities": [
+        "depot"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 2
+    },
+    "heavy_transports": {
+      "stage": 4,
+      "facilities": [
+        "depot",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 3
+    },
+    "coastal_galley": {
+      "stage": 3,
+      "facilities": [
+        "arsenal"
+      ],
+      "deep_water": false,
+      "waters": [
+        "coastal"
+      ],
+      "repair_stage": 2
+    },
+    "corvus_quinquereme": {
+      "stage": 4,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 3
+    },
+    "war_trireme": {
+      "stage": 4,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 3
+    },
+    "punic_war_quinquereme": {
+      "stage": 4,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 3
+    },
+    "punic_heptereme": {
+      "stage": 5,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 4
+    },
+    "delta_war_galley": {
+      "stage": 4,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": false,
+      "waters": [
+        "river",
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 3
+    },
+    "raiding_longboats": {
+      "stage": 2,
+      "facilities": [
+        "repair_yard"
+      ],
+      "deep_water": false,
+      "waters": [
+        "river",
+        "coastal"
+      ],
+      "repair_stage": 1
+    },
+    "imperial_war_squadron": {
+      "stage": 5,
+      "facilities": [
+        "arsenal",
+        "repair_yard"
+      ],
+      "deep_water": true,
+      "waters": [
+        "coastal",
+        "open"
+      ],
+      "repair_stage": 4
+    }
+  },
+  "layout": {
+    "bounds": [
+      -60,
+      -45,
+      120,
+      95
+    ],
+    "land": [
+      -60,
+      -45,
+      120,
+      53
+    ],
+    "water": [
+      -60,
+      8,
+      120,
+      42
+    ],
+    "structures": [
+      {
+        "id": "towpath",
+        "name": "Waterside towpath",
+        "kind": "road",
+        "stage": 1,
+        "rect": [
+          -55,
+          -1,
+          110,
+          5
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "settlement_road",
+        "name": "Road to settlement",
+        "kind": "road",
+        "stage": 1,
+        "rect": [
+          -4,
+          -45,
+          8,
+          45
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "ramp",
+        "name": "Original loading ramp",
+        "kind": "ramp",
+        "stage": 1,
+        "rect": [
+          -17,
+          2,
+          7,
+          13
+        ],
+        "height": 0.45,
+        "facility": ""
+      },
+      {
+        "id": "landing_shelter",
+        "name": "Ferrymen’s shelter",
+        "kind": "shed",
+        "stage": 1,
+        "rect": [
+          -24,
+          -10,
+          8,
+          6
+        ],
+        "height": 3,
+        "facility": ""
+      },
+      {
+        "id": "first_stores",
+        "name": "Supply stacks",
+        "kind": "cargo",
+        "stage": 1,
+        "rect": [
+          -31,
+          -6,
+          5,
+          4
+        ],
+        "height": 1.2,
+        "facility": ""
+      },
+      {
+        "id": "west_pier",
+        "name": "Timber finger pier",
+        "kind": "pier",
+        "stage": 2,
+        "rect": [
+          -36,
+          3,
+          5,
+          26
+        ],
+        "height": 0.7,
+        "facility": ""
+      },
+      {
+        "id": "east_pier",
+        "name": "Boatbuilders’ jetty",
+        "kind": "pier",
+        "stage": 2,
+        "rect": [
+          28,
+          3,
+          5,
+          26
+        ],
+        "height": 0.7,
+        "facility": ""
+      },
+      {
+        "id": "boatbuilder",
+        "name": "Boatbuilder’s shed",
+        "kind": "shed",
+        "stage": 2,
+        "rect": [
+          34,
+          -12,
+          12,
+          8
+        ],
+        "height": 4,
+        "facility": ""
+      },
+      {
+        "id": "slip",
+        "name": "Working slipway",
+        "kind": "ramp",
+        "stage": 2,
+        "rect": [
+          37,
+          0,
+          9,
+          18
+        ],
+        "height": 0.5,
+        "facility": ""
+      },
+      {
+        "id": "gate_left",
+        "name": "Road guardhouse",
+        "kind": "tower",
+        "stage": 2,
+        "rect": [
+          -10,
+          -33,
+          6,
+          6
+        ],
+        "height": 5,
+        "facility": ""
+      },
+      {
+        "id": "gate_right",
+        "name": "Road guardhouse",
+        "kind": "tower",
+        "stage": 2,
+        "rect": [
+          4,
+          -33,
+          6,
+          6
+        ],
+        "height": 5,
+        "facility": ""
+      },
+      {
+        "id": "west_quay",
+        "name": "Commercial quay",
+        "kind": "quay",
+        "stage": 3,
+        "rect": [
+          -51,
+          3,
+          37,
+          8
+        ],
+        "height": 0.8,
+        "facility": ""
+      },
+      {
+        "id": "east_quay",
+        "name": "Troop quay",
+        "kind": "quay",
+        "stage": 3,
+        "rect": [
+          6,
+          3,
+          46,
+          8
+        ],
+        "height": 0.8,
+        "facility": ""
+      },
+      {
+        "id": "customs",
+        "name": "Customs house",
+        "kind": "hall",
+        "stage": 3,
+        "rect": [
+          -16,
+          -24,
+          10,
+          8
+        ],
+        "height": 5,
+        "facility": ""
+      },
+      {
+        "id": "warehouse",
+        "name": "Quayside warehouse",
+        "kind": "warehouse",
+        "stage": 3,
+        "rect": [
+          -46,
+          -20,
+          18,
+          10
+        ],
+        "height": 5,
+        "facility": ""
+      },
+      {
+        "id": "assembly",
+        "name": "Troop assembly court",
+        "kind": "court",
+        "stage": 3,
+        "rect": [
+          8,
+          -18,
+          20,
+          14
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "market",
+        "name": "Harbor market",
+        "kind": "market",
+        "stage": 3,
+        "rect": [
+          -45,
+          -37,
+          23,
+          10
+        ],
+        "height": 2.5,
+        "facility": ""
+      },
+      {
+        "id": "cargo_lane",
+        "name": "Warehouse lane",
+        "kind": "road",
+        "stage": 3,
+        "rect": [
+          -51,
+          -25,
+          4,
+          28
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "military_lane",
+        "name": "Military service road",
+        "kind": "road",
+        "stage": 3,
+        "rect": [
+          28,
+          -30,
+          5,
+          33
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "cross_lane",
+        "name": "Civic cross street",
+        "kind": "road",
+        "stage": 3,
+        "rect": [
+          -50,
+          -27,
+          82,
+          4
+        ],
+        "height": 0,
+        "facility": ""
+      },
+      {
+        "id": "warehouse_depot",
+        "name": "Bonded warehouse",
+        "kind": "warehouse",
+        "stage": 2,
+        "rect": [
+          -58,
+          -20,
+          10,
+          14
+        ],
+        "height": 5,
+        "facility": "depot"
+      },
+      {
+        "id": "repair_workshop",
+        "name": "Repair workshop",
+        "kind": "workshop",
+        "stage": 2,
+        "rect": [
+          36,
+          -26,
+          16,
+          10
+        ],
+        "height": 4,
+        "facility": "repair_yard"
+      },
+      {
+        "id": "arsenal",
+        "name": "Naval arsenal",
+        "kind": "arsenal",
+        "stage": 3,
+        "rect": [
+          8,
+          -38,
+          18,
+          11
+        ],
+        "height": 5,
+        "facility": "arsenal"
+      },
+      {
+        "id": "military_pier",
+        "name": "Military boarding pier",
+        "kind": "pier",
+        "stage": 4,
+        "rect": [
+          10,
+          11,
+          7,
+          25
+        ],
+        "height": 1,
+        "facility": ""
+      },
+      {
+        "id": "barracks",
+        "name": "Marines’ barracks",
+        "kind": "barracks",
+        "stage": 4,
+        "rect": [
+          35,
+          -40,
+          17,
+          10
+        ],
+        "height": 5,
+        "facility": ""
+      },
+      {
+        "id": "west_wall",
+        "name": "Western perimeter",
+        "kind": "wall",
+        "stage": 4,
+        "rect": [
+          -59,
+          -42,
+          2,
+          44
+        ],
+        "height": 4,
+        "facility": ""
+      },
+      {
+        "id": "east_wall",
+        "name": "Eastern perimeter",
+        "kind": "wall",
+        "stage": 4,
+        "rect": [
+          56,
+          -42,
+          2,
+          44
+        ],
+        "height": 4,
+        "facility": ""
+      },
+      {
+        "id": "north_wall_west",
+        "name": "Landward wall west",
+        "kind": "wall",
+        "stage": 4,
+        "rect": [
+          -59,
+          -43,
+          55,
+          2
+        ],
+        "height": 4,
+        "facility": ""
+      },
+      {
+        "id": "north_wall_east",
+        "name": "Landward wall east",
+        "kind": "wall",
+        "stage": 4,
+        "rect": [
+          4,
+          -43,
+          54,
+          2
+        ],
+        "height": 4,
+        "facility": ""
+      },
+      {
+        "id": "west_tower",
+        "name": "Commercial approach tower",
+        "kind": "tower",
+        "stage": 4,
+        "rect": [
+          -57,
+          1,
+          5,
+          6
+        ],
+        "height": 8,
+        "facility": ""
+      },
+      {
+        "id": "east_tower",
+        "name": "Military approach tower",
+        "kind": "tower",
+        "stage": 4,
+        "rect": [
+          51,
+          1,
+          5,
+          6
+        ],
+        "height": 8,
+        "facility": ""
+      },
+      {
+        "id": "ship_shed",
+        "name": "Covered ship slip",
+        "kind": "shipshed",
+        "stage": 4,
+        "rect": [
+          39,
+          15,
+          12,
+          20
+        ],
+        "height": 7,
+        "facility": "arsenal"
+      },
+      {
+        "id": "outer_mole",
+        "name": "Harbor breakwater",
+        "kind": "breakwater",
+        "stage": 5,
+        "rect": [
+          -52,
+          36,
+          35,
+          5
+        ],
+        "height": 1.5,
+        "facility": ""
+      },
+      {
+        "id": "military_mole",
+        "name": "Military breakwater",
+        "kind": "breakwater",
+        "stage": 5,
+        "rect": [
+          18,
+          38,
+          37,
+          5
+        ],
+        "height": 1.5,
+        "facility": ""
+      },
+      {
+        "id": "beacon",
+        "name": "Harbor beacon",
+        "kind": "beacon",
+        "stage": 5,
+        "rect": [
+          -24,
+          35,
+          5,
+          5
+        ],
+        "height": 12,
+        "facility": ""
+      },
+      {
+        "id": "civic_hall",
+        "name": "Port administration",
+        "kind": "hall",
+        "stage": 5,
+        "rect": [
+          -19,
+          -40,
+          12,
+          12
+        ],
+        "height": 7,
+        "facility": ""
+      },
+      {
+        "id": "monument",
+        "name": "Waterfront monument",
+        "kind": "monument",
+        "stage": 5,
+        "rect": [
+          -5,
+          -21,
+          5,
+          5
+        ],
+        "height": 7,
+        "facility": ""
+      },
+      {
+        "id": "deep_pier",
+        "name": "Merchant loading pier",
+        "kind": "pier",
+        "stage": 5,
+        "rect": [
+          -8,
+          10,
+          7,
+          23
+        ],
+        "height": 1,
+        "facility": ""
+      },
+      {
+        "id": "quay_bridge",
+        "name": "Inner quay footbridge",
+        "kind": "bridge",
+        "stage": 4,
+        "rect": [
+          0,
+          -6,
+          8,
+          4
+        ],
+        "height": 0.8,
+        "facility": ""
+      },
+      {
+        "id": "street_bridge",
+        "name": "Arsenal road bridge",
+        "kind": "bridge",
+        "stage": 4,
+        "rect": [
+          0,
+          -27,
+          8,
+          4
+        ],
+        "height": 0.8,
+        "facility": ""
+      }
+    ],
+    "routes": [
+      {
+        "id": "town",
+        "name": "Settlement approach",
+        "stage": 1,
+        "points": [
+          [
+            0,
+            -48
+          ],
+          [
+            0,
+            -3
+          ]
+        ]
+      },
+      {
+        "id": "cargo",
+        "name": "Cargo route",
+        "stage": 3,
+        "points": [
+          [
+            -37,
+            -9
+          ],
+          [
+            -37,
+            0
+          ],
+          [
+            -34,
+            7
+          ],
+          [
+            -34,
+            25
+          ]
+        ]
+      },
+      {
+        "id": "troops",
+        "name": "Troop embarkation",
+        "stage": 4,
+        "points": [
+          [
+            18,
+            -24
+          ],
+          [
+            30,
+            -24
+          ],
+          [
+            30,
+            -3
+          ],
+          [
+            13,
+            -3
+          ],
+          [
+            13,
+            30
+          ]
+        ]
+      },
+      {
+        "id": "repair",
+        "name": "Workshop access",
+        "stage": 2,
+        "points": [
+          [
+            44,
+            -14
+          ],
+          [
+            53,
+            -14
+          ],
+          [
+            53,
+            0
+          ],
+          [
+            43,
+            0
+          ],
+          [
+            43,
+            14
+          ]
+        ]
+      }
+    ],
+    "berths": [
+      {
+        "id": "landing_berth",
+        "stage": 1,
+        "rect": [
+          -11,
+          10,
+          5,
+          9
+        ]
+      },
+      {
+        "id": "river_berth",
+        "stage": 2,
+        "rect": [
+          -30,
+          16,
+          6,
+          12
+        ]
+      },
+      {
+        "id": "merchant_berth",
+        "stage": 3,
+        "rect": [
+          -44,
+          13,
+          7,
+          18
+        ]
+      },
+      {
+        "id": "military_berth",
+        "stage": 4,
+        "rect": [
+          18,
+          17,
+          7,
+          17
+        ]
+      },
+      {
+        "id": "deep_berth",
+        "stage": 5,
+        "rect": [
+          0,
+          14,
+          7,
+          18
+        ]
+      }
+    ],
+    "channels": [
+      {
+        "id": "military_channel",
+        "stage": 4,
+        "rect": [
+          2,
+          -27,
+          4,
+          35
+        ]
+      }
+    ]
+  }
+}

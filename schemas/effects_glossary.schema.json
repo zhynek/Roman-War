@@ -221,7 +221,8 @@
               "culture_cap",
               "already_built",
               "no_such_tier",
-              "requires_building"
+              "requires_building",
+              "port_development"
             ]
           },
           "line": {
@@ -1566,6 +1567,12 @@
       }
     },
     "waterways": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ports": {
       "type": "object",
       "additionalProperties": {
         "type": "string"

@@ -10,7 +10,7 @@ static func appearance_key(report: Dictionary) -> String:
 	var buildings: Array = report.get("buildings", []).duplicate()
 	buildings.sort()
 	# A new observation date changes the intelligence label, not the geometry.
-	return JSON.stringify([report.get("owner", ""), report.get("level", ""), int(report.get("population", 0)) / 250, buildings, report.get("watchpost", {}), report.get("construction", [])])
+	return JSON.stringify([report.get("owner", ""), report.get("level", ""), int(report.get("population", 0)) / 250, buildings, report.get("watchpost", {}), report.get("construction", []), report.get("port", {})])
 
 static func plan(data: GameData, region: String, report: Dictionary, approaches: Array = []) -> Dictionary:
 	if report.is_empty():

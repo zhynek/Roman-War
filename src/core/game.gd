@@ -1600,3 +1600,24 @@ func naval_encounter(fleet_id: String, enemy_id: String) -> Dictionary:
 	var result := WaterwayRules.battle(data, state, fleet_id, enemy_id, resolver, rng)
 	state["rng_state"] = rng.state_string()
 	return result
+
+
+func develop_port(region: String, kind: String = "stage") -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "error": "battle_active"}
+	if not _owns_settlement(region):
+		return {"ok": false, "error": "wrong_owner"}
+	return PortRules.queue_project(data, state, region, kind)
+
+func commission_ship(region: String, template: String) -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_settlement(region):
+		return {"ok": false, "error": "wrong_owner"}
+	var quote := PortRules.ship_quote(data, state, region, template)
+	if quote["ok"]:
+		quote["ok"] = RecruitmentRules.queue_unit(data, state, region, template)
+	return quote
+
+func service_port(region: String) -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_settlement(region):
+		return {"count": 0, "cost": 0}
+	return PortRules.repair_harbour(data, state, region)

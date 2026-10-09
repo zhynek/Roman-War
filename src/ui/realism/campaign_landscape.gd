@@ -184,6 +184,9 @@ func _ground(point: Vector2, region: String = "") -> Vector3:
 	var distance_to_track := _track_distance(point, id)
 	for source in terrain_sources:
 		distance_to_track = minf(distance_to_track, maxf(0, point.distance_to(source.at) - 18.0))
+	var waterfront := _port_footprint(id)
+	if waterfront.has_area():
+		distance_to_track = minf(distance_to_track, point.distance_to(point.clamp(waterfront.position, waterfront.end)))
 	h = lerpf(0.95, h, smoothstep(2.1, 15.0, distance_to_track))
 	for site in crossing_sites:
 		if not site.kind in ["river", "bridge"]:
@@ -328,7 +331,7 @@ func _build_region(id: String) -> void:
 	for i in range(int(profile.trees) * 3):
 		var key := id + "/" + str(i)
 		var at := bounds.position + bounds.size * Vector2(RealismModels.scatter(key, 0), RealismModels.scatter(key, 1))
-		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 24:
+		if view.geometry.region_at_world(at) != id or (at.distance_to(anchor) < 24 or _port_footprint(id).grow(3).has_point(at)):
 			continue
 		var p := ground(at, id)
 		if _track_distance(at, id) < 6.5:
@@ -350,7 +353,7 @@ func _build_region(id: String) -> void:
 	for i in range(700 if region["terrain"] in ["marsh", "forest"] else 180):
 		var key := id + "/ground/" + str(i)
 		var at := bounds.position + bounds.size * Vector2(RealismModels.scatter(key, 0), RealismModels.scatter(key, 1))
-		if view.geometry.region_at_world(at) != id or at.distance_to(anchor) < 24 or _track_distance(at, id) < 2.4:
+		if view.geometry.region_at_world(at) != id or (at.distance_to(anchor) < 24 or _port_footprint(id).grow(3).has_point(at)) or _track_distance(at, id) < 2.4:
 			continue
 		var p := ground(at, id)
 		var scale_by := 0.6 + RealismModels.scatter(key, 2) * 1.0
@@ -434,6 +437,18 @@ func _sync_settlements() -> void:
 		var shell := CampaignCityModel.build(spec, view.world_pos(view.game.data.regions[id]), ground)
 		if shell != null:
 			_mesh(root, shell, settlement_material)
+		var architecture: Dictionary = report.get("port", {})
+		if int(architecture.get("stage",0)) > 0:
+			var harbor := MeshInstance3D.new()
+			harbor.mesh = PortModel.build(PortLayout.build(view.game.data,id,architecture),false,false)
+			var material := StandardMaterial3D.new()
+			material.vertex_color_use_as_albedo = true
+			material.roughness = 0.9
+			material.cull_mode = BaseMaterial3D.CULL_DISABLED
+			harbor.material_override = material
+			harbor.scale = Vector3.ONE * 0.14
+			harbor.position = ground(anchor + Vector2(-13,19)) + Vector3.UP * 0.5
+			root.add_child(harbor)
 		settlements[id] = {"node": root, "key": key, "plan": spec, "detail": null}
 
 func _triangle(st: SurfaceTool, id: String, a: Vector2, b: Vector2, c: Vector2, depth: int) -> void:
@@ -567,3 +582,11 @@ func _batch(parent: Node3D, mesh: Mesh, material: Material, poses: Array[Transfo
 	node.material_override = material
 	parent.add_child(node)
 	return node
+
+
+func _port_footprint(region: String) -> Rect2:
+	if not view.game.data.ports.get("sites", {}).has(region):
+		return Rect2()
+	var anchor := view.world_pos(view.game.data.regions[region]) + Vector2(-13,19)
+	var bounds := PortLayout.rectangle(view.game.data.ports["layout"]["bounds"])
+	return Rect2(anchor + bounds.position * 0.14, bounds.size * 0.14)

@@ -67,6 +67,9 @@ static func settlement_income_breakdown(data: GameData, state: Dictionary, regio
 
 	# ...and the generous orders send a bill every turn, scaled by the number of
 	# people being provided for.
+	var port_upkeep := int(PortRules.capabilities(data, state, region_id)["upkeep"])
+	if port_upkeep > 0:
+		factors.append({"label": "port_upkeep", "value": -port_upkeep})
 	var edict_upkeep := EdictRules.upkeep(data, settlement)
 	if edict_upkeep > 0.0:
 		factors.append({"label": "edict_upkeep", "value": -edict_upkeep})
@@ -101,7 +104,7 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 	var owner: String = settlement["owner"]
 	var economy_rules: Dictionary = data.balance["economy"]
 	var own_resources: Array = data.regions[region_id].get("resources", [])
-	var port_level := int(SettlementRules.effect_max(data, settlement, "port_level"))
+	var port_level := PortRules.stage(data, state, region_id) if MapRules.coastal(data, region_id) else 0
 	var trade_pct := SettlementRules.effect_total(data, settlement, "trade_pct") \
 		+ KnowledgeRules.faction_effect_total(data, state, owner, "trade_pct") \
 		+ EdictRules.faction_effect_total(data, state, owner, "trade_pct")
@@ -124,7 +127,7 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 				* float(economy_rules["road_trade_bonus_per_level"])
 			land_total += (float(economy_rules["land_trade_route_base"]) + premium) * road_bonus
 		elif port_level > 0 and MapRules.shared_sea_zone(data, region_id, other_id) \
-				and SettlementRules.effect_max(data, other, "port_level") > 0.0:
+				and PortRules.stage(data, state, other_id) > 0:
 			sea_routes.append(float(economy_rules["sea_trade_route_base"]) + premium)
 
 	sea_routes.sort()
