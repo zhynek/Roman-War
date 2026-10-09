@@ -447,23 +447,33 @@ your army is the thing that wins you regions and the thing that bankrupts you.
 Deep enough debt disbands units for you, starting with the expensive ones
 (never a general's last unit).
 
-## Fleets
+## Fleets, rivers and shipping
 
-Ships are built in a port city's shipyard and wait in its **harbour** — a
-second list on the city panel, beside the garrison. Tick ships and **Launch
-fleet into** one of the seas the port touches; the new fleet flies its banner
-at that sea's anchor and sails from next season. Select a fleet by its banner
-(or by clicking the sea's anchor when the map is zoomed out): its card lists
-the ships and the seas it can reach, ringed on the map. **Right-click a ringed
-sea** to sail there, or **one of your own ports on this sea** to dock — the
-ships go back into the harbour, where **Retrain** re-arms them and from which
-they can be launched again. Fleets regroup like armies: transfer ticked ships
-between two of your fleets in the same sea (or into a harbour, which costs
-them the lane a docking fleet pays), merge, split, or disband ticked ships in
-a sea touching one of your ports. Ships in harbour cost upkeep like
-any unit. Fleets do not fight yet (see the end of this guide), but they watch
-the seas: their own sea and its neighbours are visible to you, foreign sails
-included.
+Select a river province and open **Waterways & shipping** to build a landing,
+commission transports and bridge an unbridged river when you own both banks.
+Sea ports and their upgrades remain in the settlement building drawer. Completed
+ships wait in the harbour: tick them and launch into an adjoining waterway.
+
+Select a ship or fleet banner, choose a distant destination and a coastal or
+open-water route, inspect its seasonal estimate, then **Issue voyage**. The fleet
+sails as far as this season's movement allows and continues automatically on later
+turns. The route stays visible; **Halt voyage / end trade service** cancels it.
+Armies retain the same multi-turn marching controls they already use on land.
+
+**Embark** loads an army at an owned port or river landing; six company spaces per
+ship include one space for a commander. Carried troops cannot act on land and
+still cost upkeep. **Land troops**, or right-click a shore, unloads them with no
+land movement until next season. Unopposed enemy coasts allow amphibious landings;
+the enemy town still needs to be taken afterward. Land troops before regrouping
+or docking ships.
+
+An empty fleet can run a recurring trade service between accessible landings or
+ports. Deliveries earn income; loss of access pauses the service. River boats use
+rivers and coastal corridors; warships can also choose open-water shortcuts.
+Enemy fleet encounters resolve automatically, without a tactical naval scene.
+
+See [Waterways and shipping](docs/WATERWAYS.md) for costs, controls, the Tiber/Nile/
+Danube network, carrying limits, construction and shipping rules.
 
 ## Your family
 
@@ -682,10 +692,9 @@ Honest list, so you know what you are looking at:
 - **The computer players do not use agents against you.** Spies, blades and
   envoys are a player's edge this build; the AI's counter-intelligence still
   works, so your own agents can still fail.
-- **Naval combat.** Fleets move, dock, regroup and watch the coasts, but they
-  do not fight, carry no armies, and there are no port blockades yet. (Armies
-  still cross the sea on their own, and an amphibious landing on an enemy
-  shore already works.) The computer players build no ships at all.
+- **Naval strategy.** Player transport, recurring shipping, multi-turn voyages,
+  river landings, bridges and automatic fleet encounters are playable. Port
+  blockades and autonomous AI fleet operations/shipbuilding remain future work.
 - **Buying elections, and the aftermath of a civil war.** You cannot canvass
   for a seat with silver, cannot declare on the Senate yourself or join another
   house's rebellion before the Senate demands your life or your ambitious sons
@@ -750,7 +759,7 @@ Marsh costs 2 movement before road improvements, compared with 1 for plains.
 Mountains are traversed through passes; marked unbroken ridges and unbridged
 river borders cannot be marched, attacked, or besieged across. A bridge adds
 0.25 movement and gives its defender a 20% crossing advantage, alongside the
-existing terrain/class factors. Straits require the existing coastal transport
+existing terrain/class factors. Straits require embarked fleet transport
 order. Roads also govern land trade and grain connections.
 
 The province panel explains terrain and known crossings. The army strip shows

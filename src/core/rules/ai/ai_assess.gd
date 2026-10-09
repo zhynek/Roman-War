@@ -126,7 +126,7 @@ static func distance_map(data: GameData, state: Dictionary, faction_id: String, 
 		if data.regions.has(source):
 			cost[source] = 0
 			frontier.append(source)
-	var table := _traversal_table(data)
+	var table := _traversal_table(data, state)
 	# Ownership and diplomacy cannot change during this read-only query.
 	# Evaluate them once per region instead of again for every relaxed edge.
 	# Keep this local: the next faction may declare war or capture a town.
@@ -153,36 +153,24 @@ static func distance_map(data: GameData, state: Dictionary, faction_id: String, 
 	return cost
 
 
-static func _traversal_table(data: GameData) -> Dictionary:
+static func _traversal_table(data: GameData, state: Dictionary = {}) -> Dictionary:
 	## {region_id: [{region, cost, sea}, ...]} — land adjacency at cost 1 plus
-	## sea crossings at sea_hop_cost(). The map never changes after load, so
-	## the table is built once per GameData instance.
-	var cache_key := data.get_instance_id()
+	## completed bridges. Sea transport requires a fleet; the land planner
+	## must never assume an abstract crossing. Cache includes built bridges.
+	var bridge_keys: Array = state.get("waterworks", {}).get("bridges", {}).keys()
+	bridge_keys.sort()
+	var cache_key := str(data.get_instance_id()) + str(bridge_keys)
 	if _traversal_cache.has(cache_key):
 		return _traversal_cache[cache_key]
-	var crossing := sea_hop_cost(data)
 	var table := {}
 	var region_ids: Array = data.regions.keys()
 	region_ids.sort()
 	for region_id in region_ids:
 		var steps: Array = []
 		for neighbor in data.regions[region_id].get("adjacent", []):
-			if data.regions.has(neighbor) and TerrainRules.land_connection(data, region_id, neighbor):
+			if data.regions.has(neighbor) and TerrainRules.land_connection(data, region_id, neighbor, state):
 				steps.append({"region": neighbor, "cost": 1, "sea": false})
-		var zones: Array = data.regions[region_id].get("sea_zones", [])
-		if not zones.is_empty():
-			var reachable_zones := {}
-			for zone in zones:
-				reachable_zones[zone] = true
-				for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
-					reachable_zones[adjacent_zone] = true
-			for other_id in region_ids:
-				if other_id == region_id:
-					continue
-				for zone in data.regions[other_id].get("sea_zones", []):
-					if reachable_zones.has(zone):
-						steps.append({"region": other_id, "cost": crossing, "sea": true})
-						break
+
 		table[region_id] = steps
 	if _traversal_cache.size() > 8:
 		_traversal_cache.clear()
@@ -299,7 +287,7 @@ static func approach_cost(data: GameData, state: Dictionary, faction_id: String,
 		return int(reach.get(goal, unreachable))
 	var best := unreachable
 	for neighbor in data.regions.get(goal, {}).get("adjacent", []):
-		if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, goal, neighbor) or not passable(state, faction_id, neighbor):
+		if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, goal, neighbor, state) or not passable(state, faction_id, neighbor):
 			continue
 		var cost := int(reach.get(neighbor, unreachable))
 		if cost < unreachable:

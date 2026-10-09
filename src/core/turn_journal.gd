@@ -19,6 +19,9 @@ class_name TurnJournal
 const KINDS: Array[String] = [
 	# Our works — what the player's own orders finished.
 	"building_completed",
+	"waterway_voyage",
+	"waterway_delivery",
+	"waterway_completed",
 	"unit_mustered",
 	# Our coffers and people.
 	"treasury_change",

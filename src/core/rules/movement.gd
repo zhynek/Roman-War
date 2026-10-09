@@ -68,7 +68,7 @@ static func fleet_movement_points_for(data: GameData, state: Dictionary, fleet: 
 
 
 static func step_cost(data: GameData, state: Dictionary, to_region: String, from_region: String = "") -> float:
-	if from_region != "" and not TerrainRules.land_connection(data, from_region, to_region):
+	if from_region != "" and not TerrainRules.land_connection(data, from_region, to_region, state):
 		return INF
 	var movement_rules: Dictionary = data.balance["movement"]
 	var terrain: String = data.regions[to_region]["terrain"]
@@ -77,14 +77,14 @@ static func step_cost(data: GameData, state: Dictionary, to_region: String, from
 		var road_level := int(SettlementRules.effect_max(data, state["settlements"][to_region], "road_level"))
 		var multipliers: Array = movement_rules["road_cost_multiplier"]
 		cost *= float(multipliers[mini(road_level, multipliers.size() - 1)])
-	return cost + TerrainRules.crossing_cost(data, from_region, to_region)
+	return cost + TerrainRules.crossing_cost(data, from_region, to_region, state)
 
 
 static func can_enter(data: GameData, state: Dictionary, army_id: String, to_region: String) -> bool:
 	## Entering a region held by a faction you are at war with is an attack or a
 	## siege, not a move — those go through Game.attack/besiege actions.
 	var army: Dictionary = state["armies"][army_id]
-	if not TerrainRules.land_connection(data, army["region"], to_region):
+	if not TerrainRules.land_connection(data, army["region"], to_region, state):
 		return false
 	var owner: String = army["owner"]
 	if hostile_army_in(state, owner, to_region):
@@ -126,62 +126,27 @@ static func move_army(data: GameData, state: Dictionary, army_id: String, to_reg
 	return true
 
 
-static func sea_move_army(data: GameData, state: Dictionary, army_id: String, to_region: String) -> bool:
-	## Naval transport, abstracted for the foundation: an army in a coastal
-	## region may cross to another coastal region on the same or an adjacent
-	## sea zone, spending its whole turn. Explicit embark-on-fleet transport
-	## can replace this later without touching callers.
-	##
-	## Landing on the shore of a faction you are AT WAR with is an amphibious
-	## invasion: allowed as long as no hostile field army contests the beach
-	## (the garrison waits behind its walls — besiege it next turn). Without
-	## this, island regions with no land link — rebel-held Creta and Cyprus
-	## among them — could never change hands, and Egypt's long campaign could
-	## never be won.
-	var army: Dictionary = state["armies"][army_id]
-	var from_zones: Array = data.regions.get(army["region"], {}).get("sea_zones", [])
-	var to_zones: Array = data.regions.get(to_region, {}).get("sea_zones", [])
-	if from_zones.is_empty() or to_zones.is_empty() or army["region"] == to_region:
-		return false
-	var connected := false
-	for zone in from_zones:
-		if to_zones.has(zone):
-			connected = true
-			break
-		for adjacent_zone in data.sea_zones.get(zone, {}).get("adjacent", []):
-			if to_zones.has(adjacent_zone):
-				connected = true
-				break
-	if not connected:
-		return false
-	var cost := float(data.balance["movement"]["sea_move_cost"])
-	if cost > float(army["movement_left"]) + 0.0001:
-		return false
-	if hostile_army_in(state, army["owner"], to_region):
-		return false
-	army["movement_left"] = 0.0
-	# Marching away lifts a siege at once, not at the end of the turn.
-	SiegeRules.release(state, army_id)
-	ReconRules.record_move(data, state, army_id, to_region)
-	CartographyRules.record_reports(data, state)
-	army["region"] = to_region
-	CartographyRules.record_reports(data, state)
-	sync_general_location(state, army)
-	return true
+static func sea_move_army(_data: GameData, _state: Dictionary, _army_id: String, _to_region: String) -> bool:
+	## Transport now requires an actual fleet, landing and carrying capacity.
+	return false
 
 
 static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_zone: String) -> bool:
-	var fleet: Dictionary = state["fleets"][fleet_id]
-	if not data.sea_zones.has(to_zone):
+	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
+	if fleet.is_empty():
 		return false
-	if not data.sea_zones[fleet["sea_zone"]]["adjacent"].has(to_zone):
+	var cost := WaterwayRules.step_cost(data, fleet, fleet["sea_zone"], to_zone, fleet.get("sail_mode", "coastal"))
+	if cost > float(fleet["movement_left"]) or not WaterwayRules.hostiles(state, fleet).is_empty():
 		return false
-	var cost := float(data.balance["movement"]["sea_lane_cost"])
-	if cost > float(fleet["movement_left"]) + 0.0001:
-		return false
-	fleet["movement_left"] = float(fleet["movement_left"]) - cost
-	CartographyRules.record_reports(data, state)
+	var target := fleet.duplicate()
+	target["sea_zone"] = to_zone
+	if not WaterwayRules.hostiles(state, target).is_empty():
+		return false # Combat belongs to the facade's resolver-backed voyage.
+	fleet["sail_path"] = []
+	fleet["trade_route"] = {}
+	fleet["movement_left"] = SocietyRules.quantize(float(fleet["movement_left"]) - cost)
 	fleet["sea_zone"] = to_zone
+	WaterwayRules._sync_cargo(state, fleet)
 	CartographyRules.record_reports(data, state)
 	return true
 
@@ -249,29 +214,12 @@ static func can_afford_step(data: GameData, state: Dictionary, army: Dictionary,
 
 
 static func fleet_reachable(data: GameData, state: Dictionary, fleet_id: String) -> Dictionary:
-	## {zone_id: {cost, via}} for every sea a fleet can reach this season,
-	## one lane at a time. Fleets pass each other at sea; battle is explicit.
 	var reach := {}
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
-	if fleet.is_empty():
-		return reach
-	var lane := float(data.balance["movement"]["sea_lane_cost"])
-	var budget := float(fleet["movement_left"])
-	var frontier: Array = [fleet["sea_zone"]]
-	var best := {fleet["sea_zone"]: 0.0}
-	while not frontier.is_empty():
-		var zone: String = frontier.pop_front()
-		var cost: float = best[zone]
-		var adjacent: Array = data.sea_zones.get(zone, {}).get("adjacent", []).duplicate()
-		adjacent.sort()
-		for next_zone in adjacent:
-			if not data.sea_zones.has(next_zone) or best.has(next_zone):
-				continue
-			if cost + lane > budget + 0.0001:
-				continue
-			best[next_zone] = cost + lane
-			reach[next_zone] = {"cost": cost + lane, "via": zone}
-			frontier.append(next_zone)
+	for zone in data.sea_zones:
+		var quote := WaterwayRules.preview(data, state, fleet_id, zone, fleet.get("sail_mode", "coastal"))
+		if not quote.is_empty() and not quote["path"].is_empty() and int(quote["turns"]) == 1:
+			reach[zone] = {"cost": quote["cost"], "via": fleet["sea_zone"] if quote["path"].size() == 1 else quote["path"][-2]}
 	return reach
 
 

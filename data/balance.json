@@ -1064,5 +1064,20 @@
       "low",
       "normal"
     ]
+  },
+  "waterways": {
+    "capacity_per_ship": 6,
+    "landing_cost": 180,
+    "landing_turns": 1,
+    "bridge_cost": 450,
+    "bridge_turns": 2,
+    "boat_turns": 1,
+    "handling_cost": 0.5,
+    "trade_delivery_base": 240,
+    "trade_resource_bonus": 40,
+    "trade_capacity_limit": 4,
+    "coastal_cost_multiplier": 1,
+    "open_cost_multiplier": 1,
+    "river_cost_multiplier": 1
   }
 }

@@ -72,6 +72,8 @@ var selected_region := "":
 			_overlay_layer.queue_redraw()
 var selected_force := "":
 	set(value):
+		if selected_force != value:
+			waterway_preview = {}
 		selected_force = value
 		if _banner_layer != null:
 			_banner_layer.queue_redraw()
@@ -167,6 +169,8 @@ var motion_enabled := true
 var follow_marches := true
 var _follow_force := ""
 var _marches: Dictionary = {}
+var _voyages: Dictionary = {}
+var waterway_preview: Dictionary = {}
 var _visual_clock := 0.0
 var _visual_tick := 0.0
 var _detail := false
@@ -515,6 +519,7 @@ func decor_points(region_id: String, detail: bool = false) -> PackedVector2Array
 func _process(_delta: float) -> void:
 	_advance_pan(_delta)
 	_advance_marches(_delta)
+	_advance_voyages(_delta)
 	_advance_sighting(_delta)
 	# One transform carries pan/zoom for every world layer; catching direct
 	# _camera_offset writes here keeps the pinned camera contract intact.
@@ -878,6 +883,13 @@ func _pick(screen_point: Vector2) -> Dictionary:
 		for id in ids:
 			if _force_contains_point(id, screen_point):
 				return {"kind": "army", "id": id}
+	for id in game.state["fleets"]:
+		if visible_zones.has(game.state["fleets"][id]["sea_zone"]) and fleet_screen_position(id).distance_to(screen_point) <= 22 * clampf(_zoom, 0.75, 2):
+			return {"kind": "fleet", "id": id}
+	if game.state["fleets"].has(selected_force):
+		for node in game.data.waterways.get("river_nodes", []):
+			if visible_zones.has(node["id"]) and to_screen(zone_world_pos(node)).distance_to(screen_point) < 20:
+				return {"kind": "zone", "id": node["id"]}
 	var region := _region_at(screen_point)
 	if region != "":
 		return {"kind": "region", "id": region}
@@ -1004,6 +1016,9 @@ func banner_layout() -> Array:
 		var origin := to_screen(zone_world_pos(game.data.sea_zones[zone_id])) \
 			+ Vector2(-(shown * SLOT_PITCH - 2.0) / 2.0, 4.0) * _zoom
 		_place_row(entries, "fleet", fleets, zone_id, origin)
+		for entry in entries:
+			if entry["kind"] == "fleet" and fleets.has(entry["id"]):
+				entry["rect"].position = fleet_screen_position(entry["id"]) + Vector2(-17, 24)
 	_banner_entries = entries
 	return entries
 
@@ -1542,6 +1557,8 @@ func draw_contacts(canvas: CanvasItem) -> void:
 func finish_marches() -> void:
 	_sighting = {}
 	_marches.clear()
+	_voyages.clear()
+	waterway_preview = {}
 	_follow_force = ""
 	_banner_dirty = true
 	if _miniature_layer != null:
@@ -1618,3 +1635,42 @@ func _map_transform() -> Transform2D:
 		var tilt := sin(CampaignLandscape.PITCH)
 		return Transform2D(0, Vector2(_zoom, _zoom * tilt), 0, Vector2(_camera_offset.x * _zoom, _camera_offset.y * _zoom * tilt + size.y * 0.5 * (1 - tilt)))
 	return Transform2D(0, Vector2.ONE * _zoom, 0, _camera_offset * _zoom)
+
+
+func fleet_screen_position(id: String) -> Vector2:
+	var fleet: Dictionary = game.state["fleets"].get(id, {})
+	if fleet.is_empty():
+		return Vector2.INF
+	var at := zone_world_pos(game.data.sea_zones[fleet["sea_zone"]])
+	if _voyages.has(id):
+		at = _voyages[id]["position"]
+	var peers := ForceRules.fleets_in(game.state, fleet["sea_zone"])
+	peers.sort()
+	return to_screen(at) + Vector2(peers.find(id) * 54, -5)
+
+func play_voyage(id: String, origin: String, traversed: Array) -> void:
+	waterway_preview = {}
+	if not motion_enabled or traversed.is_empty() or not game.state["fleets"].has(id):
+		return
+	var points := PackedVector2Array([zone_world_pos(game.data.sea_zones[origin])])
+	for zone in traversed:
+		points.append(zone_world_pos(game.data.sea_zones[zone]))
+	var length := 0.0
+	for i in range(points.size() - 1):
+		length += points[i].distance_to(points[i + 1])
+	_voyages[id] = {"points": points, "distance": 0.0, "length": length, "position": points[0]}
+
+func _advance_voyages(delta: float) -> void:
+	for id in _voyages.keys():
+		if not motion_enabled or not game.state["fleets"].has(id):
+			_voyages.erase(id)
+			continue
+		var voyage: Dictionary = _voyages[id]
+		voyage["distance"] = minf(voyage["length"], voyage["distance"] + delta * maxf(80, voyage["length"] / 2.5))
+		voyage["position"] = sample_route(voyage["points"], voyage["distance"])["position"]
+		if follow_marches and selected_force == id:
+			_camera_offset = -voyage["position"] + size / (2 * _zoom)
+		if voyage["distance"] >= voyage["length"]:
+			_voyages.erase(id)
+		_banner_dirty = true
+		_banner_layer.queue_redraw()

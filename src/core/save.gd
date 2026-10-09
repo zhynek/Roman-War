@@ -112,6 +112,7 @@ static func _valid_state(state: Variant) -> bool:
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
 		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
+		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
 		"advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
@@ -160,10 +161,39 @@ static func _valid_state(state: Variant) -> bool:
 			return false
 		if not _fields(army, {"march_path": TYPE_ARRAY}, true):
 			return false
+	if state.has("waterworks"):
+		var works: Dictionary = state["waterworks"]
+		if not _fields(works, {"landings": TYPE_DICTIONARY, "bridges": TYPE_DICTIONARY, "projects": TYPE_ARRAY}):
+			return false
+		for project in works["projects"]:
+			if not _fields(project, {"region": TYPE_STRING, "other": TYPE_STRING, "owner": TYPE_STRING, "kind": TYPE_STRING, "key": TYPE_STRING, "turns": TYPE_FLOAT}):
+				return false
+			if not project["kind"] in ["landing", "bridge", "boat"] or not _whole_at_least(project["turns"], 1):
+				return false
 	for fleet in state["fleets"].values():
 		if not _fields(fleet, {"owner": TYPE_STRING, "sea_zone": TYPE_STRING,
 			"movement_left": TYPE_FLOAT, "ships": TYPE_ARRAY}) or not _units(fleet["ships"]):
 			return false
+		if not _fields(fleet, {"cargo": TYPE_DICTIONARY, "trade_route": TYPE_DICTIONARY, "sail_path": TYPE_ARRAY, "sail_mode": TYPE_STRING}, true):
+			return false
+		for zone in fleet.get("sail_path", []):
+			if not zone is String:
+				return false
+		var cargo: Dictionary = fleet.get("cargo", {})
+		if not cargo.is_empty():
+			if not _fields(cargo, {"id": TYPE_STRING, "army": TYPE_DICTIONARY}) or state["armies"].has(cargo["id"]):
+				return false
+			var army: Dictionary = cargo["army"]
+			if not _fields(army, {"owner": TYPE_STRING, "region": TYPE_STRING, "movement_left": TYPE_FLOAT, "units": TYPE_ARRAY}) or not _units(army["units"]) or not _nullable_fields(army, {"general": TYPE_STRING}):
+				return false
+			if army["owner"] != fleet["owner"]:
+				return false
+		var route: Dictionary = fleet.get("trade_route", {})
+		if not route.is_empty():
+			if not _fields(route, {"from": TYPE_STRING, "to": TYPE_STRING, "from_zone": TYPE_STRING, "to_zone": TYPE_STRING, "heading": TYPE_STRING, "paid_turn": TYPE_FLOAT, "paused": TYPE_BOOL}):
+				return false
+			if not route["heading"] in ["from", "to"]:
+				return false
 	for character in state["characters"].values():
 		if not _fields(character, {"faction": TYPE_STRING, "name": TYPE_STRING,
 			"alive": TYPE_BOOL, "role": TYPE_STRING, "location": TYPE_STRING,

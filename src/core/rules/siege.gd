@@ -9,7 +9,7 @@ static func begin_siege(data: GameData, state: Dictionary, army_id: String, regi
 	if not state["settlements"].has(region_id):
 		return false
 	var marching_in: bool = army["region"] != region_id
-	if marching_in and not TerrainRules.land_connection(data, army["region"], region_id):
+	if marching_in and not TerrainRules.land_connection(data, army["region"], region_id, state):
 		return false
 	var settlement: Dictionary = state["settlements"][region_id]
 	if settlement["owner"] == army["owner"] or settlement["siege"] != null:

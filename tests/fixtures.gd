@@ -486,6 +486,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"alpha": _settlement(game_data, "blue", 1200, {"tribal_government": 1}),
 		},
 		"armies": {}, "fleets": {}, "characters": {},
+		"waterworks": {"landings": {}, "bridges": {}, "projects": []}, "naval_report": {},
 		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
 		"tributes": [], "pending_offers": [], "agents": {},
 		"forest_patrols": {},
@@ -550,6 +551,7 @@ static func add_fleet(campaign_state: Dictionary, owner: String, zone: String, t
 	campaign_state["fleets"][fleet_id] = {
 		"owner": owner, "sea_zone": zone, "ships": ships, "movement_left": 2.0,
 	}
+	WaterwayRules.ensure_fleet(campaign_state["fleets"][fleet_id])
 	return fleet_id
 
 

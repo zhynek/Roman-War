@@ -74,7 +74,7 @@ func _ready() -> void:
 		terrain_sources.append({"at": view.world_pos(r), "relief": float(view.game.data.terrain_content["terrains"][r["terrain"]]["relief"])})
 	for key in view.geometry.edges:
 		var ends := String(key).split("|")
-		if TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
+		if TerrainRules.land_connection(view.game.data, ends[0], ends[1], view.game.state):
 			var track: PackedVector2Array = view.geometry.edges[key]
 			for j in range(track.size() - 1):
 				var box := Rect2(track[j], Vector2.ZERO).expand(track[j + 1]).grow(16)
@@ -84,7 +84,7 @@ func _ready() -> void:
 						if not track_grid.has(cell):
 							track_grid[cell] = []
 						track_grid[cell].append([track[j], track[j + 1]])
-		var kind := TerrainRules.crossing_kind(view.game.data, ends[0], ends[1])
+		var kind := TerrainRules.crossing_kind(view.game.data, ends[0], ends[1], view.game.state)
 		if kind == "":
 			continue
 		var path: PackedVector2Array = view.geometry.edges[key]
@@ -421,7 +421,7 @@ func _sync_settlements() -> void:
 		var anchor := view.world_pos(view.game.data.regions[id])
 		for edge_key in view.geometry.edges:
 			var endpoints := String(edge_key).split("|")
-			if not id in endpoints or not TerrainRules.land_connection(view.game.data, endpoints[0], endpoints[1]):
+			if not id in endpoints or not TerrainRules.land_connection(view.game.data, endpoints[0], endpoints[1], view.game.state):
 				continue
 			var local_path := PackedVector2Array()
 			for point in view.geometry.edges[edge_key]:
@@ -466,7 +466,7 @@ func _build_routes() -> void:
 	var structures := RealismModels.new()
 	for key in view.geometry.edges:
 		var ends := String(key).split("|")
-		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
+		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1], view.game.state):
 			continue
 		var path: PackedVector2Array = view.geometry.edges[key]
 		var width := 0.7 + float(view.road_levels.get(key, 0)) * 0.12
@@ -486,7 +486,7 @@ func _build_routes() -> void:
 		var middle: Vector2 = site.center
 		var tangent: Vector2 = site.tangent
 		var cross: Vector2 = site.cross
-		var kind: String = site.kind
+		var kind := TerrainRules.crossing_kind(view.game.data, ends[0], ends[1], view.game.state)
 		if kind in ["river", "bridge"]:
 			for i in range(56):
 				var a := middle + cross * (i - 28.0) + tangent * sin((i - 28.0) * 0.13) * 1.1

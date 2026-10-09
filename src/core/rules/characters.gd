@@ -220,6 +220,10 @@ static func kill(state: Dictionary, char_id: String, data: GameData = null, noti
 	for army in state["armies"].values():
 		if army["general"] == char_id:
 			army["general"] = null
+	for fleet in state.get("fleets", {}).values():
+		var carried: Dictionary = fleet.get("cargo", {}).get("army", {})
+		if carried.get("general") == char_id:
+			carried["general"] = null
 	if data != null and faction_id != "":
 		FamilyRules.ensure_succession(data, state, faction_id, notices)
 
@@ -284,6 +288,9 @@ static func _governed_settlement(state: Dictionary, char_id: String) -> String:
 
 
 static func _leads_army(state: Dictionary, char_id: String) -> bool:
+	for fleet in state.get("fleets", {}).values():
+		if fleet.get("cargo", {}).get("army", {}).get("general") == char_id:
+			return true
 	for army in state["armies"].values():
 		if army["general"] == char_id:
 			return true

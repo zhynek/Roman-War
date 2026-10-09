@@ -119,7 +119,7 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 		for resource in data.regions[other_id].get("resources", []):
 			if not own_resources.has(resource):
 				premium += float(economy_rules["trade_income_per_resource"])
-		if TerrainRules.land_connection(data, region_id, other_id):
+		if TerrainRules.land_connection(data, region_id, other_id, state):
 			var road_bonus := 1.0 + SettlementRules.effect_max(data, settlement, "road_level") \
 				* float(economy_rules["road_trade_bonus_per_level"])
 			land_total += (float(economy_rules["land_trade_route_base"]) + premium) * road_bonus
@@ -194,6 +194,7 @@ static func faction_upkeep(data: GameData, state: Dictionary, faction_id: String
 	for fleet in state["fleets"].values():
 		if fleet["owner"] == faction_id:
 			soldiery += army_upkeep(data, fleet["ships"], pct_by_class)
+			soldiery += army_upkeep(data, fleet.get("cargo", {}).get("army", {}).get("units", []), pct_by_class)
 	for settlement in state["settlements"].values():
 		if settlement["owner"] == faction_id:
 			soldiery += army_upkeep(data, settlement["garrison"], pct_by_class)

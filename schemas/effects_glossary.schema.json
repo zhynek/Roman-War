@@ -1564,6 +1564,12 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "waterways": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   }
 }
