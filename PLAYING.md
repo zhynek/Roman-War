@@ -159,8 +159,9 @@ upkeep, effects and settling delay, then explicitly confirm. Edicts have no
 upfront charge here; normal season resolution charges population-scaled upkeep.
 Legion Levy creates no units. Refusal has no hidden punishment. Each dilemma can
 resolve once in that campaign, with a shared two-season cooldown. Changing patron
-or reloading cannot erase a recorded decision; changing quoted conditions requires
-a fresh confirmation. The gods' words are original game fiction.
+does not clear decisions. Reloading a save retains its recorded choices; loading
+an earlier save restores that save's earlier history. Changing quoted conditions
+requires a fresh confirmation. The gods' words are original game fiction.
 
 On this computer, double-click **Launch Roman War Advisors.command** in the
 repository to start the campaign with the private local voice broker. The provider

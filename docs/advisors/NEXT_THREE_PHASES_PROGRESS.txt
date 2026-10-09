@@ -217,3 +217,13 @@ The root agent will save the local source checkpoint and the dedicated reporter
 will submit the final Isengard report as Pending human review. The assignment
 will remain In progress until a human accepts the report; no automatic acceptance,
 push, release, deployment or broad test suite is part of this session.
+
+Final implementation and review linkage
+Implementation commit: d1da241db9be27b0e8f34177aaab2c860d037391 (53 files,
+3,147 insertions and 118 deletions; clean worktree at that checkpoint; no push).
+Isengard assignment: 78dc60e5-c926-4d29-9645-476374d22528.
+Evidence report: fc21f192-7b46-49d0-9fae-753f980bf787.
+Read-back verification confirmed report status Pending, the assignment linkage
+and full implementation SHA. Assignment status remains In progress until human
+review; this agent did not accept the report.
+Review: http://127.0.0.1:2269/?view=Needs%20review&project=c5c7ddd7-57d4-4763-9cbe-a0dcdad62f8a
