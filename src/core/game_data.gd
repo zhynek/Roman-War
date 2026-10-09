@@ -15,6 +15,8 @@ var unit_classes: Dictionary = {}      # class id -> {role, matchups, terrain, .
 var unit_attributes: Dictionary = {}   # attribute id -> {effects, ...}
 var regions: Dictionary = {}           # id -> region dict
 var grain_regions: Array = []          # sorted region ids producing grain (hot-path index)
+var waterways: Dictionary = {}
+var waterway_links: Dictionary = {}
 var sea_zones: Dictionary = {}         # id -> sea zone dict
 var traits: Dictionary = {}            # id -> trait dict
 var ancillaries: Dictionary = {}       # id -> ancillary dict
@@ -110,6 +112,14 @@ func _load_all(dir: String) -> void:
 		regions[region["id"]] = region
 	for zone in map_data.get("sea_zones", []):
 		sea_zones[zone["id"]] = zone
+	waterways = _read_json(dir + "/waterways.json")
+	for node in waterways.get("river_nodes", []):
+		sea_zones[node["id"]] = {"id": node["id"], "name": node["name"], "position": node["position"], "adjacent": [], "river": true}
+	for link in waterways.get("links", []):
+		waterway_links[TerrainRules.edge_key(link["a"], link["b"])] = link
+		for pair in [[link["a"], link["b"]], [link["b"], link["a"]]]:
+			if sea_zones.has(pair[0]) and not sea_zones[pair[0]]["adjacent"].has(pair[1]):
+				sea_zones[pair[0]]["adjacent"].append(pair[1])
 	index_grain_regions()
 
 	for trait_def in _read_json(dir + "/traits.json").get("traits", []):

@@ -45,7 +45,7 @@ class TerrainLayer:
 	func _draw_roads(geometry: MapGeometry) -> void:
 		for key in geometry.edges:
 			var ends := String(key).split("|")
-			if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1]):
+			if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]) or not TerrainRules.land_connection(view.game.data, ends[0], ends[1], view.game.state):
 				continue
 			var path: PackedVector2Array = geometry.edges[key]
 			var level := int(view.road_levels.get(key, 0))
@@ -276,6 +276,8 @@ class OverlayLayer:
 		_draw_path_preview()
 
 	func _draw_sea_marks() -> void:
+		if view.game.state["fleets"].has(view.selected_force):
+			return # The projected ship and ordered corridor share the screen overlay.
 		if view.selected_sea_zone != "":
 			var at := _zone_anchor(view.selected_sea_zone)
 			if at != Vector2.INF:
@@ -460,6 +462,7 @@ class BannerLayer:
 	func _draw() -> void:
 		if view.game == null:
 			return
+		WaterwayMap.draw(self, view)
 		for entry in view.banner_layout():
 			if entry["id"] != view._sighting.get("id", ""):
 				view.draw_banner(self, entry)

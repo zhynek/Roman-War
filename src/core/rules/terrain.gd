@@ -5,17 +5,19 @@ class_name TerrainRules
 static func edge_key(a: String, b: String) -> String:
 	return "%s|%s" % [a, b] if a < b else "%s|%s" % [b, a]
 
-static func crossing_kind(data: GameData, a: String, b: String) -> String:
+static func crossing_kind(data: GameData, a: String, b: String, state: Dictionary = {}) -> String:
+	if state.get("waterworks", {}).get("bridges", {}).has(edge_key(a, b)):
+		return "bridge"
 	return String(data.terrain_crossings.get(edge_key(a, b), {}).get("kind", ""))
 
-static func land_connection(data: GameData, a: String, b: String) -> bool:
-	return MapRules.are_adjacent(data, a, b) and not crossing_kind(data, a, b) in ["river", "ridge", "water"]
+static func land_connection(data: GameData, a: String, b: String, state: Dictionary = {}) -> bool:
+	return MapRules.are_adjacent(data, a, b) and not crossing_kind(data, a, b, state) in ["river", "ridge", "water"]
 
-static func crossing_cost(data: GameData, a: String, b: String) -> float:
-	return float(data.balance.get("terrain_routes", {}).get("crossing_cost", {}).get(crossing_kind(data, a, b), 0.0))
+static func crossing_cost(data: GameData, a: String, b: String, state: Dictionary = {}) -> float:
+	return float(data.balance.get("terrain_routes", {}).get("crossing_cost", {}).get(crossing_kind(data, a, b, state), 0.0))
 
-static func crossing_defense(data: GameData, a: String, b: String) -> float:
-	return float(data.balance.get("terrain_routes", {}).get("crossing_defense_pct", {}).get(crossing_kind(data, a, b), 0.0))
+static func crossing_defense(data: GameData, a: String, b: String, state: Dictionary = {}) -> float:
+	return float(data.balance.get("terrain_routes", {}).get("crossing_defense_pct", {}).get(crossing_kind(data, a, b, state), 0.0))
 
 static func supply_regions(data: GameData, state: Dictionary, faction: String, observed_only: bool = false) -> Dictionary:
 	## Ground supply from the capital through friendly or allied territory.
@@ -37,6 +39,6 @@ static func supply_regions(data: GameData, state: Dictionary, faction: String, o
 		var neighbors: Array = data.regions.get(current, {}).get("adjacent", []).duplicate()
 		neighbors.sort()
 		for neighbor in neighbors:
-			if land_connection(data, current, neighbor):
+			if land_connection(data, current, neighbor, state):
 				frontier.append(neighbor)
 	return reached

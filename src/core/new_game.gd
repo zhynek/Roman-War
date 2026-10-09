@@ -197,6 +197,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 
 	ReconRules.refresh_contacts(data, state)
 	state["rng_state"] = rng.state_string()
+	WaterwayRules.ensure(state)
 	return state
 
 
@@ -207,6 +208,7 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	WaterwayRules.ensure(state)
 	if not state.has("city_campaign"):
 		state["city_campaign"] = {}
 	if not state.has("city_battles"):
@@ -304,6 +306,7 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		_ensure_unit_arms(army["units"])
 	for fleet in state["fleets"].values():
 		_ensure_unit_arms(fleet["ships"])
+		_ensure_unit_arms(fleet.get("cargo", {}).get("army", {}).get("units", []))
 	for settlement in state["settlements"].values():
 		_ensure_unit_arms(settlement["garrison"])
 		_ensure_unit_arms(settlement["harbour"])

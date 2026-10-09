@@ -15,10 +15,10 @@ static func preview(data: GameData, state: Dictionary, army_id: String,
 	if state.get("cartography", {}).has(army["owner"]) and not CartographyRules.known_regions(data, state, army["owner"]).has(target):
 		result["reason"] = "uncharted"
 		return result
-	result["crossing"] = TerrainRules.crossing_kind(data, origin, target)
+	result["crossing"] = TerrainRules.crossing_kind(data, origin, target, state)
 	var settlement: Dictionary = state["settlements"].get(target, {})
 	var siege = settlement.get("siege")
-	var nearby := origin == target or TerrainRules.land_connection(data, origin, target)
+	var nearby := origin == target or TerrainRules.land_connection(data, origin, target, state)
 	if nearby and visible.has(target):
 		var enemies: Array = state["armies"].keys()
 		enemies.sort()
@@ -55,7 +55,7 @@ static func preview(data: GameData, state: Dictionary, army_id: String,
 		var budget := float(army["movement_left"])
 		if forced:
 			budget *= float(data.balance["movement"]["forced_march_multiplier"])
-		if TerrainRules.land_connection(data, origin, target) and not PathfindingRules._blocked(data, state, army["owner"], target, visible) \
+		if TerrainRules.land_connection(data, origin, target, state) and not PathfindingRules._blocked(data, state, army["owner"], target, visible) \
 				and MovementRules.step_cost(data, state, target, origin) <= budget + 0.0001:
 			result["action"] = "withdraw"
 			result["cost"] = MovementRules.step_cost(data, state, target, origin)
@@ -93,7 +93,7 @@ static func queued(data: GameData, state: Dictionary, army_id: String, visible: 
 		if not data.regions.has(region):
 			return {}
 		var cost := PathfindingRules.known_step_cost(data, state, region, visible, previous)
-		result["legs"].append({"region": region, "cost": cost, "crossing": TerrainRules.crossing_kind(data, previous, region)})
+		result["legs"].append({"region": region, "cost": cost, "crossing": TerrainRules.crossing_kind(data, previous, region, state)})
 		result["cost"] += cost
 		previous = region
 	# Retain the actual saved queue. Re-running best_path here could draw a

@@ -182,6 +182,12 @@ func _ready() -> void:
 		_on_order_target("region", region_id, forced))
 	force_panel.sail_requested.connect(func(zone_id: String):
 		_on_order_target("zone", zone_id, false))
+	force_panel.voyage_preview.connect(func(id, target, mode):
+		map_view.waterway_preview = game.fleet_path_preview(id, target, mode)
+		map_view.waterway_preview["from"] = game.state["fleets"][id]["sea_zone"]
+		map_view.queue_redraw()
+		map_view._overlay_layer.queue_redraw())
+	force_panel.voyage_started.connect(func(id, origin, path): map_view.play_voyage(id, origin, path))
 	force_panel.sheet_requested.connect(func(char_id: String):
 		family_panel.open_for(game, char_id))
 	force_panel.unit_info_requested.connect(open_unit_card)
@@ -1022,22 +1028,24 @@ func _on_order_target(kind: String, target_id: String, forced: bool) -> void:
 
 
 func _fleet_order(zone_id: String) -> void:
-	var zone_name: String = game.data.sea_zones.get(zone_id, {}).get("name", zone_id)
-	var result := game.sail_fleet(selected_fleet, zone_id)
-	if result.get("arrived", false):
-		_log("The fleet sails for the %s." % zone_name)
-	elif result.get("ok", false):
-		var halt: String = String(result.get("stopped_at", ""))
-		_log("The fleet makes for the %s and halts in the %s — no lanes left this season."
-			% [zone_name, game.data.sea_zones.get(halt, {}).get("name", halt)])
-	else:
-		_log("The fleet cannot reach the %s this season." % zone_name)
+	var id := selected_fleet
+	var origin: String = game.state["fleets"][id]["sea_zone"]
+	var outcome := game.sail_fleet(id, zone_id)
+	var words: Dictionary = game.data.effects_glossary["waterways"]
+	_log(String(words["voyage_issued"]).format({"destination": game.data.sea_zones[zone_id]["name"]}) if outcome.get("ok", false) else words["route_unavailable"])
+	map_view.play_voyage(id, origin, outcome.get("path", []))
 	_after_order()
 
 
 func _dock_order(region_id: String) -> void:
 	## A right click on one of our ports with a fleet selected makes port:
 	## the ships wait in the harbour until launched again.
+	if not game.state["fleets"].get(selected_fleet, {}).get("cargo", {}).is_empty():
+		var landing := game.disembark_army(selected_fleet, region_id)
+		if not landing.get("ok", false):
+			_on_refused(landing.get("error", "occupied"))
+		_after_order()
+		return
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	if settlement.is_empty() or settlement["owner"] != game.state["player_faction"]:
 		_log("A fleet makes port only in one of our own harbours.")
@@ -1085,9 +1093,7 @@ func _army_order(target_region: String, forced_march: bool = false) -> void:
 		# Use one route execution result for immediate and queued movement,
 		# including the actual legs the presentation should animate.
 		march = game.march_army(army_id, target_region, forced_march)
-	if march.is_empty() and game.sea_move_army(army_id, target_region):
-		_log("The army takes ship for %s." % target_name)
-	elif march.is_empty():
+	if march.is_empty():
 		_log(command_bar.words("unreachable"))
 	elif march.get("halted", false):
 		_log(command_bar.words("barred"))
@@ -1373,6 +1379,10 @@ func _end_turn() -> void:
 		refresh()
 		return
 
+	for voyage in turn_result.get("voyages", []):
+		var id: String = voyage["fleet"]
+		if game.state["fleets"].get(id, {}).get("owner", "") == game.state["player_faction"]:
+			map_view.play_voyage(id, voyage["from"], voyage.get("path", []))
 	_day_beats = game.day_beats()
 	_treasury_delta = int(faction["treasury"]) - treasury_before
 	_treasury_shown = float(treasury_before)
@@ -1654,6 +1664,9 @@ func _on_fleet_launched(fleet_id: String) -> void:
 
 
 func _on_refused(error: String) -> void:
+	if game.data.effects_glossary.get("waterways", {}).has(error):
+		_log(String(game.data.effects_glossary["waterways"][error]))
+		return
 	_log("[color=#e0a060]%s[/color]" % ForcePanel.explain(error))
 
 

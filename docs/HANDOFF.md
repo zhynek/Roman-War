@@ -11,6 +11,29 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Waterways and shipping — October 8, 2026
+
+The parent campaign now has player-issued multi-season fleet routes, river
+landings and transport flotillas, buildable river bridges, troop embarkation and
+landing, recurring trade deliveries, and resolver-based automatic naval
+encounters. Existing port construction supplies maritime endpoints. The Tiber,
+Nile and Danube are data-authored overlays; coast/open-water route choices and
+seasonal ETA appear in the fleet panel and on the map. See
+[controls, rules, architecture and direct evidence](WATERWAYS.md).
+
+New saves remain version 2 with additive waterworks/fleet fields. Carried armies
+leave the land index but retain identities, general lifecycle and upkeep. Direct
+army sea teleportation is disabled; unopposed amphibious landings require ships.
+Bridge state feeds shared terrain rules and AI land paths. No AI naval strategy,
+blockades, tactical naval scene or independent village changes are included.
+
+The work started from current origin/main in an isolated checkout to preserve
+unfinished advisor/patronage work. Data validated with zero errors/warnings;
+Godot import and rendered planning/sailing/arrival/max-zoom/bridge/trade inspection
+completed. Parsed live/resumed campaign state matched after a carried voyage.
+
+Verified by: data/schema validation, Godot import and an isolated rendered shipping walkthrough. Tests: not run (weekly review policy).
+
 ## Weekly testing policy — adopted October 8, 2026
 
 `AGENTS.md` now carries Zach's shared weekly review policy, which takes
@@ -375,7 +398,7 @@ behind `rules/battle/battle_resolver.gd`.
 
 | Panel | Facade methods |
 |---|---|
-| `campaign_screen.gd` (the shell) | `end_turn`, `day_beats`, `move_army`, `march_army`, `sea_move_army`, `sail_fleet`, `dock_fleet`, `attack_army`, `besiege`, `assault_settlement`, `disband_unit`, `force_summary`, `reachable_regions`, `targets_for`, `reachable_zones`, `forces_awaiting_orders`, `guided_enabled`/`set_guided`, `move_agent`, `agent_scout/_assassinate/_bribe/_steal_technique`, `visible_regions`, `victory_progress`, `save_to`, `load_from`. Selection is hoisted here (`selected_army`, `selected_fleet`, `selected_agent`; `select_force`, `deselect`, `cycle_selection`); a LEFT click selects, a RIGHT click with a force selected is `_on_order_target` |
+| `campaign_screen.gd` (the shell) | `end_turn`, `day_beats`, `move_army`, `march_army`, `embark_army`, `disembark_army`, `sail_fleet`, `dock_fleet`, `attack_army`, `besiege`, `assault_settlement`, `disband_unit`, `force_summary`, `reachable_regions`, `targets_for`, `reachable_zones`, `forces_awaiting_orders`, `guided_enabled`/`set_guided`, `move_agent`, `agent_scout/_assassinate/_bribe/_steal_technique`, `visible_regions`, `victory_progress`, `save_to`, `load_from`. Selection is hoisted here (`selected_army`, `selected_fleet`, `selected_agent`; `select_force`, `deselect`, `cycle_selection`); a LEFT click selects, a RIGHT click with a force selected is `_on_order_target` |
 | `panels/force_panel.gd` (the force card) | `force_summary`, `check`, `transfer_units`, `merge_armies`, `split_army`, `attach_general`, `detach_general`, `consolidate_units`, `merge_fleets`, `split_fleet`, `dock_fleet`, `own_ports_on_zone`, `candidate_generals`, `reachable_regions`, `reachable_zones`, `garrison_army`, `halt_march`, `battle_estimate`, `assault_estimate`, `mercenaries_available`, `hire_mercenary`; every refusal comes back as an error code the screen explains through `ForcePanel.explain` |
 | `panels/region_panel.gd` (the biggest) | `growth/order/income_breakdown`, `available_buildings/units`, `queue_building/unit`, `demolish_building`, `set_tax_level`, `retrain_garrison`, `raise_units`, `raise_army`, `transfer_units`, `launch_fleet`, `candidate_generals`, `move_capital`, `recruit_agent`, `agents_in`, `set_edict`, `revoke_edict`, `available_edicts`, `edict_status` — the garrison and harbour are tick rows |
 | `panels/diplomacy_panel.gd` | `pending_offers`, `respond_offer`, `declare_war` — fleets left this scroll for the map |
@@ -663,10 +686,9 @@ What costs time to rediscover:
   why: it is omniscient, so spies would add nothing, and AI assassins without
   counterplay UI are pure feel-bad. Governor counter-intelligence already
   defends AI cities, so the player's agents can still fail.
-- **The AI cannot invade a hostile island.** The *player* can — an amphibious
-  landing is legal where no field army holds the beach — but `AiAssess`
-  deliberately refuses to route through a hostile shore (DESIGN §9 explains
-  what that fixed). Island factions therefore expand only if war finds them.
+- **The AI cannot invade a hostile island.** Players can carry armies on a
+  fleet and make an unopposed landing. AI land planning excludes sea crossings
+  until an autonomous transport planner can assign actual ships.
 - **Sea-zone `position` values** in `regions.json` are used only to anchor
   fleet banners, the sea-zone click target and sea labels; no zone is a
   first-class map object.
@@ -677,7 +699,7 @@ What costs time to rediscover:
   and re-run `test_ai_campaign` (the 600 ms guard) when the AI is next tuned.
 - **The AI builds no ships and uses no harbour.** `AiEconomy._recruit` skips
   the `ship` class; the only AI fleets are the campaign's starting ones.
-  Harbours, launching and docking are player-only until the sea phase.
+  Harbours, launching, docking and shipping assignments remain player-controlled.
 - **One mission kind is still forward content**: `blockade_port` needs port
   blockades (Phase 3 remainder). `SenateRules.LIVE_KINDS` names what is judged,
   `FORWARD_MISSION_KINDS` in the validator allowlists the rest, and
@@ -716,9 +738,9 @@ What costs time to rediscover:
   a `Game.join_rebellion()` act is the follow-up beside crossing the Rubicon.
 - **Offices are Roman-only.** Other cultures drain Ambition by government tiers
   alone (DESIGN §4.4); a Hellenistic court or a tribal assembly has no ladder.
-- **Phase 3 remainder**: embark-on-fleet transport (sea movement is an
-  abstracted crossing today), naval battles, port blockades, forts and
-  watchtowers, ambush. The `ship` class has no matchups (no naval battles yet).
+- **Naval follow-up**: autonomous AI fleet strategy/shipbuilding, port blockades,
+  dedicated naval balance and richer cargo economics. Player embarkation,
+  automatic encounters and multi-season routes are implemented in WATERWAYS.md.
 - **Military layer edges.** Technique `escape_pct` / `pursuit_pct` are
   side-wide (the Parthian shot speeds the whole army's escape, not only the
   horse archers); the AI plans with `force_strength` (now the estimator with no
@@ -783,11 +805,10 @@ gated on `popular_standing`, setting `at_civil_war` and then
 rebellion by choice — the player's counterpart of `house_joins_rebellion`. Then
 proscriptions and army defections once a war is on, and AI canvassing.
 
-**Phase 3 remainder — the sea.** Fleets move, dock, launch and regroup now
-(harbours, `NavalRules`) but never fight and carry no armies; `blockade_port`
-missions are authored and allowlisted. The corvus technique and its **Boarding
-Marines** (the first `requires_technique` unit) were written as the hook for
-exactly this slice, and the harbour is where an embarked army would board.
+**Naval follow-up.** The player now uses actual fleets for troop transport,
+persistent voyages and shipping services, with automatic encounters. The next
+naval phase is AI shipbuilding/assignment, blockades and dedicated naval balance;
+`blockade_port` missions remain authored and allowlisted. See WATERWAYS.md.
 
 **The optional online narrator.** The chronicle is already the
 machine-readable feed (`schemas/chronicle_entry.schema.json`,

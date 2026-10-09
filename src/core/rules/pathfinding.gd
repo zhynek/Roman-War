@@ -57,7 +57,7 @@ static func best_path(data: GameData, state: Dictionary, army_id: String,
 		var approaches: Array = data.regions[to_region].get("adjacent", []).duplicate()
 		approaches.sort()
 		for neighbor in approaches:
-			if TerrainRules.land_connection(data, neighbor, to_region) and dist.has(neighbor) and float(dist[neighbor]) < beside_cost - 0.000001:
+			if TerrainRules.land_connection(data, neighbor, to_region, state) and dist.has(neighbor) and float(dist[neighbor]) < beside_cost - 0.000001:
 				beside_cost = float(dist[neighbor])
 				beside = String(neighbor)
 		if beside == "":
@@ -73,7 +73,7 @@ static func best_path(data: GameData, state: Dictionary, army_id: String,
 	var legs: Array = []
 	var previous := String(army["region"])
 	for step in path:
-		legs.append({"region": step, "cost": known_step_cost(data, state, String(step), visible, previous), "crossing": TerrainRules.crossing_kind(data, previous, step)})
+		legs.append({"region": step, "cost": known_step_cost(data, state, String(step), visible, previous), "crossing": TerrainRules.crossing_kind(data, previous, step, state)})
 		previous = step
 	var total := float(dist[target])
 	return {"path": path, "legs": legs, "cost": total,
@@ -179,7 +179,7 @@ static func _search(data: GameData, state: Dictionary, army: Dictionary,
 		var neighbors: Array = data.regions.get(current, {}).get("adjacent", []).duplicate()
 		neighbors.sort()
 		for neighbor in neighbors:
-			if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, current, neighbor):
+			if not data.regions.has(neighbor) or not TerrainRules.land_connection(data, current, neighbor, state):
 				continue
 			if not visible.is_empty() and state.get("cartography", {}).has(owner) and not known.has(neighbor):
 				continue
@@ -202,7 +202,7 @@ static func known_step_cost(data: GameData, state: Dictionary, region_id: String
 	## Unreported roads cannot change route, range or ETA through the fog.
 	## Geography is public; roads become known once the province is scouted.
 	if not visible.is_empty() and not visible.has(region_id):
-		return float(data.balance["movement"]["terrain_cost"][data.regions[region_id]["terrain"]]) + TerrainRules.crossing_cost(data, from_region, region_id)
+		return float(data.balance["movement"]["terrain_cost"][data.regions[region_id]["terrain"]]) + TerrainRules.crossing_cost(data, from_region, region_id, state)
 	return MovementRules.step_cost(data, state, region_id, from_region)
 
 

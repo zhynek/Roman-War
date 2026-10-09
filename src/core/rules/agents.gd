@@ -55,7 +55,7 @@ static func move_agent(data: GameData, state: Dictionary, agent_id: String, to_r
 	var agent: Dictionary = state["agents"].get(agent_id, {})
 	if agent.is_empty() or not data.regions.has(to_region):
 		return false
-	if not TerrainRules.land_connection(data, agent["region"], to_region):
+	if not TerrainRules.land_connection(data, agent["region"], to_region, state):
 		return false
 	var cost := MovementRules.step_cost(data, state, to_region, agent["region"])
 	if cost > float(agent["movement_left"]) + 0.0001:

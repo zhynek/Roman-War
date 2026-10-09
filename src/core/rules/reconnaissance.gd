@@ -159,7 +159,7 @@ static func encounter(data: GameData, state: Dictionary, army: Dictionary, desti
 	## An affordable attempted march into a concealed hostile position halts
 	## at the border. The advance guard spends its patrol cost and reports the
 	## province. No automatic battle and no destination movement are implied.
-	if not TerrainRules.land_connection(data, army["region"], destination):
+	if not TerrainRules.land_connection(data, army["region"], destination, state):
 		return
 	if not MovementRules.hostile_army_in(state, army["owner"], destination):
 		return

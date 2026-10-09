@@ -2420,6 +2420,47 @@
       "era": "any",
       "description": "A mounted household escort for Roma’s commander, recruited through the barracks while a general is present. One such escort may be maintained by the faction, including troops in training or serving in field armies. A gameplay muster option: armored riders carry a crested helmet, command standard and the Rally the line ability.",
       "city_recruit_only": true
+    },
+    {
+      "id": "river_transports",
+      "name": "River Transport Flotilla",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "julii",
+        "junii",
+        "cornelii",
+        "senate",
+        "macedon",
+        "greek_cities",
+        "seleucia",
+        "thracia",
+        "parthia",
+        "armenia",
+        "pontus",
+        "carthage",
+        "numidia",
+        "egypt",
+        "gaul",
+        "germania",
+        "britannia",
+        "dacia",
+        "hispania",
+        "scythia"
+      ],
+      "soldiers": 40,
+      "attack": 2,
+      "defense": 3,
+      "morale": 6,
+      "speed": 5,
+      "cost": 220,
+      "upkeep": 45,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Shallow cargo boats and hired ferrymen carry troops between river landings and along sheltered coasts. They cannot take open-water shortcuts."
     }
   ]
 }
