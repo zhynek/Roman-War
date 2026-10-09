@@ -112,7 +112,7 @@ static func _valid_state(state: Variant) -> bool:
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
 		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
-		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY,
+		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY, "ports": TYPE_DICTIONARY, "port_navigation_version": TYPE_FLOAT,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
@@ -146,6 +146,7 @@ static func _valid_state(state: Variant) -> bool:
 			return false
 		for job in settlement["recruitment_queue"]:
 			if not job is Dictionary: return false
+			if job.has("port_contract") and not job["port_contract"] is bool: return false
 			if job.has("city_days_left") and not _whole_at_least(job["city_days_left"],1): return false
 	for army in state["armies"].values():
 		if not _fields(army, {"owner": TYPE_STRING, "region": TYPE_STRING,
@@ -155,6 +156,33 @@ static func _valid_state(state: Variant) -> bool:
 			return false
 		if not _fields(army, {"march_path": TYPE_ARRAY}, true):
 			return false
+	if state.has("port_navigation_version") and (not _whole_at_least(state["port_navigation_version"], 1) or state["port_navigation_version"] > 1):
+		return false
+	for region in state.get("ports", {}):
+		if not state["settlements"].has(region):
+			return false
+		var port: Variant = state["ports"][region]
+		if not _fields(port, {"stage": TYPE_FLOAT, "facilities": TYPE_ARRAY, "project": TYPE_DICTIONARY,
+			"handling_turn": TYPE_FLOAT, "handled": TYPE_FLOAT, "repair_turn": TYPE_FLOAT}):
+			return false
+		if not _whole_at_least(port["stage"], 0) or port["stage"] > 5 or not _whole_at_least(port["handled"], 0):
+			return false
+		for key in ["handling_turn", "repair_turn"]:
+			if not _whole_at_least(port[key], -1) or port[key] > state["turn"]:
+				return false
+		var seen := {}
+		for facility in port["facilities"]:
+			if not facility is String or not facility in ["depot", "repair_yard", "arsenal"] or seen.has(facility):
+				return false
+			seen[facility] = true
+		var job: Dictionary = port["project"]
+		if not job.is_empty():
+			if not _fields(job, {"kind": TYPE_STRING, "rank": TYPE_FLOAT, "turns": TYPE_FLOAT, "owner": TYPE_STRING}):
+				return false
+			if not job["kind"] in ["stage", "depot", "repair_yard", "arsenal"] or not _whole_at_least(job["turns"], 1) or not state["factions"].has(job["owner"]):
+				return false
+			if not _whole_at_least(job["rank"], 0) or job["rank"] > 5 or (job["kind"] == "stage" and job["rank"] < 1):
+				return false
 	if state.has("waterworks"):
 		var works: Dictionary = state["waterworks"]
 		if not _fields(works, {"landings": TYPE_DICTIONARY, "bridges": TYPE_DICTIONARY, "projects": TYPE_ARRAY}):
@@ -233,6 +261,11 @@ static func _valid_state(state: Variant) -> bool:
 				return false
 			for building in report["buildings"]:
 				if not building is String:
+					return false
+			if report.has("port"):
+				if not _fields(report["port"], {"stage": TYPE_FLOAT, "facilities": TYPE_ARRAY, "setting": TYPE_STRING, "project": TYPE_STRING}):
+					return false
+				if not _whole_at_least(report["port"]["stage"], 0) or report["port"]["stage"] > 5:
 					return false
 			if not _fields(report, {"construction": TYPE_ARRAY}, true):
 				return false
@@ -607,7 +640,7 @@ static func _units(units: Array) -> bool:
 		if not _fields(unit, {"template": TYPE_STRING, "experience": TYPE_FLOAT,
 			"strength_pct": TYPE_FLOAT}):
 			return false
-		if not _fields(unit, {"weapon": TYPE_FLOAT, "armor": TYPE_FLOAT}, true):
+		if not _fields(unit, {"weapon": TYPE_FLOAT, "armor": TYPE_FLOAT, "legacy_river_access": TYPE_BOOL}, true):
 			return false
 	return true
 

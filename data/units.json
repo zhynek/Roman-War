@@ -2461,6 +2461,138 @@
       },
       "era": "any",
       "description": "Shallow cargo boats and hired ferrymen carry troops between river landings and along sheltered coasts. They cannot take open-water shortcuts."
+    },
+    {
+      "id": "river_barges",
+      "name": "River Barge Train",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 50,
+      "attack": 2,
+      "defense": 4,
+      "morale": 8,
+      "speed": 3,
+      "cost": 360,
+      "upkeep": 65,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Broad shallow barges carry large loads inland. Their slow passage and light protection reward escort."
+    },
+    {
+      "id": "river_patrol",
+      "name": "River Patrol Flotilla",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 65,
+      "attack": 7,
+      "defense": 6,
+      "morale": 8,
+      "speed": 8,
+      "cost": 480,
+      "upkeep": 100,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Light patrol boats protect inland traffic and can work along the coast."
+    },
+    {
+      "id": "coastal_transports",
+      "name": "Coastal Troop Transports",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 70,
+      "attack": 3,
+      "defense": 5,
+      "morale": 8,
+      "speed": 5,
+      "cost": 610,
+      "upkeep": 110,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Stout coastal vessels concentrate troop capacity without the expense of an arsenal."
+    },
+    {
+      "id": "merchant_convoy",
+      "name": "Deep-water Merchant Convoy",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 85,
+      "attack": 3,
+      "defense": 6,
+      "morale": 8,
+      "speed": 5,
+      "cost": 900,
+      "upkeep": 150,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Large freight carriers connect advanced commercial ports across open water. Escorts provide their protection."
+    },
+    {
+      "id": "heavy_transports",
+      "name": "Heavy Troop Convoy",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 110,
+      "attack": 5,
+      "defense": 8,
+      "morale": 8,
+      "speed": 4,
+      "cost": 1400,
+      "upkeep": 220,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "Dedicated troop carriers embark a large expedition while leaving warships free to escort it."
+    },
+    {
+      "id": "imperial_war_squadron",
+      "name": "Heavy Arsenal Squadron",
+      "class": "ship",
+      "culture": "neutral",
+      "factions": [
+        "all"
+      ],
+      "soldiers": 160,
+      "attack": 15,
+      "defense": 14,
+      "morale": 8,
+      "speed": 5,
+      "cost": 1900,
+      "upkeep": 340,
+      "requirements": {
+        "building_kind": "port",
+        "building_level": 1
+      },
+      "era": "any",
+      "description": "The largest campaign shipbuilding investment pairs powerful fighting hulls with substantial crews and maintenance."
     }
   ]
 }

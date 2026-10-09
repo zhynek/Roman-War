@@ -47,6 +47,11 @@ static func check_launch_fleet(data: GameData, state: Dictionary, region_id: Str
 		return error
 	if not zones_touching(data, region_id).has(zone_id):
 		return ForceRules.ERR_NO_ZONE
+	var selected: Array = []
+	for index in indices:
+		selected.append(harbour[int(index)])
+	if not PortRules.supports_zone(data, selected, zone_id):
+		return "route_unavailable"
 	if indices.size() > ForceRules.max_units(data):
 		return ForceRules.ERR_OVER_CAP
 	return ""
@@ -142,7 +147,7 @@ static func merge_fleets(data: GameData, state: Dictionary, from_id: String, int
 	into["trade_route"] = {}
 	for ship in from["ships"]:
 		into["ships"].append(ship)
-	into["movement_left"] = minf(float(into["movement_left"]), float(from["movement_left"]))
+	into["movement_left"] = minf(minf(float(into["movement_left"]), float(from["movement_left"])), MovementRules.fleet_movement_points_for(data, state, into))
 	state["fleets"].erase(from_id)
 	return {"ok": true, "error": ""}
 

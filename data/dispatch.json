@@ -836,6 +836,18 @@
       "id": "waterway_completed",
       "headline": "Waterway works at {settlement}",
       "body": "A river landing, bridge or transport flotilla has finished. Open the settlement to inspect its shipping facilities."
+    },
+    {
+      "chapter": "works",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "good",
+      "icon": "ship",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "id": "port_completed",
+      "headline": "Waterfront works at {settlement}",
+      "body": "A waterfront expansion or specialist facility has finished. Inspect the port to review new capacity and available vessels."
     }
   ]
 }

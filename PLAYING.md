@@ -866,3 +866,25 @@ escort per faction. In a newly started **Practice siege**, select the escort for
 spears**. Begin battle to enable abilities; pause to issue orders, then resume.
 Hover the ability button for effects and recovery. **Inspect troops** and the
 camera controls give close views of swordplay and mounted guards.
+
+
+## Developing ports and shipyards
+
+Select an owned waterfront province and choose **Waterways & shipping → Inspect
+waterfront & shipyards**. Build the first landing, then upgrade through timber
+wharf, established harbor, fortified port and imperial center. Inland ports keep
+their river role. The inspector compares stages, requirements and capabilities;
+its 3D previews spend nothing. Drag to orbit, scroll to zoom, Shift-drag to pan.
+
+Choose commercial depots for freight and merchants, repair yards for servicing,
+and arsenals for military shipbuilding. Ship cards display actual passenger,
+freight and crew capacity, waterway eligibility, strength ratings and costs.
+Commissioned ships join the ordinary recruitment queue and then the harbour;
+use the existing harbour controls to launch them.
+
+Transport now counts surviving soldiers, rather than company cards. A whole army
+must fit both its fleet and the landing's remaining handling allowance; split it
+before embarking if necessary. The slowest vessel determines fleet speed.
+Freight earnings depend on hull capacity and both endpoints. Dock ships and
+choose **Repair & resupply berthed ships** for a paid, season-limited service.
+Full rules and progression tables: [Port evolution](docs/PORTS.md).

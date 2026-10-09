@@ -198,6 +198,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	ReconRules.refresh_contacts(data, state)
 	state["rng_state"] = rng.state_string()
 	WaterwayRules.ensure(state)
+	PortRules.ensure(state)
+	PortRules.migrate_navigation(data, state)
 	return state
 
 
@@ -209,6 +211,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
 	WaterwayRules.ensure(state)
+	PortRules.ensure(state)
+	PortRules.migrate_navigation(data, state)
 	if not state.has("city_campaign"):
 		state["city_campaign"] = {}
 	if not state.has("city_battles"):

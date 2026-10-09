@@ -11,6 +11,22 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Port evolution and shipyards — October 9, 2026
+
+Five waterfront stages now connect port architecture with ship production,
+actual-soldier transport capacity, freight throughput, paid repairs, upkeep and
+harbor defense. Commercial depots, repair yards and naval arsenals provide
+separate investments. A procedural 3D inspector previews every stage; the same
+footprints supply future walkability, obstacles, gates, ramps and berths.
+See [PORTS.md](PORTS.md) for controls, exact balance, save migration and evidence.
+
+Developed from current `origin/main` in an isolated checkout because the primary
+workspace has active advisor edits. Existing port buildings and paid queues are
+preserved. Naval combat still uses BattleResolver; tactical port battles and
+individual traversal remain future phases.
+
+Verified by: data/schema validation, Godot import and an isolated rendered port walkthrough. Tests: not run (weekly review policy).
+
 ## Waterways and shipping — October 8, 2026
 
 The parent campaign now has player-issued multi-season fleet routes, river

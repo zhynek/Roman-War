@@ -28,7 +28,10 @@ static func available_units(data: GameData, state: Dictionary, region_id: String
 		if String(unit.get("class", "")) == "general_bodyguard":
 			if not include_city or not unit.get("city_recruit_only",false) or int(unit["cost"])<=0:continue
 			if not for_training and not city_escort_available(data,state,region_id):continue
-		if not _requirements_met(data, settlement, unit):
+		if unit.get("class") == "ship":
+			if PortRules.ship_error(data, state, region_id, unit["id"]) != "":
+				continue
+		elif not _requirements_met(data, settlement, unit):
 			continue
 		available.append(unit)
 	return available
@@ -61,6 +64,8 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	var template: Dictionary = data.units.get(template_id, {})
 	if template.is_empty():
 		return false
+	if template.get("class") == "ship" and not PortRules.ship_quote(data, state, region_id, template_id)["ok"]:
+		return false
 	var allowed := false
 	for unit in available_units(data, state, region_id, include_city):
 		if unit["id"] == template_id:
@@ -82,7 +87,8 @@ static func queue_unit(data: GameData, state: Dictionary, region_id: String, tem
 	SocietyRules.record_recruitment(data, state, region_id, soldiers)
 	settlement["recruitment_queue"].append({
 		"template": template_id,
-		"turns_left": 1,
+		"turns_left": int(PortRules.vessel(data, template_id).get("turns", 1)),
+		"port_contract": template.get("class") == "ship",
 	})
 	return true
 
@@ -157,6 +163,10 @@ static func advance_queues(data: GameData, state: Dictionary, region_id: String)
 		if job.has("city_days_left"):
 			remaining.append(job)
 			continue
+		if first and job.get("port_contract", false) and data.units.get(job["template"], {}).get("class") == "ship" and PortRules.ship_error(data, state, region_id, job["template"]) != "":
+			remaining.append(job)
+			first = false
+			continue
 		if first:
 			job["turns_left"] = int(job["turns_left"]) - 1
 			first = false
@@ -189,8 +199,8 @@ static func retrain_garrison(data: GameData, state: Dictionary, region_id: Strin
 	if settlement["siege"] != null:
 		return 0
 	var faction: Dictionary = state["factions"][settlement["owner"]]
-	var healed := 0
-	var in_port: Array = settlement["garrison"] + settlement.get("harbour", [])
+	var healed := int(PortRules.repair_harbour(data, state, region_id)["count"])
+	var in_port: Array = settlement["garrison"]
 	for unit in in_port:
 		var template: Dictionary = data.units.get(unit["template"], {})
 		if not _requirements_met(data, settlement, template):

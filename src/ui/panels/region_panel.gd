@@ -15,6 +15,7 @@ signal disband_requested(force_id: String, indices: Array)
 signal refused(error: String)
 signal unit_info_requested(template_id: String)
 signal building_info_requested(chain_id: String)
+signal port_requested(region: String)
 signal drawer_requested(tab: String, chain_id: String)
 signal agent_selected(agent_id: String)
 signal scout_requested(agent_id: String)
@@ -193,6 +194,7 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	var water := WaterwayPanel.new()
 	add_child(water)
 	water.changed.connect(func(): action_taken.emit())
+	water.port_requested.connect(func(id): port_requested.emit(id))
 	water.setup_region(game, region_id)
 
 	# Taxes

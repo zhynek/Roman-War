@@ -430,6 +430,12 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 			return ERR_IS_SHIP
 		if not ship and to_holds_ships:
 			return ERR_NOT_SHIP
+	if to["kind"] == "fleet":
+		var ships: Array = []
+		for index in indices:
+			ships.append(from["units"][int(index)])
+		if not PortRules.supports_zone(data, ships, to["sea_zone"]):
+			return "route_unavailable"
 	if to["kind"] not in ["garrison", "harbour"] and to["units"].size() + indices.size() > max_units(data):
 		return ERR_OVER_CAP
 	if from["kind"] == "army" and from["container"]["general"] != null and indices.size() >= from["units"].size():
@@ -498,6 +504,8 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 	elif from["kind"] == "harbour" and to["kind"] == "fleet":
 		var settlement: Dictionary = from["container"]
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_sail_left", INF)))
+	if to["kind"] == "fleet":
+		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), MovementRules.fleet_movement_points_for(data, state, to["container"]))
 	if to["kind"] == "army":
 		MovementRules.cap_movement(data, state, to["container"])
 	_erase_if_empty(data, state, from_id)

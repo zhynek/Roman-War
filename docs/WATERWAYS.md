@@ -4,6 +4,17 @@ This phase adds player-controlled naval logistics to the parent Roman War campai
 It uses the existing seasonal clock, port buildings, harbours, force controls and
 BattleResolver. The independent Yenikapı village remains a separate experience.
 
+## Port evolution update — October 9, 2026
+
+The next phase replaces flat ship-card transport and delivery allowances with
+five port stages, specialist facilities, per-vessel passenger/freight capacity,
+actual soldier loads and port throughput. Port and shipyard construction now
+uses **Inspect waterfront & shipyards** in the shipping section. Existing
+landings, port buildings and paid queues migrate additively. See [PORTS.md](PORTS.md)
+for current controls, balance, restrictions and direct evidence. The original
+phase description below is retained as its October 8 implementation record;
+its company-space and per-card-income figures have been superseded.
+
 ## Playing
 
 1. Select an owned province on the Tiber, Nile or Danube. **Waterways & shipping**

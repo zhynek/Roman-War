@@ -83,7 +83,7 @@ static func _snapshot(data: GameData, state: Dictionary, region: String) -> Dict
 	return {"owner": String(settlement["owner"]),
 		"level": SettlementRules.settlement_level(data, settlement),
 		"population": int(settlement["population"]), "buildings": buildings,
-		"watchpost": watchpost, "construction": construction, "turn": int(state.get("turn", 0))}
+		"port": PortRules.snapshot(data, state, region), "watchpost": watchpost, "construction": construction, "turn": int(state.get("turn", 0))}
 
 static func grant(data: GameData, state: Dictionary, grantor: String, recipient: String) -> void:
 	if not state.has("map_access"):

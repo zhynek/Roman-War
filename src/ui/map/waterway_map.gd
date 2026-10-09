@@ -16,12 +16,18 @@ static func draw(canvas: CanvasItem, view: MapView) -> void:
 			continue
 		var at := view.to_screen(view.zone_world_pos(data.sea_zones[node["id"]]))
 		canvas.draw_circle(at, 5, Color(0.65, 0.92, 0.95))
-	for region in view.game.state.get("waterworks", {}).get("landings", {}):
-		if view.visible_cache.has(region):
-			var at := view.to_screen(view.world_pos(data.regions[region])) + Vector2(-18, 18)
-			canvas.draw_line(at, at + Vector2(14, 0), UiStyle.CAPITAL_GOLD, 4, true)
-			canvas.draw_line(at + Vector2(3, -4), at + Vector2(3, 7), UiStyle.CAPITAL_GOLD, 2, true)
-			canvas.draw_line(at + Vector2(11, -4), at + Vector2(11, 7), UiStyle.CAPITAL_GOLD, 2, true)
+	for region in view.settlement_reports:
+		var architecture: Dictionary = view.settlement_reports[region].get("port", {})
+		var rank := int(architecture.get("stage",0))
+		if rank > 0 and view.known_cache.has(region):
+			var at := view.to_screen(view.world_pos(data.regions[region])) + Vector2(-22,24)
+			canvas.draw_line(at,at+Vector2(24,0),UiStyle.CAPITAL_GOLD,3,true)
+			for i in range(rank):
+				canvas.draw_line(at+Vector2(i*5,-4),at+Vector2(i*5,6),UiStyle.CAPITAL_GOLD,2,true)
+			if architecture.get("facilities",[]).has("arsenal"):
+				canvas.draw_colored_polygon(PackedVector2Array([at+Vector2(28,-7),at+Vector2(36,-7),at+Vector2(32,4)]),Color("b6604a"))
+			if architecture.get("facilities",[]).has("depot"):
+				canvas.draw_rect(Rect2(at+Vector2(-8,-4),Vector2(5,8)),Color("6aa98d"))
 	for key in view.game.state.get("waterworks", {}).get("bridges", {}):
 		var ends := String(key).split("|")
 		if not view.known_cache.has(ends[0]) or not view.known_cache.has(ends[1]):

@@ -246,6 +246,9 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			state["year"] = 1  # no year zero
 		report["characters"].append_array(FamilyRules.process_year(data, state, rng))
 
+	report["ports"] = PortRules.advance(data, state)
+	for port in report["ports"]:
+		TurnJournal.add(journal, "port_completed", {"faction": port["owner"], "region": port["region"], "subject": port["kind"], "value": port["rank"]})
 	report["waterworks"] = WaterwayRules.advance_projects(data, state)
 	MovementRules.reset_movement(data, state)
 	report["voyages"] = WaterwayRules.advance_season(data, state, resolver, rng)

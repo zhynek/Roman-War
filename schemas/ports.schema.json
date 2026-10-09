@@ -1,0 +1,351 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "description",
+    "stages",
+    "facilities",
+    "sites",
+    "vessels",
+    "layout"
+  ],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "inland_name",
+          "name",
+          "min_settlement",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "inland_name": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "min_settlement": {
+            "enum": [
+              "village",
+              "town",
+              "large_town",
+              "minor_city",
+              "large_city",
+              "huge_city"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "facilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "stage",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sites": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "setting",
+          "deep_water"
+        ],
+        "properties": {
+          "setting": {
+            "enum": [
+              "riverbank",
+              "estuary",
+              "sheltered_bay",
+              "exposed_coast"
+            ]
+          },
+          "deep_water": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "vessels": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stage",
+          "facilities",
+          "deep_water",
+          "waters",
+          "repair_stage"
+        ],
+        "properties": {
+          "stage": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "facilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "deep_water": {
+            "type": "boolean"
+          },
+          "waters": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "river",
+                "coastal",
+                "open"
+              ]
+            }
+          },
+          "repair_stage": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bounds",
+        "land",
+        "water",
+        "structures",
+        "routes",
+        "berths",
+        "channels"
+      ],
+      "properties": {
+        "bounds": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "land": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "water": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "number"
+          }
+        },
+        "structures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "kind",
+              "stage",
+              "rect",
+              "height",
+              "facility"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "road",
+                  "ramp",
+                  "shed",
+                  "cargo",
+                  "pier",
+                  "tower",
+                  "quay",
+                  "hall",
+                  "warehouse",
+                  "court",
+                  "market",
+                  "workshop",
+                  "arsenal",
+                  "barracks",
+                  "wall",
+                  "shipshed",
+                  "breakwater",
+                  "beacon",
+                  "monument",
+                  "bridge"
+                ]
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "rect": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0
+              },
+              "facility": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "stage",
+              "points"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "points": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "berths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "stage",
+              "rect"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "rect": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "stage",
+              "rect"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "stage": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "rect": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
