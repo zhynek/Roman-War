@@ -230,13 +230,17 @@ func move_fleet(fleet_id: String, to_zone: String) -> bool:
 	return MovementRules.move_fleet(data, state, fleet_id, to_zone)
 
 
-func sail_fleet(fleet_id: String, to_zone: String) -> Dictionary:
+func sail_fleet(fleet_id: String, to_zone: String, mode: String = "") -> Dictionary:
 	if CityBattleRules.locked(state):
 		return {"ok": false, "reason": "battle_active", "error": "battle_active"}
-	## Multi-lane voyage along the cheapest route (see MovementRules.sail).
-	if not _owns_force(fleet_id):
+	## Distant destinations persist and resume on each fresh movement budget.
+	if not state["fleets"].has(fleet_id) or not _owns_force(fleet_id):
 		return {"ok": false, "arrived": false, "path": [], "stopped_at": ""}
-	return MovementRules.sail(data, state, fleet_id, to_zone)
+	var rng := _rng()
+	var travel_mode := String(state["fleets"][fleet_id].get("sail_mode", "coastal")) if mode == "" else mode
+	var result := WaterwayRules.order(data, state, fleet_id, to_zone, travel_mode, resolver, rng)
+	state["rng_state"] = rng.state_string()
+	return result
 
 
 func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
@@ -433,17 +437,9 @@ func respond_offer(offer_id: String, accept: bool) -> bool:
 	return false
 
 
-func sea_move_army(army_id: String, to_region: String) -> bool:
-	if CityBattleRules.locked(state):
-		return false
-	_cancel_march(army_id)
-	if not _owns_army(army_id):
-		return false
-	var moved := MovementRules.sea_move_army(data, state, army_id, to_region)
-	if moved:
-		GuidedRules.bump(state, "army_moves")
-		_after_relocation()
-	return moved
+func sea_move_army(_army_id: String, _to_region: String) -> bool:
+	## Kept for older callers; transport now requires embark_army + a voyage.
+	return false
 
 
 func march_army(army_id: String, to_region: String, forced_march: bool = false) -> Dictionary:
@@ -663,7 +659,7 @@ func battle_estimate(attacker_id: String, defender_id: String) -> Dictionary:
 	if not army_is_visible(defender_id) or attacker.is_empty() or defender.is_empty() or attacker["owner"] == defender["owner"]:
 		return {}
 	if attacker["region"] != defender["region"] \
-			and not TerrainRules.land_connection(data, attacker["region"], defender["region"]):
+			and not TerrainRules.land_connection(data, attacker["region"], defender["region"], state):
 		return {}
 	return BattleResolver.estimate(data, attacker["units"], defender["units"],
 		CombatRules.battle_context(data, state, attacker, defender))
@@ -1447,7 +1443,7 @@ func terrain_report(region_id: String, from_region: String = "") -> Dictionary:
 	var terrain := String(data.regions[region_id]["terrain"])
 	return {"terrain": terrain, "movement": PathfindingRules.known_step_cost(data, state, region_id, visible_regions(), from_region),
 		"defense": float(data.balance["battle"]["terrain_defense_multiplier"].get(terrain, 1.0)),
-		"crossing": TerrainRules.crossing_kind(data, from_region, region_id),
+		"crossing": TerrainRules.crossing_kind(data, from_region, region_id, state),
 		"observed": visible_regions().has(region_id)}
 
 
@@ -1557,3 +1553,50 @@ func city_battle_command(region: String, ids: Array, action: String, position: A
 
 func city_battle_control(region: String, action: String) -> Dictionary:
 	return CityBattleRules.control(data,state,region,action)
+
+
+func waterway_project(region: String, kind: String, other: String = "") -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_settlement(region):
+		return {"ok": false, "error": "wrong_owner"}
+	return WaterwayRules.queue_project(data, state, region, kind, other)
+
+func fleet_path_preview(fleet_id: String, target: String, mode: String = "coastal") -> Dictionary:
+	if not state["fleets"].has(fleet_id) or not _owns_force(fleet_id):
+		return {}
+	return WaterwayRules.preview(data, state, fleet_id, target, mode)
+
+func halt_voyage(fleet_id: String) -> bool:
+	if CityBattleRules.locked(state) or not state["fleets"].has(fleet_id) or not _owns_force(fleet_id):
+		return false
+	state["fleets"][fleet_id]["sail_path"] = []
+	state["fleets"][fleet_id]["trade_route"] = {}
+	return true
+
+func embark_army(fleet_id: String, army_id: String) -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_force(fleet_id) or not _owns_army(army_id):
+		return {"ok": false, "error": "wrong_owner"}
+	var result := WaterwayRules.embark(data, state, fleet_id, army_id)
+	if result.get("ok", false):
+		_after_relocation()
+	return result
+
+func disembark_army(fleet_id: String, region: String) -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_force(fleet_id):
+		return {"ok": false, "error": "wrong_owner"}
+	var result := WaterwayRules.disembark(data, state, fleet_id, region)
+	if result.get("ok", false):
+		_after_relocation()
+	return result
+
+func assign_shipping(fleet_id: String, from: String, to: String, mode: String = "coastal") -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_force(fleet_id):
+		return {"ok": false, "error": "wrong_owner"}
+	return WaterwayRules.assign_trade(data, state, fleet_id, from, to, mode)
+
+func naval_encounter(fleet_id: String, enemy_id: String) -> Dictionary:
+	if CityBattleRules.locked(state) or not _owns_force(fleet_id):
+		return {}
+	var rng := _rng()
+	var result := WaterwayRules.battle(data, state, fleet_id, enemy_id, resolver, rng)
+	state["rng_state"] = rng.state_string()
+	return result

@@ -190,6 +190,11 @@ func _build_settlement_section(settlement: Dictionary) -> void:
 	else:
 		_label("No governor", Color(0.9, 0.8, 0.5))
 
+	var water := WaterwayPanel.new()
+	add_child(water)
+	water.changed.connect(func(): action_taken.emit())
+	water.setup_region(game, region_id)
+
 	# Taxes
 	var tax_row := HBoxContainer.new()
 	add_child(tax_row)

@@ -800,6 +800,42 @@
       "in_dispatch": true,
       "headline": "{faction}: a column sighted near {settlement}",
       "body": "Our lookouts counted {value} soldiers on the move. Only the stretch of road within our sight is shown."
+    },
+    {
+      "chapter": "works",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "good",
+      "icon": "ship",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "id": "waterway_voyage",
+      "headline": "Shipping orders advance",
+      "body": "A fleet has sailed {value} waterway legs this season. Its remaining orders are retained."
+    },
+    {
+      "chapter": "works",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "good",
+      "icon": "ship",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "id": "waterway_delivery",
+      "headline": "Shipping delivery",
+      "body": "A scheduled cargo delivery earned {value} denarii."
+    },
+    {
+      "chapter": "works",
+      "visibility": "own",
+      "severity": 3,
+      "tone": "good",
+      "icon": "ship",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "id": "waterway_completed",
+      "headline": "Waterway works at {settlement}",
+      "body": "A river landing, bridge or transport flotilla has finished. Open the settlement to inspect its shipping facilities."
     }
   ]
 }

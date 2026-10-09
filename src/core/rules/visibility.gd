@@ -23,7 +23,7 @@ static func visible_regions(data: GameData, state: Dictionary, faction_id: Strin
 		if fleet["owner"] != faction_id:
 			continue
 		for region_id in data.regions:
-			if data.regions[region_id].get("sea_zones", []).has(fleet["sea_zone"]):
+			if NavalRules.zones_touching(data, region_id).has(fleet["sea_zone"]):
 				visible[region_id] = true
 
 	for agent in state.get("agents", {}).values():
@@ -47,11 +47,11 @@ static func visible_sea_zones(data: GameData, state: Dictionary, faction_id: Str
 			visible[adjacent] = true
 	for region_id in state.get("settlements", {}):
 		if state.get("settlements", {})[region_id]["owner"] == faction_id:
-			for zone in data.regions.get(region_id, {}).get("sea_zones", []):
+			for zone in NavalRules.zones_touching(data, region_id):
 				visible[zone] = true
 	for army in state.get("armies", {}).values():
 		if army["owner"] == faction_id:
-			for zone in data.regions.get(army["region"], {}).get("sea_zones", []):
+			for zone in NavalRules.zones_touching(data, army["region"]):
 				visible[zone] = true
 	return visible
 

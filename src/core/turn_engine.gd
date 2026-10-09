@@ -246,7 +246,17 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 			state["year"] = 1  # no year zero
 		report["characters"].append_array(FamilyRules.process_year(data, state, rng))
 
+	report["waterworks"] = WaterwayRules.advance_projects(data, state)
 	MovementRules.reset_movement(data, state)
+	report["voyages"] = WaterwayRules.advance_season(data, state, resolver, rng)
+	for work in report["waterworks"]:
+		TurnJournal.add(journal, "waterway_completed", {"faction": work["owner"], "region": work["region"], "subject": work["kind"]})
+	for voyage in report["voyages"]:
+		var fleet: Dictionary = state["fleets"].get(voyage["fleet"], {})
+		if not fleet.is_empty() and not voyage["path"].is_empty():
+			TurnJournal.add(journal, "waterway_voyage", {"faction": fleet["owner"], "subject": voyage["fleet"], "value": voyage["path"].size()})
+		if voyage.has("income") and not fleet.is_empty():
+			TurnJournal.add(journal, "waterway_delivery", {"faction": fleet["owner"], "subject": voyage["fleet"], "value": voyage["income"]})
 
 	# Queued marches resume on the fresh points. No RNG is drawn here, but the
 	# report order must not depend on dictionary order either — sorted ids.

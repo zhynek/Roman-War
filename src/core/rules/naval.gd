@@ -9,6 +9,7 @@ class_name NavalRules
 
 static func zones_touching(data: GameData, region_id: String) -> Array:
 	var zones: Array = data.regions.get(region_id, {}).get("sea_zones", []).duplicate()
+	zones.append_array(WaterwayRules.river_access(data, region_id))
 	zones.sort()
 	return zones
 
@@ -28,7 +29,7 @@ static func own_ports_on_zone(state: Dictionary, data: GameData, faction_id: Str
 	region_ids.sort()
 	for region_id in region_ids:
 		if state["settlements"][region_id]["owner"] == faction_id \
-				and data.regions.get(region_id, {}).get("sea_zones", []).has(zone_id):
+				and WaterwayRules.access(data, state, faction_id, region_id, zone_id, true):
 			ports.append(region_id)
 	return ports
 
@@ -38,7 +39,9 @@ static func own_ports_on_zone(state: Dictionary, data: GameData, faction_id: Str
 static func check_launch_fleet(data: GameData, state: Dictionary, region_id: String, indices: Array, zone_id: String) -> String:
 	if not state["settlements"].has(region_id):
 		return ForceRules.ERR_NO_SETTLEMENT
-	var harbour := harbour_of(state, region_id)
+	if not WaterwayRules.access(data, state, state["settlements"][region_id]["owner"], region_id, zone_id, true):
+		return "landing_required"
+	var harbour: Array = state["settlements"][region_id].get("harbour", [])
 	var error := ForceRules._check_indices(harbour, indices)
 	if error != "":
 		return error
@@ -64,6 +67,7 @@ static func launch_fleet(data: GameData, state: Dictionary, region_id: String, i
 	state["fleets"][fleet_id] = {
 		"owner": settlement["owner"], "sea_zone": zone_id, "ships": ships, "movement_left": 0.0,
 	}
+	WaterwayRules.ensure_fleet(state["fleets"][fleet_id])
 	return {"ok": true, "error": "", "fleet_id": fleet_id}
 
 
@@ -71,6 +75,10 @@ static func check_dock_fleet(data: GameData, state: Dictionary, fleet_id: String
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not fleet.get("cargo", {}).is_empty():
+		return "cargo_aboard"
+	if not WaterwayRules.access(data, state, fleet["owner"], region_id, fleet["sea_zone"], true):
+		return "landing_required"
 	var settlement: Dictionary = state["settlements"].get(region_id, {})
 	if settlement.is_empty():
 		return ForceRules.ERR_NO_SETTLEMENT
@@ -113,6 +121,8 @@ static func check_merge_fleets(data: GameData, state: Dictionary, from_id: Strin
 	var into: Dictionary = state["fleets"].get(into_id, {})
 	if from.is_empty() or into.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not from.get("cargo", {}).is_empty() or not into.get("cargo", {}).is_empty():
+		return "cargo_aboard"
 	if from["owner"] != into["owner"]:
 		return ForceRules.ERR_WRONG_OWNER
 	if from["sea_zone"] != into["sea_zone"]:
@@ -128,6 +138,8 @@ static func merge_fleets(data: GameData, state: Dictionary, from_id: String, int
 		return {"ok": false, "error": error}
 	var from: Dictionary = state["fleets"][from_id]
 	var into: Dictionary = state["fleets"][into_id]
+	into["sail_path"] = []
+	into["trade_route"] = {}
 	for ship in from["ships"]:
 		into["ships"].append(ship)
 	into["movement_left"] = minf(float(into["movement_left"]), float(from["movement_left"]))
@@ -139,6 +151,8 @@ static func check_split_fleet(data: GameData, state: Dictionary, fleet_id: Strin
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not fleet.get("cargo", {}).is_empty():
+		return "cargo_aboard"
 	var error := ForceRules._check_indices(fleet["ships"], indices)
 	if error != "":
 		return error
@@ -160,6 +174,9 @@ static func split_fleet(data: GameData, state: Dictionary, fleet_id: String, ind
 		"owner": fleet["owner"], "sea_zone": fleet["sea_zone"], "ships": ships,
 		"movement_left": float(fleet["movement_left"]),
 	}
+	WaterwayRules.ensure_fleet(state["fleets"][new_id])
+	fleet["sail_path"] = []
+	fleet["trade_route"] = {}
 	return {"ok": true, "error": "", "fleet_id": new_id}
 
 

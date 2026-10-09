@@ -16,6 +16,8 @@ signal assault_requested(region_id: String, occupation: String)
 signal explore_requested(army_id: String)
 signal march_requested(region_id: String, forced: bool)
 signal sail_requested(zone_id: String)
+signal voyage_preview(fleet_id: String, target: String, mode: String)
+signal voyage_started(fleet_id: String, origin: String, path: Array)
 signal sheet_requested(char_id: String)
 signal unit_info_requested(template_id: String)
 signal force_replaced(kind: String, id: String)     # the selection should move to this force
@@ -209,6 +211,17 @@ func _army_actions(summary: Dictionary) -> void:
 	var settlement: Dictionary = game.state["settlements"].get(region_id, {})
 	var at_home: bool = not settlement.is_empty() and settlement["owner"] == player
 	var has_movement: bool = float(summary["movement_left"]) > 0.0001
+
+	for id in game.state["fleets"]:
+		var fleet: Dictionary = game.state["fleets"][id]
+		if fleet["owner"] == player and WaterwayRules.access(game.data, game.state, player, region_id, fleet["sea_zone"], true):
+			var target: String = id
+			_action_button(String(game.data.effects_glossary["waterways"]["embark"]).format({"name": _fleet_name(id)}), func():
+				var outcome := game.embark_army(target, army_id)
+				if outcome.get("ok", false):
+					force_replaced.emit("fleet", target)
+				else:
+					refused.emit(outcome["error"]))
 
 	# Standing in our own city: the army can join its garrison.
 	if at_home:
@@ -449,24 +462,12 @@ func _regroup_actions(summary: Dictionary) -> void:
 
 func _fleet_actions(summary: Dictionary) -> void:
 	var fleet_id := force_id
-	var reach := game.reachable_zones(fleet_id)
-	var zones: Array = reach.keys()
-	zones.sort()
-	if not zones.is_empty():
-		_header("Sail to")
-		var row := HBoxContainer.new()
-		add_child(row)
-		var go := Button.new()
-		go.text = "Sail →"
-		go.focus_mode = Control.FOCUS_NONE
-		go.add_theme_font_size_override("font_size", 11)
-		row.add_child(go)
-		var options := _dropdown(row)
-		for zone_id in zones:
-			options.add_item(String(game.data.sea_zones.get(zone_id, {}).get("name", zone_id)))
-		go.pressed.connect(func():
-			if options.selected >= 0:
-				sail_requested.emit(zones[options.selected]))
+	var water := WaterwayPanel.new()
+	add_child(water)
+	water.changed.connect(func(): action_taken.emit())
+	water.previewed.connect(func(id, target, mode): voyage_preview.emit(id, target, mode))
+	water.sailed.connect(func(id, origin, path): voyage_started.emit(id, origin, path))
+	water.setup_fleet(game, fleet_id)
 
 	# Other fleets of ours in the same sea: transfer ships between them, or merge.
 	var others: Array = []
@@ -544,7 +545,7 @@ func _fleet_actions(summary: Dictionary) -> void:
 			refused.emit(ForceRules.ERR_EMPTY_SELECTION)
 		else:
 			disband_requested.emit(fleet_id, indices))
-	_label("Right-click a ringed sea to sail there. Esc deselects.", HINT_COLOR)
+	_label(String(game.data.effects_glossary["waterways"]["fleet_hint"]), HINT_COLOR)
 
 
 ## --- Small builders -------------------------------------------------------

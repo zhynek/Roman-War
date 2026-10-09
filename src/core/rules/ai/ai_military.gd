@@ -202,7 +202,7 @@ static func _defend(data: GameData, state: Dictionary, faction_id: String, rng: 
 		var blocked := _march(data, state, defender,
 			AiAssess.distance_map(data, state, faction_id, [region_id]))
 		var army: Dictionary = state["armies"][defender]
-		if army["region"] == region_id or TerrainRules.land_connection(data, army["region"], region_id):
+		if army["region"] == region_id or TerrainRules.land_connection(data, army["region"], region_id, state):
 			_attack_strongest(data, state, faction_id, defender, region_id, rng, resolver,
 				ai_notices, character_notices, 0.0)  # committed: the relief odds were checked from home
 		elif blocked != "":
@@ -270,7 +270,7 @@ static func _campaign_on_target(data: GameData, state: Dictionary, faction_id: S
 		# own ground, the goal, or the road that blocked the march.
 		var fought := _attack_strongest(data, state, faction_id, army_id, army["region"],
 			rng, resolver, ai_notices, character_notices, attack_odds)
-		if not fought and TerrainRules.land_connection(data, army["region"], goal):
+		if not fought and TerrainRules.land_connection(data, army["region"], goal, state):
 			fought = _attack_strongest(data, state, faction_id, army_id, goal,
 				rng, resolver, ai_notices, character_notices, attack_odds)
 		if not fought and blocked != "" and blocked != goal:
@@ -279,7 +279,7 @@ static func _campaign_on_target(data: GameData, state: Dictionary, faction_id: S
 		if not state["armies"].has(army_id):
 			continue
 		army = state["armies"][army_id]
-		if (army["region"] == goal or TerrainRules.land_connection(data, army["region"], goal)) \
+		if (army["region"] == goal or TerrainRules.land_connection(data, army["region"], goal, state)) \
 				and state["settlements"].has(goal):
 			# Invest only with the strength to survive the eventual sally —
 			# anything less feeds the garrison a victory at the walls.
@@ -313,7 +313,7 @@ static func _attack_strongest(data: GameData, state: Dictionary, faction_id: Str
 	if targets.is_empty():
 		return false
 	var army: Dictionary = state["armies"][army_id]
-	if army["region"] != region_id and not TerrainRules.land_connection(data, army["region"], region_id):
+	if army["region"] != region_id and not TerrainRules.land_connection(data, army["region"], region_id, state):
 		return false
 	var strongest := ""
 	var strongest_power := -1.0
@@ -354,7 +354,7 @@ static func _march(data: GameData, state: Dictionary, army_id: String, goal_cost
 		var next_step := ""
 		var next_cost := here_cost
 		for neighbor in data.regions[here].get("adjacent", []):
-			if not goal_costs.has(neighbor) or not TerrainRules.land_connection(data, here, neighbor):
+			if not goal_costs.has(neighbor) or not TerrainRules.land_connection(data, here, neighbor, state):
 				continue
 			var cost := int(goal_costs[neighbor])
 			if cost < next_cost:

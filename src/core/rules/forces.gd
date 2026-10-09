@@ -416,6 +416,8 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 	if not _colocated(data, state, from, to):
 		return ERR_NOT_COLOCATED
 	for force in [from, to]:
+		if force["kind"] == "fleet" and (not force["container"].get("cargo", {}).is_empty() or not force["container"].get("trade_route", {}).is_empty()):
+			return "cargo_aboard"
 		if force["kind"] == "garrison" and force["container"].get("siege") != null:
 			return ERR_BESIEGED
 	var error := _check_indices(from["units"], indices)
@@ -452,7 +454,7 @@ static func _colocated(data: GameData, state: Dictionary, a: Dictionary, b: Dict
 			return false
 		if state["settlements"][harbour["region"]]["owner"] != other["owner"]:
 			return false
-		return data.regions.get(harbour["region"], {}).get("sea_zones", []).has(other["sea_zone"])
+		return WaterwayRules.access(data, state, other["owner"], harbour["region"], other["sea_zone"], true)
 	if kinds.has("fleet"):
 		return a["kind"] == "fleet" and b["kind"] == "fleet" and a["sea_zone"] == b["sea_zone"]
 	if a["region"] == "" or a["region"] != b["region"]:
@@ -611,6 +613,8 @@ static func check_disband_unit(data: GameData, state: Dictionary, force_id: Stri
 		return ERR_BAD_INDEX
 	if force["kind"] == "army" and force["container"]["general"] != null and force["units"].size() == 1:
 		return ERR_LAST_UNIT
+	if force["kind"] == "fleet" and not force["container"].get("cargo", {}).is_empty():
+		return "cargo_aboard"
 	if force["kind"] == "fleet" and not _fleet_touches_own_port(data, state, force["container"]):
 		return ERR_NOT_DOCKED
 	return ""
@@ -619,7 +623,7 @@ static func check_disband_unit(data: GameData, state: Dictionary, force_id: Stri
 static func _fleet_touches_own_port(data: GameData, state: Dictionary, fleet: Dictionary) -> bool:
 	for region_id in state["settlements"]:
 		if state["settlements"][region_id]["owner"] == fleet["owner"] \
-				and data.regions.get(region_id, {}).get("sea_zones", []).has(fleet["sea_zone"]):
+				and WaterwayRules.access(data, state, fleet["owner"], region_id, fleet["sea_zone"], true):
 			return true
 	return false
 

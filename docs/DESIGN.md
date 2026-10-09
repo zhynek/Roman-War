@@ -560,6 +560,14 @@ rest to make geography matter.
   (0.8 / 1.0 / 1.2 / 1.4 for easy → very hard) and, at higher difficulties, a flat
   order bonus — the AI gets richer, never smarter.
 
+### Campaign waterways — October 2026 extension
+
+[Waterways and shipping](WATERWAYS.md) defines the playable river/coastal/open-water
+logistics layer: paid landings and bridges, real embarked armies, persistent fleet
+routes, recurring deliveries and automatic encounters through BattleResolver.
+Its controls and save contract supersede the older abstract sea-crossing model.
+AI movement is land-only until a fleet assignment planner is implemented.
+
 ## 6. Military
 
 ### 6.1 Recruitment
@@ -635,14 +643,12 @@ swerved around an unseen ambush, or an unexplored enemy town, would paint
 allegiances through the fog; execution still halts against hidden reality when
 the army gets there. A visibly barred destination halts the path in the
 cheapest region beside it.
-The abstracted sea crossing (a coastal region to another on the same or an
-adjacent sea zone, spending the whole turn) may land on the shore of a faction
-the army's owner is **at war** with — an amphibious invasion — provided no
-hostile field army contests the beach; the garrison waits behind its walls for
-the siege. Without this rule, island regions with no land link (rebel-held
-Creta and Cyprus among them) could never change hands, and Egypt's long
-campaign could never be won. Landing on any other shore follows the same rules
-as before.
+Sea transport requires a fleet with sufficient carrying capacity. Embark at an
+owned port or river landing, issue a voyage, then disembark at an accessible
+landing or an unopposed enemy coast. A hostile field army or siege blocks the
+beach. Landing spends the army's season and does not capture the settlement;
+the garrison remains behind its walls for a subsequent siege. Island regions
+such as Creta and Cyprus remain conquerable through actual fleet transport.
 
 **Attacks cost the season, and generals cannot be stranded.** An attack across
 a border needs movement enough for the step into the defender's region (the
@@ -1177,15 +1183,11 @@ Behavioral notes:
   never expand, declare, or make peace.
 - **AI captures always occupy** — enslavement and extermination stay player
   decisions.
-- **Single-region islands sit outside the AI's war planning** (Sardinia,
-  Britannia, Crete, Rhodes, Cyprus). The *player* can take one: an amphibious
-  landing on a hostile shore is legal as long as no field army contests the
-  beach (`MovementRules.sea_move_army`). The AI's traversal deliberately will
-  not — `AiAssess.distance_map` refuses to expand sea edges out of a hostile
-  region, because those edges advertised approaches its armies never finished
-  and froze whole coastal campaigns. So the AI neither targets islands nor
-  counts them reachable, and island factions expand only if war finds them.
-  Teaching it the landing is Phase 6 follow-up work, not a missing rule.
+- **AI island invasions remain unimplemented.** Players can embark an army and
+  make an unopposed enemy-coast landing through `WaterwayRules.disembark`.
+  `AiAssess.distance_map` now follows land routes and completed bridges; it
+  cannot assume a sea crossing without a fleet assigned to carry the army.
+  Autonomous fleet assignment and naval strategy are a later AI phase.
 
 ## 10. The Guided Trail & Points of Interest
 
@@ -1494,7 +1496,7 @@ streams each called their own layer "Phase 9". Status as of this document:
 | 0 — Design & setup | Schemas for every data table, repo, CI, save format, this document | **Done** |
 | 1 — Campaign map & turns | Region graph, sea zones, movement & forced march, fog of war, end-turn loop, seasons | **Done** |
 | 2 — Settlements & economy | Growth/order factor lists, squalor, plague, buildings & queues, taxes, trade, corruption, treasury, riots/revolts, capture options | **Done** |
-| 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (abstracted crossing, including amphibious landing on a hostile shore), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth**, plus the **military strategy layer** (§6.5–6.8, §3.3): unit-class counters and per-class terrain/walls in an RNG-free estimator with odds and named factors, kit from armouries and drill, the casualty/rout model, garrison quality, levy strain, war mood, and warcraft techniques learned from buildings, resources and the enemies faced. Remaining: embark-on-fleet transport, naval battles & port blockades, forts/watchtowers, ambush |
+| 3 — Armies & battles | Recruitment, experience, retrain/merge, garrisons, sieges, mercenary hiring, sea transport (embarked armies and unopposed amphibious landings), **BattleResolver interface + AutoResolver**, debt disbandment | **Done at foundation depth**, plus the **military strategy layer** (§6.5–6.8, §3.3): unit-class counters and per-class terrain/walls in an RNG-free estimator with odds and named factors, kit from armouries and drill, the casualty/rout model, garrison quality, levy strain, war mood, and warcraft techniques learned from buildings, resources and the enemies faced. Player fleet transport, automatic naval encounters, multi-season voyages, river works and shipping services are now implemented (see WATERWAYS.md). Remaining naval work: AI fleet operations, blockades and dedicated naval balance |
 | 4 — Characters | Trait/ancillary trigger engine, family tree, succession, marriage/adoption, natural death, hero-of-the-field | **Done.** Trait points with anti-trait erosion, triggers (governing/campaigning/idle/battle/siege/occupation), retinue acquisition & transfer, effective attributes wired into order/income/growth/movement/battles; yearly aging, natural death, succession & set-heir, coming of age, births, seeded households, marriage suitors, adoption, man-of-the-hour. `office_gained` triggers fire from the summer elections (§8.1) |
 | 5 — Agents & diplomacy | Envoys/spies/assassins, negotiation offers, AI attitude model | **Done.** Attitude factor model with decaying memory; offers priced in denarii (payments, tribute schedules, region cessions, stance changes) with live appraisal in the negotiation dialog; AI→player envoys with expiry; diplomats/spies/assassins on the map reading the two formerly-dormant effects (`personal_security`, `agent_skill`); senate courtship & assassination missions. Deferred: AI agent use, sabotage |
 | 6 — AI opponents | Modular economy/expansion/diplomacy/war behaviors, difficulty tuning | **Done** (§9). Persona-driven (`data/ai.json`) modular AI: economy, objectives/muster, armies (raise/merge/attack/besiege/assault/defend, land & sea movement), war-and-peace initiative with war hunger and a war ledger; difficulty wired as income/order bonuses plus player-attitude bias. Verified by a 60-turn harness (map changes hands, byte-identical replay, save/resume lockstep) and 100-turn soaks. Deferred: AI use of agents, AI retinue management, fleet operations, invading a hostile island (§9) |

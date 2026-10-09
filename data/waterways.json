@@ -1,0 +1,270 @@
+{
+  "$schema": "../schemas/waterways.schema.json",
+  "description": "Interpretive campaign waterway corridors, not surveyed channels. One distance point is one seasonal movement point before route modifiers.",
+  "river_nodes": [
+    {
+      "id": "tiber_upper",
+      "name": "Upper Tiber",
+      "position": {
+        "x": 35.8,
+        "y": 40.5
+      },
+      "regions": [
+        "umbria",
+        "etruria"
+      ]
+    },
+    {
+      "id": "tiber_lower",
+      "name": "Lower Tiber",
+      "position": {
+        "x": 34.8,
+        "y": 44.4
+      },
+      "regions": [
+        "latium"
+      ]
+    },
+    {
+      "id": "nile_upper",
+      "name": "Upper Nile",
+      "position": {
+        "x": 66.1,
+        "y": 91
+      },
+      "regions": [
+        "thebais"
+      ]
+    },
+    {
+      "id": "nile_middle",
+      "name": "Middle Nile",
+      "position": {
+        "x": 64,
+        "y": 85
+      },
+      "regions": [
+        "heptanomis"
+      ]
+    },
+    {
+      "id": "nile_delta",
+      "name": "Nile Delta",
+      "position": {
+        "x": 62,
+        "y": 77
+      },
+      "regions": [
+        "aegyptus"
+      ]
+    },
+    {
+      "id": "danube_upper",
+      "name": "Upper Danube",
+      "position": {
+        "x": 44,
+        "y": 29
+      },
+      "regions": [
+        "noricum",
+        "pannonia"
+      ]
+    },
+    {
+      "id": "danube_middle",
+      "name": "Middle Danube",
+      "position": {
+        "x": 49,
+        "y": 33
+      },
+      "regions": [
+        "dacia"
+      ]
+    },
+    {
+      "id": "danube_lower",
+      "name": "Lower Danube",
+      "position": {
+        "x": 54,
+        "y": 37
+      },
+      "regions": [
+        "moesia"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "a": "mare_suebicum",
+      "b": "oceanus_britannicus",
+      "kind": "coastal",
+      "distance": 2.0
+    },
+    {
+      "a": "oceanus_atlanticus",
+      "b": "oceanus_britannicus",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_ibericum",
+      "b": "oceanus_atlanticus",
+      "kind": "coastal",
+      "distance": 2.0
+    },
+    {
+      "a": "mare_ibericum",
+      "b": "mare_ligusticum",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_ligusticum",
+      "b": "mare_tyrrhenum",
+      "kind": "coastal",
+      "distance": 0.75
+    },
+    {
+      "a": "mare_africum",
+      "b": "mare_ibericum",
+      "kind": "coastal",
+      "distance": 1.75
+    },
+    {
+      "a": "mare_africum",
+      "b": "mare_tyrrhenum",
+      "kind": "coastal",
+      "distance": 1.0
+    },
+    {
+      "a": "mare_africum",
+      "b": "mare_ionium",
+      "kind": "coastal",
+      "distance": 1.0
+    },
+    {
+      "a": "mare_africum",
+      "b": "mare_libycum",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_hadriaticum",
+      "b": "mare_ionium",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_ionium",
+      "b": "mare_tyrrhenum",
+      "kind": "coastal",
+      "distance": 1.0
+    },
+    {
+      "a": "mare_ionium",
+      "b": "mare_libycum",
+      "kind": "coastal",
+      "distance": 1.25
+    },
+    {
+      "a": "mare_aegaeum",
+      "b": "mare_ionium",
+      "kind": "coastal",
+      "distance": 1.0
+    },
+    {
+      "a": "mare_aegaeum",
+      "b": "pontus_euxinus",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_aegaeum",
+      "b": "mare_lycium",
+      "kind": "coastal",
+      "distance": 1.0
+    },
+    {
+      "a": "mare_aegaeum",
+      "b": "mare_libycum",
+      "kind": "coastal",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_aegyptium",
+      "b": "mare_lycium",
+      "kind": "coastal",
+      "distance": 0.75
+    },
+    {
+      "a": "mare_aegyptium",
+      "b": "mare_libycum",
+      "kind": "coastal",
+      "distance": 1.25
+    },
+    {
+      "a": "tiber_upper",
+      "b": "tiber_lower",
+      "kind": "river",
+      "distance": 1
+    },
+    {
+      "a": "tiber_lower",
+      "b": "mare_tyrrhenum",
+      "kind": "river",
+      "distance": 1
+    },
+    {
+      "a": "nile_upper",
+      "b": "nile_middle",
+      "kind": "river",
+      "distance": 1.5
+    },
+    {
+      "a": "nile_middle",
+      "b": "nile_delta",
+      "kind": "river",
+      "distance": 1.5
+    },
+    {
+      "a": "nile_delta",
+      "b": "mare_aegyptium",
+      "kind": "river",
+      "distance": 1
+    },
+    {
+      "a": "danube_upper",
+      "b": "danube_middle",
+      "kind": "river",
+      "distance": 1
+    },
+    {
+      "a": "danube_middle",
+      "b": "danube_lower",
+      "kind": "river",
+      "distance": 1
+    },
+    {
+      "a": "danube_lower",
+      "b": "pontus_euxinus",
+      "kind": "river",
+      "distance": 1.5
+    },
+    {
+      "a": "mare_tyrrhenum",
+      "b": "mare_aegaeum",
+      "kind": "open",
+      "distance": 2
+    },
+    {
+      "a": "mare_africum",
+      "b": "mare_aegyptium",
+      "kind": "open",
+      "distance": 2
+    }
+  ],
+  "transport_template": "river_transports",
+  "shallow_templates": [
+    "river_transports"
+  ]
+}

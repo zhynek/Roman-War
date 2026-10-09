@@ -2235,6 +2235,79 @@
           "maximum": 1000
         }
       }
+    },
+    "waterways": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capacity_per_ship",
+        "landing_cost",
+        "landing_turns",
+        "bridge_cost",
+        "bridge_turns",
+        "boat_turns",
+        "handling_cost",
+        "trade_delivery_base",
+        "trade_resource_bonus",
+        "trade_capacity_limit",
+        "coastal_cost_multiplier",
+        "open_cost_multiplier",
+        "river_cost_multiplier"
+      ],
+      "properties": {
+        "capacity_per_ship": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "landing_cost": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "landing_turns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bridge_cost": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bridge_turns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "boat_turns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "handling_cost": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "trade_delivery_base": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "trade_resource_bonus": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "trade_capacity_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coastal_cost_multiplier": {
+          "type": "integer",
+          "minimum": 0.01
+        },
+        "open_cost_multiplier": {
+          "type": "integer",
+          "minimum": 0.01
+        },
+        "river_cost_multiplier": {
+          "type": "integer",
+          "minimum": 0.01
+        }
+      }
     }
   },
   "$defs": {

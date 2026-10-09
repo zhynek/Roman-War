@@ -24,6 +24,7 @@ SCHEMAS = ROOT / "schemas"
 
 # data file -> schema file (buildings and temples share one schema)
 TABLES = {
+    "waterways.json": "waterways.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
@@ -537,6 +538,29 @@ def cross_checks(t: dict[str, dict]) -> None:
         unreachable = set(regions) - reachable
         if unreachable:
             err(f"regions: unreachable from {next(iter(regions))}: {sorted(unreachable)[:10]}")
+
+    waterways = t.get("waterways.json", {})
+    water_nodes = set(zones)
+    for node in waterways.get("river_nodes", []):
+        if node["id"] in water_nodes:
+            err(f"waterways: duplicate node {node['id']}")
+        water_nodes.add(node["id"])
+        for region in node["regions"]:
+            if region not in regions:
+                err(f"waterways: unknown landing region {region}")
+    water_edges = set()
+    for link in waterways.get("links", []):
+        key = tuple(sorted([link["a"], link["b"]]))
+        if link["a"] not in water_nodes or link["b"] not in water_nodes or link["a"] == link["b"] or key in water_edges:
+            err(f"waterways: invalid or duplicate link {key}")
+        water_edges.add(key)
+    for zone in zones.values():
+        for other in zone["adjacent"]:
+            if tuple(sorted([zone["id"], other])) not in water_edges:
+                err(f"waterways: sea lane missing distance {zone['id']} / {other}")
+    for unit in [waterways.get("transport_template"), *waterways.get("shallow_templates", [])]:
+        if unit not in units or units[unit].get("class") != "ship":
+            err(f"waterways: unknown ship template {unit}")
 
     # --- map positions ----------------------------------------------------
     for region in regions.values():

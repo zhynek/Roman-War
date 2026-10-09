@@ -10,7 +10,7 @@ static func attack_army(data: GameData, state: Dictionary, resolver: BattleResol
 	if attacker["owner"] == defender["owner"]:
 		return {}
 	if attacker["region"] != defender["region"] \
-			and not TerrainRules.land_connection(data, attacker["region"], defender["region"]):
+			and not TerrainRules.land_connection(data, attacker["region"], defender["region"], state):
 		return {}
 	# Attacking IS a declaration of war — alliances end the moment blood is
 	# drawn. A war the Republic forbids (Roman on Roman before the break) is
@@ -109,7 +109,7 @@ static func battle_context(data: GameData, state: Dictionary, attacker: Dictiona
 		"terrain": region["terrain"],
 		"wall_level": 0,
 		"fort_defense_pct": ReconRules.fort_defense(data, state, defender),
-		"crossing_defense_pct": TerrainRules.crossing_defense(data, attacker["region"], defender["region"]),
+		"crossing_defense_pct": TerrainRules.crossing_defense(data, attacker["region"], defender["region"], state),
 		"attacker_general": general_profile(data, state, attacker),
 		"defender_general": general_profile(data, state, defender),
 		"attacker_fatigued": attacker.get("forced_march", false),
