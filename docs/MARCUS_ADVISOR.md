@@ -55,15 +55,19 @@ application connected by the campaign adapter described below.
    A seasonal council presents counsel after the deterministic season resolves.
    Neither spoken dialogue nor an LLM decides rewards, outcomes or unlocks.
 
-Milestone 4 is implemented in the campaign phase below. Milestones 5–6 remain
-future work. The advisor introduces no new temple,
-worship, emperor succession, council, or civilization-expansion mechanics.
+Milestone 4 and the first specialist, Lucius, are implemented. The next slice
+adds an authored seasonal council and optional Zeus/Ares patronage through existing
+temple chains. Explicit pledges, deterministic seasonal assessment and saved
+narrative honors shape both advisors' context. Military specialists, additional
+gods, emperor succession and autonomous council debates remain future work.
 
 ## Boundaries
 
-- The advisor is presentation only. It cannot dispatch commands, purchase,
+- LLM advice is presentation only. It cannot dispatch commands, purchase,
   adopt a rules profile, advance seasons, mutate saves, consume campaign RNG,
-  or call the battle resolver. “Show me” navigates; the player acts.
+  or call the battle resolver. “Show me” navigates; the player acts. The divine
+  patronage page exposes explicit confirmed player commands through the Game
+  facade; no model response can pledge or renounce on the player's behalf.
 - Tutorial position and mute preference belong in a separate `user://` config.
   Conversation text stays in memory and is not written into campaign saves.
 - Current context is constructed from an allowlist when the player asks. Never

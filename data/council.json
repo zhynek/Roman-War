@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/council.schema.json",
+  "ui": {
+    "council": "Convene the council",
+    "patronage": "Divine patronage",
+    "title": "Two voices. Your decision.",
+    "source": "AUTHORED COUNCIL · WORKS OFFLINE",
+    "help": "These written perspectives share the reports below. They are not a live debate or predictions. Choose a speaker to continue with optional AI text and voice; no connection starts automatically.",
+    "latest": "Latest resolved season only · {date} · turn {turn}",
+    "stale": "This briefing is from turn {turn}; the campaign is now at turn {current}. Finish the current presentation to refresh it.",
+    "no_season": "The first seasonal council awaits a resolved campaign turn. You can still consider the selected city and either advisor’s approach.",
+    "reports": "What has been reported",
+    "quiet": "No visible Dispatch headlines were selected this season.",
+    "omitted": "{count} further reports are not included. Read the full Dispatch before deciding.",
+    "city": "A shared question: {city}",
+    "survey": "Societal report: {level} · {age} turns old. Missing or banded values remain uncertain.",
+    "no_city": "Select a settlement you own to bring its public reports before the council.",
+    "tax": "Current tax setting: {tax}",
+    "public_order": "Public order factors",
+    "growth": "Population growth factors",
+    "income": "Income factors",
+    "factors_limited": "Only the first {limit} factors of each reading are supplied.",
+    "city_question": "Which cost in this city would you accept, and which would you refuse?",
+    "ask": "Ask {name} about this council",
+    "question": "Help me weigh this council’s perspectives against the shared reports and my patron’s mandate, if any. What should I check before deciding?",
+    "lucius_locked": "Lucius’s seat is still unfilled. Complete the required government building to invite his governing perspective.",
+    "battle": "The council awaits the end of the battle view. No live campaign or economic readings are taken while the tactical worker is active.",
+    "presentation": "Finish the turn presentation and close its report before convening or changing a pledge.",
+    "return": "Return to lessons",
+    "mandate": "Through your patron’s eyes",
+    "patronage_title": "Whose promise will you carry?",
+    "patronage_help": "Choose an optional narrative patron through a completed matching temple. Zeus and Ares ask different things of a ruler. Their words shape counsel; pledges grant no new combat, income or temple bonuses.",
+    "divine_source": "AUTHORED DIVINE ADDRESS · ORIGINAL GAME FICTION",
+    "mission": "The divine charge",
+    "tradeoff": "What this asks of you",
+    "temples": "A completed temple is required",
+    "temple_seat": "{city} · {temple} (tier {level})",
+    "temple_needed": "You have no completed matching temple in an owned settlement. Review construction in a city that supports this patron’s existing temple chain.",
+    "select_seat": "Choose the temple at which you will pledge:",
+    "pledge": "Consider a pledge to {name}",
+    "confirm_title": "A promise made deliberately",
+    "confirm_pledge": "Pledge to {name} at {city}? This replaces any current pledge and clears its progress. Unfulfilled charges are checked when a campaign season resolves; earlier honors remain fulfilled. The existing temple retains its normal effects.",
+    "confirm_renounce": "Renounce your current patron? Current mission progress will be cleared. Earlier fulfilled missions remain recorded. You can pledge again later.",
+    "confirm": "Confirm this choice",
+    "cancel": "Keep things as they are",
+    "renounce": "Consider renouncing this pledge",
+    "chosen": "Your patron: {name} · pledged on turn {turn}",
+    "progress": "Mission progress: {progress} / {target} · last checked on turn {turn}",
+    "awaiting": "This pledge has not yet reached its first seasonal check.",
+    "fulfilled": "This divine charge has been fulfilled. Your patron’s perspective remains part of the council.",
+    "remembered": "You have fulfilled this patron’s charge before.",
+    "temple_lost": "No matching temple remains under your control. Restore one before this mission can progress.",
+    "pledged": "Your pledge is recorded. The next seasonal council will weigh its demands.",
+    "renounced": "Your pledge has been released. Your next decision is your own.",
+    "changed": "The campaign changed before this choice could be made. Review the refreshed temple and mission details.",
+    "blocked": "Resolve the active battle or pending defense before changing divine patronage.",
+    "finished": "This campaign has ended. Its pledges can be read but no longer changed."
+  },
+  "speakers": {
+    "marcus": {
+      "name": "Marcus",
+      "stance": "Duty before ambition",
+      "counsel": "Begin with what the reports establish. Decide which obligation deserves your attention this season, then ask whether you could defend the cost to those who bear it. A larger realm is not, by itself, a better governed one.",
+      "city": "Consider the city’s public order alongside its growth and income. No single favorable total absolves us from examining its causes.",
+      "season": "Treat each headline as evidence of an event, not proof that your next choice will succeed. What has changed your responsibilities?",
+      "patrons": {
+        "zeus": "Zeus asks you to keep a city steady before reaching for another. I would ask whether the promise serves its people even when the god is no longer watching.",
+        "ares": "Ares’s appetite does not settle your duty. A wider realm is a choice, and peaceful acquisition counts. Ask what you would leave neglected in pursuing it."
+      }
+    },
+    "lucius": {
+      "name": "Lucius",
+      "stance": "Institutions must carry the promise",
+      "counsel": "A worthy intention still needs a workable administration. Identify the factor your decision would address, the people who would pay, and the report that could show whether it helped. Patience without a question can become neglect.",
+      "city": "Read the age and precision of the city’s survey. If the report is incomplete, ask what you can verify before promising a remedy.",
+      "season": "Which reported event exposes a recurring weakness in government? Repairing that cause may serve the realm longer than answering its loudest symptom.",
+      "patrons": {
+        "zeus": "A gentler tax setting must still support the work the city needs. Read the actual order factors and the age of the survey before calling calm a lasting settlement.",
+        "ares": "If the borders move, the obligations move with them. Examine the treasury, administration and reported condition of new cities before treating expansion as success."
+      }
+    }
+  }
+}

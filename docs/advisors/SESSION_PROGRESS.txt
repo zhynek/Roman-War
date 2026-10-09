@@ -1,0 +1,151 @@
+Roman War — three-phase session progress
+October 8, 2026
+
+Authority and baseline
+The user requested prompts and automatic implementation for private native voice,
+seasonal council, and divine patronage, plus a dedicated sub-agent reporting to
+Isengard. Continue the existing Marcus/Lucius branch. Baseline is local commit
+27aac4e: Lucius governance unlock, offline city readings, and private provider
+configuration are implemented. Real native provider speech remains unverified.
+
+Plan
+Full implementation prompts: docs/advisors/THREE_PHASE_DEVELOPMENT_PROMPTS.txt.
+1. Connect the private credential through supported Chrome controls; secure local
+   storage and usable launch, then native text/audio acceptance if permitted.
+2. Optional authored seasonal council with Marcus and unlocked Lucius, explicit
+   speaker/questions, bounded visible context, no automatic provider spending.
+3. Optional two-patron story using existing compatible temples, explicit adoption,
+   deterministic visible mission progress, additive saves and advisor context.
+
+Safety and verification boundaries
+No secrets in this record or Isengard. No broad test suite, release or deployment.
+Focused credential and save checks use explicit weekly-policy exceptions.
+Authored guidance, configuration, source checks, rendering, and live acceptance
+will be recorded separately. Isengard reports remain pending human review.
+
+Milestone 1 — plan prepared before implementation
+Created all three implementation prompts and recorded them before development in
+Isengard assignment 762ed14c-6d92-44ef-b99f-675b4b2be04c, titled "Advisor experience
+— private voice, seasonal council and divine patronage" (In progress). It links
+to earlier Marcus assignment 43bbb7f8-11f2-4b5c-9d62-cef289a01aae, whose objective
+is already near its maximum length. The new objective contains the complete
+prompts; this repository file remains the detailed progress record.
+
+Milestone 2 — private voice preparation
+Chrome is signed in to ElevenLabs. Two existing credentials are masked; their
+available control copies the key ID, not a usable secret. The root agent prepared
+but did not create "Roman War — Private Advisors": ElevenAgents Read only,
+other endpoints disabled, a 10,000-credit refresh limit, and automatic disable on
+leak detection. The browser security policy requires action-time confirmation
+for this new persistent access, so the agent requested it and the exact
+folder_save destination. No credential has been created, copied to this record,
+or saved in the repository. Credential creation and real native speech acceptance
+remain pending; they are not failures or completed milestones. Independent work
+continues on secure local credential-file launch, council presentation and the
+deterministic patronage slice.
+
+Milestone 3 — secure local launcher implemented
+The root agent added --credentials-file PATH to the broker. It accepts an
+owner-only external JSON file with exactly the three provider fields, rejects
+duplicate or extra fields, oversized files, symlinks, shared permissions and
+repository paths, and does not log file contents. The provider file is never
+passed to Godot. --campaign --launch supplies a convenient parent-campaign launch.
+Twenty focused credential checks passed in 4.093 seconds using synthetic values
+under the policy's credential-handling exception. These are boundary checks,
+not a live ElevenLabs conversation. No actual key has been created, read or saved;
+confirmation and destination remain pending. Patronage rules have been written
+by the rules agent and council UI is in progress. Combined data validation,
+imports and rendered acceptance are not yet complete.
+
+Milestone 4 — credential authorization received
+The user explicitly approved creation of the restricted ElevenLabs credential
+(ElevenAgents Read only, 10,000-credit cap and leak auto-disable) and identified
+the existing Folder_Save.rtf in iCloud TextEdit as the requested storage file.
+The root agent located that exact file and is completing creation and persistence.
+The earlier confirmation/destination blocker is resolved. This update does not
+yet claim that the credential is saved or that native speech has been accepted.
+Integrated rendering, live acceptance and the final source checkpoint remain
+pending.
+
+Milestone 5 — credential saved; mint permission identified
+The restricted credential was created and saved in the requested existing iCloud
+TextEdit Folder_Save.rtf and in the local runtime file
+~/Library/Application Support/Roman War/private-advisors.json (file mode 0600,
+parent directory mode 0700). Its value was not printed or recorded here. A real
+provider request successfully read a private advisor, but signed-session minting
+returned HTTP 401 missing_permissions for convai_write. The root agent requested
+action-time approval to change only ElevenAgents Read to Write, preserving the
+credit cap, disabled unrelated endpoints and leak auto-disable. This is the new
+live-acceptance blocker; the credential itself exists and is stored. The council
+agent is performing integrated rendered QA.
+
+Milestone 6 — native credential boundary exercised
+The root agent launched native Godot through the real broker using the stored
+credential. Direct output confirmed provider_key_in_game=false and
+broker_token_available=true. With the current Read-only provider scope, the UI
+reports the safe broker_rejected message; connected=false and audio_bytes=0.
+This proves the private launch boundary and failure handling, not successful
+speech. A value-free comparison confirmed the iCloud copy matches the local JSON;
+the local file remains mode 0600. ElevenAgents Write approval is still pending.
+
+The integrated campaign walkthrough is complete. A subsequent focused pass
+corrected layout/load behavior and weak-reference shutdown; the resulting
+shutdown log is clean. Twenty credential checks and five focused patronage/save
+checks passed under the policy exceptions. Detailed UI observations are being
+collected for the final report; the standalone village shared-panel render is
+still in progress. No broad suite was run.
+
+Milestone 7 — integrated council and patronage evidence
+The rendered turn-1 council included two speakers, 16 visible reports and the
+owned city Latium. Opening it left game state unchanged. Selecting Lucius
+prefilled a question on Chat without connecting either advisor or changing game
+state. Provider requests remain explicit. Council readings use reported city
+information and bounded latest-season headlines; they do not stage a live debate.
+
+The optional divine slice offers Zeus (stewardship) and Ares (expansion), using
+existing Greek Zeus/Ares and Roman Jupiter/Mars temple routes without renaming
+cults or adding equivalents to other cultures. Pledges are original narrative
+fiction. The rendered sample correctly showed Zeus eligible through one owned
+completed temple and Ares ineligible with none. Opening and cancelling the pledge
+confirmation left state unchanged. Confirming Zeus recorded progress 0 and made
+Lucius's authored mandate interpretation available. Turn presentation blocked
+changes without mutation; explicit renunciation cleared the active pledge.
+
+The first walkthrough's load fixture was invalid; its script-error output is not
+a successful load check. The corrected focused pass used a valid nonempty state:
+loading returned to Marcus, cleared both transcripts, pending choice and prepared
+question, and restored a neutral pledge. Snapshot output was bounded to 8,334
+bytes for Marcus and 9,364 for Lucius and left state unchanged. The corrected chat
+panel fit the 800-pixel viewport with the connection footer visible. A separate
+shutdown pass confirmed the session freed cleanly after weak-owner references
+replaced the ownership cycle. Earlier leak diagnostics are superseded by that
+focused result, not hidden.
+
+Five focused patronage/save checks passed: neutral legacy migration and pure
+reads, completed-owned-temple eligibility and guarded commands, once-per-season
+stewardship with save round trip, interrupted progress/expansion through reload,
+and malformed-state rejection. This narrative layer adds no economic or combat
+bonuses, hidden actions or random draws.
+
+Milestone 8 — shared village and private-source checks
+The standalone village shared-panel render passed: panelopen=true, lessons=11,
+experience=yenikapi_early_settlement, unchanged=true and seasonal_offer=false.
+The agent inspected /tmp/marcus-village-shared-panel.png; the corresponding
+/tmp/marcus-village-council-review.log was clean. The launcher's shell syntax was
+valid. An exact-value scan confirmed the new private credential is absent from
+the Git diff and every untracked source file, without printing its value.
+The requested iCloud Folder_Save.rtf also has local mode 0600; its preserved
+contents and matching credential were verified without exposing the value.
+
+Current completion boundary
+The three prompts, secure file launch, optional authored council and two-patron
+campaign slice are implemented. Credential copies exist at the user's requested
+private destinations. Real live speech remains pending the requested explicit
+approval for ElevenAgents Write, which private signed-session minting requires.
+No successful native speech claim is made. The final local source checkpoint and
+Pending Isengard review report will be recorded after the root agent commits.
+
+Verified by: focused native launch, rendered campaign/council/patronage and village
+walkthroughs, data/import checks reported by the implementation agents, and shell
+syntax. Tests: not run (weekly review policy), except 20 credential checks and 5
+patronage/save checks under the explicit policy exceptions, which passed.

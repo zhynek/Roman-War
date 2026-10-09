@@ -1055,5 +1055,14 @@
     "max_advance_seasons": 4,
     "history_limit": 640,
     "chronicle_limit": 40
+  },
+  "patronage": {
+    "stewardship_seasons": 2,
+    "minimum_order": 100,
+    "expansion_settlements": 1,
+    "allowed_tax_levels": [
+      "low",
+      "normal"
+    ]
   }
 }

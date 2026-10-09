@@ -1,0 +1,65 @@
+{
+  "$schema": "../schemas/patronage.schema.json",
+  "patrons": [
+    {
+      "id": "zeus",
+      "name": "Zeus",
+      "kind": "stewardship",
+      "temple_chains": [
+        "greek_zeus",
+        "roman_jupiter"
+      ],
+      "mission": "For {target} consecutive season closes, keep at least one owned matching-temple settlement at low or normal taxes and public order of at least {minimum_order}.",
+      "tradeoff": "Restraint may leave less tax income for soldiers and construction. Calm purchased through force need not mean consent.",
+      "address": "Mortal ruler, stone endures only when the oath beneath it holds. Let a city breathe before you ask it to carry another ambition.",
+      "mandates": {
+        "marcus": "Interpret Zeus's demand through restraint and keeping promises. Ask whether expansion would leave existing people less secure; the emperor may disagree.",
+        "lucius": "Examine taxes, public order and the reported burdens of the temple city. Distinguish apparent calm from consent and acknowledge stale surveys."
+      }
+    },
+    {
+      "id": "ares",
+      "name": "Ares",
+      "kind": "expansion",
+      "temple_chains": [
+        "greek_ares",
+        "roman_mars"
+      ],
+      "mission": "At a season close, own at least {target} more settlement than when you pledged, while retaining an owned matching temple. Peaceful acquisition also counts.",
+      "tradeoff": "A larger realm may burden the treasury and unsettle newly acquired cities. The god's desire for expansion need not serve your people.",
+      "address": "Mortal ruler, your borders are a question you have not yet answered. Widen the realm, and then prove that you can hold what you claim.",
+      "mandates": {
+        "marcus": "Interpret Ares's demand as pressure to expand, never an order the player must obey. Weigh whether the realm can sustain another settlement and remind the emperor that peaceful acquisition counts.",
+        "lucius": "Question the governing cost of expansion: taxes, legitimacy, administration and the burdens on newly acquired people. Do not invent enemy strength or promise victory."
+      }
+    }
+  ],
+  "ui": {
+    "title": "Divine patronage",
+    "subtitle": "An optional fictional divine mission",
+    "fiction": "These are original dramatic interpretations of Greek gods, not historical quotations. Roman Jupiter and Mars temples provide the matching gameplay route; their cults retain their own names. Other cultures have no invented equivalents.",
+    "neutral": "No patron chosen. Your campaign remains free of divine obligations.",
+    "choose": "Pledge to {name}",
+    "renounce": "Renounce the current patron",
+    "renounce_note": "Renouncing or changing patron clears current progress. Recorded honors remain. No treasury, combat or building bonuses are granted.",
+    "temple_required": "Select an owned settlement with a completed matching temple before pledging. Queued construction and foreign temples do not qualify.",
+    "temple_evidence": "{settlement}: {temple}",
+    "active": "Chosen patron: {name}",
+    "progress": "Mission progress: {progress} / {target}",
+    "completed": "Narrative honor recorded in turn {turn}.",
+    "pending": "Progress is judged only after a resolved season; reading this page cannot advance it.",
+    "lost_temple": "No owned matching temple remains. The mandate stays chosen, but cannot complete until one is restored.",
+    "blocked": "Divine choices wait until the battle, pending defense or campaign conclusion is resolved.",
+    "mission": "The mandate",
+    "tradeoff": "The cost of obedience",
+    "marcus": "Marcus's interpretation",
+    "lucius": "Lucius's interpretation",
+    "unavailable": "No eligible temple seat",
+    "pledged": "Your pledge is recorded. The first assessment follows the next resolved season.",
+    "rejected": "The pledge could not be made. Check ownership, completed temples and pending defenses.",
+    "renounced": "The active pledge is ended; earlier honors remain.",
+    "already_chosen": "Current patron",
+    "honors": "Recorded honors",
+    "no_honors": "No divine honors recorded yet."
+  }
+}

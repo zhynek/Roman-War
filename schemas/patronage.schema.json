@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Optional fictional patronage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patrons",
+    "ui"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "patrons": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "temple_chains",
+          "mission",
+          "tradeoff",
+          "address",
+          "mandates"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "zeus",
+              "ares"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "kind": {
+            "enum": [
+              "stewardship",
+              "expansion"
+            ]
+          },
+          "temple_chains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "mission": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "tradeoff": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "mandates": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "marcus",
+              "lucius"
+            ],
+            "properties": {
+              "marcus": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "lucius": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1500
+      },
+      "required": [
+        "title",
+        "subtitle",
+        "fiction",
+        "neutral",
+        "choose",
+        "renounce",
+        "renounce_note",
+        "temple_required",
+        "temple_evidence",
+        "active",
+        "progress",
+        "completed",
+        "pending",
+        "lost_temple",
+        "blocked",
+        "mission",
+        "tradeoff",
+        "marcus",
+        "lucius",
+        "unavailable",
+        "pledged",
+        "rejected",
+        "renounced",
+        "already_chosen",
+        "honors",
+        "no_honors"
+      ]
+    }
+  }
+}

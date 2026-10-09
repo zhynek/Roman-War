@@ -497,6 +497,7 @@ static func state(game_data: GameData) -> Dictionary:
 		"city_battles": {},
 		"city_campaign": {},
 		"advisor_unlocks": {},
+		"patronage": PatronageRules.neutral(),
 	}
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}

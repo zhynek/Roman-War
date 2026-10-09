@@ -46,10 +46,10 @@ in Roma. On first use, a three-page opening leads into six replayable lessons.
 **Show me this place** opens the actual inspection controls; it does not buy,
 move troops or advance time. The written guide works offline.
 
-After a season’s presentation and Dispatch finish, **Review the season with
-Marcus** offers a written account of the latest reports available to you.
-You can revisit it inside Marcus. It includes only the latest season when
-several are advanced together. Reviewing it spends nothing and advances no time.
+After a season’s presentation and Dispatch finish, **Convene the council**
+offers Marcus's and, once unlocked, Lucius's perspectives on shared reports.
+You can revisit it inside either advisor. It includes only the latest season
+when several are advanced together. Reviewing it spends nothing and advances no time.
 
 **Connect Marcus** enables typed questions with ElevenLabs text and optional
 speech using the [private launcher](docs/marcus/SETUP.md). Context is refreshed
@@ -78,6 +78,34 @@ Switching ends the previous voice session and retains each advisor's on-screen
 transcript. Reconnecting starts a new provider conversation; retained text is
 not long-term AI memory. Loading a save clears both transcripts and returns to
 Marcus. The village experience still uses Marcus alone.
+
+## Seasonal council and divine patronage
+
+**Convene the council** brings the latest Dispatch headlines and a selected owned
+city's reported factors before your advisors. Their initial perspectives are
+written game content and work offline. **Ask Marcus/Lucius about this council**
+selects that speaker and prepares a question; you choose when to connect and send.
+Each advisor keeps a separate conversation. Their advice cannot issue game orders.
+
+**Divine patronage** offers optional original dramatic addresses from Zeus and
+Ares. A completed owned temple is required: Zeus/Jupiter or Ares/Mars respectively.
+Queued buildings and foreign temples do not qualify. Select a temple seat, consider
+a pledge, and confirm it. Roman temples keep their Roman names.
+
+Zeus asks for two consecutive season closes with at least one matching-temple
+city at low or normal taxes and public order of at least 100. Ares asks you to
+retain a matching temple and own at least one more settlement than when you pledged;
+peaceful acquisition counts. Progress changes only when a season resolves.
+Fulfillment records a narrative honor, with no additional income or combat bonus.
+Your patron shapes both advisors' perspectives, but its ambitions remain yours to
+question. Changing or renouncing a pledge clears its active progress and retains
+previous honors. Old saves begin without a patron. Choices wait for battles,
+pending defenses and season presentations to finish.
+
+On this computer, double-click **Launch Roman War Advisors.command** in the
+repository to start the campaign with the private local voice broker. The provider
+key remains outside the game and its saves. See [setup](docs/marcus/SETUP.md) for
+configuration and verified connection status.
 
 ## Starting a campaign
 

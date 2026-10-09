@@ -5,6 +5,9 @@ import contextlib
 import http.client
 import io
 import json
+import os
+from pathlib import Path
+import tempfile
 import threading
 import unittest
 from unittest.mock import patch
@@ -13,7 +16,7 @@ from urllib.parse import parse_qs, urlsplit
 
 from marcus_broker import (
     BROKER_URL, BrokerError, BrokerServer, Config, ConfigurationError,
-    ElevenLabs, SessionGate, child_environment,
+    ElevenLabs, SessionGate, child_environment, private_credentials,
 )
 
 
@@ -299,6 +302,55 @@ class ProviderBoundaryTests(unittest.TestCase):
                 "ELEVENLABS_AGENT_ID": "same", "ELEVENLABS_LUCIUS_AGENT_ID": "same"})
         self.assertNotIn(TOKEN, repr(CONFIG))
         self.assertNotIn(CONFIG.api_key, repr(CONFIG))
+
+
+class CredentialFileTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.path = Path(self.directory.name) / "private.json"
+
+    def write(self, body):
+        self.path.write_text(body, encoding="utf-8")
+        self.path.chmod(0o600)
+
+    def test_private_file_loads_only_provider_fields(self):
+        self.write(json.dumps({"ELEVENLABS_API_KEY": "synthetic-key",
+                               "ELEVENLABS_AGENT_ID": "marcus", "ELEVENLABS_LUCIUS_AGENT_ID": "lucius"}))
+        values = private_credentials(str(self.path))
+        self.assertEqual(values["ELEVENLABS_LUCIUS_AGENT_ID"], "lucius")
+        self.assertEqual(child_environment(values, TOKEN), {
+            "MARCUS_BROKER_TOKEN": TOKEN, "MARCUS_BROKER_URL": BROKER_URL})
+
+    def test_ambiguous_extra_and_oversized_content_is_rejected_without_echo(self):
+        bodies = [
+            '{"ELEVENLABS_API_KEY":"private-marker","ELEVENLABS_API_KEY":"other"}',
+            '{"ELEVENLABS_API_KEY":"private-marker","MARCUS_BROKER_URL":"http://other"}',
+            '{"ELEVENLABS_API_KEY":42}', '{}', 'private-marker',
+            '{"ELEVENLABS_API_KEY":"' + 'private-marker' * 1000 + '"}',
+        ]
+        for body in bodies:
+            self.write(body)
+            with self.assertRaises(ConfigurationError) as raised:
+                private_credentials(str(self.path))
+            self.assertNotIn("private-marker", str(raised.exception))
+
+    @unittest.skipUnless(os.name == "posix", "POSIX ownership and permissions")
+    def test_shared_file_and_symlink_are_rejected(self):
+        self.write('{"ELEVENLABS_API_KEY":"synthetic-key"}')
+        self.path.chmod(0o644)
+        with self.assertRaises(ConfigurationError):
+            private_credentials(str(self.path))
+        self.path.chmod(0o600)
+        link = self.path.with_name("link.json")
+        link.symlink_to(self.path)
+        with self.assertRaises(ConfigurationError):
+            private_credentials(str(link))
+
+    def test_repository_and_missing_files_are_rejected(self):
+        for path in (Path(__file__).resolve(), self.path):
+            with self.assertRaises(ConfigurationError):
+                private_credentials(str(path))
 
 
 if __name__ == "__main__":

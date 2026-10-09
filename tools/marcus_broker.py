@@ -21,6 +21,7 @@ import re
 import secrets
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import threading
@@ -42,6 +43,46 @@ UPSTREAM_TIMEOUT_SECONDS = 10
 MAX_HTTP_WORKERS = 4
 MAX_UPSTREAM_WORKERS = 2
 SESSIONS_PER_MINUTE = 6
+MAX_CREDENTIAL_BYTES = 8192
+
+
+def private_credentials(path: str) -> dict[str, str]:
+    """Read a user-selected private JSON file; never execute it as shell code."""
+    location = Path(path).expanduser().absolute()
+    repo = Path(__file__).resolve().parent.parent
+    try:
+        resolved = location.resolve(strict=True)
+        if resolved == repo or repo in resolved.parents:
+            raise ConfigurationError("Keep the credential file outside the game repository.")
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+        descriptor = os.open(location, flags)
+        with os.fdopen(descriptor, "rb") as source:
+            info = os.fstat(source.fileno())
+            if not stat.S_ISREG(info.st_mode):
+                raise ConfigurationError("The credential file must be a regular private file.")
+            if os.name == "posix" and (info.st_uid != os.getuid() or info.st_mode & 0o077):
+                raise ConfigurationError("The credential file must belong to you with owner-only permissions (chmod 600).")
+            body = source.read(MAX_CREDENTIAL_BYTES + 1)
+        if len(body) > MAX_CREDENTIAL_BYTES:
+            raise ConfigurationError("The credential file is too large.")
+        def unique_fields(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ValueError("duplicate field")
+                result[key] = value
+            return result
+        values = json.loads(body, object_pairs_hook=unique_fields)
+        allowed = {"ELEVENLABS_API_KEY", "ELEVENLABS_AGENT_ID", "ELEVENLABS_LUCIUS_AGENT_ID"}
+        if (not isinstance(values, dict) or set(values) - allowed
+                or not values.get("ELEVENLABS_API_KEY")
+                or any(not isinstance(value, str) or not value for value in values.values())):
+            raise ValueError("invalid fields")
+        return values
+    except ConfigurationError:
+        raise
+    except (OSError, ValueError, UnicodeError):
+        raise ConfigurationError("Cannot read a valid private credential JSON file; no file contents were logged.") from None
 
 
 class ConfigurationError(ValueError):
@@ -375,12 +416,29 @@ def main(argv: list[str] | None = None) -> int:
         help="Prompt locally for missing ElevenLabs credentials; the key is hidden.",
     )
     parser.add_argument(
+        "--credentials-file", metavar="PATH",
+        help="Read provider settings from an owner-only JSON file outside the repository; never sent to Godot.",
+    )
+    parser.add_argument(
+        "--campaign", action="store_true",
+        help="Use the parent Roman campaign as the default --launch target.",
+    )
+    parser.add_argument(
         "--launch", nargs=argparse.REMAINDER, metavar="COMMAND",
         help="Generate a private token, run Godot with it, and stop when Godot exits. "
              "An optional command follows this final flag (default: the Yenikapi village project).",
     )
     args = parser.parse_args(argv)
     env = dict(os.environ)
+    if args.campaign and args.launch is None:
+        parser.error("--campaign requires --launch")
+    if args.credentials_file:
+        try:
+            # An explicitly chosen file is authoritative for its provider fields.
+            env.update(private_credentials(args.credentials_file))
+        except ConfigurationError as error:
+            print(str(error), file=sys.stderr)
+            return 2
     if args.prompt_credentials:
         if not sys.stdin.isatty():
             print("Credential prompts require an interactive terminal.", file=sys.stderr)
@@ -411,7 +469,7 @@ def main(argv: list[str] | None = None) -> int:
         bundled_godot = repo / "build/constantinople-toolchain/Godot.app/Contents/MacOS/Godot"
         godot = shutil.which("godot") or (str(bundled_godot) if bundled_godot.is_file() else "godot")
         village = repo / "Castles and Cities/sites/yenikapi_6000_bce/experience"
-        command = args.launch or [godot, "--path", str(village)]
+        command = args.launch or [godot, "--path", str(repo if args.campaign else village)]
         try:
             child = subprocess.Popen(command, env=child_environment(env, config.token))
             return child.wait()

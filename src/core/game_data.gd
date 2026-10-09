@@ -50,6 +50,8 @@ var effects_glossary: Dictionary = {}  # the player-facing wording for building 
 
 var advisors: Dictionary = {}
 var advisor_content: Dictionary = {}
+var patronage_content: Dictionary = {}
+var patrons: Dictionary = {}
 
 var load_errors: PackedStringArray = []
 
@@ -66,6 +68,9 @@ func ok() -> bool:
 
 func _load_all(dir: String) -> void:
 	balance = _read_json(dir + "/balance.json")
+	patronage_content = _read_json(dir + "/patronage.json")
+	for patron in patronage_content.get("patrons", []):
+		patrons[patron.id] = patron
 	advisor_content = _read_json(dir + "/advisors.json")
 	for advisor in advisor_content.get("advisors", []):
 		advisors[advisor.id] = advisor

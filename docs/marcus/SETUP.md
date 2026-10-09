@@ -1,9 +1,10 @@
 # Marcus and Lucius private voice connections
 
-Live credential status: pending. The secure local broker and native client are
-implemented, but an authenticated ElevenLabs conversation has not yet been
-verified in the native game. One dashboard text conversation succeeded and was
-ended; it does not prove the native audio/text connection.
+Credential storage is configured locally. The restricted key can read both
+private agents, but conversation minting requires ElevenAgents Write
+(`convai_write`); Read alone returns HTTP 401. Permission expansion and native
+text/audio acceptance remain pending. The authored guide, council and patronage
+work offline. A dashboard preview does not establish native playback.
 
 Marcus's native Godot client obtains a temporary conversation URL from
 `tools/marcus_broker.py`. Only that Python process holds the ElevenLabs API key.
@@ -36,8 +37,7 @@ Its nonsecret agent ID is `agent_1001m4e1c02ee6p8n4jf0fcj5b6w`.
 
 GPT-6 Sol was rejected by the dashboard as incompatible with zero retention;
 Claude Sonnet 5 was accepted with that protection enabled. These are provider
-settings, not hardcoded client requirements; the live native connection remains
-pending the private key and one end-to-end conversation.
+settings, not hardcoded client requirements; live acceptance is tracked above.
 
 The published prompt now supports both `yenikapi_early_settlement` and
 `roman_campaign`, including partial seasonal reports and the limited live
@@ -75,7 +75,8 @@ not the dashboard/API field. Leave the hostname allowlist empty. The broker
 checks this configuration again before every session and refuses public agents.
 
 Use an ElevenLabs API key with permission to read that agent and generate
-conversation signed URLs. Keep it in your own secret manager, a protected local
+conversation signed URLs. ElevenLabs requires ElevenAgents Write for signed URL
+generation, even though that endpoint uses GET. Keep the key in a secret manager, a protected local
 environment, or the hidden terminal prompt below. A key saved as a GitHub Actions
 secret is available to authorized Actions jobs, not retrievable by this local
 game. Never add a key to an agent prompt, JSON content, a Godot setting, a save,
@@ -88,6 +89,31 @@ Official references:
 - [Generate a signed conversation URL](https://elevenlabs.io/docs/api-reference/conversations/get-signed-url)
 
 ## Launch safely
+
+On the configured computer, double-click
+[`Launch Roman War Advisors.command`](../../Launch%20Roman%20War%20Advisors.command).
+It starts the parent campaign and local broker using:
+
+```sh
+python3 tools/marcus_broker.py \
+  --credentials-file "$HOME/Library/Application Support/Roman War/private-advisors.json" \
+  --campaign --launch
+```
+
+The JSON file contains the provider key and the two agent IDs. It is outside the
+repository in an owner-only directory (0700), with owner-only file permissions
+(0600). The loader rejects repository paths, symlinks, shared permissions, unknown
+fields, duplicates and oversized files. No shell evaluation is used. The user also
+requested a private backup in `Folder_Save.rtf` in iCloud TextEdit; existing notes
+were preserved and its local file permissions were restricted to 0600. Neither
+file is included in exports or source control.
+
+The dedicated key is named **Roman War — Private Advisors**, with a 10,000-credit
+limit per refresh period and leaked-key auto-disable enabled. All unrelated API
+endpoints are disabled. Permission status and live acceptance are recorded above.
+
+For a different computer without this private file, the hidden terminal prompt
+remains available. The following command opens the standalone village:
 
 From the repository directory, run:
 
@@ -180,9 +206,10 @@ This isolated security check uses synthetic values and a loopback ephemeral port
 It never contacts ElevenLabs, spends provider credit or runs the campaign suite.
 It is covered by the weekly testing policy's credential-handling exception.
 
-Verified October 8, 2026: all 16 focused checks passed in 4.139 seconds,
+Verified October 8, 2026: all 20 focused checks passed in 4.093 seconds,
 including separate Lucius routing, wrong-agent signed URLs, private-agent
-requirements, duplicate selector rejection and child-process credential removal.
+requirements, duplicate selector rejection, child-process credential removal,
+and the private-file boundary described above.
 This verifies the local credential boundary with synthetic credentials, not a
 live provider conversation. The broad game suite was not run under the weekly
 review policy.

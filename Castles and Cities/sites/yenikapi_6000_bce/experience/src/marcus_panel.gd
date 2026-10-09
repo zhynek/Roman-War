@@ -5,6 +5,7 @@ const Portrait=preload("marcus_portrait.gd")
 const Voice=preload("marcus_voice.gd")
 signal opened_changed(active: bool)
 signal advisor_requested(advisor_id: String)
+signal council_speaker_requested(advisor_id: String)
 signal refresh_requested
 var adapter
 var preference_path: String
@@ -45,6 +46,9 @@ var season_offer: Button
 var _offer_pending: bool=false
 var input_shield: Control
 var council_body: VBoxContainer
+var page_navigation: HFlowContainer
+var _patronage_confirmation: Dictionary={}
+var _patronage_notice: String=""
 
 func configure_context(context_adapter, auto_open: bool=true) -> void:
 	adapter=context_adapter
@@ -134,7 +138,7 @@ func _build() -> void:
 	launcher_title.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	launcher_row.add_child(launcher_title)
 
-	season_offer=_button(w("review_season"),show_briefing,"MarcusSeasonOffer")
+	season_offer=_button(_review_label(),show_briefing,"MarcusSeasonOffer")
 	season_offer.hide()
 	add_child(season_offer)
 	panel=PanelContainer.new()
@@ -173,11 +177,15 @@ func _build() -> void:
 	chat_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	tabs.add_child(chat_button)
 
-	briefing_button=_button(w("review_season"),show_briefing,"MarcusSeasonReview")
-	column.add_child(briefing_button)
+	page_navigation=HFlowContainer.new()
+	column.add_child(page_navigation)
+	briefing_button=_button(_review_label(),show_briefing,"MarcusSeasonReview")
+	page_navigation.add_child(briefing_button)
 	briefing_button.hide()
 	if adapter.has_method("city_reading"):
-		column.add_child(_button(w("city_reading"),show_city_reading,"AdvisorCityReading"))
+		page_navigation.add_child(_button(w("city_reading"),show_city_reading,"AdvisorCityReading"))
+	if adapter.has_method("patronage_page"):
+		page_navigation.add_child(_button(cw("patronage"),show_patronage,"AdvisorPatronage"))
 	guide_scroll=ScrollContainer.new()
 	guide_scroll.name="MarcusGuideScroll"
 	guide_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -245,7 +253,8 @@ func _build() -> void:
 func _layout() -> void:
 	if not is_instance_valid(panel):return
 	var viewport: Vector2=get_viewport_rect().size
-	var width: float=minf(460.0,maxf(250.0,viewport.x-32.0))
+	var wide: bool=_tab=="guide" and _mode in ["council","patronage"]
+	var width: float=minf(780.0 if wide else 460.0,maxf(250.0,viewport.x-32.0))
 	launcher.position=Vector2(maxf(8,viewport.x-198),maxf(8,viewport.y-90))
 	launcher.size=Vector2(182,74)
 	season_offer.position=Vector2(maxf(8,viewport.x-454),maxf(8,viewport.y-70))
@@ -253,6 +262,8 @@ func _layout() -> void:
 	var height:=minf(730.0,maxf(300.0,viewport.y-122))
 	panel.position=Vector2(maxf(8,viewport.x-width-16),maxf(16,viewport.y-106-height))
 	panel.size=Vector2(width,height)
+	var seats=guide_body.get_node_or_null("CouncilSeats")
+	if seats!=null:seats.columns=2 if viewport.x>=800 else 1
 
 func _schedule_layout() -> void:
 	# Autowrapped labels initially measure at zero width and can enlarge the
@@ -310,6 +321,7 @@ func close_panel() -> void:
 func _choose_tab(tab: String) -> void:
 	_tab=tab
 	guide_scroll.visible=tab=="guide"
+	page_navigation.visible=tab=="guide"
 	chat_body.visible=tab=="chat"
 	guide_button.disabled=tab=="guide"
 	chat_button.disabled=tab=="chat"
@@ -350,6 +362,10 @@ func _render_guide() -> void:
 	lesson_speech=null
 	if _mode=="briefing":
 		_render_briefing()
+	elif _mode=="council":
+		_render_council_page()
+	elif _mode=="patronage":
+		_render_patronage_page()
 	elif _mode=="reading":
 		_render_city_reading()
 	elif _mode=="intro":
@@ -571,7 +587,11 @@ func context_snapshot() -> Dictionary:
 	result.guide={"mode":_mode,"index":_intro_step if _mode=="intro" else _lesson}
 	if _mode=="intro":result.guide.page=copy.intro[_intro_step].duplicate(true)
 	elif _mode=="briefing":result.guide.page=adapter.season_briefing()
-	elif _mode=="reading":result.guide.page=adapter.city_reading()
+	elif _mode=="reading":result.guide.page={"source":"city_reading"}
+	elif _mode=="council":result.guide.page={"source":"council_session", "title":cw("title")}
+	elif _mode=="patronage":
+		result.guide.page={"source":"patronage", "title":cw("patronage_title")}
+		if not _patronage_confirmation.is_empty():result.guide.page.uncommitted_choice=_patronage_confirmation.duplicate(true)
 	else:
 		result.guide.page=lessons[_lesson].duplicate(true)
 		result.guide.counsel=copy.lesson_counsel[_lesson]
@@ -579,21 +599,26 @@ func context_snapshot() -> Dictionary:
 
 func reset_conversation() -> void:
 	close_panel()
+	_patronage_confirmation.clear()
+	_patronage_notice=""
+	if _mode in ["council","patronage","briefing","reading"]:_mode="guide"
+	question.clear()
+	message.text=""
 	_conversation.clear()
 	_render_transcript()
 	refresh_briefing(false)
 
 func refresh_briefing(offer: bool=true) -> void:
 	var available: bool=not adapter.season_briefing().is_empty()
-	briefing_button.visible=available
+	briefing_button.visible=available or adapter.has_method("council_page")
 	_offer_pending=offer and available
 	season_offer.visible=_offer_pending and not is_open()
-	if _mode=="briefing":_render_guide()
+	if _mode in ["briefing","council","patronage"]:_render_guide()
 	_schedule_layout()
 
 func show_briefing() -> void:
 	_offer_pending=false
-	_mode="briefing"
+	_mode="council" if adapter.has_method("council_page") else "briefing"
 	_choose_tab("guide")
 	open()
 
@@ -636,3 +661,187 @@ func _render_city_reading() -> void:
 		guide_body.add_child(_label(section.title,18,"b8ccb9"))
 		for line in section.lines:guide_body.add_child(_label(line,15))
 	guide_body.add_child(_button(w("restart"),_choose_lesson.bind(0)))
+
+func cw(id: String) -> String:
+	return String(adapter.council_words().get(id,id))
+
+func _review_label() -> String:
+	return cw("council") if adapter.has_method("council_page") else w("review_season")
+
+func _card(background: String="203832",parent: Control=null) -> VBoxContainer:
+	var frame:=PanelContainer.new()
+	frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	frame.add_theme_stylebox_override("panel",_style(background))
+	(parent if parent!=null else guide_body).add_child(frame)
+	var body:=VBoxContainer.new()
+	body.add_theme_constant_override("separation",10)
+	frame.add_child(body)
+	return body
+
+func open_council_question(text: String) -> void:
+	_mode="council"
+	_choose_tab("chat")
+	open()
+	_fill_question(text)
+
+func _render_council_page() -> void:
+	var page: Dictionary=adapter.council_page()
+	guide_body.add_child(_label(cw("source"),11,"cabb87"))
+	guide_body.add_child(_label(cw("title"),25,"eee3c2"))
+	if page.get("blocked","")!="":
+		guide_body.add_child(_label(cw(page.blocked),15))
+		return
+	guide_body.add_child(_label(cw("help"),13,"b8c5b8"))
+	var season: Dictionary=page.get("season",{})
+	if season.is_empty():guide_body.add_child(_label(cw("no_season"),14,"d4bd93"))
+	else:
+		guide_body.add_child(_label(cw("latest").format(season),14,"cabb87"))
+		if season.get("stale",false):
+			guide_body.add_child(_label(cw("stale").format({"turn":season.turn,"current":page.current_turn}),13,"d4bd93"))
+	var seats:=GridContainer.new()
+	seats.name="CouncilSeats"
+	seats.columns=2 if get_viewport_rect().size.x>=800 else 1
+	seats.add_theme_constant_override("h_separation",12)
+	seats.add_theme_constant_override("v_separation",12)
+	guide_body.add_child(seats)
+	for speaker in page.get("speakers",[]):
+		var body:=_card("203832" if speaker.id=="marcus" else "302f3b",seats)
+		var identity:=HBoxContainer.new()
+		identity.add_theme_constant_override("separation",12)
+		body.add_child(identity)
+		var portrait=adapter.council_portrait(String(speaker.id))
+		portrait.custom_minimum_size=Vector2(58,58)
+		portrait.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		identity.add_child(portrait)
+		var name_label:=_label(speaker.name,23,"eee3c2")
+		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		identity.add_child(name_label)
+		if not speaker.available:
+			body.add_child(_label(cw("lucius_locked"),14,"b8c5b8"))
+			continue
+		body.add_child(_label(speaker.stance,13,"cabb87"))
+		body.add_child(_label(speaker.counsel,16))
+		for key in ["city","season"]:
+			if speaker.has(key):body.add_child(_label(speaker[key],14,"b8ccb9"))
+		if speaker.get("mandate","")!="":
+			body.add_child(_label(cw("mandate"),13,"cabb87"))
+			body.add_child(_label(speaker.mandate,14,"b8c5b8"))
+		body.add_child(_button(cw("ask").format({"name":speaker.name}),_council_speaker.bind(String(speaker.id)),"CouncilAsk"+String(speaker.name)))
+	var city: Dictionary=page.get("city",{})
+	if city.is_empty():guide_body.add_child(_label(cw("no_city"),14,"b8c5b8"))
+	else:
+		guide_body.add_child(_label(cw("city").format({"city":city.name}),21,"eee3c2"))
+		guide_body.add_child(_label(cw("survey").format({"level":city.society.get("level",""),"age":city.society.get("stale_turns",0)}),13,"b8c5b8"))
+		guide_body.add_child(_label(cw("tax").format({"tax":city.tax_level}),14))
+		for key in ["public_order","growth","income"]:
+			guide_body.add_child(_label(cw(key),17,"cabb87"))
+			for factor in city.factors.get(key,[]):
+				guide_body.add_child(_label("%s: %+.1f"%[String(factor.label).replace("_"," ").capitalize(),float(factor.value)],13))
+		guide_body.add_child(_label(cw("factors_limited").format({"limit":city.factor_limit}),12,"b8c5b8"))
+		guide_body.add_child(_label(cw("city_question"),16,"b8ccb9"))
+	guide_body.add_child(_label(cw("reports"),21,"eee3c2"))
+	if season.get("lines",[]).is_empty():guide_body.add_child(_label(cw("quiet"),14,"b8c5b8"))
+	for line in season.get("lines",[]):guide_body.add_child(_label(String(line),14))
+	if int(season.get("omitted",0))>0:
+		guide_body.add_child(_label(cw("omitted").format({"count":season.omitted}),12,"d4bd93"))
+	guide_body.add_child(_button(cw("return"),_choose_lesson.bind(0)))
+
+func _council_speaker(id: String) -> void:
+	council_speaker_requested.emit(id)
+
+func show_patronage() -> void:
+	_patronage_confirmation.clear()
+	_patronage_notice=""
+	_mode="patronage"
+	_choose_tab("guide")
+	open()
+
+func _render_patronage_page() -> void:
+	var page: Dictionary=adapter.patronage_page()
+	guide_body.add_child(_label(cw("divine_source"),11,"cabb87"))
+	guide_body.add_child(_label(cw("patronage_title"),25,"eee3c2"))
+	if page.get("blocked","")!="":
+		guide_body.add_child(_label(cw(page.blocked),15))
+		return
+	guide_body.add_child(_label(cw("patronage_help"),14,"b8c5b8"))
+	guide_body.add_child(_label(page.get("fiction",""),12,"b8c5b8"))
+	if _patronage_notice!="":guide_body.add_child(_label(cw(_patronage_notice),15,"d4bd93"))
+	var status: Dictionary=page.status
+	var blocked: String=status.get("command_blocked","")
+	if blocked!="":guide_body.add_child(_label(cw("finished" if blocked=="campaign_finished" else "blocked"),14,"d4bd93"))
+	if not _patronage_confirmation.is_empty():
+		_render_patronage_confirmation(blocked!="")
+		return
+	var active: Dictionary=status.get("active",{})
+	if not active.is_empty():
+		var body:=_card("343426")
+		body.add_child(_label(cw("chosen").format({"name":active.name,"turn":status.pledged_turn}),20,"eee3c2"))
+		body.add_child(_label(active.mission,15))
+		if active.get("completed",false):body.add_child(_label(cw("fulfilled"),14,"b8ccb9"))
+		else:
+			body.add_child(_label(cw("progress").format({"progress":status.progress,"target":status.target,"turn":status.last_checked_turn}),14,"cabb87"))
+			if int(status.last_checked_turn)<=int(status.pledged_turn):body.add_child(_label(cw("awaiting"),13,"b8c5b8"))
+			if not status.get("has_matching_temple",false):body.add_child(_label(cw("temple_lost"),14,"d4bd93"))
+		var renounce:=_button(cw("renounce"),_consider_renounce,"PatronageRenounce")
+		renounce.disabled=blocked!=""
+		body.add_child(renounce)
+	for option in status.get("options",[]):
+		var body:=_card("26333e" if option.id=="zeus" else "3b2c2a")
+		body.add_child(_label(option.name,24,"eee3c2"))
+		body.add_child(_label(option.address,18,"cabb87"))
+		body.add_child(_label(cw("mission"),14,"b8ccb9"))
+		body.add_child(_label(option.mission,15))
+		body.add_child(_label(cw("tradeoff"),14,"b8ccb9"))
+		body.add_child(_label(option.tradeoff,14))
+		if option.get("completed",false):body.add_child(_label(cw("remembered"),13,"cabb87"))
+		var temples: Array=option.get("temples",[])
+		body.add_child(_label(cw("temples"),14,"b8ccb9"))
+		body.add_child(_label(", ".join(option.get("required_temples",[])),14,"cabb87"))
+		if temples.is_empty():
+			body.add_child(_label(cw("temple_needed"),14,"b8c5b8"))
+			continue
+		body.add_child(_label(cw("select_seat"),13,"b8c5b8"))
+		var picker:=OptionButton.new()
+		picker.name="PatronageSeat"+String(option.id).capitalize()
+		picker.clip_text=true
+		picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		for temple in temples:
+			picker.add_item(cw("temple_seat").format({"city":temple.city,"temple":temple.name,"level":temple.level}))
+			picker.set_item_metadata(picker.item_count-1,temple)
+		body.add_child(picker)
+		var pledge:=_button(cw("pledge").format({"name":option.name}),_consider_pledge.bind(String(option.id),String(option.name),picker),"PatronagePledge"+String(option.id).capitalize())
+		pledge.disabled=blocked!="" or status.get("chosen","")==option.id
+		body.add_child(pledge)
+	guide_body.add_child(_button(cw("return"),_choose_lesson.bind(0)))
+
+func _consider_pledge(id: String,patron_name: String,picker: OptionButton) -> void:
+	if picker.selected<0:return
+	var temple: Dictionary=picker.get_item_metadata(picker.selected)
+	_patronage_confirmation={"action":"pledge","id":id,"name":patron_name,"region":temple.region,"city":temple.city}
+	_patronage_notice=""
+	_render_guide()
+
+func _consider_renounce() -> void:
+	_patronage_confirmation={"action":"renounce","id":"","region":""}
+	_patronage_notice=""
+	_render_guide()
+
+func _render_patronage_confirmation(blocked: bool) -> void:
+	var body:=_card("343426")
+	body.add_child(_label(cw("confirm_title"),21,"eee3c2"))
+	body.add_child(_label(cw("confirm_pledge" if _patronage_confirmation.action=="pledge" else "confirm_renounce").format(_patronage_confirmation),16))
+	var confirm:=_button(cw("confirm"),_commit_patronage,"PatronageConfirm")
+	confirm.disabled=blocked
+	body.add_child(confirm)
+	body.add_child(_button(cw("cancel"),_cancel_patronage,"PatronageCancel"))
+
+func _cancel_patronage() -> void:
+	_patronage_confirmation.clear()
+	_render_guide()
+
+func _commit_patronage() -> void:
+	if _patronage_confirmation.is_empty():return
+	_patronage_notice=adapter.commit_patronage(_patronage_confirmation.action,_patronage_confirmation.id,_patronage_confirmation.region)
+	_patronage_confirmation.clear()
+	_render_guide()

@@ -113,11 +113,12 @@ static func _valid_state(state: Variant) -> bool:
 		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
-		"advisor_unlocks": TYPE_DICTIONARY,
+		"advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
 		return false
+	if state.has("patronage") and not _valid_patronage(state.patronage, state):return false
 	for unlock in state.get("advisor_unlocks", {}).values():
 		if not _fields(unlock, {"turn":TYPE_FLOAT,"region":TYPE_STRING}):return false
 		if not _whole_at_least(unlock.turn,0) or unlock.turn > state.turn:return false
@@ -603,3 +604,24 @@ static func _battle_formation(f: Dictionary) -> bool:
 	for key in ["soldiers","hp","cooldown_ms","charge_cooldown_ms","runup_cm","morale","power","attack_seq"]:
 		if not _whole_at_least(f[key],0): return false
 	return int(f["hp"])<=int(f["initial_strength"])*1000 and int(f["unit"]["strength_pct"])==ceili(float(f["hp"])/1000.0) and int(f["morale"])<=100
+
+
+static func _valid_patronage(record: Variant, state: Dictionary) -> bool:
+	if not _fields(record,{"chosen":TYPE_STRING,"pledged_turn":TYPE_FLOAT,
+		"baseline_owned":TYPE_FLOAT,"progress":TYPE_FLOAT,"last_checked_turn":TYPE_FLOAT,
+		"completed":TYPE_DICTIONARY}):return false
+	for key in ["pledged_turn","baseline_owned","progress","last_checked_turn"]:
+		if not _whole_at_least(record[key],0):return false
+	if record.pledged_turn > state.turn or record.last_checked_turn > state.turn:return false
+	if record.last_checked_turn < record.pledged_turn:return false
+	if record.baseline_owned > state.settlements.size() or record.progress > state.settlements.size() + state.turn:return false
+	var chosen: String = record.chosen
+	if chosen != "" and (not chosen.is_valid_identifier() or chosen.length() > 64):return false
+	if chosen == "" and (record.pledged_turn != 0 or record.baseline_owned != 0 or record.progress != 0 or record.last_checked_turn != 0):return false
+	if chosen != "" and record.baseline_owned < 1:return false
+	# Bounded extensible identifiers keep future narrative content additive.
+	if record.completed.size() > 32:return false
+	for id in record.completed:
+		if not id is String or not id.is_valid_identifier() or id.length() > 64:return false
+		if not _whole_at_least(record.completed[id],0) or record.completed[id] > state.turn:return false
+	return true

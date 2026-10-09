@@ -51,6 +51,7 @@ func _ready() -> void:
 	lucius.opened_changed.connect(_advisor_opened)
 	for advisor in [marcus,lucius]:
 		advisor.advisor_requested.connect(_choose_advisor)
+		advisor.council_speaker_requested.connect(_ask_council)
 		advisor.refresh_requested.connect(_refresh_council)
 	_refresh_council()
 
@@ -224,6 +225,13 @@ func _choose_advisor(id: String) -> void:
 	active_advisor = id
 	_active_panel().show()
 	_active_panel().open()
+
+func _ask_council(id: String) -> void:
+	if id not in ["marcus","lucius"]:return
+	if marcus_context.council_context.blocked()!="":return
+	_choose_advisor(id)
+	if active_advisor==id:
+		_active_panel().open_council_question(String(marcus_context.council_words().question))
 
 func _refresh_council() -> void:
 	if not is_instance_valid(marcus) or not is_instance_valid(lucius):return

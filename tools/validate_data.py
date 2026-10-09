@@ -27,6 +27,8 @@ TABLES = {
     "marcus.json": "marcus.schema.json",
     "lucius.json": "marcus.schema.json",
     "advisors.json": "advisors.schema.json",
+    "patronage.json": "patronage.schema.json",
+    "council.json": "council.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
     "balance.json": "balance.schema.json",
@@ -129,6 +131,20 @@ def load_tables() -> dict[str, dict]:
     return tables
 
 
+def _patronage_checks(t: dict[str, dict]) -> None:
+    profiles = t.get("patronage.json", {}).get("patrons", [])
+    ids = [profile.get("id") for profile in profiles]
+    if len(ids) != len(set(ids)):
+        err("patronage: duplicate patron id")
+    chains = {chain["id"]: chain for chain in t.get("temples.json", {}).get("chains", [])}
+    for profile in profiles:
+        for chain_id in profile.get("temple_chains", []):
+            if chain_id not in chains or chains[chain_id].get("kind") != "temple":
+                err(f"patronage: unknown temple chain {chain_id}")
+        if not set(re.findall(r"\{([a-z_]+)\}", profile.get("mission", ""))) <= {"target", "minimum_order"}:
+            err("patronage: unsupported mission placeholder")
+
+
 def _advisor_checks(t: dict[str, dict]) -> None:
     advisors = t.get("advisors.json", {}).get("advisors", [])
     ids = [a.get("id") for a in advisors]
@@ -171,6 +187,7 @@ def cross_checks(t: dict[str, dict]) -> None:
     _marcus_checks(t)
     _marcus_checks(t, "lucius.json")
     _advisor_checks(t)
+    _patronage_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 

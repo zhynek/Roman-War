@@ -4,7 +4,7 @@
   "name": "Marcus",
   "role": "Your companion through the ages",
   "fiction_note": "Marcus is an original, timeless fictional counselor inspired by Stoic philosophy. His presence across different reigns is a storytelling device, not a claim about the historical Marcus Aurelius.",
-  "future_note": "Lucius is available through completed government development. Temples retain their existing campaign effects. Personal divine missions, military advisors and councils of competing voices remain future story systems.",
+  "future_note": "Lucius is earned through completed government development. The optional council offers written perspectives and live questions. Pledge to Zeus or Ares through an existing matching temple to begin a narrative mission. Military specialists and a larger council remain future story systems.",
   "ui": {
     "launcher": "Ask Marcus",
     "launcher_hint": "A little counsel, whenever you need it",
@@ -52,9 +52,9 @@
     "no_known_incident": "No discovered incident to discuss.",
     "not_connected": "Connect Marcus to ask a new question. Your guide and this conversation remain available.",
     "lesson_source": "From the campaign’s current controls and reports",
-    "review_season": "Review the season with Marcus",
+    "review_season": "Convene the council",
     "season_title": "What the season has brought",
-    "season_help": "These are the latest resolved season’s reports available to you. Read them here, or connect and ask Marcus about the choices ahead. Reviewing them does not advance time.",
+    "season_help": "The council shares the latest resolved season’s visible Dispatch reports and the selected owned city’s public readings. Written perspectives work offline; connect to question an advisor with text and voice.",
     "season_quiet": "There are no dispatch items to summarize for this season.",
     "season_more": "Further reports are available in Dispatch. This briefing includes a limited selection.",
     "presentation_navigation_blocked": "Finish the turn presentation and close Dispatch before following a lesson. Counsel remains available here.",
@@ -96,13 +96,13 @@
     {
       "id": "measure",
       "title": "The measure of a ruler",
-      "body": "In our unfolding story, the gods will disagree over what deserves to endure: order, wisdom, glory, or the care of a home. Their ambitions may differ from yours. Today, the responsibility is concrete: understand your cities, weigh the cost of an order, and attend to what each season brings.",
+      "body": "The gods disagree over what deserves to endure. Zeus asks for stewardship; Ares presses you to widen your realm. A completed matching temple lets you choose an optional divine charge. Their demands may differ from yours, and you may decline them. Begin by understanding your cities and the consequences of each season.",
       "counsel": "A divine promise can wait while you examine a real consequence. Your judgment remains your own."
     },
     {
       "id": "counsel",
       "title": "A voice at your side",
-      "body": "Call on me from the corner of either the map or Roma. Read these lessons offline, or connect to ask questions with text and voice. After a season, you may review its reports with me. I offer counsel; you use the game’s controls to decide and act.",
+      "body": "Call on me from the corner of either the map or Roma. Read these lessons offline, or connect to ask questions with text and voice. After a season, convene the council for contrasting perspectives; Lucius joins once his civic seat is earned. We offer counsel. You decide and act.",
       "counsel": "First we shall inspect your capital, then its work and public order, then your armies and the passing of time."
     }
   ],
@@ -151,7 +151,7 @@
       "id": "seasons",
       "title": "Let a season resolve, then reflect",
       "destination": "dispatch",
-      "body": "END TURN resolves the campaign. Watch the turn presentation and read Dispatch for the outcomes reported to you. Once it finishes, Review the season with Marcus offers a written briefing and optional conversation. Show me opens the existing Dispatch; it does not end a turn. The briefing contains only the latest season, even after advancing several at once."
+      "body": "END TURN resolves the campaign. Watch the turn presentation and read Dispatch for outcomes reported to you. Once it finishes, Convene the council offers authored perspectives on the latest season and your selected owned city. Ask a speaker opens optional conversation without starting a connection. Show me opens Dispatch and does not end a turn. Advancing several seasons still gives the council only the latest season."
     },
     {
       "id": "city_ledger",

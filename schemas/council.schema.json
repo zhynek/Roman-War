@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ui",
+    "speakers"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "ui": {
+      "type": "object",
+      "minProperties": 40,
+      "additionalProperties": {
+        "$ref": "#/$defs/text"
+      },
+      "required": [
+        "council",
+        "patronage",
+        "title",
+        "source",
+        "help",
+        "latest",
+        "stale",
+        "no_season",
+        "reports",
+        "quiet",
+        "omitted",
+        "city",
+        "survey",
+        "no_city",
+        "tax",
+        "public_order",
+        "growth",
+        "income",
+        "factors_limited",
+        "city_question",
+        "ask",
+        "question",
+        "lucius_locked",
+        "battle",
+        "presentation",
+        "return",
+        "mandate",
+        "patronage_title",
+        "patronage_help",
+        "divine_source",
+        "mission",
+        "tradeoff",
+        "temples",
+        "temple_seat",
+        "temple_needed",
+        "select_seat",
+        "pledge",
+        "confirm_title",
+        "confirm_pledge",
+        "confirm_renounce",
+        "confirm",
+        "cancel",
+        "renounce",
+        "chosen",
+        "progress",
+        "awaiting",
+        "fulfilled",
+        "remembered",
+        "temple_lost",
+        "pledged",
+        "renounced",
+        "changed",
+        "blocked",
+        "finished"
+      ]
+    },
+    "speakers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marcus",
+        "lucius"
+      ],
+      "properties": {
+        "marcus": {
+          "$ref": "#/$defs/speaker"
+        },
+        "lucius": {
+          "$ref": "#/$defs/speaker"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "speaker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "stance",
+        "counsel",
+        "city",
+        "season",
+        "patrons"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "stance": {
+          "$ref": "#/$defs/text"
+        },
+        "counsel": {
+          "$ref": "#/$defs/text"
+        },
+        "city": {
+          "$ref": "#/$defs/text"
+        },
+        "season": {
+          "$ref": "#/$defs/text"
+        },
+        "patrons": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "zeus",
+            "ares"
+          ],
+          "properties": {
+            "zeus": {
+              "$ref": "#/$defs/text"
+            },
+            "ares": {
+              "$ref": "#/$defs/text"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,6 +11,53 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Private launch, seasonal council and divine patronage — October 8, 2026
+
+The three [implementation prompts](advisors/THREE_PHASE_DEVELOPMENT_PROMPTS.txt)
+were recorded before development in Isengard assignment
+`762ed14c-6d92-44ef-b99f-675b4b2be04c`. A dedicated reporting agent maintains
+[session evidence](advisors/SESSION_PROGRESS.txt) and the review record.
+
+Implemented an optional council after season presentation/Dispatch, with shared
+bounded reports, original procedural portraits and distinct authored Marcus/Lucius
+perspectives. Speaker buttons prepare a question in the existing conversation;
+they never connect or send automatically. Temple-based Zeus/Ares patronage uses
+explicit pledge/renounce confirmation, deterministic end-turn assessment and
+additive saved narrative honors. It grants no new economic/military bonuses and
+consumes no RNG. Legacy saves remain neutral. No LLM can invoke these commands.
+Battle, pending-defense, presentation and campaign-end guards remain authoritative.
+
+The restricted private key is stored outside the repository in an owner-only
+local JSON file, with the requested backup appended to iCloud TextEdit's
+`Folder_Save.rtf`. The [double-click launcher](../Launch%20Roman%20War%20Advisors.command)
+uses it without putting the key in arguments or Godot's environment. The file
+loader rejects unsafe permissions, symlinks, repository paths, duplicate/unknown
+fields and oversized inputs. Both private provider prompts now understand actual
+council and patronage context. No separate Anthropic/OpenAI key is needed.
+
+**Live acceptance remains blocked by provider permission:** ElevenAgents Read
+can read both private agents, but signed-session minting requires `convai_write`.
+The user was asked to approve changing only ElevenAgents to Write while retaining
+the 10,000-credit cap, leaked-key auto-disable and all unrelated endpoints disabled.
+Do not broaden access without that answer. Native Godot safely reports
+`broker_rejected`, with no audio buffered. Actual text/audio playback is unverified.
+
+Verification: data validation and Godot import; rendered council, patronage,
+confirmation and chat; read-only full-state equality; explicit pledge/cancel/
+renounce and presentation guard; corrected load reset. Bounded contexts were
+8,334 bytes for Marcus and 9,364 for Lucius. Fixed chat footer overflow and an
+introduced adapter/helper reference cycle; focused shutdown is clean. Initial
+QA load errors came from an incorrectly enveloped QA save, corrected in the
+driver. Native broker launch confirmed provider credentials absent from Godot
+while its local session token was present. Credentials never appeared in source,
+saves, exports or reports. No broad suite, push, CI polling or release.
+
+Verified by: data validation, Godot import, rendered walkthrough, direct load/command checks and native private-broker launch. Tests: not run (weekly review policy), except 20 credential checks and 5 patronage/save checks, which passed.
+
+Next gameplay phase: unlock a military advisor through existing military
+buildings, grounding counsel in visible force/order reports and detached battle
+snapshots; retain explicit player commands and current combat resolution.
+
 ## Lucius governance phase — October 8, 2026
 
 Implemented the user-authorized [phase prompt](advisors/NEXT_PHASE_PROMPT.txt),

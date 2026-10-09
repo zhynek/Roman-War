@@ -1,0 +1,108 @@
+Roman War — voice, seasonal council and divine patronage
+Authorized implementation prompts — October 8, 2026
+
+Shared contract
+Continue the existing Marcus/Lucius work on codex/marcus-advisor. Read AGENTS.md,
+CLAUDE.md, docs/HANDOFF.md and docs/reviews/2026-09-map-experience.md before
+editing. Inspect the worktree and preserve other changes. Use the established
+Godot client, private Python broker and ElevenLabs personas. Keep the campaign
+engine scene-free and deterministic, all prose and tunable values in validated
+data, saves additive, art original and procedural, and combat behind the existing
+BattleResolver boundary. Never put credentials in source, exports, saves, logs,
+reports or prompts. Preserve the independent village experience.
+
+A dedicated documentation agent must record the plan and implementation evidence
+in Isengard before development, then maintain docs/advisors/SESSION_PROGRESS.txt.
+Distinguish configured, compiled, rendered and live-verified behavior. Follow the
+weekly review policy: no broad suite or generic new tests; narrowly exercise
+credential and additive-save boundaries under the policy's explicit exceptions.
+Do not accept your own Isengard report. Save a local source checkpoint; no public
+deployment or release is requested.
+
+Phase 1 prompt — Complete private voice integration
+
+Take over the user's signed-in Google Chrome ElevenLabs dashboard and connect
+the private API key to the existing native advisor transport. Use supported UI
+automation and observed controls; do not extract hidden browser data or bypass
+authentication. If key creation or security scope expansion requires a browser
+handoff, honor it and continue all independent development. Keep both provider
+agents private and retain the strict server-side marcus/lucius mapping, URL
+validation, loopback authorization, limits and timeouts. Never substitute a
+public agent to bypass an unavailable credential.
+
+The user has authorized a private local text copy opened in TextEdit in their
+folder_save location. Locate that destination before writing, keep it outside
+the repository and exports, use owner-only permissions where supported, and
+never reproduce its contents in tool output or documentation. Prefer an existing
+permitted credential and the minimum scope needed for private conversation
+minting. Make the normal local launch usable without exposing the key in command
+arguments or shell history. Document only the credential file path or setup
+procedure, never its value. If exact destination or handoff is unavailable while
+the user is asleep, record the remaining user action honestly.
+
+Complete one real native conversation with Marcus and one with Lucius when
+credentials permit. Verify matching streamed text and audible speech, bounded
+composer behavior, mute/disconnect, switching advisors, and clear connection
+failure handling. Any direct acceptance run must use isolated QA preferences and
+saves. Preserve separate local transcripts and load reset. Do not silently start
+paid conversations on opening a lesson, switching a view, resolving a season or
+adopting a patron. Report live acceptance separately from provider configuration.
+
+Phase 2 prompt — Add an optional seasonal council
+
+Build a voluntary council after each resolved season, once turn presentation and
+the latest Daily Dispatch are finished. Marcus chairs the discussion; Lucius
+participates only when that campaign has unlocked him. Keep an accessible way to
+reopen the most recent council. Use the shared advisor panel and procedural
+portraits, with explicit speaker selection and questions the player chooses.
+Provide useful authored offline perspectives before any network request.
+
+Ground the council in a bounded snapshot of the latest player-visible Dispatch
+and the selected owned city's existing factor lists and reported society data.
+Label delayed surveys and unavailable information. Each advisor should emphasize
+a different tradeoff without inventing facts, forecasting hidden outcomes or
+claiming authority to act. During active city battles defer economic reads and
+do not touch the worker's live state. Never expose unseen enemy rosters.
+
+Council presentation is optional and disposable. No automatic LLM call, game
+order, tax change, construction, turn advance or RNG draw may follow from opening
+it, selecting a speaker or hearing advice. Keep per-advisor conversations
+separate, stop the previous voice session on switching, retain appropriate
+presentation across map/city views, and clear it on load. Do not make model prose
+part of the authoritative save or turn engine. Verify one rendered season-to-
+council path, speaker availability, read-only state behavior and reset behavior.
+
+Phase 3 prompt — Add a focused divine patronage story
+
+Implement an optional parent-campaign vertical slice with two authored Greek gods
+whose priorities contrast. Treat divine audiences and mandates as original game
+fiction; distinguish them from historical claims about Greek or Roman practice.
+Tie eligibility and mission objectives to existing compatible completed temple
+chains and current player-owned settlements. Do not introduce a parallel temple
+economy, silently alter existing worship, or rebalance military/economic rules.
+
+Provide an explicit player choice/adoption step that explains each patron's
+priority and the objective before writing state. Store only stable ids and the
+small deterministic progress record needed for additive saves. Legacy saves
+remain uncommitted until the player explicitly adopts this optional system.
+Reads, narration, animation and timers never grant patronage or mission progress.
+Evaluate mission advancement at an existing authoritative boundary; show its
+actual visible prerequisites, current progress and completion. Preserve progress
+through save/load without duplicate awards or RNG changes. No unstated economic
+reward or punishment may arise from narrative favor.
+
+Add current patron, mandate and visible mission progress to the bounded advisor
+context so Marcus and Lucius can interpret the same obligation through their
+different roles. The gods' goals may create a strategic dilemma, but advisors
+cannot enforce compliance or issue commands. Include an authored offline
+explanation and a visible way to inspect the current mission. Reuse current
+UI/navigation rather than interrupting every turn. Do not build a military
+specialist, full pantheon, generational simulator, microphone input or deployment
+in this slice. Validate data and compile; directly verify adoption, eligibility,
+progress, additive migration and save integrity, then inspect the rendered flow.
+
+Completion handoff
+Report which phases are implemented and which are live-verified, exact checks
+performed, any blocked credential step, local source checkpoint, and the next
+bounded development phase. Update Isengard with evidence and a pending human-
+review report without implying unperformed tests, deployment or live speech.

@@ -34,7 +34,8 @@
     "terrain_routes",
     "city",
     "city_battle",
-    "city_campaign"
+    "city_campaign",
+    "patronage"
   ],
   "additionalProperties": false,
   "properties": {
@@ -2233,6 +2234,41 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
+        }
+      }
+    },
+    "patronage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stewardship_seasons",
+        "minimum_order",
+        "expansion_settlements",
+        "allowed_tax_levels"
+      ],
+      "properties": {
+        "stewardship_seasons": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minimum_order": {
+          "type": "number",
+          "minimum": 0
+        },
+        "expansion_settlements": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "allowed_tax_levels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "low",
+              "normal"
+            ]
+          }
         }
       }
     }

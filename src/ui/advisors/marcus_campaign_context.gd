@@ -6,11 +6,13 @@ var content: Dictionary
 var lessons: Array
 var preference_path := "user://marcus_campaign_preferences.cfg"
 var _briefing: Dictionary = {}
+var council_context
 
 func _init(owner_session) -> void:
 	session = owner_session
 	content = JSON.parse_string(FileAccess.get_file_as_string("res://data/marcus.json"))
 	lessons = content.lessons
+	council_context=preload("res://src/ui/advisors/council_context.gd").new(self)
 	capture_season()
 
 func prepare_open() -> void:
@@ -137,6 +139,16 @@ func context_snapshot() -> Dictionary:
 		result.order_preview = _fields(preview,["action", "from", "target", "forced", "cost", "turns", "blocked", "reason", "uncertain", "crossing"])
 		result.order_preview.path = preview.get("path",[]).slice(0,24)
 	result.last_resolved_season = season_briefing()
+	result.council_session = council_page()
+	# Reuse the report and factor evidence already present above instead of
+	# tripling a bounded context just because its guide page is the council.
+	if not result.council_session.get("season",{}).is_empty():
+		result.council_session.season.erase("lines")
+		result.council_session.shared_reports_key="last_resolved_season"
+	if not result.council_session.get("city",{}).is_empty():
+		result.council_session.city.erase("factors")
+		result.council_session.shared_factors_key="selection.factors"
+	result.patronage = council_context.patronage_snapshot()
 	return result
 
 func _settlement(region: String) -> Dictionary:
@@ -172,3 +184,19 @@ func capture_season() -> bool:
 
 func season_briefing() -> Dictionary:
 	return _briefing.duplicate(true)
+
+func council_words() -> Dictionary:
+	return council_context.content.ui
+
+func council_portrait(id: String):
+	if id=="lucius":return preload("res://src/ui/advisors/lucius_portrait.gd").new()
+	return preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_portrait.gd").new()
+
+func council_page() -> Dictionary:
+	return council_context.page()
+
+func patronage_page() -> Dictionary:
+	return council_context.patronage_page()
+
+func commit_patronage(action: String,id: String,region: String) -> String:
+	return council_context.commit_patronage(action,id,region)

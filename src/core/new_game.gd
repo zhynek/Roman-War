@@ -36,6 +36,8 @@ class_name NewGame
 ##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
 ##      — public identity/count snapshots and only the endpoints seen at the time
 ##  advisor_unlocks: {advisor_id: {turn, region}} — permanent player counsel
+##  patronage: {chosen, pledged_turn, baseline_owned, progress, last_checked_turn,
+##      completed: {patron_id: turn}} — optional narrative honor, neutral by default
 ##  events_fired: [event_id], winner: null|String, next_id: int
 ##  ai: {war_turns: {"a|b": int}, targets: {fid: region_id},
 ##       peace_turn: {"a|b": int}} — the AI's persistent memory (FactionAi):
@@ -99,6 +101,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"city_battles": {},
 		"city_campaign": {},
 		"advisor_unlocks": {},
+		"patronage": PatronageRules.neutral(),
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -210,6 +213,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	if not state.has("patronage"):
+		state.patronage = PatronageRules.neutral()
 	if not state.has("advisor_unlocks") and data != null:
 		AdvisorRules.reconcile(data,state)
 	if not state.has("city_campaign"):

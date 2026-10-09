@@ -1193,6 +1193,18 @@ func growth_breakdown(region_id: String) -> Array:
 	return GrowthRules.breakdown(data, state, region_id)
 
 
+func patronage_status() -> Dictionary:
+	return PatronageRules.status(data,state)
+
+
+func pledge_patron(patron_id: String, region_id: String) -> bool:
+	return PatronageRules.pledge(data,state,patron_id,region_id)
+
+
+func renounce_patron() -> bool:
+	return PatronageRules.renounce(data,state)
+
+
 func advisor_status(advisor_id: String) -> Dictionary:
 	return AdvisorRules.status(data,state,advisor_id)
 
