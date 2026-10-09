@@ -35,6 +35,9 @@ class_name NewGame
 ##      watchpost, construction, turn}}} — dated architecture, never troop rosters
 ##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
 ##      — public identity/count snapshots and only the endpoints seen at the time
+##  divine_dilemmas: {cooldown_until, resolved: {id: {turn, region, choice}}}
+##  advisor_tutorial: {baseline_turn, last_checked_turn, strain_active, milestones}
+##      milestone records carry status, turn, params and postponed_until.
 ##  advisor_unlocks: {advisor_id: {turn, region}} — permanent player counsel
 ##  patronage: {chosen, pledged_turn, baseline_owned, progress, last_checked_turn,
 ##      completed: {patron_id: turn}} — optional narrative honor, neutral by default
@@ -102,6 +105,8 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 		"city_campaign": {},
 		"advisor_unlocks": {},
 		"patronage": PatronageRules.neutral(),
+		"advisor_tutorial": AdvisorTutorialRules.fresh(),
+		"divine_dilemmas": DivineDilemmaRules.fresh(),
 	}
 
 	for faction_setup in data.campaign["factions"]:
@@ -214,6 +219,8 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	## the missing key via .get — this just normalizes eagerly on load.
 	## With `data` supplied, a pre-knowledge save's factions receive their
 	## culture's 270 BC technique endowment instead of an empty ledger.
+	if not state.has("divine_dilemmas"):
+		state.divine_dilemmas = DivineDilemmaRules.fresh()
 	if not state.has("patronage"):
 		state.patronage = PatronageRules.neutral()
 	if not state.has("advisor_unlocks") and data != null:
@@ -326,6 +333,7 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 		state["pending_offers"] = []
 	if not state.has("agents"):
 		state["agents"] = {}
+	AdvisorTutorialRules.ensure(data,state)
 
 
 static func _ensure_unit_arms(units: Array) -> void:

@@ -30,10 +30,11 @@ func page() -> Dictionary:
 	result.city=_city()
 	var patron: Dictionary=game.patronage_status().get("active",{})
 	if not patron.is_empty():result.patron={"id":patron.id,"name":patron.name,"mission":patron.mission,"tradeoff":patron.tradeoff}
-	for id in ["marcus","lucius"]:
-		var available: bool=id=="marcus" or session._lucius_status.get("available",false)
+	for id in session.advisor_ids():
+		if not content.speakers.has(id):continue
+		var available: bool=session.advisor_available(id)
 		var profile: Dictionary=content.speakers[id]
-		var card: Dictionary={"id":id,"name":profile.name,"available":available}
+		var card: Dictionary={"id":id,"name":profile.name,"available":available,"locked":profile.locked}
 		if available:
 			card.stance=profile.stance
 			card.counsel=profile.counsel
@@ -93,7 +94,48 @@ func patronage_snapshot() -> Dictionary:
 	# explicit pledge page, not copied wholesale into every conversation.
 	if not status.get("active",{}).is_empty():
 		result.active=owner._fields(status.active,["id","name","mission","tradeoff","mandates","completed"])
+		for id in result.active.get("mandates",{}).keys():
+			if not owner.session.advisor_available(id):result.active.mandates.erase(id)
 	result.available_patrons=[]
 	for option in status.get("options",[]):
 		result.available_patrons.append(owner._fields(option,["id","name","mission","tradeoff","eligible","completed","temple_chains"]))
+	return result
+
+func discussion_key() -> String:
+	if blocked()!="":return "blocked"
+	var game: Game=owner.session.game
+	if PatronageRules.command_blocked(game.data,game.state)!="":return "blocked"
+	var screen: Dictionary=owner._screen()
+	return JSON.stringify([owner.session.active_view,screen.get("region",""),screen.get("force",""),
+		game.state.turn,game.state.patronage.chosen,game.state.patronage.pledged_turn])
+
+func discussion_snapshot() -> Dictionary:
+	if discussion_key()=="blocked":return {}
+	var reading: Dictionary=page()
+	if reading.city.is_empty() or reading.season.is_empty() or reading.season.get("stale",false):return {}
+	var result: Dictionary={"experience":"roman_campaign_council","fiction":owner.content.fiction_note,
+		"calendar":owner._fields(owner.session.game.state,["turn","year","season"]),
+		"last_resolved_season":reading.season.duplicate(true),"city":reading.city.duplicate(true),
+		"patronage":patronage_snapshot(),"advisors":[]}
+	for card in reading.speakers:
+		if card.available:result.advisors.append(owner._fields(card,["id","name","stance","counsel","mandate"]))
+	if owner.session.advisor_available("gaius"):
+		result.military=owner.session.gaius_context._military_snapshot()
+	# Only authored, currently eligible alternatives; never model-generated commands.
+	var choices: Dictionary=owner.session.game.divine_dilemmas(String(reading.city.region))
+	result.divine_dilemmas=[]
+	for card in choices.get("cards",[]):
+		if card.get("resolved",false):continue
+		var authored: Dictionary=owner._fields(card,["id","patron","title","address","body"])
+		authored.choices=[];authored.reactions={}
+		for id in card.reactions:
+			if owner.session.advisor_available(id):authored.reactions[id]=card.reactions[id]
+		for choice in card.choices:
+			if not choice.available:continue
+			var quoted: Dictionary=owner.session.game.divine_dilemma_quote(card.id,choice.id,reading.city.region)
+			if not quoted.get("ok",false):continue
+			var option: Dictionary=owner._fields(choice,["id","label","description"])
+			option.consequences=quoted.consequences.duplicate(true)
+			authored.choices.append(option)
+		if not authored.choices.is_empty():result.divine_dilemmas.append(authored)
 	return result

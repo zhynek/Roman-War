@@ -127,7 +127,12 @@ func city_battle_step(region_id: String) -> Dictionary:
 
 
 func city_battle_close(region_id: String) -> Dictionary:
-	return CityBattleRules.close(data, state, region_id)
+	var battle: Dictionary = state.get("city_battles",{}).get(region_id,{})
+	var completed_real: bool = not battle.get("practice",true) and battle.get("phase","") == "finished" and battle.get("committed",false)
+	var result := CityBattleRules.close(data, state, region_id)
+	if result.get("ok",false) and completed_real:
+		AdvisorTutorialRules.record(data,state,"war",{"region":region_id})
+	return result
 
 
 func city_campaign_enter(region_id: String) -> Dictionary:
@@ -217,6 +222,7 @@ func move_army(army_id: String, to_region: String, forced_march: bool = false) -
 		return false
 	var moved := MovementRules.move_army(data, state, army_id, to_region, forced_march)
 	if moved:
+		AdvisorTutorialRules.record(data,state,"army",{"region":String(state.armies[army_id].region),"subject":army_id})
 		GuidedRules.bump(state, "army_moves")
 		_after_relocation()
 	return moved
@@ -269,6 +275,7 @@ func attack_army(attacker_id: String, defender_id: String) -> Dictionary:
 	if not result.is_empty() and state["armies"].has(attacker_id):
 		state["armies"][attacker_id]["movement_left"] = 0.0
 	_after_relocation()
+	if not result.is_empty():AdvisorTutorialRules.record(data,state,"war",{"region":defender_region})
 	return result
 
 
@@ -276,7 +283,11 @@ func declare_war(other_faction: String, faction_id: String = "") -> bool:
 	if CityBattleRules.locked(state):
 		return false
 	var fid := faction_id if faction_id != "" else String(state["player_faction"])
-	return DiplomacyRules.declare_war(data, state, fid, other_faction)
+	var prior_war: bool = state.factions.has(fid) and state.factions.has(other_faction) and DiplomacyRules.at_war(state,fid,other_faction)
+	var changed := DiplomacyRules.declare_war(data, state, fid, other_faction)
+	if changed and not prior_war and (fid == state.player_faction or other_faction == state.player_faction):
+		AdvisorTutorialRules.record(data,state,"war",{"subject":other_faction})
+	return changed
 
 
 func set_stance(other_faction: String, stance: String, faction_id: String = "") -> bool:
@@ -287,7 +298,11 @@ func set_stance(other_faction: String, stance: String, faction_id: String = "") 
 		return false
 	if stance != "war" and DiplomacyRules.roman_peace_forbidden(data, state, fid, other_faction):
 		return false
-	return DiplomacyRules.set_stance(state, fid, other_faction, stance)
+	var prior_war: bool = state.factions.has(fid) and state.factions.has(other_faction) and DiplomacyRules.at_war(state,fid,other_faction)
+	var changed := DiplomacyRules.set_stance(state, fid, other_faction, stance)
+	if changed and stance == "war" and not prior_war and (fid == state.player_faction or other_faction == state.player_faction):
+		AdvisorTutorialRules.record(data,state,"war",{"subject":other_faction})
+	return changed
 
 
 func senate_overview() -> Dictionary:
@@ -472,6 +487,7 @@ func march_army(army_id: String, to_region: String, forced_march: bool = false) 
 	outcome["turns"] = found["turns"]
 	outcome["blocked_destination"] = found["blocked_destination"]
 	if int(outcome.get("moved", 0)) > 0:
+		AdvisorTutorialRules.record(data,state,"army",{"region":String(state.armies[army_id].region),"subject":army_id})
 		GuidedRules.bump(state, "army_moves")
 		_after_relocation()
 	return outcome
@@ -805,6 +821,7 @@ func assault_settlement(army_id: String, region_id: String, occupation: String =
 		CombatRules.fire_occupation_triggers(data, state, rng, general, occupation, notices)
 		result["character_notices"] = notices
 	state["rng_state"] = rng.state_string()
+	if not result.is_empty():AdvisorTutorialRules.record(data,state,"war",{"region":region_id})
 	return result
 
 
@@ -1187,6 +1204,26 @@ func explore_site(army_id: String) -> Dictionary:
 
 func growth_breakdown(region_id: String) -> Array:
 	return GrowthRules.breakdown(data, state, region_id)
+
+
+func advisor_tutorial_status() -> Dictionary:
+	return AdvisorTutorialRules.status(data,state)
+
+
+func advisor_tutorial_respond(id: String, action: String) -> bool:
+	return AdvisorTutorialRules.respond(data,state,id,action)
+
+
+func divine_dilemmas(region_id: String) -> Dictionary:
+	return DivineDilemmaRules.status(data,state,region_id)
+
+
+func divine_dilemma_quote(id: String, choice_id: String, region_id: String) -> Dictionary:
+	return DivineDilemmaRules.quote(data,state,id,choice_id,region_id)
+
+
+func resolve_divine_dilemma(id: String, choice_id: String, region_id: String, signature: String) -> Dictionary:
+	return DivineDilemmaRules.resolve(data,state,id,choice_id,region_id,signature)
 
 
 func patronage_status() -> Dictionary:

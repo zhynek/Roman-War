@@ -87,7 +87,7 @@ func context_snapshot() -> Dictionary:
 		return result
 	var game: Game = session.game
 	var player: String = game.state.player_faction
-	result.council = {"lucius":session._lucius_status.duplicate(true)}
+	result.council = session.advisor_statuses.duplicate(true)
 	result.calendar = _fields(game.state, ["turn", "year", "season"])
 	result.faction = _fields(game.state.factions[player], ["treasury", "capital"])
 	result.faction.id = player
@@ -189,7 +189,7 @@ func council_words() -> Dictionary:
 	return council_context.content.ui
 
 func council_portrait(id: String):
-	if id=="lucius":return preload("res://src/ui/advisors/lucius_portrait.gd").new()
+	if id!="marcus" and session.advisor_contexts.has(id):return session.advisor_contexts[id].create_portrait()
 	return preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_portrait.gd").new()
 
 func council_page() -> Dictionary:
@@ -200,3 +200,74 @@ func patronage_page() -> Dictionary:
 
 func commit_patronage(action: String,id: String,region: String) -> String:
 	return council_context.commit_patronage(action,id,region)
+
+func tutorial_page() -> Dictionary:
+	# Encounter detection belongs to authoritative commands, never this UI read.
+	if council_context.blocked()!="":return {"blocked":council_context.blocked(),"milestones":[],"eligible":[]}
+	return session.game.advisor_tutorial_status()
+
+func tutorial_words() -> Dictionary:
+	return session.game.data.reactive_tutorial.ui
+
+func tutorial_respond(id: String, action: String) -> bool:
+	if council_context.blocked()!="":return false
+	return session.game.advisor_tutorial_respond(id,action)
+
+func tutorial_text(text: String, params: Dictionary) -> String:
+	var visible: Dictionary=params.duplicate(true)
+	var region: String=String(params.get("region",""))
+	if region!="":visible.region=session.game.data.regions.get(region,{}).get("settlement_name",region)
+	return text.format(visible)
+
+func tutorial_navigate(id: String) -> bool:
+	if council_context.blocked()!="":return false
+	for card in tutorial_page().get("milestones",[]):
+		if card.id!=id:continue
+		for index in range(lessons.size()):
+			if lessons[index].id==card.lesson:
+				if navigation_blocked(lessons[index])!="":return false
+				var region: String=card.get("params",{}).get("region","")
+				if region!="" and session.game.state.settlements.get(region,{}).get("owner","")==session.game.state.player_faction:
+					session.show_campaign()
+					session.campaign._inspect_settlement(region)
+					session.campaign.map_view.center_on(region)
+					if lessons[index].destination=="orders":session.campaign.show_controls()
+					else:session.campaign.open_drawer()
+					return true
+				navigate(lessons[index],index)
+				return true
+	return false
+
+func living_council_state():
+	return session.living_council
+
+func start_living_council(muted: bool) -> bool:
+	return session.living_council.start(muted)
+
+func stop_living_council() -> void:
+	session._stop_discussion()
+
+func dilemma_words() -> Dictionary:
+	return session.game.data.divine_dilemma_content.ui
+
+func dilemma_page() -> Dictionary:
+	if council_context.blocked()!="":return {"blocked":"blocked","cards":[]}
+	var region: String=_screen().get("region","")
+	return session.game.divine_dilemmas(region)
+
+func dilemma_quote(id: String,choice: String,region: String) -> Dictionary:
+	if council_context.blocked()!="":return {"ok":false,"reason":"blocked"}
+	return session.game.divine_dilemma_quote(id,choice,region)
+
+func resolve_dilemma(quote: Dictionary) -> Dictionary:
+	if council_context.blocked()!="":return {"ok":false,"reason":"blocked"}
+	stop_living_council()
+	return session.game.resolve_divine_dilemma(quote.id,quote.choice,quote.region,quote.signature)
+
+func dilemma_snapshot() -> Dictionary:
+	var result: Dictionary=dilemma_page().duplicate(true)
+	result.source="authored_policy_choices"
+	for card in result.get("cards",[]):
+		for id in card.get("reactions",{}).keys():
+			if not session.advisor_available(id):card.reactions.erase(id)
+	return result

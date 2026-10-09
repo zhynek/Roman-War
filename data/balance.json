@@ -1079,5 +1079,14 @@
     "coastal_cost_multiplier": 1,
     "open_cost_multiplier": 1,
     "river_cost_multiplier": 1
+  },
+  "advisor_tutorial": {
+    "postpone_turns": 1,
+    "strain_treasury_below": 0,
+    "strain_order_below": 80
+  },
+  "divine_dilemmas": {
+    "cooldown_turns": 2,
+    "pledge_wait_turns": 1
   }
 }

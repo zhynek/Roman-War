@@ -1,0 +1,123 @@
+{
+  "$schema": "../schemas/divine_dilemmas.schema.json",
+  "dilemmas": [
+    {
+      "id": "zeus_city_petition",
+      "patron": "zeus",
+      "title": "The petition beneath the thunderer's altar",
+      "address": "You have raised a house for my name. Now hear those who stand outside it.",
+      "body": "Petitioners ask your temple city to carry a lighter burden. The god asks for visible care, while your treasury must still sustain the realm. Choose an existing policy, or refuse the request without a supernatural penalty.",
+      "reactions": {
+        "marcus": "An oath is tested by the cost of keeping it. Lower taxes may honor restraint, but ask which public obligation would then wait.",
+        "lucius": "Compare relief with a funded service. Public Works takes time to mature and charges upkeep while its benefits develop; a favorable intention does not balance the ledger.",
+        "gaius": "The army also depends on this treasury. Count the burden on upkeep and readiness before promising another recurring expense; refuse a war plan that assumes money twice."
+      },
+      "choices": [
+        {
+          "id": "tax_relief",
+          "label": "Lower the city's taxes to low",
+          "description": "Use the existing low tax setting. Tax income falls while the existing tax factors for order and growth improve; no special divine bonus is added.",
+          "action": "tax",
+          "target": "low"
+        },
+        {
+          "id": "public_works",
+          "label": "Issue Public Works",
+          "description": "Use the existing provincial edict. It has population-scaled upkeep and takes several seasons to reach full effect. It does not replace an existing edict automatically.",
+          "action": "edict",
+          "target": "public_works"
+        },
+        {
+          "id": "decline",
+          "label": "Decline the petition",
+          "description": "Keep your current policies. Record the refusal and its cooldown; there is no hidden punishment or reward.",
+          "action": "decline",
+          "target": ""
+        }
+      ]
+    },
+    {
+      "id": "ares_levy_fields",
+      "patron": "ares",
+      "title": "The levy and the unharvested fields",
+      "address": "You ask for wider borders. Tell me whose hands will bear the weight of them.",
+      "body": "Ares presses for a standing levy; the farmers ask for breathing room. The Legion Levy changes the city's existing societal and growth factors. It does not create units. You may instead lower taxes, or decline both demands.",
+      "reactions": {
+        "marcus": "A god's appetite need not become your own. Decide whether the realm's duty is expansion this season or care for those who would make it possible.",
+        "lucius": "The Legion Levy places a burden on the province and reduces growth and civic provision as it settles in. Ask whether its institutions can sustain that obligation before calling it strength.",
+        "gaius": "A levy obligation is not a trained cohort. Check actual recruitment, equipment and upkeep separately; no divine promise will fill an empty formation."
+      },
+      "choices": [
+        {
+          "id": "legion_levy",
+          "label": "Issue the Legion Levy",
+          "description": "Use the existing edict where the required barracks and settlement tier are present. Review its permanent-while-active tradeoffs and settling delay; no units are recruited by this choice.",
+          "action": "edict",
+          "target": "legion_levy"
+        },
+        {
+          "id": "protect_fields",
+          "label": "Protect the fields with low taxes",
+          "description": "Use the existing low tax setting. The reduced tax factor gives up revenue while improving the existing order and growth tax factors. This is restraint in response to Ares, not free military power.",
+          "action": "tax",
+          "target": "low"
+        },
+        {
+          "id": "decline",
+          "label": "Decline the demand",
+          "description": "Keep your current policies. Record the refusal and its cooldown; there is no hidden punishment or reward.",
+          "action": "decline",
+          "target": ""
+        }
+      ]
+    }
+  ],
+  "ui": {
+    "title": "When the gods ask too much",
+    "source": "AUTHORED DIVINE DILEMMAS \u00b7 REAL POLICY CHOICES",
+    "help": "Each dilemma can be resolved once in this saved campaign. Read the quoted effects before confirming. These choices use existing tax or edict rules; no model can enact them for you.",
+    "empty": "Select an owned city with your chosen patron's completed matching temple. A dilemma can begin after the first season following your pledge.",
+    "quote": "Review this choice",
+    "confirm": "Confirm the quoted policy",
+    "cancel": "Keep the current policy",
+    "confirm_title": "{dilemma} \u00b7 {city}",
+    "immediate_cost": "Immediate treasury cost: {cost}",
+    "tax_change": "Tax setting: {before} \u2192 {after}",
+    "tax_income": "Tax income multiplier: {before} \u2192 {after}",
+    "tax_order": "Tax contribution to public order: {before} \u2192 {after}",
+    "tax_growth": "Tax contribution to population growth: {before}% \u2192 {after}%",
+    "tax_note": "These are existing tax factors, not a prediction of final net income or the city's full response.",
+    "edict": "Provincial edict: {name}",
+    "upkeep": "Quoted upkeep: {upkeep} per season at {population} population ({per_1000} per 1,000 people).",
+    "upkeep_note": "The normal economy charges upkeep when the next season resolves. It changes with population; no upfront charge is made here.",
+    "settle": "Reaches full effect over {turns} seasons.",
+    "revoke": "After revocation, the existing edict cooldown is {turns} seasons.",
+    "effects": "Full-strength existing edict effects",
+    "effect": "{label}: {value}",
+    "decline_note": "No policy changes, costs or supernatural penalties. This dilemma is recorded as resolved.",
+    "cooldown": "The next divine dilemma can be resolved from turn {turn}.",
+    "resolved": "Resolved on turn {turn}: {choice}",
+    "recorded": "Your decision is recorded. Its existing policy consequences remain part of the campaign.",
+    "reaction": "{name}'s view",
+    "return": "Return to the council",
+    "current_city": "Temple city: {city}",
+    "battle_active": "Close the active battle before considering a divine policy choice.",
+    "defense_pending": "Resolve the pending city defense first.",
+    "campaign_finished": "This campaign has ended; its choices can no longer change.",
+    "not_owned": "Choose a settlement you own.",
+    "unknown_dilemma": "This dilemma is not available.",
+    "unknown_choice": "This choice is not available.",
+    "wrong_patron": "This dilemma belongs to a different patron. Pledging remains an explicit choice.",
+    "temple_required": "This owned city needs a completed temple matching the chosen patron.",
+    "pledge_too_recent": "Let one campaign season resolve after this pledge before answering its dilemma.",
+    "cooldown_active": "An earlier divine decision is still within its cooldown.",
+    "already_resolved": "This dilemma has already been resolved in this campaign.",
+    "tax_not_lower": "Taxes are already at low or a gentler setting; this relief would not lower them.",
+    "edict_unavailable": "The existing edict requirements are not met. Read the reason below.",
+    "stale_quote": "The campaign or quoted conditions changed. Review a fresh quote before confirming.",
+    "invalid_signature": "Review this choice again before confirming.",
+    "commit_failed": "The policy could not be applied; no divine decision was recorded.",
+    "navigation": "Divine dilemmas",
+    "blocked": "Finish the turn presentation and Dispatch, or close the active battle, before considering a divine policy choice."
+  }
+}

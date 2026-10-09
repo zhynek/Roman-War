@@ -49,6 +49,18 @@ var council_body: VBoxContainer
 var page_navigation: HFlowContainer
 var _patronage_confirmation: Dictionary={}
 var _patronage_notice: String=""
+var tutorial_offer: Button
+var _tutorial_id: String=""
+var _tutorial_pending: bool=false
+var _live_status: Label
+var _live_text: RichTextLabel
+var _live_hear: Button
+var _live_help: Label
+var _live_portrait
+var _live_portrait_slot: HBoxContainer
+var _live_portrait_id := ""
+var _dilemma_confirmation: Dictionary={}
+var _dilemma_notice := ""
 
 func configure_context(context_adapter, auto_open: bool=true) -> void:
 	adapter=context_adapter
@@ -141,6 +153,10 @@ func _build() -> void:
 	season_offer=_button(_review_label(),show_briefing,"MarcusSeasonOffer")
 	season_offer.hide()
 	add_child(season_offer)
+	if adapter.has_method("tutorial_page") and copy.id=="marcus":
+		tutorial_offer=_button(tw("invitation"),show_tutorial,"MarcusTutorialOffer")
+		tutorial_offer.hide()
+		add_child(tutorial_offer)
 	panel=PanelContainer.new()
 	panel.name="MarcusPanel"
 	panel.add_theme_stylebox_override("panel",_style())
@@ -182,10 +198,15 @@ func _build() -> void:
 	briefing_button=_button(_review_label(),show_briefing,"MarcusSeasonReview")
 	page_navigation.add_child(briefing_button)
 	briefing_button.hide()
-	if adapter.has_method("city_reading"):
-		page_navigation.add_child(_button(w("city_reading"),show_city_reading,"AdvisorCityReading"))
+	if adapter.has_method("advisor_reading") or adapter.has_method("city_reading"):
+		var reading_label: String=adapter.reading_label() if adapter.has_method("reading_label") else w("city_reading")
+		page_navigation.add_child(_button(reading_label,show_city_reading,"AdvisorCityReading"))
 	if adapter.has_method("patronage_page"):
 		page_navigation.add_child(_button(cw("patronage"),show_patronage,"AdvisorPatronage"))
+	if adapter.has_method("dilemma_page"):
+		page_navigation.add_child(_button(dw("navigation"),show_dilemmas,"AdvisorDilemmas"))
+	if tutorial_offer!=null:
+		page_navigation.add_child(_button(tw("history"),show_tutorial_archive,"MarcusTutorialArchive"))
 	guide_scroll=ScrollContainer.new()
 	guide_scroll.name="MarcusGuideScroll"
 	guide_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -253,12 +274,15 @@ func _build() -> void:
 func _layout() -> void:
 	if not is_instance_valid(panel):return
 	var viewport: Vector2=get_viewport_rect().size
-	var wide: bool=_tab=="guide" and _mode in ["council","patronage"]
+	var wide: bool=_tab=="guide" and _mode in ["council","patronage","tutorial","dilemmas"]
 	var width: float=minf(780.0 if wide else 460.0,maxf(250.0,viewport.x-32.0))
 	launcher.position=Vector2(maxf(8,viewport.x-198),maxf(8,viewport.y-90))
 	launcher.size=Vector2(182,74)
 	season_offer.position=Vector2(maxf(8,viewport.x-454),maxf(8,viewport.y-70))
 	season_offer.size=Vector2(242,36)
+	if tutorial_offer!=null:
+		tutorial_offer.position=season_offer.position
+		tutorial_offer.size=season_offer.size
 	var height:=minf(730.0,maxf(300.0,viewport.y-122))
 	panel.position=Vector2(maxf(8,viewport.x-width-16),maxf(16,viewport.y-106-height))
 	panel.size=Vector2(width,height)
@@ -297,6 +321,7 @@ func open() -> void:
 	panel.show()
 	input_shield.show()
 	season_offer.hide()
+	if tutorial_offer!=null:tutorial_offer.hide()
 	opened_changed.emit(true)
 	_layout()
 	_render_guide()
@@ -305,6 +330,7 @@ func open() -> void:
 	else:panel.find_child("MarcusClose",true,false).grab_focus()
 
 func close_panel() -> void:
+	_stop_living_council()
 	if _mode=="intro":_intro_seen=true
 	# Hidden captions must never accompany continuing speech or a billed session.
 	voice.stop()
@@ -314,11 +340,13 @@ func close_panel() -> void:
 	panel.hide()
 	input_shield.hide()
 	season_offer.visible=_offer_pending
+	refresh_tutorial_offer()
 	opened_changed.emit(false)
 	var focus: Control=get_viewport().gui_get_focus_owner()
 	if focus!=null and is_ancestor_of(focus):focus.release_focus()
 
 func _choose_tab(tab: String) -> void:
+	if tab!="guide":_stop_living_council()
 	_tab=tab
 	guide_scroll.visible=tab=="guide"
 	page_navigation.visible=tab=="guide"
@@ -360,14 +388,21 @@ func _render_guide() -> void:
 		guide_body.remove_child(child)
 		child.queue_free()
 	lesson_speech=null
+	_live_status=null;_live_text=null;_live_hear=null;_live_help=null;_live_portrait=null;_live_portrait_slot=null;_live_portrait_id=""
+	if _mode!="council":_stop_living_council()
+	guide_body.tooltip_text=""
 	if _mode=="briefing":
 		_render_briefing()
 	elif _mode=="council":
 		_render_council_page()
+	elif _mode=="dilemmas":
+		_render_dilemmas()
 	elif _mode=="patronage":
 		_render_patronage_page()
 	elif _mode=="reading":
 		_render_city_reading()
+	elif _mode=="tutorial":
+		_render_tutorial()
 	elif _mode=="intro":
 		var page: Dictionary=copy.intro[_intro_step]
 		guide_body.add_child(_label(w("intro_tag"),11,"bdb17f"))
@@ -478,12 +513,18 @@ func _explain_page() -> void:
 	_ask(w("explain_prompt"))
 
 func _toggle_connection() -> void:
+	if _living_active():_stop_living_council();return
+	if _mode=="council" and _tab=="guide" and adapter.has_method("start_living_council"):_hear_council();return
 	if voice.is_agent_connected() or _status_code=="connecting":
 		voice.stop()
 		return
 	voice.connect_agent(context_snapshot())
 
 func _toggle_mute() -> void:
+	if _living_active():
+		var discussion=adapter.living_council_state()
+		discussion.set_muted(not discussion.muted)
+		return
 	_muted=not _muted
 	voice.set_muted(_muted)
 	_save_preferences()
@@ -500,10 +541,17 @@ func _status_changed(code: String) -> void:
 
 func _sync_connection() -> void:
 	if not is_instance_valid(status_label):return
+	if _living_active():
+		var discussion=adapter.living_council_state()
+		status_label.text=cw("live_"+discussion.status).format({"name":String(discussion.speaker).capitalize()})
+		connect_button.text=cw("live_stop")
+		mute_button.text=cw("live_unmute" if discussion.muted else "live_mute")
+		send_button.disabled=true
+		return
 	var connected: bool=voice.is_agent_connected()
 	status_label.text=copy.status.get(_status_code,copy.status.unavailable)
 	if _status_code in ["setup_required","unconfigured","agent_private_required"]:status_label.text+="\n"+w("setup_note")
-	connect_button.text=w("disconnect" if connected or _status_code=="connecting" else "connect")
+	connect_button.text=cw("hear_council") if _mode=="council" and _tab=="guide" and adapter.has_method("start_living_council") else w("disconnect" if connected or _status_code=="connecting" else "connect")
 	mute_button.text=w("unmute" if _muted else "mute")
 	send_button.disabled=not connected or voice.is_answering()
 	if is_instance_valid(lesson_speech):lesson_speech.disabled=send_button.disabled
@@ -587,8 +635,17 @@ func context_snapshot() -> Dictionary:
 	result.guide={"mode":_mode,"index":_intro_step if _mode=="intro" else _lesson}
 	if _mode=="intro":result.guide.page=copy.intro[_intro_step].duplicate(true)
 	elif _mode=="briefing":result.guide.page=adapter.season_briefing()
-	elif _mode=="reading":result.guide.page={"source":"city_reading"}
+	elif _mode=="reading":result.guide.page={"source":"advisor_reading"}
 	elif _mode=="council":result.guide.page={"source":"council_session", "title":cw("title")}
+	elif _mode=="tutorial":
+		result.guide.page={"source":"reactive_tutorial","id":_tutorial_id}
+		for card in adapter.tutorial_page().get("milestones",[]):
+			if card.id==_tutorial_id:result.guide.page=card.duplicate(true)
+	elif _mode=="dilemmas":
+		result.guide.page=adapter.dilemma_snapshot()
+		if not _dilemma_confirmation.is_empty():
+			result.guide.page.uncommitted_choice=_dilemma_confirmation.duplicate(true)
+			result.guide.page.uncommitted_choice.erase("signature")
 	elif _mode=="patronage":
 		result.guide.page={"source":"patronage", "title":cw("patronage_title")}
 		if not _patronage_confirmation.is_empty():result.guide.page.uncommitted_choice=_patronage_confirmation.duplicate(true)
@@ -598,21 +655,26 @@ func context_snapshot() -> Dictionary:
 	return result
 
 func reset_conversation() -> void:
+	_dilemma_confirmation.clear();_dilemma_notice=""
+	_stop_living_council()
 	close_panel()
 	_patronage_confirmation.clear()
 	_patronage_notice=""
-	if _mode in ["council","patronage","briefing","reading"]:_mode="guide"
+	_tutorial_id=""
+	if _mode in ["council","patronage","briefing","reading","tutorial","dilemmas"]:_mode="guide"
 	question.clear()
 	message.text=""
 	_conversation.clear()
 	_render_transcript()
 	refresh_briefing(false)
+	refresh_tutorial_offer()
 
 func refresh_briefing(offer: bool=true) -> void:
 	var available: bool=not adapter.season_briefing().is_empty()
 	briefing_button.visible=available or adapter.has_method("council_page")
 	_offer_pending=offer and available
 	season_offer.visible=_offer_pending and not is_open()
+	refresh_tutorial_offer()
 	if _mode in ["briefing","council","patronage"]:_render_guide()
 	_schedule_layout()
 
@@ -643,6 +705,7 @@ func set_council(choices: Array, detail: String) -> void:
 	for choice in choices:
 		var button:=_button(choice.label,func():advisor_requested.emit(choice.id))
 		button.disabled=not choice.available or choice.id==copy.id
+		button.tooltip_text=choice.get("detail","")
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		row.add_child(button)
 	council_body.add_child(_label(detail,12,"b8c5b8"))
@@ -654,7 +717,7 @@ func show_city_reading() -> void:
 	open()
 
 func _render_city_reading() -> void:
-	var reading: Dictionary=adapter.city_reading()
+	var reading: Dictionary=adapter.advisor_reading() if adapter.has_method("advisor_reading") else adapter.city_reading()
 	guide_body.add_child(_label(reading.title,25,"eee3c2"))
 	guide_body.add_child(_label(reading.note,14))
 	for section in reading.get("sections",[]):
@@ -686,11 +749,12 @@ func open_council_question(text: String) -> void:
 
 func _render_council_page() -> void:
 	var page: Dictionary=adapter.council_page()
-	guide_body.add_child(_label(cw("source"),11,"cabb87"))
-	guide_body.add_child(_label(cw("title"),25,"eee3c2"))
 	if page.get("blocked","")!="":
 		guide_body.add_child(_label(cw(page.blocked),15))
 		return
+	_render_living_council()
+	guide_body.add_child(_label(cw("source"),11,"cabb87"))
+	guide_body.add_child(_label(cw("title"),25,"eee3c2"))
 	guide_body.add_child(_label(cw("help"),13,"b8c5b8"))
 	var season: Dictionary=page.get("season",{})
 	if season.is_empty():guide_body.add_child(_label(cw("no_season"),14,"d4bd93"))
@@ -718,7 +782,7 @@ func _render_council_page() -> void:
 		name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		identity.add_child(name_label)
 		if not speaker.available:
-			body.add_child(_label(cw("lucius_locked"),14,"b8c5b8"))
+			body.add_child(_label(speaker.get("locked",cw("lucius_locked")),14,"b8c5b8"))
 			continue
 		body.add_child(_label(speaker.stance,13,"cabb87"))
 		body.add_child(_label(speaker.counsel,16))
@@ -840,8 +904,232 @@ func _cancel_patronage() -> void:
 	_patronage_confirmation.clear()
 	_render_guide()
 
+func tw(id: String) -> String:
+	return String(adapter.tutorial_words().get(id,id))
+
+func refresh_tutorial_offer() -> void:
+	if tutorial_offer==null:return
+	var page: Dictionary=adapter.tutorial_page()
+	_tutorial_pending=page.get("blocked","")=="" and not page.get("eligible",[]).is_empty()
+	tutorial_offer.visible=_tutorial_pending and not is_open()
+	season_offer.visible=_offer_pending and not _tutorial_pending and not is_open()
+
+func show_tutorial() -> void:
+	var page: Dictionary=adapter.tutorial_page()
+	if not page.get("eligible",[]).is_empty():_tutorial_id=page.eligible[0].id
+	_mode="tutorial"
+	_choose_tab("guide")
+	open()
+
+func show_tutorial_archive() -> void:
+	_mode="tutorial"
+	_choose_tab("guide")
+	open()
+
+func _render_tutorial() -> void:
+	var page: Dictionary=adapter.tutorial_page()
+	guide_body.add_child(_label(tw("title"),25,"eee3c2"))
+	if page.get("blocked","")!="":
+		guide_body.add_child(_label(tw("blocked"),15))
+		return
+	guide_body.tooltip_text=tw("source")
+	var cards: Array=page.get("milestones",[])
+	if cards.is_empty():
+		guide_body.add_child(_label(tw("empty"),15))
+		return
+	var selected:=0
+	var picker:=OptionButton.new()
+	picker.name="MarcusEncounterPicker"
+	picker.clip_text=true
+	for i in range(cards.size()):
+		picker.add_item(cards[i].title)
+		if cards[i].id==_tutorial_id:selected=i
+	_tutorial_id=cards[selected].id
+	picker.selected=selected
+	picker.item_selected.connect(func(index):_tutorial_id=cards[index].id;_render_guide())
+	guide_body.add_child(picker)
+	var card: Dictionary=cards[selected]
+	guide_body.add_child(_label(tw(String(card.get("status","unseen"))),12,"cabb87"))
+	if int(card.get("postponed_until",0))>int(page.get("turn",0)):
+		guide_body.add_child(_label(tw("postponed").format({"turn":card.postponed_until}),12,"cabb87"))
+	guide_body.add_child(_label(adapter.tutorial_text(card.body,card.get("params",{})),16))
+	var navigation:=HFlowContainer.new()
+	guide_body.add_child(navigation)
+	navigation.add_child(_button(tw("show_me"),_tutorial_show_place,"MarcusEncounterShowMe"))
+	navigation.add_child(_button(tw("ask"),_tutorial_ask.bind(String(card.get("question",""))),"MarcusEncounterAsk"))
+	var actions:=HFlowContainer.new()
+	guide_body.add_child(actions)
+	for action in ["acknowledge","postpone","dismiss"]:
+		var button:=_button(tw(action),_tutorial_respond.bind(String(action)),"MarcusEncounter"+String(action).capitalize())
+		button.disabled=card.get("status","unseen")!="pending"
+		actions.add_child(button)
+	picker.tooltip_text=tw("help")
+
+func _tutorial_respond(action: String) -> void:
+	adapter.tutorial_respond(_tutorial_id,action)
+	refresh_tutorial_offer()
+	_render_guide()
+
+func _tutorial_show_place() -> void:
+	if adapter.tutorial_navigate(_tutorial_id):close_panel()
+
+func _tutorial_ask(text: String) -> void:
+	_choose_tab("chat")
+	_fill_question(text)
+
 func _commit_patronage() -> void:
 	if _patronage_confirmation.is_empty():return
 	_patronage_notice=adapter.commit_patronage(_patronage_confirmation.action,_patronage_confirmation.id,_patronage_confirmation.region)
 	_patronage_confirmation.clear()
 	_render_guide()
+
+func _living_active() -> bool:
+	return adapter!=null and adapter.has_method("living_council_state") and is_instance_valid(adapter.living_council_state()) and adapter.living_council_state().active
+
+func _stop_living_council() -> void:
+	if adapter!=null and adapter.has_method("stop_living_council"):adapter.stop_living_council()
+
+func _render_living_council() -> void:
+	if not adapter.has_method("living_council_state"):return
+	var body:=_card("303829")
+	body.add_child(_label(cw("live_source"),11,"cabb87"))
+	_live_help=_label(cw("live_help"),13,"b8c5b8")
+	body.add_child(_live_help)
+	_live_hear=_button(cw("hear_council"),_hear_council,"HearLivingCouncil")
+	body.add_child(_live_hear)
+	_live_portrait_slot=HBoxContainer.new()
+	body.add_child(_live_portrait_slot)
+	_live_status=_label("",14,"cabb87")
+	_live_status.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_live_portrait_slot.add_child(_live_status)
+	_live_text=RichTextLabel.new()
+	_live_text.name="LivingCouncilTranscript"
+	_live_text.bbcode_enabled=false
+	_live_text.selection_enabled=true
+	_live_text.scroll_following=true
+	_live_text.fit_content=true
+	_live_text.scroll_active=false
+	_live_text.add_theme_font_size_override("normal_font_size",16)
+	body.add_child(_live_text)
+	refresh_living_council()
+
+func _hear_council() -> void:
+	guide_scroll.scroll_vertical=0
+	adapter.start_living_council(_muted)
+	refresh_living_council()
+
+func refresh_living_council() -> void:
+	if adapter==null or not adapter.has_method("living_council_state"):return
+	var discussion=adapter.living_council_state()
+	if not is_instance_valid(discussion):return
+	_sync_connection()
+	if not is_instance_valid(_live_status):return
+	_live_hear.disabled=discussion.active
+	var discussing: bool=discussion.active or not discussion.turns.is_empty()
+	_live_hear.visible=not discussing
+	_live_help.visible=not discussing
+	_live_text.fit_content=not discussing
+	_live_text.scroll_active=discussing
+	_live_text.custom_minimum_size.y=128 if discussing else 0
+	var lines:=PackedStringArray()
+	for turn in discussion.turns:
+		lines.append(String(turn.name)+"\n"+String(turn.text))
+	_live_text.text="\n\n".join(lines) if not lines.is_empty() else cw("live_empty")
+	_live_status.text=cw("live_"+discussion.status).format({"name":String(discussion.speaker).capitalize()})
+	if not discussion.snapshot.is_empty():
+		_live_status.text+="\n"+cw("live_snapshot").format({"date":discussion.snapshot.last_resolved_season.date,"city":discussion.snapshot.city.name})
+	if discussion.speaker!="" and discussion.speaker!=_live_portrait_id:
+		if is_instance_valid(_live_portrait):_live_portrait_slot.remove_child(_live_portrait);_live_portrait.queue_free()
+		_live_portrait_id=discussion.speaker
+		_live_portrait=adapter.council_portrait(discussion.speaker)
+		_live_portrait.custom_minimum_size=Vector2(54,54)
+		_live_portrait.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+		_live_portrait_slot.add_child(_live_portrait)
+		_live_portrait_slot.move_child(_live_portrait,0)
+	if is_instance_valid(_live_portrait):_live_portrait.set_speaking(discussion.active and discussion.voice._speaking)
+
+func dw(id: String) -> String:
+	return String(adapter.dilemma_words().get(id,id))
+
+func show_dilemmas() -> void:
+	_dilemma_confirmation.clear();_dilemma_notice=""
+	_mode="dilemmas";_choose_tab("guide");open()
+
+func _render_dilemmas() -> void:
+	var page: Dictionary=adapter.dilemma_page()
+	guide_body.add_child(_label(dw("source"),11,"cabb87"))
+	guide_body.add_child(_label(dw("title"),25,"eee3c2"))
+	if _dilemma_confirmation.is_empty():guide_body.add_child(_label(dw("help"),14,"b8c5b8"))
+	if _dilemma_notice!="":guide_body.add_child(_label(dw(_dilemma_notice),15,"d4bd93"))
+	if page.get("blocked","")!="":
+		guide_body.add_child(_label(dw(page.blocked),15));return
+	if not _dilemma_confirmation.is_empty():_render_dilemma_confirmation();return
+	if page.get("cards",[]).is_empty():guide_body.add_child(_label(dw("empty"),15))
+	for card in page.get("cards",[]):
+		var body:=_card("26333e" if card.patron=="zeus" else "3b2c2a")
+		body.add_child(_label(card.title,23,"eee3c2"))
+		body.add_child(_label(card.address,17,"cabb87"))
+		body.add_child(_label(card.body,15))
+		if card.get("resolved",false):
+			var receipt: Dictionary=card.receipt.duplicate(true)
+			for choice in card.choices:
+				if choice.id==receipt.choice:receipt.choice=choice.label;break
+			body.add_child(_label(dw("resolved").format(receipt),14,"b8c5b8"))
+		else:
+			for choice in card.choices:
+				body.add_child(_label(choice.description,14,"b8c5b8"))
+				var button:=_button(choice.label,_consider_dilemma.bind(card.id,choice.id,page.region),"DilemmaChoice"+String(choice.id).to_pascal_case())
+				button.disabled=not choice.available
+				body.add_child(button)
+				if not choice.available:
+					body.add_child(_label(dw(choice.reason)+(" "+choice.get("detail","") if choice.get("detail","")!="" else ""),12,"d4bd93"))
+		for id in card.get("reactions",{}):
+			if adapter.session.advisor_available(id):
+				body.add_child(_label(dw("reaction").format({"name":String(id).capitalize()}),15,"cabb87"))
+				body.add_child(_label(card.reactions[id],14,"b8c5b8"))
+	if int(page.get("cooldown_until",0))>int(page.get("turn",0)):
+		guide_body.add_child(_label(dw("cooldown").format({"turn":page.cooldown_until}),13,"d4bd93"))
+	guide_body.add_child(_button(dw("return"),show_briefing))
+
+func _consider_dilemma(id: String,choice: String,region: String) -> void:
+	var quote: Dictionary=adapter.dilemma_quote(id,choice,region)
+	_dilemma_notice="" if quote.get("ok",false) else quote.get("reason","stale_quote")
+	_dilemma_confirmation=quote if quote.get("ok",false) else {}
+	_render_guide()
+
+func _render_dilemma_confirmation() -> void:
+	var quote: Dictionary=_dilemma_confirmation
+	var body:=_card("343426")
+	body.add_child(_label(dw("confirm_title").format({"dilemma":quote.dilemma_title,"city":quote.city_name}),21,"eee3c2"))
+	body.add_child(_label(quote.choice_label,19,"cabb87"))
+	var cost: Dictionary=quote.consequences
+	body.add_child(_label(dw("immediate_cost").format({"cost":cost.immediate_cost}),15))
+	if cost.kind=="tax":
+		for spec in [["tax_change","tax_before","tax_after"],["tax_income","tax_income_multiplier_before","tax_income_multiplier_after"],
+			["tax_order","order_tax_factor_before","order_tax_factor_after"],["tax_growth","growth_tax_factor_before","growth_tax_factor_after"]]:
+			body.add_child(_label(dw(spec[0]).format({"before":cost[spec[1]],"after":cost[spec[2]]}),15))
+		body.add_child(_label(dw("tax_note"),13,"b8c5b8"))
+	elif cost.kind=="edict":
+		body.add_child(_label(dw("edict").format({"name":cost.name}),17))
+		body.add_child(_label(dw("upkeep").format({"upkeep":str(cost.upkeep_per_turn),"population":cost.population,"per_1000":cost.upkeep_per_1000_pop}),15))
+		body.add_child(_label(dw("upkeep_note"),13,"b8c5b8"))
+		body.add_child(_label(dw("settle").format({"turns":cost.settle_turns}),15))
+		body.add_child(_label(dw("revoke").format({"turns":cost.revoke_cooldown}),15))
+		body.add_child(_label(dw("effects"),16,"cabb87"))
+		for key in cost.effects:
+			body.add_child(_label(dw("effect").format({"label":String(key).replace("_"," ").capitalize(),"value":cost.effects[key]}),14))
+	else:body.add_child(_label(dw("decline_note"),15))
+	body.add_child(_label(dw("cooldown").format({"turn":quote.cooldown_until}),14,"d4bd93"))
+	body.add_child(_button(dw("confirm"),_confirm_dilemma,"DilemmaConfirm"))
+	body.add_child(_button(dw("cancel"),_cancel_dilemma,"DilemmaCancel"))
+
+func _confirm_dilemma() -> void:
+	if _dilemma_confirmation.is_empty():return
+	var quote: Dictionary=_dilemma_confirmation.duplicate(true)
+	_dilemma_confirmation.clear() # Repeated clicks cannot reuse the confirmation.
+	var result: Dictionary=adapter.resolve_dilemma(quote)
+	_dilemma_notice="recorded" if result.get("ok",false) else result.get("reason","stale_quote")
+	_render_guide()
+
+func _cancel_dilemma() -> void:
+	_dilemma_confirmation.clear();_render_guide()

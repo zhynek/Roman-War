@@ -3,12 +3,12 @@
   "ui": {
     "council": "Convene the council",
     "patronage": "Divine patronage",
-    "title": "Two voices. Your decision.",
+    "title": "Different counsel. Your decision.",
     "source": "AUTHORED COUNCIL · WORKS OFFLINE",
     "help": "These written perspectives share the reports below. They are not a live debate or predictions. Choose a speaker to continue with optional AI text and voice; no connection starts automatically.",
     "latest": "Latest resolved season only · {date} · turn {turn}",
     "stale": "This briefing is from turn {turn}; the campaign is now at turn {current}. Finish the current presentation to refresh it.",
-    "no_season": "The first seasonal council awaits a resolved campaign turn. You can still consider the selected city and either advisor’s approach.",
+    "no_season": "The first seasonal council awaits a resolved campaign turn. You can still consider the selected city and each advisor’s approach.",
     "reports": "What has been reported",
     "quiet": "No visible Dispatch headlines were selected this season.",
     "omitted": "{count} further reports are not included. Read the full Dispatch before deciding.",
@@ -54,7 +54,27 @@
     "renounced": "Your pledge has been released. Your next decision is your own.",
     "changed": "The campaign changed before this choice could be made. Review the refreshed temple and mission details.",
     "blocked": "Resolve the active battle or pending defense before changing divine patronage.",
-    "finished": "This campaign has ended. Its pledges can be read but no longer changed."
+    "finished": "This campaign has ended. Its pledges can be read but no longer changed.",
+    "hear_council": "Hear the council",
+    "live_title": "The council speaks",
+    "live_source": "GENERATED DISCUSSION · ADVICE ONLY",
+    "live_help": "One short turn per unlocked advisor, chaired by Marcus. This action sends a frozen visible report to ElevenLabs using up to three private connections and one question per speaker. It never repeats automatically.",
+    "live_ready": "Select an owned city after a resolved season, then ask to hear the council.",
+    "live_needs_context": "Finish the turn presentation, close Dispatch and select an owned city with a current season report.",
+    "live_connecting": "Inviting {name}…",
+    "live_discussing": "{name} has the floor.",
+    "live_complete": "The discussion has ended. Its snapshot may become out of date; your orders remain yours.",
+    "live_stopped": "Discussion stopped. No further speakers will be contacted.",
+    "live_context_changed": "The context changed, so the discussion stopped. Start again explicitly to use the new reports.",
+    "live_timeout": "The discussion reached its time limit and stopped. The written council remains available below.",
+    "live_unavailable": "A private advisor could not complete the discussion. No retry was made; the written council remains available below.",
+    "live_too_long": "A reply exceeded the discussion limit. Its text is truncated and playback has stopped.",
+    "live_too_large": "These reports exceed the discussion size limit. The written council remains available.",
+    "live_stop": "Stop council",
+    "live_mute": "Mute council",
+    "live_unmute": "Enable council voice",
+    "live_snapshot": "Frozen report: {date} · {city}",
+    "live_empty": "No generated discussion yet. The written perspectives below work offline."
   },
   "speakers": {
     "marcus": {
@@ -66,7 +86,8 @@
       "patrons": {
         "zeus": "Zeus asks you to keep a city steady before reaching for another. I would ask whether the promise serves its people even when the god is no longer watching.",
         "ares": "Ares’s appetite does not settle your duty. A wider realm is a choice, and peaceful acquisition counts. Ask what you would leave neglected in pursuing it."
-      }
+      },
+      "locked": "Marcus is your companion from the beginning."
     },
     "lucius": {
       "name": "Lucius",
@@ -77,7 +98,32 @@
       "patrons": {
         "zeus": "A gentler tax setting must still support the work the city needs. Read the actual order factors and the age of the survey before calling calm a lasting settlement.",
         "ares": "If the borders move, the obligations move with them. Examine the treasury, administration and reported condition of new cities before treating expansion as success."
+      },
+      "locked": "Lucius’s seat is still unfilled. Complete the required government building to invite his governing perspective."
+    },
+    "gaius": {
+      "name": "Gaius",
+      "stance": "Prepare before you commit",
+      "counsel": "A plan begins with the force you actually command, the ground you can see and the time the march will cost. Leave room for what your scouts have not established. Courage does not make a hidden army smaller.",
+      "city": "Ask what defending this city would leave unavailable elsewhere. A garrison has a duty here before it becomes a promise on a distant road.",
+      "season": "Which reported change has altered your readiness? Review the next order and the position it would leave your force in before committing another season.",
+      "locked": "Gaius joins after a season with an owned completed tier-three barracks. Queued or foreign buildings do not count.",
+      "patrons": {
+        "zeus": "Zeus asks for a city that can endure. I would first ask what must remain to defend it, and whether a march would leave that duty unanswered.",
+        "ares": "Ares welcomes another border, but a god will not carry your supplies. Examine the route and what you know of opposition. Peaceful acquisition can answer this mandate too."
       }
     }
+  },
+  "discussion": {
+    "limits": {
+      "turns": 3,
+      "words": 60,
+      "response_characters": 720,
+      "speaker_seconds": 45,
+      "session_seconds": 140,
+      "snapshot_bytes": 18000,
+      "greeting_settle_ms": 750
+    },
+    "prompt": "Give your one council turn in at most three short sentences and 60 words. Speak only as council_discussion.speaker, from the frozen visible evidence. Marcus chairs by naming the central tension. Lucius weighs institutions and civic costs; Gaius weighs security and operational costs. If prior turns exist, address one of their points with a distinct priority or a reasoned disagreement. Identify uncertainty. Divine alternatives are authored choices only: never invent or execute costs, rewards or options. End with one practical consideration for the player."
   }
 }

@@ -22,6 +22,7 @@ const RESPONSE_TIMEOUT_MS: int = 60000
 const IDLE_TIMEOUT_MS: int = 120000
 const PACKETS_PER_FRAME: int = 32
 const AUDIO_BUFFER_SECONDS: float = 0.2
+const AUDIO_SETTLE_MS: int = 500
 
 var _http: HTTPRequest
 var _player: AudioStreamPlayer
@@ -52,6 +53,7 @@ var _audio_chunks: Array[PackedByteArray] = []
 var _audio_offset: int = 0
 var _audio_bytes: int = 0
 var _audio_drain_at: int = 0
+var _audio_settle_until: int = 0
 var _suppress_audio: bool = false
 
 func _ready() -> void:
@@ -122,6 +124,7 @@ func ask(text: String, context: Dictionary) -> void:
 	_answer = ""
 	_audio_text_ready = false
 	_suppress_audio = false
+	_audio_settle_until = 0
 	_clear_audio()
 	_last_user_at = Time.get_ticks_msec()
 	_response_started_at = _last_user_at
@@ -138,6 +141,7 @@ func set_muted(muted: bool) -> void:
 	_muted = muted
 	# Unmuting never resumes a sentence halfway through; the next answer can speak.
 	_suppress_audio = true
+	_audio_settle_until = 0
 	_clear_audio()
 	if is_agent_connected():
 		_refresh_response_status()
@@ -147,12 +151,15 @@ func is_agent_connected() -> bool:
 	return _active and _metadata_ready and _socket != null and _socket.get_ready_state() == WebSocketPeer.STATE_OPEN
 
 func is_answering() -> bool:
-	return _waiting_response or _speaking or not _audio_chunks.is_empty()
+	return _waiting_response or _speaking or not _audio_chunks.is_empty() or _is_audio_settling()
+
+func _is_audio_settling() -> bool:
+	return not _muted and not _suppress_audio and Time.get_ticks_msec() < _audio_settle_until
 
 func _refresh_response_status() -> void:
 	if _speaking or not _audio_chunks.is_empty():
 		_set_status("speaking")
-	elif _waiting_response:
+	elif _waiting_response or _is_audio_settling():
 		_set_status("thinking")
 	else:
 		_set_status("muted" if _muted else "connected")
@@ -255,6 +262,12 @@ func _handle_event(event: Dictionary) -> void:
 		"agent_response":
 			var response: Dictionary = _payload(event, "agent_response_event")
 			if _observe_text_response(response):
+				# These read-only advisors have no tools or follow-on tool turns.
+				# agent_response commits the complete message; live sessions can
+				# omit agent_response_complete for greetings AND user questions.
+				_waiting_response = false
+				if not _muted and not _suppress_audio:
+					_audio_settle_until = Time.get_ticks_msec() + AUDIO_SETTLE_MS
 				_publish_answer(str(response.get("agent_response", "")))
 		"agent_response_correction":
 			var correction: Dictionary = _payload(event, "agent_response_correction_event")
@@ -273,6 +286,7 @@ func _handle_event(event: Dictionary) -> void:
 		"audio":
 			_receive_audio(_payload(event, "audio_event"))
 		"interruption":
+			_audio_settle_until = 0
 			_clear_audio()
 			_audio_text_ready = false
 			_retire_response_id()
@@ -342,16 +356,20 @@ func _publish_answer(text: String) -> void:
 	_audio_text_ready = not text.is_empty()
 	answer_received.emit(_answer)
 	# A delta is not a completed turn. Keep the response deadline and composer
-	# lock until agent_response_complete, including while voice is muted.
+	# lock until its completion boundary, including while voice is muted.
 	_refresh_response_status()
 
 func _receive_audio(payload: Dictionary) -> void:
-	if not _metadata_ready or _muted or _suppress_audio:
+	if not _metadata_ready:
 		return
 	var event_id: int = int(payload.get("event_id", -1))
 	if event_id >= 0 and event_id < _minimum_audio_event:
 		return
+	# Even discarded/muted audio belongs to this turn. Retain its watermark
+	# so the next ask cannot play late greeting chunks under a new answer.
 	_latest_audio_event = maxi(_latest_audio_event, event_id)
+	if _muted or _suppress_audio:
+		return
 	var encoded: String = str(payload.get("audio_base_64", ""))
 	if encoded.is_empty() or encoded.length() > MAX_PACKET_BYTES:
 		_fail("protocol_error")
@@ -365,6 +383,7 @@ func _receive_audio(payload: Dictionary) -> void:
 		return
 	_audio_chunks.append(pcm)
 	_audio_bytes += pcm.size()
+	_audio_settle_until = Time.get_ticks_msec() + AUDIO_SETTLE_MS
 
 func _pump_audio() -> void:
 	# Complete agent_response can arrive after audio. Until text exists, retain
@@ -400,6 +419,10 @@ func _pump_audio() -> void:
 			_set_status("speaking")
 	elif _speaking and Time.get_ticks_msec() >= _audio_drain_at:
 		_clear_audio()
+		_refresh_response_status()
+	elif not _speaking:
+		# A committed text reply can precede the first/last PCM packet. Keep
+		# the composer locked briefly, then release it without a provider event.
 		_refresh_response_status()
 
 func _clear_audio() -> void:
@@ -483,6 +506,7 @@ func _close() -> void:
 	_answer = ""
 	_context_json = "{}"
 	_suppress_audio = false
+	_audio_settle_until = 0
 	_clear_audio()
 
 func _exit_tree() -> void:

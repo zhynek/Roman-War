@@ -114,12 +114,14 @@ static func _valid_state(state: Variant) -> bool:
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
 		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
-		"advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY,
+		"advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY, "advisor_tutorial": TYPE_DICTIONARY, "divine_dilemmas": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
 		return false
 	if state.has("patronage") and not _valid_patronage(state.patronage, state):return false
+	if state.has("advisor_tutorial") and not _valid_advisor_tutorial(state.advisor_tutorial,state):return false
+	if state.has("divine_dilemmas") and not _valid_divine_dilemmas(state.divine_dilemmas,state):return false
 	for unlock in state.get("advisor_unlocks", {}).values():
 		if not _fields(unlock, {"turn":TYPE_FLOAT,"region":TYPE_STRING}):return false
 		if not _whole_at_least(unlock.turn,0) or unlock.turn > state.turn:return false
@@ -654,4 +656,39 @@ static func _valid_patronage(record: Variant, state: Dictionary) -> bool:
 	for id in record.completed:
 		if not id is String or not id.is_valid_identifier() or id.length() > 64:return false
 		if not _whole_at_least(record.completed[id],0) or record.completed[id] > state.turn:return false
+	return true
+
+
+static func _valid_advisor_tutorial(ledger: Variant, state: Dictionary) -> bool:
+	if not _fields(ledger,{"baseline_turn":TYPE_FLOAT,"last_checked_turn":TYPE_FLOAT,
+		"strain_active":TYPE_BOOL,"milestones":TYPE_DICTIONARY}):return false
+	for key in ["baseline_turn","last_checked_turn"]:
+		if not _whole_at_least(ledger[key],0) or ledger[key] > state.turn:return false
+	if ledger.last_checked_turn < ledger.baseline_turn or ledger.milestones.size() > 32:return false
+	for id in ledger.milestones:
+		if not id is String or not id.is_valid_identifier() or id.length() > 64:return false
+		var item = ledger.milestones[id]
+		if not _fields(item,{"status":TYPE_STRING,"turn":TYPE_FLOAT,"params":TYPE_DICTIONARY,"postponed_until":TYPE_FLOAT}):return false
+		if item.status not in ["pending","acknowledged","dismissed"]:return false
+		if not _whole_at_least(item.turn,0) or item.turn < ledger.baseline_turn or item.turn > state.turn:return false
+		if not _whole_at_least(item.postponed_until,0) or item.postponed_until < item.turn:return false
+		if not _fields(item.params,{"region":TYPE_STRING,"subject":TYPE_STRING,"value":TYPE_FLOAT}):return false
+		if item.params.size() != 3:return false
+		if item.params.region != "" and not state.settlements.has(item.params.region):return false
+		if item.params.subject.length() > 128:return false
+		if float(item.params.value) != floorf(float(item.params.value)):return false
+	return true
+
+
+static func _valid_divine_dilemmas(ledger: Variant, state: Dictionary) -> bool:
+	if not _fields(ledger,{"cooldown_until":TYPE_FLOAT,"resolved":TYPE_DICTIONARY}):return false
+	if not _whole_at_least(ledger.cooldown_until,0) or ledger.resolved.size() > 32:return false
+	if ledger.resolved.is_empty() and ledger.cooldown_until != 0:return false
+	for id in ledger.resolved:
+		if not id is String or not id.is_valid_identifier() or id.length() > 64:return false
+		var receipt = ledger.resolved[id]
+		if not _fields(receipt,{"turn":TYPE_FLOAT,"region":TYPE_STRING,"choice":TYPE_STRING}):return false
+		if not _whole_at_least(receipt.turn,0) or receipt.turn > state.turn or receipt.turn > ledger.cooldown_until:return false
+		if not state.settlements.has(receipt.region):return false
+		if not receipt.choice.is_valid_identifier() or receipt.choice.length() > 64:return false
 	return true

@@ -26,9 +26,12 @@ SCHEMAS = ROOT / "schemas"
 TABLES = {
     "marcus.json": "marcus.schema.json",
     "lucius.json": "marcus.schema.json",
+    "gaius.json": "marcus.schema.json",
     "advisors.json": "advisors.schema.json",
     "patronage.json": "patronage.schema.json",
     "council.json": "council.schema.json",
+    "reactive_tutorial.json": "reactive_tutorial.schema.json",
+    "divine_dilemmas.json": "divine_dilemmas.schema.json",
     "waterways.json": "waterways.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
@@ -132,6 +135,46 @@ def load_tables() -> dict[str, dict]:
     return tables
 
 
+def _divine_dilemma_checks(t: dict[str, dict]) -> None:
+    cards = t.get("divine_dilemmas.json", {}).get("dilemmas", [])
+    ids = [card.get("id") for card in cards]
+    if len(ids) != len(set(ids)):
+        err("divine dilemmas: duplicate id")
+    patrons = {p["id"] for p in t.get("patronage.json", {}).get("patrons", [])}
+    edicts = {e["id"] for e in t.get("edicts.json", {}).get("edicts", [])}
+    taxes = t.get("balance.json", {}).get("taxes", {}).get("income_multiplier", {})
+    for card in cards:
+        if card.get("patron") not in patrons:
+            err("divine dilemmas: unknown patron")
+        choices = card.get("choices", [])
+        choice_ids = [choice.get("id") for choice in choices]
+        if len(choice_ids) != len(set(choice_ids)):
+            err("divine dilemmas: duplicate choice id")
+        if sum(choice.get("action") == "decline" for choice in choices) != 1:
+            err("divine dilemmas: exactly one cost-free decline required")
+        for choice in choices:
+            action, target = choice.get("action"), choice.get("target")
+            if action == "tax" and target not in taxes:
+                err("divine dilemmas: unknown tax setting")
+            if action == "edict" and target not in edicts:
+                err("divine dilemmas: unknown edict")
+            if action == "decline" and target != "":
+                err("divine dilemmas: decline cannot target a policy")
+
+
+def _reactive_tutorial_checks(t: dict[str, dict]) -> None:
+    cards = t.get("reactive_tutorial.json", {}).get("milestones", [])
+    ids = [card.get("id") for card in cards]
+    if len(ids) != len(set(ids)):
+        err("reactive tutorial: duplicate milestone id")
+    lessons = {lesson["id"] for lesson in t.get("marcus.json", {}).get("lessons", [])}
+    for card in cards:
+        if card.get("lesson") not in lessons:
+            err(f"reactive tutorial: unknown lesson {card.get('lesson')}")
+        if not set(re.findall(r"\{([a-z_]+)\}", card.get("body", ""))) <= {"region", "subject", "value"}:
+            err("reactive tutorial: unsupported body placeholder")
+
+
 def _patronage_checks(t: dict[str, dict]) -> None:
     profiles = t.get("patronage.json", {}).get("patrons", [])
     ids = [profile.get("id") for profile in profiles]
@@ -187,8 +230,11 @@ def cross_checks(t: dict[str, dict]) -> None:
     _city_checks(t)
     _marcus_checks(t)
     _marcus_checks(t, "lucius.json")
+    _marcus_checks(t, "gaius.json")
     _advisor_checks(t)
     _patronage_checks(t)
+    _reactive_tutorial_checks(t)
+    _divine_dilemma_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 

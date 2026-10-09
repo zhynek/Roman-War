@@ -1,4 +1,4 @@
-# Marcus and Lucius private voice connections
+# Private voices for Marcus, Lucius and Gaius
 
 Live native verification completed October 9, 2026 after the user enabled
 ElevenAgents Write (`convai_write`). Both Marcus and Lucius received private
@@ -71,6 +71,45 @@ The broker maps `marcus` to `ELEVENLABS_AGENT_ID` and `lucius` to
 fails clearly; it never falls back to Marcus. Equal agent IDs are rejected.
 The unlock gates the game UI, not paid multiplayer entitlements; this local
 broker trusts its authorized native process and does not validate saves.
+
+## Gaius military agent and the living council
+
+Created October 9, 2026 through the existing restricted key:
+[Gaius — Roman War Military Counselor](https://elevenlabs.io/app/agents/agents/agent_3601m4gd7j2wfnatxtn3vykjkqmv/agent).
+Nonsecret agent ID: `agent_3601m4gd7j2wfnatxtn3vykjkqmv`; stock **Adam** voice
+`pNInz6obpgDQGcFmaJgB`, V4 Turbo, PCM 16 kHz. Its original
+[military persona](../advisors/gaius-agent-prompt.txt) uses the same model,
+private authentication, zero retention, no recording, no tools and account limits
+as the other advisors. No key was replaced or permission broadened.
+
+The existing owner-only private JSON now contains `ELEVENLABS_GAIUS_AGENT_ID`
+alongside the other provider fields. The broker allowlists this identity and
+rejects missing or duplicate IDs; it never substitutes Marcus or Lucius.
+The double-click launcher needs no additional setup on this computer.
+
+All three provider prompts were updated and read back to match the repository's
+council and dilemma instructions while preserving privacy/authentication settings.
+The explicit council opens at most one connection per unlocked speaker, one
+question per connection, with no retries. Introductions are muted; the bounded
+answer plays sequentially with labelled text. Cancellation closes the transport.
+The existing local session rate limit of six attempts per minute still applies.
+
+The subsequent isolated native council completed all three speakers using a
+7,530-byte frozen campaign snapshot. Marcus, Lucius and Gaius produced readable
+294/377/404-character replies and sequential PCM playback, with no overlapping
+audio or campaign-state changes. A second explicit discussion verified mute and
+context-change cancellation. Offline fallback retained the authored council.
+These are technical playback observations; voice character and pacing still
+need the player's listening review.
+
+The live provider omitted `agent_response_complete` for both greetings and
+questions despite that event being enabled. The client now accepts the documented
+final `agent_response` for these tool-free advisors, retains streamed text, and
+waits for queued PCM/playback plus a 500 ms settling interval before advancing.
+Late and interrupted text/audio retain their response-ID/event-ID safeguards.
+The focused regression uses synthetic events and no credentials. It passed,
+with one retained `AudioStreamGeneratorPlayback` warning at headless teardown;
+the real campaign and standalone village sessions exited cleanly.
 
 ## Recreate or change the agent
 
@@ -174,7 +213,7 @@ Content-Type: application/json
 {"advisor":"lucius"}
 ```
 
-Only `marcus` or `lucius` is accepted. An empty object remains compatible with
+Only `marcus`, `lucius` or `gaius` is accepted. An empty object remains compatible with
 older Marcus clients. Unknown identities, duplicate fields, extra fields,
 arbitrary agent IDs and URLs are rejected.
 
@@ -185,7 +224,7 @@ connection, never log or persist it. The broker requests
 connection promptly; ElevenLabs documents a 15-minute connection window.
 
 `GET /health` returns only `{"configured":true}` or `{"configured":false}`;
-this means Marcus values are present, not that either agent was verified.
+this means Marcus values are present, not that any agent was verified.
 Every response is `Cache-Control: no-store`. Error responses contain a fixed
 machine-readable `error` code, never a provider response, API key or agent ID.
 
@@ -214,8 +253,8 @@ This isolated security check uses synthetic values and a loopback ephemeral port
 It never contacts ElevenLabs, spends provider credit or runs the campaign suite.
 It is covered by the weekly testing policy's credential-handling exception.
 
-Verified October 8, 2026: all 20 focused checks passed in 4.093 seconds,
-including separate Lucius routing, wrong-agent signed URLs, private-agent
+Verified October 9, 2026: all 21 focused checks passed in 4.094 seconds,
+including separate Lucius/Gaius routing, wrong-agent signed URLs, private-agent
 requirements, duplicate selector rejection, child-process credential removal,
 and the private-file boundary described above.
 This verifies the local credential boundary with synthetic credentials, not a

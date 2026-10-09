@@ -55,11 +55,11 @@ application connected by the campaign adapter described below.
    A seasonal council presents counsel after the deterministic season resolves.
    Neither spoken dialogue nor an LLM decides rewards, outcomes or unlocks.
 
-Milestone 4 and the first specialist, Lucius, are implemented. The next slice
-adds an authored seasonal council and optional Zeus/Ares patronage through existing
-temple chains. Explicit pledges, deterministic seasonal assessment and saved
-narrative honors shape both advisors' context. Military specialists, additional
-gods, emperor succession and autonomous council debates remain future work.
+The campaign integration, reactive tutorial, Lucius and Gaius specialists,
+authored and generated seasonal councils, and Zeus/Ares patronage and dilemmas
+are implemented locally. The latest three-phase record below supersedes older
+“next phase” notes, which remain as development history. A larger pantheon and
+persistent advisor memory across the existing generations remain future work.
 
 ## Boundaries
 
@@ -279,3 +279,128 @@ Next logical phase: a small season council with Marcus and Lucius presenting
 separate, bounded viewpoints on the latest Dispatch and the selected city's
 reported conditions. Keep it optional and player-controlled, and finish live
 native voice acceptance before expanding to another specialist or divine rules.
+
+
+## Three advisor phases implemented — October 9, 2026
+
+This session began from clean `245503c` on `codex/marcus-advisor`, retaining the
+integrated waterways. The complete plan was recorded before implementation in
+Isengard assignment `78dc60e5-c926-4d29-9645-476374d22528`, linked to the original
+`762ed14c-6d92-44ef-b99f-675b4b2be04c`. The dedicated reporting agent maintains
+[the progress record](advisors/NEXT_THREE_PHASES_PROGRESS.txt). No push or release
+was authorized.
+
+### Reactive Marcus
+
+`data/reactive_tutorial.json` and its schema author five encounters. The
+scene-free `AdvisorTutorialRules` records real season resolution, completed
+construction, mustered units/actual marches, a new negative-treasury or sub-80
+public-order crossing, and declarations of war/involved battles. Queuing a
+project or reading a report is insufficient. The invitation only polls saved
+evidence; it never records progress or consumes RNG from a frame callback.
+
+The additive `advisor_tutorial` ledger travels with the campaign save. It stores
+the baseline, last inspected season, previous strain state and first evidence,
+status and postponement for each encounter. Saves missing it establish a current
+baseline: historical seasons and continuing old strain do not generate a flood.
+A loaded save is the campaign identity; loading an earlier save restores that
+save's earlier progress. Separate campaigns/save forks have independent ledgers.
+No machine-global completed flag suppresses another campaign's lessons.
+
+Invitations wait for battles, pending defense, presentation and Dispatch. Show me
+uses existing inspection controls, preferring the milestone's still-owned city.
+Acknowledgment/dismissal is permanent in that save; postponement lasts until the
+next resolved season. The archive remains replayable and Ask prepares a question
+without connecting. The separate rewarded Guided mode is unchanged.
+
+### Gaius
+
+`data/gaius.json`, the shared advisor schema and `gaius_portrait.gd` define an
+original commander with five lessons and a procedural portrait. The existing
+`AdvisorRules` awards his permanent seat for an owned completed tier-three
+barracks. All culture-specific barracks use their existing chain. Existing saves
+with unlock records award a newly introduced advisor at an eligible season close;
+status reads cannot award him. Session availability is seeded before a resumed
+battle worker starts and cached throughout battle presentation.
+
+The advisor registry retains separate panels, contexts, preferences and
+conversations. Switching closes the previous voice before opening another.
+Gaius's military adapter uses only owned force summaries, known destination
+terrain and the actual final route approach, order previews, and observed hostile
+presence. Neutral/allied forces are not labelled enemies. Enemy rosters, precise
+strength and estimator results are absent. Tactical advice takes the detached
+panel snapshot, selected defending formations and revealed attacker presence;
+it never calls the running worker's campaign/economy readers.
+
+The broker adds only the allowlisted `gaius` selector and
+`ELEVENLABS_GAIUS_AGENT_ID`. Missing/duplicate configuration fails explicitly.
+A distinct private Adam voice persona is configured in the existing owner-only
+credential file. Provider credentials remain in Python; the child environment,
+prompts, saves and repository never receive the key.
+
+### Living council and dilemmas
+
+`living_council.gd` is a presentation controller over the existing transport.
+**Hear the council** requires an owned selected city and the current resolved
+season's visible reports. It freezes a bounded deep copy, filters locked seats
+and their interpretations, and includes only currently eligible authored divine
+alternatives and their quoted effects. Quote signatures never leave the game.
+Marcus chairs; Lucius weighs institutions; Gaius weighs defense and recurring
+costs. Each gets one explicit question after a muted introduction. Every preceding
+connection closes before the next opens.
+
+Data sets limits of three turns, 60 requested words/720 characters per answer,
+45 seconds per speaker, 140 seconds overall, and 18,000 snapshot bytes. The
+transport's separate 24,576-byte ceiling includes prior turns. No retries or
+background debates occur. Mute preserves text; stop, close, tab/speaker/view or
+selection changes, new seasons, load and exit cancel playback. The written
+perspectives remain available when the provider is absent or fails.
+
+`data/divine_dilemmas.json` authors Zeus's city petition and Ares's levy/fields
+choice. `DivineDilemmaRules` offers existing low-tax settings, Public Works,
+Legion Levy or refusal. It requires ownership, the current patron's completed
+matching temple, at least one season after the pledge and a two-season global
+cooldown. Each dilemma resolves once per campaign. Review quotes show exact
+existing tax factors or population-based upkeep, full-strength edict effects,
+settling delay and revocation cooldown. Confirmation rechecks a canonical hash
+of the relevant owned state and rules before applying the existing policy and
+writing an additive receipt. Repeated clicks, patron changes and loads cannot
+reapply a recorded outcome. Refusal has no hidden penalty; Legion Levy creates
+no units. Generated dialogue has no command path.
+
+### Observed verification and limits
+
+The isolated native walkthrough queued legal construction/recruitment, resolved
+the military prerequisite, observed invitations, followed read-only navigation,
+declared war, pledged Zeus and requested the council. All three speakers streamed
+text and played native PCM sequentially. The shared snapshot was 7,530 bytes;
+three replies were 294/377/404 characters. No playback overlap or campaign/RNG
+mutation occurred. The discussion contrasted civic legitimacy with recurring
+public-service and garrison costs. Mute stopped audio; changing selection stopped
+and disconnected a second explicitly requested discussion.
+
+Public Works was quoted at 260.208 per season for population 10,008, with five
+settling seasons, four revocation-cooldown seasons, and civic +7/growth +0.5/
+burden +2 at full strength. Cancel changed nothing. Confirm set the existing
+edict and one turn-3 receipt without an upfront charge or RNG draw; a repeated
+confirmation did nothing. Load retained the edict, receipt, Gaius and dismissal,
+while clearing all transient conversations/council playback.
+
+A prepared 20-unit garrison with one denarius and an actual low-tax season
+produced treasury -1,725 through normal income/upkeep and recorded strain. A
+separate high-tax/mustering attempt did not cross the threshold, and was not
+counted as success. The active practice battle supplied detached tactical
+context without faction finances and blocked live council generation. Offline
+council failure preserved all authored seats. Final caption/quote screens and the
+standalone village's 11-lesson Marcus panel were inspected in isolated storage.
+
+The provider omitted `agent_response_complete` even when configured. The shared
+read-only transport now uses accepted final `agent_response`, queued PCM and a
+500 ms settling interval; stale and muted-audio safeguards remain. One focused
+escaped-bug regression passed; its synthetic headless teardown still reports an
+ObjectDB warning. The real campaign and village walkthroughs exited cleanly.
+Technical playback was verified; subjective voice character and pacing still
+need the player's listening review. This remains a private local development
+service, with no multiplayer entitlement or hosted production deployment.
+
+Verified by: data/schema validation, Godot import, isolated native campaign and village walkthroughs, and focused exception checks. Tests: broad suites not run (weekly review policy); 21 credential, four tutorial-save, five dilemma money/save checks and one transport regression passed.

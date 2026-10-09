@@ -21,7 +21,8 @@
           "id",
           "name",
           "role",
-          "unlock"
+          "unlock",
+          "unlock_label"
         ],
         "properties": {
           "id": {
@@ -45,7 +46,10 @@
             ],
             "properties": {
               "building_kind": {
-                "const": "government"
+                "enum": [
+                  "government",
+                  "barracks"
+                ]
               },
               "min_level": {
                 "type": "integer",
@@ -53,6 +57,10 @@
                 "maximum": 6
               }
             }
+          },
+          "unlock_label": {
+            "type": "string",
+            "minLength": 1
           }
         }
       }
@@ -73,7 +81,12 @@
         "available",
         "battle",
         "no_seat",
-        "permanent"
+        "permanent",
+        "locked_name",
+        "roster_ready",
+        "roster_locked",
+        "advisor_available",
+        "locked_requirement"
       ]
     },
     "reading": {

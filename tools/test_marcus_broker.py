@@ -141,13 +141,14 @@ class LocalBoundaryTests(unittest.TestCase):
         self.assertEqual(self.provider.calls, 1)
 
     def test_advisor_route_is_allowlisted_and_unambiguous(self):
-        status, _, _ = self.request(body=b'{"advisor":"lucius"}')
-        self.assertEqual(status, 200)
-        self.assertEqual(self.provider.advisor, "lucius")
+        for advisor in ("lucius", "gaius"):
+            status, _, _ = self.request(body=json.dumps({"advisor":advisor}).encode())
+            self.assertEqual(status, 200)
+            self.assertEqual(self.provider.advisor, advisor)
         for body in (b'{"advisor":"other"}', b'{"advisor":null}', b'{"advisor":[]}',
                      b'{"advisor":"lucius","advisor":"marcus"}'):
             self.assertEqual(self.request(body=body)[0], 400)
-        self.assertEqual(self.provider.calls, 1)
+        self.assertEqual(self.provider.calls, 2)
 
 
     def test_global_session_rate_limit(self):
@@ -184,6 +185,25 @@ class ProviderBoundaryTests(unittest.TestCase):
         with patch.object(unconfigured, "_get") as upstream:
             with self.assertRaises(BrokerError):unconfigured.create_session("lucius")
             upstream.assert_not_called()
+
+    def test_gaius_uses_distinct_private_agent_without_fallback(self):
+        provider = ElevenLabs(Config(token=TOKEN, api_key="synthetic", agent_id="agent_synthetic",
+                                     lucius_agent_id="agent_lucius", gaius_agent_id="agent_gaius"))
+        auth = {"platform_settings": {"auth": {"enable_auth": True, "allowlist": []}}}
+        gaius_url = SIGNED_URL.replace("agent_synthetic", "agent_gaius")
+        with patch.object(provider, "_get", side_effect=[auth, {"signed_url":gaius_url}]) as upstream:
+            self.assertEqual(provider.create_session("gaius"), gaius_url)
+            self.assertEqual(upstream.call_args_list[0].args[0], "/agents/agent_gaius")
+        with patch.object(provider, "_get", side_effect=[auth, {"signed_url":SIGNED_URL}]):
+            with self.assertRaises(BrokerError):provider.create_session("gaius")
+        with patch.object(provider, "_get", return_value={"platform_settings":{"auth":{"enable_auth":False}}}) as upstream:
+            with self.assertRaises(BrokerError):provider.create_session("gaius")
+            self.assertEqual(upstream.call_count, 1)
+        for config in (CONFIG, Config(token=TOKEN, api_key="synthetic", agent_id="same", gaius_agent_id="same")):
+            provider=ElevenLabs(config)
+            with patch.object(provider, "_get") as upstream:
+                with self.assertRaises(BrokerError):provider.create_session("gaius")
+                upstream.assert_not_called()
 
     def test_private_auth_is_checked_before_each_single_use_mint(self):
         provider = ElevenLabs(CONFIG)
@@ -277,7 +297,7 @@ class ProviderBoundaryTests(unittest.TestCase):
     def test_launcher_strips_provider_credentials_and_replaces_old_session(self):
         source = {
             "PATH": "/bin", "ELEVENLABS_API_KEY": "secret", "ELEVENLABS_AGENT_ID": "agent",
-            "ELEVENLABS_LUCIUS_AGENT_ID": "lucius-agent",
+            "ELEVENLABS_LUCIUS_AGENT_ID": "lucius-agent", "ELEVENLABS_GAIUS_AGENT_ID": "gaius-agent",
             "OPENAI_API_KEY": "secret", "ANTHROPIC_AUTH_TOKEN": "secret",
             "AZURE_OPENAI_KEY": "secret", "XI_API_KEY": "secret",
             "MARCUS_BROKER_TOKEN": "old", "MARCUS_BROKER_URL": "http://other",
@@ -292,7 +312,7 @@ class ProviderBoundaryTests(unittest.TestCase):
             with self.subTest(token=token):
                 with self.assertRaises(ConfigurationError):
                     Config.from_environment({"MARCUS_BROKER_TOKEN": token})
-        for name, value in (("ELEVENLABS_API_KEY", "key\r\nInjected: value"), ("ELEVENLABS_AGENT_ID", "../other"), ("ELEVENLABS_LUCIUS_AGENT_ID", "../other")):
+        for name, value in (("ELEVENLABS_API_KEY", "key\r\nInjected: value"), ("ELEVENLABS_AGENT_ID", "../other"), ("ELEVENLABS_LUCIUS_AGENT_ID", "../other"), ("ELEVENLABS_GAIUS_AGENT_ID", "../other")):
             with self.subTest(name=name):
                 with self.assertRaises(ConfigurationError):
                     Config.from_environment({"MARCUS_BROKER_TOKEN": TOKEN, name: value})
@@ -300,6 +320,10 @@ class ProviderBoundaryTests(unittest.TestCase):
         with self.assertRaises(ConfigurationError):
             Config.from_environment({"MARCUS_BROKER_TOKEN": TOKEN,
                 "ELEVENLABS_AGENT_ID": "same", "ELEVENLABS_LUCIUS_AGENT_ID": "same"})
+        for other in ("ELEVENLABS_AGENT_ID", "ELEVENLABS_LUCIUS_AGENT_ID"):
+            with self.assertRaises(ConfigurationError):
+                Config.from_environment({"MARCUS_BROKER_TOKEN":TOKEN,
+                    "ELEVENLABS_GAIUS_AGENT_ID":"same",other:"same"})
         self.assertNotIn(TOKEN, repr(CONFIG))
         self.assertNotIn(CONFIG.api_key, repr(CONFIG))
 
@@ -316,9 +340,10 @@ class CredentialFileTests(unittest.TestCase):
 
     def test_private_file_loads_only_provider_fields(self):
         self.write(json.dumps({"ELEVENLABS_API_KEY": "synthetic-key",
-                               "ELEVENLABS_AGENT_ID": "marcus", "ELEVENLABS_LUCIUS_AGENT_ID": "lucius"}))
+                               "ELEVENLABS_AGENT_ID": "marcus", "ELEVENLABS_LUCIUS_AGENT_ID": "lucius", "ELEVENLABS_GAIUS_AGENT_ID":"gaius"}))
         values = private_credentials(str(self.path))
         self.assertEqual(values["ELEVENLABS_LUCIUS_AGENT_ID"], "lucius")
+        self.assertEqual(values["ELEVENLABS_GAIUS_AGENT_ID"], "gaius")
         self.assertEqual(child_environment(values, TOKEN), {
             "MARCUS_BROKER_TOKEN": TOKEN, "MARCUS_BROKER_URL": BROKER_URL})
 

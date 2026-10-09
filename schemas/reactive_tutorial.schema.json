@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "milestones",
+    "ui"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "body",
+          "lesson",
+          "question"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "first_season",
+              "construction",
+              "army",
+              "strain",
+              "war"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "lesson": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1200
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1200
+      },
+      "required": [
+        "title",
+        "invitation",
+        "show_me",
+        "ask",
+        "acknowledge",
+        "dismiss",
+        "postpone",
+        "replay",
+        "pending",
+        "unseen",
+        "acknowledged",
+        "dismissed",
+        "postponed",
+        "blocked",
+        "empty",
+        "source",
+        "return",
+        "turn",
+        "history",
+        "help"
+      ]
+    }
+  }
+}

@@ -11,6 +11,42 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Current local advisor development — October 9, 2026
+
+All three requested phases are implemented on `codex/marcus-advisor`, extending
+clean `245503c` and preserving the waterways integration below. Read the latest
+[advisor implementation record](MARCUS_ADVISOR.md#three-advisor-phases-implemented--october-9-2026),
+[session evidence](advisors/NEXT_THREE_PHASES_PROGRESS.txt), and
+[player instructions](../PLAYING.md#marcus-notices-your-progress).
+
+- Marcus has five saved reactive milestones with discreet invitations,
+  read-only navigation, dismissal, postponement and replay. Existing saves gain
+  a current baseline instead of historical invitation spam.
+- Gaius joins through an owned completed tier-three barracks. He has original
+  procedural art, lessons, visible military readings and a distinct private
+  voice. The registry preserves separate conversations and battle-safe context.
+- Hear the council explicitly requests a frozen, bounded three-speaker discussion.
+  It stops on cancellation/context/load changes and never issues game commands.
+  Zeus/Ares dilemmas quote existing tax/edict effects, require confirmation, and
+  record deterministic once-only decisions and cooldowns in additive saves.
+
+Double-click `Launch Roman War Advisors.command`. The existing mode-0600 private
+file now includes Gaius's agent ID; no new key or scope expansion was needed.
+All three prompts were updated and read back privately. The native council
+completed with three streamed replies and PCM playback, no overlapping audio,
+and unchanged campaign state. A real Public Works confirmation and save/load
+retained exactly one receipt. Offline fallback, tactical detached context,
+reactive strain and standalone village rendering were checked directly.
+
+The provider does not reliably emit `agent_response_complete`; the shared
+transport now handles its documented final message and audio settling. One
+synthetic regression has an ObjectDB teardown warning; real campaign/village
+runs exited cleanly. Voice quality remains subjective listening review. No
+hosted backend, release or push is included. The next useful phase is persistent
+advisor memory anchored to the existing chronicle and succession events.
+
+Verified by: data validation, Godot import, isolated native campaign/village walkthroughs and focused exception checks. Tests: broad suites not run (weekly review policy); 21 credential, four tutorial-save, five dilemma money/save checks and one transport regression passed.
+
 ## Local integration with advisor development — October 8, 2026
 
 This local checkout combines the waterways phase described below with the

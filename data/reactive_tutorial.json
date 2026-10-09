@@ -1,0 +1,62 @@
+{
+  "$schema": "../schemas/reactive_tutorial.schema.json",
+  "milestones": [
+    {
+      "id": "first_season",
+      "title": "Your first season has resolved",
+      "body": "The world has answered your orders. Read the Dispatch, then compare the changes with the plans you made. A headline records an event; it does not promise the next outcome.",
+      "lesson": "seasons",
+      "question": "Help me read this resolved season. Which visible change deserves my attention first, and what should I check before acting?"
+    },
+    {
+      "id": "construction",
+      "title": "A building is ready to serve",
+      "body": "Construction has completed at {region}. Review the building's benefits and burdens, then check the city's reported condition. Completing a building is a beginning, not proof that its people are better governed.",
+      "lesson": "construction",
+      "question": "What should I review after this construction completed? Explain its visible benefits, burdens and the relevant city reports."
+    },
+    {
+      "id": "army",
+      "title": "Orders have become action",
+      "body": "An army has moved or a recruited unit has mustered. Check its position, movement allowance and upkeep before the next order. An intended route and a completed move are different things.",
+      "lesson": "orders",
+      "question": "Help me understand this military milestone. What should I verify about movement, orders and upkeep without exposing hidden enemy details?"
+    },
+    {
+      "id": "strain",
+      "title": "The realm is asking for attention",
+      "body": "A resolved season has brought a treasury or public-order warning. Open the relevant breakdown before changing policy; the largest visible symptom may not be its underlying cause.",
+      "lesson": "public_order",
+      "question": "Help me investigate this treasury or public-order warning using the supplied reports. What is known, what may be stale, and which tradeoff should I examine first?"
+    },
+    {
+      "id": "war",
+      "title": "Peace has given way to conflict",
+      "body": "A new war or battle now concerns your faction. Review diplomacy, your own forces and visible order previews. Counsel can explain a choice, but cannot promise a victory or reveal an unseen enemy roster.",
+      "lesson": "orders",
+      "question": "Help me orient after this war or battle. Which visible facts and decisions matter now, and what remains uncertain?"
+    }
+  ],
+  "ui": {
+    "title": "Marcus notices your progress",
+    "invitation": "Marcus has guidance",
+    "show_me": "Show me the relevant controls",
+    "ask": "Ask Marcus about this moment",
+    "acknowledge": "I've read this",
+    "dismiss": "Dismiss this invitation",
+    "postpone": "Remind me next season",
+    "replay": "Replay this lesson",
+    "pending": "Ready to explore",
+    "unseen": "Awaiting a campaign milestone",
+    "acknowledged": "Reviewed",
+    "dismissed": "Dismissed",
+    "postponed": "Postponed until turn {turn}",
+    "blocked": "Finish the turn presentation and Dispatch, or resolve the active battle and pending city defense, before responding to tutorial invitations.",
+    "empty": "No new tutorial invitation is waiting. The lessons remain available whenever you want them.",
+    "source": "WRITTEN TUTORIAL \u00b7 NO AUTOMATIC VOICE CONNECTION",
+    "return": "Return to lessons",
+    "turn": "Recorded on turn {turn}",
+    "history": "Your campaign milestones",
+    "help": "These invitations are optional and belong to this saved campaign. Reading never changes orders or advances time. Acknowledging, dismissing or postponing only changes tutorial progress."
+  }
+}

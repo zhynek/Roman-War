@@ -47,8 +47,8 @@ in Roma. On first use, a three-page opening leads into six replayable lessons.
 move troops or advance time. The written guide works offline.
 
 After a season’s presentation and Dispatch finish, **Convene the council**
-offers Marcus's and, once unlocked, Lucius's perspectives on shared reports.
-You can revisit it inside either advisor. It includes only the latest season
+offers Marcus's and unlocked specialists' perspectives on shared reports.
+You can revisit it inside any advisor. It includes only the latest season
 when several are advanced together. Reviewing it spends nothing and advances no time.
 
 **Connect Marcus** enables typed questions with ElevenLabs text and optional
@@ -57,6 +57,23 @@ when you ask and includes only bounded player-visible facts. Conversations
 survive ordinary map/city navigation; loading a save clears them. Closing Marcus
 ends the online connection. During a city battle, only its presented snapshot
 is supplied; the battle continues unless you pause it with its own controls.
+
+## Marcus notices your progress
+
+A small **Marcus has guidance** invitation appears after your first resolved
+season, completed building, recruited unit or actual army movement, financial
+or public-order strain, and declaration of war or battle. Reading a queued
+project does not count as completion. Invitations wait for battles, pending
+city defenses, turn presentation and Dispatch to finish. They never open a
+large panel, connect a voice or spend provider credit automatically.
+
+Open **Your campaign milestones** to replay any lesson. **Show me the relevant
+controls** navigates without issuing an order. **Ask Marcus about this moment**
+prepares a question for you to send. You can acknowledge, dismiss, or postpone
+an invitation until the next resolved season. Progress belongs to the campaign
+save: loading an older save restores that save's progress, and a new campaign
+starts afresh. Established saves receive a baseline instead of a flood of past
+lessons. This tutorial is separate from the existing rewarded Guided mode.
 
 ## Lucius and governing well
 
@@ -76,16 +93,45 @@ tradeoffs. Economic readings wait until an open city battle closes.
 
 Switching ends the previous voice session and retains each advisor's on-screen
 transcript. Reconnecting starts a new provider conversation; retained text is
-not long-term AI memory. Loading a save clears both transcripts and returns to
+not long-term AI memory. Loading a save clears all transcripts and returns to
 Marcus. The village experience still uses Marcus alone.
+
+## Gaius and military judgment
+
+**Gaius** is an original military counselor. He joins after you own a completed
+tier-three barracks—Roman **Manipular Barracks**—at campaign creation or season
+close. Queued or foreign buildings do not qualify. Existing saves that already
+have advisor records award his new seat at the next eligible season close.
+Once earned, his seat survives later losses.
+
+Select **Gaius**, then **Read the military situation** or one of his five lessons.
+Select your own army, fleet or settlement to discuss its visible readiness,
+upkeep and movement; a pinned route also supplies its known destination terrain.
+Enemy presence never supplies hidden strength or rosters. During a viewed city
+battle, counsel uses only its detached displayed snapshot. It does not pause
+combat. His conversation and private voice are separate; switching speakers
+stops the previous connection. The written reading works offline.
 
 ## Seasonal council and divine patronage
 
 **Convene the council** brings the latest Dispatch headlines and a selected owned
 city's reported factors before your advisors. Their initial perspectives are
-written game content and work offline. **Ask Marcus/Lucius about this council**
+written game content and work offline. **Ask an advisor about this council**
 selects that speaker and prepares a question; you choose when to connect and send.
 Each advisor keeps a separate conversation. Their advice cannot issue game orders.
+
+After a resolved season, select an owned city and click **Hear the council**.
+Marcus chairs a generated discussion; Lucius and Gaius join only after unlocking.
+The council freezes the visible reports when you start, then gives each speaker
+one turn. Text appears with the speaker's name while their voice plays. The
+limits are three speakers, 60 requested words per turn, 720 displayed characters
+per reply, 45 seconds per speaker and 140 seconds overall. It uses at most three
+private connections and three questions, with no automatic retry.
+
+**Mute council** preserves text; **Stop council** immediately ends the discussion.
+Closing the panel, changing its context, loading or leaving the campaign also
+ends playback. A missing provider or timeout preserves the written perspectives.
+Generated opinions are advice; they cannot issue commands or add game facts.
 
 **Divine patronage** offers optional original dramatic addresses from Zeus and
 Ares. A completed owned temple is required: Zeus/Jupiter or Ares/Mars respectively.
@@ -97,10 +143,24 @@ city at low or normal taxes and public order of at least 100. Ares asks you to
 retain a matching temple and own at least one more settlement than when you pledged;
 peaceful acquisition counts. Progress changes only when a season resolves.
 Fulfillment records a narrative honor, with no additional income or combat bonus.
-Your patron shapes both advisors' perspectives, but its ambitions remain yours to
+Your patron shapes your advisors' perspectives, but its ambitions remain yours to
 question. Changing or renouncing a pledge clears its active progress and retains
 previous honors. Old saves begin without a patron. Choices wait for battles,
 pending defenses and season presentations to finish.
+
+**Divine dilemmas** presents two authored choices: Zeus's civic petition and
+Ares's levy and fields. Choose an owned city with your patron's completed matching
+temple and resolve at least one season after the pledge. Zeus offers low taxes,
+Public Works, or refusal. Ares offers Legion Levy, low taxes, or refusal. Existing
+edict prerequisites apply; another edict is never replaced automatically.
+
+Selecting an option only opens a quote. Read the exact tax factors or edict
+upkeep, effects and settling delay, then explicitly confirm. Edicts have no
+upfront charge here; normal season resolution charges population-scaled upkeep.
+Legion Levy creates no units. Refusal has no hidden punishment. Each dilemma can
+resolve once in that campaign, with a shared two-season cooldown. Changing patron
+or reloading cannot erase a recorded decision; changing quoted conditions requires
+a fresh confirmation. The gods' words are original game fiction.
 
 On this computer, double-click **Launch Roman War Advisors.command** in the
 repository to start the campaign with the private local voice broker. The provider

@@ -4,7 +4,8 @@
   "additionalProperties": false,
   "required": [
     "ui",
-    "speakers"
+    "speakers",
+    "discussion"
   ],
   "properties": {
     "$schema": {
@@ -70,7 +71,27 @@
         "renounced",
         "changed",
         "blocked",
-        "finished"
+        "finished",
+        "hear_council",
+        "live_title",
+        "live_source",
+        "live_help",
+        "live_ready",
+        "live_needs_context",
+        "live_connecting",
+        "live_discussing",
+        "live_complete",
+        "live_stopped",
+        "live_context_changed",
+        "live_timeout",
+        "live_unavailable",
+        "live_too_long",
+        "live_too_large",
+        "live_stop",
+        "live_mute",
+        "live_unmute",
+        "live_snapshot",
+        "live_empty"
       ]
     },
     "speakers": {
@@ -78,7 +99,8 @@
       "additionalProperties": false,
       "required": [
         "marcus",
-        "lucius"
+        "lucius",
+        "gaius"
       ],
       "properties": {
         "marcus": {
@@ -86,6 +108,72 @@
         },
         "lucius": {
           "$ref": "#/$defs/speaker"
+        },
+        "gaius": {
+          "$ref": "#/$defs/speaker"
+        }
+      }
+    },
+    "discussion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "limits",
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "$ref": "#/$defs/text"
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "turns",
+            "words",
+            "response_characters",
+            "speaker_seconds",
+            "session_seconds",
+            "snapshot_bytes",
+            "greeting_settle_ms"
+          ],
+          "properties": {
+            "turns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3
+            },
+            "words": {
+              "type": "integer",
+              "minimum": 20,
+              "maximum": 80
+            },
+            "response_characters": {
+              "type": "integer",
+              "minimum": 200,
+              "maximum": 1000
+            },
+            "speaker_seconds": {
+              "type": "integer",
+              "minimum": 15,
+              "maximum": 60
+            },
+            "session_seconds": {
+              "type": "integer",
+              "minimum": 30,
+              "maximum": 180
+            },
+            "snapshot_bytes": {
+              "type": "integer",
+              "minimum": 2000,
+              "maximum": 18000
+            },
+            "greeting_settle_ms": {
+              "type": "integer",
+              "minimum": 500,
+              "maximum": 1500
+            }
+          }
         }
       }
     }
@@ -105,7 +193,8 @@
         "counsel",
         "city",
         "season",
-        "patrons"
+        "patrons",
+        "locked"
       ],
       "properties": {
         "name": {
@@ -138,6 +227,9 @@
               "$ref": "#/$defs/text"
             }
           }
+        },
+        "locked": {
+          "$ref": "#/$defs/text"
         }
       }
     }

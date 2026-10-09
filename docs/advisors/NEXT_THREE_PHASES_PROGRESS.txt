@@ -1,0 +1,219 @@
+Roman War — reactive guidance, military advisor and living council
+Session progress — October 9, 2026
+
+Authority and baseline
+The user authorized automatic implementation of three ordered phases, with a
+dedicated reporting sub-agent. Start from clean local HEAD 245503c, which includes
+the waterways integration and accepted real native Marcus/Lucius voice. Preserve
+the prior Isengard assignment 762ed14c-6d92-44ef-b99f-675b4b2be04c and reports.
+
+Plan prepared before implementation
+Full plan: docs/advisors/NEXT_THREE_PHASES_PROMPT.txt.
+1. Five reactive Marcus milestones: first resolved season, completed construction,
+   meaningful army recruitment/movement, economic/public-order strain, and first
+   declaration of war/battle. Subtle opt-in invitation; explain what/why/next;
+   Show me, postpone, dismiss, replay and resume; no automatic paid requests.
+2. Original military advisor with completed-owned-military-building unlock,
+   visible bounded readings, separate private voice and unlocked council seat.
+3. Explicit bounded generated council with frozen context and sequential audio,
+   plus authored Zeus/Ares dilemmas with confirmed deterministic consequences.
+
+Required acceptance path
+Campaign milestone -> Marcus invitation -> relevant controls -> military unlock
+-> council participation -> explicit generated discussion -> confirmed dilemma
+consequence -> save/load, using isolated QA state/preferences. Record observed
+evidence, distinguish offline/configured/live behavior, and preserve no-automatic-
+spending, hidden-information, battle-worker and once-only consequence boundaries.
+
+Verification and reporting
+No broad suite or generic tests. Only focused credential/migration exception
+checks where applicable; validate data, import/compile and inspect the actual UI.
+No replacement credential, unapproved scope expansion, push, release or deployment.
+Never record secret values. Isengard reports remain Pending human review.
+
+Milestone 1 — full plan captured
+Created the complete implementation prompt and this progress record before source
+development. Recorded the full plan and acceptance path in linked Isengard
+assignment 78dc60e5-c926-4d29-9645-476374d22528, titled "Advisor progression — reactive
+Marcus, military counsel and living council", status In progress. The objective
+contains the full prompt (6,504 characters). Prior assignments/reports are
+preserved; no development result or new acceptance is claimed at this milestone.
+
+Milestone 2 — reactive guidance implementation underway
+Implementation began after the Isengard plan was recorded. The core agent owns
+authoritative milestone hooks and the additive per-campaign guidance record;
+the root agent owns the existing shared panel and campaign context. Invitations
+poll already-recorded events through read-only UI access. The implementation
+includes five authored cards, affected-city Show me navigation, explicit
+acknowledgement/dismissal/postponement, an archive and prefilled Marcus questions.
+A legacy baseline prevents historical milestones from flooding established
+campaigns. These are implementation details, not verified outcomes yet.
+
+The phase-2 design audit is complete: Gaius will be the original military advisor,
+unlocked through an owned completed barracks of tier 3 using the existing
+permanent advisor-unlock record. No new phase has passed direct verification yet.
+
+Milestone 3 — reactive guidance direct evidence
+A legal one-turn Skirmishers' Field construction was queued without creating an
+invitation. Resolution recorded first_season and construction milestone ids.
+The invitation appeared with the provider disconnected; opening it preserved
+the full game state. At turn 1 the construction lesson could be postponed until
+turn 2. Its question was prefilled without connecting. Show me selected Latium
+without changing game state. A save/load restored pending/postponed guidance and
+cleared transcripts to zero. Dispatch suppressed the invitation while open.
+
+Data validation reported zero errors and warnings; Godot import was clean. Four
+focused additive-save checks passed under the weekly-policy exception. The GUI
+runtime had no script errors. Rapid QA shutdown emitted GPU/RID and one object
+warning, which remains under investigation for the combined cleanup pass.
+Inspection of /tmp/reactive-marcus-construction.png exposed cramped content; the
+root agent widened the tutorial and removed a duplicate title. Those final
+layout changes will be inspected during combined QA. Gaius implementation has
+now started. This milestone does not claim all five trigger paths or the full
+three-phase acceptance path are complete.
+
+Milestone 4 — Gaius source and private persona configured
+The military-advisor source is integrated. A distinct private Gaius persona was
+created through the existing scoped provider API, without a replacement key or
+wider permissions: agent_3601m4gd7j2wfnatxtn3vykjkqmv, Adam voice
+pNInz6obpgDQGcFmaJgB. Authentication is required, no domain bypass is enabled,
+retention is zero, recording is disabled, concurrency is 2, daily limit is 30,
+and bursting is disabled. These identifiers are not provider credentials.
+
+The existing private runtime file was updated atomically with Gaius's identifier
+and remains mode 0600; no credential was printed. Data validation reported zero
+errors and warnings. Import and focused credential checks are underway. Native
+Gaius playback and subjective voice quality have not yet been verified; provider
+configuration is not live acceptance.
+
+Milestone 5 — military unlock and first native Gaius run
+Direct QA in /tmp/gaius-review.log rejected a foreign tier-3 barracks and an owned
+queued tier-3 barracks. The advisor remained locked after one season; actual
+construction completed after the second season at Latium and granted the
+permanent unlock with earned turn 2. The council then showed three available
+seats. Mute, advisor-switch disconnect, separate conversation history and load
+clearing/unlock behavior passed. The latest shutdown was clean with proper QA
+cleanup, so the earlier phase-1 GPU/RID warning was not reproduced.
+
+The native Gaius greeting streamed text and PCM audio. However, the composer
+stayed busy: the requested follow-up was never sent and ended in response_timeout.
+An event probe observed no agent_response_complete for the initial greeting,
+despite the enabled provider event setting. A focused escaped-bug fix/regression
+check is in progress under the testing-policy exception. This milestone does
+not claim successful question/answer acceptance. The widened Marcus screenshot
+was inspected, but actions remained below the fold; final UI polish is pending.
+
+Milestone 6 — grounded Gaius answer; completion compatibility still open
+The repeated native run produced a full grounded Gaius answer and PCM playback.
+The 7,720-byte context contained Latium's actual 500-person garrison, four groups
+and 550 upkeep; unknown enemy information was qualified. The military reading
+was verified against the selected garrison. Switching/loading cleared the
+expected session state, and the final tutorial screenshot showed all actions.
+
+The provider also omitted the completion event for the user reply, leaving the
+composer thinking after 60 seconds. Final-message compatibility work remains in
+progress and will be checked with the integrated council; this is not a clean
+end-to-end completion claim. Twenty-one focused broker checks passed. The focused
+greeting regression passed, with one ObjectDB warning from synthetic teardown
+that remains separately identified. Phase-3 work has started: the rules agent
+owns dilemma data/core/migration and the root agent owns bounded council UI.
+
+Milestone 7 — integrated native council and confirmed dilemma
+The connected walkthrough in /tmp/advisor-three-phase-review.log queued real
+construction and a unit. Two resolved seasons recorded first_season, army and
+construction guidance and unlocked Gaius; an actual war declaration recorded war.
+A legal Zeus pledge was made. Marcus's invitation remained disconnected and
+Show me selected Latium without changing game state.
+
+Explicit council start froze a 7,530-byte context; a duplicate start was rejected.
+The discussion completed three turns with PCM playback observed for Marcus,
+Lucius and Gaius, no overlapping audio and unchanged full campaign state. Text
+lengths were 294, 377 and 404 characters respectively. Their responses presented
+different views on legitimacy and recurring defense costs. The native final-turn
+completion compatibility fix worked for all three speakers. A second explicitly
+started discussion verified mute stopped audio; changing selection cancelled the
+discussion and disconnected its voice session.
+
+Rendering the dilemma context was pure. The Public Works option quoted 260.208
+per season at population 10,008, with a five-season settling period, four-season
+revoke cooldown, and existing effects civic 7, growth 0.5 and burden 2. Cancelling
+left state unchanged. Confirmation enacted the existing edict and recorded one
+Zeus receipt at turn 3, without an RNG change or an upfront charge. Repeating the
+UI confirmation did nothing. Load cleared the council transcript/active flag and
+preserved Gaius's unlock, dismissed construction guidance, receipt and edict.
+Five focused money/save-boundary checks passed cleanly under policy exceptions.
+
+Remaining direct coverage: the separate Gaul strain fixture did not cross the
+threshold, so it is not evidence for the strain trigger. A genuine legal strain
+example, tactical practice-context coverage and standalone rendering remain
+pending. Other observed milestones are not generalized to those unfinished cases.
+
+Milestone 8 — remaining trigger, fallback and rendering coverage closed
+The final direct run in /tmp/advisor-final-render.log used a prepared fixture with
+a legal-capacity 20-unit garrison and a nonnegative treasury of 1, then issued a
+real very-low-tax command and resolved a season. Forecast income was 1,506.4 and
+upkeep 3,430. The engine produced treasury -1,725 and recorded strain at turn 1.
+No negative ledger value was inserted manually. This closes the fifth reactive
+milestone category after the earlier insufficient Gaul fixture.
+
+With no broker environment, an explicit council request immediately became
+unavailable/inactive while retaining all three authored seats. The main integrated
+tactical practice pass used detached displayed-tactical-snapshot scope, contained
+no faction finances and blocked the live council; it exited cleanly.
+
+The three observed native replies were rendered as captions within a 128-pixel
+transcript: its y range 387–515 fits within the guide viewport 280–544. The root
+agent inspected /tmp/advisor-captions-final.png and confirmed the speaker label
+and reply were visible. Dilemma effects and confirmation were also inspected.
+The final upkeep text formatting is being adjusted to preserve the exact quoted
+float instead of rounding to two decimals; the source will receive a final
+static review after that small formatting change.
+
+Standalone village compatibility passed at 1280×800 with all 11 lessons, unchanged
+state and a disconnected provider. The inspected image and
+/tmp/marcus-village-final-compatibility.log showed clean stderr and exit 0.
+The previously outstanding direct-coverage gaps are closed. Final documentation,
+static/credential scans, local source checkpoint and Pending review report remain.
+
+Verification at this checkpoint
+Observed the full requested path: campaign milestones -> Marcus invitation ->
+relevant controls -> completed-owned military unlock -> council participation ->
+explicit three-speaker generated discussion -> confirmed deterministic dilemma
+consequence -> save/load. Read-only counsel preserved state, provider requests
+were explicit, audio did not overlap and consequence confirmation was once-only.
+Configured provider personas, actual native playback and authored/offline behavior
+are separately identified above. No subjective human-listening claim is made.
+
+Verified by: data validation, Godot imports, isolated rendered gameplay/native
+council/dilemma and village walkthroughs. Tests: not run (weekly review policy),
+except 21 credential checks, 4 guidance migration checks, 5 dilemma money/save
+checks and a focused escaped-greeting-bug regression under policy exceptions.
+
+Milestone 9 — final precision and private-source checks
+The final exact-cost render in /tmp/advisor-exact-cost.log displayed the actual
+confirmation label as 264.914 per season at population 10,189. It passed with
+exit 0 and no script errors or warnings. Final data validation reported zero
+errors and warnings; git diff --check was clean.
+
+The secure loader performed an in-memory scan of all 1,099 tracked and new
+nonignored files: zero matches for the actual private credential. The private
+file remains mode 0600 and configures three distinct advisor ids. Its credential
+value was neither printed nor copied into the repository or this record.
+
+The focused voice regression still passes. Verbose diagnostics identify one
+AudioStreamGeneratorPlayback retained only during synthetic headless teardown;
+an ineffective cleanup change was reverted. This known synthetic warning is not
+claimed fixed. Actual native campaign and standalone village runs exited cleanly.
+
+Completion boundary
+All three scoped phases are implemented and the full requested gameplay path has
+been observed. The final exact-cost, data, whitespace and private-source checks
+are complete. Native council evidence establishes streamed text, PCM playback,
+sequential speaking, completion, mute and cancellation; subjective voice quality
+and human listening were not assessed. The sole noted verification limitation is
+the synthetic headless playback teardown warning described above.
+
+The root agent will save the local source checkpoint and the dedicated reporter
+will submit the final Isengard report as Pending human review. The assignment
+will remain In progress until a human accepts the report; no automatic acceptance,
+push, release, deployment or broad test suite is part of this session.

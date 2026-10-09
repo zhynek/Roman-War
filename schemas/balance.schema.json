@@ -35,7 +35,9 @@
     "city",
     "city_battle",
     "city_campaign",
-    "patronage"
+    "patronage",
+    "advisor_tutorial",
+    "divine_dilemmas"
   ],
   "additionalProperties": false,
   "properties": {
@@ -2342,6 +2344,49 @@
         "river_cost_multiplier": {
           "type": "integer",
           "minimum": 0.01
+        }
+      }
+    },
+    "advisor_tutorial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "postpone_turns",
+        "strain_treasury_below",
+        "strain_order_below"
+      ],
+      "properties": {
+        "postpone_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "strain_treasury_below": {
+          "type": "integer"
+        },
+        "strain_order_below": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "divine_dilemmas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cooldown_turns",
+        "pledge_wait_turns"
+      ],
+      "properties": {
+        "cooldown_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "pledge_wait_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
         }
       }
     }

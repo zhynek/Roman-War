@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dilemmas",
+    "ui"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "dilemmas": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "patron",
+          "title",
+          "address",
+          "body",
+          "reactions",
+          "choices"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "patron": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "maxLength": 64
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "address": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "reactions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "marcus",
+              "lucius",
+              "gaius"
+            ],
+            "properties": {
+              "marcus": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "lucius": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              },
+              "gaius": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            }
+          },
+          "choices": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label",
+                "description",
+                "action",
+                "target"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]*$",
+                  "maxLength": 64
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1500
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1500
+                },
+                "action": {
+                  "enum": [
+                    "tax",
+                    "edict",
+                    "decline"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "maxLength": 64
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1500
+      },
+      "required": [
+        "title",
+        "source",
+        "help",
+        "empty",
+        "quote",
+        "confirm",
+        "cancel",
+        "confirm_title",
+        "immediate_cost",
+        "tax_change",
+        "tax_income",
+        "tax_order",
+        "tax_growth",
+        "tax_note",
+        "edict",
+        "upkeep",
+        "upkeep_note",
+        "settle",
+        "revoke",
+        "effects",
+        "effect",
+        "decline_note",
+        "cooldown",
+        "resolved",
+        "recorded",
+        "reaction",
+        "return",
+        "current_city",
+        "battle_active",
+        "defense_pending",
+        "campaign_finished",
+        "not_owned",
+        "unknown_dilemma",
+        "unknown_choice",
+        "wrong_patron",
+        "temple_required",
+        "pledge_too_recent",
+        "cooldown_active",
+        "already_resolved",
+        "tax_not_lower",
+        "edict_unavailable",
+        "stale_quote",
+        "invalid_signature",
+        "commit_failed",
+        "navigation",
+        "blocked"
+      ]
+    }
+  }
+}

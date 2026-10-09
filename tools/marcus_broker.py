@@ -73,7 +73,7 @@ def private_credentials(path: str) -> dict[str, str]:
                 result[key] = value
             return result
         values = json.loads(body, object_pairs_hook=unique_fields)
-        allowed = {"ELEVENLABS_API_KEY", "ELEVENLABS_AGENT_ID", "ELEVENLABS_LUCIUS_AGENT_ID"}
+        allowed = {"ELEVENLABS_API_KEY", "ELEVENLABS_AGENT_ID", "ELEVENLABS_LUCIUS_AGENT_ID", "ELEVENLABS_GAIUS_AGENT_ID"}
         if (not isinstance(values, dict) or set(values) - allowed
                 or not values.get("ELEVENLABS_API_KEY")
                 or any(not isinstance(value, str) or not value for value in values.values())):
@@ -102,12 +102,14 @@ class Config:
     api_key: str = field(default="", repr=False)
     agent_id: str = field(default="", repr=False)
     lucius_agent_id: str = field(default="", repr=False)
+    gaius_agent_id: str = field(default="", repr=False)
 
     def agent_for(self, advisor: str) -> str:
-        if advisor not in ("marcus", "lucius"):
+        agents = {"marcus": self.agent_id, "lucius": self.lucius_agent_id, "gaius": self.gaius_agent_id}
+        if advisor not in agents:
             raise BrokerError(400, "unknown_advisor")
-        selected = self.agent_id if advisor == "marcus" else self.lucius_agent_id
-        if not self.api_key or not selected or (advisor == "lucius" and selected == self.agent_id):
+        selected = agents[advisor]
+        if not self.api_key or not selected or sum(value == selected for value in agents.values()) > 1:
             raise BrokerError(503, "provider_not_configured")
         return selected
 
@@ -142,7 +144,12 @@ class Config:
             raise ConfigurationError("ELEVENLABS_LUCIUS_AGENT_ID has an invalid format.")
         if lucius and lucius == agent:
             raise ConfigurationError("Lucius requires a different private agent from Marcus.")
-        return cls(token=token, api_key=key, agent_id=agent, lucius_agent_id=lucius)
+        gaius = env.get("ELEVENLABS_GAIUS_AGENT_ID", "")
+        if gaius and not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", gaius):
+            raise ConfigurationError("ELEVENLABS_GAIUS_AGENT_ID has an invalid format.")
+        if gaius and gaius in (agent, lucius):
+            raise ConfigurationError("Gaius requires a distinct private agent.")
+        return cls(token=token, api_key=key, agent_id=agent, lucius_agent_id=lucius, gaius_agent_id=gaius)
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -355,7 +362,7 @@ class BrokerHandler(BaseHTTPRequestHandler):
             if len(body) != length or not isinstance(request, dict) or set(request) - {"advisor"}:
                 raise BrokerError(400, "invalid_body")
             advisor = request.get("advisor", "marcus")
-            if advisor not in ("marcus", "lucius"):
+            if advisor not in ("marcus", "lucius", "gaius"):
                 raise BrokerError(400, "unknown_advisor")
             return advisor
         except (ValueError, UnicodeError):

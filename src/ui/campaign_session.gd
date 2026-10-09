@@ -14,10 +14,26 @@ var marcus
 var marcus_context
 var lucius
 var lucius_context
+var gaius
+var gaius_context
+var advisor_panels: Dictionary = {}
+var advisor_contexts: Dictionary = {}
+var advisor_statuses: Dictionary = {}
 var active_advisor := "marcus"
+var living_council
 var _lucius_status: Dictionary = {}
 var _season_review_pending := false
 var _last_season_offered := -1
+var _tutorial_refresh_left := 0.0
+
+
+func _process(delta: float) -> void:
+	# Presentation-only polling of already-recorded milestones. No detection,
+	# progress or awards are performed by a frame/timer callback.
+	_tutorial_refresh_left-=delta
+	if _tutorial_refresh_left>0.0:return
+	_tutorial_refresh_left=0.5
+	if is_instance_valid(marcus):marcus.refresh_tutorial_offer()
 
 
 static func create(current_game: Game, view: String = "campaign", slot: String = CampaignScreen.SAVE_PATH) -> CampaignSession:
@@ -30,29 +46,38 @@ static func create(current_game: Game, view: String = "campaign", slot: String =
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Seed earned seats before a resumed city battle can start its worker.
+	# Later refreshes reuse this cache while that worker owns mutable state.
+	for id in game.data.advisors:advisor_statuses[id]=game.advisor_status(id)
+	_lucius_status=advisor_statuses.get("lucius",{}).duplicate(true)
 	if initial_view == "city" and can_enter_city():
 		show_city()
 	else:
 		show_campaign()
-	# Retain advisor conversations above both views, outside their refresh cycles.
+	# Retain distinct conversations above both views, outside refresh cycles.
 	marcus_context = preload("res://src/ui/advisors/marcus_campaign_context.gd").new(self)
+	lucius_context = preload("res://src/ui/advisors/lucius_context.gd").new(self)
+	gaius_context = preload("res://src/ui/advisors/gaius_context.gd").new(self)
+	advisor_contexts = {"marcus":marcus_context,"lucius":lucius_context,"gaius":gaius_context}
+	living_council=preload("res://src/ui/advisors/living_council.gd").new(self)
+	add_child(living_council)
+	living_council.changed.connect(_discussion_changed)
 	var advisor_layer := CanvasLayer.new()
 	advisor_layer.layer = 20
 	add_child(advisor_layer)
-	marcus = preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_panel.gd").new()
-	advisor_layer.add_child(marcus)
-	marcus.opened_changed.connect(_advisor_opened)
-	marcus.configure_context(marcus_context)
-	lucius_context = preload("res://src/ui/advisors/lucius_context.gd").new(self)
-	lucius = preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_panel.gd").new()
-	advisor_layer.add_child(lucius)
-	lucius.configure_context(lucius_context,false)
-	lucius.hide()
-	lucius.opened_changed.connect(_advisor_opened)
-	for advisor in [marcus,lucius]:
+	for id in advisor_contexts:
+		var advisor = preload("res://Castles and Cities/sites/yenikapi_6000_bce/experience/src/marcus_panel.gd").new()
+		advisor_panels[id] = advisor
+		advisor_layer.add_child(advisor)
+		advisor.opened_changed.connect(_advisor_opened)
+		advisor.configure_context(advisor_contexts[id],id=="marcus")
+		if id!="marcus":advisor.hide()
 		advisor.advisor_requested.connect(_choose_advisor)
 		advisor.council_speaker_requested.connect(_ask_council)
 		advisor.refresh_requested.connect(_refresh_council)
+	marcus = advisor_panels.marcus
+	lucius = advisor_panels.lucius
+	gaius = advisor_panels.gaius
 	_refresh_council()
 
 
@@ -62,6 +87,7 @@ func can_enter_city() -> bool:
 
 
 func _suspend_views() -> void:
+	_stop_discussion("context_changed")
 	if is_instance_valid(city):
 		city.battle_panel.host.stop()
 		city.hide()
@@ -134,6 +160,7 @@ func show_campaign_from_city() -> void:
 
 
 func _state_loaded() -> void:
+	if is_instance_valid(living_council):living_council.reset()
 	# Both views borrow the facade, so replacing its Dictionary replaces the
 	# world for both. Clear only stale presentation, never make a second Game.
 	if is_instance_valid(city):
@@ -148,11 +175,10 @@ func _state_loaded() -> void:
 		campaign._restore_loaded_presentation()
 		campaign.refresh()
 	if is_instance_valid(marcus):
-		marcus_context.capture_season()
-		marcus.reset_conversation()
-		lucius_context.capture_season()
-		lucius.reset_conversation()
-		lucius.hide()
+		for id in advisor_panels:
+			advisor_contexts[id].capture_season()
+			advisor_panels[id].reset_conversation()
+			advisor_panels[id].hide()
 		active_advisor = "marcus"
 		marcus.show()
 		_refresh_council()
@@ -161,6 +187,8 @@ func _state_loaded() -> void:
 
 
 func return_to_menu() -> void:
+	_stop_discussion()
+	for advisor in advisor_panels.values():advisor.voice.stop()
 	if is_instance_valid(city):
 		city.battle_panel.host.stop()
 	if not game.save_to(save_path):
@@ -188,9 +216,8 @@ func _advisor_opened(active: bool) -> void:
 
 
 func _season_started() -> void:
-	if is_instance_valid(marcus):
-		marcus.refresh_briefing(false)
-		lucius.refresh_briefing(false)
+	_stop_discussion("context_changed")
+	for advisor in advisor_panels.values():advisor.refresh_briefing(false)
 	_season_review_pending = true
 
 
@@ -198,60 +225,90 @@ func _season_presented() -> void:
 	if not is_instance_valid(marcus):return
 	_season_review_pending = not marcus_context.capture_season()
 	if not _season_review_pending:
-		lucius_context.capture_season()
+		for id in advisor_contexts:
+			if id!="marcus":advisor_contexts[id].capture_season()
 		_refresh_council()
 		var season: Dictionary = marcus_context.season_briefing()
 		var turn: int = int(season.get("turn", -1))
 		if turn != _last_season_offered:
 			_last_season_offered = turn
-			marcus.refresh_briefing()
-			lucius.refresh_briefing()
+			for advisor in advisor_panels.values():advisor.refresh_briefing()
 
 
 func _exit_tree() -> void:
+	_stop_discussion()
 	if is_instance_valid(city) and city.battle_panel != null:
 		city.battle_panel.host.stop()
 
+func advisor_ids() -> Array:
+	return advisor_contexts.keys()
+
+func advisor_available(id: String) -> bool:
+	return id=="marcus" or advisor_statuses.get(id,{}).get("available",false)
+
 func _active_panel():
-	return lucius if active_advisor == "lucius" else marcus
+	return advisor_panels.get(active_advisor,marcus)
 
 func _choose_advisor(id: String) -> void:
-	if id not in ["marcus","lucius"] or id == active_advisor:return
+	if not advisor_panels.has(id) or id==active_advisor:return
 	_refresh_council()
-	if id == "lucius" and not _lucius_status.get("available",false):return
+	if not advisor_available(id):return
+	_stop_discussion()
 	var previous = _active_panel()
-	previous.close_panel() # stop streaming before changing the visible speaker
+	previous.close_panel() # End the old transport before changing speakers.
 	previous.hide()
 	active_advisor = id
 	_active_panel().show()
 	_active_panel().open()
 
 func _ask_council(id: String) -> void:
-	if id not in ["marcus","lucius"]:return
+	if not advisor_panels.has(id):return
 	if marcus_context.council_context.blocked()!="":return
 	_choose_advisor(id)
 	if active_advisor==id:
 		_active_panel().open_council_question(String(marcus_context.council_words().question))
 
 func _refresh_council() -> void:
-	if not is_instance_valid(marcus) or not is_instance_valid(lucius):return
+	if not is_instance_valid(marcus):return
+	# A tactical worker owns mutable state while its view is open. Preserve
+	# the last safe permanent-unlock reading until that view closes.
+	var battle: bool = marcus_context._battle_visible()
+	if not battle:
+		for id in game.data.advisors:advisor_statuses[id] = game.advisor_status(id)
+		_lucius_status = advisor_statuses.get("lucius",{}).duplicate(true)
 	var words: Dictionary = game.data.advisor_content.ui
-	var detail: String = words.battle
-	# The worker may be mutating campaign state: keep the last safe unlock
-	# reading until the battle closes; no new eligibility read during combat.
-	if not marcus_context._battle_visible():
-		_lucius_status = game.advisor_status("lucius")
-		if _lucius_status.get("available",false):
-			var earned: Dictionary = _lucius_status.unlocked
-			detail = String(words.available).format({"settlement":game.data.regions.get(earned.region,{}).get("settlement_name",earned.region),"turn":earned.turn})
-		else:
-			detail = String(words.locked).format({"required":_lucius_status.get("required_level",0),"current":_lucius_status.get("level",0)})
-			if _lucius_status.get("qualifies",false):detail += " " + String(words.qualifying)
-			if _lucius_status.get("required_building","") != "":
-				detail += " " + String(words.building_example).format({"settlement":game.data.regions[_lucius_status.region].get("settlement_name",_lucius_status.region),"building":_lucius_status.required_building})
-			else:detail += " " + String(words.no_seat)
-	var available: bool = _lucius_status.get("available",false)
-	var choices: Array = [{"id":"marcus","label":words.marcus,"available":true},
-		{"id":"lucius","label":words.lucius if available else words.locked_button,"available":available}]
-	marcus.set_council(choices,detail)
-	lucius.set_council(choices,detail)
+	var choices: Array = []
+	for id in advisor_ids():
+		var available: bool = advisor_available(id)
+		var advisor_name: String = advisor_contexts[id].content.name
+		choices.append({"id":id,"label":advisor_name if available else String(words.locked_name).format({"name":advisor_name}),
+			"available":available,"detail":_advisor_detail(id) if not battle else words.battle})
+	for id in advisor_panels:
+		advisor_panels[id].set_council(choices,String(words.battle) if battle else _advisor_detail(id))
+
+func _advisor_detail(id: String) -> String:
+	var words: Dictionary = game.data.advisor_content.ui
+	if id=="marcus":
+		var lines: PackedStringArray=[]
+		for specialist in game.data.advisors:
+			var profile: Dictionary=game.data.advisors[specialist]
+			var status: Dictionary=advisor_statuses.get(specialist,{})
+			lines.append(String(words.roster_ready if advisor_available(specialist) else words.roster_locked).format({
+				"name":profile.name,"required":profile.unlock.min_level,"kind":profile.unlock_label,"current":status.get("level",0)}))
+		return "\n".join(lines)
+	var profile: Dictionary=game.data.advisors.get(id,{})
+	var status: Dictionary=advisor_statuses.get(id,{})
+	if profile.is_empty():return ""
+	if status.get("available",false):
+		var earned: Dictionary=status.unlocked
+		return String(words.advisor_available).format({"name":profile.name,"settlement":game.data.regions.get(earned.region,{}).get("settlement_name",earned.region),"turn":earned.turn})
+	var detail: String=String(words.locked_requirement).format({"name":profile.name,"kind":profile.unlock_label,"required":profile.unlock.min_level,"current":status.get("level",0)})
+	if status.get("required_building","")!="":
+		detail+=" "+String(words.building_example).format({"settlement":game.data.regions.get(status.region,{}).get("settlement_name",status.region),"building":status.required_building})
+	return detail
+
+func _stop_discussion(reason: String="stopped") -> void:
+	if is_instance_valid(living_council) and living_council.active:living_council.stop(reason)
+
+func _discussion_changed() -> void:
+	for panel in advisor_panels.values():panel.refresh_living_council()

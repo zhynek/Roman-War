@@ -1,0 +1,102 @@
+Roman War — reactive guidance, military advisor and living council
+User-authorized implementation prompt — October 9, 2026
+
+Start from the clean local HEAD 245503c, preserving the integrated waterways,
+Marcus/Lucius, seasonal council, patronage and accepted native voice work. Read
+AGENTS.md, CLAUDE.md, docs/HANDOFF.md and the map-experience review before editing.
+Record this full plan and acceptance path in Isengard before implementation;
+link prior assignment 762ed14c-6d92-44ef-b99f-675b4b2be04c and preserve its reports.
+A dedicated documentation sub-agent maintains NEXT_THREE_PHASES_PROGRESS.txt and
+Isengard milestones, then submits a Pending human-review report without accepting
+it. Implement the following phases in order.
+
+Shared boundaries
+Preserve the deterministic scene-free engine, data/schema conventions, additive
+saves, BattleResolver seam, original procedural art and independent village.
+Never reveal hidden enemy information or read mutable campaign economics while
+a battle worker is active. Prose and tunable values belong in validated data.
+Use the existing private credential at ~/Library/Application Support/Roman War/
+private-advisors.json; create no replacement key or unapproved permission scope.
+Never copy secrets into source, logs, exports, saves, prompts or Isengard. Keep
+provider credentials in the broker and advisor routing strictly allowlisted.
+
+Phase 1 — Reactive Marcus guidance
+Make Marcus a contextual guide who can offer useful help when these five campaign
+milestones first occur:
+1. First resolved campaign season.
+2. First completed construction project.
+3. First meaningful army recruitment or movement milestone.
+4. First economic or public-order strain.
+5. First declaration of war or battle milestone.
+
+Use authoritative existing events and player-visible reports to detect milestones,
+not UI frames, hidden state inference or invented progress. Each authored lesson
+explains what happened, why it matters and what to consider next. Offer Show me
+navigation to relevant existing controls and an optional prefilled question for
+Marcus. Navigation never issues orders or changes taxes, construction or time.
+
+Invite the player subtly and only by opt-in: no automatic panel takeover, provider
+connection, paid request or speech. Support dismissal, postponement, replay and
+resuming unfinished guidance. Keep progress coherent across save/load and normal
+map/city navigation without flooding established campaigns with old milestones.
+Queue guidance while a battle, pending defense, turn playback or Dispatch is
+active; surface it only after the conflicting presentation has safely ended.
+Retain offline guidance and distinguish authored lessons from generated answers.
+
+Phase 2 — First military advisor
+Add an original military advisor with an original procedural portrait, distinct
+persona and separate private voice configuration. Unlock this advisor through a
+data-authored completed, player-owned military building prerequisite. Queued or
+foreign buildings do not qualify. Follow the existing permanent advisor-unlock
+and additive-save contract; show the actual prerequisite and visible progress.
+
+Provide bounded military readings using existing player-visible force, order,
+movement and battle reports. Explain uncertainty and tradeoffs; never expose
+hidden rosters, promise victory, substitute an invented combat model or execute
+commands. During tactical work use only the detached visible battle snapshot.
+Reuse shared transport with strict server-side routing and a separate transcript.
+Stop the previous voice session on switching and reset conversations on load.
+Configure a distinct private provider persona without weakening authentication
+or expanding credential scopes. Include the advisor in council participation
+only after that campaign has unlocked the role. Preserve Marcus and Lucius.
+
+Phase 3 — Living council and Zeus/Ares dilemmas
+Extend the authored council with a player-requested short generated discussion.
+An explicit Hear council action freezes a bounded snapshot of the latest visible
+season, selected owned city, current patron and mandate, and unlocked roles.
+Only unlocked advisors may speak. Let their distinct perspectives respond to
+shared facts and each other while making the player's authority clear.
+
+Bound speaker turns, response lengths, timeouts and provider requests. Label each
+speaker and present text with speech. Play audio sequentially without overlap.
+Provide mute, stop and cancel; cancel on load, leaving the discussion or context
+change. Do not retry, restart, connect or spend automatically. Freeze context for
+the whole discussion, prevent stale replies from crossing into another campaign,
+and preserve an authored offline fallback when the provider is unavailable.
+Generated dialogue is advisory presentation, never an authoritative game action,
+stored rule, hidden-state source or automatic decision.
+
+Add authored Zeus/Ares dilemmas with data-driven eligibility, options, displayed
+costs, consequences and cooldowns. Use existing deterministic game mechanics.
+Show the exact consequence before explicit player confirmation; apply it once
+through an authoritative command boundary. Repeated clicks, save/load, stale
+quotes and patron changes must not duplicate costs or awards or apply an obsolete
+choice. The gods may want something that conflicts with the player's interests;
+the player may refuse. LLM text cannot create, select or execute consequences.
+
+Acceptance path
+Exercise the actual connected gameplay path in isolated QA saves/preferences:
+campaign milestone -> Marcus invitation -> relevant controls -> military unlock
+-> council participation -> explicit generated discussion -> confirmed
+deterministic dilemma consequence -> save/load.
+
+Verify facts observed in the running implementation, not implementation intent.
+Check no automatic paid calls, hidden-information leaks, game mutations from
+reading guidance, overlapping audio, duplicate consequences or stale conversation
+state. Validate changed data and compile/import once, inspect the rendered flow,
+and follow the weekly policy: no broad suite or generic new tests. Only narrowly
+permitted credential and migration checks may be added/run under its exceptions.
+Report real provider acceptance separately from configured or offline behavior.
+Preserve human review in Isengard. Save local source checkpoints; do not push,
+release or deploy. Finish with actual evidence, limitations and the next bounded
+development phase.

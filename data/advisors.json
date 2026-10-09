@@ -8,6 +8,17 @@
       "unlock": {
         "building_kind": "government",
         "min_level": 3
+      },
+      "unlock_label": "government"
+    },
+    {
+      "id": "gaius",
+      "name": "Gaius",
+      "role": "Counsel on command and defense",
+      "unlock_label": "barracks",
+      "unlock": {
+        "building_kind": "barracks",
+        "min_level": 3
       }
     }
   ],
@@ -21,7 +32,12 @@
     "available": "Lucius joined your council at {settlement} in turn {turn}. His counsel remains available after later losses.",
     "battle": "Council availability and city readings are checked again after the battle view closes.",
     "no_seat": "No owned government building is reported yet.",
-    "permanent": "Existing qualifying campaigns welcome him at creation or when an older save is first loaded."
+    "permanent": "Existing qualifying campaigns welcome him at creation or when an older save is first loaded.",
+    "locked_name": "{name} · Locked",
+    "roster_ready": "{name}: a seat at your council.",
+    "roster_locked": "{name}: complete owned tier-{required} {kind}, then resolve a season. Best tier: {current}.",
+    "advisor_available": "{name} joined at {settlement} in turn {turn}. This seat remains after later losses.",
+    "locked_requirement": "{name} joins after a season with an owned completed {kind} building of tier {required} or higher. Best completed tier: {current}. Queued work does not count."
   },
   "reading": {
     "heading": "A reading of your city",
