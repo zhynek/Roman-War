@@ -137,15 +137,48 @@ the Git diff and every untracked source file, without printing its value.
 The requested iCloud Folder_Save.rtf also has local mode 0600; its preserved
 contents and matching credential were verified without exposing the value.
 
-Current completion boundary
-The three prompts, secure file launch, optional authored council and two-patron
-campaign slice are implemented. Credential copies exist at the user's requested
-private destinations. Real live speech remains pending the requested explicit
-approval for ElevenAgents Write, which private signed-session minting requires.
-No successful native speech claim is made. The final local source checkpoint and
-Pending Isengard review report will be recorded after the root agent commits.
+October 8 source checkpoint and review
+Local commit 59ca717 includes the three prompts, secure file launch, optional
+authored council and two-patron campaign slice (35 files, no push). Credential
+copies exist at the user's requested private destinations. Isengard report
+9e35be87-929e-4e99-9c45-26fc89959533 is Pending human review. Its outstanding
+ElevenAgents Write permission and live-acceptance boundary is superseded by the
+October 9 evidence below; it remains an accurate record of the earlier checkpoint.
 
 Verified by: focused native launch, rendered campaign/council/patronage and village
 walkthroughs, data/import checks reported by the implementation agents, and shell
 syntax. Tests: not run (weekly review policy), except 20 credential checks and 5
 patronage/save checks under the explicit policy exceptions, which passed.
+
+Milestone 9 — live native streaming and playback accepted, October 9, 2026
+The user reported saving the approved ElevenAgents Write permission. The root
+agent then ran both private advisors through the actual broker and native GUI
+Godot client. The process exited 0 and /tmp/advisor-live-review.log was clean.
+The provider credential was absent from the Godot child for both connections.
+
+Marcus used an 8,396-byte bounded context; Lucius used 9,424 bytes. Each produced
+greeting text with PCM playback, then answer text with PCM playback, a running
+native player and status=speaking. Both replies addressed the Zeus mandate's
+tax/public-order requirement and two-season tradeoff from the supplied snapshots.
+Each answer was deliberately muted mid-stream; mute stopped audio, disconnect
+succeeded and the buffer became empty. The logged answer text is therefore
+partial by design, not a claim of completed narration.
+
+This confirms real provider-backed text streaming and native PCM playback,
+mute and disconnect. It does not assess subjective voice quality or establish
+that a human listened to the audio. The earlier Read-only minting blocker is
+resolved. No source changes or automated tests were needed for this acceptance
+turn. The iCloud backup's permission note was updated from Read to Write only;
+its local file permissions remain 0600 and no secret value appears in this record.
+
+Current completion boundary
+All three scoped phases are implemented, and the outstanding live native
+streaming/playback acceptance is now complete for Marcus and Lucius. The original
+implementation and this supplemental evidence remain subject to human review
+in Isengard. No release or public deployment was performed. The next bounded
+gameplay phase is a military advisor grounded in existing visible force, order
+and battle reports, with the same explicit request and read-only counsel model.
+
+Verified by: one real native Godot conversation per advisor through the private
+broker, including text/PCM playback, mute, disconnect and absent child-process
+provider credentials. Tests: not run (weekly review policy).

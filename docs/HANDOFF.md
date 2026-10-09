@@ -19,10 +19,15 @@ launcher. Naval changes were developed and verified from `origin/main`; the
 advisor work remains on the local advisor branch. The detailed advisor milestone
 records are preserved in [the handoff history](HANDOFF-HISTORY.md#advisor-development-before-local-waterways-integration).
 
-The advisor branch's outstanding provider permission remains outstanding:
-ElevenAgents Read cannot mint signed sessions without `convai_write`; do not
-broaden provider access without the user's answer. The naval work does not
-change that integration or its private credentials.
+The user enabled ElevenAgents Write on October 9. Native Marcus and Lucius
+connections then passed: private session minting, streamed response text, PCM
+playback, immediate mute and clean disconnect with empty audio buffers. Godot
+lacked the provider key in both sessions; only the local broker holds it. Bounded
+campaign snapshots grounded each reply in the Zeus mandate. No source fix was
+needed; the provider permission was the blocker. The private launcher is ready.
+See [setup](marcus/SETUP.md) for exact evidence and launch instructions.
+
+Verified by: one real native Godot conversation per advisor, including PCM playback, mute/disconnect and credential isolation. Tests: not run (weekly review policy).
 
 ## Waterways and shipping — October 8, 2026
 

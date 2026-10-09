@@ -1,10 +1,17 @@
 # Marcus and Lucius private voice connections
 
-Credential storage is configured locally. The restricted key can read both
-private agents, but conversation minting requires ElevenAgents Write
-(`convai_write`); Read alone returns HTTP 401. Permission expansion and native
-text/audio acceptance remain pending. The authored guide, council and patronage
-work offline. A dashboard preview does not establish native playback.
+Live native verification completed October 9, 2026 after the user enabled
+ElevenAgents Write (`convai_write`). Both Marcus and Lucius received private
+sessions, streamed relevant text, and played PCM audio through Godot's native
+AudioStreamPlayer. Muting immediately stopped playback; disconnecting cleared
+the connection and audio buffer. Provider credentials were absent from the game
+process. The authored guide, council and patronage also work offline.
+
+The direct check used bounded campaign snapshots (8,396 and 9,424 bytes) with
+Zeus pledged. Both advisors discussed the tax/order stewardship tradeoff. Replies
+were deliberately interrupted after text and playback began to verify mute and
+disconnect; this was a technical playback check, not a subjective voice-quality
+review. No broad test suite was run. Read alone cannot mint these sessions.
 
 Marcus's native Godot client obtains a temporary conversation URL from
 `tools/marcus_broker.py`. Only that Python process holds the ElevenLabs API key.
@@ -56,7 +63,8 @@ The dashboard confirmed private authentication, PCM 16 kHz, zero retention,
 recording off, 30 daily calls, two concurrent calls, bursting and queuing off.
 The settings were copied from Marcus, including client events and no tools.
 Marcus's published prompt now recognizes Lucius and the actual council status.
-Neither configuration publication nor selecting a voice proves native playback.
+Native playback for both configured voices was subsequently verified as described
+above.
 
 The broker maps `marcus` to `ELEVENLABS_AGENT_ID` and `lucius` to
 `ELEVENLABS_LUCIUS_AGENT_ID`. Set both for the campaign. Missing Lucius config
