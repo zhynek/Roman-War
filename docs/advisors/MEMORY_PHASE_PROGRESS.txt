@@ -103,3 +103,22 @@ Review: http://127.0.0.1:2269/?view=Needs%20review&project=c5c7ddd7-57d4-4763-9c
 
 Verified by: data validation, Godot import and isolated source/succession/save,
 rendered memory and standalone village walkthroughs. Tests: not run (weekly review policy).
+
+Milestone 5 — explicit approval and remote prompt synchronization
+The user explicitly approved uploading the updated character prompts, resolving
+the earlier automatic-review transmission block. The root agent ran
+python3 /tmp/update-advisor-prompts.py through the existing secure credential
+loader; it exited 0. For Marcus, Lucius and Gaius the helper reported:
+"prompt verified; privacy and authentication preserved; tool count 0".
+
+The helper patched only conversation_config.agent.prompt.prompt on each existing
+private agent, then read each agent back and asserted exact repository prompt
+text plus unchanged authentication and privacy. No replacement key, expanded
+scope or new provider agent was involved. No new live provider discussion or
+native memory-conditioned playback was run; exact prompt synchronization does
+not establish that separate acceptance. The historical local-scope report above
+remains preserved, and a supplemental Pending report will record this approval
+and verification after the documentation commit.
+
+Verified by: exact remote GET read-back of all three updated prompts with
+preserved privacy/authentication and zero tools. Tests: not run (weekly review policy).

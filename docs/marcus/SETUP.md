@@ -1,12 +1,13 @@
 # Private voices for Marcus, Lucius and Gaius
 
-October 10 memory phase: the local persona files now contain source-backed
-campaign-memory instructions. Automatic approval review blocked their upload to
-ElevenLabs pending explicit approval to transfer the new instructions and run
-one isolated fictional QA council. The previously configured voices and broker
-are unchanged. The new memory page, bounded context assembly and save/load path
-have been verified locally; new provider prompt synchronization and
-memory-conditioned native playback must not be claimed until approved and run.
+October 10 memory phase: Marcus, Lucius and Gaius now have the source-backed
+campaign-memory instructions in their existing private ElevenLabs agents.
+Following explicit user approval, each uploaded prompt was read back and matched
+its repository file exactly; authentication and privacy settings were unchanged,
+with zero tools. This resolves the earlier automatic approval block. The
+previously configured voices and broker are unchanged. The new memory page,
+bounded context assembly and save/load path have been verified locally;
+memory-conditioned native playback has not been rerun.
 
 Live native verification completed October 9, 2026 after the user enabled
 ElevenAgents Write (`convai_write`). Both Marcus and Lucius received private

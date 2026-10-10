@@ -102,3 +102,12 @@ Perform no memory reads against live tactical-worker state. Mark truncated or
 missing history explicitly incomplete; loading an earlier save restores that
 save's own record. The core agent owns projection/data/schema, UI agent the
 guarded shared panel, and root agent adapters/council/prompts/provider/integration.
+
+Authorized provider follow-up — October 10
+The user explicitly approved uploading the updated prompts for the other
+characters. Synchronize only the prompt text on the existing Marcus, Lucius and
+Gaius private agents, using the existing secure credential loader. Read each
+agent back and verify exact repository prompt text, preserved authentication and
+privacy, and no tools. Do not create keys or widen scopes. This follow-up covers
+prompt synchronization only; a new memory-conditioned live council or native
+playback run is not part of its acceptance claim.

@@ -34,15 +34,16 @@ save focus clearing, bounded role/council contexts, read-only Annals navigation
 and battle exclusion. Memory and village screens were inspected; both sessions
 exited cleanly. No new tests or broad suite were run.
 
-The local three-persona prompt changes are ready, but automatic approval review
-blocked uploading them to ElevenLabs pending explicit user approval for the new
-content. The approval question also covers one isolated fictional memory council.
-Existing voices remain configured; new memory-conditioned native playback is
-not verified. No provider update, new key, scope expansion, push or release has
-occurred in this phase. Isengard assignment:
+After explicit user approval, the prepared Marcus, Lucius and Gaius memory
+prompts were uploaded to their existing private ElevenLabs agents. A provider
+read-back matched each repository prompt exactly and confirmed unchanged
+authentication/privacy settings and zero tools. This resolves the earlier
+automatic approval block. Existing voices remain configured; new
+memory-conditioned native playback has not been run. No new key, permission
+expansion, push or release occurred. Isengard assignment:
 `3b8ae6d4-8945-41ef-a85a-9e5c8354b542`.
 
-Verified by: data validation, Godot import and isolated rendered campaign/village walkthroughs. Tests: not run (weekly review policy).
+Verified by: data validation, Godot import, isolated rendered campaign/village walkthroughs and exact ElevenLabs prompt read-back with unchanged authentication/privacy. Tests: not run (weekly review policy).
 
 ## Previous local advisor development — October 9, 2026
 

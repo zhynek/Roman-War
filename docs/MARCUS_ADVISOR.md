@@ -471,12 +471,13 @@ history stayed safe, and an active practice battle withheld campaign memory.
 The rendered ruler/source cards and standalone village were inspected. Both
 native sessions exited cleanly, with no script errors or warnings.
 
-The completed local Marcus/Lucius/Gaius persona changes have not been uploaded.
-Automatic approval review rejected that external transfer because explicit user
-approval is required for the new source-derived content. The approval question
-covers the existing three private agents and one isolated fictional QA council.
-Existing configured voices remain available; no memory-conditioned native voice
-acceptance or provider prompt synchronization is claimed. The previous synthetic
-headless audio-cleanup warning was outside this change and was not rerun.
+Following explicit user approval, the Marcus/Lucius/Gaius persona changes were
+uploaded to their existing private ElevenLabs agents. A fresh provider read-back
+matched all three repository prompts exactly, preserved authentication and
+privacy settings, and confirmed zero tools. This resolves the earlier automatic
+approval block on transferring the new instructions. Existing configured voices
+remain available; memory-conditioned native playback and subjective voice
+quality have not been reverified. The previous synthetic headless audio-cleanup
+warning was outside this change and was not rerun.
 
-Verified by: data validation, Godot import and isolated native campaign/village walkthroughs. Tests: not run (weekly review policy).
+Verified by: data validation, Godot import, isolated native campaign/village walkthroughs and exact ElevenLabs prompt read-back with unchanged authentication/privacy. Tests: not run (weekly review policy).
