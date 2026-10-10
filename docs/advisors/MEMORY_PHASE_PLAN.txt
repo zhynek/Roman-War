@@ -1,0 +1,104 @@
+Roman War — persistent advisor memory
+User-authorized phase plan — October 10, 2026
+
+Baseline and tracking
+Continue clean local HEAD 079353e on codex/marcus-advisor, preserving waterways,
+reactive Marcus, military advisor Gaius, living council and Zeus/Ares dilemmas.
+Read AGENTS.md, CLAUDE.md, docs/HANDOFF.md and the map-experience review before
+editing. Record this full plan and acceptance path in a new linked Isengard
+assignment before implementation. Preserve prior assignment
+78dc60e5-c926-4d29-9645-476374d22528 and Pending report
+fc21f192-7b46-49d0-9fae-753f980bf787. A dedicated reporting agent maintains
+MEMORY_PHASE_PROGRESS.txt and submits a Pending human-review report; it never
+accepts reports. Core/source audit will refine the precise storage/selection
+contract before implementation without changing these boundaries.
+
+Objective
+Let Marcus, Lucius and Gaius recall relevant events across the campaign and its
+successions using persistent, bounded, source-backed memories. Ground memory in
+existing player-visible chronicle/reign records and explicit patron/dilemma
+receipts. Make the same memory available offline for inspection so players can
+understand what an advisor remembers, when it happened and where it came from.
+
+Authoritative memory contract
+Audit existing chronicle, reign/succession, patronage, dilemma receipts and save
+identity before choosing implementation details. Reuse authoritative recorded
+events rather than reconstructing hidden outcomes. Memory extraction, selection,
+ordering and bounds must be deterministic and scene-free. Store only necessary
+stable ids/scalars/source references if any new saved state is required; all
+readers must tolerate old saves and every new save field must follow the existing
+additive compatibility contract. Do not create an independent global history
+that survives loading an earlier or different campaign contrary to that save.
+
+Every displayed or exported recollection must identify its source and date/reign
+when available. Distinguish current reported facts, historical facts and uncertain
+or unavailable detail. Do not invent a date, participant, motive, causal claim or
+outcome missing from the source. Model replies and local conversation transcripts
+are not authoritative facts and must never be promoted into campaign memory.
+No unseeded randomness or extra campaign RNG consumption is permitted.
+
+Player experience and advisor roles
+Add an offline, inspectable memory view in the existing advisor experience,
+using authored source labels, dates and bounded readable entries. Give each
+advisor a relevant selection: Marcus emphasizes leadership, obligations and
+succession; Lucius governing decisions and civic consequences; Gaius visible
+military events and the costs of conflict. These perspectives may differ, but
+they must refer to the same underlying evidence and preserve uncertainty.
+Retain original procedural art and existing authored/offline guidance.
+
+Conversation and council integration
+Add bounded relevant memory to existing explicit conversation requests and the
+council's frozen context. Opening memory, loading a save, changing selection,
+succession or recording an event must not start a provider request or audio.
+Preserve strict private broker routing and existing credentials; no replacement
+key, permission expansion or public provider access is needed. Keep current
+request/turn/length/time bounds and sequential council playback. Do not let stale
+memory or generated replies cross a load, campaign identity, context change or
+cancel boundary. Recollection is advisory: it cannot issue orders, enact policy,
+spend money, resolve dilemmas or change campaign state.
+
+Visibility and worker boundaries
+Use only facts the player may already inspect. Never export hidden enemy rosters,
+foreign private values, concealed incident details or mutable live battle-worker
+state. During an active tactical worker, use only the existing detached visible
+snapshot or explicitly defer campaign memory until the view is safe. Preserve
+BattleResolver, engine determinism, data/schema conventions, additive saves and
+the independent village experience. Prose and limits belong in validated data.
+
+Acceptance path
+Use isolated QA saves/preferences. Exercise a real recorded campaign event,
+inspect its dated/source-labeled offline memory, verify distinct advisor recall,
+and provide that bounded memory to an explicitly requested conversation/council.
+Exercise succession/reign recall where the engine supports it and prove the
+selection is sourced, stable and bounded. Check save/load persistence, loading an
+earlier save and a different campaign, legacy-save behavior, absence of transcript
+facts, and no hidden-information or active-worker leakage. Confirm reads preserve
+full game state/RNG and create no automatic paid request. Inspect the rendered
+memory view and preserve standalone village behavior after shared UI changes.
+
+Verify the changed data and import/compile once; use the fastest direct checks
+that establish the changed flow. Follow the weekly policy: no broad suites or
+generic new tests; only narrowly applicable credential, migration, money or
+escaped-bug exceptions. Distinguish implemented/configured/offline behavior from
+actual provider acceptance and subjective voice assessment. Report observed
+results and limits, save local source checkpoints, and do not push, release or
+deploy. Finish with the verified implementation SHA and Pending Isengard report.
+
+Audited implementation contract — October 10
+Reuse the existing save's chronicle (already capped at 10 entries per turn and
+2,000 total), the player's actual ruler/reign, and explicit dilemma/honor
+receipts. Add no memory save field, sidecar, generated summary, transcript
+persistence or invented pledge history. Memory is a deterministic read-only
+projection: at most 12 records on the page, 6 in advisor context and 2 prior
+reigns. Selection uses advisor-role and owned-city relevance plus a validated
+focused source. No cross-campaign cache survives loading another save.
+
+The offline view labels sources and dates. Current-ruler identity comes from the
+actual living leader; show a reign date only when the ledger matches that leader.
+Prior-reign totals are labeled as lifetime deeds at closure, not deeds earned
+solely during that reign. Apply the player-involvement filter before resolving
+names. Exclude foreign-only records, battle troop totals and capture loot.
+Perform no memory reads against live tactical-worker state. Mark truncated or
+missing history explicitly incomplete; loading an earlier save restores that
+save's own record. The core agent owns projection/data/schema, UI agent the
+guarded shared panel, and root agent adapters/council/prompts/provider/integration.

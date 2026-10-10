@@ -404,3 +404,79 @@ need the player's listening review. This remains a private local development
 service, with no multiplayer entitlement or hosted production deployment.
 
 Verified by: data/schema validation, Godot import, isolated native campaign and village walkthroughs, and focused exception checks. Tests: broad suites not run (weekly review policy); 21 credential, four tutorial-save, five dilemma money/save checks and one transport regression passed.
+
+## Persistent campaign memory — October 10, 2026
+
+This phase begins at clean `079353e` and reuses authoritative saved history.
+The full plan and acceptance criteria were recorded before implementation in
+Isengard assignment `3b8ae6d4-8945-41ef-a85a-9e5c8354b542`, linked to the earlier
+advisor assignments. The dedicated reporter maintains
+[the plan](advisors/MEMORY_PHASE_PLAN.txt) and
+[observed progress](advisors/MEMORY_PHASE_PROGRESS.txt).
+
+`AdvisorMemoryRules.project` and `Game.advisor_memory` are deterministic,
+scene-free, read-only projections. They write neither history nor RNG, add no
+save fields and keep no machine-global archive. Existing chronicle, character,
+reign, divine-choice and patron-honor records provide persistence. Missing old
+fields yield unknown/empty history; loading an earlier campaign save restores
+that save's earlier facts. Generated conversation is never promoted to evidence.
+
+`data/advisor_memory.json` supplies safe templates, UI text and advisor priority
+lists, validated by its schema and cross-reference checks. `balance.advisor_memory`
+sets 12 page records, six provider-context records, two earlier reign summaries,
+4,096/16,000-byte compact/page caps, 96-character names and 768-character summaries.
+Selection prefers a validated requested source, then the selected currently owned
+city, then the advisor's authored priorities, recency and stable source reference.
+The complete result is trimmed to its byte budget with accurate omission counts;
+focus is reported only if its record survives in the returned selection.
+
+The global annals are not a visibility boundary. This projection first requires
+player faction involvement, then resolves allowlisted subjects and numeric
+fields. Foreign-only records, hidden troop counts, capture loot/population and
+unknown or malformed entries do not pass. It never exports the raw chronicle or
+full character dictionaries. The current leader comes from actual living player
+characters; the reign start is supplied only when the saved reign ledger names
+that same leader. Earlier reign totals are explicitly the character's recorded
+lifetime deeds at closure. Divine receipts carry a choice, city and turn, without
+inventing a ruler attribution, motive, past quote or continuing policy. Former
+pledges and renunciations cannot be reconstructed from the current patron ledger.
+
+Every unlocked campaign advisor has a guarded **Campaign memory** page with
+source labels, dates, role perspective, ruler continuity, omission notices,
+refresh, return to lessons and read-only Annals navigation. Asking about a record
+revalidates it and only prefills the conversation. Clear focus restores normal
+selection. Connection/send rechecks focused sources; load clears source selection,
+question text and transient conversations. Marcus, Lucius and Gaius inherit the
+same boundary but use different role priorities. The standalone village gains no
+campaign memory dependency or navigation.
+
+Ordinary conversations add one compact `campaign_memory` snapshot. A living
+council adds one shared chair-selected snapshot frozen with its existing visible
+season evidence, rather than three duplicated histories. All model instructions
+separate recorded facts, present conditions and interpretation. No background
+request or automatic spending was added. Memory reads return before campaign
+history traversal while the tactical view owns a battle worker; tactical
+conversations receive only their existing detached snapshot.
+
+Observed locally: an isolated campaign used a prepared old-age prerequisite,
+then actual yearly processing changed Appius Claudius to Manius Valerius. The
+saved prior reign and new current ruler appeared correctly. An actual legal Zeus
+pledge and confirmed Public Works choice supplied the divine receipt. Role
+snapshots were 1,946–1,947 bytes, the focused Marcus context 11,528 bytes and the
+shared council context 7,440 bytes. Full campaign state stayed unchanged by reads
+and Annals navigation. Save/load produced identical memory; loading the earlier
+save cleared the focused source, question and conversation. Foreign/raw-detail
+stress fixtures were excluded, a stale reign date became unknown, missing legacy
+history stayed safe, and an active practice battle withheld campaign memory.
+The rendered ruler/source cards and standalone village were inspected. Both
+native sessions exited cleanly, with no script errors or warnings.
+
+The completed local Marcus/Lucius/Gaius persona changes have not been uploaded.
+Automatic approval review rejected that external transfer because explicit user
+approval is required for the new source-derived content. The approval question
+covers the existing three private agents and one isolated fictional QA council.
+Existing configured voices remain available; no memory-conditioned native voice
+acceptance or provider prompt synchronization is claimed. The previous synthetic
+headless audio-cleanup warning was outside this change and was not rerun.
+
+Verified by: data validation, Godot import and isolated native campaign/village walkthroughs. Tests: not run (weekly review policy).

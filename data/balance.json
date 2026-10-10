@@ -1088,5 +1088,14 @@
   "divine_dilemmas": {
     "cooldown_turns": 2,
     "pledge_wait_turns": 1
+  },
+  "advisor_memory": {
+    "compact_records": 6,
+    "page_records": 12,
+    "previous_reigns": 2,
+    "compact_bytes": 4096,
+    "page_bytes": 16000,
+    "max_name_chars": 96,
+    "max_summary_chars": 768
   }
 }

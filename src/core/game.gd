@@ -1214,6 +1214,10 @@ func advisor_tutorial_respond(id: String, action: String) -> bool:
 	return AdvisorTutorialRules.respond(data,state,id,action)
 
 
+func advisor_memory(advisor_id: String, region: String = "", focus_ref: String = "", compact: bool = true) -> Dictionary:
+	return AdvisorMemoryRules.project(data,state,advisor_id,region,focus_ref,compact)
+
+
 func divine_dilemmas(region_id: String) -> Dictionary:
 	return DivineDilemmaRules.status(data,state,region_id)
 

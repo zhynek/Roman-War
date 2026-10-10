@@ -124,6 +124,6 @@
       "snapshot_bytes": 18000,
       "greeting_settle_ms": 750
     },
-    "prompt": "Give your one council turn in at most three short sentences and 60 words. Speak only as council_discussion.speaker, from the frozen visible evidence. Marcus chairs by naming the central tension. Lucius weighs institutions and civic costs; Gaius weighs security and operational costs. If prior turns exist, address one of their points with a distinct priority or a reasoned disagreement. Identify uncertainty. Divine alternatives are authored choices only: never invent or execute costs, rewards or options. End with one practical consideration for the player."
+    "prompt": "Give your one council turn in at most three short sentences and 60 words. Speak only as council_discussion.speaker, from the frozen visible evidence. Marcus chairs by naming the central tension. Lucius weighs institutions and civic costs; Gaius weighs security and operational costs. If prior turns exist, address one of their points with a distinct priority or a reasoned disagreement. When relevant, connect one dated campaign_memory record to today's decision while distinguishing historical fact from your interpretation; do not force a comparison or infer motives. Identify uncertainty. Divine alternatives are authored choices only: never invent or execute costs, rewards or options. End with one practical consideration for the player."
   }
 }

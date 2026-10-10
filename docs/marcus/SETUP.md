@@ -1,5 +1,13 @@
 # Private voices for Marcus, Lucius and Gaius
 
+October 10 memory phase: the local persona files now contain source-backed
+campaign-memory instructions. Automatic approval review blocked their upload to
+ElevenLabs pending explicit approval to transfer the new instructions and run
+one isolated fictional QA council. The previously configured voices and broker
+are unchanged. The new memory page, bounded context assembly and save/load path
+have been verified locally; new provider prompt synchronization and
+memory-conditioned native playback must not be claimed until approved and run.
+
 Live native verification completed October 9, 2026 after the user enabled
 ElevenAgents Write (`convai_write`). Both Marcus and Lucius received private
 sessions, streamed relevant text, and played PCM audio through Godot's native

@@ -117,6 +117,10 @@ func discussion_snapshot() -> Dictionary:
 		"calendar":owner._fields(owner.session.game.state,["turn","year","season"]),
 		"last_resolved_season":reading.season.duplicate(true),"city":reading.city.duplicate(true),
 		"patronage":patronage_snapshot(),"advisors":[]}
+	# One shared bounded selection keeps every speaker on the same saved facts.
+	# It is frozen with the season snapshot; private conversations use role recall.
+	result.campaign_memory=owner.session.game.advisor_memory("marcus",String(reading.city.region),"",true)
+	result.campaign_memory.selection_basis="shared_chair_selection"
 	for card in reading.speakers:
 		if card.available:result.advisors.append(owner._fields(card,["id","name","stance","counsel","mandate"]))
 	if owner.session.advisor_available("gaius"):

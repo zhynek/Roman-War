@@ -61,6 +61,8 @@ var _live_portrait_slot: HBoxContainer
 var _live_portrait_id := ""
 var _dilemma_confirmation: Dictionary={}
 var _dilemma_notice := ""
+var _memory_source_ref := ""
+var _memory_notice := ""
 
 func configure_context(context_adapter, auto_open: bool=true) -> void:
 	adapter=context_adapter
@@ -205,6 +207,8 @@ func _build() -> void:
 		page_navigation.add_child(_button(cw("patronage"),show_patronage,"AdvisorPatronage"))
 	if adapter.has_method("dilemma_page"):
 		page_navigation.add_child(_button(dw("navigation"),show_dilemmas,"AdvisorDilemmas"))
+	if adapter.has_method("memory_page"):
+		page_navigation.add_child(_button(mw("navigation"),show_memory,"AdvisorMemory"))
 	if tutorial_offer!=null:
 		page_navigation.add_child(_button(tw("history"),show_tutorial_archive,"MarcusTutorialArchive"))
 	guide_scroll=ScrollContainer.new()
@@ -274,7 +278,7 @@ func _build() -> void:
 func _layout() -> void:
 	if not is_instance_valid(panel):return
 	var viewport: Vector2=get_viewport_rect().size
-	var wide: bool=_tab=="guide" and _mode in ["council","patronage","tutorial","dilemmas"]
+	var wide: bool=_tab=="guide" and _mode in ["council","patronage","tutorial","dilemmas","memory"]
 	var width: float=minf(780.0 if wide else 460.0,maxf(250.0,viewport.x-32.0))
 	launcher.position=Vector2(maxf(8,viewport.x-198),maxf(8,viewport.y-90))
 	launcher.size=Vector2(182,74)
@@ -397,6 +401,8 @@ func _render_guide() -> void:
 		_render_council_page()
 	elif _mode=="dilemmas":
 		_render_dilemmas()
+	elif _mode=="memory":
+		_render_memory()
 	elif _mode=="patronage":
 		_render_patronage_page()
 	elif _mode=="reading":
@@ -518,6 +524,7 @@ func _toggle_connection() -> void:
 	if voice.is_agent_connected() or _status_code=="connecting":
 		voice.stop()
 		return
+	if not _validate_memory_focus():return
 	voice.connect_agent(context_snapshot())
 
 func _toggle_mute() -> void:
@@ -564,6 +571,7 @@ func _fill_question(text: String) -> void:
 func _ask(text: String) -> void:
 	var trimmed: String=text.strip_edges()
 	if trimmed.is_empty():return
+	if not _validate_memory_focus():return
 	if not voice.is_agent_connected():message.text=w("not_connected");return
 	if send_button.disabled:return
 	if trimmed.length()>int(copy.limits.question_characters):
@@ -631,12 +639,14 @@ func _save_preferences() -> void:
 	config.save(preference_path)
 
 func context_snapshot() -> Dictionary:
+	_validate_memory_focus()
 	var result: Dictionary=adapter.context_snapshot()
 	result.guide={"mode":_mode,"index":_intro_step if _mode=="intro" else _lesson}
 	if _mode=="intro":result.guide.page=copy.intro[_intro_step].duplicate(true)
 	elif _mode=="briefing":result.guide.page=adapter.season_briefing()
 	elif _mode=="reading":result.guide.page={"source":"advisor_reading"}
 	elif _mode=="council":result.guide.page={"source":"council_session", "title":cw("title")}
+	elif _mode=="memory":result.guide.page={"source":"campaign_memory"}
 	elif _mode=="tutorial":
 		result.guide.page={"source":"reactive_tutorial","id":_tutorial_id}
 		for card in adapter.tutorial_page().get("milestones",[]):
@@ -655,13 +665,15 @@ func context_snapshot() -> Dictionary:
 	return result
 
 func reset_conversation() -> void:
+	_memory_source_ref="";_memory_notice=""
+	if adapter.has_method("memory_focus"):adapter.memory_focus("")
 	_dilemma_confirmation.clear();_dilemma_notice=""
 	_stop_living_council()
 	close_panel()
 	_patronage_confirmation.clear()
 	_patronage_notice=""
 	_tutorial_id=""
-	if _mode in ["council","patronage","briefing","reading","tutorial","dilemmas"]:_mode="guide"
+	if _mode in ["council","patronage","briefing","reading","tutorial","dilemmas","memory"]:_mode="guide"
 	question.clear()
 	message.text=""
 	_conversation.clear()
@@ -675,7 +687,7 @@ func refresh_briefing(offer: bool=true) -> void:
 	_offer_pending=offer and available
 	season_offer.visible=_offer_pending and not is_open()
 	refresh_tutorial_offer()
-	if _mode in ["briefing","council","patronage"]:_render_guide()
+	if _mode in ["briefing","council","patronage","memory"]:_render_guide()
 	_schedule_layout()
 
 func show_briefing() -> void:
@@ -1047,6 +1059,102 @@ func refresh_living_council() -> void:
 		_live_portrait_slot.add_child(_live_portrait)
 		_live_portrait_slot.move_child(_live_portrait,0)
 	if is_instance_valid(_live_portrait):_live_portrait.set_speaking(discussion.active and discussion.voice._speaking)
+
+func mw(id: String) -> String:
+	return String(adapter.memory_words().get(id,id))
+
+func show_memory() -> void:
+	_memory_notice=""
+	_mode="memory";_choose_tab("guide");open()
+
+func _render_memory() -> void:
+	_validate_memory_focus()
+	var page: Dictionary=adapter.memory_page()
+	guide_body.add_child(_label(mw("title"),25,"eee3c2"))
+	guide_body.add_child(_label(mw("source_note"),14,"cabb87"))
+	guide_body.add_child(_label(mw("role_note"),14,"b8c5b8"))
+	var actions:=HFlowContainer.new()
+	guide_body.add_child(actions)
+	actions.add_child(_button(mw("refresh"),_refresh_memory,"AdvisorMemoryRefresh"))
+	var annals:=_button(mw("annals"),_open_memory_annals,"AdvisorMemoryAnnals")
+	annals.disabled=page.get("blocked","")!=""
+	actions.add_child(annals)
+	if String(page.get("focus_ref", ""))!="":
+		actions.add_child(_button(mw("clear_focus"),_clear_memory_focus,"AdvisorMemoryClearFocus"))
+	if _memory_notice!="":guide_body.add_child(_label(mw(_memory_notice),14,"d4bd93"))
+	var blocked: String=page.get("blocked","")
+	if blocked!="":
+		guide_body.add_child(_label(mw("battle_note" if blocked in ["battle","battle_active"] else "presentation_note"),15))
+		return
+	guide_body.add_child(_label(mw("retention_note"),13,"a6b8ab"))
+	var ruler: Dictionary=page.get("current_ruler",{})
+	var ruler_card:=_card("30382e")
+	ruler_card.add_child(_label(mw("current_ruler").format(ruler) if not ruler.is_empty() else mw("unknown_ruler"),20,"eee3c2"))
+	if not ruler.is_empty():
+		ruler_card.add_child(_label(mw("unknown_since") if ruler.get("since_turn")==null else mw("since").format({"turn":ruler.since_turn}),13,"b8c5b8"))
+	var reigns: Array=page.get("previous_reigns",[])
+	if not reigns.is_empty():
+		guide_body.add_child(_label(mw("previous_reigns"),20,"eee3c2"))
+		guide_body.add_child(_label(mw("previous_reigns_note"),13,"a6b8ab"))
+		for record in reigns:_render_memory_record(record,page)
+	if int(page.get("previous_reigns_omitted",0))>0:
+		guide_body.add_child(_label(mw("previous_reigns_omitted").format({"count":page.previous_reigns_omitted}),13,"a6b8ab"))
+	guide_body.add_child(_label(mw("records"),20,"eee3c2"))
+	var records: Array=page.get("records",[])
+	if records.is_empty():guide_body.add_child(_label(mw("empty"),15))
+	for record in records:_render_memory_record(record,page)
+	if int(page.get("omitted_count",0))>0:
+		guide_body.add_child(_label(mw("omitted").format({"count":page.omitted_count}),13,"a6b8ab"))
+	guide_body.add_child(_button(mw("return"),_choose_lesson.bind(0),"AdvisorMemoryReturn"))
+
+func _render_memory_record(record: Dictionary,page: Dictionary) -> void:
+	var body:=_card("343b2d" if record.source_ref==page.get("focus_ref","") else "203832")
+	body.add_child(_label(mw("record_source").format({"source":mw("source_"+String(record.source)),"turn":record.turn}),12,"cabb87"))
+	body.add_child(_label(String(record.date),17,"eee3c2"))
+	body.add_child(_label(String(record.summary),15))
+	body.add_child(_button(mw("ask"),_ask_memory_record.bind(String(record.source_ref)),"AdvisorMemoryAsk"))
+
+func _ask_memory_record(source_ref: String) -> void:
+	# Resolve again when clicked: a displayed card may predate a load or season.
+	if not adapter.memory_focus(source_ref):
+		_invalidate_memory_focus();_render_guide();return
+	var page: Dictionary=adapter.memory_page()
+	var records: Array=page.get("records",[]).duplicate()
+	records.append_array(page.get("previous_reigns",[]))
+	for record in records:
+		if record.source_ref!=source_ref:continue
+		_memory_source_ref=source_ref;_memory_notice=""
+		message.text=""
+		_choose_tab("chat")
+		_fill_question(mw("ask_prompt").format(record))
+		return
+	_invalidate_memory_focus();_render_guide()
+
+func _validate_memory_focus() -> bool:
+	if _memory_source_ref.is_empty():return true
+	if adapter.has_method("memory_focus") and adapter.memory_focus(_memory_source_ref):return true
+	_invalidate_memory_focus()
+	return false
+
+func _invalidate_memory_focus() -> void:
+	_memory_source_ref="";_memory_notice="focus_missing"
+	if adapter.has_method("memory_focus"):adapter.memory_focus("")
+	if is_instance_valid(question):question.clear()
+	if is_instance_valid(message):message.text=mw("focus_missing")
+
+func _clear_memory_focus() -> void:
+	_memory_source_ref="";_memory_notice=""
+	adapter.memory_focus("")
+	question.clear();message.text=""
+	_render_guide()
+
+func _refresh_memory() -> void:
+	_memory_notice=""
+	_render_guide()
+
+func _open_memory_annals() -> void:
+	if adapter.memory_navigate_annals():close_panel()
+	else:_render_guide()
 
 func dw(id: String) -> String:
 	return String(adapter.dilemma_words().get(id,id))

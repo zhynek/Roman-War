@@ -176,6 +176,7 @@ func _state_loaded() -> void:
 		campaign.refresh()
 	if is_instance_valid(marcus):
 		for id in advisor_panels:
+			advisor_contexts[id].reset_memory()
 			advisor_contexts[id].capture_season()
 			advisor_panels[id].reset_conversation()
 			advisor_panels[id].hide()

@@ -37,7 +37,8 @@
     "city_campaign",
     "patronage",
     "advisor_tutorial",
-    "divine_dilemmas"
+    "divine_dilemmas",
+    "advisor_memory"
   ],
   "additionalProperties": false,
   "properties": {
@@ -2387,6 +2388,54 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100
+        }
+      }
+    },
+    "advisor_memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compact_records",
+        "page_records",
+        "previous_reigns",
+        "compact_bytes",
+        "page_bytes",
+        "max_name_chars",
+        "max_summary_chars"
+      ],
+      "properties": {
+        "compact_records": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "page_records": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "previous_reigns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "compact_bytes": {
+          "type": "integer",
+          "minimum": 4096
+        },
+        "page_bytes": {
+          "type": "integer",
+          "minimum": 8192
+        },
+        "max_name_chars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 128
+        },
+        "max_summary_chars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
         }
       }
     }

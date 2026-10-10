@@ -32,6 +32,7 @@ TABLES = {
     "council.json": "council.schema.json",
     "reactive_tutorial.json": "reactive_tutorial.schema.json",
     "divine_dilemmas.json": "divine_dilemmas.schema.json",
+    "advisor_memory.json": "advisor_memory.schema.json",
     "waterways.json": "waterways.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
@@ -135,6 +136,36 @@ def load_tables() -> dict[str, dict]:
     return tables
 
 
+def _advisor_memory_checks(t: dict[str, dict]) -> None:
+    content = t.get("advisor_memory.json", {})
+    templates = content.get("templates", {})
+    subjects = {
+        "war_declared": {"faction", "other_faction"}, "battle": {"faction", "other_faction", "region"},
+        "city_taken": {"faction", "other_faction", "region"}, "city_sacked": {"faction", "other_faction", "region"},
+        "city_revolted": {"faction", "region"}, "peace_made": {"faction", "other_faction"},
+        "alliance_made": {"faction", "other_faction"}, "technique_originated": {"faction", "technique"},
+        "technique_adopted": {"faction", "technique"}, "edict_enacted": {"faction", "edict"},
+        "edict_lapsed": {"faction", "edict"}, "leader_died": {"faction", "character", "age"},
+        "succession": {"faction", "character"},
+        "reign_summary": {"faction", "character", "battles_won", "cities_taken", "techniques_completed", "edicts_enacted"},
+        "war_summary": {"faction", "other_faction", "turns", "battles"}, "faction_destroyed": {"faction"},
+        "disaster": {"faction", "region"}, "epithet_earned": {"faction", "character", "epithet"},
+        "office_taken": {"faction", "character", "office"}, "civil_war": {"faction"},
+        "divine_choice": {"region", "dilemma", "choice"}, "patron_honor": {"patron"}}
+    for kind, template in templates.items():
+        if set(re.findall(r"\{([a-z_]+)\}", template)) != subjects.get(kind, set()):
+            err(f"advisor memory: unsupported or missing placeholders in {kind}")
+    advisor_ids = {"marcus"} | {a["id"] for a in t.get("advisors.json", {}).get("advisors", [])}
+    for advisor, role in content.get("roles", {}).items():
+        if advisor not in advisor_ids:
+            err(f"advisor memory: unknown advisor {advisor}")
+        if not set(role.get("priorities", [])) <= set(templates):
+            err(f"advisor memory: unknown priority kind for {advisor}")
+    limits = t.get("balance.json", {}).get("advisor_memory", {})
+    if limits.get("compact_bytes", 0) > limits.get("page_bytes", 0):
+        err("advisor memory: compact budget exceeds page budget")
+
+
 def _divine_dilemma_checks(t: dict[str, dict]) -> None:
     cards = t.get("divine_dilemmas.json", {}).get("dilemmas", [])
     ids = [card.get("id") for card in cards]
@@ -235,6 +266,7 @@ def cross_checks(t: dict[str, dict]) -> None:
     _patronage_checks(t)
     _reactive_tutorial_checks(t)
     _divine_dilemma_checks(t)
+    _advisor_memory_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 

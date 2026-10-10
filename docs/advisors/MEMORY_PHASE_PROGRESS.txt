@@ -1,0 +1,88 @@
+Roman War — persistent advisor memory
+Session progress — October 10, 2026
+
+Baseline and authorization
+The user authorized the next persistent-memory phase after the completed three
+advisor phases. The worktree was clean at 079353e on codex/marcus-advisor.
+Earlier assignment 78dc60e5-c926-4d29-9645-476374d22528 remains In progress with
+report fc21f192-7b46-49d0-9fae-753f980bf787 verified Pending; preserve both.
+
+Plan before implementation
+Full plan: docs/advisors/MEMORY_PHASE_PLAN.txt. Deterministic bounded recall from
+existing visible chronicle/reign records and explicit patron/dilemma receipts;
+offline dates/source labels; role-relevant selections for Marcus, Lucius and
+Gaius; bounded memory in explicit conversation/council contexts. No automatic
+provider requests, transcript-as-fact memory, hidden data or active-worker reads.
+Save identity, earlier/different campaigns and legacy saves must remain safe.
+The core/source audit will refine the exact storage/selection contract.
+
+Acceptance and reporting
+Observe source event -> dated offline memory -> relevant advisor recall ->
+explicit bounded conversation/council -> succession/save/load/earlier-or-other
+campaign behavior. Verify state/RNG purity, bounds, visibility, worker guards and
+no automatic provider call. Isolated QA state/preferences; validate data, import
+and inspect the actual UI once. No broad suites; narrow policy exceptions only.
+No secrets, replacement key, scope expansion, push, release or deployment.
+Dedicated reporter submits Pending evidence; no self-acceptance.
+
+Milestone 1 — plan prepared
+Read current handoff and prior report linkage, verified clean baseline and prior
+Pending status, and prepared this full plan before implementation. Recorded the
+full plan in linked Isengard assignment 3b8ae6d4-8945-41ef-a85a-9e5c8354b542,
+"Advisor memory — chronicle, succession and source-backed recall", In progress.
+The objective contains the full 5,474-character plan. No memory implementation
+or acceptance is claimed yet.
+
+Milestone 2 — source audit and storage contract finalized
+The audit chose a read-only projection of existing saved sources, with no new
+memory save fields or sidecar. It reuses the chronicle's existing cap of 10 per
+turn/2,000 total, the actual own ruler/reign, and explicit dilemma/honor receipts.
+The projection is bounded to 12 page records, 6 context records and 2 prior
+reigns, selected by advisor-role/owned-city relevance and a validated focused
+source. There are no generated summaries, transcript persistence, invented
+pledge history or cross-campaign cache.
+
+Dates/source labels remain inspectable. Reign dates require the ledger to match
+the actual living ruler. Closed-reign totals are explicitly lifetime deeds at
+closure. Player involvement is filtered before names; foreign-only records,
+battle troop totals and capture loot are excluded. Truncated/missing history is
+marked incomplete; earlier saves restore their own history. Live tactical-worker
+memory reads remain prohibited.
+
+Implementation has begun: core agent owns projection/data/schema; UI agent owns
+the guarded shared panel; root agent owns context adapters, council, prompts,
+provider and integration. No verification result is claimed at this checkpoint.
+
+Milestone 3 — offline source, succession and save acceptance
+The isolated walkthrough in /tmp/advisor-memory-review.log issued a legal war
+declaration and Zeus pledge, then resolved three seasons. A prepared old-age
+condition led to an actual yearly succession from Appius Claudius to Manius
+Valerius. The prior-reign summary and current living leader were recalled
+correctly. A confirmed Public Works dilemma receipt was also recalled.
+
+Direct checks confirmed pure reads, identical memory after save/load, filtering
+of foreign-only records and raw hidden details, a null date for a stale reign
+ledger, and safe missing legacy history. Role memory snapshots were 1,946–1,947
+bytes; complete Marcus context was 11,528 bytes and frozen council context 7,440.
+The source/ruler cards were rendered and inspected. Ask only prefilled a question;
+Annals navigation preserved state. Loading an earlier save cleared memory focus
+and conversation; restoring the later save restored its receipt. Active practice
+battle withheld campaign memory. The run reported zero failures and exited
+cleanly without errors.
+
+The independent village passed its separate one-pass 1280×800 inspection with
+11 lessons, no memory hook/navigation, no provider connection and unchanged
+state. Its shutdown was clean. Godot import was clean, and core data validation
+reported zero errors and warnings. These results establish the local/offline
+memory flow, not new provider acceptance.
+
+Milestone 4 — provider update awaiting explicit approval
+Automatic approval review rejected transmission of the three updated persona
+prompts to ElevenLabs. The stated reason was that the new source-derived payload
+requires explicit approval. No prompt update was executed. The root agent asked
+the user to approve that update and one isolated fictional QA council. This is
+an external approval boundary, not a local source/verification failure.
+Local implementation and offline acceptance are complete; prompt synchronization
+and new native memory-aware council acceptance remain pending. Do not infer
+either from the earlier phase's live voice results. Final local documentation
+and commit are in progress while the approval question remains open.

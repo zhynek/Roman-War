@@ -92,9 +92,10 @@ missing information labeled. These readings work offline; connect to ask about
 tradeoffs. Economic readings wait until an open city battle closes.
 
 Switching ends the previous voice session and retains each advisor's on-screen
-transcript. Reconnecting starts a new provider conversation; retained text is
-not long-term AI memory. Loading a save clears all transcripts and returns to
-Marcus. The village experience still uses Marcus alone.
+transcript. Reconnecting starts a new provider conversation. Campaign memory
+comes from saved game records, rather than these transient conversations.
+Loading a save clears all transcripts and returns to Marcus. The village
+experience still uses Marcus alone.
 
 ## Gaius and military judgment
 
@@ -111,6 +112,33 @@ Enemy presence never supplies hidden strength or rosters. During a viewed city
 battle, counsel uses only its detached displayed snapshot. It does not pause
 combat. His conversation and private voice are separate; switching speakers
 stops the previous connection. The written reading works offline.
+
+## Campaign memory across rulers
+
+Choose **Campaign memory** in any unlocked advisor's panel. It works offline
+and shows your current ruler, retained summaries of earlier reigns, and dated
+records from your faction's history. Marcus considers continuity and duty,
+Lucius civic institutions, and Gaius military commitments. Selecting an owned
+city helps bring its records forward.
+
+Each memory names its source. **Ask about this record** prepares a question
+and focuses that record for your next explicit conversation; it never connects
+or sends on its own. Clear the focus to return to the advisor's usual selection.
+**Open Annals** opens the existing history panel without issuing a game command.
+The seasonal council receives one shared, frozen selection of saved history.
+
+This is a selection from retained records, not a complete biography. Old annals
+can be compacted, and omitted records are not evidence that something never
+happened. Prior reign summaries describe the character's recorded lifetime
+deeds at the close. Divine-choice receipts record a choice, city and turn;
+they do not establish who made a same-turn decision, why it was made, or whether
+the policy remains active. Advisors must distinguish those facts from opinions.
+
+Memory follows the loaded campaign save. Loading an earlier save restores its
+earlier history and clears the selected memory and conversation. Another
+campaign has its own records. There is no additional transcript archive or
+automatic provider request. Campaign memory waits while a tactical battle or
+turn presentation is open; tactical advice uses its detached battle view.
 
 ## Seasonal council and divine patronage
 

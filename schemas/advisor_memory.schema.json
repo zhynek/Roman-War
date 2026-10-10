@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ui",
+    "roles",
+    "templates"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "ui": {
+      "type": "object",
+      "required": [
+        "navigation",
+        "title",
+        "source_note",
+        "retention_note",
+        "battle_note",
+        "presentation_note",
+        "empty",
+        "current_ruler",
+        "unknown_ruler",
+        "since",
+        "unknown_since",
+        "previous_reigns",
+        "previous_reigns_note",
+        "previous_reigns_omitted",
+        "records",
+        "record_source",
+        "source_chronicle",
+        "source_dilemma",
+        "source_honor",
+        "omitted",
+        "ask",
+        "ask_prompt",
+        "refresh",
+        "annals",
+        "focus_missing",
+        "date",
+        "date_turn",
+        "year_bc",
+        "year_ad",
+        "summer",
+        "winter",
+        "return",
+        "clear_focus"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1500
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marcus",
+        "lucius",
+        "gaius"
+      ],
+      "properties": {
+        "marcus": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "note",
+            "priorities"
+          ],
+          "properties": {
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "priorities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "war_declared",
+                  "battle",
+                  "city_taken",
+                  "city_sacked",
+                  "city_revolted",
+                  "peace_made",
+                  "alliance_made",
+                  "technique_originated",
+                  "technique_adopted",
+                  "edict_enacted",
+                  "edict_lapsed",
+                  "leader_died",
+                  "succession",
+                  "reign_summary",
+                  "war_summary",
+                  "faction_destroyed",
+                  "disaster",
+                  "epithet_earned",
+                  "office_taken",
+                  "civil_war",
+                  "divine_choice",
+                  "patron_honor"
+                ]
+              }
+            }
+          }
+        },
+        "lucius": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "note",
+            "priorities"
+          ],
+          "properties": {
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "priorities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "war_declared",
+                  "battle",
+                  "city_taken",
+                  "city_sacked",
+                  "city_revolted",
+                  "peace_made",
+                  "alliance_made",
+                  "technique_originated",
+                  "technique_adopted",
+                  "edict_enacted",
+                  "edict_lapsed",
+                  "leader_died",
+                  "succession",
+                  "reign_summary",
+                  "war_summary",
+                  "faction_destroyed",
+                  "disaster",
+                  "epithet_earned",
+                  "office_taken",
+                  "civil_war",
+                  "divine_choice",
+                  "patron_honor"
+                ]
+              }
+            }
+          }
+        },
+        "gaius": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "note",
+            "priorities"
+          ],
+          "properties": {
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1500
+            },
+            "priorities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "enum": [
+                  "war_declared",
+                  "battle",
+                  "city_taken",
+                  "city_sacked",
+                  "city_revolted",
+                  "peace_made",
+                  "alliance_made",
+                  "technique_originated",
+                  "technique_adopted",
+                  "edict_enacted",
+                  "edict_lapsed",
+                  "leader_died",
+                  "succession",
+                  "reign_summary",
+                  "war_summary",
+                  "faction_destroyed",
+                  "disaster",
+                  "epithet_earned",
+                  "office_taken",
+                  "civil_war",
+                  "divine_choice",
+                  "patron_honor"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "templates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "war_declared",
+        "battle",
+        "city_taken",
+        "city_sacked",
+        "city_revolted",
+        "peace_made",
+        "alliance_made",
+        "technique_originated",
+        "technique_adopted",
+        "edict_enacted",
+        "edict_lapsed",
+        "leader_died",
+        "succession",
+        "reign_summary",
+        "war_summary",
+        "faction_destroyed",
+        "disaster",
+        "epithet_earned",
+        "office_taken",
+        "civil_war",
+        "divine_choice",
+        "patron_honor"
+      ],
+      "properties": {
+        "war_declared": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "battle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "city_taken": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "city_sacked": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "city_revolted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "peace_made": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "alliance_made": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "technique_originated": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "technique_adopted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "edict_enacted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "edict_lapsed": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "leader_died": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "succession": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "reign_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "war_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "faction_destroyed": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "disaster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "epithet_earned": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "office_taken": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "civil_war": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "divine_choice": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        },
+        "patron_honor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      }
+    }
+  }
+}

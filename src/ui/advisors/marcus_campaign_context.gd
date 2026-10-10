@@ -6,6 +6,7 @@ var content: Dictionary
 var lessons: Array
 var preference_path := "user://marcus_campaign_preferences.cfg"
 var _briefing: Dictionary = {}
+var _memory_focus_ref := ""
 var council_context
 
 func _init(owner_session) -> void:
@@ -149,6 +150,7 @@ func context_snapshot() -> Dictionary:
 		result.council_session.city.erase("factors")
 		result.council_session.shared_factors_key="selection.factors"
 	result.patronage = council_context.patronage_snapshot()
+	result.campaign_memory = memory_snapshot()
 	return result
 
 func _settlement(region: String) -> Dictionary:
@@ -271,3 +273,39 @@ func dilemma_snapshot() -> Dictionary:
 		for id in card.get("reactions",{}).keys():
 			if not session.advisor_available(id):card.reactions.erase(id)
 	return result
+
+func memory_words() -> Dictionary:
+	var authored: Dictionary=session.game.data.advisor_memory_content
+	var words: Dictionary=authored.ui.duplicate(true)
+	words.role_note=authored.roles.get(String(content.id),{}).get("note","")
+	return words
+
+func _memory_read(compact: bool, focus_ref: String) -> Dictionary:
+	# Return before traversing campaign history while the tactical worker owns it.
+	var block: String=council_context.blocked()
+	if block!="":return {"blocked":block,"records":[],"previous_reigns":[]}
+	return session.game.advisor_memory(String(content.id),String(_screen().get("region","")),focus_ref,compact)
+
+func memory_page() -> Dictionary:
+	return _memory_read(false,_memory_focus_ref)
+
+func memory_snapshot() -> Dictionary:
+	return _memory_read(true,_memory_focus_ref)
+
+func memory_focus(source_ref: String) -> bool:
+	if source_ref.is_empty():
+		_memory_focus_ref=""
+		return true
+	var reading: Dictionary=_memory_read(true,source_ref)
+	if reading.get("blocked","")!="" or not reading.get("focus_found",false):return false
+	_memory_focus_ref=source_ref
+	return true
+
+func reset_memory() -> void:
+	_memory_focus_ref=""
+
+func memory_navigate_annals() -> bool:
+	if council_context.blocked()!="" or CityBattleRules.locked(session.game.state):return false
+	session.show_campaign()
+	session.campaign.annals_panel.open_for(session.game)
+	return true

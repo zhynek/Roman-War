@@ -1,0 +1,103 @@
+{
+  "$schema": "../schemas/advisor_memory.schema.json",
+  "ui": {
+    "navigation": "Campaign memory",
+    "title": "What your counselors remember",
+    "source_note": "These recollections come from this saved campaign's records, not remembered chat transcripts.",
+    "retention_note": "The retained archive is incomplete: crowded seasons and older entries may be omitted. Missing records do not mean an event never happened. Choices do not reveal motives, and former pledges are not reconstructed.",
+    "battle_note": "Campaign recollections wait until the active battle closes; no mutable tactical state is read.",
+    "presentation_note": "Finish the turn presentation and Dispatch before reviewing campaign memory.",
+    "empty": "No eligible saved recollection is available for this view.",
+    "current_ruler": "Current ruler: {name}",
+    "unknown_ruler": "No living ruler is recorded for your faction.",
+    "since": "Recorded reign begins on turn {turn}",
+    "unknown_since": "The current ruler's reign date is not yet recorded.",
+    "previous_reigns": "Earlier rulers in the retained annals",
+    "previous_reigns_note": "Reign summaries report the character's recorded lifetime deeds at closure, not deeds earned only during that reign.",
+    "previous_reigns_omitted": "{count} older reign summaries are not shown.",
+    "records": "Dated campaign recollections",
+    "record_source": "{source} · turn {turn}",
+    "source_chronicle": "Campaign annals",
+    "source_dilemma": "Confirmed divine choice",
+    "source_honor": "Recorded divine honor",
+    "omitted": "{count} other eligible records are not shown.",
+    "ask": "Ask about this recollection",
+    "ask_prompt": "Recall the selected saved record {source_ref}: {summary} Put it in context for this campaign, distinguish recorded facts from interpretation, and do not invent motives or unrecorded history.",
+    "refresh": "Refresh from this save",
+    "annals": "Open the annals",
+    "focus_missing": "The selected source is not eligible in this loaded campaign. No earlier campaign memory has been carried over.",
+    "date": "{season}, {year}",
+    "date_turn": "Turn {turn}",
+    "year_bc": "{year} BC",
+    "year_ad": "AD {year}",
+    "summer": "Summer",
+    "winter": "Winter",
+    "return": "Return to lessons",
+    "clear_focus": "Clear focused memory"
+  },
+  "roles": {
+    "marcus": {
+      "note": "Marcus recalls duties, rulers and consequential choices. His interpretation is separate from the saved facts.",
+      "priorities": [
+        "succession",
+        "reign_summary",
+        "leader_died",
+        "divine_choice",
+        "patron_honor",
+        "city_revolted",
+        "war_summary"
+      ]
+    },
+    "lucius": {
+      "note": "Lucius recalls governing choices and changes affecting cities. Historical decisions do not establish current conditions.",
+      "priorities": [
+        "divine_choice",
+        "edict_enacted",
+        "edict_lapsed",
+        "city_revolted",
+        "technique_adopted",
+        "technique_originated",
+        "city_taken",
+        "city_sacked",
+        "patron_honor"
+      ]
+    },
+    "gaius": {
+      "note": "Gaius recalls recorded wars and territorial changes. Old victories reveal no hidden enemy roster or present guarantee.",
+      "priorities": [
+        "battle",
+        "war_summary",
+        "war_declared",
+        "peace_made",
+        "city_taken",
+        "city_sacked",
+        "civil_war",
+        "divine_choice"
+      ]
+    }
+  },
+  "templates": {
+    "war_declared": "{faction} declared war upon {other_faction}.",
+    "battle": "{faction} and {other_faction} fought near {region}. This record does not provide current troop strength.",
+    "city_taken": "{faction} took {region} from {other_faction}.",
+    "city_sacked": "{faction} sacked {region}, previously held by {other_faction}.",
+    "city_revolted": "{region} revolted against {faction}.",
+    "peace_made": "{faction} and {other_faction} made peace.",
+    "alliance_made": "{faction} and {other_faction} formed an alliance.",
+    "technique_originated": "{faction} originated the technique {technique}.",
+    "technique_adopted": "{faction} adopted the technique {technique}.",
+    "edict_enacted": "{faction} enacted {edict}.",
+    "edict_lapsed": "{faction}'s edict {edict} lapsed.",
+    "leader_died": "{character}, a ruler of {faction}, died aged {age}.",
+    "succession": "{character} succeeded to the leadership of {faction}.",
+    "reign_summary": "The annals closed {character}'s reign over {faction}. At closure, the character's recorded lifetime deeds totaled {battles_won} battle victories, {cities_taken} cities taken, {techniques_completed} techniques completed and {edicts_enacted} edicts enacted.",
+    "war_summary": "The recorded war between {faction} and {other_faction} lasted {turns} seasons and included {battles} battles.",
+    "faction_destroyed": "{faction} ceased to exist as a campaign faction.",
+    "disaster": "A disaster was recorded at {region}, held at the time by {faction}.",
+    "epithet_earned": "{character} of {faction} earned the epithet {epithet}.",
+    "office_taken": "{character} of {faction} took the office of {office}.",
+    "civil_war": "{faction} entered civil war.",
+    "divine_choice": "At {region}, the confirmed choice in '{dilemma}' was '{choice}'. This receipt records the decision, not its motive, the ruler who made it, or whether its policy remains active.",
+    "patron_honor": "The campaign recorded fulfillment of {patron}'s divine charge. The honor remains a historical record, not proof that the patron is still chosen."
+  }
+}

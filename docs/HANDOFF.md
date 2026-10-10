@@ -11,7 +11,40 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
-## Current local advisor development — October 9, 2026
+## Advisor campaign memory — October 10, 2026
+
+The next phase extends clean `079353e` without replacing the three advisors or
+waterways. **Campaign memory** now projects saved, player-involved chronicle
+records, the actual current ruler, earlier reign summaries and explicit divine
+choice/honor receipts. It adds no save fields, transcript archive or simulation
+commands. Read [the phase record](advisors/MEMORY_PHASE_PROGRESS.txt) and
+[player controls](../PLAYING.md#campaign-memory-across-rulers).
+
+Recall is role- and owned-city-relevant, with 12 page records or six context
+records and at most two earlier reigns. Compact memory is capped at 4,096 bytes.
+The living council freezes one shared selection. Records carry source references
+and dates; missing or compacted history stays unknown. Prior reign totals are
+recorded lifetime deeds, and a divine receipt does not identify its ruler or
+prove a policy remains active. Foreign-only records and raw battle details are
+excluded before names are resolved. Tactical views withhold campaign memory.
+
+An isolated native walkthrough observed actual yearly succession, a confirmed
+Public Works receipt, pure memory reads, exact recall after save/load, earlier
+save focus clearing, bounded role/council contexts, read-only Annals navigation
+and battle exclusion. Memory and village screens were inspected; both sessions
+exited cleanly. No new tests or broad suite were run.
+
+The local three-persona prompt changes are ready, but automatic approval review
+blocked uploading them to ElevenLabs pending explicit user approval for the new
+content. The approval question also covers one isolated fictional memory council.
+Existing voices remain configured; new memory-conditioned native playback is
+not verified. No provider update, new key, scope expansion, push or release has
+occurred in this phase. Isengard assignment:
+`3b8ae6d4-8945-41ef-a85a-9e5c8354b542`.
+
+Verified by: data validation, Godot import and isolated rendered campaign/village walkthroughs. Tests: not run (weekly review policy).
+
+## Previous local advisor development — October 9, 2026
 
 All three requested phases are implemented on `codex/marcus-advisor`, extending
 clean `245503c` and preserving the waterways integration below. Read the latest

@@ -55,6 +55,7 @@ var advisor_content: Dictionary = {}
 var patronage_content: Dictionary = {}
 var reactive_tutorial: Dictionary = {}
 var divine_dilemma_content: Dictionary = {}
+var advisor_memory_content: Dictionary = {}
 var patrons: Dictionary = {}
 
 var load_errors: PackedStringArray = []
@@ -72,6 +73,7 @@ func ok() -> bool:
 
 func _load_all(dir: String) -> void:
 	balance = _read_json(dir + "/balance.json")
+	advisor_memory_content = _read_json(dir + "/advisor_memory.json")
 	divine_dilemma_content = _read_json(dir + "/divine_dilemmas.json")
 	reactive_tutorial = _read_json(dir + "/reactive_tutorial.json")
 	patronage_content = _read_json(dir + "/patronage.json")
