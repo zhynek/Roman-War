@@ -1921,9 +1921,11 @@ func _enter_roma() -> void:
 
 
 func open_port(region: String) -> void:
+	if CityBattleRules.locked(game.state):
+		return
 	if game.state["settlements"].get(region,{}).get("owner","") != game.state["player_faction"]:
 		return
-	var dialog := PortDialog.new()
+	var dialog: PortDialog = PortDistrict.new() if PortRules.stage(game.data,game.state,region)>0 else PortDialog.new()
 	add_child(dialog)
 	dialog.changed.connect(refresh)
 	dialog.open_for(game,region)

@@ -1240,6 +1240,11 @@
         "movement": 2,
         "turns": 5
       }
+    },
+    "district": {
+      "grid_spacing": 1.0,
+      "pedestrian_radius": 0.28,
+      "walk_speed": 8.0
     }
   }
 }

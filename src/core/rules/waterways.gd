@@ -130,7 +130,7 @@ static func cargo_size(fleet: Dictionary) -> int:
 	var army: Dictionary = fleet.get("cargo", {}).get("army", {})
 	return army.get("units", []).size() + (1 if army.get("general") != null else 0)
 
-static func embark(data: GameData, state: Dictionary, fleet_id: String, army_id: String) -> Dictionary:
+static func embark_quote(data: GameData, state: Dictionary, fleet_id: String, army_id: String) -> Dictionary:
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	var army: Dictionary = state["armies"].get(army_id, {})
 	if fleet.is_empty() or army.is_empty() or fleet["owner"] != army["owner"]:
@@ -147,6 +147,16 @@ static func embark(data: GameData, state: Dictionary, fleet_id: String, army_id:
 	var cost := float(rules(data)["handling_cost"])
 	if float(army["movement_left"]) < cost or float(fleet["movement_left"]) < cost:
 		return {"ok": false, "error": "no_movement"}
+	return {"ok": true, "passengers": passengers, "capacity": capacity(data,fleet), "cost": cost}
+
+static func embark(data: GameData, state: Dictionary, fleet_id: String, army_id: String) -> Dictionary:
+	var quote := embark_quote(data,state,fleet_id,army_id)
+	if not quote["ok"]:
+		return quote
+	var fleet: Dictionary = state["fleets"][fleet_id]
+	var army: Dictionary = state["armies"][army_id]
+	var passengers := int(quote["passengers"])
+	var cost := float(quote["cost"])
 	PortRules.handle(state, army["region"], passengers)
 	SiegeRules.release(state, army_id)
 	army.erase("march_path")
@@ -171,7 +181,7 @@ static func can_land(data: GameData, state: Dictionary, fleet: Dictionary, regio
 		and DiplomacyRules.at_war(state, fleet.get("owner", ""), town["owner"]) \
 		and not MovementRules.hostile_army_in(state, fleet.get("owner", ""), region)
 
-static func disembark(data: GameData, state: Dictionary, fleet_id: String, region: String) -> Dictionary:
+static func landing_quote(data: GameData, state: Dictionary, fleet_id: String, region: String) -> Dictionary:
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.get("cargo", {}).is_empty() or not can_land(data, state, fleet, region):
 		return {"ok": false, "error": "occupied"}
@@ -184,6 +194,18 @@ static func disembark(data: GameData, state: Dictionary, fleet_id: String, regio
 	if access(data, state, fleet["owner"], region, fleet["sea_zone"]):
 		if passengers > PortRules.handling_left(data, state, region):
 			return {"ok": false, "error": "handling_full"}
+	return {"ok":true,"cost":cost,"passengers":passengers}
+
+static func disembark(data: GameData, state: Dictionary, fleet_id: String, region: String) -> Dictionary:
+	var quote := landing_quote(data,state,fleet_id,region)
+	if not quote["ok"]:
+		return quote
+	var fleet: Dictionary = state["fleets"][fleet_id]
+	var cargo: Dictionary = fleet["cargo"]
+	var army: Dictionary = cargo["army"]
+	var passengers := int(quote["passengers"])
+	var cost := float(quote["cost"])
+	if access(data,state,fleet["owner"],region,fleet["sea_zone"]):
 		PortRules.handle(state, region, passengers)
 	army["region"] = region
 	army["movement_left"] = 0.0
@@ -354,7 +376,7 @@ static func trade_valid(data: GameData, state: Dictionary, fleet: Dictionary, ro
 			return false
 	return true
 
-static func assign_trade(data: GameData, state: Dictionary, fleet_id: String, from: String, to: String, mode: String = "coastal") -> Dictionary:
+static func trade_quote(data: GameData, state: Dictionary, fleet_id: String, from: String, to: String, mode: String = "coastal") -> Dictionary:
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty() or not fleet.get("cargo", {}).is_empty() or from == to:
 		return {"ok": false, "error": "cargo_aboard"}
@@ -373,6 +395,14 @@ static func assign_trade(data: GameData, state: Dictionary, fleet_id: String, fr
 			target = zone
 	if best.is_empty():
 		return {"ok": false, "error": "route_unavailable"}
+	return {"ok":true,"from":from,"to":to,"to_zone":target,"from_zone":fleet["sea_zone"],"path":best["path"].duplicate(),"turns":best["turns"],"cost":best["cost"],"capacity":PortRules.delivery_capacity(data,state,fleet,{"from":from,"to":to})}
+
+static func assign_trade(data: GameData, state: Dictionary, fleet_id: String, from: String, to: String, mode: String = "coastal") -> Dictionary:
+	var best := trade_quote(data,state,fleet_id,from,to,mode)
+	if not best["ok"]:
+		return best
+	var fleet: Dictionary = state["fleets"][fleet_id]
+	var target: String = best["to_zone"]
 	fleet["sail_mode"] = mode
 	fleet["trade_route"] = {"from": from, "to": to, "from_zone": fleet["sea_zone"], "to_zone": target, "heading": "to", "paid_turn": int(state["turn"]), "paused": false}
 	fleet["sail_path"] = best["path"].duplicate()

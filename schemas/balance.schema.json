@@ -2527,6 +2527,29 @@
               }
             }
           }
+        },
+        "district": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "grid_spacing",
+            "pedestrian_radius",
+            "walk_speed"
+          ],
+          "properties": {
+            "grid_spacing": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "pedestrian_radius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "walk_speed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     }

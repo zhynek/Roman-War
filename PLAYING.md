@@ -870,17 +870,45 @@ camera controls give close views of swordplay and mounted guards.
 
 ## Developing ports and shipyards
 
-Select an owned waterfront province and choose **Waterways & shipping → Inspect
-waterfront & shipyards**. Build the first landing, then upgrade through timber
-wharf, established harbor, fortified port and imperial center. Inland ports keep
-their river role. The inspector compares stages, requirements and capabilities;
-its 3D previews spend nothing. Drag to orbit, scroll to zoom, Shift-drag to pan.
+Select an owned waterfront province. **Waterways & shipping → Inspect waterfront
+& shipyards** develops an undeveloped shore. After the first landing is complete,
+choose **Enter port**. The district uses the original, persistent architectural
+layout as it grows through timber wharf, established harbor, fortified port and
+imperial center. Inland exchanges retain their river role.
 
-Choose commercial depots for freight and merchants, repair yards for servicing,
-and arsenals for military shipbuilding. Ship cards display actual passenger,
-freight and crew capacity, waterway eligibility, strength ratings and costs.
-Commissioned ships join the ordinary recruitment queue and then the harbour;
-use the existing harbour controls to launch them.
+Use **Command view** to understand the whole district; **Explore** follows a
+local inspection representative at a closer scale. Click open ground to walk a
+route, or select a facility and **Walk to this approach**. Buildings, walls,
+water and dock edges block walking. Bridges and gates provide connections.
+Drag to pan, right-drag to orbit, and scroll to zoom; manual camera movement
+releases follow. **Follow party** finds the representative, **Stop walking**
+cancels only the local route, and **Return to campaign** leaves immediately.
+The representative is not a general or campaign force and spends no army movement.
+
+Select a building, berth, or compact overview row to inspect its actual work.
+The location menu also finds every facility, gate and bridge. The boatbuilder
+shows vessel requirements, crew, costs and queue completion estimates. The
+arsenal exposes military vessels; commercial facilities show freight services;
+the repair yard quotes readiness, crew and total charges; assembly courts offer
+eligible armies and passenger counts. Berths identify real ships and offer
+launch and dock commands. Small landings coordinate these services from the
+ferrymen’s shelter. Unavailable orders give a reason. **Plans & previews** keeps
+the five-stage comparison available without moving the inspection party.
+
+Orders commit through the same campaign commands as the existing panels. Ships
+complete only when seasonal recruitment advances. Labeled berthed hulls are real
+harbor ships, with overflow waiting outside the pictured waterfront. Timber ribs
+represent the paid ship queue; work stakes mark planned construction. Troop
+figures summarize an already committed embarked manifest. They cannot load troops
+by animation. Crates, ropes and cranes are static architectural props.
+
+Inspection position and camera preferences survive saves and return visits.
+Routes are deliberately not saved: reopening never replays a transaction. A
+completed upgrade may interrupt a route and move the representative to a nearby
+valid location, with an explanation. Ownership loss or an active campaign battle
+closes the district. Local exploration does not advance the season or change RNG.
+Army deployment, tactical port combat and locally controlled vessel sailing are
+future work; campaign voyages still use the waterway graph.
 
 Transport now counts surviving soldiers, rather than company cards. A whole army
 must fit both its fleet and the landing's remaining handling allowance; split it

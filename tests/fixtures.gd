@@ -486,7 +486,7 @@ static func state(game_data: GameData) -> Dictionary:
 			"alpha": _settlement(game_data, "blue", 1200, {"tribal_government": 1}),
 		},
 		"armies": {}, "fleets": {}, "characters": {},
-		"waterworks": {"landings": {}, "bridges": {}, "projects": []}, "naval_report": {}, "ports": {}, "port_navigation_version": 1,
+		"waterworks": {"landings": {}, "bridges": {}, "projects": []}, "naval_report": {}, "ports": {}, "port_navigation_version": 1, "port_visits": {},
 		"events_fired": [], "event_cooldowns": {}, "winner": null, "next_id": 1,
 		"tributes": [], "pending_offers": [], "agents": {},
 		"forest_patrols": {},

@@ -11,6 +11,36 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Playable port districts — October 10, 2026
+
+Completed waterfronts now offer **Enter port** from the campaign. An overhead
+command view and closer exploration camera share the existing PortLayout with
+an independent local representative. Facility/overview selections expose real
+shipbuilding, development, repairs, transport, berth and shipping operations.
+Commands still resolve through Game; presentation never commits transactions.
+
+`PortNavigation` derives clearance-aware routes and public boarding/facility
+approaches from the shared footprints. Final-stage access ramps connect the
+merchant pier and coastal breakwaters; explicit shoreline footprints also
+constrain the separate vessel geometry query. `PortOperations` keeps owned
+queues, hulls and manifests out of the public battle layout. Actual ships use
+appropriate available berths; excess hulls wait outside the pictured district.
+Save version 2 adds validated local position/camera preferences in `port_visits`.
+An upgrade can interrupt a route and relocate the representative; ownership,
+battle or loaded-state changes close access. No tactical port combat, army
+movement within the district, or real-time waterfront economy is implemented.
+
+Built on current main `13c3158` in `/private/tmp/roman-war-port-districts`, branch
+`codex/playable-port-districts`; the advisor checkout was preserved. Read the
+[playing instructions](../PLAYING.md#developing-ports-and-shipyards) and the
+[architecture and direct evidence](PORTS.md#playable-district-verification--october-10-2026).
+Evidence lives outside the repo at `/private/tmp/roman-district-qa`. Direct
+walkthroughs covered both scales, gates/bridges, invalid destinations, all
+operation categories, genuine previous-phase saves, interrupted presentations,
+expansion displacement, ownership loss, battle locks, and campaign entry/return.
+
+Verified by: data validation, Godot import and isolated rendered district/campaign walkthroughs. Tests: not run (weekly review policy).
+
 ## Port evolution and shipyards — October 9, 2026
 
 Five waterfront stages now connect port architecture with ship production,

@@ -112,12 +112,24 @@ static func _valid_state(state: Variant) -> bool:
 		"forest_patrols": TYPE_DICTIONARY, "cartography": TYPE_DICTIONARY,
 		"settlement_memory": TYPE_DICTIONARY,
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
-		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY, "ports": TYPE_DICTIONARY, "port_navigation_version": TYPE_FLOAT,
+		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY, "ports": TYPE_DICTIONARY, "port_visits": TYPE_DICTIONARY, "port_navigation_version": TYPE_FLOAT,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
 		return false
+	for region in state.get("port_visits", {}):
+		var visit: Variant = state["port_visits"][region]
+		if not state["settlements"].has(region) or not _fields(visit, {"position": TYPE_ARRAY, "pan": TYPE_ARRAY, "mode": TYPE_STRING, "zoom": TYPE_FLOAT, "yaw": TYPE_FLOAT, "follow": TYPE_BOOL}):
+			return false
+		if not visit["mode"] in ["command", "explore"] or visit["zoom"] < 18 or visit["zoom"] > 160 or absf(visit["yaw"]) > 100:
+			return false
+		for key in ["position", "pan"]:
+			if visit[key].size() != 2:
+				return false
+			for value in visit[key]:
+				if not (value is float or value is int) or not is_finite(float(value)) or absf(float(value)) > 200:
+					return false
 	for faction in state["factions"].values():
 		if not _fields(faction, {"treasury": TYPE_FLOAT, "capital": TYPE_STRING,
 			"alive": TYPE_BOOL, "era": TYPE_STRING, "diplomacy": TYPE_DICTIONARY,
