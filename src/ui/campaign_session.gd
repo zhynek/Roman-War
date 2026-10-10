@@ -21,6 +21,8 @@ var advisor_contexts: Dictionary = {}
 var advisor_statuses: Dictionary = {}
 var active_advisor := "marcus"
 var living_council
+var council_agenda := "season"
+var succession_key := ""
 var _lucius_status: Dictionary = {}
 var _season_review_pending := false
 var _last_season_offered := -1
@@ -161,6 +163,8 @@ func show_campaign_from_city() -> void:
 
 func _state_loaded() -> void:
 	if is_instance_valid(living_council):living_council.reset()
+	council_agenda = "season"
+	succession_key = ""
 	# Both views borrow the facade, so replacing its Dictionary replaces the
 	# world for both. Clear only stale presentation, never make a second Game.
 	if is_instance_valid(city):
@@ -265,9 +269,10 @@ func _choose_advisor(id: String) -> void:
 func _ask_council(id: String) -> void:
 	if not advisor_panels.has(id):return
 	if marcus_context.council_context.blocked()!="":return
+	if council_agenda=="succession" and marcus_context.succession_context.selected_briefing().is_empty():return
 	_choose_advisor(id)
 	if active_advisor==id:
-		_active_panel().open_council_question(String(marcus_context.council_words().question))
+		_active_panel().open_council_question(marcus_context.council_context.question())
 
 func _refresh_council() -> void:
 	if not is_instance_valid(marcus):return

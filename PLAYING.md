@@ -113,6 +113,30 @@ battle, counsel uses only its detached displayed snapshot. It does not pause
 combat. His conversation and private voice are separate; switching speakers
 stops the previous connection. The written reading works offline.
 
+## The successor's first council
+
+After your ruler changes and that season resolves, Marcus offers **A successor’s
+council awaits** beside his portrait. The invitation waits for the turn
+presentation, Dispatch and any pending defense or battle to finish. Opening it
+does not connect a voice or issue an order.
+
+The dated handover preserves the treasury, war stances, taxes, edicts, patronage
+and selected historical records at the end of that succession season. Later
+orders do not rewrite it. Scroll down for its sources and the advisors' written
+perspectives; any current city reports are separate from this historical record.
+
+Choose **Mark reviewed**, **Remind me next season** or **Dismiss invitation**.
+You can replay it through **Successor's first council** in an advisor's panel
+throughout that ruler's reign. The next successor replaces this handover; older
+reign records remain available in Campaign memory and the Annals. Older saves
+start silently with their existing ruler and await a future succession.
+
+**Hear the successor’s council** explicitly requests one short turn from Marcus
+and each unlocked specialist, using the existing private voice connection.
+Reading the handover works offline. Mute and Stop remain available, and leaving
+or changing the council or loading a save ends its playback. Use **Return to the
+current seasonal council** for the ordinary discussion of current city reports.
+
 ## Campaign memory across rulers
 
 Choose **Campaign memory** in any unlocked advisor's panel. It works offline

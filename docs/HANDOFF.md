@@ -11,6 +11,54 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Successor's first council — October 10, 2026
+
+The completed advisor branch through `bd3e9fe` was pushed to
+`origin/codex/marcus-advisor` at the user's request. No CI polling or release was
+performed. This new phase extends that baseline and reuses the existing council.
+
+Each actual player ruler change produces one saved, bounded handover after the
+season resolves. `SuccessionCouncilRules` captures visible own-faction war
+stances, treasury, owned-city tax/edict summaries, patron progress and selected
+memory records. Its resolved-season date is distinct from the next calendar
+turn at which it was saved. Replay never replaces these facts with present-day
+readings. Only the current ruler's handover is retained; the existing chronicle
+continues to carry older history.
+
+The optional `advisor_succession` save field preserves reminder state and the
+handover. New/legacy campaigns baseline their actual current ruler silently;
+loading an earlier or different save restores that save's own record. Pure reads
+never create invitations. Exact-key responses reject stale/repeated actions,
+and the next real succession replaces the current invitation. The UI defers
+while presentation, Dispatch, pending defense or a battle is active.
+
+The shared advisor panel adds a quiet invitation, explicit review/postpone/
+dismiss controls and replay within its existing council page. Marcus chairs;
+only unlocked specialists participate. The existing finite voice controller
+uses a frozen successor agenda only after **Hear**. Loading or changing the
+agenda clears playback/context. No provider persona or credential changes were
+needed. The standalone village has no succession dependency.
+
+See [player controls](../PLAYING.md#the-successors-first-council),
+[the plan](advisors/SUCCESSION_COUNCIL_PLAN.txt) and
+[observed progress](advisors/SUCCESSION_COUNCIL_PROGRESS.txt).
+Isengard assignment: `8125f5c1-140f-4bfb-993f-1dcd5acb73c7`.
+
+Observed in isolated native QA: actual yearly succession from Appius Claudius
+to Manius Valerius, a 1,931-byte handover with a confirmed Public Works receipt,
+presentation/Dispatch/defense/worker deferral, postponement/dismissal/replay,
+exact serialized save/load, silent legacy migration, different-campaign reset
+and replacement after the next actual succession. Final private discussion used
+6,353 bytes and completed all three speakers with text and PCM, no overlapping
+audio and unchanged campaign state. Provider credentials were absent from the
+game process. The village retained its 11-lesson guide with no successor hooks.
+Technical playback is verified; voice quality remains a listening judgment.
+The explicit Hear action now brings labels and captions into the guide viewport.
+A separate local render using the observed replies verified this layout fix
+without another paid request.
+
+Verified by: data validation, Godot import, isolated native succession/save/load and village walkthroughs, and one complete private three-speaker council with PCM playback. Tests: not run (weekly review policy).
+
 ## Advisor campaign memory — October 10, 2026
 
 The next phase extends clean `079353e` without replacing the three advisors or
@@ -40,7 +88,8 @@ read-back matched each repository prompt exactly and confirmed unchanged
 authentication/privacy settings and zero tools. This resolves the earlier
 automatic approval block. Existing voices remain configured; new
 memory-conditioned native playback has not been run. No new key, permission
-expansion, push or release occurred. Isengard assignment:
+expansion, push or release occurred at that checkpoint. The later successor
+council above verifies native use of memory-derived handover facts. Isengard assignment:
 `3b8ae6d4-8945-41ef-a85a-9e5c8354b542`.
 
 Verified by: data validation, Godot import, isolated rendered campaign/village walkthroughs and exact ElevenLabs prompt read-back with unchanged authentication/privacy. Tests: not run (weekly review policy).

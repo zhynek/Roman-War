@@ -505,6 +505,7 @@ static func state(game_data: GameData) -> Dictionary:
 	campaign_state["factions"]["red"]["diplomacy"] = {"blue": "war", "rebels": "war"}
 	campaign_state["factions"]["blue"]["diplomacy"] = {"red": "war", "rebels": "war"}
 	campaign_state["factions"]["rebels"]["diplomacy"] = {"red": "war", "blue": "war"}
+	SuccessionCouncilRules.ensure(campaign_state)
 	return campaign_state
 
 

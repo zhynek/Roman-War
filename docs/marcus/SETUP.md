@@ -9,6 +9,14 @@ previously configured voices and broker are unchanged. The new memory page,
 bounded context assembly and save/load path have been verified locally;
 memory-conditioned native playback has not been rerun.
 
+The subsequent October 10 successor-council phase reused those private agents
+without provider configuration changes. One isolated 6,353-byte discussion of a
+saved handover and its memory-derived facts completed all three speakers with
+streamed text and native PCM, no overlapping audio and unchanged campaign state.
+This verifies that explicit handover discussion, including private credential
+isolation; it does not constitute a subjective listening review or verification
+of every possible generated historical claim.
+
 Live native verification completed October 9, 2026 after the user enabled
 ElevenAgents Write (`convai_write`). Both Marcus and Lucius received private
 sessions, streamed relevant text, and played PCM audio through Godot's native

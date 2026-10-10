@@ -56,10 +56,11 @@ application connected by the campaign adapter described below.
    Neither spoken dialogue nor an LLM decides rewards, outcomes or unlocks.
 
 The campaign integration, reactive tutorial, Lucius and Gaius specialists,
-authored and generated seasonal councils, and Zeus/Ares patronage and dilemmas
-are implemented locally. The latest three-phase record below supersedes older
-“next phase” notes, which remain as development history. A larger pantheon and
-persistent advisor memory across the existing generations remain future work.
+authored and generated seasonal councils, Zeus/Ares patronage and dilemmas,
+source-backed campaign memory and the successor's first council are implemented.
+The latest records below supersede older “next phase” notes, which remain as
+development history. A larger pantheon and multi-season divine story arcs remain
+future work.
 
 ## Boundaries
 
@@ -481,3 +482,73 @@ quality have not been reverified. The previous synthetic headless audio-cleanup
 warning was outside this change and was not rerun.
 
 Verified by: data validation, Godot import, isolated native campaign/village walkthroughs and exact ElevenLabs prompt read-back with unchanged authentication/privacy. Tests: not run (weekly review policy).
+
+## Successor's first council — October 10, 2026
+
+`SuccessionCouncilRules` records one bounded handover at the end of the first
+resolved season after the actual player leader changes. It runs after the
+existing chronicle collects the succession; it never chooses or kills a ruler,
+draws RNG, or issues policy or military commands. The 5,120-byte capture includes
+at most six own war stances, six owned-city edicts, aggregate tax settings, the
+treasury, chosen patron/progress and up to three memory entries plus one prior
+reign summary. Omitted entries remain explicit and do not imply absence.
+
+The optional `advisor_succession` field keeps a silent current-leader baseline,
+the current handover and its pending/reviewed/dismissed/postponed invitation.
+Creation, migration, season reconciliation and fixture construction all seed it.
+Save validation checks bounded structures, dates and source shapes. Legacy saves
+remain version 2 and do not reconstruct historical handovers. A response requires
+the exact save-local ruler/turn key; duplicate or stale replies do nothing. The
+next actual succession replaces this current-reign record without creating an
+unbounded archive. No game-wide chat memory is introduced.
+
+The panel uses the existing council page, authored portraits and live controller.
+The successor invitation has priority over other optional advisor invitations,
+but waits for battles, pending defense, turn presentation and Dispatch. Opening,
+reading and selecting an agenda are presentation only; review/postpone/dismiss
+change only the invitation record. Later replay labels the frozen season-close
+facts separately from current visible reports. A retained divine choice still
+does not identify its ruler, motive or continuing policy.
+
+The live snapshot has one `succession_handover` and separately labelled
+`current_situation`, with only unlocked speakers. The current shared limits
+remain: three speaker turns, 60 requested words each, 720-character response cap,
+45 seconds per speaker, 140 seconds total, 18,000-byte initial snapshot, no retry.
+The existing private personas already support explicit council requests; an
+authored runtime question supplies the new agenda without changing credentials
+or provider configuration. Speaker switching, leaving, context invalidation and
+loading preserve the established stop/reset behavior.
+
+Native acceptance used an isolated old-age prerequisite, then actual seasonal
+processing changed Appius Claudius to Manius Valerius. The 1,931-byte handover
+included an actual confirmed Public Works receipt; the final council snapshot
+was 6,353 bytes. Invitations waited through presentation, Dispatch, prepared
+pending defense and a real practice battle worker. Postponement, dismissal,
+replay, exact serialized file save/load, silent legacy baseline, malformed-field
+rejection, earlier/different save resets and a second actual succession were
+observed directly. No automatic provider connection or reading-induced game
+mutation occurred.
+
+The first walkthrough left the fresh-profile introduction open for its quiet
+invitation assertion and used strict Dictionary equality across JSON numeric
+types. Those two QA assertions were corrected in a focused follow-up: closing
+the introduction exposed the quiet invitation, and canonical handover content
+matched exactly after actual file save/load. Source review also fixed stale
+individual-advisor questions and absence wording when all entries were omitted.
+The final focused run reported zero failures and exited cleanly.
+
+One explicit private council completed Marcus, Lucius and Gaius in order with
+readable text and PCM playback, no overlapping audio and unchanged full campaign
+state. Provider credentials were absent from the native child. The standalone
+village's isolated render retained all 11 lessons, no successor hook/navigation/
+invitation, no connection and unchanged state. Both native sessions exited
+without script errors or warnings. Subjective voice quality is not asserted.
+
+Visual review caught the successor heading leaving live captions below the
+initial scroll position. The explicit Hear action now waits for layout, fits
+the transcript to the guide viewport and reveals its speaker/status card.
+Opening a page does not move the reading position. A focused native render
+using the three observed replies verified active and completed caption layouts
+above Stop/Mute, with no additional provider request or campaign mutation.
+
+Verified by: data validation, Godot import, isolated native successor/save/load and village walkthroughs, and one complete three-speaker private council with PCM playback. Tests: not run (weekly review policy).

@@ -52,6 +52,10 @@ var _patronage_notice: String=""
 var tutorial_offer: Button
 var _tutorial_id: String=""
 var _tutorial_pending: bool=false
+var succession_offer: Button
+var _succession_pending: bool=false
+var _succession_notice := ""
+var _succession_opened_key := ""
 var _live_status: Label
 var _live_text: RichTextLabel
 var _live_hear: Button
@@ -59,6 +63,8 @@ var _live_help: Label
 var _live_portrait
 var _live_portrait_slot: HBoxContainer
 var _live_portrait_id := ""
+var _live_card: Control
+var _live_caption_height := 128.0
 var _dilemma_confirmation: Dictionary={}
 var _dilemma_notice := ""
 var _memory_source_ref := ""
@@ -159,6 +165,10 @@ func _build() -> void:
 		tutorial_offer=_button(tw("invitation"),show_tutorial,"MarcusTutorialOffer")
 		tutorial_offer.hide()
 		add_child(tutorial_offer)
+	if adapter.has_method("succession_page") and copy.id=="marcus":
+		succession_offer=_button(sw("invitation"),show_succession_council,"MarcusSuccessionOffer")
+		succession_offer.hide()
+		add_child(succession_offer)
 	panel=PanelContainer.new()
 	panel.name="MarcusPanel"
 	panel.add_theme_stylebox_override("panel",_style())
@@ -209,6 +219,8 @@ func _build() -> void:
 		page_navigation.add_child(_button(dw("navigation"),show_dilemmas,"AdvisorDilemmas"))
 	if adapter.has_method("memory_page"):
 		page_navigation.add_child(_button(mw("navigation"),show_memory,"AdvisorMemory"))
+	if adapter.has_method("succession_page"):
+		page_navigation.add_child(_button(sw("navigation"),show_succession_council,"AdvisorSuccessionCouncil"))
 	if tutorial_offer!=null:
 		page_navigation.add_child(_button(tw("history"),show_tutorial_archive,"MarcusTutorialArchive"))
 	guide_scroll=ScrollContainer.new()
@@ -287,6 +299,9 @@ func _layout() -> void:
 	if tutorial_offer!=null:
 		tutorial_offer.position=season_offer.position
 		tutorial_offer.size=season_offer.size
+	if succession_offer!=null:
+		succession_offer.position=season_offer.position
+		succession_offer.size=season_offer.size
 	var height:=minf(730.0,maxf(300.0,viewport.y-122))
 	panel.position=Vector2(maxf(8,viewport.x-width-16),maxf(16,viewport.y-106-height))
 	panel.size=Vector2(width,height)
@@ -326,6 +341,7 @@ func open() -> void:
 	input_shield.show()
 	season_offer.hide()
 	if tutorial_offer!=null:tutorial_offer.hide()
+	if succession_offer!=null:succession_offer.hide()
 	opened_changed.emit(true)
 	_layout()
 	_render_guide()
@@ -392,7 +408,7 @@ func _render_guide() -> void:
 		guide_body.remove_child(child)
 		child.queue_free()
 	lesson_speech=null
-	_live_status=null;_live_text=null;_live_hear=null;_live_help=null;_live_portrait=null;_live_portrait_slot=null;_live_portrait_id=""
+	_live_status=null;_live_text=null;_live_hear=null;_live_help=null;_live_portrait=null;_live_portrait_slot=null;_live_portrait_id="";_live_card=null
 	if _mode!="council":_stop_living_council()
 	guide_body.tooltip_text=""
 	if _mode=="briefing":
@@ -665,6 +681,7 @@ func context_snapshot() -> Dictionary:
 	return result
 
 func reset_conversation() -> void:
+	_succession_notice="";_succession_pending=false;_succession_opened_key=""
 	_memory_source_ref="";_memory_notice=""
 	if adapter.has_method("memory_focus"):adapter.memory_focus("")
 	_dilemma_confirmation.clear();_dilemma_notice=""
@@ -691,6 +708,8 @@ func refresh_briefing(offer: bool=true) -> void:
 	_schedule_layout()
 
 func show_briefing() -> void:
+	_succession_notice="";_succession_opened_key=""
+	if adapter.has_method("seasonal_council_select"):adapter.seasonal_council_select()
 	_offer_pending=false
 	_mode="council" if adapter.has_method("council_page") else "briefing"
 	_choose_tab("guide")
@@ -764,7 +783,12 @@ func _render_council_page() -> void:
 	if page.get("blocked","")!="":
 		guide_body.add_child(_label(cw(page.blocked),15))
 		return
+	var succession: Dictionary=adapter.succession_page() if adapter.has_method("succession_page") else {}
+	if not succession.is_empty():_render_succession_briefing(succession)
 	_render_living_council()
+	if succession.get("available",false) and succession.get("selected",false):
+		if is_instance_valid(_live_hear):_live_hear.text=sw("listen")
+		_render_succession_sources(succession)
 	guide_body.add_child(_label(cw("source"),11,"cabb87"))
 	guide_body.add_child(_label(cw("title"),25,"eee3c2"))
 	guide_body.add_child(_label(cw("help"),13,"b8c5b8"))
@@ -825,6 +849,69 @@ func _render_council_page() -> void:
 
 func _council_speaker(id: String) -> void:
 	council_speaker_requested.emit(id)
+
+func sw(id: String) -> String:
+	return String(adapter.succession_words().get(id,id))
+
+func show_succession_council(key: String="") -> void:
+	var page: Dictionary=adapter.succession_page()
+	var selected_key: String=String(page.get("key","")) if key.is_empty() else key
+	_succession_notice=""
+	if not page.get("available",false):
+		_succession_notice="no_briefing"
+	elif not adapter.succession_select(selected_key):
+		_succession_notice="stale_note"
+	else:_succession_opened_key=selected_key
+	_offer_pending=false
+	_mode="council";_choose_tab("guide");open()
+
+func _render_succession_briefing(page: Dictionary) -> void:
+	if not _succession_opened_key.is_empty() and (not page.get("available",false) or not page.get("selected",false) or page.get("key","")!=_succession_opened_key):
+		_succession_notice="stale_note"
+		_succession_opened_key=""
+	if _succession_notice!="":guide_body.add_child(_label(sw(_succession_notice),14,"d4bd93"))
+	if not page.get("available",false):
+		if _succession_notice=="" and page.get("selected",false):guide_body.add_child(_label(sw("stale_note"),14,"d4bd93"))
+		return
+	if not page.get("selected",false):
+		guide_body.add_child(_button(sw("navigation"),show_succession_council.bind(String(page.key)),"CouncilReplaySuccession"))
+		return
+	var body:=_card("34382b")
+	body.add_child(_label(String(page.get("title",sw("title"))),24,"eee3c2"))
+	if String(page.get("notice",""))!="":body.add_child(_label(String(page.notice),14,"d4bd93"))
+	var status: String=page.get("status","")
+	if status in ["acknowledged","reviewed","dismissed"]:
+		body.add_child(_label(sw("reviewed" if status=="acknowledged" else status),13,"cabb87"))
+	if int(page.get("postponed_until",0))>0:
+		body.add_child(_label(sw("postponed").format({"turn":page.postponed_until}),13,"cabb87"))
+	var actions:=HFlowContainer.new()
+	body.add_child(actions)
+	for action in ["acknowledge","postpone","dismiss"]:
+		var button:=_button(sw(action),_succession_respond.bind(String(page.key),String(action)),"SuccessionCouncil"+String(action).capitalize())
+		button.disabled=status!="pending" or page.get("blocked","")!=""
+		actions.add_child(button)
+	var navigation:=HFlowContainer.new()
+	body.add_child(navigation)
+	navigation.add_child(_button(sw("refresh"),_refresh_succession,"SuccessionCouncilRefresh"))
+	navigation.add_child(_button(sw("current_council"),show_briefing,"SuccessionCouncilCurrent"))
+
+func _render_succession_sources(page: Dictionary) -> void:
+	var body:=_card("28332d")
+	body.add_child(_label(sw("source_note"),13,"cabb87"))
+	body.add_child(_label(sw("help"),14,"b8c5b8"))
+	for section in page.get("sections",[]):
+		body.add_child(_label(String(section.title),18,"eee3c2"))
+		for line in section.get("lines",[]):body.add_child(_label(String(line),14))
+
+func _succession_respond(key: String,action: String) -> void:
+	_succession_notice="" if adapter.succession_respond(key,action) else "stale_note"
+	refresh_tutorial_offer()
+	_render_guide()
+
+func _refresh_succession() -> void:
+	_succession_notice=""
+	refresh_tutorial_offer()
+	_render_guide()
 
 func show_patronage() -> void:
 	_patronage_confirmation.clear()
@@ -920,11 +1007,20 @@ func tw(id: String) -> String:
 	return String(adapter.tutorial_words().get(id,id))
 
 func refresh_tutorial_offer() -> void:
-	if tutorial_offer==null:return
-	var page: Dictionary=adapter.tutorial_page()
-	_tutorial_pending=page.get("blocked","")=="" and not page.get("eligible",[]).is_empty()
-	tutorial_offer.visible=_tutorial_pending and not is_open()
-	season_offer.visible=_offer_pending and not _tutorial_pending and not is_open()
+	_tutorial_pending=false
+	if tutorial_offer!=null:
+		var page: Dictionary=adapter.tutorial_page()
+		_tutorial_pending=page.get("blocked","")=="" and not page.get("eligible",[]).is_empty()
+	refresh_succession_offer()
+
+func refresh_succession_offer() -> void:
+	_succession_pending=false
+	if succession_offer!=null:
+		var page: Dictionary=adapter.succession_page()
+		_succession_pending=page.get("blocked","")=="" and page.get("eligible",false)
+		succession_offer.visible=_succession_pending and not is_open()
+	if tutorial_offer!=null:tutorial_offer.visible=_tutorial_pending and not _succession_pending and not is_open()
+	season_offer.visible=_offer_pending and not _tutorial_pending and not _succession_pending and not is_open()
 
 func show_tutorial() -> void:
 	var page: Dictionary=adapter.tutorial_page()
@@ -1004,6 +1100,8 @@ func _stop_living_council() -> void:
 func _render_living_council() -> void:
 	if not adapter.has_method("living_council_state"):return
 	var body:=_card("303829")
+	_live_card=body.get_parent()
+	_live_caption_height=128.0
 	body.add_child(_label(cw("live_source"),11,"cabb87"))
 	_live_help=_label(cw("live_help"),13,"b8c5b8")
 	body.add_child(_live_help)
@@ -1026,9 +1124,24 @@ func _render_living_council() -> void:
 	refresh_living_council()
 
 func _hear_council() -> void:
-	guide_scroll.scroll_vertical=0
 	adapter.start_living_council(_muted)
 	refresh_living_council()
+	_focus_living_council()
+
+func _focus_living_council() -> void:
+	# Only an explicit Hear request moves the reading position. Let the hidden
+	# controls and wrapped status settle before fitting and revealing captions.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not is_open() or _mode!="council" or _tab!="guide" or not is_instance_valid(_live_card):return
+	if _live_text.scroll_active:
+		var overhead: float=_live_card.size.y-_live_text.size.y
+		_live_caption_height=clampf(guide_scroll.size.y-overhead-4.0,64.0,128.0)
+		_live_text.custom_minimum_size.y=_live_caption_height
+		await get_tree().process_frame
+		await get_tree().process_frame
+	if not is_open() or _mode!="council" or _tab!="guide" or not is_instance_valid(_live_card):return
+	guide_scroll.ensure_control_visible(_live_card)
 
 func refresh_living_council() -> void:
 	if adapter==null or not adapter.has_method("living_council_state"):return
@@ -1042,7 +1155,7 @@ func refresh_living_council() -> void:
 	_live_help.visible=not discussing
 	_live_text.fit_content=not discussing
 	_live_text.scroll_active=discussing
-	_live_text.custom_minimum_size.y=128 if discussing else 0
+	_live_text.custom_minimum_size.y=_live_caption_height if discussing else 0
 	var lines:=PackedStringArray()
 	for turn in discussion.turns:
 		lines.append(String(turn.name)+"\n"+String(turn.text))

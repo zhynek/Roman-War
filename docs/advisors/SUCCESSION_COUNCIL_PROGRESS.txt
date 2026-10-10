@@ -1,0 +1,139 @@
+Roman War — successor's first council
+Session progress — October 10, 2026
+
+Authorization and baseline
+The user authorized pushing completed prior work and continuing with the
+recommended successor's first council. Baseline is clean bd3e9fe on
+codex/marcus-advisor. The root agent owns the authorized push; no CI polling or
+release. Dedicated reporter owns these two phase documents and Isengard only.
+
+Plan before implementation
+Full plan: docs/advisors/SUCCESSION_COUNCIL_PLAN.txt. Actual player succession
+offers an optional first council after presentations/Dispatch/pending defense.
+Legacy baselines prevent historical invitation spam; dismiss/postpone/replay and
+save identity follow existing conventions. Offline inherited wars, current policy,
+divine receipts and reign context distinguish current facts/history/unknowns.
+Marcus chairs with only unlocked Lucius/Gaius. Existing explicit Hear/frozen
+bounded council session; no automatic opening/audio/provider/game commands.
+Compatible additive save state only if audit requires it; worker/village and
+hidden-information boundaries preserved.
+
+Acceptance
+Isolated actual succession -> safely deferred invitation -> optional sourced
+briefing/council -> explicit interaction -> dismissal/postponement/replay ->
+save/load, plus legacy/earlier/different-save safety, no duplicates or auto-spend,
+unlocked speakers, state/RNG purity and worker exclusion. Validate/import once,
+inspect the native UI and relevant village compatibility; no broad suite or
+generic tests. Record observed facts and limitations, not intentions.
+
+Milestone 1 — plan prepared before implementation
+Verified clean baseline and inspected parent memory assignment
+3b8ae6d4-8945-41ef-a85a-9e5c8354b542. Both reports remain Pending, including prompt
+synchronization report b067206b-bbad-4c02-8300-d16bb3ad2440. Preserve earlier
+assignment 762ed14c-6d92-44ef-b99f-675b4b2be04c and all report history. Full plan
+and acceptance are prepared for a linked new Isengard assignment. No source
+implementation, push result or new acceptance is claimed yet.
+Recorded the full 5,471-character plan before implementation in new linked
+assignment 8125f5c1-140f-4bfb-993f-1dcd5acb73c7, "Advisor succession — the successor's
+first council", status In progress.
+
+Milestone 2 — authorized push and audited implementation contract
+The prior completed work was successfully pushed to origin/codex/marcus-advisor
+at bd3e9feffe971ed2e0c7092addc23fc25486c8f8; tracking was set. No CI polling took
+place. This is the authorized prior-work push, not a release or new-phase push.
+
+The source audit chose an additive current-reign ledger with a silent baseline
+for new/legacy campaigns. Authoritative ruler change is detected after Chronicle
+collection and freezes one bounded end-of-succession-season handover, replaced
+at the next succession. It includes own wars, tax counts, policy, treasury,
+patron and visible history only. Later replay labels it historical and separates
+current conditions. Exact-key acknowledgement/dismissal/postponement rejects stale
+responses; only unlocked advisors join, using the existing council agenda/live
+session. Root, core and panel agents have started implementation under the plan.
+No new-phase verification or provider acceptance is claimed yet.
+
+Milestone 3 — first native offline succession walkthrough
+Godot import was clean after an initial sandbox-only abort with no diagnostic
+log; retry used authorized cache access. The isolated native run observed actual
+Appius-to-Manius succession at turn 2 and a frozen Winter 270 BC/turn-1 handover.
+The handover was 1,931 bytes and full council context 6,305 bytes. A real Public
+Works receipt was present. The run exercised deferral during turn presentation,
+Dispatch, pending defense and an active worker; unlocked-seat filtering; no paid
+automatic request; offline fallback; postpone/dismiss/replay/load; legacy
+baseline; malformed-state rejection; and replacement at the next real succession.
+
+Two QA assertions failed and are not counted as acceptance: the fresh-campaign
+intro had been left open (not opened by the succession feature), and strict
+Dictionary equality compared JSON float/int representations. A focused follow-up
+will explicitly close the intro and compare serialized state equivalence. Review
+also found stale routing for an individual Ask action and misleading absence
+wording when all entries were omitted; the root agent fixed both and will verify
+them. Opening/facts screenshots at 1280×800 were inspected and readable. Core and
+UI runtime logs contained no errors, but complete acceptance remains pending.
+
+Milestone 4 — focused follow-up and final push scope
+The corrected follow-up passed: quiet invitation after explicitly closing the
+fresh intro, canonical save/load handover equivalence, actual Game.save/load file
+round trip, no false absence wording for all-omitted entries, rejection of stale
+individual Ask actions, and context reset on a different campaign. The latest
+integrated snapshot is 6,353 bytes; provider credentials were absent from the
+native child. Final data validation reported zero errors/warnings after the tax
+wording fix. The prior fixture/assertion gaps are resolved by these focused checks.
+
+One explicitly requested three-speaker native council is running through the
+existing broker; its result and final village compatibility remain pending.
+The root agent clarified the user's push instruction applies to the completed
+advisor branch, including this phase after implementation/evidence/report docs
+are committed. The plan now reflects that scope. No merge, release or CI polling;
+the final push is planned, not yet reported as completed.
+
+Milestone 5 — one real successor council and village acceptance
+The explicit live run in /tmp/succession-focused-review.log exited 0 with zero
+focused failures. The 6,353-byte frozen snapshot produced a completed three-turn
+council with native PCM playback observed for Marcus, Lucius and Gaius, no audio
+overlap and unchanged full game state. The speakers gave distinct civic-duty,
+institutional and security tradeoffs grounded in handover sources. Only one
+three-speaker provider discussion was run; no provider configuration or key
+change was needed. This establishes native playback, not subjective voice quality.
+
+Standalone village compatibility passed at 1280×800: 11 lessons, unchanged
+state, no succession hook/navigation/invitation, no provider and clean exit.
+
+A final presentation issue was observed: the handover header left live captions
+below the fold. The panel agent is correcting request-time scrolling to the
+actual captions and will inspect a presentation-only render using the observed
+reply text, without another paid call. The root also normalized integer display
+after JSON reload. Final completion awaits that local presentation check.
+
+Milestone 6 — final caption presentation verified
+The explicit Hear action now waits for container layout and scrolls to the live
+card. A presentation-only native fixture reused the three already-observed
+replies in both active and completed states. Source/status/captions at y 431–527
+fit within the 224-pixel guide scroll; Stop/Mute at y 641–677 remained visible.
+The UI agent inspected both layouts; the root also inspected the active
+screenshot. The run in
+/tmp/succession-caption-layout.log preserved state, made no additional provider
+request and exited 0 without errors. Loaded numeric fields display as integers.
+Final git diff --check was clean.
+
+Completion and review preparation
+All scoped implementation and direct acceptance are complete: actual succession,
+safe optional invitation, source-backed historical/current handover, unlocked
+three-speaker native council, responses/replay, save/load/legacy/next-succession
+isolation, worker guards and standalone village compatibility. The initial QA
+fixture and caption issues were directly resolved as recorded above. Only one
+paid three-speaker discussion was requested. Native playback is verified;
+subjective voice quality and human listening were not assessed.
+
+Reserved report identifier: d9389858-7211-4816-a574-73aec9b8dbec (not yet submitted
+at this documentation checkpoint). After the root commits, the reporter will
+submit the actual SHA to assignment 8125f5c1-140f-4bfb-993f-1dcd5acb73c7 as Pending
+human review, verify stored linkage/status, and never accept it. The completed
+advisor branch will then be pushed as authorized, with no CI polling, merge,
+release or deployment. Final source SHA, stored report ID and push result are
+not claimed before those operations occur.
+Review: http://127.0.0.1:2269/?view=Needs%20review&project=c5c7ddd7-57d4-4763-9cbe-a0dcdad62f8a
+
+Verified by: data validation, Godot import, isolated native succession/save/load,
+one actual three-speaker council with PCM, village compatibility and final local
+caption rendering; git diff --check. Tests: not run (weekly review policy).

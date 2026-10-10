@@ -39,6 +39,7 @@ const _PROVINCE_TEMPER := {
 
 
 static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver) -> Dictionary:
+	SuccessionCouncilRules.ensure(state)
 	var rng := CampaignRng.from_state_string(String(state["rng_state"]))
 	var journal: Array = []
 	var before := TurnJournal.snapshot(data, state)
@@ -307,6 +308,7 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 	# The scribes write last: derived records (wars, reigns, alliances,
 	# destructions) against the snapshot, then compaction. No rng.
 	ChronicleRules.collect(data, state, report, pre)
+	SuccessionCouncilRules.reconcile(data,state,pre)
 
 	state["rng_state"] = rng.state_string()
 	return report

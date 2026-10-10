@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ui",
+    "speakers",
+    "prompt"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "ui": {
+      "type": "object",
+      "required": [
+        "navigation",
+        "title",
+        "invitation",
+        "help",
+        "source_note",
+        "no_briefing",
+        "stale_note",
+        "presentation_note",
+        "battle_note",
+        "blocked_note",
+        "acknowledge",
+        "dismiss",
+        "postpone",
+        "reviewed",
+        "dismissed",
+        "postponed",
+        "pending",
+        "refresh",
+        "current_council",
+        "return_to_successor",
+        "rulers",
+        "treasury",
+        "wars",
+        "taxes",
+        "edicts",
+        "patron",
+        "history",
+        "omitted",
+        "captured",
+        "date",
+        "year_bc",
+        "year_ad",
+        "summer",
+        "winter",
+        "ruler_line",
+        "treasury_line",
+        "war_line",
+        "tax_line",
+        "edict_line",
+        "patron_line",
+        "patron_complete",
+        "no_patron",
+        "no_wars",
+        "no_edicts",
+        "no_history",
+        "history_line",
+        "history_note",
+        "unknown_ruler",
+        "listen",
+        "ask",
+        "ask_prompt",
+        "very_low",
+        "low",
+        "normal",
+        "high",
+        "very_high",
+        "status_silent",
+        "status_pending",
+        "status_acknowledged",
+        "status_dismissed",
+        "status_stale",
+        "ruler_title",
+        "replay_note",
+        "question",
+        "patron_note"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1400
+      }
+    },
+    "speakers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marcus",
+        "lucius",
+        "gaius"
+      ],
+      "properties": {
+        "marcus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1400
+        },
+        "lucius": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1400
+        },
+        "gaius": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1400
+        }
+      }
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1400
+    }
+  }
+}

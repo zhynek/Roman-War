@@ -16,6 +16,10 @@ func blocked() -> String:
 	if is_instance_valid(session.campaign):
 		if session.campaign.turn_sequence.is_playing() or session.campaign.dispatch_panel.visible:return "presentation"
 	if session.active_view=="city" and is_instance_valid(session.city) and session.city.dawn.visible:return "presentation"
+	# Pending defense and detached/resumable battles also defer campaign reads.
+	var command_block: String=PatronageRules.command_blocked(session.game.data,session.game.state)
+	if command_block=="battle_active":return "battle"
+	if command_block=="defense_pending":return "blocked"
 	return ""
 
 func page() -> Dictionary:
@@ -33,6 +37,7 @@ func page() -> Dictionary:
 	for id in session.advisor_ids():
 		if not content.speakers.has(id):continue
 		var available: bool=session.advisor_available(id)
+		if session.council_agenda=="succession" and not available:continue
 		var profile: Dictionary=content.speakers[id]
 		var card: Dictionary={"id":id,"name":profile.name,"available":available,"locked":profile.locked}
 		if available:
@@ -41,6 +46,8 @@ func page() -> Dictionary:
 			if not result.city.is_empty():card.city=profile.city
 			if not result.season.is_empty():card.season=profile.season
 			if not patron.is_empty():card.mandate=profile.patrons.get(patron.id,"")
+			if session.council_agenda=="succession":
+				card.counsel=game.data.succession_council_content.speakers.get(id,card.counsel)
 		result.speakers.append(card)
 	return result
 
@@ -106,11 +113,22 @@ func discussion_key() -> String:
 	var game: Game=owner.session.game
 	if PatronageRules.command_blocked(game.data,game.state)!="":return "blocked"
 	var screen: Dictionary=owner._screen()
+	if owner.session.council_agenda=="succession" and owner.succession_context.selected_briefing().is_empty():return "blocked"
 	return JSON.stringify([owner.session.active_view,screen.get("region",""),screen.get("force",""),
-		game.state.turn,game.state.patronage.chosen,game.state.patronage.pledged_turn])
+		game.state.turn,game.state.patronage.chosen,game.state.patronage.pledged_turn,
+		owner.session.council_agenda,owner.session.succession_key])
+
+func question() -> String:
+	if owner.session.council_agenda=="succession":return String(owner.succession_context.words().question)
+	return String(content.ui.question)
+
+func discussion_prompt() -> String:
+	if owner.session.council_agenda=="succession":return String(owner.session.game.data.succession_council_content.prompt)
+	return String(content.discussion.prompt)
 
 func discussion_snapshot() -> Dictionary:
 	if discussion_key()=="blocked":return {}
+	if owner.session.council_agenda=="succession":return _succession_snapshot()
 	var reading: Dictionary=page()
 	if reading.city.is_empty() or reading.season.is_empty() or reading.season.get("stale",false):return {}
 	var result: Dictionary={"experience":"roman_campaign_council","fiction":owner.content.fiction_note,
@@ -142,4 +160,24 @@ func discussion_snapshot() -> Dictionary:
 			option.consequences=quoted.consequences.duplicate(true)
 			authored.choices.append(option)
 		if not authored.choices.is_empty():result.divine_dilemmas.append(authored)
+	return result
+
+func _succession_snapshot() -> Dictionary:
+	var inherited: Dictionary=owner.succession_context.selected_briefing()
+	if inherited.is_empty():return {}
+	var game: Game=owner.session.game
+	var reading: Dictionary=page()
+	# This historical handover is already bounded, saved and detached. Current
+	# facts have a separate scope so a later replay never rewrites inheritance.
+	var result: Dictionary={"experience":"roman_campaign_council","agenda":"successor_first_council",
+		"fiction":owner.content.fiction_note,"calendar":owner._fields(game.state,["turn","year","season"]),
+		"succession_handover":inherited,"advisors":[],
+		"last_resolved_season":{"turn":int(inherited.resolved_season.turn),"date":owner.succession_context.date(inherited.resolved_season),"scope":"saved_handover"},
+		"city":{"region":"","name":String(inherited.faction.name)},
+		"current_situation":{"scope":"current_visible_reports","as_of":owner._fields(game.state,["turn","year","season"]),
+			"selected_owned_city":reading.city.duplicate(true),"patronage":patronage_snapshot()}}
+	for card in reading.speakers:
+		if card.available:result.advisors.append(owner._fields(card,["id","name","stance","counsel"]))
+	if owner.session.advisor_available("gaius"):
+		result.current_situation.military=owner.session.gaius_context._military_snapshot()
 	return result

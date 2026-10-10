@@ -114,11 +114,12 @@ static func _valid_state(state: Variant) -> bool:
 		"map_access": TYPE_DICTIONARY, "recon": TYPE_DICTIONARY,
 		"waterworks": TYPE_DICTIONARY, "naval_report": TYPE_DICTIONARY,
 		"city_governance": TYPE_DICTIONARY, "city_battles": TYPE_DICTIONARY, "city_campaign": TYPE_DICTIONARY,
-		"advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY, "advisor_tutorial": TYPE_DICTIONARY, "divine_dilemmas": TYPE_DICTIONARY,
+		"advisor_succession": TYPE_DICTIONARY, "advisor_unlocks": TYPE_DICTIONARY, "patronage": TYPE_DICTIONARY, "advisor_tutorial": TYPE_DICTIONARY, "divine_dilemmas": TYPE_DICTIONARY,
 		"journal": TYPE_DICTIONARY, "ai": TYPE_DICTIONARY, "guided": TYPE_DICTIONARY,
 		"event_cooldowns": TYPE_DICTIONARY, "mercenary_pools": TYPE_DICTIONARY,
 	}, true):
 		return false
+	if state.has("advisor_succession") and not _valid_advisor_succession(state.advisor_succession,state):return false
 	if state.has("patronage") and not _valid_patronage(state.patronage, state):return false
 	if state.has("advisor_tutorial") and not _valid_advisor_tutorial(state.advisor_tutorial,state):return false
 	if state.has("divine_dilemmas") and not _valid_divine_dilemmas(state.divine_dilemmas,state):return false
@@ -691,4 +692,78 @@ static func _valid_divine_dilemmas(ledger: Variant, state: Dictionary) -> bool:
 		if not _whole_at_least(receipt.turn,0) or receipt.turn > state.turn or receipt.turn > ledger.cooldown_until:return false
 		if not state.settlements.has(receipt.region):return false
 		if not receipt.choice.is_valid_identifier() or receipt.choice.length() > 64:return false
+	return true
+
+
+static func _valid_advisor_succession(ledger: Variant, state: Dictionary) -> bool:
+	if not _succession_fields(ledger,{"baseline_turn":TYPE_FLOAT,"last_checked_turn":TYPE_FLOAT,
+		"leader":TYPE_STRING,"detected_turn":TYPE_FLOAT,"status":TYPE_STRING,
+		"postponed_until":TYPE_FLOAT,"briefing":TYPE_DICTIONARY}):return false
+	for key in ["baseline_turn","last_checked_turn","detected_turn"]:
+		if not _whole_at_least(ledger[key],0) or ledger[key] > state.turn:return false
+	if ledger.baseline_turn > ledger.detected_turn or ledger.detected_turn > ledger.last_checked_turn:return false
+	if not _whole_at_least(ledger.postponed_until,int(ledger.detected_turn)):return false
+	if ledger.status not in ["silent","pending","acknowledged","dismissed"]:return false
+	if ledger.leader != "" and not state.characters.has(ledger.leader):return false
+	if ledger.status == "silent":return ledger.briefing.is_empty()
+	if ledger.leader == "":return false
+	var item: Dictionary = ledger.briefing
+	if not _succession_fields(item,{"scope":TYPE_STRING,"facts_source":TYPE_STRING,
+		"resolved_season":TYPE_DICTIONARY,"captured_turn":TYPE_FLOAT,"faction":TYPE_DICTIONARY,
+		"predecessor":TYPE_DICTIONARY,"ruler":TYPE_DICTIONARY,"treasury":TYPE_FLOAT,
+		"wars":TYPE_ARRAY,"taxes":TYPE_ARRAY,"edicts":TYPE_ARRAY,"patron":TYPE_DICTIONARY,
+		"history":TYPE_ARRAY,"history_complete":TYPE_BOOL,"omitted":TYPE_DICTIONARY}):return false
+	# Structural safety envelope is deliberately above the authored 5KB cap so
+	# future tuning remains additive; content is never allowed an unbounded blob.
+	if JSON.stringify(item).to_utf8_buffer().size() > 8192:return false
+	if item.scope != "first_resolved_season_of_reign" or item.facts_source != "resolved_campaign_state" or item.history_complete:return false
+	if item.captured_turn != ledger.detected_turn:return false
+	if not _succession_fields(item.resolved_season,{"turn":TYPE_FLOAT,"year":TYPE_FLOAT,"season":TYPE_STRING}):return false
+	if not _whole_at_least(item.resolved_season.turn,0) or item.resolved_season.turn != item.captured_turn - 1:return false
+	if not _whole_at_least(item.resolved_season.year,-100000) or item.resolved_season.year > 100000:return false
+	if item.resolved_season.season not in ["summer","winter"]:return false
+	for person in [item.faction,item.predecessor]:
+		if not _succession_fields(person,{"id":TYPE_STRING,"name":TYPE_STRING}):return false
+	if item.faction.id != state.player_faction:return false
+	if not _fields(item.ruler,{"id":TYPE_STRING,"name":TYPE_STRING}) or item.ruler.size() != 3 or not item.ruler.has("since_turn"):return false
+	if item.ruler.id != ledger.leader or not item.ruler.name is String or item.ruler.name.length() > 512:return false
+	if item.ruler.since_turn != null and (not _whole_at_least(item.ruler.since_turn,0) or item.ruler.since_turn > item.captured_turn):return false
+	if not _number(item.treasury) or item.treasury != floorf(item.treasury):return false
+	if item.wars.size() > 12 or item.edicts.size() > 12 or item.taxes.size() > Constants.TAX_LEVELS.size() or item.history.size() > 7:return false
+	var seen := {}
+	for war in item.wars:
+		if not _succession_fields(war,{"id":TYPE_STRING,"name":TYPE_STRING,"source_ref":TYPE_STRING}):return false
+		if war.id == state.player_faction or not state.factions.has(war.id) or seen.has(war.id):return false
+		if war.source_ref != "diplomacy:" + String(state.player_faction) + ":" + String(war.id):return false
+		seen[war.id] = true
+	seen.clear()
+	for tax in item.taxes:
+		if not _succession_fields(tax,{"level":TYPE_STRING,"count":TYPE_FLOAT}):return false
+		if tax.level not in Constants.TAX_LEVELS or not _whole_at_least(tax.count,1) or tax.count > state.settlements.size() or seen.has(tax.level):return false
+		seen[tax.level] = true
+	seen.clear()
+	for edict in item.edicts:
+		if not _succession_fields(edict,{"region":TYPE_STRING,"city":TYPE_STRING,"id":TYPE_STRING,"name":TYPE_STRING,"turns_held":TYPE_FLOAT}):return false
+		if not state.settlements.has(edict.region) or seen.has(edict.region) or not _whole_at_least(edict.turns_held,0):return false
+		seen[edict.region] = true
+	if not item.patron.is_empty():
+		if not _succession_fields(item.patron,{"id":TYPE_STRING,"name":TYPE_STRING,"progress":TYPE_FLOAT,"target":TYPE_FLOAT,"completed":TYPE_BOOL}):return false
+		if not _whole_at_least(item.patron.progress,0) or not _whole_at_least(item.patron.target,0) or item.patron.progress > item.patron.target:return false
+	seen.clear()
+	for record in item.history:
+		if not _succession_fields(record,{"source_ref":TYPE_STRING,"source":TYPE_STRING,"kind":TYPE_STRING,"turn":TYPE_FLOAT,"date":TYPE_STRING,"summary":TYPE_STRING,"region":TYPE_STRING},1024):return false
+		if record.source not in ["chronicle","dilemma","honor"] or not record.source_ref.begins_with(record.source + ":"):return false
+		if not _whole_at_least(record.turn,0) or record.turn > item.captured_turn or seen.has(record.source_ref):return false
+		if record.region != "" and not state.settlements.has(record.region):return false
+		seen[record.source_ref] = true
+	if not _succession_fields(item.omitted,{"wars":TYPE_FLOAT,"edicts":TYPE_FLOAT,"history":TYPE_FLOAT}):return false
+	for count in item.omitted.values():
+		if not _whole_at_least(count,0):return false
+	return true
+
+
+static func _succession_fields(record: Variant, fields: Dictionary, max_string: int = 512) -> bool:
+	if not _fields(record,fields) or record.size() != fields.size():return false
+	for key in fields:
+		if fields[key] == TYPE_STRING and record[key].length() > max_string:return false
 	return true

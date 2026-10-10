@@ -1097,5 +1097,13 @@
     "page_bytes": 16000,
     "max_name_chars": 96,
     "max_summary_chars": 768
+  },
+  "succession_council": {
+    "postpone_turns": 1,
+    "snapshot_bytes": 5120,
+    "max_name_chars": 80,
+    "max_wars": 6,
+    "max_edicts": 6,
+    "max_history": 3
   }
 }

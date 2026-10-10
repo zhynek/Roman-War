@@ -1214,6 +1214,14 @@ func advisor_tutorial_respond(id: String, action: String) -> bool:
 	return AdvisorTutorialRules.respond(data,state,id,action)
 
 
+func succession_council_status() -> Dictionary:
+	return SuccessionCouncilRules.status(data,state)
+
+
+func succession_council_respond(key: String, action: String) -> bool:
+	return SuccessionCouncilRules.respond(data,state,key,action)
+
+
 func advisor_memory(advisor_id: String, region: String = "", focus_ref: String = "", compact: bool = true) -> Dictionary:
 	return AdvisorMemoryRules.project(data,state,advisor_id,region,focus_ref,compact)
 

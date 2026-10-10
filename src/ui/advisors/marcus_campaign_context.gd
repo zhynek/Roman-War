@@ -8,12 +8,14 @@ var preference_path := "user://marcus_campaign_preferences.cfg"
 var _briefing: Dictionary = {}
 var _memory_focus_ref := ""
 var council_context
+var succession_context
 
 func _init(owner_session) -> void:
 	session = owner_session
 	content = JSON.parse_string(FileAccess.get_file_as_string("res://data/marcus.json"))
 	lessons = content.lessons
 	council_context=preload("res://src/ui/advisors/council_context.gd").new(self)
+	succession_context=preload("res://src/ui/advisors/succession_context.gd").new(self)
 	capture_season()
 
 func prepare_open() -> void:
@@ -151,6 +153,9 @@ func context_snapshot() -> Dictionary:
 		result.council_session.shared_factors_key="selection.factors"
 	result.patronage = council_context.patronage_snapshot()
 	result.campaign_memory = memory_snapshot()
+	if session.council_agenda=="succession":
+		var inherited: Dictionary=succession_context.selected_briefing()
+		if not inherited.is_empty():result.succession_handover=inherited
 	return result
 
 func _settlement(region: String) -> Dictionary:
@@ -196,6 +201,25 @@ func council_portrait(id: String):
 
 func council_page() -> Dictionary:
 	return council_context.page()
+
+func succession_words() -> Dictionary:
+	return succession_context.words()
+
+func succession_page() -> Dictionary:
+	return succession_context.page()
+
+func succession_select(key: String) -> bool:
+	return succession_context.select(key)
+
+func succession_respond(key: String, action: String) -> bool:
+	return succession_context.respond(key,action)
+
+func seasonal_council_select() -> void:
+	if session.council_agenda!="season":
+		for panel in session.advisor_panels.values():panel.voice.stop()
+		session.living_council.reset()
+	session.council_agenda="season"
+	session.succession_key=""
 
 func patronage_page() -> Dictionary:
 	return council_context.patronage_page()

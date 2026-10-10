@@ -33,6 +33,7 @@ TABLES = {
     "reactive_tutorial.json": "reactive_tutorial.schema.json",
     "divine_dilemmas.json": "divine_dilemmas.schema.json",
     "advisor_memory.json": "advisor_memory.schema.json",
+    "succession_council.json": "succession_council.schema.json",
     "waterways.json": "waterways.schema.json",
     "campaign_terrain.json": "campaign_terrain.schema.json",
     "realism_study.json": "realism_study.schema.json",
@@ -134,6 +135,26 @@ def load_tables() -> dict[str, dict]:
             err(f"{name}: {path_str}: {violation.message[:200]}")
         tables[name] = document
     return tables
+
+
+def _succession_council_checks(t: dict[str, dict]) -> None:
+    content = t.get("succession_council.json", {})
+    advisor_ids = {"marcus"} | {a["id"] for a in t.get("advisors.json", {}).get("advisors", [])}
+    if not set(content.get("speakers", {})) <= advisor_ids:
+        err("succession council: unknown speaker")
+    placeholders = {
+        "postponed": {"turn"}, "omitted": {"count", "kind"},
+        "captured": {"season", "year", "turn", "captured_turn"},
+        "date": {"season", "year"}, "year_bc": {"year"}, "year_ad": {"year"},
+        "ruler_line": {"previous", "ruler"}, "ruler_title": {"name"},
+        "treasury_line": {"amount"}, "war_line": {"name"},
+        "tax_line": {"level", "count"}, "edict_line": {"city", "name", "turns"},
+        "patron_line": {"name", "progress", "target"},
+        "history_line": {"date", "source_ref", "summary"},
+    }
+    for key, value in content.get("ui", {}).items():
+        if set(re.findall(r"\{([a-z_]+)\}", value)) != placeholders.get(key, set()):
+            err(f"succession council: unsupported or missing placeholders in {key}")
 
 
 def _advisor_memory_checks(t: dict[str, dict]) -> None:
@@ -267,6 +288,7 @@ def cross_checks(t: dict[str, dict]) -> None:
     _reactive_tutorial_checks(t)
     _divine_dilemma_checks(t)
     _advisor_memory_checks(t)
+    _succession_council_checks(t)
     cultures = {c["id"] for c in t.get("cultures.json", {}).get("cultures", [])}
     factions = {f["id"]: f for f in t.get("factions.json", {}).get("factions", [])}
 

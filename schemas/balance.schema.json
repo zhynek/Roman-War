@@ -38,7 +38,8 @@
     "patronage",
     "advisor_tutorial",
     "divine_dilemmas",
-    "advisor_memory"
+    "advisor_memory",
+    "succession_council"
   ],
   "additionalProperties": false,
   "properties": {
@@ -2436,6 +2437,50 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1024
+        }
+      }
+    },
+    "succession_council": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "postpone_turns",
+        "snapshot_bytes",
+        "max_name_chars",
+        "max_wars",
+        "max_edicts",
+        "max_history"
+      ],
+      "properties": {
+        "postpone_turns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "snapshot_bytes": {
+          "type": "integer",
+          "minimum": 4096,
+          "maximum": 5120
+        },
+        "max_name_chars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 80
+        },
+        "max_wars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "max_edicts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "max_history": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6
         }
       }
     }

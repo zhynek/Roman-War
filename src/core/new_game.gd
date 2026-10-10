@@ -36,6 +36,7 @@ class_name NewGame
 ##  recon: {contacts: {army_id: {summary, turn}}, movements: [observation]}
 ##      — public identity/count snapshots and only the endpoints seen at the time
 ##  divine_dilemmas: {cooldown_until, resolved: {id: {turn, region, choice}}}
+##  advisor_succession: current-ruler baseline, invitation and bounded frozen handover
 ##  advisor_tutorial: {baseline_turn, last_checked_turn, strain_active, milestones}
 ##      milestone records carry status, turn, params and postponed_until.
 ##  advisor_unlocks: {advisor_id: {turn, region}} — permanent player counsel
@@ -209,6 +210,7 @@ static func build(data: GameData, player_faction: String, seed_value: int, diffi
 	AdvisorRules.reconcile(data,state)
 	state["rng_state"] = rng.state_string()
 	WaterwayRules.ensure(state)
+	SuccessionCouncilRules.ensure(state)
 	return state
 
 
@@ -334,6 +336,7 @@ static func ensure_state_keys(state: Dictionary, data: GameData = null) -> void:
 	if not state.has("agents"):
 		state["agents"] = {}
 	AdvisorTutorialRules.ensure(data,state)
+	SuccessionCouncilRules.ensure(state)
 
 
 static func _ensure_unit_arms(units: Array) -> void:

@@ -1,0 +1,105 @@
+Roman War — successor's first council
+User-authorized development plan — October 10, 2026
+
+Authorization and baseline
+The user requested: "Push and continue on with next phase of recommended
+development." Push the completed existing codex/marcus-advisor work without
+polling CI, then implement the recommended successor's first council. This is
+authorization for the prior completed-work push and continued development, not a
+release or deployment. The completed advisor branch will also be pushed after
+this phase's implementation, evidence and report documentation, without merging
+or polling CI. Baseline is clean local bd3e9fe, with persistent campaign
+memory and approved private persona prompts. Preserve the integrated waterways,
+reactive guidance, three advisors, living council and divine choice mechanics.
+
+Read AGENTS.md, CLAUDE.md, docs/HANDOFF.md and the map-experience review before
+editing. Record this plan and acceptance path before implementation in a linked
+new Isengard assignment. Parent memory assignment is
+3b8ae6d4-8945-41ef-a85a-9e5c8354b542; earlier three-phase assignment is
+762ed14c-6d92-44ef-b99f-675b4b2be04c. Preserve every prior Pending report. A
+dedicated reporter maintains SUCCESSION_COUNCIL_PROGRESS.txt and submits observed
+evidence as Pending human review; it never accepts reports. Refine exact hooks
+and persistence only after the source audit.
+
+Objective and authoritative trigger
+When an actual player ruler succession occurs, offer an optional first council
+for the successor. Use the authoritative living leader and existing succession/
+reign evidence, not a guessed UI-name change or generated story. Baseline older
+campaigns to their current ruler instead of replaying historical invitations.
+Prevent duplicate invitations for one succession and preserve campaign/save
+identity. Loading an earlier save restores that save's own history, not an
+irreversible machine-global ledger.
+
+Invitation and replay
+Offer the first council only after turn presentations, Daily Dispatch and pending
+defense are safely finished. Queue it during a battle or other blocked activity.
+Keep it subtle and optional; never automatically open the panel, connect a
+provider, speak, issue orders or alter policy. Support dismissal, postponement
+and replay through existing guidance/preferences/save conventions. Add compatible
+save fields only when the audit shows they are genuinely needed; follow all
+additive creation, migration and tolerant-reader rules.
+
+Source-backed inherited situation
+Provide an authored offline briefing that lets the player inspect the successor's
+inheritance: current inherited wars, active policies, divine receipts/mandates
+and relevant reign context. Separate current facts from historical evidence and
+unknowns. A receipt does not identify a ruler or prove a policy is still active;
+earlier reign totals remain recorded lifetime deeds, not invented reign totals.
+Use bounded existing visible-source projections and label their dates/sources.
+Do not invent a promise, causal explanation, hidden enemy information or missing
+succession detail. Offline reading/navigation must preserve full game state/RNG.
+
+Council experience
+Marcus chairs the successor's first council. Lucius and Gaius participate only
+when that campaign has unlocked them. Reuse the established council UI/session
+and explicit Hear action, freezing one bounded shared snapshot for the entire
+discussion. Preserve per-speaker labels, sequential text/audio, request/turn/
+length/time bounds, mute/stop/cancel, and cancellation on context/load/leave.
+No automatic paid calls, retry loops, transcript-as-fact memory or model-driven
+game command. Keep the authored offline fallback useful when voice is unavailable.
+Use existing private credentials and provider configuration; no replacement key
+or scope expansion. Any new external payload must follow the applicable approval
+boundary, and configured/offline behavior must not be described as live-verified.
+
+Engine and worker boundaries
+Preserve deterministic scene-free rules, data/schema prose and constants,
+BattleResolver, original procedural art, additive saves and hidden-information
+filters. Never read mutable campaign state while a tactical worker is active;
+use the existing detached snapshot or defer succession/campaign briefing. Preserve
+the independent village experience and its lack of parent-campaign succession.
+
+Acceptance path
+Use isolated QA saves and preferences. Observe actual player succession ->
+invitation withheld through conflicting presentation/Dispatch/defense -> optional
+successor council -> dated/current-vs-historical inherited briefing -> explicit
+bounded council interaction -> dismissal/postponement/replay -> save/load.
+Check no historical flood in legacy campaigns, no duplicate invite, earlier-save
+and different-campaign isolation, only unlocked speakers, no automatic provider
+request or game mutation, frozen context/cancellation and active-worker safety.
+Inspect the real rendered flow and standalone village compatibility for shared
+UI changes. Report native lifecycle evidence separately from actual new provider
+text/PCM playback and subjective voice quality.
+
+Validate changed data and import/compile once; run the fastest direct checks that
+prove the changed flow. Follow the weekly policy: no broad suite or generic new
+tests, only narrowly applicable policy exceptions. Do not poll CI after the
+authorized pushes. Save local implementation checkpoints, report actual evidence
+and limits, submit the SHA-linked Pending report without accepting it, and push
+the completed advisor branch after the evidence/report documentation is committed.
+No merge, release or deployment is authorized.
+
+Audited storage and trigger contract — October 10
+Use an additive current-reign ledger with a silent current-ruler baseline for
+new and legacy campaigns. Detect authoritative ruler change after Chronicle
+collection, then freeze one bounded handover at the close of the succession
+season. Replace that handover at the next succession; do not accumulate an
+unbounded archive. Include only the player's wars, tax counts, active policy,
+treasury, patron and visible history. Later replay must identify that handover
+as historical and keep current conditions separate.
+
+Response commands bind the exact succession key for acknowledgement, dismissal
+and postponement so stale clicks cannot affect another ruler's invitation. Only
+unlocked advisors participate. Reuse the existing council agenda and live session
+instead of introducing a second provider pipeline. Root owns integration while
+the core and panel agents implement their respective deterministic ledger and
+guarded presentation seams.

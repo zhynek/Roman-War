@@ -21,6 +21,7 @@ var _settle_at := 0
 var _deadline := 0
 var _speaker_deadline := 0
 var _limits: Dictionary = {}
+var _prompt := ""
 
 func _init(owner_session) -> void:
 	_session=weakref(owner_session)
@@ -38,6 +39,7 @@ func start(quiet: bool) -> bool:
 	var frozen: Dictionary=context.discussion_snapshot()
 	if frozen.is_empty():status="needs_context";changed.emit();return false
 	_limits=context.content.discussion.limits.duplicate(true)
+	_prompt=context.discussion_prompt()
 	if JSON.stringify(frozen).to_utf8_buffer().size()>int(_limits.snapshot_bytes):
 		status="too_large";changed.emit();return false
 	for panel in session.advisor_panels.values():panel.voice.stop()
@@ -82,7 +84,7 @@ func _process(_delta: float) -> void:
 		_stage="answer";status="discussing"
 		voice.set_muted(muted)
 		turns.append({"id":speaker,"name":_speakers[_index].name,"text":""})
-		voice.ask(session.marcus_context.council_context.content.discussion.prompt,_turn_context())
+		voice.ask(_prompt,_turn_context())
 		changed.emit()
 	elif _stage=="answer" and not turns.back().text.is_empty() and voice.is_agent_connected() and not voice.is_answering():
 		_next_speaker()
