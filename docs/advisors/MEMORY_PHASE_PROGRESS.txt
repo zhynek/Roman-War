@@ -86,3 +86,20 @@ Local implementation and offline acceptance are complete; prompt synchronization
 and new native memory-aware council acceptance remain pending. Do not infer
 either from the earlier phase's live voice results. Final local documentation
 and commit are in progress while the approval question remains open.
+
+Final local checkpoint and review linkage
+Implementation commit ff29c06d3ca7a1c13da2fd0da600981b9bdb8476 contains 27 files,
+1,274 insertions and 14 deletions; the worktree was clean at that checkpoint.
+Final root data validation reported zero errors/warnings and git diff --check
+was clean. No push or release was made.
+
+Completed LOCAL scope was submitted to Isengard as report
+0fe5ed4d-38d0-4174-a982-d57605ae408a. Read-back verified status Pending, assignment
+3b8ae6d4-8945-41ef-a85a-9e5c8354b542 and the full implementation SHA. Assignment
+remains In progress. Provider prompt transmission and the new native memory-aware
+council still await the explicit approval described above; the report does not
+claim their completion and was not self-accepted.
+Review: http://127.0.0.1:2269/?view=Needs%20review&project=c5c7ddd7-57d4-4763-9cbe-a0dcdad62f8a
+
+Verified by: data validation, Godot import and isolated source/succession/save,
+rendered memory and standalone village walkthroughs. Tests: not run (weekly review policy).
