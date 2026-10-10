@@ -137,3 +137,14 @@ Review: http://127.0.0.1:2269/?view=Needs%20review&project=c5c7ddd7-57d4-4763-9c
 Verified by: data validation, Godot import, isolated native succession/save/load,
 one actual three-speaker council with PCM, village compatibility and final local
 caption rendering; git diff --check. Tests: not run (weekly review policy).
+
+Final implementation and submitted review checkpoint
+Implementation commit d69207470592a52346eed802ba746d03e8477895 contains 27 files,
+1,216 insertions and 19 deletions; the worktree was clean at that checkpoint.
+Submitted report record c35cb14a-f55e-4491-9520-465240f89572 uses reserved external
+report identifier d9389858-7211-4816-a574-73aec9b8dbec. Read-back verified status
+Pending, full implementation SHA and assignment
+8125f5c1-140f-4bfb-993f-1dcd5acb73c7. Assignment remains In progress; report was not
+self-accepted. The final tracking commit and authorized completed-branch push are
+pending at this checkpoint. The earlier successful bd3e9fe push remains recorded
+above; no final push result, release or CI outcome is inferred here.
