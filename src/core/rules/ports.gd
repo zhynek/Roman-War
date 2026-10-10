@@ -247,33 +247,61 @@ static func defense(data: GameData, state: Dictionary, fleet: Dictionary) -> flo
 		best = maxf(best, float(capabilities(data, state, region)["defense_pct"]))
 	return best
 
-static func repair_harbour(data: GameData, state: Dictionary, region: String) -> Dictionary:
-	var out := {"count": 0, "cost": 0}
+static func repair_quote(data: GameData, state: Dictionary, region: String) -> Dictionary:
+	var out := {"ok": false, "error": "no_repairs", "count": 0, "cost": 0, "crew": 0, "ships": []}
 	var town: Dictionary = state["settlements"].get(region, {})
-	if town.is_empty() or town.get("siege") != null or int(record(state, region).get("repair_turn", -1)) == int(state["turn"]):
+	if town.is_empty():
+		return out
+	if town.get("siege") != null:
+		out["error"] = "besieged"
+		return out
+	if int(record(state, region).get("repair_turn", -1)) == int(state["turn"]):
+		out["error"] = "repair_spent"
 		return out
 	var caps := capabilities(data, state, region)
-	var faction: Dictionary = state["factions"][town["owner"]]
-	for ship in town.get("harbour", []):
-		if out["count"] >= int(caps["support"]):
-			break
-		if ship_error(data, state, region, ship["template"], true) != "":
-			continue
-		var gained := mini(100 - int(ship["strength_pct"]), int(caps["repair_pct"]))
-		if gained <= 0:
-			continue
-		var template: Dictionary = data.units[ship["template"]]
-		var cost := maxi(1, ceili(float(template["cost"]) * gained / 100.0 * float(rules(data)["repair_cost_factor"])))
-		var crew := ceili(float(template["soldiers"]) * (int(ship["strength_pct"]) + gained) / 100.0) - ceili(float(template["soldiers"]) * int(ship["strength_pct"]) / 100.0)
-		if int(faction["treasury"]) < cost or int(town["population"]) - crew < int(data.balance["growth"]["min_population"]):
-			continue
-		faction["treasury"] -= cost
-		RecruitmentRules.add_levy_strain(data, state, region, crew)
-		town["population"] -= crew
-		SocietyRules.record_recruitment(data, state, region, crew)
-		ship["strength_pct"] = int(ship["strength_pct"]) + gained
-		out["count"] += 1
-		out["cost"] += cost
-	if out["count"] > 0:
-		live(state, region)["repair_turn"] = int(state["turn"])
+	var treasury := int(state["factions"][town["owner"]]["treasury"])
+	var population := int(town["population"])
+	for i in range(town.get("harbour", []).size()):
+		var ship: Dictionary = town["harbour"][i]
+		var row := {"index": i, "error": ship_error(data,state,region,ship["template"],true), "gained":0, "cost":0, "crew":0}
+		var gained := mini(100-int(ship["strength_pct"]),int(caps["repair_pct"]))
+		if row["error"] == "" and gained <= 0:
+			row["error"] = "ready"
+		if row["error"] == "":
+			var template: Dictionary = data.units[ship["template"]]
+			row["gained"] = gained
+			row["cost"] = maxi(1,ceili(float(template["cost"])*gained/100.0*float(rules(data)["repair_cost_factor"])))
+			row["crew"] = ceili(float(template["soldiers"])*(int(ship["strength_pct"])+gained)/100.0)-ceili(float(template["soldiers"])*int(ship["strength_pct"])/100.0)
+			if out["count"] >= int(caps["support"]):
+				row["error"] = "repair_limit"
+			elif treasury < row["cost"]:
+				row["error"] = "funds"
+			elif population-row["crew"] < int(data.balance["growth"]["min_population"]):
+				row["error"] = "population"
+		if row["error"] == "":
+			treasury -= row["cost"]
+			population -= row["crew"]
+			out["count"] += 1
+			out["cost"] += row["cost"]
+			out["crew"] += row["crew"]
+		out["ships"].append(row)
+	out["ok"] = out["count"] > 0
+	if out["ok"]:
+		out["error"] = ""
 	return out
+
+static func repair_harbour(data: GameData, state: Dictionary, region: String) -> Dictionary:
+	var quote := repair_quote(data,state,region)
+	if not quote["ok"]:
+		return {"count":0,"cost":0}
+	var town: Dictionary = state["settlements"][region]
+	for row in quote["ships"]:
+		if row["error"] != "":
+			continue
+		state["factions"][town["owner"]]["treasury"] -= row["cost"]
+		RecruitmentRules.add_levy_strain(data,state,region,row["crew"])
+		town["population"] -= row["crew"]
+		SocietyRules.record_recruitment(data,state,region,row["crew"])
+		town["harbour"][row["index"]]["strength_pct"] += row["gained"]
+	live(state,region)["repair_turn"] = int(state["turn"])
+	return {"count":quote["count"],"cost":quote["cost"]}

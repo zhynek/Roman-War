@@ -225,4 +225,6 @@ func _render() -> void:
 	var rank := int(architecture["stage"])
 	heading.text = words("stage",{"stage":rank,"name":stage_name(rank)})
 	caption.text = words("gallery_note") if preview_rank > 0 else words("live")
-	view.display(PortLayout.build(game.data,region,architecture),navigation.button_pressed)
+	var plan := PortLayout.build(game.data,region,architecture)
+	plan["illustrative"] = preview_rank > 0
+	view.display(plan,navigation.button_pressed)

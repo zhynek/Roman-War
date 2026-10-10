@@ -56,6 +56,15 @@ The Julii can start with an Umbria landing and the Etruria–Umbria bridge. Egyp
 can use its existing fleet and Alexandrian port, then build landings at Memphis
 and Thebae to establish a Nile service.
 
+## Operations from a port district
+
+Completed owned ports now provide **Enter port** in the settlement's waterway
+panel. Shipyard, commercial, repair, assembly and berth controls call the same
+Game commands as the campaign panels. Embarkation, landing and service quotes
+are shared rule functions. Local walking, camera movement and interrupted
+presentation do not issue fleet voyages or spend campaign movement. See
+[playable port districts](PORTS.md#architecture-saves-and-district-navigation).
+
 ## Rules and limits
 
 - Routes use authored graph distances, not kilometres or continuous ship physics.

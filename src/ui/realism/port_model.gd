@@ -8,10 +8,12 @@ var timber := Color("73523a")
 var roof := Color("a55338")
 var linen := Color("d8c7a0")
 var fine := true
+var illustrative := true
 
 static func build(layout: Dictionary, navigation: bool = false, detail: bool = true) -> ArrayMesh:
 	var art := PortModel.new()
 	art.fine = detail
+	art.illustrative = layout.get("illustrative", false)
 	art._build(layout, navigation)
 	return art.model.finish()
 
@@ -21,11 +23,8 @@ func slab(rect: Array, y: float, height: float, color: Color) -> void:
 func _build(layout: Dictionary, navigation: bool) -> void:
 	slab(layout["water"], -0.65, 0.3, Color("285866"))
 	slab(layout["land"], -0.6, 1.2, Color("a99570"))
-	if layout["setting"] == "riverbank":
-		slab([-60,43,120,7], -0.2, 1.5, Color("6c7855"))
-	elif layout["setting"] == "sheltered_bay":
-		for x in [-58,55]:
-			slab([x,8,4,40], -0.2, 1.0, Color("a59879"))
+	for bank in layout.get("banks",[]):
+		slab(bank,-0.2,1.0,Color("6c7855") if layout["setting"]=="riverbank" else Color("a59879"))
 	# Shallow shore wash and a continuous, readable land-water boundary.
 	slab([-60,6,120,2], -0.35, 0.12, Color("688b85"))
 	if fine:
@@ -39,6 +38,8 @@ func _build(layout: Dictionary, navigation: bool) -> void:
 	# Berths are docking envelopes, not walls. Reference boats are illustrative
 	# fittings of the port diorama, never a hidden fleet roster.
 	for berth in layout["berths"]:
+		if not illustrative:
+			continue
 		var r: Array = berth["rect"]
 		_boat(Vector3(r[0]+r[2]*0.5, 0.1, r[1]+r[3]*0.5), minf(12, r[3]*0.75), int(layout["stage"]) >= 3)
 	if int(layout["stage"]) > 0:
@@ -79,6 +80,27 @@ func _feature(f: Dictionary) -> void:
 		return
 	if kind in ["pier", "ramp", "quay", "breakwater", "bridge"]:
 		var wood := kind in ["pier", "ramp", "bridge"]
+		if kind in ["ramp", "bridge"]:
+			# Walking and rendering use the same sloping surface.
+			var sections := 16
+			for i in range(sections):
+				var z0: float = r[1]+r[3]*i/sections
+				var z1: float = r[1]+r[3]*(i+1)/sections
+				if kind == "ramp":
+					var a := Vector3(r[0],h*i/sections,z0)
+					var b := Vector3(r[0]+r[2],h*i/sections,z0)
+					var c := Vector3(r[0]+r[2],h*(i+1)/sections,z1)
+					var d := Vector3(r[0],h*(i+1)/sections,z1)
+					model.triangle(a,c,b,timber)
+					model.triangle(a,d,c,timber)
+				else:
+					var x0: float = r[0]+r[2]*i/sections
+					var x1: float = r[0]+r[2]*(i+1)/sections
+					var h0: float = h*minf(1,minf(x0-r[0],r[0]+r[2]-x0)/2)
+					var h1: float = h*minf(1,minf(x1-r[0],r[0]+r[2]-x1)/2)
+					model.triangle(Vector3(x0,h0,r[1]),Vector3(x1,h1,r[1]+r[3]),Vector3(x1,h1,r[1]),timber)
+					model.triangle(Vector3(x0,h0,r[1]),Vector3(x0,h0,r[1]+r[3]),Vector3(x1,h1,r[1]+r[3]),timber)
+			return
 		slab(r,h*0.5,h,timber if wood else stone)
 		if fine:
 			for z in range(ceili(r[1]),floori(r[1]+r[3])):
@@ -109,7 +131,8 @@ func _feature(f: Dictionary) -> void:
 		for x in [r[0]+0.4,r[0]+r[2]-0.4]:
 			for z in range(ceili(r[1])+1,floori(r[1]+r[3]),4):
 				model.rod(Vector3(x,0,z),Vector3(x,h,z),0.25,timber)
-		_boat(center+Vector3(0,1.3,0),r[3]*0.8,false)
+		if illustrative:
+			_boat(center+Vector3(0,1.3,0),r[3]*0.8,false)
 	else:
 		slab(r,h*0.5,h,color)
 	if kind in ["tower", "beacon"]:

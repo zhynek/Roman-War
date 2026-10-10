@@ -5,12 +5,13 @@ bay and exposed-coast settings. The stages are gameplay progression, not a claim
 that all ancient ports evolved this way. Site depth is an authored campaign
 abstraction rather than a reconstruction of ancient hydrography.
 
-Select an owned waterfront province, then **Waterways & shipping → Inspect
-waterfront & shipyards**. The inspector contains the current port, future-stage
-previews, construction, specialist facilities, a vessel catalogue, ship queues,
-and paid repair/resupply. Drag to orbit, scroll to zoom and Shift-drag to pan.
-Previews explicitly show illustrative future facilities; they spend nothing and
-do not unlock ships. Return to the region's harbour controls to launch ships.
+Select an owned waterfront province, then **Waterways & shipping → Enter port**
+for a completed waterfront, or **Inspect waterfront & shipyards** to develop an
+empty shore. The navigable district provides an overhead command view and a
+closer exploration camera, with an independent local inspection representative.
+The facility controls use the existing campaign facade and read-only rule quotes.
+**Plans & previews** retains the original five-stage architectural comparison.
+Detailed controls are in [the playing guide](../PLAYING.md#developing-ports-and-shipyards).
 
 ## Five stages
 
@@ -118,7 +119,7 @@ per delivery. Payment remains limited to one arrival per fleet per season.
 This replaces flat income per ship card. It is a transport-contract economy,
 not a commodity stockpile or market-price simulation.
 
-## Architecture, saves and future traversal
+## Architecture, saves and district navigation
 
 - `data/ports.json` owns named stages, facilities, vessel requirements, sites,
   and stable local-meter architectural footprints. Numerical progression and
@@ -144,18 +145,61 @@ not a commodity stockpile or market-price simulation.
   effects are retained, not rewritten or deleted.
 - `PortLayout` produces walkable surfaces, obstacle footprints, entrances,
   gates, bridges over a military access channel, ramps, berth envelopes, dock edges, land/water boundaries, objectives
-  and reserved routes. `walkable_at` queries those same footprints. This is
-  spatial foundation data, not a completed tactical pathfinder or navmesh.
+  and reserved routes. `walkable_at` queries those same footprints. `PortNavigation` samples these same surfaces into a deterministic local graph,
+  validates complete connecting segments with pedestrian clearance, and derives
+  reachable approaches. It is a district route planner, not a tactical simulation.
 - `PortModel` builds original procedural 3D meshes from that layout. The close
   inspector and campaign miniature share the plan; the classic map uses stage
   ticks and distinct depot/arsenal badges. Public architecture passes through
   observed settlement reports, never hidden enemy fleet or cargo data.
 
-The inspector is a scaled architectural diorama, not a surveyed location in
-the campaign terrain. Reference boats are illustrative berth fittings, not the
-actual fleet roster. No bitmap art was added. Individual traversal, tactical
-port combat, autonomous AI port/shipbuilding strategy, tides, weather and a
-stockpile-based naval supply model remain future work.
+The district remains a scaled architectural place, not surveyed campaign terrain.
+Its representative moves locally through streets, courts, bridges and piers;
+no general moves, no campaign force is created, and no campaign RNG is consumed.
+Graph nodes and routes are rebuilt from shared geometry. Existing buildings keep
+their footprints as stages expand; three additive access ramps connect the final
+merchant pier and breakwaters. Opposite riverbanks and bay edges are now shared
+shoreline footprints used by rendering and vessel clearance. Pedestrian routing
+checks a clearance disk and every route segment; a separate vessel graph checks
+water, hull beam, obstructions and low bridges. It does not issue fleet orders.
+
+`PortLayout.battle_sites()` exports public stable IDs and footprint rectangles
+for settlement connections, gates, bridges, ramps, berths, deployment courts,
+and military/commercial objectives. `PortNavigation.battle_sites()` additionally
+exports reachable facility entrances and boarding points with elevation. These
+records contain no ownership, troops, queues, or fleet information. No new
+combat resolver, scenery damage, siege rules, or naval battle scene is introduced.
+
+`PortOperations.snapshot()` is a separate, owner-scoped read-only projection of
+harbor ships, queue entries, pending work and nearby fleets. It assigns completed
+ships to available berths suitable for their vessel stage; excess ships wait off
+the pictured waterfront without changing campaign capacity. Nearby campaign
+fleets are identified as offshore, not silently docked. Reference boats are
+restricted to explicitly labeled development previews; the live campaign port
+miniature contains only architecture. Damaged hull labels, committed seasonal
+service signs, construction ribs, project stakes and already-embarked manifest
+figures derive from campaign facts. They perform no work on a timer.
+
+`PortDistrict` reuses `Game.commission_ship`, `develop_port`, `service_port`,
+`embark_army`, `disembark_army`, `launch_fleet`, `dock_fleet` and `assign_shipping`.
+The repair, embarkation, landing and trade commands share their pure rule quotes
+with the district. A changed quote is displayed again before commitment.
+Shipbuilding follows the existing head-only seasonal queue. Repair still consumes
+one seasonal service action, even if fewer than the maximum hulls can be serviced.
+No seasonal economy or additional operation ledger exists in the UI.
+
+Save version 2 adds optional `port_visits`, initialized in new games, migration,
+and fixtures and validated at the save boundary. Each visited settlement stores
+only inspection position, camera center, mode, zoom, yaw and follow preference.
+Coordinates are quantized. No route, animation, roster or transaction is saved
+here. Loading a different campaign closes the old window without writing its
+preferences into the new state. Architecture changes interrupt the local route;
+a blocked representative moves to the nearest position in the entrance-connected
+walkable area. Ownership loss or an active campaign battle closes access.
+
+No bitmap art was added. Troop formations, tactical port combat, vessel steering,
+autonomous AI port strategy, tides, weather, and commodity stockpiles remain
+future work. Local representative traversal is implemented.
 
 ## Direct verification — October 9, 2026
 
@@ -183,3 +227,49 @@ Screenshots cover stages, previews, navigation
 footprints and the live campaign miniature.
 
 Verified by: data/schema validation, Godot import and the isolated rendered port walkthrough. Tests: not run (weekly review policy).
+
+## Playable district verification — October 10, 2026
+
+Developed from `origin/main` at `13c3158` in an isolated checkout. The primary
+advisor branch and its untracked notes were left intact. Godot 4.4.1 compiled
+the new classes; data/schema/cross-reference validation returned **0 errors,
+0 warnings**. The direct rendered walkthroughs used disposable Egyptian
+campaigns and kept all scripts, screenshots and saves outside the repository,
+in `/private/tmp/roman-district-qa`.
+
+- Walked a stage-one Nile landing, then retained the original ramp through all
+  five inland stages. Destinations in water and inside the shelter were
+  refused. Entering and exploring preserved the entire campaign dictionary
+  after excluding the explicitly local `port_visits` preference container.
+- Walked the advanced maritime harbor through both defensive gates, the arsenal
+  road bridge, inner quay footbridge, military boarding pier, merchant access
+  ramp and breakwater access. Every selectable facility/berth/gate approach was
+  connected. Vessel routing reached berth water and refused a pier, low bridge
+  and an overly narrow channel; rendered river/bay shorelines blocked vessels.
+- Pressed the real district commission button: **220 denarii**, exactly one
+  river transport contract. Only seasonal recruitment completed it. A saved,
+  interrupted inspection route was not replayed on reopening or loading;
+  the committed queue and treasury remained identical.
+- Pressed the yard's repair button: **44 denarii and 16 crew**, readiness
+  **40% → 80%**, with a repeated service refused that season. Embarked
+  **321 passengers into 1,000 spaces** from the assembly control and retained
+  exactly one cargo army after reopening. District landing, berth launch and
+  freight-service assignment also completed through their existing commands.
+- Loaded the genuine previous-phase `completed-port-campaign.json` save.
+  Entered through the actual campaign settlement button, selected the rendered
+  boatbuilder by screen coordinates, walked locally, released camera follow
+  with manual zoom, returned to the campaign, and reopened the district.
+  The authoritative campaign state was unchanged. Development previews opened
+  and returned to the same district. Malformed local preferences were refused.
+- An expansion placing a warehouse over the representative moved it to valid
+  connected ground and displayed the interrupted-route explanation. Ownership
+  loss and an active campaign battle each closed district access.
+
+The first walkthrough exposed road paving incorrectly blocking a carved vessel
+channel, and camera buttons whose labels were squeezed away. Both were corrected
+and the affected cases were checked directly. Final walkthrough logs contained
+no Godot error or warning diagnostics. Screenshots cover the modest landing,
+shipbuilding, advanced district, bridges, service receipt, committed passenger
+manifest, final camera controls, and return to the actual campaign.
+
+Verified by: data validation, Godot import and isolated rendered district/campaign walkthroughs. Tests: not run (weekly review policy).

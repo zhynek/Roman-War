@@ -156,7 +156,8 @@
         "structures",
         "routes",
         "berths",
-        "channels"
+        "channels",
+        "banks"
       ],
       "properties": {
         "bounds": {
@@ -246,6 +247,9 @@
               },
               "facility": {
                 "type": "string"
+              },
+              "coastal_only": {
+                "type": "boolean"
               }
             }
           }
@@ -294,7 +298,8 @@
             "required": [
               "id",
               "stage",
-              "rect"
+              "rect",
+              "max_vessel_stage"
             ],
             "properties": {
               "id": {
@@ -311,6 +316,11 @@
                 "items": {
                   "type": "number"
                 }
+              },
+              "max_vessel_stage": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
               }
             }
           }
@@ -334,6 +344,62 @@
                 "minimum": 1
               },
               "rect": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "banks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "riverbank",
+            "sheltered_bay",
+            "estuary",
+            "exposed_coast"
+          ],
+          "properties": {
+            "riverbank": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "sheltered_bay": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "estuary": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "exposed_coast": {
+              "type": "array",
+              "items": {
                 "type": "array",
                 "minItems": 4,
                 "maxItems": 4,

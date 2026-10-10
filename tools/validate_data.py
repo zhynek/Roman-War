@@ -566,6 +566,13 @@ def cross_checks(t: dict[str, dict]) -> None:
             err(f"ports: unknown facility for {feature['id']}")
         if min(feature["rect"][2:]) <= 0:
             err(f"ports: invalid footprint {feature['id']}")
+    for berth in layout.get("berths", []):
+        if berth["id"] in seen_port_features or min(berth["rect"][2:]) <= 0:
+            err(f"ports: duplicate berth id or invalid envelope {berth['id']}")
+        seen_port_features.add(berth["id"])
+    for setting, banks in layout.get("banks", {}).items():
+        if any(min(bank[2:]) <= 0 for bank in banks):
+            err(f"ports: invalid shoreline footprint for {setting}")
     waterways = t.get("waterways.json", {})
     water_nodes = set(zones)
     for node in waterways.get("river_nodes", []):

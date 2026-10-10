@@ -514,7 +514,7 @@
       },
       {
         "id": "landing_shelter",
-        "name": "Ferrymen’s shelter",
+        "name": "Ferrymen\u2019s shelter",
         "kind": "shed",
         "stage": 1,
         "rect": [
@@ -556,7 +556,7 @@
       },
       {
         "id": "east_pier",
-        "name": "Boatbuilders’ jetty",
+        "name": "Boatbuilders\u2019 jetty",
         "kind": "pier",
         "stage": 2,
         "rect": [
@@ -570,7 +570,7 @@
       },
       {
         "id": "boatbuilder",
-        "name": "Boatbuilder’s shed",
+        "name": "Boatbuilder\u2019s shed",
         "kind": "shed",
         "stage": 2,
         "rect": [
@@ -808,7 +808,7 @@
       },
       {
         "id": "barracks",
-        "name": "Marines’ barracks",
+        "name": "Marines\u2019 barracks",
         "kind": "barracks",
         "stage": 4,
         "rect": [
@@ -1029,6 +1029,50 @@
         ],
         "height": 0.8,
         "facility": ""
+      },
+      {
+        "id": "merchant_ramp",
+        "name": "Merchant pier access ramp",
+        "kind": "ramp",
+        "stage": 5,
+        "rect": [
+          -8,
+          4,
+          7,
+          8
+        ],
+        "height": 1,
+        "facility": ""
+      },
+      {
+        "id": "west_mole_access",
+        "name": "Commercial breakwater access",
+        "kind": "ramp",
+        "stage": 5,
+        "rect": [
+          -51,
+          9,
+          4,
+          29
+        ],
+        "height": 1.5,
+        "facility": "",
+        "coastal_only": true
+      },
+      {
+        "id": "east_mole_access",
+        "name": "Military breakwater access",
+        "kind": "ramp",
+        "stage": 5,
+        "rect": [
+          52,
+          7,
+          3,
+          33
+        ],
+        "height": 1.5,
+        "facility": "",
+        "coastal_only": true
       }
     ],
     "routes": [
@@ -1134,7 +1178,8 @@
           10,
           5,
           9
-        ]
+        ],
+        "max_vessel_stage": 1
       },
       {
         "id": "river_berth",
@@ -1144,7 +1189,8 @@
           16,
           6,
           12
-        ]
+        ],
+        "max_vessel_stage": 2
       },
       {
         "id": "merchant_berth",
@@ -1154,7 +1200,8 @@
           13,
           7,
           18
-        ]
+        ],
+        "max_vessel_stage": 3
       },
       {
         "id": "military_berth",
@@ -1164,7 +1211,8 @@
           17,
           7,
           17
-        ]
+        ],
+        "max_vessel_stage": 5
       },
       {
         "id": "deep_berth",
@@ -1174,7 +1222,8 @@
           14,
           7,
           18
-        ]
+        ],
+        "max_vessel_stage": 5
       }
     ],
     "channels": [
@@ -1188,6 +1237,32 @@
           35
         ]
       }
-    ]
+    ],
+    "banks": {
+      "riverbank": [
+        [
+          -60,
+          43,
+          120,
+          7
+        ]
+      ],
+      "sheltered_bay": [
+        [
+          -58,
+          8,
+          4,
+          40
+        ],
+        [
+          55,
+          8,
+          4,
+          40
+        ]
+      ],
+      "estuary": [],
+      "exposed_coast": []
+    }
   }
 }

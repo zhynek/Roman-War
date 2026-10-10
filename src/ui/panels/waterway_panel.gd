@@ -57,7 +57,7 @@ func setup_region(current_game: Game, region: String) -> void:
 	var definition := PortRules.stage_spec(game.data,rank)
 	var name: String = port_words["shore"] if rank == 0 else definition["name" if MapRules.coastal(game.data,region) else "inland_name"]
 	label(String(port_words["stage"]).format({"stage":rank,"name":name}))
-	button(port_words["inspect"],func(): port_requested.emit(region))
+	button(port_words["enter"] if rank>0 else port_words["inspect"],func(): port_requested.emit(region))
 	for other in game.data.regions[region].get("adjacent", []):
 		if TerrainRules.crossing_kind(game.data, region, other) == "river" and not game.state.get("waterworks", {}).get("bridges", {}).has(TerrainRules.edge_key(region, other)):
 			_project(region, "bridge", other)
