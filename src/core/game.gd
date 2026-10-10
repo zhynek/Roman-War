@@ -1570,6 +1570,7 @@ func halt_voyage(fleet_id: String) -> bool:
 		return false
 	state["fleets"][fleet_id]["sail_path"] = []
 	state["fleets"][fleet_id]["trade_route"] = {}
+	state["fleets"][fleet_id]["blockade"] = {}
 	return true
 
 func embark_army(fleet_id: String, army_id: String) -> Dictionary:
@@ -1592,6 +1593,23 @@ func assign_shipping(fleet_id: String, from: String, to: String, mode: String = 
 	if CityBattleRules.locked(state) or not _owns_force(fleet_id):
 		return {"ok": false, "error": "wrong_owner"}
 	return WaterwayRules.assign_trade(data, state, fleet_id, from, to, mode)
+
+func blockade_port(fleet_id: String, region: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "error": "battle_active"}
+	if not state["fleets"].has(fleet_id) or not _owns_force(fleet_id):
+		return {"ok": false, "error": "wrong_owner"}
+	return BlockadeRules.begin(data, state, fleet_id, region)
+
+func relieve_port(fleet_id: String, region: String) -> Dictionary:
+	if CityBattleRules.locked(state):
+		return {"ok": false, "error": "battle_active"}
+	if not state["fleets"].has(fleet_id) or not _owns_force(fleet_id) or not _owns_settlement(region):
+		return {"ok": false, "error": "wrong_owner"}
+	var rng := _rng()
+	var result := BlockadeRules.relieve(data, state, fleet_id, region, resolver, rng)
+	state["rng_state"] = rng.state_string()
+	return result
 
 func naval_encounter(fleet_id: String, enemy_id: String) -> Dictionary:
 	if CityBattleRules.locked(state) or not _owns_force(fleet_id):

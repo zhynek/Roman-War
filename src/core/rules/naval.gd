@@ -80,8 +80,12 @@ static func check_dock_fleet(data: GameData, state: Dictionary, fleet_id: String
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not fleet.get("blockade", {}).is_empty():
+		return "blockade_existing"
 	if not fleet.get("cargo", {}).is_empty():
 		return "cargo_aboard"
+	if BlockadeRules.blocked(data, state, region_id):
+		return "port_blockaded"
 	if not WaterwayRules.access(data, state, fleet["owner"], region_id, fleet["sea_zone"], true):
 		return "landing_required"
 	var settlement: Dictionary = state["settlements"].get(region_id, {})
@@ -126,6 +130,8 @@ static func check_merge_fleets(data: GameData, state: Dictionary, from_id: Strin
 	var into: Dictionary = state["fleets"].get(into_id, {})
 	if from.is_empty() or into.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not from.get("blockade", {}).is_empty() or not into.get("blockade", {}).is_empty():
+		return "blockade_existing"
 	if not from.get("cargo", {}).is_empty() or not into.get("cargo", {}).is_empty():
 		return "cargo_aboard"
 	if from["owner"] != into["owner"]:
@@ -143,6 +149,7 @@ static func merge_fleets(data: GameData, state: Dictionary, from_id: String, int
 		return {"ok": false, "error": error}
 	var from: Dictionary = state["fleets"][from_id]
 	var into: Dictionary = state["fleets"][into_id]
+	into["naval_battle_turn"] = maxi(int(from.get("naval_battle_turn", -1)), int(into.get("naval_battle_turn", -1)))
 	into["sail_path"] = []
 	into["trade_route"] = {}
 	for ship in from["ships"]:
@@ -156,6 +163,8 @@ static func check_split_fleet(data: GameData, state: Dictionary, fleet_id: Strin
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty():
 		return ForceRules.ERR_NOT_FOUND
+	if not fleet.get("blockade", {}).is_empty():
+		return "blockade_existing"
 	if not fleet.get("cargo", {}).is_empty():
 		return "cargo_aboard"
 	var error := ForceRules._check_indices(fleet["ships"], indices)
@@ -180,6 +189,7 @@ static func split_fleet(data: GameData, state: Dictionary, fleet_id: String, ind
 		"movement_left": float(fleet["movement_left"]),
 	}
 	WaterwayRules.ensure_fleet(state["fleets"][new_id])
+	state["fleets"][new_id]["naval_battle_turn"] = int(fleet.get("naval_battle_turn", -1))
 	fleet["sail_path"] = []
 	fleet["trade_route"] = {}
 	return {"ok": true, "error": "", "fleet_id": new_id}

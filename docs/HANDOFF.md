@@ -11,6 +11,42 @@ minutes. It deliberately does **not** repeat the other docs:
 | How to produce a downloadable app | [`BUILDING.md`](../BUILDING.md) |
 | Why the design is what it is | [`docs/research/rtw-research-report.md`](research/rtw-research-report.md) |
 
+## Contested waterways — October 10, 2026
+
+Built from main `8d60305` in `/private/tmp/roman-war-contested-waterways`, branch
+`codex/contested-waterways`; the primary advisor checkout remains untouched.
+`AiNaval` now commissions, groups, launches, trades, returns for paid repairs,
+protects owned ports and seeks local hostile stations using ordinary rules.
+Its naval decisions respect faction visibility and consume RNG only in encounters.
+`BlockadeRules` derives interruptions from explicit paid fleet stations, war,
+position and military readiness. Harbor defense raises the station requirement.
+District security controls offer relief through Game and the existing resolver.
+
+Read the [rules, balance, persistence and observed evidence](WATERWAYS.md#contested-waterways--october-10-2026)
+and [player loop](../PLAYING.md#blockades-and-relief-fleets). Save version 2 gains
+optional fleet `blockade` and `naval_battle_turn` fields via the existing ensure
+path. Paused shipping retains its route and payment stamp; no operational state
+is stored in the district. Encounters stamp both fleets, cancel defeated stations
+and withdraw surviving losers along one legal safe edge. New station costs are
+prepaid explicitly; they are separate from ordinary ship upkeep. Active stations
+count in AI war staleness, and debt shedding preserves assigned fleets/cargo.
+
+Native evidence is outside the repository in `/private/tmp/roman-naval-qa`.
+The visible loop paid 120 denarii to hold a defended port, serviced a relief hull
+for 380 denarii, launched and fought through the district, then resumed a saved
+620-denarii delivery. Live/save continuations matched losses, treasury and RNG;
+repeat commands, maintenance and payments had no duplicate effects. A real full
+season with AI naval actions also replayed identically. River/civilian/defense/
+funds refusals, peace/capture, ownership and battle locks, multi-fleet relief,
+visibility, AI repair/production/trade/protection, sea-versus-land income, and a
+genuine previous-phase save were exercised directly. Final UI images inspected.
+
+No tactical port battle, AI amphibious invasion, Senate blockade mission or new
+combat resolver was added. Longer naval balance evidence belongs to the weekly
+review; no suite, CI polling or release build was run here.
+
+Verified by: data/schema validation, Godot import and isolated rendered blockade/relief and naval boundary walkthroughs. Tests: not run (weekly review policy).
+
 ## Playable port districts — October 10, 2026
 
 Completed waterfronts now offer **Enter port** from the campaign. An overhead

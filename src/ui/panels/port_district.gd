@@ -147,7 +147,7 @@ func _process(delta: float) -> void:
 		_refresh()
 
 func _campaign_key() -> String:
-	return JSON.stringify([game.state["turn"],game.state["settlements"][region],game.state.get("ports",{}).get(region,{}),game.state["fleets"],game.state["armies"],game.state["factions"][game.state["player_faction"]]["treasury"]])
+	return JSON.stringify([game.state["turn"],game.state["settlements"][region],game.state.get("ports",{}).get(region,{}),game.state["fleets"],game.state["armies"],game.state["factions"],game.state["factions"][game.state["player_faction"]]["treasury"]])
 
 func _clear(parent: Node) -> void:
 	for child in parent.get_children():
@@ -191,16 +191,17 @@ func _overview() -> void:
 	for id in PortRules.facilities(game.data,game.state,region):
 		built.append(_facility_name(id))
 	label(overview,words("specialization",{"name":", ".join(built) if not built.is_empty() else words("general_port")}))
+	_focus_row(words("blockade_clear") if facts["blockaders"].is_empty() else words("blockade_summary",{"count":facts["blockaders"].size()}),["arsenal","landing_berth"])
 	var project: Dictionary = facts["project"]
 	_focus_row(words("works_empty") if project.is_empty() else words("project",{"name":stage_name(project["rank"]) if project["kind"]=="stage" else _facility_name(project["kind"]),"turns":project["turns"]}),["civic_hall","customs"])
 	_focus_row(words("queue_overview",{"count":facts["queue"].size()}),["boatbuilder"])
 	_focus_row(words("berth_overview",{"count":game.state["settlements"][region]["harbour"].size(),"waiting":facts["waiting"].size(),"fleets":facts["fleets"].size()}),["landing_berth"])
-	_focus_row(words("handling",{"remaining":PortRules.handling_left(game.data,game.state,region),"total":caps["troop_handling"]}),["assembly","ramp"])
+	_focus_row(words("handling_suspended" if not facts["blockaders"].is_empty() else "handling",{"remaining":PortRules.handling_left(game.data,game.state,region),"total":caps["troop_handling"]}),["assembly","ramp"])
 	var services := 0
 	for fleet in game.state["fleets"].values():
 		if fleet["owner"] == game.state["player_faction"] and (fleet.get("trade_route",{}).get("from")==region or fleet.get("trade_route",{}).get("to")==region):
 			services += 1
-	_focus_row(words("freight_overview",{"capacity":caps["cargo_handling"],"services":services}),["warehouse_depot","warehouse","west_pier"])
+	_focus_row(words("freight_suspended" if not facts["blockaders"].is_empty() else "freight_overview",{"capacity":caps["cargo_handling"],"services":services}),["warehouse_depot","warehouse","west_pier"])
 	var left := 0 if int(PortRules.record(game.state,region).get("repair_turn",-1))==int(game.state["turn"]) else int(caps["support"])
 	_focus_row(words("repair_overview",{"left":left,"total":caps["support"],"gain":caps["repair_pct"]}),["repair_workshop","boatbuilder"])
 	_focus_row(words("defense_overview",{"cost":caps["upkeep"],"defense":caps["defense_pct"]}),["arsenal","road_gate"])
@@ -223,6 +224,8 @@ func _details() -> void:
 	if receipt != "":
 		label(details,receipt)
 	var purpose := _purpose(site)
+	if purpose in ["office","arsenal","commercial","berth"]:
+		_security()
 	if purpose in ["shipyard","arsenal","office"]:
 		_shipyard(purpose=="arsenal")
 	if purpose in ["repair","shipyard","office"]:
@@ -284,6 +287,11 @@ func _commit(shown: Dictionary, quote_fn: Callable, command: Callable) -> void:
 	var result: Dictionary = command.call()
 	var success: bool = result.get("ok",int(result.get("count",0))>0)
 	receipt = words("committed") if success else _reason(result.get("error","no_repairs"))
+	var encounter: Dictionary = result.get("battle",{})
+	for resolved in result.get("battles",[]):
+		if not resolved.is_empty(): encounter = resolved
+	if not encounter.is_empty():
+		receipt = words("relief_result",{"winner":words("relief_won" if encounter.get("winner")=="attacker" else "relief_lost")})
 	if result.has("count"):
 		receipt = words("repaired",result)
 	_refresh()
@@ -369,6 +377,8 @@ func _berth() -> void:
 func _trade() -> void:
 	_section(words("shipping"))
 	label(details,words("trade_terms"))
+	if BlockadeRules.blocked(game.data,game.state,region):
+		label(details,words("blockade_paused"))
 	for fid in game.state["fleets"]:
 		var fleet: Dictionary = game.state["fleets"][fid]
 		var route: Dictionary = fleet.get("trade_route",{})
@@ -417,3 +427,24 @@ func _development() -> void:
 			var values: Dictionary = PortRules.rules(game.data)["facilities"][id].duplicate()
 			values["name"] = facility["name"]
 			_offer(words("facility",values),func(): return PortRules.project_quote(game.data,game.state,region,id),func(): return game.develop_port(region,id))
+
+func _security() -> void:
+	_section(words("blockade_title"))
+	if facts["blockaders"].is_empty():
+		label(details,words("blockade_clear"))
+		return
+	label(details,words("blockade_effects"))
+	for enemy in facts["blockaders"]:
+		label(details,words("blockade_contact",{"faction":game.data.factions[enemy["owner"]]["name"],"zone":game.data.sea_zones[enemy["zone"]]["name"]}))
+	label(details,words("relief_terms"))
+	var ids: Array = game.state["fleets"].keys()
+	ids.sort()
+	var count := 0
+	for id in ids:
+		if game.state["fleets"][id]["owner"] != game.state["player_faction"]: continue
+		count += 1
+		var fid: String = id
+		var offer := BlockadeRules.relief_quote(game.data,game.state,fid,region)
+		var caption_text := words("relief_local",{"fleet":fid}) if offer.get("path",[]).is_empty() else words("relief_action",{"fleet":fid,"cost":offer.get("cost",0),"turns":offer.get("turns",0)})
+		_offer(caption_text,func(): return BlockadeRules.relief_quote(game.data,game.state,fid,region),func(): return game.relieve_port(fid,region))
+	if count == 0: label(details,words("relief_none"))

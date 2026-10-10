@@ -13,6 +13,24 @@ The facility controls use the existing campaign facade and read-only rule quotes
 **Plans & previews** retains the original five-stage architectural comparison.
 Detailed controls are in [the playing guide](../PLAYING.md#developing-ports-and-shipyards).
 
+## Contested waterfronts
+
+The [contested waterways phase](WATERWAYS.md#contested-waterways--october-10-2026)
+connects this district to naval AI, explicit blockades and relief operations.
+Security appears first in the operational overview and focuses an arsenal or
+berth. Blocked troop handling and freight are labeled as suspended; the underlying
+stage and facilities remain intact. The district shows observed hostile factions
+and waterway locations separately from public architecture. Its owned-fleet relief
+quotes share Game commands with the campaign's naval rules.
+
+Walk to the repair yard, buy service, launch ships from a berth and engage or sail
+to relieve the port from the security panel. Shipbuilding and repairs remain
+available during a naval blockade; a land siege retains its existing restrictions.
+A successful relief removes the defeated station and existing shipping services
+resume on the next seasonal voyage. There is no local fleet steering, troop
+formation movement or tactical port battle. The stable gates, approaches and
+objectives remain the spatial foundation for that later work.
+
 ## Five stages
 
 | Stage | Inland / coastal name | Settlement needed | Cost | Seasons | Upkeep | Troops handled / season | Freight / delivery |
@@ -198,7 +216,7 @@ a blocked representative moves to the nearest position in the entrance-connected
 walkable area. Ownership loss or an active campaign battle closes access.
 
 No bitmap art was added. Troop formations, tactical port combat, vessel steering,
-autonomous AI port strategy, tides, weather, and commodity stockpiles remain
+amphibious AI strategy, tides, weather, and commodity stockpiles remain
 future work. Local representative traversal is implemented.
 
 ## Direct verification — October 9, 2026

@@ -14,9 +14,11 @@ static func ensure(state: Dictionary) -> void:
 		ensure_fleet(fleet)
 
 static func ensure_fleet(fleet: Dictionary) -> void:
-	for key in ["cargo", "trade_route"]:
+	for key in ["cargo", "trade_route", "blockade"]:
 		if not fleet.has(key):
 			fleet[key] = {}
+	if not fleet.has("naval_battle_turn"):
+		fleet["naval_battle_turn"] = -1
 	if not fleet.has("sail_path"):
 		fleet["sail_path"] = []
 	if not fleet.has("sail_mode"):
@@ -139,6 +141,10 @@ static func embark_quote(data: GameData, state: Dictionary, fleet_id: String, ar
 		return {"ok": false, "error": "cargo_aboard"}
 	if not access(data, state, fleet["owner"], army["region"], fleet["sea_zone"], true):
 		return {"ok": false, "error": "occupied"}
+	if BlockadeRules.blocked(data, state, army["region"]):
+		return {"ok": false, "error": "port_blockaded"}
+	if not fleet.get("blockade", {}).is_empty():
+		return {"ok": false, "error": "blockade_existing"}
 	var passengers := PortRules.passengers(data, army)
 	if passengers > capacity(data, fleet):
 		return {"ok": false, "error": "capacity_error"}
@@ -192,6 +198,8 @@ static func landing_quote(data: GameData, state: Dictionary, fleet_id: String, r
 	var army: Dictionary = cargo["army"]
 	var passengers := PortRules.passengers(data, army)
 	if access(data, state, fleet["owner"], region, fleet["sea_zone"]):
+		if BlockadeRules.blocked(data, state, region):
+			return {"ok": false, "error": "port_blockaded"}
 		if passengers > PortRules.handling_left(data, state, region):
 			return {"ok": false, "error": "handling_full"}
 	return {"ok":true,"cost":cost,"passengers":passengers}
@@ -296,6 +304,8 @@ static func preview(data: GameData, state: Dictionary, fleet_id: String, target:
 	return {"path": path, "legs": legs, "cost": SocietyRules.quantize(dist[target]), "turns": turns, "mode": mode}
 
 static func order(data: GameData, state: Dictionary, fleet_id: String, target: String, mode: String, resolver: BattleResolver, rng: CampaignRng) -> Dictionary:
+	if not state["fleets"].get(fleet_id, {}).get("blockade", {}).is_empty():
+		return {"ok": false, "error": "blockade_existing"}
 	var quote := preview(data, state, fleet_id, target, mode)
 	if quote.is_empty() or quote["path"].is_empty():
 		return {"ok": false, "error": "route_unavailable"}
@@ -308,9 +318,17 @@ static func order(data: GameData, state: Dictionary, fleet_id: String, target: S
 static func advance(data: GameData, state: Dictionary, fleet_id: String, resolver: BattleResolver, rng: CampaignRng) -> Dictionary:
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	var out := {"ok": true, "arrived": false, "path": [], "battles": [], "stopped_at": fleet.get("sea_zone", "")}
-	if fleet.is_empty():
+	if fleet.is_empty() or not fleet.get("blockade", {}).is_empty():
 		return out
 	var path: Array = fleet.get("sail_path", [])
+	# An arrival saved while its contact was already spent must resolve that
+	# contact on continuation before it can pay. Empty geometry is not access.
+	if path.is_empty() and not fleet.get("trade_route", {}).is_empty():
+		var contact := hostiles(state, fleet)
+		if not contact.is_empty():
+			out["battles"].append(battle(data, state, fleet_id, contact[0], resolver, rng, true))
+			out["stopped_at"] = fleet.get("sea_zone", out["stopped_at"])
+			return out
 	while not path.is_empty():
 		var cost := step_cost(data, fleet, fleet["sea_zone"], path[0], fleet.get("sail_mode", "coastal"))
 		if is_inf(cost) or cost > MovementRules.fleet_movement_points_for(data, state, fleet) + 0.0001:
@@ -334,6 +352,9 @@ static func advance(data: GameData, state: Dictionary, fleet_id: String, resolve
 		if not enemies.is_empty():
 			out["battles"].append(battle(data, state, fleet_id, enemies[0], resolver, rng, true))
 			break
+	if state["fleets"].has(fleet_id) and fleet["sea_zone"] != out["stopped_at"]:
+		out["path"].append(fleet["sea_zone"])
+		out["stopped_at"] = fleet["sea_zone"]
 	out["arrived"] = path.is_empty() and state["fleets"].has(fleet_id)
 	return out
 
@@ -346,16 +367,31 @@ static func hostiles(state: Dictionary, fleet: Dictionary) -> Array:
 	ids.sort()
 	return ids
 
+static func encounter_error(state: Dictionary, attacker_id: String, defender_id: String, intercept: bool = false) -> String:
+	var attacker: Dictionary = state["fleets"].get(attacker_id, {})
+	var defender: Dictionary = state["fleets"].get(defender_id, {})
+	if attacker.is_empty() or defender.is_empty() or not hostiles(state, attacker).has(defender_id):
+		return "not_found"
+	if int(attacker.get("naval_battle_turn", -1)) == int(state["turn"]) or int(defender.get("naval_battle_turn", -1)) == int(state["turn"]):
+		return "blockade_battle_spent"
+	if not intercept and float(attacker["movement_left"]) <= 0:
+		return "no_movement"
+	return ""
+
 static func battle(data: GameData, state: Dictionary, attacker_id: String, defender_id: String, resolver: BattleResolver, rng: CampaignRng, intercept: bool = false) -> Dictionary:
 	var attacker: Dictionary = state["fleets"].get(attacker_id, {})
 	var defender: Dictionary = state["fleets"].get(defender_id, {})
-	if attacker.is_empty() or defender.is_empty() or (not intercept and float(attacker["movement_left"]) <= 0) or not hostiles(state, attacker).has(defender_id):
+	if encounter_error(state, attacker_id, defender_id, intercept) != "":
 		return {}
+	var encounter_zone: String = attacker["sea_zone"]
 	var result := resolver.resolve(data, rng, attacker["ships"], defender["ships"], {"terrain": "plains", "wall_level": 0, "fort_defense_pct": PortRules.defense(data, state, defender),
 		"attacker_mods": KnowledgeRules.army_mods(data, state, attacker["owner"]), "defender_mods": KnowledgeRules.army_mods(data, state, defender["owner"])})
 	for id in [attacker_id, defender_id]:
 		var fleet: Dictionary = state["fleets"][id]
 		fleet["movement_left"] = 0.0
+		fleet["naval_battle_turn"] = int(state["turn"])
+		if id == (defender_id if result.get("winner") == "attacker" else attacker_id):
+			fleet["blockade"] = {}
 		fleet["sail_path"] = []
 		fleet["trade_route"] = {}
 		var cargo: Dictionary = fleet.get("cargo", {}).get("army", {})
@@ -365,14 +401,36 @@ static func battle(data: GameData, state: Dictionary, attacker_id: String, defen
 			if cargo.get("general") != null:
 				CharacterRules.kill(state, cargo["general"], data)
 			state["fleets"].erase(id)
-	state["naval_report"] = {"turn": state["turn"], "zone": attacker["sea_zone"], "winner": attacker["owner"] if result.get("winner") == "attacker" else defender["owner"]}
+	var loser_id: String = defender_id if result.get("winner") == "attacker" else attacker_id
+	if state["fleets"].has(loser_id):
+		_retreat(data, state, state["fleets"][loser_id])
+	state["naval_report"] = {"turn": state["turn"], "zone": encounter_zone, "winner": attacker["owner"] if result.get("winner") == "attacker" else defender["owner"]}
 	return result
+
+static func _retreat(data: GameData, state: Dictionary, fleet: Dictionary) -> void:
+	# Resolver owns losses; the campaign supplies one legal withdrawal edge.
+	# No safe edge means survivors remain in contact, with the blockade broken.
+	var neighbors: Array = data.sea_zones[fleet["sea_zone"]].get("adjacent", []).duplicate()
+	neighbors.sort()
+	var target := ""
+	var best := INF
+	for zone in neighbors:
+		var price := step_cost(data, fleet, fleet["sea_zone"], zone, fleet.get("sail_mode", "coastal"))
+		var candidate := fleet.duplicate()
+		candidate["sea_zone"] = zone
+		if price < best and price <= MovementRules.fleet_movement_points_for(data, state, fleet) and hostiles(state, candidate).is_empty():
+			best = price
+			target = zone
+	if target != "":
+		fleet["sea_zone"] = target
+		_sync_cargo(state, fleet)
+		CartographyRules.record_reports(data, state)
 
 static func trade_valid(data: GameData, state: Dictionary, fleet: Dictionary, route: Dictionary) -> bool:
 	if route.is_empty():
 		return false
 	for end in ["from", "to"]:
-		if not access(data, state, fleet["owner"], route[end], route[end + "_zone"]):
+		if BlockadeRules.blocked(data, state, route[end]) or not access(data, state, fleet["owner"], route[end], route[end + "_zone"]):
 			return false
 	return true
 
@@ -380,6 +438,10 @@ static func trade_quote(data: GameData, state: Dictionary, fleet_id: String, fro
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
 	if fleet.is_empty() or not fleet.get("cargo", {}).is_empty() or from == to:
 		return {"ok": false, "error": "cargo_aboard"}
+	if not fleet.get("blockade", {}).is_empty():
+		return {"ok": false, "error": "blockade_existing"}
+	if BlockadeRules.blocked(data, state, from) or BlockadeRules.blocked(data, state, to):
+		return {"ok": false, "error": "port_blockaded"}
 	if PortRules.fleet_capacity(data, fleet, "cargo") <= 0:
 		return {"ok": false, "error": "cargo_empty"}
 	if not access(data, state, fleet["owner"], from, fleet["sea_zone"], true):
@@ -421,7 +483,7 @@ static func advance_season(data: GameData, state: Dictionary, resolver: BattleRe
 			trade["paused"] = not trade_valid(data, state, fleet, trade)
 			if trade["paused"]:
 				continue
-		if fleet.get("sail_path", []).is_empty():
+		if fleet.get("sail_path", []).is_empty() and (trade.is_empty() or fleet["sea_zone"] != trade[trade["heading"] + "_zone"]):
 			continue
 		var origin: String = fleet["sea_zone"]
 		var report := advance(data, state, id, resolver, rng)
@@ -430,7 +492,7 @@ static func advance_season(data: GameData, state: Dictionary, resolver: BattleRe
 		reports.append(report)
 		if not state["fleets"].has(id) or fleet.get("trade_route", {}).is_empty() or not report["battles"].is_empty():
 			continue
-		if report["arrived"] and int(trade["paid_turn"]) < int(state["turn"]):
+		if report["arrived"] and trade_valid(data, state, fleet, trade) and int(trade["paid_turn"]) < int(state["turn"]):
 			var premium := 0
 			var origin_resources: Array = data.regions[trade["from"]].get("resources", [])
 			for resource in data.regions[trade["to"]].get("resources", []):

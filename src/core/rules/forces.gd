@@ -416,6 +416,8 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 	if not _colocated(data, state, from, to):
 		return ERR_NOT_COLOCATED
 	for force in [from, to]:
+		if force["kind"] == "fleet" and not force["container"].get("blockade", {}).is_empty():
+			return "blockade_existing"
 		if force["kind"] == "fleet" and (not force["container"].get("cargo", {}).is_empty() or not force["container"].get("trade_route", {}).is_empty()):
 			return "cargo_aboard"
 		if force["kind"] == "garrison" and force["container"].get("siege") != null:
@@ -442,6 +444,8 @@ static func check_transfer_units(data: GameData, state: Dictionary, from_id: Str
 		return ERR_LAST_UNIT
 	# Ships making port pay a sea lane exactly as a docking fleet does; a
 	# fleet with no lane left cannot slip its ships into the harbour either.
+	if from["kind"] == "fleet" and to["kind"] == "harbour" and BlockadeRules.blocked(data, state, to["region"]):
+		return "port_blockaded"
 	if from["kind"] == "fleet" and to["kind"] == "harbour" \
 			and NavalRules.lane_cost(data) > float(from["container"]["movement_left"]) + 0.0001:
 		return ERR_NO_MOVEMENT
@@ -496,6 +500,7 @@ static func transfer_units(data: GameData, state: Dictionary, from_id: String, t
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(settlement.get("muster_march_left", INF)))
 		to["container"]["forced_march"] = bool(to["container"].get("forced_march", false)) or bool(settlement.get("muster_fatigued", false))
 	elif from["kind"] == "fleet" and to["kind"] == "fleet":
+		to["container"]["naval_battle_turn"] = maxi(int(from["container"].get("naval_battle_turn", -1)), int(to["container"].get("naval_battle_turn", -1)))
 		to["container"]["movement_left"] = minf(float(to["container"]["movement_left"]), float(from["container"]["movement_left"]))
 	elif from["kind"] == "fleet" and to["kind"] == "harbour":
 		# Making port costs the ships a lane (NavalRules.dock_fleet's rule),

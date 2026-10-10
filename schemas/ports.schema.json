@@ -113,7 +113,8 @@
           "facilities",
           "deep_water",
           "waters",
-          "repair_stage"
+          "repair_stage",
+          "role"
         ],
         "properties": {
           "stage": {
@@ -142,6 +143,13 @@
           "repair_stage": {
             "type": "integer",
             "minimum": 1
+          },
+          "role": {
+            "enum": [
+              "transport",
+              "freight",
+              "military"
+            ]
           }
         }
       }

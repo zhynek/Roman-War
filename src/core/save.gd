@@ -208,8 +208,18 @@ static func _valid_state(state: Variant) -> bool:
 		if not _fields(fleet, {"owner": TYPE_STRING, "sea_zone": TYPE_STRING,
 			"movement_left": TYPE_FLOAT, "ships": TYPE_ARRAY}) or not _units(fleet["ships"]):
 			return false
-		if not _fields(fleet, {"cargo": TYPE_DICTIONARY, "trade_route": TYPE_DICTIONARY, "sail_path": TYPE_ARRAY, "sail_mode": TYPE_STRING}, true):
+		if not _fields(fleet, {"cargo": TYPE_DICTIONARY, "trade_route": TYPE_DICTIONARY, "sail_path": TYPE_ARRAY, "sail_mode": TYPE_STRING, "blockade": TYPE_DICTIONARY, "naval_battle_turn": TYPE_FLOAT}, true):
 			return false
+		if not _whole_at_least(fleet.get("naval_battle_turn", -1), -1) or int(fleet.get("naval_battle_turn", -1)) > int(state["turn"]):
+			return false
+		var blockade: Dictionary = fleet.get("blockade", {})
+		if not blockade.is_empty():
+			if not _fields(blockade, {"region": TYPE_STRING, "paid_turn": TYPE_FLOAT}):
+				return false
+			if not state["settlements"].has(blockade["region"]) or not _whole_at_least(blockade["paid_turn"], 0) or int(blockade["paid_turn"]) > int(state["turn"]):
+				return false
+			if not fleet.get("cargo", {}).is_empty() or not fleet.get("trade_route", {}).is_empty() or not fleet.get("sail_path", []).is_empty():
+				return false
 		for zone in fleet.get("sail_path", []):
 			if not zone is String:
 				return false

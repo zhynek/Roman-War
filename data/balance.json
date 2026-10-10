@@ -1246,5 +1246,22 @@
       "pedestrian_radius": 0.28,
       "walk_speed": 8.0
     }
+  },
+  "naval_operations": {
+    "base_pressure": 1.0,
+    "pressure_per_defense": 0.04,
+    "station_cost_per_ship": 40,
+    "station_movement": 1.0,
+    "ai_reserve": 1500,
+    "ai_min_net": 150,
+    "ai_military_hulls": 4,
+    "ai_trade_hulls": 2,
+    "ai_group_size": 3,
+    "ai_repair_below": 65,
+    "ai_launch_readiness": 85,
+    "ai_attack_ratio": 1.2,
+    "ai_local_turns": 3,
+    "ai_trade_turns": 5,
+    "ai_development_stage": 3
   }
 }
