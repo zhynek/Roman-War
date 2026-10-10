@@ -383,7 +383,7 @@ Deep enough debt disbands units for you, starting with the expensive ones
 
 Select a river province and open **Waterways & shipping** to build a landing,
 commission transports and bridge an unbridged river when you own both banks.
-Sea ports and their upgrades remain in the settlement building drawer. Completed
+Use the port inspector for waterfront upgrades and specialist facilities. Completed
 ships wait in the harbour: tick them and launch into an adjoining waterway.
 
 Select a ship or fleet banner, choose a distant destination and a coastal or
@@ -392,8 +392,8 @@ sails as far as this season's movement allows and continues automatically on lat
 turns. The route stays visible; **Halt voyage / end trade service** cancels it.
 Armies retain the same multi-turn marching controls they already use on land.
 
-**Embark** loads an army at an owned port or river landing; six company spaces per
-ship include one space for a commander. Carried troops cannot act on land and
+**Embark** loads an army at an owned port or river landing; capacity uses actual
+soldier counts plus the commander, limited by ship readiness and port handling. Carried troops cannot act on land and
 still cost upkeep. **Land troops**, or right-click a shore, unloads them with no
 land movement until next season. Unopposed enemy coasts allow amphibious landings;
 the enemy town still needs to be taken afterward. Land troops before regrouping
@@ -406,6 +406,38 @@ Enemy fleet encounters resolve automatically, without a tactical naval scene.
 
 See [Waterways and shipping](docs/WATERWAYS.md) for costs, controls, the Tiber/Nile/
 Danube network, carrying limits, construction and shipping rules.
+
+## Blockades and relief fleets
+
+AI factions now build and operate fleets, trade between their ports, repair damaged
+ships and contest nearby waterfronts. A blockaded port shows a security notice in
+its campaign panel, district overview and Daily Dispatch. Its shipping services,
+background sea trade, docking and friendly troop handling are suspended. Land
+trade, shipbuilding, repairs and relief launches continue.
+
+Enter the port and select the security overview entry. Use the yard to service
+ships and a berth to launch them, then choose a relief fleet at the arsenal or
+port office. A new fleet receives movement next season. The relief quote shows
+travel cost and timing; local engagement spends the remaining season and resolves
+immediately. Victory removes the defeated fleet's blockade; survivors withdraw
+along a safe neighboring waterway if available. Several blocking fleets can need
+separate engagements. Your paused services keep their assignments and resume on
+the next seasonal voyage after access returns.
+
+To blockade an enemy yourself, sail a military fleet beside a completed hostile
+port, resolve hostile contact, and use **Blockade** in its fleet panel. Review the
+ready military hull coverage, harbor-defense requirement and fee first. Beginning
+requires one movement point and spends all remaining movement. Stationing costs
+40 denarii per ship each season, prepaid in addition to normal upkeep. **Withdraw
+blockade** releases the order without a refund; movement returns next season.
+Peace, capture, defeat, insufficient readiness or inability to pay end its effects.
+Transports and merchants cannot supply military coverage.
+
+Orders and payments belong to the campaign. Changing views, closing the district
+or loading a save cannot repeat an engagement, a fee or a freight payment. The
+local inspection party remains independent of armies; this phase adds no tactical
+port combat or AI amphibious invasion planning. See [the precise rules and current
+limits](docs/WATERWAYS.md#contested-waterways--october-10-2026).
 
 ## Your family
 
@@ -626,13 +658,15 @@ Honest list, so you know what you are looking at:
   works, so your own agents can still fail.
 - **Naval strategy.** Player transport, recurring shipping, multi-turn voyages,
   river landings, bridges and automatic fleet encounters are playable. Port
-  blockades and autonomous AI fleet operations/shipbuilding remain future work.
+  blockades, AI shipbuilding, local fleet protection and freight assignments are
+  now playable. Autonomous amphibious invasions, tactical port/naval battles and
+  wider naval balance remain future work.
 - **Buying elections, and the aftermath of a civil war.** You cannot canvass
   for a seat with silver, cannot declare on the Senate yourself or join another
   house's rebellion before the Senate demands your life or your ambitious sons
   force the matter, and a civil war proscribes nobody: armies and cities stay with their houses. The computer
   houses always comply with the Senate's demand. Of the Senate's authored
-  charges, blockading a port waits on naval combat.
+  charges, the scripted blockade mission is still deferred; manual blockades work.
 - **All art is drawn by code.** The map, the towns, the buildings and the
   troops are procedural vector work rebuilt from the campaign data every
   launch. There are no character portraits and no battle-scene art yet, and

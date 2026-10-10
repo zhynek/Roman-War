@@ -346,6 +346,13 @@ static func tick_wars(data: GameData, state: Dictionary) -> void:
 		if DiplomacyRules.at_war(state, army["owner"], holder):
 			active[war_key(army["owner"], holder)] = true
 
+	var fleet_ids: Array = state["fleets"].keys()
+	fleet_ids.sort()
+	for id in fleet_ids:
+		var fleet: Dictionary = state["fleets"][id]
+		if BlockadeRules.active(data, state, fleet):
+			active[war_key(fleet["owner"], state["settlements"][fleet["blockade"]["region"]]["owner"])] = true
+
 	var targets: Dictionary = memory["targets"]
 	var aiming_ids: Array = targets.keys()
 	aiming_ids.sort()

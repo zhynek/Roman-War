@@ -22,6 +22,7 @@ const KINDS: Array[String] = [
 	"waterway_voyage",
 	"waterway_delivery",
 	"waterway_completed",
+	"port_blockaded",
 	"port_completed",
 	"unit_mustered",
 	# Our coffers and people.

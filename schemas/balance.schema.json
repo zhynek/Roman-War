@@ -34,7 +34,8 @@
     "terrain_routes",
     "city",
     "city_battle",
-    "city_campaign"
+    "city_campaign",
+    "naval_operations"
   ],
   "additionalProperties": false,
   "properties": {
@@ -2550,6 +2551,89 @@
               "exclusiveMinimum": 0
             }
           }
+        }
+      }
+    },
+    "naval_operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_pressure",
+        "pressure_per_defense",
+        "station_cost_per_ship",
+        "station_movement",
+        "ai_reserve",
+        "ai_min_net",
+        "ai_military_hulls",
+        "ai_trade_hulls",
+        "ai_group_size",
+        "ai_repair_below",
+        "ai_launch_readiness",
+        "ai_attack_ratio",
+        "ai_local_turns",
+        "ai_trade_turns",
+        "ai_development_stage"
+      ],
+      "properties": {
+        "base_pressure": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "pressure_per_defense": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "station_cost_per_ship": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "station_movement": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "ai_reserve": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_min_net": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_military_hulls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_trade_hulls": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_group_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_repair_below": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_launch_readiness": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_attack_ratio": {
+          "type": "number",
+          "minimum": 0.01
+        },
+        "ai_local_turns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_trade_turns": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ai_development_stage": {
+          "type": "integer",
+          "minimum": 1
         }
       }
     }

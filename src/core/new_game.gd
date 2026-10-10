@@ -432,6 +432,8 @@ static func _add_fleet(state: Dictionary, setup: Dictionary, owner: String) -> v
 		"movement_left": 0.0,
 	}
 
+	WaterwayRules.ensure_fleet(state["fleets"][fleet_id])
+
 
 static func _add_character(data: GameData, state: Dictionary, setup: Dictionary, owner: String) -> void:
 	# Starting trait ids become just enough points to hold the trait's first level.

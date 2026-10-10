@@ -88,9 +88,8 @@ static func _set_tax(data: GameData, state: Dictionary, region_id: String) -> vo
 
 static func _shed_debt(data: GameData, state: Dictionary, faction_id: String, owned: Array) -> void:
 	## A treasury deep in the red sheds one thing a turn before the engine's
-	## forced disbandment bites: the costliest fleet ship first (fleets earn
-	## nothing until naval phases exist), then the weakest garrison unit from
-	## the calmest settlement that still keeps a guard behind.
+	## forced disbandment bites: the costliest idle fleet ship first, then the
+	## weakest garrison unit from the calmest settlement that still keeps a guard behind.
 	var fleet_ids: Array = state["fleets"].keys()
 	fleet_ids.sort()
 	var worst_fleet := ""
@@ -98,7 +97,7 @@ static func _shed_debt(data: GameData, state: Dictionary, faction_id: String, ow
 	var worst_upkeep := -1
 	for fleet_id in fleet_ids:
 		var fleet: Dictionary = state["fleets"][fleet_id]
-		if fleet["owner"] != faction_id:
+		if fleet["owner"] != faction_id or not fleet.get("cargo", {}).is_empty() or not fleet.get("trade_route", {}).is_empty() or not fleet.get("blockade", {}).is_empty():
 			continue
 		for i in range(fleet["ships"].size()):
 			var upkeep := int(data.units.get(fleet["ships"][i]["template"], {}).get("upkeep", 0))
@@ -169,8 +168,7 @@ static func _recruit(data: GameData, state: Dictionary, faction_id: String, regi
 	for unit in RecruitmentRules.available_units(data, state, region_id):
 		if int(unit["cost"]) > budget:
 			continue
-		# Warships finish in the harbour, and the AI has no admiral yet: a
-		# fleet it would never launch is upkeep for nothing.
+		# AiNaval budgets hulls separately from land garrison requirements.
 		if String(unit.get("class", "")) == "ship":
 			continue
 		# Recruiting into the red is for settlements under the gun, cities on

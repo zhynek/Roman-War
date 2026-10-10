@@ -288,7 +288,8 @@
         "river",
         "coastal"
       ],
-      "repair_stage": 1
+      "repair_stage": 1,
+      "role": "transport"
     },
     "river_barges": {
       "stage": 2,
@@ -299,7 +300,8 @@
       "waters": [
         "river"
       ],
-      "repair_stage": 1
+      "repair_stage": 1,
+      "role": "freight"
     },
     "river_patrol": {
       "stage": 2,
@@ -311,7 +313,8 @@
         "river",
         "coastal"
       ],
-      "repair_stage": 1
+      "repair_stage": 1,
+      "role": "military"
     },
     "coastal_transports": {
       "stage": 3,
@@ -320,7 +323,8 @@
       "waters": [
         "coastal"
       ],
-      "repair_stage": 2
+      "repair_stage": 2,
+      "role": "transport"
     },
     "merchant_convoy": {
       "stage": 3,
@@ -332,7 +336,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 2
+      "repair_stage": 2,
+      "role": "freight"
     },
     "heavy_transports": {
       "stage": 4,
@@ -345,7 +350,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 3
+      "repair_stage": 3,
+      "role": "transport"
     },
     "coastal_galley": {
       "stage": 3,
@@ -356,7 +362,8 @@
       "waters": [
         "coastal"
       ],
-      "repair_stage": 2
+      "repair_stage": 2,
+      "role": "military"
     },
     "corvus_quinquereme": {
       "stage": 4,
@@ -369,7 +376,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 3
+      "repair_stage": 3,
+      "role": "military"
     },
     "war_trireme": {
       "stage": 4,
@@ -382,7 +390,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 3
+      "repair_stage": 3,
+      "role": "military"
     },
     "punic_war_quinquereme": {
       "stage": 4,
@@ -395,7 +404,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 3
+      "repair_stage": 3,
+      "role": "military"
     },
     "punic_heptereme": {
       "stage": 5,
@@ -408,7 +418,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 4
+      "repair_stage": 4,
+      "role": "military"
     },
     "delta_war_galley": {
       "stage": 4,
@@ -422,7 +433,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 3
+      "repair_stage": 3,
+      "role": "military"
     },
     "raiding_longboats": {
       "stage": 2,
@@ -434,7 +446,8 @@
         "river",
         "coastal"
       ],
-      "repair_stage": 1
+      "repair_stage": 1,
+      "role": "military"
     },
     "imperial_war_squadron": {
       "stage": 5,
@@ -447,7 +460,8 @@
         "coastal",
         "open"
       ],
-      "repair_stage": 4
+      "repair_stage": 4,
+      "role": "military"
     }
   },
   "layout": {

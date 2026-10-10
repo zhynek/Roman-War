@@ -1,10 +1,13 @@
 class_name PortOperations
 ## Read-only, owner-scoped presentation facts. Never part of public PortLayout.
 static func snapshot(data: GameData, state: Dictionary, region: String, layout: Dictionary) -> Dictionary:
-	var result := {"berths":{},"waiting":[],"fleets":[],"queue":[],"project":{}}
+	var result := {"berths":{},"waiting":[],"fleets":[],"queue":[],"project":{},"blockaders":[]}
 	var town: Dictionary = state.get("settlements",{}).get(region,{})
 	if town.get("owner","") != state.get("player_faction",""):
 		return result
+	for id in BlockadeRules.at_port(data,state,region):
+		var fleet: Dictionary = state["fleets"][id]
+		result["blockaders"].append({"id":id,"owner":fleet["owner"],"zone":fleet["sea_zone"]})
 	result["project"] = PortRules.record(state,region).get("project",{}).duplicate(true)
 	var eta := 0
 	for job in town.get("recruitment_queue",[]):

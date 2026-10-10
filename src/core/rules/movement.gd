@@ -136,7 +136,7 @@ static func sea_move_army(_data: GameData, _state: Dictionary, _army_id: String,
 
 static func move_fleet(data: GameData, state: Dictionary, fleet_id: String, to_zone: String) -> bool:
 	var fleet: Dictionary = state["fleets"].get(fleet_id, {})
-	if fleet.is_empty():
+	if fleet.is_empty() or not fleet.get("blockade", {}).is_empty():
 		return false
 	var cost := WaterwayRules.step_cost(data, fleet, fleet["sea_zone"], to_zone, fleet.get("sail_mode", "coastal"))
 	if cost > float(fleet["movement_left"]) or not WaterwayRules.hostiles(state, fleet).is_empty():

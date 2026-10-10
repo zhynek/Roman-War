@@ -848,6 +848,18 @@
       "id": "port_completed",
       "headline": "Waterfront works at {settlement}",
       "body": "A waterfront expansion or specialist facility has finished. Inspect the port to review new capacity and available vessels."
+    },
+    {
+      "chapter": "works",
+      "visibility": "own",
+      "severity": 4,
+      "tone": "bad",
+      "icon": "ship",
+      "in_sequence": false,
+      "in_dispatch": true,
+      "id": "port_blockaded",
+      "headline": "Blockade at {settlement}",
+      "body": "{value} hostile fleet(s) hold the waterfront. Shipping and troop handling are suspended. Enter the port to prepare a relief fleet; repairs and shipbuilding remain available."
     }
   ]
 }

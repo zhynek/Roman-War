@@ -127,7 +127,8 @@ static func trade_income(data: GameData, state: Dictionary, region_id: String) -
 				* float(economy_rules["road_trade_bonus_per_level"])
 			land_total += (float(economy_rules["land_trade_route_base"]) + premium) * road_bonus
 		elif port_level > 0 and MapRules.shared_sea_zone(data, region_id, other_id) \
-				and PortRules.stage(data, state, other_id) > 0:
+				and PortRules.stage(data, state, other_id) > 0 \
+				and not BlockadeRules.blocked(data, state, region_id) and not BlockadeRules.blocked(data, state, other_id):
 			sea_routes.append(float(economy_rules["sea_trade_route_base"]) + premium)
 
 	sea_routes.sort()

@@ -251,7 +251,12 @@ static func end_turn(data: GameData, state: Dictionary, resolver: BattleResolver
 		TurnJournal.add(journal, "port_completed", {"faction": port["owner"], "region": port["region"], "subject": port["kind"], "value": port["rank"]})
 	report["waterworks"] = WaterwayRules.advance_projects(data, state)
 	MovementRules.reset_movement(data, state)
+	BlockadeRules.maintain(data, state)
 	report["voyages"] = WaterwayRules.advance_season(data, state, resolver, rng)
+	for region in region_ids:
+		var blockaders := BlockadeRules.at_port(data, state, region)
+		if not blockaders.is_empty():
+			TurnJournal.add(journal, "port_blockaded", {"faction": state["settlements"][region]["owner"], "region": region, "value": blockaders.size()})
 	for work in report["waterworks"]:
 		TurnJournal.add(journal, "waterway_completed", {"faction": work["owner"], "region": work["region"], "subject": work["kind"]})
 	for voyage in report["voyages"]:

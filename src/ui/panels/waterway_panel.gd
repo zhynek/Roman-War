@@ -57,6 +57,9 @@ func setup_region(current_game: Game, region: String) -> void:
 	var definition := PortRules.stage_spec(game.data,rank)
 	var name: String = port_words["shore"] if rank == 0 else definition["name" if MapRules.coastal(game.data,region) else "inland_name"]
 	label(String(port_words["stage"]).format({"stage":rank,"name":name}))
+	var blockaders := BlockadeRules.at_port(game.data, game.state, region)
+	if not blockaders.is_empty():
+		label(words("blockade_summary", {"count":blockaders.size()})).add_theme_color_override("font_color", UiStyle.CAPITAL_GOLD)
 	button(port_words["enter"] if rank>0 else port_words["inspect"],func(): port_requested.emit(region))
 	for other in game.data.regions[region].get("adjacent", []):
 		if TerrainRules.crossing_kind(game.data, region, other) == "river" and not game.state.get("waterworks", {}).get("bridges", {}).has(TerrainRules.edge_key(region, other)):
@@ -89,7 +92,10 @@ func setup_fleet(current_game: Game, id: String) -> void:
 		label(words("queued", {"destination": game.data.sea_zones[path.back()]["name"], "steps": path.size()}))
 	var trade: Dictionary = fleet.get("trade_route", {})
 	if not trade.is_empty():
+		if BlockadeRules.blocked(game.data,game.state,trade["from"]) or BlockadeRules.blocked(game.data,game.state,trade["to"]):
+			label(words("blockade_paused"))
 		label(words("trade_active", {"from": _town(trade["from"]), "to": _town(trade["to"]), "status": words("trade_ready" if WaterwayRules.trade_valid(game.data, game.state, fleet, trade) else "trade_paused")}))
+	_blockade_controls(fleet)
 	if not path.is_empty() or not trade.is_empty():
 		button(words("halt"), func():
 			game.halt_voyage(fleet_id)
@@ -133,12 +139,15 @@ func setup_fleet(current_game: Game, id: String) -> void:
 
 	for enemy in WaterwayRules.hostiles(game.state, fleet):
 		var enemy_id: String = enemy
-		button(words("battle", {"name": game.data.factions[game.state["fleets"][enemy]["owner"]]["name"]}), func():
+		var combat := button(words("battle", {"name": game.data.factions[game.state["fleets"][enemy]["owner"]]["name"]}), func():
 			var outcome := game.naval_encounter(fleet_id, enemy_id)
 			if outcome.is_empty():
 				status.text = words("no_movement")
 			else:
 				changed.emit())
+		var error := WaterwayRules.encounter_error(game.state,fleet_id,enemy_id)
+		combat.disabled = error != ""
+		combat.tooltip_text = words(error) if error != "" else words("relief_terms")
 	if not fleet.get("cargo", {}).is_empty():
 		for region in game.state["settlements"]:
 			if WaterwayRules.can_land(game.data, game.state, fleet, region):
@@ -191,3 +200,31 @@ func _trade_controls(fleet: Dictionary) -> void:
 		if options.selected >= 0:
 			result(game.assign_shipping(fleet_id, pairs[options.selected][0], pairs[options.selected][1], _mode())))
 	action.disabled = pairs.is_empty()
+
+func _blockade_controls(fleet: Dictionary) -> void:
+	var order: Dictionary = fleet.get("blockade", {})
+	if not order.is_empty():
+		label(words("blockade_active", {"name":_town(order["region"]),"cost":BlockadeRules.cost(game.data,fleet)}))
+		button(words("blockade_withdraw"),func():
+			game.halt_voyage(fleet_id)
+			changed.emit())
+		return
+	label(words("blockade_patrol"))
+	var regions: Array = game.visible_regions().keys()
+	regions.sort()
+	for region in regions:
+		var town: Dictionary = game.state["settlements"].get(region,{})
+		if town.is_empty() or not DiplomacyRules.at_war(game.state,fleet["owner"],town["owner"]) or not NavalRules.zones_touching(game.data,region).has(fleet["sea_zone"]) or PortRules.stage(game.data,game.state,region)==0: continue
+		var target: String = region
+		var offer := BlockadeRules.quote(game.data,game.state,fleet_id,target)
+		var values: Dictionary = offer.duplicate()
+		values["minimum"] = BlockadeRules.rules(game.data)["station_movement"]
+		label(words("blockade_terms",values))
+		var action := button(words("blockade_order",{"name":_town(target),"cost":offer["cost"]}),func():
+			var fresh := BlockadeRules.quote(game.data,game.state,fleet_id,target)
+			if JSON.stringify(fresh)!=JSON.stringify(offer):
+				changed.emit()
+				return
+			result(game.blockade_port(fleet_id,target)))
+		action.disabled = not offer["ok"]
+		if not offer["ok"]: label(words(offer["error"]))

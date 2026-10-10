@@ -71,6 +71,8 @@ static func take_turn(data: GameData, state: Dictionary, faction_id: String, rng
 			context["staging"] = _staging_for(state, faction_id, context["goal_costs"])
 
 	AiMilitary.take_turn(data, state, faction_id, context, rng, resolver, ai_notices, character_notices)
+	if not is_rebel:
+		AiNaval.take_turn(data, state, faction_id, rng, resolver)
 	AiEconomy.take_turn(data, state, faction_id, context)
 	if not is_rebel:
 		# What the court takes up next. Rebels have no court.
